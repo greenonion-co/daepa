@@ -1,5 +1,5 @@
 import { overlay } from "overlay-kit";
-import Selector from "@/components/register/components/selector";
+import Selector from "@/app/(브리더스룸)/register/components/selector";
 import MorphSelector from "../components/selector/morph";
 
 export function useSelector() {
