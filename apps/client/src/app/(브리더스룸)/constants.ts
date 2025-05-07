@@ -1,4 +1,7 @@
+import { Home, Inbox } from "lucide-react";
 import { FormStep, SelectorConfig } from "./register/types";
+import { FOOD } from "@/types/pet";
+import { BadgeProps } from "@mui/material";
 
 export const USER_NAME = "낸시";
 
@@ -139,16 +142,17 @@ export const SALE_KOREAN_INFO = {
 export const TABLE_HEADER = {
   name: "이름",
   species: "종",
-  morph: "모프",
+  morphs: "모프",
+  traits: "형질",
   sex: "성별",
   size: "크기",
   weight: "몸무게",
   mother: "모",
   father: "부",
-  birthDate: "생년월일",
+  birthdate: "생년월일",
   photos: "사진",
   description: "설명",
-  food: "먹이",
+  foods: "먹이",
   canBreed: "발정 여부",
   breedingCount: "산란",
   pairing: "메이팅 상대",
@@ -168,4 +172,42 @@ export const SELECTOR_CONFIGS: Record<string, SelectorConfig> = {
     title: "성별 선택",
     selectList: ["수컷", "암컷", "미구분"],
   },
+};
+
+export const SIDEBAR_ITEMS = [
+  {
+    title: "마이펫",
+    url: "/pet",
+    icon: Home,
+  },
+  {
+    title: "개체 등록",
+    url: "/register",
+    icon: Inbox,
+  },
+];
+
+export const FOOD_BADGE_COLORS: Record<FOOD, string> = {
+  "판게아 인섹트": "bg-indigo-300",
+  귀뚜라미: "bg-gray-300",
+  누에: "bg-yellow-300",
+  "지렙 인섹트": "bg-blue-100",
+};
+
+export const FOOD_BADGE_TEXT_COLORS: Record<FOOD, string> = {
+  "판게아 인섹트": "text-indigo-900",
+  귀뚜라미: "text-gray-900",
+  누에: "text-yellow-900",
+  "지렙 인섹트": "text-blue-900",
+};
+
+export const GENDER_KOREAN_INFO = {
+  M: "수컷",
+  F: "암컷",
+  N: "미구분",
+};
+
+export const SPECIES_KOREAN_INFO = {
+  CR: "크레스티드 게코",
+  LF: "레오파드 게코",
 };
