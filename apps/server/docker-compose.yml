@@ -1,0 +1,32 @@
+version: '3.8' # 사용하는 Docker Compose 버전에 따라 변경될 수 있습니다.
+
+name: project_daepa
+
+services:
+  # 데이터베이스 서비스 정의
+  db:
+    image: mysql:8.0 # 사용할 MySQL 이미지 버전 (원하는 안정적인 버전으로 변경 가능)
+    container_name: mysql_backend # 컨테이너 이름 지정
+    restart: always # 컨테이너 종료 시 항상 재시작
+    environment: # MySQL 환경 변수 설정 (컨테이너 초기 설정에 사용)
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD} # Docker root 비밀번호 (실제 사용 시 안전한 값으로)
+      MYSQL_DATABASE: ${MYSQL_DATABASE} # NestJS에서 사용할 데이터베이스 이름
+      MYSQL_USER: ${MYSQL_USER} # NestJS에서 접속할 사용자 이름 (root 사용 방지)
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD} # 위 사용자의 비밀번호 (실제 사용 시 안전한 값으로)
+      # 로컬 개발 환경에서만 임시로 비밀번호 없이 root 접속 허용 (보안상 매우 위험)
+      # MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+    ports:
+      # "호스트_포트:컨테이너_포트" 형식. NestJS 앱은 호스트_포트로 접속.
+      # 기본 3306 포트 사용. 만약 호스트 3306이 사용 중이면 "3307:3306" 등으로 변경.
+      - ${MYSQL_PORT}:${MYSQL_PORT}
+    volumes:
+      # 데이터 지속성을 위한 볼륨 설정. 컨테이너 삭제 시 데이터 유실 방지.
+      # 'db_data' 볼륨에 컨테이너의 MySQL 데이터 디렉토리(/var/lib/mysql) 연결.
+      - db_data:/var/lib/mysql
+      # (선택 사항) 사용자 정의 MySQL 설정 파일을 마운트하려면 주석 해제
+      # - ./mysql/my.cnf:/etc/mysql/my.cnf
+
+# Docker 볼륨 정의 (데이터 저장을 위해 필요)
+volumes:
+  db_data: # 위 services.db.volumes에서 사용한 볼륨 이름
+    driver: local # 로컬 스토리지에 저장
