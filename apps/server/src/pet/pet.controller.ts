@@ -1,17 +1,21 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpException,
   HttpStatus,
   Param,
+  Patch,
   Post,
+  Query,
 } from '@nestjs/common';
-import { CreatePetDto } from './pet.dto';
+import { CreatePetDto, UpdatePetDto } from './pet.dto';
 import { PetService } from './pet.service';
 import { nanoid } from 'nanoid';
+import { PetEntity } from './pet.entity';
+import { PageOptionsDto, PageDto } from 'src/common/page.dto';
 
-// MySQL 에러를 위한 커스텀 클래스
 class MySQLError extends Error {
   code: string;
 
@@ -21,7 +25,6 @@ class MySQLError extends Error {
   }
 }
 
-// 타입 가드 함수
 function isMySQLError(error: unknown): error is MySQLError {
   return (
     error instanceof MySQLError ||
@@ -38,9 +41,10 @@ export class PetController {
   constructor(private readonly petService: PetService) {}
 
   @Get()
-  async findAll() {
-    // 유저의 모든 펫 정보를 조회
-    return await this.petService.getAllPets();
+  async findAll(
+    @Query() pageOptionsDto: PageOptionsDto,
+  ): Promise<PageDto<PetEntity>> {
+    return await this.petService.getAllPets(pageOptionsDto);
   }
 
   @Get(':id')
@@ -50,8 +54,7 @@ export class PetController {
 
   @Post()
   async create(@Body() createPetDto: CreatePetDto) {
-    console.log(createPetDto);
-    // TODO: userId를 owner_id에 저장
+    // TODO: userId를 ownerId로 사용
     const tempOwnerId = 'ADMIN';
     const maxRetries = 3;
     let attempts = 0;
@@ -72,19 +75,17 @@ export class PetController {
               message: '',
             };
             if (error.message.includes('UNIQUE_OWNER_PET_NAME')) {
-              // 중복 펫 이름 처리
               response.message = '이미 존재하는 펫 이름입니다.';
               throw new HttpException(response, HttpStatus.CONFLICT);
             }
             if (error.message.includes('UNIQUE_PET_ID')) {
-              // 중복 펫 아이디인 경우 재시도
               attempts++;
               if (attempts >= maxRetries) {
                 response.message =
                   '펫 아이디 생성 중 오류가 발생했습니다. 나중에 다시 시도해주세요.';
                 throw new HttpException(response, HttpStatus.CONFLICT);
               }
-              continue; // 다음 시도 진행
+              continue;
             }
           }
           throw error;
@@ -92,5 +93,18 @@ export class PetController {
         throw error;
       }
     }
+  }
+
+  @Patch()
+  async update(
+    @Body()
+    updatePetDto: UpdatePetDto,
+  ) {
+    return await this.petService.updatePet(updatePetDto);
+  }
+
+  @Delete()
+  async delete(@Body('petId') petId: string) {
+    return await this.petService.deletePet(petId);
   }
 }
