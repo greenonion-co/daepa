@@ -7,7 +7,8 @@ import {
   IsObject,
   IsOptional,
 } from 'class-validator';
-import { SEX_ENUM, SPECIES_ENUM } from './pet.constants';
+import { PartialType } from '@nestjs/mapped-types';
+import { PET_SEX, PET_SPECIES } from './pet.constants';
 
 export class PetSummaryDto {
   id: number;
@@ -52,8 +53,8 @@ export class CreatePetDto {
   name: string;
 
   @IsString()
-  @IsEnum(SPECIES_ENUM)
-  species: (typeof SPECIES_ENUM)[number];
+  @IsEnum(PET_SPECIES)
+  species: keyof typeof PET_SPECIES;
 
   @IsOptional()
   @IsArray()
@@ -68,8 +69,8 @@ export class CreatePetDto {
   birthdate?: string;
 
   @IsOptional()
-  @IsEnum(SEX_ENUM)
-  sex?: (typeof SEX_ENUM)[number];
+  @IsEnum(PET_SEX)
+  sex?: keyof typeof PET_SEX;
 
   @IsOptional()
   @IsNumber()
@@ -102,6 +103,11 @@ export class CreatePetDto {
   @IsOptional()
   @IsObject()
   sales?: PetSalesDto;
+}
+
+export class UpdatePetDto extends PartialType(CreatePetDto) {
+  @IsString()
+  petId: string;
 }
 
 export class PetInfoDto extends PetBaseDto {

@@ -1,27 +1,28 @@
-import { Expose } from 'class-transformer';
+import { Exclude, Expose } from 'class-transformer';
 import { Entity, PrimaryGeneratedColumn, Column, Index } from 'typeorm';
-import { SEX_ENUM, SPECIES_ENUM } from './pet.constants';
+import { PET_SEX, PET_SPECIES } from './pet.constants';
 
 @Entity({ name: 'pets' })
 @Index('UNIQUE_PET_ID', ['pet_id'], { unique: true })
 @Index('UNIQUE_OWNER_PET_NAME', ['owner_id', 'name'], { unique: true })
 export class PetEntity {
+  @Exclude()
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
   @Expose({ name: 'petId' })
+  @Column()
   pet_id: string;
 
-  @Column()
   @Expose({ name: 'ownerId' })
+  @Column()
   owner_id: string;
 
   @Column()
   name: string; // 이름
 
-  @Column({ type: 'enum', enum: SPECIES_ENUM })
-  species: typeof SPECIES_ENUM; // 종
+  @Column({ type: 'enum', enum: PET_SPECIES })
+  species: keyof typeof PET_SPECIES; // 종
 
   @Column('json', { nullable: true })
   morphs?: string[]; // 모프
@@ -32,8 +33,8 @@ export class PetEntity {
   @Column({ nullable: true })
   birthdate?: string; // 생년월일
 
-  @Column({ type: 'enum', enum: SEX_ENUM, nullable: true })
-  sex?: typeof SEX_ENUM; // 성별
+  @Column({ type: 'enum', enum: PET_SEX, nullable: true })
+  sex?: keyof typeof PET_SEX; // 성별
 
   @Column({ type: 'decimal', precision: 10, scale: 1, nullable: true })
   weight?: number; // 몸무게(g)
