@@ -58,7 +58,7 @@ const PetDetail = ({ pet }: PetDetailProps) => {
                 animate={{
                   height: isExpanded ? "100%" : "65%",
                 }}
-                transition={{ duration: 0.5 }}
+                transition={{ duration: 0.2 }}
                 className="absolute inset-x-0 top-0"
               >
                 {/* 스와이프 가능한 이미지 컨테이너 */}
@@ -136,8 +136,8 @@ const PetDetail = ({ pet }: PetDetailProps) => {
                   color: isExpanded ? "white" : "black",
                 }}
                 transition={{
-                  duration: 0.5,
-                  delay: isExpanded ? 0 : 0.4,
+                  duration: 0.25,
+                  delay: isExpanded ? 0 : 0.2,
                 }}
                 className="absolute left-0 right-0 z-10 p-6"
               >
