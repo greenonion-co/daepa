@@ -153,7 +153,7 @@ export default function RegisterPage({ params }: { params: Promise<{ funnel: str
     }
   };
   return (
-    <div className="relative min-h-screen pb-20">
+    <div className="relative mx-auto min-h-screen max-w-[640px] p-4 pb-20">
       <FormHeader funnel={funnel} />
       <form onSubmit={handleSubmit} className="space-y-4">
         {funnel === REGISTER_PAGE.FIRST && (
@@ -194,7 +194,9 @@ export default function RegisterPage({ params }: { params: Promise<{ funnel: str
           !isMobile && state === "expanded" && "ml-[255px]",
         )}
       >
-        <SubmitButton label="다음" onClick={() => goNext()} />
+        <div className="mx-auto max-w-[640px]">
+          <SubmitButton label="다음" onClick={() => goNext()} />
+        </div>
       </div>
 
       <MorphAlert />
