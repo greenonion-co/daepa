@@ -18,11 +18,13 @@ import FileField from "../components/Form/FileField";
 import ParentsField from "../components/Form/ParentsField";
 import NumberField from "../components/Form/NumberField";
 import { useSidebar } from "@/components/ui/sidebar";
+import React from "react";
 
 export default function RegisterPage({ params }: { params: Promise<{ funnel: string }> }) {
   const { handleNext, goNext } = useRegisterForm();
   const { formData, step, errors, setFormData } = useFormStore();
   const { state, isMobile } = useSidebar();
+  const isFirstRender = React.useRef(true);
 
   const resolvedParams = use(params);
   const funnel = Number(resolvedParams.funnel);
@@ -30,12 +32,22 @@ export default function RegisterPage({ params }: { params: Promise<{ funnel: str
 
   useEffect(() => {
     const currentStep = FORM_STEPS[FORM_STEPS.length - step - 1];
-
     if (!currentStep) return;
 
     const { field } = currentStep;
-
     if (formData[field.name]) return;
+
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      setTimeout(() => {
+        if (field.type === "select") {
+          handleSelect(field.name);
+        } else if (field.type === "multipleSelect") {
+          handleMorphSelect();
+        }
+      }, 0);
+      return;
+    }
 
     if (field.type === "select") {
       handleSelect(field.name);
