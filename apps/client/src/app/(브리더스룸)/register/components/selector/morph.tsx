@@ -57,7 +57,7 @@ export default function MorphSelector({
                   selectedMorphs.includes(morph)
                     ? "bg-[#1A56B3] text-[#D9E1EC]"
                     : "hover:bg-gray-100"
-                }`}
+                } dark:hover:bg-gray-800`}
                 onClick={() => handleMorphSelect(morph)}
               >
                 {morph}

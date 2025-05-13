@@ -72,9 +72,9 @@ export const OPTION_STEPS: FormStep[] = [
     },
   },
   {
-    title: "해칭일",
+    title: "생년월일",
     field: {
-      name: "hatchingDate",
+      name: "birthDate",
       type: "date",
       required: true,
       validation: (value) => value.length > 0,

@@ -29,6 +29,7 @@ export default function RegisterPage({ params }: { params: Promise<{ funnel: str
   const visibleSteps = FORM_STEPS.slice(-step - 1);
 
   useEffect(() => {
+    if (funnel === REGISTER_PAGE.SECOND) return;
     const currentStep = FORM_STEPS[FORM_STEPS.length - step - 1];
     if (!currentStep) return;
 
@@ -89,7 +90,7 @@ export default function RegisterPage({ params }: { params: Promise<{ funnel: str
     const { name, placeholder, type } = field;
     const value = formData[name];
     const error = errors[name];
-    const inputClassName = `text-[20px] w-full border-b-[1.2px] border-b-gray-200 h-9 pr-1 text-left focus:outline-none focus:ring-0 text-gray-400 ${error && "border-b-red-500"}`;
+    const inputClassName = `text-[20px] w-full border-b-[1.2px] border-b-gray-200 h-9 pr-1 text-left focus:outline-none focus:ring-0 text-gray-400 dark:border-b-gray-600 dark:text-gray-400 ${error && "border-b-red-500"}`;
 
     switch (type) {
       case "file":
@@ -101,7 +102,7 @@ export default function RegisterPage({ params }: { params: Promise<{ funnel: str
       case "textarea":
         return (
           <textarea
-            className={`w-full rounded-xl bg-gray-100 p-4 text-left text-[20px] focus:outline-none focus:ring-0`}
+            className={`w-full rounded-xl bg-gray-100 p-4 text-left text-[20px] focus:outline-none focus:ring-0 dark:bg-gray-600/50 dark:text-white`}
             rows={4}
             value={value}
             onChange={(e) => handleNext({ type: field.name, value: e.target.value })}
@@ -143,8 +144,8 @@ export default function RegisterPage({ params }: { params: Promise<{ funnel: str
         return (
           <input
             type={field.type}
-            className={inputClassName}
-            value={value}
+            className={cn(inputClassName, "text-black dark:text-white")}
+            value={value || ""}
             onChange={(e) => handleNext({ type: field.name, value: e.target.value })}
           />
         );
@@ -188,7 +189,7 @@ export default function RegisterPage({ params }: { params: Promise<{ funnel: str
 
       <div
         className={cn(
-          "fixed bottom-0 left-0 right-0 bg-white p-4 shadow-[0_-4px_10px_rgba(0,0,0,0.1)]",
+          "fixed bottom-0 left-0 right-0 bg-white p-4 shadow-[0_-4px_10px_rgba(0,0,0,0.1)] dark:bg-black",
           !isMobile && state === "expanded" && "ml-[255px]",
         )}
       >

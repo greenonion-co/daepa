@@ -22,7 +22,7 @@ const SelectButton = ({
 }) => (
   <button
     type="button"
-    className={`w-full cursor-pointer rounded-2xl px-4 py-2 text-left text-lg outline-none transition-colors focus:outline-none focus:ring-0 ${
+    className={`w-full cursor-pointer rounded-2xl px-4 py-2 text-left text-lg outline-none transition-colors focus:outline-none focus:ring-0 dark:hover:bg-gray-800 ${
       isSelected
         ? "bg-[#247DFE] font-semibold text-white hover:bg-blue-600"
         : "hover:bg-gray-100 focus:bg-gray-100"

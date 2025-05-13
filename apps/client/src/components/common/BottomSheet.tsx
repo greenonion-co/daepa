@@ -45,7 +45,7 @@ export default function BottomSheet({
             : "left-1/2 -translate-x-1/2"
         }`}
       >
-        <div className="max-h-[90vh] min-h-[40vh] animate-[slideUp_0.3s_ease-out] overflow-y-auto rounded-2xl bg-white p-3 pb-20">
+        <div className="max-h-[90vh] min-h-[40vh] animate-[slideUp_0.3s_ease-out] overflow-y-auto rounded-2xl bg-white p-3 pb-20 dark:bg-[#18181B]">
           <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-gray-200" />
           {children}
           {buttonText && (

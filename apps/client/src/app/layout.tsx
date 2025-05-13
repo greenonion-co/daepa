@@ -27,10 +27,7 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <Providers>
-          {children}
-          <TempGlobalButton />
-        </Providers>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );
