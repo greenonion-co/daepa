@@ -10,11 +10,12 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { CreatePetDto, UpdatePetDto } from './pet.dto';
+import { CreatePetDto, PetDto, UpdatePetDto } from './pet.dto';
 import { PetService } from './pet.service';
 import { nanoid } from 'nanoid';
 import { PetEntity } from './pet.entity';
 import { PageOptionsDto, PageDto } from 'src/common/page.dto';
+import { ApiResponse } from '@nestjs/swagger';
 
 class MySQLError extends Error {
   code: string;
@@ -41,15 +42,26 @@ export class PetController {
   constructor(private readonly petService: PetService) {}
 
   @Get()
+  @ApiResponse({
+    status: 200,
+    description: '펫 목록 조회 성공',
+    isArray: true,
+    type: PetDto,
+  })
   async findAll(
     @Query() pageOptionsDto: PageOptionsDto,
   ): Promise<PageDto<PetEntity>> {
     return await this.petService.getAllPets(pageOptionsDto);
   }
 
-  @Get(':id')
-  async findOne(@Param('id') id: string) {
-    return await this.petService.getPet(id);
+  @Get(':petId')
+  @ApiResponse({
+    status: 200,
+    description: '펫 정보 조회 성공',
+    type: PetDto,
+  })
+  async findOne(@Param('petId') petId: string) {
+    return await this.petService.getPet(petId);
   }
 
   @Post()
@@ -95,16 +107,16 @@ export class PetController {
     }
   }
 
-  @Patch()
+  @Patch(':petId')
   async update(
-    @Body()
-    updatePetDto: UpdatePetDto,
+    @Param('petId') petId: string,
+    @Body() updatePetDto: UpdatePetDto,
   ) {
-    return await this.petService.updatePet(updatePetDto);
+    return await this.petService.updatePet(petId, updatePetDto);
   }
 
-  @Delete()
-  async delete(@Body('petId') petId: string) {
+  @Delete(':petId')
+  async delete(@Param('petId') petId: string) {
     return await this.petService.deletePet(petId);
   }
 }
