@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { useFormStore } from "../../store/form";
 import SearchIcon from "@mui/icons-material/Search";
-import ParentSearchSelector from "../selector/parent";
+import ParentSearchSelector from "../../../components/ParentSearchSelector";
 
 const SearchButton = ({ label, openSelector }: { label: string; openSelector: () => void }) => {
   const buttonStyle =
-    "flex h-[calc(min(50vw,320px)-24px)] w-[calc(min(50vw,320px)-24px)] items-center justify-center rounded-2xl bg-gray-100 text-[#D9E1EC]";
+    "flex h-[calc(min(50vw,320px)-24px)] w-[calc(min(50vw,320px)-24px)] items-center justify-center rounded-2xl bg-gray-100 text-[#D9E1EC] dark:bg-gray-600/50 dark:text-white";
 
   return (
     <div className="flex flex-col gap-2">

@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import { useFormStore } from "../../store/form";
 import { FormStep } from "../../types";
 
@@ -7,7 +8,7 @@ const NumberField = ({
   value,
 }: {
   inputClassName: string;
-  field: FormStep["fields"];
+  field: FormStep["field"];
   value: string;
 }) => {
   const { formData, setFormData } = useFormStore();
@@ -17,7 +18,7 @@ const NumberField = ({
         type="tel"
         inputMode="decimal"
         pattern="[0-9]*[.,]?[0-9]*"
-        className={`${inputClassName} focus:outline-none focus:ring-0`}
+        className={cn(inputClassName, "text-black dark:text-white")}
         value={value}
         onChange={(e) => {
           const inputValue = e.target.value;

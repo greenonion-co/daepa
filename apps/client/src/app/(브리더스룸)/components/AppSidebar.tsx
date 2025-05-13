@@ -8,20 +8,8 @@ import {
   SidebarGroupLabel,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { Home, Inbox } from "lucide-react";
-
-const items = [
-  {
-    title: "마이펫",
-    url: "/main",
-    icon: Home,
-  },
-  {
-    title: "개체 등록",
-    url: "/register",
-    icon: Inbox,
-  },
-];
+import Link from "next/link";
+import { SIDEBAR_ITEMS } from "../constants";
 
 export function AppSidebar() {
   return (
@@ -31,13 +19,13 @@ export function AppSidebar() {
           <SidebarGroupLabel>브리더스룸</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.map((item) => (
+              {SIDEBAR_ITEMS.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <a href={item.url}>
+                    <Link href={item.url}>
                       <item.icon />
-                      <span>{item.title}</span>
-                    </a>
+                      {item.title}
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}

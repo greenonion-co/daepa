@@ -22,11 +22,12 @@ import {
 import { SearchFilter } from "./SearchFilter";
 import { Pagination } from "./Pagination";
 import useTableStore from "../store/table";
-import { PET } from "../types";
+import { Pet } from "@/types/pet";
+import { useRouter } from "next/navigation";
 
 interface DataTableProps {
-  columns: ColumnDef<PET, unknown>[];
-  data: PET[];
+  columns: ColumnDef<Pet, unknown>[];
+  data: Pet[];
 }
 
 export const DataTable = ({ columns, data }: DataTableProps) => {
@@ -40,6 +41,8 @@ export const DataTable = ({ columns, data }: DataTableProps) => {
     setColumnVisibility,
     setRowSelection,
   } = useTableStore();
+
+  const router = useRouter();
 
   const table = useReactTable({
     data,
@@ -59,6 +62,17 @@ export const DataTable = ({ columns, data }: DataTableProps) => {
       rowSelection,
     },
   });
+
+  const handleRowClick = ({ e, id }: { e: React.MouseEvent<HTMLTableRowElement>; id: string }) => {
+    // checkbox나 버튼 클릭 시에는 detail 페이지로 이동하지 않음
+    if (
+      (e.target as HTMLElement).closest("button") ||
+      (e.target as HTMLElement).closest('[role="checkbox"]')
+    ) {
+      return;
+    }
+    router.push(`/pet/${id}`);
+  };
 
   return (
     <div className="w-full">
@@ -83,7 +97,12 @@ export const DataTable = ({ columns, data }: DataTableProps) => {
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && "selected"}
+                  className="cursor-pointer"
+                  onClick={(e) => handleRowClick({ e, id: row.original.petId })}
+                >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}

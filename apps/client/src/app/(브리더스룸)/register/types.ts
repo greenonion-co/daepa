@@ -1,7 +1,20 @@
+export type FieldName =
+  | "species"
+  | "morph"
+  | "size"
+  | "gender"
+  | "parentSearch"
+  | "name"
+  | "birthDate"
+  | "weight"
+  | "description"
+  | "images"
+  | "photo";
+
 export type FormStep = {
   title: string;
-  fields: {
-    name: string;
+  field: {
+    name: FieldName;
     type: string;
     required?: boolean;
     placeholder?: string;

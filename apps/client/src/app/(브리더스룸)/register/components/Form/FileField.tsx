@@ -35,7 +35,7 @@ const FileField = () => {
 
   return (
     <>
-      <p className="text-sm text-blue-500">최대 3장까지 업로드 가능합니다.</p>
+      <p className="pb-1 text-sm text-blue-500">최대 3장까지 업로드 가능합니다.</p>
       <input
         type="file"
         accept="image/*"
@@ -49,7 +49,7 @@ const FileField = () => {
       ) : (
         <label
           htmlFor="photo-upload"
-          className="flex h-[130px] w-full cursor-pointer items-center justify-center rounded-2xl bg-gray-100"
+          className="flex h-[130px] w-full cursor-pointer items-center justify-center rounded-2xl bg-gray-100 dark:bg-gray-600/50"
         >
           <div className="text-center">
             <Add fontSize="large" className="text-gray-400" />

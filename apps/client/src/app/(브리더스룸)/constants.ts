@@ -1,35 +1,28 @@
-import { FormStep, SelectorConfig } from "./register/types";
+import { DollarSign, Egg, Heart, Home, Inbox } from "lucide-react";
+import { FieldName, FormStep, SelectorConfig } from "./register/types";
+import { FOOD } from "@/types/pet";
 
 export const USER_NAME = "낸시";
 
 export const REGISTER_PAGE = {
-  FIRST: 0,
-  SECOND: 1,
+  FIRST: 1,
+  SECOND: 2,
 };
 
 export const FORM_STEPS: FormStep[] = [
   {
-    title: "종",
-    fields: {
-      name: "species",
+    title: "성별",
+    field: {
+      name: "gender",
       type: "select",
-      required: true,
-      placeholder: "종을 선택해주세요",
-      validation: (value) => value.length > 0,
-    },
-  },
-  {
-    title: "모프",
-    fields: {
-      name: "morph",
-      type: "morph",
+      placeholder: "성별을 선택해주세요",
       required: true,
       validation: (value) => value.length > 0,
     },
   },
   {
     title: "크기",
-    fields: {
+    field: {
       name: "size",
       type: "select",
       placeholder: "크기를 선택해주세요",
@@ -38,12 +31,22 @@ export const FORM_STEPS: FormStep[] = [
     },
   },
   {
-    title: "성별",
-    fields: {
-      name: "gender",
-      type: "select",
-      placeholder: "성별을 선택해주세요",
+    title: "모프",
+    field: {
+      name: "morph",
+      type: "multipleSelect",
+      placeholder: "모프를 선택해주세요",
       required: true,
+      validation: (value) => value.length > 0,
+    },
+  },
+  {
+    title: "종",
+    field: {
+      name: "species",
+      type: "select",
+      required: true,
+      placeholder: "종을 선택해주세요",
       validation: (value) => value.length > 0,
     },
   },
@@ -52,7 +55,7 @@ export const FORM_STEPS: FormStep[] = [
 export const OPTION_STEPS: FormStep[] = [
   {
     title: "사진",
-    fields: {
+    field: {
       name: "photo",
       type: "file",
       required: true,
@@ -61,7 +64,7 @@ export const OPTION_STEPS: FormStep[] = [
   },
   {
     title: "부모 개체 정보",
-    fields: {
+    field: {
       name: "parentSearch",
       type: "parentSearch",
       required: true,
@@ -69,9 +72,9 @@ export const OPTION_STEPS: FormStep[] = [
     },
   },
   {
-    title: "해칭일",
-    fields: {
-      name: "hatchingDate",
+    title: "생년월일",
+    field: {
+      name: "birthDate",
       type: "date",
       required: true,
       validation: (value) => value.length > 0,
@@ -79,7 +82,7 @@ export const OPTION_STEPS: FormStep[] = [
   },
   {
     title: "체중",
-    fields: {
+    field: {
       name: "weight",
       type: "number",
       required: true,
@@ -88,7 +91,7 @@ export const OPTION_STEPS: FormStep[] = [
   },
   {
     title: "개체 이름/관리번호",
-    fields: {
+    field: {
       name: "name",
       type: "text",
       required: true,
@@ -97,7 +100,7 @@ export const OPTION_STEPS: FormStep[] = [
   },
   {
     title: "상세 설명",
-    fields: {
+    field: {
       name: "description",
       type: "textarea",
       required: false,
@@ -139,23 +142,24 @@ export const SALE_KOREAN_INFO = {
 export const TABLE_HEADER = {
   name: "이름",
   species: "종",
-  morph: "모프",
+  morphs: "모프",
+  traits: "형질",
   sex: "성별",
   size: "크기",
   weight: "몸무게",
   mother: "모",
   father: "부",
-  birthDate: "생년월일",
+  birthdate: "생년월일",
   photos: "사진",
   description: "설명",
-  food: "먹이",
+  foods: "먹이",
   canBreed: "발정 여부",
   breedingCount: "산란",
   pairing: "메이팅 상대",
   saleInfo: "판매 상태",
 };
 
-export const SELECTOR_CONFIGS: Record<string, SelectorConfig> = {
+export const SELECTOR_CONFIGS: Record<FieldName, SelectorConfig> = {
   species: {
     title: "종 선택",
     selectList: ["레오파드 게코", "크레스티드 게코"],
@@ -168,4 +172,57 @@ export const SELECTOR_CONFIGS: Record<string, SelectorConfig> = {
     title: "성별 선택",
     selectList: ["수컷", "암컷", "미구분"],
   },
+};
+
+export const SIDEBAR_ITEMS = [
+  {
+    title: "마이펫",
+    url: "/pet",
+    icon: Home,
+  },
+  {
+    title: "개체 등록",
+    url: "/register/1",
+    icon: Inbox,
+  },
+  {
+    title: "해칭룸",
+    url: "/hatching",
+    icon: Egg,
+  },
+  {
+    title: "메이팅룸",
+    url: "/mating",
+    icon: Heart,
+  },
+  {
+    title: "분양룸",
+    url: "/sales",
+    icon: DollarSign,
+  },
+];
+
+export const FOOD_BADGE_COLORS: Record<FOOD, string> = {
+  "판게아 인섹트": "bg-indigo-300",
+  귀뚜라미: "bg-gray-300",
+  누에: "bg-yellow-300",
+  "지렙 인섹트": "bg-blue-100",
+};
+
+export const FOOD_BADGE_TEXT_COLORS: Record<FOOD, string> = {
+  "판게아 인섹트": "text-indigo-900",
+  귀뚜라미: "text-gray-900",
+  누에: "text-yellow-900",
+  "지렙 인섹트": "text-blue-900",
+};
+
+export const GENDER_KOREAN_INFO = {
+  M: "수컷",
+  F: "암컷",
+  N: "미구분",
+};
+
+export const SPECIES_KOREAN_INFO = {
+  CR: "크레스티드 게코",
+  LF: "레오파드 게코",
 };

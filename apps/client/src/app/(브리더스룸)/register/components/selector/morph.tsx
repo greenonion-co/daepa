@@ -3,23 +3,22 @@
 import { useState, useEffect } from "react";
 import BottomSheet from "@/components/common/BottomSheet";
 import { MORPH_LIST_BY_SPECIES } from "../../../constants";
+import { useFormStore } from "../../store/form";
 
 interface MorphSelectorProps {
   isOpen: boolean;
-  onClose: () => void;
-  onSelect: (morphs: string[]) => void;
-  currentMorphs?: string[];
-  species: string;
+  onCloseAction: () => void;
+  onSelectAction: (morphs: string[]) => void;
 }
 
 export default function MorphSelector({
   isOpen,
-  onClose,
-  onSelect,
-  currentMorphs = [],
-  species,
+  onCloseAction,
+  onSelectAction,
 }: MorphSelectorProps) {
-  const [selectedMorphs, setSelectedMorphs] = useState<string[]>(currentMorphs);
+  const { formData } = useFormStore();
+  const [selectedMorphs, setSelectedMorphs] = useState<string[]>(formData.morph || []);
+  const species = formData.species as string;
 
   useEffect(() => {
     setSelectedMorphs([]);
@@ -37,32 +36,36 @@ export default function MorphSelector({
     });
   };
 
-  const handleConfirm = () => {
-    onSelect(selectedMorphs);
-    onClose();
-  };
-
   return (
-    <BottomSheet isOpen={isOpen} onClose={onClose} buttonText="선택 완료" onClick={handleConfirm}>
-      <div className="space-y-4">
-        <div className="flex items-center gap-2">
-          <h2 className="pl-4 text-xl font-bold">모프 선택</h2>
-          <span className="text-sm text-gray-500">{selectedMorphs.length}/5 선택됨</span>
+    <>
+      <BottomSheet
+        isOpen={isOpen}
+        onClose={onCloseAction}
+        buttonText="선택 완료"
+        onClick={() => onSelectAction(selectedMorphs)}
+      >
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <h2 className="pl-4 text-xl font-bold">모프 선택</h2>
+            <span className="text-sm text-gray-500">{selectedMorphs.length}/5 선택됨</span>
+          </div>
+          <div className="max-h-[50vh] overflow-y-auto">
+            {MORPH_LIST_BY_SPECIES[species]?.map((morph) => (
+              <button
+                key={morph}
+                className={`mb-2 mr-2 rounded-full pb-1 pl-4 pr-3 pt-1 ${
+                  selectedMorphs.includes(morph)
+                    ? "bg-[#1A56B3] text-[#D9E1EC]"
+                    : "hover:bg-gray-100"
+                } dark:hover:bg-gray-800`}
+                onClick={() => handleMorphSelect(morph)}
+              >
+                {morph}
+              </button>
+            ))}
+          </div>
         </div>
-        <div className="max-h-[50vh] overflow-y-auto">
-          {MORPH_LIST_BY_SPECIES[species]?.map((morph) => (
-            <button
-              key={morph}
-              className={`mb-2 mr-2 rounded-full pb-1 pl-4 pr-3 pt-1 ${
-                selectedMorphs.includes(morph) ? "bg-[#1A56B3] text-[#D9E1EC]" : "hover:bg-gray-100"
-              }`}
-              onClick={() => handleMorphSelect(morph)}
-            >
-              {morph}
-            </button>
-          ))}
-        </div>
-      </div>
-    </BottomSheet>
+      </BottomSheet>
+    </>
   );
 }
