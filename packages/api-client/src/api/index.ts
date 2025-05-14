@@ -8,7 +8,7 @@
 import axios from "axios";
 import type { AxiosRequestConfig, AxiosResponse } from "axios";
 
-import type { CreatePetDto, UpdatePetDto } from "../model";
+import type { CreatePetDto, DeleteParentDto, UpdateParentDto, UpdatePetDto } from "../model";
 
 import { faker } from "@faker-js/faker";
 
@@ -51,11 +51,32 @@ export const petControllerDelete = <TData = AxiosResponse<void>>(
   return axios.delete(`http://localhost:4000/api/v1/pet/${petId}`, options);
 };
 
+export const parentControllerCreateParent = <TData = AxiosResponse<void>>(
+  petId: string,
+  updateParentDto: UpdateParentDto,
+  options?: AxiosRequestConfig,
+): Promise<TData> => {
+  return axios.post(`http://localhost:4000/api/v1/parent/${petId}`, updateParentDto, options);
+};
+
+export const parentControllerDeleteParent = <TData = AxiosResponse<void>>(
+  petId: string,
+  deleteParentDto: DeleteParentDto,
+  options?: AxiosRequestConfig,
+): Promise<TData> => {
+  return axios.delete(`http://localhost:4000/api/v1/parent/${petId}`, {
+    data: deleteParentDto,
+    ...options,
+  });
+};
+
 export type PetControllerFindAllResult = AxiosResponse<PetDto[]>;
 export type PetControllerCreateResult = AxiosResponse<void>;
 export type PetControllerFindOneResult = AxiosResponse<PetDto>;
 export type PetControllerUpdateResult = AxiosResponse<void>;
 export type PetControllerDeleteResult = AxiosResponse<void>;
+export type ParentControllerCreateParentResult = AxiosResponse<void>;
+export type ParentControllerDeleteParentResult = AxiosResponse<void>;
 
 export const getPetControllerFindAllResponseMock = (): PetDto[] =>
   Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
@@ -210,10 +231,40 @@ export const getPetControllerDeleteMockHandler = (
     return new HttpResponse(null, { status: 200 });
   });
 };
+
+export const getParentControllerCreateParentMockHandler = (
+  overrideResponse?:
+    | void
+    | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<void> | void),
+) => {
+  return http.post("*/api/v1/parent/:petId", async (info) => {
+    await delay(1000);
+    if (typeof overrideResponse === "function") {
+      await overrideResponse(info);
+    }
+    return new HttpResponse(null, { status: 201 });
+  });
+};
+
+export const getParentControllerDeleteParentMockHandler = (
+  overrideResponse?:
+    | void
+    | ((info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<void> | void),
+) => {
+  return http.delete("*/api/v1/parent/:petId", async (info) => {
+    await delay(1000);
+    if (typeof overrideResponse === "function") {
+      await overrideResponse(info);
+    }
+    return new HttpResponse(null, { status: 200 });
+  });
+};
 export const getProjectDaepaAPIMock = () => [
   getPetControllerFindAllMockHandler(),
   getPetControllerCreateMockHandler(),
   getPetControllerFindOneMockHandler(),
   getPetControllerUpdateMockHandler(),
   getPetControllerDeleteMockHandler(),
+  getParentControllerCreateParentMockHandler(),
+  getParentControllerDeleteParentMockHandler(),
 ];
