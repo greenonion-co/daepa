@@ -1,0 +1,26 @@
+{
+  "name": "@repo/api-client",
+  "version": "0.0.0",
+  "private": true,
+  "exports": {
+    ".": {
+      "default": "./index.ts",
+      "types": "./index.ts"
+    }
+  },
+  "dependencies": {
+    "@faker-js/faker": "^9.7.0",
+    "axios": "^1.6.0",
+    "msw": "^2.0.0"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:^",
+    "@repo/typescript-config": "workspace:^",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "generate": "orval --config ../../orval.config.js",
+    "generate:watch": "orval --config ../../orval.config.js --watch"
+  }
+}

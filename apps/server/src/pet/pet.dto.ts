@@ -7,35 +7,137 @@ import {
   IsObject,
   IsOptional,
 } from 'class-validator';
-import { PartialType } from '@nestjs/mapped-types';
 import { PET_SEX, PET_SPECIES } from './pet.constants';
+import { ApiProperty, OmitType, PartialType, PickType } from '@nestjs/swagger';
 
-export class PetSummaryDto {
+class Pet {
+  @IsNumber()
   id: number;
+
+  @ApiProperty({
+    description: '펫 아이디',
+    example: 'XXXXXXXX',
+  })
+  @IsString()
+  petId: string;
+
+  @ApiProperty({
+    description: '펫 주인 아이디',
+    example: 'XXXXXXXX',
+  })
+  @IsString()
+  ownerId: string;
+
+  @ApiProperty({
+    description: '펫 이름',
+    example: '대파',
+  })
+  @IsString()
   name: string;
-  owner: any;
-  morphs: string[];
+
+  @ApiProperty({
+    description: '펫 종',
+    example: '크레스티드게코',
+  })
+  @IsString()
+  @IsEnum(PET_SPECIES)
+  species: keyof typeof PET_SPECIES;
+
+  @ApiProperty({
+    description: '펫 모프',
+    example: ['릴리화이트', '아잔틱헷100%'],
+    required: false,
+  })
+  @IsOptional()
+  @IsArray()
+  morphs?: string[];
+
+  @ApiProperty({
+    description: '펫 형질',
+    example: ['트익할', '풀핀'],
+    required: false,
+  })
+  @IsOptional()
+  @IsArray()
   traits?: string[];
-  sex: string;
-  photo?: any;
+
+  @ApiProperty({
+    description: '펫 출생일',
+    example: '2024-01-01',
+    required: false,
+  })
+  @IsOptional()
+  @IsDateString()
+  birthdate?: string;
+
+  @ApiProperty({
+    description: '펫 성장단계',
+    example: '준성체',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  growth?: string;
+
+  @ApiProperty({
+    description: '펫 성별(수컷, 암컷, 미구분)',
+    example: 'M',
+    required: false,
+  })
+  @IsOptional()
+  @IsEnum(PET_SEX)
+  sex?: keyof typeof PET_SEX;
+
+  @ApiProperty({
+    description: '펫 몸무게(g)',
+    example: 10,
+    required: false,
+  })
+  @IsOptional()
+  @IsNumber()
+  weight?: number;
+
+  @ApiProperty({
+    description: '펫 먹이',
+    example: ['판게아 인섹트', '귀뚜라미'],
+    required: false,
+  })
+  @IsOptional()
+  @IsArray()
+  foods?: string[];
+
+  @IsOptional()
+  @IsArray()
+  photos?: any[];
+
+  @ApiProperty({
+    description: '펫 소개말',
+    example: '저희 대파는 혈통있는 가문 출신의 헷100% 릴리화이트 입니다',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  desc?: string;
+
+  @IsOptional()
+  @IsString()
+  fatherId?: string;
+
+  @IsOptional()
+  @IsString()
+  motherId?: string;
 }
 
-export class PetBaseDto {
-  id: number;
-  name: string; // 이름
-  owner: any; // TODO: 주인 정보
-  species: string; // 종
-  morphs?: string[]; // 모프
-  traits?: string[]; // 형질
-  birthdate?: string; // 생년월일
-  sex?: 'M' | 'F' | 'N'; // 성별
-  weight?: number; // 몸무게
-  food?: string[]; // 먹이
-  father?: PetSummaryDto; // TODO: 부개체 요약
-  mother?: PetSummaryDto; // TODO: 모개체 요약
-  photos?: any[]; // TODO: 사진
-  desc?: string; // 소개말
-}
+export class PetSummaryDto extends PickType(Pet, [
+  'petId',
+  'name',
+  'ownerId',
+  'species',
+  'morphs',
+  'traits',
+  'sex',
+  'photos',
+]) {}
 
 export class PetMatingDto {
   status: string; // 메이팅 상태: 배란, 발정, 임신
@@ -48,38 +150,7 @@ export class PetSalesDto {
   price?: number; // 분양 가격
 }
 
-export class CreatePetDto {
-  @IsString()
-  name: string;
-
-  @IsString()
-  @IsEnum(PET_SPECIES)
-  species: keyof typeof PET_SPECIES;
-
-  @IsOptional()
-  @IsArray()
-  morphs?: string[];
-
-  @IsOptional()
-  @IsArray()
-  traits?: string[];
-
-  @IsOptional()
-  @IsDateString()
-  birthdate?: string;
-
-  @IsOptional()
-  @IsEnum(PET_SEX)
-  sex?: keyof typeof PET_SEX;
-
-  @IsOptional()
-  @IsNumber()
-  weight?: number;
-
-  @IsOptional()
-  @IsArray()
-  foods?: string[];
-
+export class PetDto extends OmitType(Pet, ['id']) {
   @IsOptional()
   @IsObject()
   father?: PetSummaryDto;
@@ -89,14 +160,6 @@ export class CreatePetDto {
   mother?: PetSummaryDto;
 
   @IsOptional()
-  @IsArray()
-  photos?: any[];
-
-  @IsOptional()
-  @IsString()
-  desc?: string;
-
-  @IsOptional()
   @IsObject()
   mating?: PetMatingDto;
 
@@ -105,12 +168,5 @@ export class CreatePetDto {
   sales?: PetSalesDto;
 }
 
-export class UpdatePetDto extends PartialType(CreatePetDto) {
-  @IsString()
-  petId: string;
-}
-
-export class PetInfoDto extends PetBaseDto {
-  mating?: PetMatingDto;
-  sales?: PetSalesDto;
-}
+export class CreatePetDto extends OmitType(PetDto, ['petId', 'ownerId']) {}
+export class UpdatePetDto extends PartialType(CreatePetDto) {}

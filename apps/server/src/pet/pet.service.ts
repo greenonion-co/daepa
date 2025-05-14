@@ -42,9 +42,11 @@ export class PetService {
     return await this.petRepository.findOneBy({ pet_id: petId });
   }
 
-  async updatePet(updatePetDto: UpdatePetDto): Promise<UpdateResult> {
-    const { petId, ...updateData } = updatePetDto;
-    return await this.petRepository.update({ pet_id: petId }, updateData);
+  async updatePet(
+    petId: string,
+    updatePetDto: UpdatePetDto,
+  ): Promise<UpdateResult> {
+    return await this.petRepository.update({ pet_id: petId }, updatePetDto);
   }
 
   async deletePet(petId: string): Promise<DeleteResult> {

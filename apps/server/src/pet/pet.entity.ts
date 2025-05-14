@@ -33,6 +33,9 @@ export class PetEntity {
   @Column({ nullable: true })
   birthdate?: string; // 생년월일
 
+  @Column()
+  growth?: string; // 성장단계
+
   @Column({ type: 'enum', enum: PET_SEX, nullable: true })
   sex?: keyof typeof PET_SEX; // 성별
 
