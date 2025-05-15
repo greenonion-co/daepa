@@ -7,6 +7,7 @@ import {
   IsInt,
   Min,
 } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 
 export enum Order {
   ASC = 'ASC',
@@ -14,16 +15,36 @@ export enum Order {
 }
 
 export class PageOptionsDto {
+  @ApiProperty({
+    description: '정렬 순서',
+    enum: Order,
+    default: Order.ASC,
+    required: false,
+  })
   @IsOptional()
   @IsEnum(Order)
   readonly order?: Order = Order.ASC;
 
+  @ApiProperty({
+    description: '페이지 번호',
+    type: Number,
+    minimum: 1,
+    default: 1,
+    required: false,
+  })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
   @Min(1)
   readonly page: number = 1;
 
+  @ApiProperty({
+    description: '페이지당 항목 수',
+    type: Number,
+    minimum: 1,
+    default: 10,
+    required: false,
+  })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
