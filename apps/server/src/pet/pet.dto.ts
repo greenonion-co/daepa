@@ -9,8 +9,10 @@ import {
 } from 'class-validator';
 import { PET_SEX, PET_SPECIES } from './pet.constants';
 import { ApiProperty, OmitType, PartialType, PickType } from '@nestjs/swagger';
+import { Exclude } from 'class-transformer';
 
 class Pet {
+  @Exclude()
   @IsNumber()
   id: number;
 
@@ -119,13 +121,15 @@ class Pet {
   @IsString()
   desc?: string;
 
+  @Exclude()
   @IsOptional()
   @IsString()
-  fatherId?: string;
+  father_id?: string;
 
+  @Exclude()
   @IsOptional()
   @IsString()
-  motherId?: string;
+  mother_id?: string;
 }
 
 export class PetSummaryDto extends PickType(Pet, [
@@ -137,7 +141,12 @@ export class PetSummaryDto extends PickType(Pet, [
   'traits',
   'sex',
   'photos',
-]) {}
+  'father_id',
+  'mother_id',
+]) {
+  @Exclude()
+  id: number;
+}
 
 export class PetMatingDto {
   status: string; // 메이팅 상태: 배란, 발정, 임신
@@ -150,7 +159,7 @@ export class PetSalesDto {
   price?: number; // 분양 가격
 }
 
-export class PetDto extends OmitType(Pet, ['id']) {
+export class PetDto extends Pet {
   @IsOptional()
   @IsObject()
   father?: PetSummaryDto;

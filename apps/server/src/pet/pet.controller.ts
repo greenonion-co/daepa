@@ -9,6 +9,7 @@ import {
   Patch,
   Post,
   Query,
+  UseInterceptors,
 } from '@nestjs/common';
 import { CreatePetDto, PetDto, UpdatePetDto } from './pet.dto';
 import { PetService } from './pet.service';
@@ -16,6 +17,7 @@ import { nanoid } from 'nanoid';
 import { PetEntity } from './pet.entity';
 import { PageOptionsDto, PageDto } from 'src/common/page.dto';
 import { ApiResponse } from '@nestjs/swagger';
+import { ExcludeNilInterceptor } from 'src/interceptors/exclude-nil';
 
 class MySQLError extends Error {
   code: string;
@@ -38,6 +40,7 @@ function isMySQLError(error: unknown): error is MySQLError {
 }
 
 @Controller('/v1/pet')
+@UseInterceptors(ExcludeNilInterceptor)
 export class PetController {
   constructor(private readonly petService: PetService) {}
 

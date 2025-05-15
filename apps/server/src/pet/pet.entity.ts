@@ -33,7 +33,7 @@ export class PetEntity {
   @Column({ nullable: true })
   birthdate?: string; // 생년월일
 
-  @Column()
+  @Column({ nullable: true })
   growth?: string; // 성장단계
 
   @Column({ type: 'enum', enum: PET_SEX, nullable: true })
@@ -44,4 +44,12 @@ export class PetEntity {
 
   @Column('json', { nullable: true })
   foods?: string[]; // 먹이
+
+  @Exclude()
+  @Column({ nullable: true })
+  father_id?: string; // 부 개체 id
+
+  @Exclude()
+  @Column({ nullable: true })
+  mother_id?: string; // 모 개체 id
 }

@@ -2,9 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { PetEntity } from './pet.entity';
 import { DeleteResult, Repository, UpdateResult } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CreatePetDto, UpdatePetDto } from './pet.dto';
+import { CreatePetDto, PetSummaryDto, UpdatePetDto } from './pet.dto';
 import { plainToInstance } from 'class-transformer';
 import { PageOptionsDto, PageDto, PageMetaDto } from 'src/common/page.dto';
+import { PetDto } from './pet.dto';
 
 @Injectable()
 export class PetService {
@@ -38,8 +39,24 @@ export class PetService {
     return new PageDto(entities, pageMetaDto);
   }
 
-  async getPet(petId: string): Promise<PetEntity | null> {
-    return await this.petRepository.findOneBy({ pet_id: petId });
+  async getPet(petId: string): Promise<PetDto | null> {
+    const pet = await this.petRepository.findOneBy({ pet_id: petId });
+
+    if (!pet) {
+      return null;
+    }
+
+    const petDto = plainToInstance(PetDto, pet);
+
+    if (pet.father_id) {
+      petDto.father = await this.getPetSummary(pet.father_id);
+    }
+
+    if (pet.mother_id) {
+      petDto.mother = await this.getPetSummary(pet.mother_id);
+    }
+
+    return petDto;
   }
 
   async updatePet(
@@ -51,5 +68,34 @@ export class PetService {
 
   async deletePet(petId: string): Promise<DeleteResult> {
     return await this.petRepository.delete({ pet_id: petId });
+  }
+
+  private async getPetSummary(petId: string): Promise<PetSummaryDto> {
+    const pet = await this.petRepository.findOneBy({ pet_id: petId });
+    return plainToInstance(PetSummaryDto, pet);
+  }
+
+  async updateParentId({
+    petId,
+    parentId,
+    target,
+  }: {
+    petId: string;
+    parentId: string;
+    target: 'father' | 'mother';
+  }): Promise<void> {
+    const fieldName = target === 'father' ? 'father_id' : 'mother_id';
+    await this.petRepository.update(
+      { pet_id: petId },
+      { [fieldName]: parentId },
+    );
+  }
+
+  async deleteParent(
+    petId: string,
+    target: 'father' | 'mother',
+  ): Promise<void> {
+    const fieldName = target === 'father' ? 'father_id' : 'mother_id';
+    await this.petRepository.update({ pet_id: petId }, { [fieldName]: null });
   }
 }

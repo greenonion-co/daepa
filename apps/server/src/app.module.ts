@@ -7,6 +7,7 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { PetEntity } from './pet/pet.entity';
+import { ParentController } from './parent/parent.controller';
 
 const ENTITIES = [PetEntity];
 
@@ -28,7 +29,7 @@ const ENTITIES = [PetEntity];
     }),
     TypeOrmModule.forFeature(ENTITIES),
   ],
-  controllers: [AppController, PetController],
+  controllers: [AppController, PetController, ParentController],
   providers: [AppService, PetService],
 })
 export class AppModule {
