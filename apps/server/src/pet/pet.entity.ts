@@ -1,5 +1,12 @@
 import { Exclude, Expose } from 'class-transformer';
-import { Entity, PrimaryGeneratedColumn, Column, Index } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  Index,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { PET_SEX, PET_SPECIES } from './pet.constants';
 
 @Entity({ name: 'pets' })
@@ -52,4 +59,12 @@ export class PetEntity {
   @Exclude()
   @Column({ nullable: true })
   mother_id?: string; // 모 개체 id
+
+  @Expose({ name: 'createdAt' })
+  @CreateDateColumn()
+  created_at: Date;
+
+  @Expose({ name: 'updatedAt' })
+  @UpdateDateColumn()
+  updated_at: Date;
 }
