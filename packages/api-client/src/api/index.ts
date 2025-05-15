@@ -8,7 +8,16 @@
 import axios from "axios";
 import type { AxiosRequestConfig, AxiosResponse } from "axios";
 
-import type { CreatePetDto, DeleteParentDto, UpdateParentDto, UpdatePetDto } from "../model";
+import type {
+  CreatePetDto,
+  CreateUserNotificationDto,
+  DeleteParentDto,
+  PetControllerFindAllParams,
+  UpdateParentDto,
+  UpdatePetDto,
+  UpdateUserNotificationDto,
+  UserNotificationControllerFindAllParams,
+} from "../model";
 
 import { faker } from "@faker-js/faker";
 
@@ -17,9 +26,13 @@ import { HttpResponse, delay, http } from "msw";
 import type { PetDto } from "../model";
 
 export const petControllerFindAll = <TData = AxiosResponse<PetDto[]>>(
+  params?: PetControllerFindAllParams,
   options?: AxiosRequestConfig,
 ): Promise<TData> => {
-  return axios.get(`http://localhost:4000/api/v1/pet`, options);
+  return axios.get(`http://localhost:4000/api/v1/pet`, {
+    ...options,
+    params: { ...params, ...options?.params },
+  });
 };
 
 export const petControllerCreate = <TData = AxiosResponse<void>>(
@@ -75,6 +88,38 @@ export const parentControllerDeleteParent = <TData = AxiosResponse<void>>(
   );
 };
 
+export const userNotificationControllerFindAll = <TData = AxiosResponse<void>>(
+  params?: UserNotificationControllerFindAllParams,
+  options?: AxiosRequestConfig,
+): Promise<TData> => {
+  return axios.get(`http://localhost:4000/api/v1/user-notifications`, {
+    ...options,
+    params: { ...params, ...options?.params },
+  });
+};
+
+export const userNotificationControllerCreate = <TData = AxiosResponse<void>>(
+  createUserNotificationDto: CreateUserNotificationDto,
+  options?: AxiosRequestConfig,
+): Promise<TData> => {
+  return axios.post(
+    `http://localhost:4000/api/v1/user-notifications`,
+    createUserNotificationDto,
+    options,
+  );
+};
+
+export const userNotificationControllerUpdate = <TData = AxiosResponse<void>>(
+  updateUserNotificationDto: UpdateUserNotificationDto,
+  options?: AxiosRequestConfig,
+): Promise<TData> => {
+  return axios.patch(
+    `http://localhost:4000/api/v1/user-notifications`,
+    updateUserNotificationDto,
+    options,
+  );
+};
+
 export type PetControllerFindAllResult = AxiosResponse<PetDto[]>;
 export type PetControllerCreateResult = AxiosResponse<void>;
 export type PetControllerFindOneResult = AxiosResponse<PetDto>;
@@ -82,6 +127,9 @@ export type PetControllerUpdateResult = AxiosResponse<void>;
 export type PetControllerDeleteResult = AxiosResponse<void>;
 export type ParentControllerCreateParentResult = AxiosResponse<void>;
 export type ParentControllerDeleteParentResult = AxiosResponse<void>;
+export type UserNotificationControllerFindAllResult = AxiosResponse<void>;
+export type UserNotificationControllerCreateResult = AxiosResponse<void>;
+export type UserNotificationControllerUpdateResult = AxiosResponse<void>;
 
 export const getPetControllerFindAllResponseMock = (): PetDto[] =>
   Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
@@ -264,6 +312,48 @@ export const getParentControllerDeleteParentMockHandler = (
     return new HttpResponse(null, { status: 201 });
   });
 };
+
+export const getUserNotificationControllerFindAllMockHandler = (
+  overrideResponse?:
+    | void
+    | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<void> | void),
+) => {
+  return http.get("*/api/v1/user-notifications", async (info) => {
+    await delay(1000);
+    if (typeof overrideResponse === "function") {
+      await overrideResponse(info);
+    }
+    return new HttpResponse(null, { status: 200 });
+  });
+};
+
+export const getUserNotificationControllerCreateMockHandler = (
+  overrideResponse?:
+    | void
+    | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<void> | void),
+) => {
+  return http.post("*/api/v1/user-notifications", async (info) => {
+    await delay(1000);
+    if (typeof overrideResponse === "function") {
+      await overrideResponse(info);
+    }
+    return new HttpResponse(null, { status: 201 });
+  });
+};
+
+export const getUserNotificationControllerUpdateMockHandler = (
+  overrideResponse?:
+    | void
+    | ((info: Parameters<Parameters<typeof http.patch>[1]>[0]) => Promise<void> | void),
+) => {
+  return http.patch("*/api/v1/user-notifications", async (info) => {
+    await delay(1000);
+    if (typeof overrideResponse === "function") {
+      await overrideResponse(info);
+    }
+    return new HttpResponse(null, { status: 200 });
+  });
+};
 export const getProjectDaepaAPIMock = () => [
   getPetControllerFindAllMockHandler(),
   getPetControllerCreateMockHandler(),
@@ -272,4 +362,7 @@ export const getProjectDaepaAPIMock = () => [
   getPetControllerDeleteMockHandler(),
   getParentControllerCreateParentMockHandler(),
   getParentControllerDeleteParentMockHandler(),
+  getUserNotificationControllerFindAllMockHandler(),
+  getUserNotificationControllerCreateMockHandler(),
+  getUserNotificationControllerUpdateMockHandler(),
 ];

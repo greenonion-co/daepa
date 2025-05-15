@@ -8,8 +8,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { PetEntity } from './pet/pet.entity';
 import { ParentController } from './parent/parent.controller';
+import { UserNotificationEntity } from './user_notification/user_notification.entity';
+import { UserNotificationService } from './user_notification/user_notification.service';
+import { UserNotificationController } from './user_notification/user_notification.controller';
 
-const ENTITIES = [PetEntity];
+const ENTITIES = [PetEntity, UserNotificationEntity];
 
 @Module({
   imports: [
@@ -29,8 +32,13 @@ const ENTITIES = [PetEntity];
     }),
     TypeOrmModule.forFeature(ENTITIES),
   ],
-  controllers: [AppController, PetController, ParentController],
-  providers: [AppService, PetService],
+  controllers: [
+    AppController,
+    PetController,
+    ParentController,
+    UserNotificationController,
+  ],
+  providers: [AppService, PetService, UserNotificationService],
 })
 export class AppModule {
   constructor(private dataSource: DataSource) {}
