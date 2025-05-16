@@ -6,7 +6,7 @@ import {
   UpdateUserNotificationDto,
 } from './user_notification.dto';
 
-@Controller('/v1/user-notifications')
+@Controller('/v1/user-notification')
 export class UserNotificationController {
   constructor(
     private readonly userNotificationService: UserNotificationService,
