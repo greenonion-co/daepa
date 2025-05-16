@@ -9,6 +9,8 @@
 export * from "./createPetDto";
 export * from "./createPetDtoSex";
 export * from "./createPetDtoSpecies";
+export * from "./createUserNotificationDto";
+export * from "./createUserNotificationDtoDetailJson";
 export * from "./deleteParentDto";
 export * from "./deleteParentDtoTarget";
 export * from "./petDto";
@@ -19,3 +21,8 @@ export * from "./updateParentDtoTarget";
 export * from "./updatePetDto";
 export * from "./updatePetDtoSex";
 export * from "./updatePetDtoSpecies";
+export * from "./updateUserNotificationDto";
+export * from "./petControllerFindAllOrder";
+export * from "./petControllerFindAllParams";
+export * from "./userNotificationControllerFindAllOrder";
+export * from "./userNotificationControllerFindAllParams";
