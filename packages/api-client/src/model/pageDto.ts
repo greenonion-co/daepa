@@ -5,10 +5,12 @@
  * Project Daepa API description
  * OpenAPI spec version: 1.0
  */
-import type { PetSummaryDto } from "./petSummaryDto";
+import type { PageDtoDataItem } from "./pageDtoDataItem";
 import type { PageMetaDto } from "./pageMetaDto";
 
-export type PetControllerFindAll200 = {
-  data: PetSummaryDto[];
+export interface PageDto {
+  /** 페이징된 데이터 */
+  data: PageDtoDataItem[];
+  /** 페이지 메타 정보 */
   meta: PageMetaDto;
-};
+}
