@@ -50,6 +50,7 @@ export class PetController {
     description: '펫 목록 조회 성공',
     schema: {
       type: 'object',
+      required: ['data', 'meta'],
       properties: {
         data: {
           type: 'array',
