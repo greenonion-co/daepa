@@ -163,10 +163,20 @@ export class PetDto extends PetBaseDto {
   @Exclude()
   declare motherId?: string;
 
+  @ApiProperty({
+    description: '아빠 개체 정보',
+    example: {},
+    required: false,
+  })
   @IsOptional()
   @IsObject()
   father?: PetSummaryDto;
 
+  @ApiProperty({
+    description: '엄마 개체 정보',
+    example: {},
+    required: false,
+  })
   @IsOptional()
   @IsObject()
   mother?: PetSummaryDto;

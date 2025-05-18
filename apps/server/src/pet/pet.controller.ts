@@ -14,9 +14,8 @@ import {
 import { CreatePetDto, PetDto, PetSummaryDto, UpdatePetDto } from './pet.dto';
 import { PetService } from './pet.service';
 import { nanoid } from 'nanoid';
-import { PetEntity } from './pet.entity';
-import { PageOptionsDto, PageDto } from 'src/common/page.dto';
-import { ApiResponse } from '@nestjs/swagger';
+import { PageOptionsDto, PageDto, PageMetaDto } from 'src/common/page.dto';
+import { ApiExtraModels, ApiResponse, getSchemaPath } from '@nestjs/swagger';
 import { ExcludeNilInterceptor } from 'src/interceptors/exclude-nil';
 
 class MySQLError extends Error {
@@ -45,11 +44,20 @@ export class PetController {
   constructor(private readonly petService: PetService) {}
 
   @Get()
+  @ApiExtraModels(PetSummaryDto, PageMetaDto)
   @ApiResponse({
     status: 200,
     description: '펫 목록 조회 성공',
-    isArray: true,
-    type: PageDto<PetSummaryDto>,
+    schema: {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'array',
+          items: { $ref: getSchemaPath(PetSummaryDto) },
+        },
+        meta: { $ref: getSchemaPath(PageMetaDto) },
+      },
+    },
   })
   async findAll(
     @Query() pageOptionsDto: PageOptionsDto,
