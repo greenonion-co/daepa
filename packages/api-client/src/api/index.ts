@@ -23,7 +23,11 @@ import { faker } from "@faker-js/faker";
 
 import { HttpResponse, delay, http } from "msw";
 
-import type { PetControllerFindAll200, PetDto } from "../model";
+import type {
+  PetControllerFindAll200,
+  PetDto,
+  UserNotificationControllerFindAll200,
+} from "../model";
 
 export const petControllerFindAll = <TData = AxiosResponse<PetControllerFindAll200>>(
   params?: PetControllerFindAllParams,
@@ -88,7 +92,9 @@ export const parentControllerDeleteParent = <TData = AxiosResponse<void>>(
   );
 };
 
-export const userNotificationControllerFindAll = <TData = AxiosResponse<void>>(
+export const userNotificationControllerFindAll = <
+  TData = AxiosResponse<UserNotificationControllerFindAll200>,
+>(
   params?: UserNotificationControllerFindAllParams,
   options?: AxiosRequestConfig,
 ): Promise<TData> => {
@@ -127,7 +133,8 @@ export type PetControllerUpdateResult = AxiosResponse<void>;
 export type PetControllerDeleteResult = AxiosResponse<void>;
 export type ParentControllerCreateParentResult = AxiosResponse<void>;
 export type ParentControllerDeleteParentResult = AxiosResponse<void>;
-export type UserNotificationControllerFindAllResult = AxiosResponse<void>;
+export type UserNotificationControllerFindAllResult =
+  AxiosResponse<UserNotificationControllerFindAll200>;
 export type UserNotificationControllerCreateResult = AxiosResponse<void>;
 export type UserNotificationControllerUpdateResult = AxiosResponse<void>;
 
@@ -248,6 +255,31 @@ export const getPetControllerFindOneResponseMock = (
   ...overrideResponse,
 });
 
+export const getUserNotificationControllerFindAllResponseMock = (
+  overrideResponse: Partial<UserNotificationControllerFindAll200> = {},
+): UserNotificationControllerFindAll200 => ({
+  data: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+    id: faker.number.int({ min: undefined, max: undefined }),
+    senderId: faker.string.alpha(20),
+    receiverId: faker.string.alpha(20),
+    type: faker.string.alpha(20),
+    targetId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+    status: faker.string.alpha(20),
+    detailJson: {},
+    createdAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+    updatedAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+  })),
+  meta: {
+    page: faker.number.int({ min: undefined, max: undefined }),
+    itemPerPage: faker.number.int({ min: undefined, max: undefined }),
+    totalCount: faker.number.int({ min: undefined, max: undefined }),
+    totalPage: faker.number.int({ min: undefined, max: undefined }),
+    hasPreviousPage: faker.datatype.boolean(),
+    hasNextPage: faker.datatype.boolean(),
+  },
+  ...overrideResponse,
+});
+
 export const getPetControllerFindAllMockHandler = (
   overrideResponse?:
     | PetControllerFindAll200
@@ -364,15 +396,24 @@ export const getParentControllerDeleteParentMockHandler = (
 
 export const getUserNotificationControllerFindAllMockHandler = (
   overrideResponse?:
-    | void
-    | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<void> | void),
+    | UserNotificationControllerFindAll200
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<UserNotificationControllerFindAll200> | UserNotificationControllerFindAll200),
 ) => {
   return http.get("*/api/v1/user-notification", async (info) => {
     await delay(1000);
-    if (typeof overrideResponse === "function") {
-      await overrideResponse(info);
-    }
-    return new HttpResponse(null, { status: 200 });
+
+    return new HttpResponse(
+      JSON.stringify(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getUserNotificationControllerFindAllResponseMock(),
+      ),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
   });
 };
 

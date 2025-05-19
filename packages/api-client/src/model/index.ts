@@ -32,5 +32,8 @@ export * from "./updatePetDto";
 export * from "./updatePetDtoSex";
 export * from "./updatePetDtoSpecies";
 export * from "./updateUserNotificationDto";
+export * from "./userNotificationControllerFindAll200";
 export * from "./userNotificationControllerFindAllOrder";
 export * from "./userNotificationControllerFindAllParams";
+export * from "./userNotificationDto";
+export * from "./userNotificationDtoDetailJson";

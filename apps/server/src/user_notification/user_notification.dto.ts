@@ -12,7 +12,7 @@ import {
 } from './user_notification.constant';
 import { ApiProperty, OmitType, PickType } from '@nestjs/swagger';
 
-class UserNotificationDto {
+export class UserNotificationDto {
   @ApiProperty({
     description: '알림 아이디',
     example: 1,
@@ -44,9 +44,11 @@ class UserNotificationDto {
   @ApiProperty({
     description: '알림 대상 이벤트 아이디 ex) 부모 개체 아이디, 댓글 아이디 등',
     example: 'XXXXXXXX',
+    required: false,
   })
   @IsString()
-  targetId: string;
+  @IsOptional()
+  targetId?: string;
 
   @ApiProperty({
     description: '알림 상태',
@@ -54,7 +56,7 @@ class UserNotificationDto {
   })
   @IsEnum(USER_NOTIFICATION_STATUS)
   @IsOptional()
-  status?: string;
+  status: string;
 
   @ApiProperty({
     description: '알림 상세 정보 JSON',

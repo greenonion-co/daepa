@@ -18,26 +18,25 @@ export class UserNotificationEntity {
 
   @Expose({ name: 'senderId' })
   @Column()
-  sender_id: string;
+  sender_id: string; // 알림 발신자 Id
 
   @Expose({ name: 'receiverId' })
   @Column()
-  receiver_id: string;
+  receiver_id: string; // 알림 수신자 Id
 
   @Column({ type: 'enum', enum: USER_NOTIFICATION_TYPE })
-  type: string;
+  type: string; // 알림 종류
 
   @Expose({ name: 'targetId' })
-  @Column()
-  target_id: string;
+  @Column({ nullable: true })
+  target_id?: string; // 알림 대상 객체 Id
 
   @Column({
     type: 'enum',
     enum: USER_NOTIFICATION_STATUS,
-    nullable: true,
     default: USER_NOTIFICATION_STATUS.UNREAD,
   })
-  status?: string;
+  status: string; // 알림 상태
 
   @Expose({ name: 'detailJson' })
   @Column('json')
