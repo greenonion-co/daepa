@@ -196,7 +196,7 @@ export default function ParentSearchSelector({ isOpen, onClose, onSelect }: Pare
               </p>
             </div>
 
-            <div className="flex gap-2">
+            <div className="flex gap-2 bg-white p-4 dark:bg-[#18181B]">
               <button
                 onClick={onClose}
                 className="flex-1 rounded-xl border border-gray-200 py-3 font-medium hover:bg-gray-50"

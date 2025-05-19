@@ -122,15 +122,15 @@ export const columns: ColumnDef<Pet>[] = [
     },
   },
   {
-    accessorKey: "size",
+    accessorKey: "growth",
     header: ({ column, table }) => {
       const uniqueSizes = Array.from(
-        new Set(table.getCoreRowModel().rows.map((row) => row.getValue("size") as string)),
+        new Set(table.getCoreRowModel().rows.map((row) => row.getValue("growth") as string)),
       ).filter(Boolean);
 
-      return <TableHeaderSelect column={column} title={TABLE_HEADER.size} items={uniqueSizes} />;
+      return <TableHeaderSelect column={column} title={TABLE_HEADER.growth} items={uniqueSizes} />;
     },
-    cell: ({ row }) => <div className="lowercase">{row.getValue("size")}</div>,
+    cell: ({ row }) => <div className="lowercase">{row.getValue("growth")}</div>,
   },
   {
     accessorKey: "morphs",
@@ -229,18 +229,12 @@ export const columns: ColumnDef<Pet>[] = [
     },
   },
   {
-    accessorKey: "description",
-    header: TABLE_HEADER.description,
+    accessorKey: "desc",
+    header: TABLE_HEADER.desc,
   },
   {
     accessorKey: "foods",
-    header: ({ column, table }) => {
-      const uniqueFoods = Array.from(
-        new Set(table.getCoreRowModel().rows.map((row) => row.getValue("foods") as string)),
-      ).filter(Boolean);
-
-      return <TableHeaderSelect column={column} title={TABLE_HEADER.foods} items={uniqueFoods} />;
-    },
+    header: TABLE_HEADER.foods,
     cell: ({ row }) => {
       const foods = row.getValue("foods") as string[];
 

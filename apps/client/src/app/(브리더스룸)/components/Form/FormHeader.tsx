@@ -1,5 +1,5 @@
 import { useRouter } from "next/navigation";
-import { REGISTER_PAGE, USER_NAME } from "../../../constants";
+import { REGISTER_PAGE, USER_NAME } from "../../constants";
 
 export const FormHeader = ({ funnel }: { funnel: number }) => {
   const router = useRouter();

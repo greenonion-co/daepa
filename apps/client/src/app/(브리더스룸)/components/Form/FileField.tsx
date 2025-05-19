@@ -1,4 +1,4 @@
-import { useFormStore } from "../../store/form";
+import { useFormStore } from "../../register/store/form";
 import { PhotoViewer } from "./PhotoViewer";
 
 import Add from "@mui/icons-material/Add";

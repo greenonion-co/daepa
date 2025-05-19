@@ -7,19 +7,18 @@ import {
   AlertDialogFooter,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { useRegisterForm } from "../../hooks/useRegisterForm";
-import { useFormStore } from "../../store/form";
 
-const MorphAlert = () => {
-  const { resetMorph } = useRegisterForm();
-  const { showMorphResetAlert, setShowMorphResetAlert } = useFormStore();
-
-  const closeAlert = () => {
-    setShowMorphResetAlert(false);
-  };
-
+const MorphAlert = ({
+  isOpen,
+  onCloseAction,
+  onConfirmAction,
+}: {
+  isOpen: boolean;
+  onCloseAction: () => void;
+  onConfirmAction: () => void;
+}) => {
   return (
-    <AlertDialog open={showMorphResetAlert}>
+    <AlertDialog open={isOpen}>
       <AlertDialogContent>
         <AlertDialogTitle>종 변경 안내</AlertDialogTitle>
         <AlertDialogDescription>
@@ -28,8 +27,8 @@ const MorphAlert = () => {
           계속하시겠습니까?
         </AlertDialogDescription>
         <AlertDialogFooter>
-          <AlertDialogCancel onClick={closeAlert}>취소</AlertDialogCancel>
-          <AlertDialogAction onClick={resetMorph}>확인</AlertDialogAction>
+          <AlertDialogCancel onClick={onCloseAction}>취소</AlertDialogCancel>
+          <AlertDialogAction onClick={onConfirmAction}>확인</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

@@ -1,6 +1,7 @@
 "use client";
 
 import BottomSheet from "@/components/common/BottomSheet";
+import { GENDER_KOREAN_INFO, SPECIES_KOREAN_INFO } from "../../constants";
 
 interface SelectorProps {
   isOpen: boolean;
@@ -9,16 +10,19 @@ interface SelectorProps {
   title?: string;
   currentValue?: string;
   selectList: string[];
+  type?: string;
 }
 
 const SelectButton = ({
   item,
   isSelected,
   onClick,
+  type,
 }: {
   item: string;
   isSelected: boolean;
   onClick: () => void;
+  type?: string;
 }) => (
   <button
     type="button"
@@ -29,7 +33,11 @@ const SelectButton = ({
     } `}
     onClick={onClick}
   >
-    {item}
+    {type === "sex"
+      ? GENDER_KOREAN_INFO[item as keyof typeof GENDER_KOREAN_INFO]
+      : type === "species"
+        ? SPECIES_KOREAN_INFO[item as keyof typeof SPECIES_KOREAN_INFO]
+        : item}
   </button>
 );
 
@@ -40,6 +48,7 @@ export default function Selector({
   title,
   currentValue,
   selectList,
+  type,
 }: SelectorProps) {
   return (
     <BottomSheet isOpen={isOpen} onClose={onCloseAction}>
@@ -52,6 +61,7 @@ export default function Selector({
               item={item}
               isSelected={currentValue === item}
               onClick={() => onSelectAction(item)}
+              type={type}
             />
           ))}
         </div>

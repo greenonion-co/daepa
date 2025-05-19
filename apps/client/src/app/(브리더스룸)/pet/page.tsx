@@ -1,10 +1,10 @@
 import { columns } from "./components/columns";
 import DataTable from "./components/DataTable";
-import { GetAllPetResponse, petApi } from "./api/pet";
+import { petControllerFindAll, PetDto } from "@repo/api-client";
 
-async function getData(): Promise<GetAllPetResponse> {
-  const response = await petApi.getAll();
-  return response;
+async function getData(): Promise<PetDto[]> {
+  const response = await petControllerFindAll();
+  return response.data;
 }
 
 export default async function PetPage() {
