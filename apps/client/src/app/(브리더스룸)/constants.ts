@@ -1,5 +1,5 @@
 import { DollarSign, Egg, Heart, Home, Inbox } from "lucide-react";
-import { FieldName, FormStep, SelectorConfig } from "./register/types";
+import { FormStep, SelectorConfig } from "./register/types";
 import { FOOD } from "@/types/pet";
 
 export const USER_NAME = "낸시";
@@ -13,7 +13,7 @@ export const FORM_STEPS: FormStep[] = [
   {
     title: "성별",
     field: {
-      name: "gender",
+      name: "sex",
       type: "select",
       placeholder: "성별을 선택해주세요",
       required: true,
@@ -23,7 +23,7 @@ export const FORM_STEPS: FormStep[] = [
   {
     title: "크기",
     field: {
-      name: "size",
+      name: "growth",
       type: "select",
       placeholder: "크기를 선택해주세요",
       required: true,
@@ -33,7 +33,7 @@ export const FORM_STEPS: FormStep[] = [
   {
     title: "모프",
     field: {
-      name: "morph",
+      name: "morphs",
       type: "multipleSelect",
       placeholder: "모프를 선택해주세요",
       required: true,
@@ -54,9 +54,19 @@ export const FORM_STEPS: FormStep[] = [
 
 export const OPTION_STEPS: FormStep[] = [
   {
+    title: "형질",
+    field: {
+      name: "traits",
+      type: "multipleSelect",
+      placeholder: "형질을 선택해주세요",
+      required: true,
+      validation: (value) => value.length > 0,
+    },
+  },
+  {
     title: "사진",
     field: {
-      name: "photo",
+      name: "photos",
       type: "file",
       required: true,
       validation: (value) => value.length > 0,
@@ -65,7 +75,7 @@ export const OPTION_STEPS: FormStep[] = [
   {
     title: "부모 개체 정보",
     field: {
-      name: "parentSearch",
+      name: "parents",
       type: "parentSearch",
       required: true,
       validation: (value) => value.length > 0,
@@ -74,7 +84,7 @@ export const OPTION_STEPS: FormStep[] = [
   {
     title: "생년월일",
     field: {
-      name: "birthDate",
+      name: "birthdate",
       type: "date",
       required: true,
       validation: (value) => value.length > 0,
@@ -90,6 +100,16 @@ export const OPTION_STEPS: FormStep[] = [
     },
   },
   {
+    title: "먹이",
+    field: {
+      name: "foods",
+      type: "multipleSelect",
+      placeholder: "먹이를 선택해주세요",
+      required: true,
+      validation: (value) => value.length > 0,
+    },
+  },
+  {
     title: "개체 이름/관리번호",
     field: {
       name: "name",
@@ -101,15 +121,15 @@ export const OPTION_STEPS: FormStep[] = [
   {
     title: "상세 설명",
     field: {
-      name: "description",
+      name: "desc",
       type: "textarea",
       required: false,
     },
   },
 ];
 
-export const MORPH_LIST_BY_SPECIES: Record<string, string[]> = {
-  "레오파드 게코": [
+export const MORPH_LIST_BY_SPECIES: Record<keyof typeof SPECIES_KOREAN_INFO, string[]> = {
+  CR: [
     "노멀",
     "루왁",
     "루왁 릴리",
@@ -128,7 +148,11 @@ export const MORPH_LIST_BY_SPECIES: Record<string, string[]> = {
     "100%헷아잔틱",
     "100%헷초초",
   ],
-  "크레스티드 게코": ["노멀", "하리퀸", "다크", "파이어", "트라이컬러", "기타"],
+  LE: ["노멀", "하리퀸", "다크", "파이어", "트라이컬러", "기타"],
+  PT: ["노멀", "하리퀸", "다크", "파이어", "트라이컬러", "기타"],
+  KN: ["노멀", "하리퀸", "다크", "파이어", "트라이컬러", "기타"],
+  LC: ["노멀", "하리퀸", "다크", "파이어", "트라이컬러", "기타"],
+  GG: ["노멀", "하리퀸", "다크", "파이어", "트라이컬러", "기타"],
 };
 
 export const SALE_KOREAN_INFO = {
@@ -145,13 +169,13 @@ export const TABLE_HEADER = {
   morphs: "모프",
   traits: "형질",
   sex: "성별",
-  size: "크기",
+  growth: "크기",
   weight: "몸무게",
   mother: "모",
   father: "부",
   birthdate: "생년월일",
   photos: "사진",
-  description: "설명",
+  desc: "설명",
   foods: "먹이",
   canBreed: "발정 여부",
   breedingCount: "산란",
@@ -159,18 +183,44 @@ export const TABLE_HEADER = {
   saleInfo: "판매 상태",
 };
 
-export const SELECTOR_CONFIGS: Record<FieldName, SelectorConfig> = {
+export const SPECIES_KOREAN_INFO = {
+  CR: "크레스티드 게코",
+  LE: "레오파드 게코",
+  PT: "펫테일 게코",
+  KN: "납테일 게코",
+  LC: "리키에너스",
+  GG: "가고일 게코",
+};
+
+export const GENDER_KOREAN_INFO = {
+  M: "수컷",
+  F: "암컷",
+  N: "미구분",
+};
+
+export const SELECTOR_CONFIGS: Record<
+  "species" | "growth" | "sex" | "traits" | "foods",
+  SelectorConfig
+> = {
   species: {
     title: "종 선택",
-    selectList: ["레오파드 게코", "크레스티드 게코"],
+    selectList: Object.keys(SPECIES_KOREAN_INFO),
   },
-  size: {
+  growth: {
     title: "크기 선택",
     selectList: ["베이비", "아성체", "준성체", "성체"],
   },
-  gender: {
+  sex: {
     title: "성별 선택",
-    selectList: ["수컷", "암컷", "미구분"],
+    selectList: Object.keys(GENDER_KOREAN_INFO),
+  },
+  traits: {
+    title: "형질 선택",
+    selectList: ["노멀", "크림시클", "하리퀸", "다크", "파이어", "트라이컬러", "기타"],
+  },
+  foods: {
+    title: "먹이 선택",
+    selectList: ["판게아 인섹트", "귀뚜라미", "냉동귀뚜라미", "누에", "지렙 인섹트"],
   },
 };
 
@@ -214,15 +264,4 @@ export const FOOD_BADGE_TEXT_COLORS: Record<FOOD, string> = {
   귀뚜라미: "text-gray-900",
   누에: "text-yellow-900",
   "지렙 인섹트": "text-blue-900",
-};
-
-export const GENDER_KOREAN_INFO = {
-  M: "수컷",
-  F: "암컷",
-  N: "미구분",
-};
-
-export const SPECIES_KOREAN_INFO = {
-  CR: "크레스티드 게코",
-  LF: "레오파드 게코",
 };

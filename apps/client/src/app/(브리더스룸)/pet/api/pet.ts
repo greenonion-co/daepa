@@ -1,5 +1,6 @@
 import axios from "axios";
 import { Pet, CreatePetDto } from "@/types/pet";
+import { petControllerFindOne } from "@repo/api-client";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
@@ -24,13 +25,14 @@ export const petApi = {
         itemPerPage,
       },
     });
+
     return response.data;
   },
 
   // 단일 펫 조회
   getDetail: async (id: string): Promise<Pet> => {
-    const response = await axios.get(`${API_URL}/v1/pet/${id}`);
-    return response.data;
+    const response = await petControllerFindOne(id);
+    return response.data as unknown as Pet;
   },
 
   // 펫 등록

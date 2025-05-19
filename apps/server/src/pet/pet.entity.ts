@@ -60,6 +60,10 @@ export class PetEntity {
   @Column({ nullable: true })
   mother_id?: string; // 모 개체 id
 
+  @Expose({ name: 'desc' })
+  @Column({ nullable: true })
+  desc?: string; // 소개말
+
   @Expose({ name: 'createdAt' })
   @CreateDateColumn()
   created_at: Date;

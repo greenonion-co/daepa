@@ -1,15 +1,18 @@
+import { PetSummaryDto } from "@/types/pet";
+
 export type FieldName =
   | "species"
-  | "morph"
-  | "size"
-  | "gender"
-  | "parentSearch"
+  | "morphs"
+  | "traits"
+  | "growth"
+  | "sex"
   | "name"
-  | "birthDate"
+  | "foods"
+  | "birthdate"
   | "weight"
-  | "description"
-  | "images"
-  | "photo";
+  | "desc"
+  | "photos"
+  | "parents";
 
 export type FormStep = {
   title: string;
@@ -24,16 +27,22 @@ export type FormStep = {
 
 export interface FormData {
   species?: string;
-  morph?: string[];
-  size?: string;
-  gender?: string;
-  parentSearch?: any;
+  morphs?: string[];
+  traits?: string[];
+  growth?: string;
+  sex?: "M" | "F" | "N";
   name?: string;
-  birthDate?: string;
-  weight?: string;
-  description?: string;
-  images?: string[];
-  photo?: string[];
+  birthdate?: string;
+  weight?: number;
+  desc?: string;
+  photo?: any[];
+  foods?: string[];
+  fatherId?: string;
+  motherId?: string;
+  father?: PetSummaryDto;
+  mother?: PetSummaryDto;
+  petId?: string;
+  ownerId?: string;
 }
 
 export interface FormErrors {
