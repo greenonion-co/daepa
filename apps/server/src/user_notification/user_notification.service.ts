@@ -19,9 +19,8 @@ export class UserNotificationService {
   async createUserNotification(
     dto: CreateUserNotificationDto,
   ): Promise<UserNotificationEntity> {
-    const userNotification = plainToInstance(UserNotificationEntity, dto);
-    console.log('here: ', userNotification);
-    return await this.userNotificationRepository.save(userNotification);
+    const userNotificationEntity = plainToInstance(UserNotificationEntity, dto);
+    return await this.userNotificationRepository.save(userNotificationEntity);
   }
 
   async getAllReceiverNotifications(
