@@ -13,7 +13,7 @@ import { FormField } from "../../components/Form/FormField";
 
 export default function RegisterPage({ params }: { params: Promise<{ funnel: string }> }) {
   const { handleNext, goNext, handleSelect, handleMultipleSelect } = useRegisterForm();
-  const { formData, step, errors } = useFormStore();
+  const { formData, step, errors, resetForm } = useFormStore();
   const { state, isMobile } = useSidebar();
 
   const resolvedParams = use(params);
@@ -22,6 +22,10 @@ export default function RegisterPage({ params }: { params: Promise<{ funnel: str
 
   useEffect(() => {
     if (funnel === REGISTER_PAGE.SECOND) return;
+    if (step === 0) {
+      resetForm();
+    }
+
     const currentStep = FORM_STEPS[FORM_STEPS.length - step - 1];
     if (!currentStep) return;
 
@@ -80,8 +84,6 @@ export default function RegisterPage({ params }: { params: Promise<{ funnel: str
                     handleChange={handleNext}
                     formData={formData}
                     errors={errors}
-                    handleSelect={handleSelect}
-                    handleMultipleSelect={handleMultipleSelect}
                   />
                 </div>
               </div>

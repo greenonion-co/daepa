@@ -6,13 +6,14 @@ import Close from "@mui/icons-material/Close";
 import ParentLink from "../../pet/components/ParentLink";
 import { useRegisterForm } from "../../register/hooks/useRegisterForm";
 import { GENDER_KOREAN_INFO, SPECIES_KOREAN_INFO } from "../../constants";
+import { toast } from "sonner";
 import { PetSummaryDto } from "@repo/api-client";
 interface FormFieldProps {
   field: FormStep["field"];
   formData: FormData;
   errors: FormErrors;
-  disabled: boolean;
-  handleChange: (value: { type: FieldName; value: string | string[] }) => void;
+  disabled?: boolean;
+  handleChange: (value: { type: FieldName; value: string | string[] | PetSummaryDto }) => void;
 }
 
 export const FormField = ({ field, formData, errors, disabled, handleChange }: FormFieldProps) => {
@@ -27,8 +28,14 @@ export const FormField = ({ field, formData, errors, disabled, handleChange }: F
     error && "border-b-red-500",
   );
 
-  const handleParentSelect = (item: PetSummaryDto) => {
-    // handleChange({ type: name, value: item });
+  const handleSelectParent = (type: "father" | "mother", value: PetSummaryDto) => {
+    handleChange({ type, value });
+    toast.success("부모 선택 해제가 완료되었습니다.");
+  };
+
+  const handleUnlink = (type: "father" | "mother") => {
+    handleChange({ type, value: null });
+    toast.success("부모 선택 해제가 완료되었습니다.");
   };
 
   switch (type) {
@@ -47,8 +54,26 @@ export const FormField = ({ field, formData, errors, disabled, handleChange }: F
     case "parentSearch":
       return (
         <div className="flex gap-2">
-          <ParentLink label="부" data={formData.father} onSelect={handleParentSelect} />
-          <ParentLink label="모" data={formData.mother} onSelect={handleParentSelect} />
+          <ParentLink
+            label="부"
+            data={formData.father}
+            onSelect={(item) => {
+              handleSelectParent("father", item);
+            }}
+            onUnlink={() => {
+              handleUnlink("father");
+            }}
+          />
+          <ParentLink
+            label="모"
+            data={formData.mother}
+            onSelect={(item) => {
+              handleSelectParent("mother", item);
+            }}
+            onUnlink={() => {
+              handleUnlink("mother");
+            }}
+          />
         </div>
       );
     case "textarea":
@@ -56,7 +81,7 @@ export const FormField = ({ field, formData, errors, disabled, handleChange }: F
         <textarea
           className={`w-full rounded-xl bg-gray-100 p-4 text-left text-[18px] focus:outline-none focus:ring-0 dark:bg-gray-600/50 dark:text-white`}
           rows={4}
-          value={value}
+          value={value || ""}
           onChange={(e) => handleChange({ type: field.name, value: e.target.value })}
           disabled={disabled}
         />

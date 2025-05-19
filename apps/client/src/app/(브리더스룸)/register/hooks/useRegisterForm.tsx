@@ -14,7 +14,8 @@ import MultipleSelector from "../../components/selector/multiple";
 import Selector from "../../components/selector";
 import { CreatePetDto, petControllerCreate } from "@repo/api-client";
 import { useMutation } from "@tanstack/react-query";
-import MorphAlert from "../../components/Form/MorphAlert";
+import Dialog from "../../components/Form/Dialog";
+import { toast } from "sonner";
 
 type SELECTOR_TYPE = "species" | "growth" | "sex";
 
@@ -24,6 +25,12 @@ export const useRegisterForm = () => {
   const { step, formData, setErrors, setStep, setFormData } = useFormStore();
   const { mutate: mutateCreatePet } = useMutation({
     mutationFn: (data: CreatePetDto) => petControllerCreate(data),
+    onSuccess: (data) => {
+      if (data?.data?.id) {
+        toast.success("펫 생성에 성공했습니다.");
+        router.push(`/pet`);
+      }
+    },
   });
 
   const validateStep = useCallback(
@@ -51,18 +58,30 @@ export const useRegisterForm = () => {
   );
 
   const createPet = useCallback((formData: FormData) => {
-    const transformedFormData = { ...formData };
-    if (transformedFormData.sex && typeof transformedFormData.sex === "string") {
-      const genderEntry = Object.entries(GENDER_KOREAN_INFO).find(
-        ([_, koreanValue]) => koreanValue === transformedFormData.sex,
-      );
-      if (genderEntry) {
-        transformedFormData.sex = genderEntry[0];
+    try {
+      const transformedFormData = { ...formData };
+      if (transformedFormData.sex && typeof transformedFormData.sex === "string") {
+        const genderEntry = Object.entries(GENDER_KOREAN_INFO).find(
+          ([_, koreanValue]) => koreanValue === transformedFormData.sex,
+        );
+        if (genderEntry) {
+          transformedFormData.sex = genderEntry[0];
+        }
       }
-    }
 
-    const response = mutateCreatePet(transformedFormData);
-    return response;
+      const { father, mother, photo, weight, ...rest } = transformedFormData;
+
+      const requestData: CreatePetDto = {
+        ...rest,
+        ...(weight && { weight: Number(weight) }),
+        ...(father?.petId && { fatherId: father.petId }),
+        ...(mother?.petId && { motherId: mother.petId }),
+      };
+
+      mutateCreatePet(requestData);
+    } catch (error) {
+      toast.error("펫 생성에 실패했습니다.");
+    }
   }, []);
 
   const goNext = useCallback(
@@ -93,13 +112,15 @@ export const useRegisterForm = () => {
         formData.morphs.length > 0
       ) {
         overlay.open(({ isOpen, close }) => (
-          <MorphAlert
+          <Dialog
             isOpen={isOpen}
             onCloseAction={close}
             onConfirmAction={() => {
               setFormData((prev) => ({ ...prev, species: value as string, morphs: [] }));
               close();
             }}
+            title="종 변경 안내"
+            description={`종을 변경하면 선택된 모프가 초기화됩니다. \n 계속하시겠습니까?`}
           />
         ));
         return;

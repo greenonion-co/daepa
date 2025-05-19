@@ -160,7 +160,7 @@ const CardFront = ({ pet }: { pet: PetDto }) => {
               <p className={isExpanded ? "text-gray-300" : "text-gray-500 dark:text-gray-400"}>
                 성별
               </p>
-              <div>{GENDER_KOREAN_INFO[pet.sex as keyof typeof GENDER_KOREAN_INFO]}</div>
+              <div>{GENDER_KOREAN_INFO[pet.sex]}</div>
             </div>
             <div>
               <p className={isExpanded ? "text-gray-300" : "text-gray-500 dark:text-gray-400"}>

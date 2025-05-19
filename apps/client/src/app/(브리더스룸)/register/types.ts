@@ -12,7 +12,8 @@ export type FieldName =
   | "weight"
   | "desc"
   | "photos"
-  | "parents";
+  | "father"
+  | "mother";
 
 export type FormStep = {
   title: string;

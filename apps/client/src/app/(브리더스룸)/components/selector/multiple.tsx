@@ -21,6 +21,7 @@ export default function MultipleSelector({
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
 
   useEffect(() => {
+    if (!initialValue) return;
     setSelectedItems(initialValue);
   }, [initialValue]);
 

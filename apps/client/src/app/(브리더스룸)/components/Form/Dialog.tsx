@@ -8,11 +8,15 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
-const MorphAlert = ({
+const Dialog = ({
+  title,
+  description,
   isOpen,
   onCloseAction,
   onConfirmAction,
 }: {
+  title: string;
+  description: string;
   isOpen: boolean;
   onCloseAction: () => void;
   onConfirmAction: () => void;
@@ -20,11 +24,9 @@ const MorphAlert = ({
   return (
     <AlertDialog open={isOpen}>
       <AlertDialogContent>
-        <AlertDialogTitle>종 변경 안내</AlertDialogTitle>
-        <AlertDialogDescription>
-          종을 변경하면 선택된 모프가 초기화됩니다.
-          <br />
-          계속하시겠습니까?
+        <AlertDialogTitle>{title}</AlertDialogTitle>
+        <AlertDialogDescription className="whitespace-pre-line">
+          {description}
         </AlertDialogDescription>
         <AlertDialogFooter>
           <AlertDialogCancel onClick={onCloseAction}>취소</AlertDialogCancel>
@@ -35,4 +37,4 @@ const MorphAlert = ({
   );
 };
 
-export default MorphAlert;
+export default Dialog;

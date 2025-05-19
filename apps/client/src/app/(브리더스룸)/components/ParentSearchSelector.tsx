@@ -4,8 +4,10 @@ import { useState, useEffect, useRef } from "react";
 import BottomSheet from "@/components/common/BottomSheet";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
-import { PetSummaryDto } from "@/types/pet";
+import { PetSummaryDto } from "@repo/api-client";
 import { ChevronRight, Send } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { petControllerFindAll } from "@repo/api-client";
 
 interface ParentSearchProps {
   isOpen: boolean;
@@ -18,6 +20,10 @@ export default function ParentSearchSelector({ isOpen, onClose, onSelect }: Pare
   const [step, setStep] = useState(1);
   const [selectedPet, setSelectedPet] = useState<PetSummaryDto | null>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+  const { data } = useQuery({
+    queryKey: ["petList"],
+    queryFn: () => petControllerFindAll(),
+  });
 
   // step이 변경될 때마다 스크롤 최상단으로 이동
   useEffect(() => {
@@ -27,7 +33,7 @@ export default function ParentSearchSelector({ isOpen, onClose, onSelect }: Pare
   }, [step]);
 
   // TODO: 실제 검색 API 연동
-  const searchResults = PET_LIST.filter((item) =>
+  const searchResults = data?.data?.data?.filter((item) =>
     item.name.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
@@ -70,7 +76,7 @@ export default function ParentSearchSelector({ isOpen, onClose, onSelect }: Pare
   const renderStep1 = () => (
     <div className="h-full overflow-y-auto px-2">
       <div className="mb-10 grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7">
-        {searchResults.map((item) => (
+        {searchResults?.map((item) => (
           <button
             key={item.petId}
             type="button"
@@ -93,13 +99,13 @@ export default function ParentSearchSelector({ isOpen, onClose, onSelect }: Pare
                   </span>
                 </div>
                 <div className="flex flex-wrap justify-center gap-1">
-                  {item.morphs.map((morph) => (
+                  {item.morphs?.map((morph) => (
                     <Badge key={morph} className="bg-blue-800 text-black text-white">
                       {morph}
                     </Badge>
                   ))}
 
-                  {item.traits.map((trait) => (
+                  {item.traits?.map((trait) => (
                     <Badge
                       variant="outline"
                       key={trait}
@@ -137,7 +143,7 @@ export default function ParentSearchSelector({ isOpen, onClose, onSelect }: Pare
                 <div className="mb-2 flex items-center gap-2">
                   <h3 className="text-2xl font-bold">{selectedPet.name}</h3>
                   <Badge variant="outline" className="bg-blue-50 text-black">
-                    {selectedPet.sex === "M" ? "수컷" : "암컷"}
+                    {selectedPet.sex?.toString() === "M" ? "수컷" : "암컷"}
                   </Badge>
                 </div>
                 <p className="text-gray-600">소유자: {selectedPet.owner}</p>
@@ -147,7 +153,7 @@ export default function ParentSearchSelector({ isOpen, onClose, onSelect }: Pare
                 <div>
                   <h4 className="mb-1.5 text-sm font-medium text-gray-500">모프</h4>
                   <div className="flex flex-wrap gap-1">
-                    {selectedPet.morphs.map((morph) => (
+                    {selectedPet.morphs?.map((morph) => (
                       <Badge key={morph} className="bg-blue-800 text-white">
                         {morph}
                       </Badge>
@@ -158,7 +164,7 @@ export default function ParentSearchSelector({ isOpen, onClose, onSelect }: Pare
                 <div>
                   <h4 className="mb-1.5 text-sm font-medium text-gray-500">특성</h4>
                   <div className="flex flex-wrap gap-1">
-                    {selectedPet.traits.map((trait) => (
+                    {selectedPet.traits?.map((trait) => (
                       <Badge
                         variant="outline"
                         key={trait}
@@ -227,54 +233,3 @@ export default function ParentSearchSelector({ isOpen, onClose, onSelect }: Pare
     </BottomSheet>
   );
 }
-
-const PET_LIST: PetSummaryDto[] = [
-  {
-    name: "꼬키",
-    petId: "wjief",
-    morphs: ["릴리화이트", "아잔틱헷100"],
-    traits: ["풀핀", "쿼드", "크림시클"],
-    sex: "M",
-    owner: "owner",
-  },
-  {
-    name: "실바나스",
-    petId: "wjief12",
-    morphs: ["릴리화이트", "아잔틱헷100"],
-    traits: ["풀핀", "쿼드", "크림시클"],
-    sex: "M",
-    owner: "owner",
-  },
-  {
-    name: "베네딕토",
-    petId: "wjief13",
-    morphs: ["릴리화이트", "아잔틱헷100"],
-    traits: ["풀핀", "쿼드", "엠티백"],
-    sex: "M",
-    owner: "owner",
-  },
-  {
-    name: "대파",
-    petId: "wjief14",
-    morphs: ["릴리화이트", "아잔틱헷100"],
-    traits: ["풀핀", "쿼드", "엠티백"],
-    sex: "M",
-    owner: "owner",
-  },
-  {
-    name: "몽실",
-    petId: "wjief15",
-    morphs: ["릴리화이트"],
-    traits: ["풀핀", "쿼드", "엠티백"],
-    sex: "M",
-    owner: "owner",
-  },
-  {
-    name: "사이",
-    petId: "wjief16",
-    morphs: ["릴리화이트"],
-    traits: ["풀핀", "쿼드", "엠티백"],
-    sex: "M",
-    owner: "owner",
-  },
-];
