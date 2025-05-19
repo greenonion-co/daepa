@@ -57,11 +57,44 @@ export class PageOptionsDto {
 }
 
 export class PageMetaDto {
+  @ApiProperty({
+    description: '페이지 번호',
+    type: Number,
+    default: 1,
+  })
   readonly page?: number;
+
+  @ApiProperty({
+    description: '페이지당 항목 수',
+    type: Number,
+    default: 10,
+  })
   readonly itemPerPage?: number;
+
+  @ApiProperty({
+    description: '총 항목 수',
+    type: Number,
+    default: 0,
+  })
   readonly totalCount: number;
+
+  @ApiProperty({
+    description: '총 페이지 수',
+    type: Number,
+    default: 0,
+  })
   readonly totalPage: number;
+
+  @ApiProperty({
+    description: '이전 페이지 존재 여부',
+    type: Boolean,
+  })
   readonly hasPreviousPage: boolean;
+
+  @ApiProperty({
+    description: '다음 페이지 존재 여부',
+    type: Boolean,
+  })
   readonly hasNextPage: boolean;
 
   constructor({
@@ -81,9 +114,17 @@ export class PageMetaDto {
 }
 
 export class PageDto<T> {
+  @ApiProperty({
+    description: '페이징된 데이터',
+    type: 'array',
+  })
   @IsArray()
   readonly data: T[];
 
+  @ApiProperty({
+    description: '페이지 메타 정보',
+    type: PageMetaDto,
+  })
   @IsObject()
   readonly meta: PageMetaDto;
 

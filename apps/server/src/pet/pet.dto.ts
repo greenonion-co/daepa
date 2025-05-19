@@ -11,11 +11,7 @@ import { PET_SEX, PET_SPECIES } from './pet.constants';
 import { ApiProperty, OmitType, PartialType, PickType } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 
-class Pet {
-  @Exclude()
-  @IsNumber()
-  id: number;
-
+export class PetBaseDto {
   @ApiProperty({
     description: '펫 아이디',
     example: 'XXXXXXXX',
@@ -120,62 +116,105 @@ class Pet {
   @IsOptional()
   @IsString()
   desc?: string;
-
-  @Exclude()
-  @IsOptional()
-  @IsString()
-  father_id?: string;
-
-  @Exclude()
-  @IsOptional()
-  @IsString()
-  mother_id?: string;
 }
 
-export class PetSummaryDto extends PickType(Pet, [
+export class PetSummaryDto extends PickType(PetBaseDto, [
   'petId',
-  'name',
   'ownerId',
+  'name',
   'species',
   'morphs',
   'traits',
   'sex',
   'photos',
-  'father_id',
-  'mother_id',
 ]) {
   @Exclude()
-  id: number;
+  declare birthdate?: string;
+
+  @Exclude()
+  declare growth?: string;
+
+  @Exclude()
+  declare weight?: number;
+
+  @Exclude()
+  declare foods?: string[];
+
+  @Exclude()
+  declare desc?: string;
+
+  @Exclude()
+  declare fatherId?: string;
+
+  @Exclude()
+  declare motherId?: string;
+
+  @Exclude()
+  declare createdAt?: Date;
+
+  @Exclude()
+  declare updatedAt?: Date;
 }
 
-export class PetMatingDto {
-  status: string; // 메이팅 상태: 배란, 발정, 임신
-  deliveryCount: number; // 산란 횟수
-  pair: Array<PetSummaryDto & { matingDate: string }>; // 페어 정보
-}
+export class PetDto extends PetBaseDto {
+  @Exclude()
+  declare fatherId?: string;
 
-export class PetSalesDto {
-  status: string; // 분양 상태: NFS, 예약중, 분양완료, 분양중, 보류(TBD)
-  price?: number; // 분양 가격
-}
+  @Exclude()
+  declare motherId?: string;
 
-export class PetDto extends Pet {
+  @ApiProperty({
+    description: '아빠 개체 정보',
+    example: {},
+    required: false,
+  })
   @IsOptional()
   @IsObject()
   father?: PetSummaryDto;
 
+  @ApiProperty({
+    description: '엄마 개체 정보',
+    example: {},
+    required: false,
+  })
   @IsOptional()
   @IsObject()
   mother?: PetSummaryDto;
 
-  @IsOptional()
-  @IsObject()
-  mating?: PetMatingDto;
+  @Exclude()
+  declare createdAt?: Date;
 
-  @IsOptional()
-  @IsObject()
-  sales?: PetSalesDto;
+  @Exclude()
+  declare updatedAt?: Date;
 }
 
-export class CreatePetDto extends OmitType(PetDto, ['petId', 'ownerId']) {}
+export class CreatePetDto extends OmitType(PetBaseDto, [
+  'petId',
+  'ownerId',
+] as const) {
+  @Exclude()
+  declare petId: string;
+
+  @Exclude()
+  declare ownerId: string;
+
+  @ApiProperty({
+    description: '아빠 개체 아이디',
+    example: 'XXXXXXXX',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  fatherId?: string;
+
+  @ApiProperty({
+    description: '엄마 개체 아이디',
+    example: 'XXXXXXXX',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  motherId?: string;
+}
+
 export class UpdatePetDto extends PartialType(CreatePetDto) {}

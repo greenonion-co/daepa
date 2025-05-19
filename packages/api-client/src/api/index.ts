@@ -23,9 +23,9 @@ import { faker } from "@faker-js/faker";
 
 import { HttpResponse, delay, http } from "msw";
 
-import type { PetDto } from "../model";
+import type { PetControllerFindAll200, PetDto } from "../model";
 
-export const petControllerFindAll = <TData = AxiosResponse<PetDto[]>>(
+export const petControllerFindAll = <TData = AxiosResponse<PetControllerFindAll200>>(
   params?: PetControllerFindAllParams,
   options?: AxiosRequestConfig,
 ): Promise<TData> => {
@@ -92,7 +92,7 @@ export const userNotificationControllerFindAll = <TData = AxiosResponse<void>>(
   params?: UserNotificationControllerFindAllParams,
   options?: AxiosRequestConfig,
 ): Promise<TData> => {
-  return axios.get(`http://localhost:4000/api/v1/user-notifications`, {
+  return axios.get(`http://localhost:4000/api/v1/user-notification`, {
     ...options,
     params: { ...params, ...options?.params },
   });
@@ -103,7 +103,7 @@ export const userNotificationControllerCreate = <TData = AxiosResponse<void>>(
   options?: AxiosRequestConfig,
 ): Promise<TData> => {
   return axios.post(
-    `http://localhost:4000/api/v1/user-notifications`,
+    `http://localhost:4000/api/v1/user-notification`,
     createUserNotificationDto,
     options,
   );
@@ -114,13 +114,13 @@ export const userNotificationControllerUpdate = <TData = AxiosResponse<void>>(
   options?: AxiosRequestConfig,
 ): Promise<TData> => {
   return axios.patch(
-    `http://localhost:4000/api/v1/user-notifications`,
+    `http://localhost:4000/api/v1/user-notification`,
     updateUserNotificationDto,
     options,
   );
 };
 
-export type PetControllerFindAllResult = AxiosResponse<PetDto[]>;
+export type PetControllerFindAllResult = AxiosResponse<PetControllerFindAll200>;
 export type PetControllerCreateResult = AxiosResponse<void>;
 export type PetControllerFindOneResult = AxiosResponse<PetDto>;
 export type PetControllerUpdateResult = AxiosResponse<void>;
@@ -131,8 +131,10 @@ export type UserNotificationControllerFindAllResult = AxiosResponse<void>;
 export type UserNotificationControllerCreateResult = AxiosResponse<void>;
 export type UserNotificationControllerUpdateResult = AxiosResponse<void>;
 
-export const getPetControllerFindAllResponseMock = (): PetDto[] =>
-  Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+export const getPetControllerFindAllResponseMock = (
+  overrideResponse: Partial<PetControllerFindAll200> = {},
+): PetControllerFindAll200 => ({
+  data: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
     petId: faker.string.alpha(20),
     ownerId: faker.string.alpha(20),
     name: faker.string.alpha(20),
@@ -149,21 +151,18 @@ export const getPetControllerFindAllResponseMock = (): PetDto[] =>
       ),
       undefined,
     ]),
-    birthdate: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
-    growth: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
     sex: faker.helpers.arrayElement([{}, undefined]),
-    weight: faker.helpers.arrayElement([
-      faker.number.int({ min: undefined, max: undefined }),
-      undefined,
-    ]),
-    foods: faker.helpers.arrayElement([
-      Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.string.alpha(20),
-      ),
-      undefined,
-    ]),
-    desc: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
-  }));
+  })),
+  meta: {
+    page: faker.number.int({ min: undefined, max: undefined }),
+    itemPerPage: faker.number.int({ min: undefined, max: undefined }),
+    totalCount: faker.number.int({ min: undefined, max: undefined }),
+    totalPage: faker.number.int({ min: undefined, max: undefined }),
+    hasPreviousPage: faker.datatype.boolean(),
+    hasNextPage: faker.datatype.boolean(),
+  },
+  ...overrideResponse,
+});
 
 export const getPetControllerFindOneResponseMock = (
   overrideResponse: Partial<PetDto> = {},
@@ -198,13 +197,63 @@ export const getPetControllerFindOneResponseMock = (
     undefined,
   ]),
   desc: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+  father: faker.helpers.arrayElement([
+    {
+      ...{
+        petId: faker.string.alpha(20),
+        ownerId: faker.string.alpha(20),
+        name: faker.string.alpha(20),
+        species: {},
+        morphs: faker.helpers.arrayElement([
+          Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+            faker.string.alpha(20),
+          ),
+          undefined,
+        ]),
+        traits: faker.helpers.arrayElement([
+          Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+            faker.string.alpha(20),
+          ),
+          undefined,
+        ]),
+        sex: faker.helpers.arrayElement([{}, undefined]),
+      },
+    },
+    undefined,
+  ]),
+  mother: faker.helpers.arrayElement([
+    {
+      ...{
+        petId: faker.string.alpha(20),
+        ownerId: faker.string.alpha(20),
+        name: faker.string.alpha(20),
+        species: {},
+        morphs: faker.helpers.arrayElement([
+          Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+            faker.string.alpha(20),
+          ),
+          undefined,
+        ]),
+        traits: faker.helpers.arrayElement([
+          Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+            faker.string.alpha(20),
+          ),
+          undefined,
+        ]),
+        sex: faker.helpers.arrayElement([{}, undefined]),
+      },
+    },
+    undefined,
+  ]),
   ...overrideResponse,
 });
 
 export const getPetControllerFindAllMockHandler = (
   overrideResponse?:
-    | PetDto[]
-    | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<PetDto[]> | PetDto[]),
+    | PetControllerFindAll200
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<PetControllerFindAll200> | PetControllerFindAll200),
 ) => {
   return http.get("*/api/v1/pet", async (info) => {
     await delay(1000);
@@ -318,7 +367,7 @@ export const getUserNotificationControllerFindAllMockHandler = (
     | void
     | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<void> | void),
 ) => {
-  return http.get("*/api/v1/user-notifications", async (info) => {
+  return http.get("*/api/v1/user-notification", async (info) => {
     await delay(1000);
     if (typeof overrideResponse === "function") {
       await overrideResponse(info);
@@ -332,7 +381,7 @@ export const getUserNotificationControllerCreateMockHandler = (
     | void
     | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<void> | void),
 ) => {
-  return http.post("*/api/v1/user-notifications", async (info) => {
+  return http.post("*/api/v1/user-notification", async (info) => {
     await delay(1000);
     if (typeof overrideResponse === "function") {
       await overrideResponse(info);
@@ -346,7 +395,7 @@ export const getUserNotificationControllerUpdateMockHandler = (
     | void
     | ((info: Parameters<Parameters<typeof http.patch>[1]>[0]) => Promise<void> | void),
 ) => {
-  return http.patch("*/api/v1/user-notifications", async (info) => {
+  return http.patch("*/api/v1/user-notification", async (info) => {
     await delay(1000);
     if (typeof overrideResponse === "function") {
       await overrideResponse(info);

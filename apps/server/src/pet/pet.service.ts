@@ -3,7 +3,7 @@ import { PetEntity } from './pet.entity';
 import { DeleteResult, Repository, UpdateResult } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreatePetDto, PetSummaryDto, UpdatePetDto } from './pet.dto';
-import { plainToInstance } from 'class-transformer';
+import { instanceToPlain, plainToInstance } from 'class-transformer';
 import { PageOptionsDto, PageDto, PageMetaDto } from 'src/common/page.dto';
 import { PetDto } from './pet.dto';
 
@@ -23,7 +23,7 @@ export class PetService {
 
   async getAllPets(
     pageOptionsDto: PageOptionsDto,
-  ): Promise<PageDto<PetEntity>> {
+  ): Promise<PageDto<PetSummaryDto>> {
     const queryBuilder = this.petRepository.createQueryBuilder('pet');
 
     queryBuilder
@@ -33,29 +33,32 @@ export class PetService {
 
     const totalCount = await queryBuilder.getCount();
     const { entities } = await queryBuilder.getRawAndEntities();
+    const petList = entities.map((entity) => instanceToPlain(entity));
+    const petSummaryDtos = petList.map((pet) =>
+      plainToInstance(PetSummaryDto, pet),
+    );
+    console.log('petSummaryDtos', petSummaryDtos);
 
     const pageMetaDto = new PageMetaDto({ totalCount, pageOptionsDto });
 
-    return new PageDto(entities, pageMetaDto);
+    return new PageDto(petSummaryDtos, pageMetaDto);
   }
 
   async getPet(petId: string): Promise<PetDto | null> {
-    const pet = await this.petRepository.findOneBy({ pet_id: petId });
-
-    if (!pet) {
+    const petEntity = await this.petRepository.findOneBy({ pet_id: petId });
+    if (!petEntity) {
       return null;
     }
 
+    const pet = instanceToPlain(petEntity);
+    if (!!pet.fatherId && typeof pet.fatherId === 'string') {
+      pet.father = await this.getPetSummary(pet.fatherId);
+    }
+    if (!!pet.motherId && typeof pet.motherId === 'string') {
+      pet.mother = await this.getPetSummary(pet.motherId);
+    }
+
     const petDto = plainToInstance(PetDto, pet);
-
-    if (pet.father_id) {
-      petDto.father = await this.getPetSummary(pet.father_id);
-    }
-
-    if (pet.mother_id) {
-      petDto.mother = await this.getPetSummary(pet.mother_id);
-    }
-
     return petDto;
   }
 
@@ -70,8 +73,13 @@ export class PetService {
     return await this.petRepository.delete({ pet_id: petId });
   }
 
-  private async getPetSummary(petId: string): Promise<PetSummaryDto> {
-    const pet = await this.petRepository.findOneBy({ pet_id: petId });
+  private async getPetSummary(petId: string): Promise<PetSummaryDto | null> {
+    const petEntity = await this.petRepository.findOneBy({ pet_id: petId });
+    if (!petEntity) {
+      return null;
+    }
+
+    const pet = instanceToPlain(petEntity);
     return plainToInstance(PetSummaryDto, pet);
   }
 

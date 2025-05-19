@@ -52,11 +52,11 @@ export class PetEntity {
   @Column('json', { nullable: true })
   foods?: string[]; // 먹이
 
-  @Exclude()
+  @Expose({ name: 'fatherId' })
   @Column({ nullable: true })
   father_id?: string; // 부 개체 id
 
-  @Exclude()
+  @Expose({ name: 'motherId' })
   @Column({ nullable: true })
   mother_id?: string; // 모 개체 id
 
