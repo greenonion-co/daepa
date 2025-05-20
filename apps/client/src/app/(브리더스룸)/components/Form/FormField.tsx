@@ -23,8 +23,9 @@ export const FormField = ({ field, formData, errors, disabled, handleChange }: F
 
   const error = errors[name];
   const inputClassName = cn(
-    `text-[20px] w-full  h-9 pr-1 text-left focus:outline-none focus:ring-0 text-gray-400 dark:border-b-gray-600 dark:text-gray-400`,
-    !disabled && " border-b-[1.2px] border-b-gray-200",
+    `text-[20px] w-full h-9 pr-1 text-left focus:outline-none focus:ring-0 text-gray-400 dark:text-gray-400
+    transition-all duration-300 ease-in-out`,
+    !disabled && "border-b-[1.2px] border-b-gray-200 focus:border-b-[2px] focus:border-[#1A56B3]",
     error && "border-b-red-500",
   );
 
@@ -95,16 +96,18 @@ export const FormField = ({ field, formData, errors, disabled, handleChange }: F
               target.style.height = `${target.scrollHeight}px`;
             }}
           />
-          <div className="absolute bottom-4 right-4 text-sm text-gray-500">
-            {currentLength}/{maxLength}
-          </div>
+          {!disabled && (
+            <div className="absolute bottom-4 right-4 text-sm text-gray-500">
+              {currentLength}/{maxLength}
+            </div>
+          )}
         </div>
       );
     }
     case "select":
       return (
         <button
-          className={cn(inputClassName, `${value && "font-semibold text-black"}`)}
+          className={cn(inputClassName, `${value && "text-black"}`)}
           disabled={disabled}
           onClick={() => {
             handleSelect(name);
@@ -130,7 +133,11 @@ export const FormField = ({ field, formData, errors, disabled, handleChange }: F
               value.length > 0 &&
               value.map((item) => (
                 <div
-                  className={`mb-2 flex items-center gap-2 rounded-full bg-[#1A56B3] pb-1 pl-3 pr-3 pt-1 font-semibold text-[#D9E1EC]`}
+                  className={cn(
+                    `mb-2 flex items-center gap-2 rounded-full border-2 border-[#1A56B3] pb-1 pl-3 pr-3 pt-1 text-[14px] font-semibold text-[#1A56B3]`,
+                    disabled &&
+                      "rounded-xl border-gray-200 bg-gray-100 text-black dark:bg-gray-600/50 dark:text-white",
+                  )}
                   key={item}
                 >
                   <span>{item}</span>
@@ -144,7 +151,7 @@ export const FormField = ({ field, formData, errors, disabled, handleChange }: F
                         });
                       }}
                     >
-                      <Close fontSize="small" className="text-white" />
+                      <Close fontSize="small" className="text-[#1A56B3]" />
                     </button>
                   )}
                 </div>

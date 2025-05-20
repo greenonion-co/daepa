@@ -3,7 +3,7 @@ import { FORM_STEPS, OPTION_STEPS } from "@/app/(브리더스룸)/constants";
 import { useFormStore } from "@/app/(브리더스룸)/register/store/form";
 import { FieldName } from "@/app/(브리더스룸)/register/types";
 import { Button } from "@/components/ui/button";
-import { Edit, FlipHorizontal } from "lucide-react";
+import { Edit3, FlipHorizontal } from "lucide-react";
 import { useState } from "react";
 import ParentLink from "../../components/ParentLink";
 import {
@@ -72,9 +72,9 @@ const CardBack = ({ pet, setIsFlipped }: CardBackProps) => {
 
       const updateData = {
         ...restFormData,
-        // fatherId: father?.petId || null,
-        // motherId: mother?.petId || null,
-        weight: Number(weight),
+        ...(weight && { weight: Number(weight) }),
+        ...(father?.petId && { fatherId: father.petId }),
+        ...(mother?.petId && { motherId: mother.petId }),
       };
 
       await petControllerUpdate(petId, updateData as UpdatePetDto);
@@ -164,7 +164,7 @@ const CardBack = ({ pet, setIsFlipped }: CardBackProps) => {
           {/* 사육 정보 */}
           <div>
             <div className="mb-2 flex items-center gap-1">
-              <h2 className="mb-2 text-xl font-bold">사육 정보</h2>
+              <h2 className="text-xl font-bold">사육 정보</h2>
 
               {/* 수정 버튼 */}
               <div className="sticky top-0 z-10 flex justify-end bg-white p-2 dark:bg-[#18181B]">
@@ -172,6 +172,7 @@ const CardBack = ({ pet, setIsFlipped }: CardBackProps) => {
                   <div className="flex gap-2">
                     <Button
                       variant="outline"
+                      className="h-8 rounded-xl"
                       onClick={() => {
                         setFormData(pet);
                         setIsEditing(false);
@@ -179,20 +180,20 @@ const CardBack = ({ pet, setIsFlipped }: CardBackProps) => {
                     >
                       취소
                     </Button>
-                    <Button className="text-white hover:bg-blue-600" onClick={handleSave}>
+                    <Button className="h-8 rounded-xl bg-[#1A56B3]" onClick={handleSave}>
                       저장하기
                     </Button>
                   </div>
                 ) : (
                   <Button
                     variant="outline"
-                    size="sm"
+                    size="icon"
+                    className="h-7 w-7"
                     onClick={() => {
                       setIsEditing(true);
                     }}
-                    className="flex items-center gap-1"
                   >
-                    <Edit />
+                    <Edit3 />
                   </Button>
                 )}
               </div>
@@ -227,7 +228,7 @@ const CardBack = ({ pet, setIsFlipped }: CardBackProps) => {
         {/* 하단 고정 버튼 영역 */}
         <div className="fixed bottom-0 left-0 right-0 flex justify-between bg-transparent p-4">
           <Button
-            className="cursor-pointer bg-red-600 opacity-50 hover:opacity-100"
+            className="cursor-pointer rounded-xl bg-red-600 opacity-50 hover:opacity-100"
             variant="destructive"
             size="sm"
             onClick={handleDelete}
