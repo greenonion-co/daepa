@@ -1,48 +1,86 @@
 "use client";
 
 import * as React from "react";
-import { useEffect, useState } from "react";
-import { useFormStore } from "../../register/store/form";
+import { useEffect, useRef } from "react";
 import CardFront from "./(펫카드)/CardFront";
 import CardBack from "./(펫카드)/CardBack";
-import { PetDto } from "@repo/api-client";
+import { PetSummaryDto } from "@repo/api-client";
 
 interface PetDetailProps {
-  pet: PetDto;
+  pet: PetSummaryDto;
 }
 
 const PetDetail = ({ pet }: PetDetailProps) => {
-  const { setFormData } = useFormStore();
-  const [isFlipped, setIsFlipped] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const isScrollingRef = useRef(false);
 
   useEffect(() => {
-    setFormData(pet);
-  }, [pet, setFormData]);
+    const container = containerRef.current;
+    if (!container) return;
 
-  if (!pet) {
-    return <div>펫을 찾을 수 없습니다.</div>;
-  }
+    let lastScrollTop = 0;
+    let lastScrollTime = Date.now();
+
+    const handleScroll = () => {
+      if (isScrollingRef.current) return;
+
+      const currentTime = Date.now();
+      const scrollTop = container.scrollTop;
+      const timeDiff = currentTime - lastScrollTime;
+      const scrollDiff = scrollTop - lastScrollTop;
+      const scrollSpeed = Math.abs(scrollDiff) / timeDiff;
+      const cardHeight = 700;
+
+      // Front에서 Back으로 이동
+      if (scrollTop > 50 && scrollTop < cardHeight && scrollDiff > 0 && scrollSpeed > 0.3) {
+        isScrollingRef.current = true;
+        container.scrollTo({
+          top: cardHeight,
+          behavior: "smooth",
+        });
+        setTimeout(() => {
+          isScrollingRef.current = false;
+        }, 500);
+      }
+
+      // Back에서 Front로 이동
+      if (
+        scrollTop > cardHeight &&
+        scrollTop < cardHeight + 50 &&
+        scrollDiff < 0 &&
+        scrollSpeed > 0.3
+      ) {
+        isScrollingRef.current = true;
+        container.scrollTo({
+          top: 0,
+          behavior: "smooth",
+        });
+        setTimeout(() => {
+          isScrollingRef.current = false;
+        }, 500);
+      }
+
+      lastScrollTop = scrollTop;
+      lastScrollTime = currentTime;
+    };
+
+    container.addEventListener("scroll", handleScroll);
+    return () => container.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
-    <div className="container mx-auto p-2">
-      {/* 힌트 텍스트 추가 */}
-      <div className="flex items-center justify-center gap-2 text-gray-500">
-        {!isFlipped && (
-          <span className="animate-bounce text-sm"> 👇 카드를 탭하여 상세 정보 보기</span>
-        )}
-      </div>
-      <div className="perspective-[2000px]">
-        <div
-          className={`relative mx-auto h-[700px] w-full max-w-[500px] cursor-pointer transition-transform duration-300 [transform-style:preserve-3d] ${
-            isFlipped ? "[transform:rotateY(180deg)]" : ""
-          }`}
-          onClick={() => setIsFlipped(!isFlipped)}
-        >
-          {/* 카드 앞면 */}
-          <CardFront pet={pet} />
-
-          {/* 카드 뒷면 */}
-          <CardBack pet={pet} setIsFlipped={setIsFlipped} />
+    <div className="mx-auto w-full max-w-[500px] px-4">
+      <div
+        ref={containerRef}
+        className="scrollbar-hide relative h-[600px] w-full overflow-y-auto scroll-smooth rounded-lg border-4 border-gray-300 bg-white shadow-xl [-ms-overflow-style:'none'] [scrollbar-width:none] dark:bg-[#18181B] [&::-webkit-scrollbar]:hidden"
+      >
+        <div className="flex flex-col">
+          <div className="h-[700px] shrink-0">
+            <CardFront pet={pet} />
+          </div>
+          <div className="h-[700px] shrink-0 pt-6">
+            <CardBack pet={pet} />
+          </div>
         </div>
       </div>
     </div>

@@ -29,7 +29,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import Link from "next/link";
-import { FOOD, Pet } from "@/types/pet";
+import { PetDto } from "@repo/api-client";
 import { formatDate } from "@/lib/utils";
 
 function TableHeaderSelect({
@@ -38,7 +38,7 @@ function TableHeaderSelect({
   items,
   renderItem = (item: string) => item,
 }: {
-  column: Column<Pet, unknown>;
+  column: Column<PetDto, unknown>;
   title: string;
   items: string[];
   renderItem?: (item: string) => string;
@@ -66,7 +66,7 @@ function TableHeaderSelect({
   );
 }
 
-export const columns: ColumnDef<Pet>[] = [
+export const columns: ColumnDef<PetDto>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -190,14 +190,16 @@ export const columns: ColumnDef<Pet>[] = [
   {
     accessorKey: "weight",
     header: TABLE_HEADER.weight,
-    cell: ({ row }) => <div className="capitalize">{row.getValue("weight") + "g"}</div>,
+    cell: ({ row }) => (
+      <div className="capitalize">{row.original.weight ? row.getValue("weight") + "g" : "-"}</div>
+    ),
   },
   {
     accessorKey: "birthdate",
     header: TABLE_HEADER.birthdate,
     cell: ({ row }) => {
       const birthdate = row.getValue("birthdate") as string;
-      return <div className="capitalize">{formatDate(birthdate)}</div>;
+      return <div className="capitalize">{birthdate ? formatDate(birthdate) : "-"}</div>;
     },
   },
   {

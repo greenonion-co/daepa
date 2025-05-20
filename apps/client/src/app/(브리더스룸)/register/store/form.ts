@@ -23,5 +23,5 @@ export const useFormStore = create<FormStore>((set) => ({
     set((state) => ({
       formData: typeof data === "function" ? data(state.formData) : data,
     })),
-  resetForm: () => set({ formData: initialFormData }),
+  resetForm: () => set({ formData: initialFormData, errors: {}, step: 0 }),
 }));

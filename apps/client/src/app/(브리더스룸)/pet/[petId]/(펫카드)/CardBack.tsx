@@ -3,8 +3,8 @@ import { FORM_STEPS, OPTION_STEPS } from "@/app/(브리더스룸)/constants";
 import { useFormStore } from "@/app/(브리더스룸)/register/store/form";
 import { FieldName } from "@/app/(브리더스룸)/register/types";
 import { Button } from "@/components/ui/button";
-import { Edit, FlipHorizontal } from "lucide-react";
-import { useState } from "react";
+import { Edit3 } from "lucide-react";
+import { useState, useEffect } from "react";
 import ParentLink from "../../components/ParentLink";
 import {
   petControllerUpdate,
@@ -21,10 +21,9 @@ import Dialog from "@/app/(브리더스룸)/components/Form/Dialog";
 import { useMutation } from "@tanstack/react-query";
 interface CardBackProps {
   pet: PetSummaryDto;
-  setIsFlipped: (isFlipped: boolean) => void;
 }
 
-const CardBack = ({ pet, setIsFlipped }: CardBackProps) => {
+const CardBack = ({ pet }: CardBackProps) => {
   const { formData, errors, setFormData } = useFormStore();
   const [isEditing, setIsEditing] = useState(false);
   const router = useRouter();
@@ -52,6 +51,10 @@ const CardBack = ({ pet, setIsFlipped }: CardBackProps) => {
       }),
   });
 
+  useEffect(() => {
+    setFormData(pet);
+  }, [pet, setFormData]);
+
   const visibleFields = [
     ...[...FORM_STEPS].reverse(),
     ...OPTION_STEPS.filter((step) =>
@@ -72,9 +75,9 @@ const CardBack = ({ pet, setIsFlipped }: CardBackProps) => {
 
       const updateData = {
         ...restFormData,
-        // fatherId: father?.petId || null,
-        // motherId: mother?.petId || null,
-        weight: Number(weight),
+        ...(weight && { weight: Number(weight) }),
+        ...(father?.petId && { fatherId: father.petId }),
+        ...(mother?.petId && { motherId: mother.petId }),
       };
 
       await petControllerUpdate(petId, updateData as UpdatePetDto);
@@ -135,12 +138,9 @@ const CardBack = ({ pet, setIsFlipped }: CardBackProps) => {
   };
 
   return (
-    <div className="absolute h-full w-full [-webkit-backface-visibility:hidden] [backface-visibility:hidden] [transform:rotateY(180deg)]">
-      <div
-        className="h-full overflow-auto rounded-lg border-4 border-gray-300 bg-white shadow-xl dark:bg-[#18181B]"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="pl-6 pr-6">
+    <div className="relative h-full w-full">
+      <div className="h-full">
+        <div className="px-6 pb-20">
           {/* 혈통 정보 */}
           <div className="pb-4 pt-4">
             <h2 className="mb-3 text-xl font-bold">혈통 정보</h2>
@@ -164,7 +164,7 @@ const CardBack = ({ pet, setIsFlipped }: CardBackProps) => {
           {/* 사육 정보 */}
           <div>
             <div className="mb-2 flex items-center gap-1">
-              <h2 className="mb-2 text-xl font-bold">사육 정보</h2>
+              <h2 className="text-xl font-bold">사육 정보</h2>
 
               {/* 수정 버튼 */}
               <div className="sticky top-0 z-10 flex justify-end bg-white p-2 dark:bg-[#18181B]">
@@ -172,6 +172,7 @@ const CardBack = ({ pet, setIsFlipped }: CardBackProps) => {
                   <div className="flex gap-2">
                     <Button
                       variant="outline"
+                      className="h-8 rounded-xl"
                       onClick={() => {
                         setFormData(pet);
                         setIsEditing(false);
@@ -179,20 +180,20 @@ const CardBack = ({ pet, setIsFlipped }: CardBackProps) => {
                     >
                       취소
                     </Button>
-                    <Button className="text-white hover:bg-blue-600" onClick={handleSave}>
+                    <Button className="h-8 rounded-xl bg-[#1A56B3]" onClick={handleSave}>
                       저장하기
                     </Button>
                   </div>
                 ) : (
                   <Button
                     variant="outline"
-                    size="sm"
+                    size="icon"
+                    className="h-7 w-7"
                     onClick={() => {
                       setIsEditing(true);
                     }}
-                    className="flex items-center gap-1"
                   >
-                    <Edit />
+                    <Edit3 />
                   </Button>
                 )}
               </div>
@@ -220,26 +221,12 @@ const CardBack = ({ pet, setIsFlipped }: CardBackProps) => {
               </div>
             </div>
           </div>
-
-          <div className="mt-10" />
         </div>
 
         {/* 하단 고정 버튼 영역 */}
-        <div className="fixed bottom-0 left-0 right-0 flex justify-between bg-transparent p-4">
+        <div className="sticky bottom-0 left-0 right-0 flex justify-between p-4">
           <Button variant="destructive" size="sm" onClick={handleDelete} className="text-white">
-            개체 삭제
-          </Button>
-
-          <Button
-            size="sm"
-            variant="outline"
-            className="rounded-full bg-white/80 backdrop-blur-sm dark:bg-gray-600/50 dark:text-white dark:hover:bg-gray-800/80"
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsFlipped(false);
-            }}
-          >
-            <FlipHorizontal className="h-4 w-4 rotate-180" />
+            삭제하기
           </Button>
         </div>
       </div>

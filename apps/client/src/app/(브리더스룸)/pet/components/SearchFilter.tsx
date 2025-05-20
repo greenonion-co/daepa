@@ -21,7 +21,7 @@ export function SearchFilter<TData>({ table }: SearchFilterProps<TData>) {
   return (
     <div className="flex items-center gap-2 py-2">
       <Input
-        placeholder="이름으로 검색"
+        placeholder="이름으로 검색(페이지 내에서만 검색됨. 수정 필요)"
         value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
         onChange={(event) => table.getColumn("name")?.setFilterValue(event.target.value)}
         className="max-w-sm"
