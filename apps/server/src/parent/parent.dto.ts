@@ -17,14 +17,10 @@ export class ParentDto {
   status: PARENT_STATUS;
 }
 
-export class FindParentDto extends PickType(ParentDto, ['role', 'status']) {
+export class FindParentDto extends PickType(ParentDto, ['role']) {
   @ApiProperty({ description: '부모 구분' })
   @IsNotEmpty()
   role: PARENT_ROLE;
-
-  @ApiProperty({ description: '부모 관계 상태' })
-  @IsNotEmpty()
-  status: PARENT_STATUS;
 }
 
 export class CreateParentDto {

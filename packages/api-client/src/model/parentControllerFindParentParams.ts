@@ -11,8 +11,4 @@ export type ParentControllerFindParentParams = {
    * 부모 구분
    */
   role: string;
-  /**
-   * 부모 관계 상태
-   */
-  status: string;
 };

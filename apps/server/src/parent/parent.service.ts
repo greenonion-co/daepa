@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ParentEntity } from './parent.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import {
   CreateParentDto,
   DeleteParentDto,
@@ -24,7 +24,7 @@ export class ParentService {
       where: {
         pet_id: petId,
         role: findParentDto.role,
-        status: findParentDto.status,
+        status: In(['pending', 'approved']),
       },
       order: {
         created_at: 'DESC',
