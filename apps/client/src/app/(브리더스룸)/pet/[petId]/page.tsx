@@ -1,4 +1,4 @@
-import { petApi } from "../api/pet";
+import { petControllerFindOne } from "@repo/api-client";
 import PetDetail from "./petDetail";
 
 interface PetDetailPageProps {
@@ -8,9 +8,9 @@ interface PetDetailPageProps {
 }
 
 async function PetDetailPage({ params }: PetDetailPageProps) {
-  const pet = await petApi.getDetail(params.petId);
+  const pet = await petControllerFindOne(params.petId);
 
-  return <PetDetail pet={pet} />;
+  return <PetDetail pet={pet.data} />;
 }
 
 export default PetDetailPage;
