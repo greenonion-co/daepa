@@ -5,9 +5,8 @@
  * Project Daepa API description
  * OpenAPI spec version: 1.0
  */
-import type { DeleteParentDtoTarget } from "./deleteParentDtoTarget";
 
 export interface DeleteParentDto {
-  /** 부모 구분 */
-  target: DeleteParentDtoTarget;
+  /** 부모 ID */
+  parentId: string;
 }
