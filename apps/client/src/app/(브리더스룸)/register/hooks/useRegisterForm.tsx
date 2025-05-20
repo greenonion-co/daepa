@@ -16,19 +16,27 @@ import { CreatePetDto, petControllerCreate } from "@repo/api-client";
 import { useMutation } from "@tanstack/react-query";
 import Dialog from "../../components/Form/Dialog";
 import { toast } from "sonner";
+import { AxiosError } from "axios";
 
 type SELECTOR_TYPE = "species" | "growth" | "sex";
 
 export const useRegisterForm = () => {
   const router = useRouter();
   const { funnel } = useParams();
-  const { step, formData, setErrors, setStep, setFormData } = useFormStore();
+  const { step, formData, setErrors, setStep, setFormData, resetForm } = useFormStore();
   const { mutate: mutateCreatePet } = useMutation({
     mutationFn: (data: CreatePetDto) => petControllerCreate(data),
-    onSuccess: (data) => {
-      if (data?.data?.id) {
-        toast.success("펫 생성에 성공했습니다.");
-        router.push(`/pet`);
+    onSuccess: () => {
+      toast.success("개체 등록이 완료되었습니다.");
+      router.push(`/pet`);
+      resetForm();
+    },
+    onError: (error: AxiosError<{ message: string }>) => {
+      console.error("Failed to create pet:", error);
+      if (error.response?.data?.message) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error("개체 등록에 실패했습니다.");
       }
     },
   });
@@ -57,8 +65,8 @@ export const useRegisterForm = () => {
     [setErrors],
   );
 
-  const createPet = useCallback((formData: FormData) => {
-    try {
+  const createPet = useCallback(
+    (formData: FormData) => {
       const transformedFormData = { ...formData };
       if (transformedFormData.sex && typeof transformedFormData.sex === "string") {
         const genderEntry = Object.entries(GENDER_KOREAN_INFO).find(
@@ -79,10 +87,9 @@ export const useRegisterForm = () => {
       };
 
       mutateCreatePet(requestData);
-    } catch (error) {
-      toast.error("펫 생성에 실패했습니다.");
-    }
-  }, []);
+    },
+    [mutateCreatePet],
+  );
 
   const goNext = useCallback(
     async (newFormData = formData) => {
