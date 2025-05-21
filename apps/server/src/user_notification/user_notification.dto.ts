@@ -21,13 +21,6 @@ export class UserNotificationDto {
   id: number;
 
   @ApiProperty({
-    description: '알림 전송 유저 아이디',
-    example: 'XXXXXXXX',
-  })
-  @IsString()
-  senderId: string;
-
-  @ApiProperty({
     description: '알림 수신 유저 아이디',
     example: 'XXXXXXXX',
   })

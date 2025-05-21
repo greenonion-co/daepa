@@ -8,8 +8,6 @@
 import type { CreateUserNotificationDtoDetailJson } from "./createUserNotificationDtoDetailJson";
 
 export interface CreateUserNotificationDto {
-  /** 알림 전송 유저 아이디 */
-  senderId: string;
   /** 알림 수신 유저 아이디 */
   receiverId: string;
   /** 알림 타입 */

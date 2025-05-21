@@ -41,7 +41,9 @@ export class UserNotificationController {
 
   @Post()
   async create(@Body() createUserNotificationDto: CreateUserNotificationDto) {
+    const userId = 'ZUCOPIA';
     return this.userNotificationService.createUserNotification(
+      userId,
       createUserNotificationDto,
     );
   }

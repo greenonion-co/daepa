@@ -303,7 +303,6 @@ export const getUserNotificationControllerFindAllResponseMock = (
 ): UserNotificationControllerFindAll200 => ({
   data: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
     id: faker.number.int({ min: undefined, max: undefined }),
-    senderId: faker.string.alpha(20),
     receiverId: faker.string.alpha(20),
     type: faker.string.alpha(20),
     targetId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),

@@ -17,9 +17,13 @@ export class UserNotificationService {
   ) {}
 
   async createUserNotification(
+    userId: string,
     dto: CreateUserNotificationDto,
   ): Promise<UserNotificationEntity> {
-    const userNotificationEntity = plainToInstance(UserNotificationEntity, dto);
+    const userNotificationEntity = plainToInstance(UserNotificationEntity, {
+      ...dto,
+      receiver_id: userId,
+    });
     return await this.userNotificationRepository.save(userNotificationEntity);
   }
 
