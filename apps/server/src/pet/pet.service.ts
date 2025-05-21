@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PetEntity } from './pet.entity';
-import { DeleteResult, Repository, UpdateResult } from 'typeorm';
+import { DeleteResult, InsertResult, Repository, UpdateResult } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   CreatePetDto,
@@ -25,9 +25,9 @@ export class PetService {
 
   async createPet(
     inputPetData: { petId: string; ownerId: string } & CreatePetDto,
-  ): Promise<PetEntity> {
+  ): Promise<InsertResult> {
     const petData = plainToInstance(PetEntity, inputPetData);
-    return await this.petRepository.save(petData);
+    return await this.petRepository.insert(petData);
   }
 
   async getPetList<T extends PetDto | PetSummaryDto>(

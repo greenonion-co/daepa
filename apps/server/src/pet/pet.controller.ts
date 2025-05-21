@@ -86,11 +86,15 @@ export class PetController {
     while (attempts < maxRetries) {
       const petId = nanoid(8);
       try {
-        return await this.petService.createPet({
+        await this.petService.createPet({
           ...createPetDto,
           petId,
           ownerId: tempOwnerId,
         });
+        return {
+          success: true,
+          message: '펫 등록이 완료되었습니다. petId: ' + petId,
+        };
       } catch (error: unknown) {
         if (isMySQLError(error)) {
           if (error.code === 'ER_DUP_ENTRY') {
