@@ -239,10 +239,10 @@ export const getPetControllerFindOneResponseMock = (
   father: faker.helpers.arrayElement([
     {
       ...{
-        petId: faker.string.alpha(20),
-        ownerId: faker.string.alpha(20),
-        name: faker.string.alpha(20),
-        species: {},
+        petId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+        ownerId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+        name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+        species: faker.helpers.arrayElement([{}, undefined]),
         morphs: faker.helpers.arrayElement([
           Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
             faker.string.alpha(20),
@@ -256,6 +256,7 @@ export const getPetControllerFindOneResponseMock = (
           undefined,
         ]),
         sex: faker.helpers.arrayElement([{}, undefined]),
+        status: faker.string.alpha(20),
       },
     },
     undefined,
@@ -263,10 +264,10 @@ export const getPetControllerFindOneResponseMock = (
   mother: faker.helpers.arrayElement([
     {
       ...{
-        petId: faker.string.alpha(20),
-        ownerId: faker.string.alpha(20),
-        name: faker.string.alpha(20),
-        species: {},
+        petId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+        ownerId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+        name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+        species: faker.helpers.arrayElement([{}, undefined]),
         morphs: faker.helpers.arrayElement([
           Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
             faker.string.alpha(20),
@@ -280,6 +281,7 @@ export const getPetControllerFindOneResponseMock = (
           undefined,
         ]),
         sex: faker.helpers.arrayElement([{}, undefined]),
+        status: faker.string.alpha(20),
       },
     },
     undefined,
@@ -358,10 +360,10 @@ export const getBrPetControllerFindAllResponseMock = (
     father: faker.helpers.arrayElement([
       {
         ...{
-          petId: faker.string.alpha(20),
-          ownerId: faker.string.alpha(20),
-          name: faker.string.alpha(20),
-          species: {},
+          petId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+          ownerId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+          name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+          species: faker.helpers.arrayElement([{}, undefined]),
           morphs: faker.helpers.arrayElement([
             Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
               faker.string.alpha(20),
@@ -375,6 +377,7 @@ export const getBrPetControllerFindAllResponseMock = (
             undefined,
           ]),
           sex: faker.helpers.arrayElement([{}, undefined]),
+          status: faker.string.alpha(20),
         },
       },
       undefined,
@@ -382,10 +385,10 @@ export const getBrPetControllerFindAllResponseMock = (
     mother: faker.helpers.arrayElement([
       {
         ...{
-          petId: faker.string.alpha(20),
-          ownerId: faker.string.alpha(20),
-          name: faker.string.alpha(20),
-          species: {},
+          petId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+          ownerId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+          name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+          species: faker.helpers.arrayElement([{}, undefined]),
           morphs: faker.helpers.arrayElement([
             Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
               faker.string.alpha(20),
@@ -399,6 +402,7 @@ export const getBrPetControllerFindAllResponseMock = (
             undefined,
           ]),
           sex: faker.helpers.arrayElement([{}, undefined]),
+          status: faker.string.alpha(20),
         },
       },
       undefined,

@@ -167,7 +167,7 @@ export class PetDto extends PetBaseDto {
   })
   @IsOptional()
   @IsObject()
-  father?: PetSummaryDto;
+  father?: PetParentDto;
 
   @ApiProperty({
     description: '엄마 개체 정보',
@@ -176,7 +176,7 @@ export class PetDto extends PetBaseDto {
   })
   @IsOptional()
   @IsObject()
-  mother?: PetSummaryDto;
+  mother?: PetParentDto;
 
   @Exclude()
   declare createdAt?: Date;

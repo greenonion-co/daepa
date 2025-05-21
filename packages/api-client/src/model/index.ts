@@ -44,3 +44,6 @@ export * from "./userNotificationControllerFindAllOrder";
 export * from "./userNotificationControllerFindAllParams";
 export * from "./userNotificationDto";
 export * from "./userNotificationDtoDetailJson";
+export * from "./petParentDto";
+export * from "./petParentDtoSex";
+export * from "./petParentDtoSpecies";

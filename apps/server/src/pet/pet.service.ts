@@ -2,7 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { PetEntity } from './pet.entity';
 import { DeleteResult, Repository, UpdateResult } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CreatePetDto, PetSummaryDto, UpdatePetDto } from './pet.dto';
+import {
+  CreatePetDto,
+  PetParentDto,
+  PetSummaryDto,
+  UpdatePetDto,
+} from './pet.dto';
 import { instanceToPlain, plainToInstance } from 'class-transformer';
 import { PageOptionsDto, PageDto, PageMetaDto } from 'src/common/page.dto';
 import { PetDto } from './pet.dto';
@@ -28,7 +33,7 @@ export class PetService {
   async getPetList<T extends PetDto | PetSummaryDto>(
     pageOptionsDto: PageOptionsDto,
     dtoClass: new () => T,
-  ): Promise<PageDto<T>> {
+  ): Promise<{ data: T[]; pageMeta: PageMetaDto }> {
     const queryBuilder = this.petRepository.createQueryBuilder('pet');
 
     queryBuilder
@@ -40,22 +45,47 @@ export class PetService {
     const { entities } = await queryBuilder.getRawAndEntities();
     const petList = entities.map((entity) => instanceToPlain(entity));
     const petDtos = petList.map((pet) => plainToInstance(dtoClass, pet));
-
     const pageMetaDto = new PageMetaDto({ totalCount, pageOptionsDto });
 
-    return new PageDto(petDtos, pageMetaDto);
+    return {
+      data: petDtos,
+      pageMeta: pageMetaDto,
+    };
   }
 
   async getPetListFull(
     pageOptionsDto: PageOptionsDto,
   ): Promise<PageDto<PetDto>> {
-    return this.getPetList<PetDto>(pageOptionsDto, PetDto);
+    const { data, pageMeta } = await this.getPetList<PetDto>(
+      pageOptionsDto,
+      PetDto,
+    );
+
+    const petListFullWithParent = await Promise.all(
+      data.map(async (pet) => {
+        const father = await this.getParent(pet.petId, 'father');
+        if (father) {
+          pet.father = plainToInstance(PetParentDto, father);
+        }
+        const mother = await this.getParent(pet.petId, 'mother');
+        if (mother) {
+          pet.mother = plainToInstance(PetParentDto, mother);
+        }
+        return pet;
+      }),
+    );
+
+    return new PageDto(petListFullWithParent, pageMeta);
   }
 
   async getPetListSummary(
     pageOptionsDto: PageOptionsDto,
   ): Promise<PageDto<PetSummaryDto>> {
-    return this.getPetList<PetSummaryDto>(pageOptionsDto, PetSummaryDto);
+    const { data, pageMeta } = await this.getPetList<PetSummaryDto>(
+      pageOptionsDto,
+      PetSummaryDto,
+    );
+    return new PageDto(data, pageMeta);
   }
 
   async getPet(petId: string): Promise<PetDto | null> {
