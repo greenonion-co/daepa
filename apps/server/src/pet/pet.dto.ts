@@ -10,6 +10,7 @@ import {
 import { PET_SEX, PET_SPECIES } from './pet.constants';
 import { ApiProperty, OmitType, PartialType, PickType } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
+import { PARENT_STATUS } from 'src/parent/parent.constant';
 
 export class PetBaseDto {
   @ApiProperty({
@@ -120,8 +121,8 @@ export class PetBaseDto {
 
 export class PetSummaryDto extends PickType(PetBaseDto, [
   'petId',
-  'ownerId',
   'name',
+  'ownerId',
   'species',
   'morphs',
   'traits',
@@ -144,25 +145,21 @@ export class PetSummaryDto extends PickType(PetBaseDto, [
   declare desc?: string;
 
   @Exclude()
-  declare fatherId?: string;
-
-  @Exclude()
-  declare motherId?: string;
-
-  @Exclude()
   declare createdAt?: Date;
 
   @Exclude()
   declare updatedAt?: Date;
 }
 
+export class PetParentDto extends PartialType(PetSummaryDto) {
+  @ApiProperty({
+    description: '부모 관계 상태',
+  })
+  @IsString()
+  status: PARENT_STATUS;
+}
+
 export class PetDto extends PetBaseDto {
-  @Exclude()
-  declare fatherId?: string;
-
-  @Exclude()
-  declare motherId?: string;
-
   @ApiProperty({
     description: '아빠 개체 정보',
     example: {},
@@ -197,24 +194,6 @@ export class CreatePetDto extends OmitType(PetBaseDto, [
 
   @Exclude()
   declare ownerId: string;
-
-  @ApiProperty({
-    description: '아빠 개체 아이디',
-    example: 'XXXXXXXX',
-    required: false,
-  })
-  @IsOptional()
-  @IsString()
-  fatherId?: string;
-
-  @ApiProperty({
-    description: '엄마 개체 아이디',
-    example: 'XXXXXXXX',
-    required: false,
-  })
-  @IsOptional()
-  @IsString()
-  motherId?: string;
 }
 
 export class UpdatePetDto extends PartialType(CreatePetDto) {}

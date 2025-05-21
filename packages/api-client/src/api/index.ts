@@ -10,9 +10,11 @@ import type { AxiosRequestConfig, AxiosResponse } from "axios";
 
 import type {
   BrPetControllerFindAllParams,
+  CreateParentDto,
   CreatePetDto,
   CreateUserNotificationDto,
   DeleteParentDto,
+  ParentControllerFindParentParams,
   PetControllerFindAllParams,
   UpdateParentDto,
   UpdatePetDto,
@@ -26,6 +28,7 @@ import { HttpResponse, delay, http } from "msw";
 
 import type {
   BrPetControllerFindAll200,
+  ParentDto,
   PetControllerFindAll200,
   PetDto,
   UserNotificationControllerFindAll200,
@@ -70,16 +73,31 @@ export const petControllerDelete = <TData = AxiosResponse<void>>(
   return axios.delete(`http://localhost:4000/api/v1/pet/${petId}`, options);
 };
 
+export const parentControllerFindParent = <TData = AxiosResponse<ParentDto>>(
+  petId: string,
+  params: ParentControllerFindParentParams,
+  options?: AxiosRequestConfig,
+): Promise<TData> => {
+  return axios.get(`http://localhost:4000/api/v1/parent/${petId}`, {
+    ...options,
+    params: { ...params, ...options?.params },
+  });
+};
+
 export const parentControllerCreateParent = <TData = AxiosResponse<void>>(
+  petId: string,
+  createParentDto: CreateParentDto,
+  options?: AxiosRequestConfig,
+): Promise<TData> => {
+  return axios.post(`http://localhost:4000/api/v1/parent/${petId}`, createParentDto, options);
+};
+
+export const parentControllerUpdateParentStatus = <TData = AxiosResponse<void>>(
   petId: string,
   updateParentDto: UpdateParentDto,
   options?: AxiosRequestConfig,
 ): Promise<TData> => {
-  return axios.post(
-    `http://localhost:4000/api/v1/parent/update/${petId}`,
-    updateParentDto,
-    options,
-  );
+  return axios.patch(`http://localhost:4000/api/v1/parent/${petId}`, updateParentDto, options);
 };
 
 export const parentControllerDeleteParent = <TData = AxiosResponse<void>>(
@@ -87,11 +105,10 @@ export const parentControllerDeleteParent = <TData = AxiosResponse<void>>(
   deleteParentDto: DeleteParentDto,
   options?: AxiosRequestConfig,
 ): Promise<TData> => {
-  return axios.post(
-    `http://localhost:4000/api/v1/parent/delete/${petId}`,
-    deleteParentDto,
-    options,
-  );
+  return axios.delete(`http://localhost:4000/api/v1/parent/${petId}`, {
+    data: deleteParentDto,
+    ...options,
+  });
 };
 
 export const userNotificationControllerFindAll = <
@@ -143,7 +160,9 @@ export type PetControllerCreateResult = AxiosResponse<void>;
 export type PetControllerFindOneResult = AxiosResponse<PetDto>;
 export type PetControllerUpdateResult = AxiosResponse<void>;
 export type PetControllerDeleteResult = AxiosResponse<void>;
+export type ParentControllerFindParentResult = AxiosResponse<ParentDto>;
 export type ParentControllerCreateParentResult = AxiosResponse<void>;
+export type ParentControllerUpdateParentStatusResult = AxiosResponse<void>;
 export type ParentControllerDeleteParentResult = AxiosResponse<void>;
 export type UserNotificationControllerFindAllResult =
   AxiosResponse<UserNotificationControllerFindAll200>;
@@ -265,6 +284,15 @@ export const getPetControllerFindOneResponseMock = (
     },
     undefined,
   ]),
+  ...overrideResponse,
+});
+
+export const getParentControllerFindParentResponseMock = (
+  overrideResponse: Partial<ParentDto> = {},
+): ParentDto => ({
+  parentId: faker.string.alpha(20),
+  role: faker.string.alpha(20),
+  status: faker.string.alpha(20),
   ...overrideResponse,
 });
 
@@ -473,12 +501,33 @@ export const getPetControllerDeleteMockHandler = (
   });
 };
 
+export const getParentControllerFindParentMockHandler = (
+  overrideResponse?:
+    | ParentDto
+    | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<ParentDto> | ParentDto),
+) => {
+  return http.get("*/api/v1/parent/:petId", async (info) => {
+    await delay(1000);
+
+    return new HttpResponse(
+      JSON.stringify(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getParentControllerFindParentResponseMock(),
+      ),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+  });
+};
+
 export const getParentControllerCreateParentMockHandler = (
   overrideResponse?:
     | void
     | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<void> | void),
 ) => {
-  return http.post("*/api/v1/parent/update/:petId", async (info) => {
+  return http.post("*/api/v1/parent/:petId", async (info) => {
     await delay(1000);
     if (typeof overrideResponse === "function") {
       await overrideResponse(info);
@@ -487,17 +536,31 @@ export const getParentControllerCreateParentMockHandler = (
   });
 };
 
-export const getParentControllerDeleteParentMockHandler = (
+export const getParentControllerUpdateParentStatusMockHandler = (
   overrideResponse?:
     | void
-    | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<void> | void),
+    | ((info: Parameters<Parameters<typeof http.patch>[1]>[0]) => Promise<void> | void),
 ) => {
-  return http.post("*/api/v1/parent/delete/:petId", async (info) => {
+  return http.patch("*/api/v1/parent/:petId", async (info) => {
     await delay(1000);
     if (typeof overrideResponse === "function") {
       await overrideResponse(info);
     }
-    return new HttpResponse(null, { status: 201 });
+    return new HttpResponse(null, { status: 200 });
+  });
+};
+
+export const getParentControllerDeleteParentMockHandler = (
+  overrideResponse?:
+    | void
+    | ((info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<void> | void),
+) => {
+  return http.delete("*/api/v1/parent/:petId", async (info) => {
+    await delay(1000);
+    if (typeof overrideResponse === "function") {
+      await overrideResponse(info);
+    }
+    return new HttpResponse(null, { status: 200 });
   });
 };
 
@@ -580,7 +643,9 @@ export const getProjectDaepaAPIMock = () => [
   getPetControllerFindOneMockHandler(),
   getPetControllerUpdateMockHandler(),
   getPetControllerDeleteMockHandler(),
+  getParentControllerFindParentMockHandler(),
   getParentControllerCreateParentMockHandler(),
+  getParentControllerUpdateParentStatusMockHandler(),
   getParentControllerDeleteParentMockHandler(),
   getUserNotificationControllerFindAllMockHandler(),
   getUserNotificationControllerCreateMockHandler(),

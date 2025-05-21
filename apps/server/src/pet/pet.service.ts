@@ -6,12 +6,16 @@ import { CreatePetDto, PetSummaryDto, UpdatePetDto } from './pet.dto';
 import { instanceToPlain, plainToInstance } from 'class-transformer';
 import { PageOptionsDto, PageDto, PageMetaDto } from 'src/common/page.dto';
 import { PetDto } from './pet.dto';
+import { ParentService } from 'src/parent/parent.service';
+import { ParentDto } from 'src/parent/parent.dto';
+import { PARENT_ROLE } from 'src/parent/parent.constant';
 
 @Injectable()
 export class PetService {
   constructor(
     @InjectRepository(PetEntity)
     private readonly petRepository: Repository<PetEntity>,
+    private readonly parentService: ParentService,
   ) {}
 
   async createPet(
@@ -61,11 +65,12 @@ export class PetService {
     }
 
     const pet = instanceToPlain(petEntity);
-    if (!!pet.fatherId && typeof pet.fatherId === 'string') {
-      pet.father = await this.getPetSummary(pet.fatherId);
+
+    if (typeof pet.petId === 'string') {
+      pet.father = await this.getParent(pet.petId, 'father');
     }
-    if (!!pet.motherId && typeof pet.motherId === 'string') {
-      pet.mother = await this.getPetSummary(pet.motherId);
+    if (typeof pet.petId === 'string') {
+      pet.mother = await this.getParent(pet.petId, 'mother');
     }
 
     const petDto = plainToInstance(PetDto, pet);
@@ -91,6 +96,22 @@ export class PetService {
 
     const pet = instanceToPlain(petEntity);
     return plainToInstance(PetSummaryDto, pet);
+  }
+
+  private async getParent(
+    petId: string,
+    role: PARENT_ROLE,
+  ): Promise<Partial<ParentDto> | null> {
+    const father = await this.parentService.findOne(petId, {
+      role,
+    });
+    if (!father) return null;
+
+    const parentSummary = await this.getPetSummary(father.parentId);
+    return {
+      ...parentSummary,
+      status: father.status,
+    };
   }
 
   async updateParentId({
