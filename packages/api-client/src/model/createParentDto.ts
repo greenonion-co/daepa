@@ -6,9 +6,9 @@
  * OpenAPI spec version: 1.0
  */
 
-export interface UpdateParentDto {
+export interface CreateParentDto {
   /** 부모 ID */
   parentId: string;
-  /** 변경할 상태 */
-  updateStatus: string;
+  /** 부모 구분 */
+  role: string;
 }

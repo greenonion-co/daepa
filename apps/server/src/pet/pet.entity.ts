@@ -52,14 +52,6 @@ export class PetEntity {
   @Column('json', { nullable: true })
   foods?: string[]; // 먹이
 
-  @Expose({ name: 'fatherId' })
-  @Column({ nullable: true })
-  father_id?: string; // 부 개체 id
-
-  @Expose({ name: 'motherId' })
-  @Column({ nullable: true })
-  mother_id?: string; // 모 개체 id
-
   @Expose({ name: 'desc' })
   @Column({ type: 'varchar', length: 500, nullable: true })
   desc?: string; // 소개말
