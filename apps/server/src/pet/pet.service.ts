@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PetEntity } from './pet.entity';
-import { DeleteResult, InsertResult, Repository, UpdateResult } from 'typeorm';
+import { DeleteResult, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   CreatePetDto,
@@ -25,9 +25,15 @@ export class PetService {
 
   async createPet(
     inputPetData: { petId: string; ownerId: string } & CreatePetDto,
-  ): Promise<InsertResult> {
+  ): Promise<void> {
     const petData = plainToInstance(PetEntity, inputPetData);
-    return await this.petRepository.insert(petData);
+    await this.petRepository.insert(petData);
+
+    await this.registerParent({
+      petId: inputPetData.petId,
+      fatherId: inputPetData.fatherId,
+      motherId: inputPetData.motherId,
+    });
   }
 
   async getPetList<T extends PetDto | PetSummaryDto>(
@@ -107,11 +113,16 @@ export class PetService {
     return petDto;
   }
 
-  async updatePet(
-    petId: string,
-    updatePetDto: UpdatePetDto,
-  ): Promise<UpdateResult> {
-    return await this.petRepository.update({ pet_id: petId }, updatePetDto);
+  async updatePet(petId: string, updatePetDto: UpdatePetDto): Promise<void> {
+    const { fatherId, motherId, ...updateData } = updatePetDto;
+
+    await this.petRepository.update({ pet_id: petId }, updateData);
+
+    await this.registerParent({
+      petId,
+      fatherId,
+      motherId,
+    });
   }
 
   async deletePet(petId: string): Promise<DeleteResult> {
@@ -144,27 +155,26 @@ export class PetService {
     };
   }
 
-  async updateParentId({
+  private async registerParent({
     petId,
-    parentId,
-    target,
+    fatherId,
+    motherId,
   }: {
     petId: string;
-    parentId: string;
-    target: 'father' | 'mother';
+    fatherId?: string;
+    motherId?: string;
   }): Promise<void> {
-    const fieldName = target === 'father' ? 'father_id' : 'mother_id';
-    await this.petRepository.update(
-      { pet_id: petId },
-      { [fieldName]: parentId },
-    );
-  }
-
-  async deleteParent(
-    petId: string,
-    target: 'father' | 'mother',
-  ): Promise<void> {
-    const fieldName = target === 'father' ? 'father_id' : 'mother_id';
-    await this.petRepository.update({ pet_id: petId }, { [fieldName]: null });
+    if (fatherId) {
+      await this.parentService.createParent(petId, {
+        parentId: fatherId,
+        role: 'father',
+      });
+    }
+    if (motherId) {
+      await this.parentService.createParent(petId, {
+        parentId: motherId,
+        role: 'mother',
+      });
+    }
   }
 }

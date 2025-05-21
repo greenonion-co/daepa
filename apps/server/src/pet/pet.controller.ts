@@ -128,7 +128,11 @@ export class PetController {
     @Param('petId') petId: string,
     @Body() updatePetDto: UpdatePetDto,
   ) {
-    return await this.petService.updatePet(petId, updatePetDto);
+    await this.petService.updatePet(petId, updatePetDto);
+    return {
+      success: true,
+      message: '펫 수정이 완료되었습니다. petId: ' + petId,
+    };
   }
 
   @Delete(':petId')

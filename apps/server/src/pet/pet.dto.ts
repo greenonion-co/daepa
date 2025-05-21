@@ -194,6 +194,24 @@ export class CreatePetDto extends OmitType(PetBaseDto, [
 
   @Exclude()
   declare ownerId: string;
+
+  @ApiProperty({
+    description: '아빠 개체 아이디',
+    example: 'XXXXXXXX',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  fatherId?: string;
+
+  @ApiProperty({
+    description: '엄마 개체 아이디',
+    example: 'XXXXXXXX',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  motherId?: string;
 }
 
 export class UpdatePetDto extends PartialType(CreatePetDto) {}
