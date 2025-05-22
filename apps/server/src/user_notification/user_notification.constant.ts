@@ -7,8 +7,8 @@ export const USER_NOTIFICATION_TYPE = {
   OWNER_REJECT: 'OWNER_REJECT',
 } as const;
 
-export const USER_NOTIFICATION_STATUS = {
-  READ: 'READ',
-  UNREAD: 'UNREAD',
-  DELETED: 'DELETED',
-} as const;
+export enum USER_NOTIFICATION_STATUS {
+  READ = 'read',
+  UNREAD = 'unread',
+  DELETED = 'deleted',
+}

@@ -45,11 +45,11 @@ export class UserNotificationDto {
 
   @ApiProperty({
     description: '알림 상태',
-    example: USER_NOTIFICATION_STATUS.READ,
+    enum: USER_NOTIFICATION_STATUS,
   })
   @IsEnum(USER_NOTIFICATION_STATUS)
   @IsOptional()
-  status: string;
+  status: USER_NOTIFICATION_STATUS;
 
   @ApiProperty({
     description: '알림 상세 정보 JSON',

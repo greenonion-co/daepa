@@ -53,3 +53,5 @@ export * from "./userNotificationControllerFindAllOrder";
 export * from "./userNotificationControllerFindAllParams";
 export * from "./userNotificationDto";
 export * from "./userNotificationDtoDetailJson";
+export * from "./updateUserNotificationDtoStatus";
+export * from "./userNotificationDtoStatus";

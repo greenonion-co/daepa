@@ -36,7 +36,7 @@ export class UserNotificationEntity {
     enum: USER_NOTIFICATION_STATUS,
     default: USER_NOTIFICATION_STATUS.UNREAD,
   })
-  status: string; // 알림 상태
+  status: USER_NOTIFICATION_STATUS; // 알림 상태
 
   @Expose({ name: 'detailJson' })
   @Column('json')
