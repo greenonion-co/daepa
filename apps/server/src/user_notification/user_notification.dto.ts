@@ -75,6 +75,7 @@ export class UserNotificationDto {
 
 export class CreateUserNotificationDto extends OmitType(UserNotificationDto, [
   'id',
+  'status',
   'createdAt',
   'updatedAt',
 ]) {}
