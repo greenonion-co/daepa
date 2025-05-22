@@ -10,6 +10,7 @@ import {
   UpdateParentDto,
 } from './parent.dto';
 import { instanceToPlain, plainToInstance } from 'class-transformer';
+import { PARENT_STATUS } from './parent.constant';
 
 @Injectable()
 export class ParentService {
@@ -66,7 +67,7 @@ export class ParentService {
         parent_id: deleteParentDto.parentId,
       },
       {
-        status: 'deleted',
+        status: PARENT_STATUS.DELETED,
       },
     );
   }

@@ -5,10 +5,11 @@
  * Project Daepa API description
  * OpenAPI spec version: 1.0
  */
+import type { UpdateParentDtoUpdateStatus } from "./updateParentDtoUpdateStatus";
 
 export interface UpdateParentDto {
   /** 부모 ID */
   parentId: string;
   /** 변경할 상태 */
-  updateStatus: string;
+  updateStatus: UpdateParentDtoUpdateStatus;
 }

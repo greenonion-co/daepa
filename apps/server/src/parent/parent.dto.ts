@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
 import { ApiProperty, PickType } from '@nestjs/swagger';
 import { PARENT_ROLE, PARENT_STATUS } from './parent.constant';
 
@@ -12,8 +12,17 @@ export class ParentDto {
   @IsNotEmpty()
   role: PARENT_ROLE;
 
-  @ApiProperty({ description: '부모 관계 상태' })
+  @ApiProperty({
+    description: `부모 관계 상태
+      - pending: 승인 대기 중
+      - approved: 부모 승인됨
+      - rejected: 수신자에 의해 요청 거절됨
+      - deleted: approved 이후, 부모 정보 변경을 위해 삭제
+      - cancelled: 승인 전, 전송자의 요청 취소`,
+    enum: PARENT_STATUS,
+  })
   @IsNotEmpty()
+  @IsEnum(PARENT_STATUS)
   status: PARENT_STATUS;
 }
 
@@ -42,9 +51,9 @@ export class UpdateParentDto {
 
   @ApiProperty({
     description: '변경할 상태',
-    example: 'pending',
+    enum: PARENT_STATUS,
   })
-  @IsString()
+  @IsEnum(PARENT_STATUS)
   @IsNotEmpty()
   updateStatus: PARENT_STATUS;
 }

@@ -26,7 +26,7 @@ export class ParentEntity {
   role: PARENT_ROLE;
 
   @Column({
-    default: 'pending',
+    default: PARENT_STATUS.PENDING,
     nullable: true,
   })
   status: PARENT_STATUS;
