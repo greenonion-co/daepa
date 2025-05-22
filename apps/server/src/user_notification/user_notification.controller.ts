@@ -41,19 +41,29 @@ export class UserNotificationController {
 
   @Post()
   async create(@Body() createUserNotificationDto: CreateUserNotificationDto) {
-    const userId = 'ZUCOPIA';
-    return this.userNotificationService.createUserNotification(
-      userId,
+    // TODO: 유저 토큰으로부터 senderId 획득
+    const senderId = 'ADMIN';
+    await this.userNotificationService.createUserNotification(
+      senderId,
       createUserNotificationDto,
     );
+    return {
+      success: true,
+      message: '알림이 생성되었습니다.',
+    };
   }
 
   @Patch()
   async update(@Body() updateUserNotificationDto: UpdateUserNotificationDto) {
-    const userId = 'ZUCOPIA';
-    return this.userNotificationService.updateUserNotification(
-      userId,
+    // TODO: 유저 토큰으로부터 senderId 획득
+    const senderId = 'ADMIN';
+    await this.userNotificationService.updateUserNotification(
+      senderId,
       updateUserNotificationDto,
     );
+    return {
+      success: true,
+      message: '알림 상태가 변경되었습니다.',
+    };
   }
 }

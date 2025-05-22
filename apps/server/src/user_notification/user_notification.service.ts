@@ -22,7 +22,7 @@ export class UserNotificationService {
   ): Promise<UserNotificationEntity> {
     const userNotificationEntity = plainToInstance(UserNotificationEntity, {
       ...dto,
-      receiver_id: userId,
+      senderId: userId,
     });
     return await this.userNotificationRepository.save(userNotificationEntity);
   }
@@ -53,7 +53,7 @@ export class UserNotificationService {
     dto: UpdateUserNotificationDto,
   ): Promise<UpdateResult> {
     return await this.userNotificationRepository.update(
-      { id: dto.id, receiver_id: userId },
+      { id: dto.id, sender_id: userId },
       dto,
     );
   }
