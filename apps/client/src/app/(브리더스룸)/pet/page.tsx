@@ -1,36 +1,52 @@
 "use client";
-import { useQuery } from "@tanstack/react-query";
+
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { columns } from "./components/columns";
 import DataTable from "./components/DataTable";
 import { brPetControllerFindAll } from "@repo/api-client";
-import { useState } from "react";
+import { useInView } from "react-intersection-observer";
+import { useEffect } from "react";
 
 export default function PetPage() {
-  const [page, setPage] = useState(1);
-  const itemPerPage = 10; // 페이지당 항목 수
+  const { ref, inView } = useInView();
+  const itemPerPage = 10;
 
-  const { data, isLoading } = useQuery({
-    queryKey: ["pets", page],
-    queryFn: () =>
+  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
+    queryKey: ["pets"],
+    queryFn: ({ pageParam = 1 }) =>
       brPetControllerFindAll({
-        page,
+        page: pageParam,
         itemPerPage,
         order: "ASC",
       }),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => {
+      if (lastPage.data.meta.hasNextPage) {
+        return lastPage.data.meta.page + 1;
+      }
+      return undefined;
+    },
   });
 
+  useEffect(() => {
+    if (inView && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [inView, fetchNextPage, hasNextPage, isFetchingNextPage]);
+
   if (isLoading) return <div>Loading...</div>;
+
+  // 모든 페이지의 데이터를 하나의 배열로 합치기
+  const allPets = data?.pages.flatMap((page) => page.data.data) ?? [];
 
   return (
     <div className="container mx-auto py-10">
       <DataTable
         columns={columns}
-        data={data?.data.data || []}
-        pagination={{
-          page,
-          setPage,
-          ...data?.data.meta,
-        }}
+        data={allPets}
+        hasMore={hasNextPage}
+        isFetchingMore={isFetchingNextPage}
+        loaderRefAction={ref}
       />
     </div>
   );

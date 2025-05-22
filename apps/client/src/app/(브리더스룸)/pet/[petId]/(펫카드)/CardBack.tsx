@@ -13,12 +13,16 @@ import {
   petControllerDelete,
   parentControllerDeleteParent,
   parentControllerCreateParent,
+  userNotificationControllerCreate,
+  CreateUserNotificationDto,
+  petControllerFindOne,
 } from "@repo/api-client";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { overlay } from "overlay-kit";
 import Dialog from "@/app/(브리더스룸)/components/Form/Dialog";
 import { useMutation } from "@tanstack/react-query";
+import { cn } from "@/lib/utils";
 interface CardBackProps {
   pet: PetSummaryDto;
 }
@@ -37,18 +41,35 @@ const CardBack = ({ pet }: CardBackProps) => {
   });
 
   const { mutate: mutateDeleteParent } = useMutation({
-    mutationFn: ({ target }: { target: "father" | "mother" }) =>
+    mutationFn: ({ parentId }: { parentId: string }) =>
       parentControllerDeleteParent(pet.petId, {
-        target,
+        parentId,
       }),
   });
 
   const { mutate: mutateRequestParent } = useMutation({
-    mutationFn: ({ parentId, target }: { parentId: string; target: "father" | "mother" }) =>
+    mutationFn: ({ parentId, role }: { parentId: string; role: "father" | "mother" }) =>
       parentControllerCreateParent(parentId, {
         parentId,
-        target,
+        role,
       }),
+    onSuccess: () => {
+      // mutateGetPetDetail(pet.petId);
+    },
+  });
+
+  const { mutate: mutateGetPetDetail } = useMutation({
+    mutationFn: (petId: string) => petControllerFindOne(petId),
+  });
+
+  const { mutate: mutateSendNotification } = useMutation({
+    mutationFn: (data: CreateUserNotificationDto) => userNotificationControllerCreate(data),
+    onSuccess: () => {
+      toast.success("부모 연동 요청이 완료되었습니다.");
+    },
+    onError: () => {
+      toast.error("부모 연동 요청에 실패했습니다.");
+    },
   });
 
   useEffect(() => {
@@ -89,12 +110,26 @@ const CardBack = ({ pet }: CardBackProps) => {
     }
   };
 
-  const handleParentSelect = (label: "father" | "mother", value: PetSummaryDto) => {
+  const handleParentSelect = (
+    role: "father" | "mother",
+    value: PetSummaryDto & { message: string },
+  ) => {
     try {
-      mutateRequestParent({ parentId: value.petId, target: label });
-      setFormData((prev) => ({ ...prev, [label]: value }));
+      //부모 연동 요청
+      mutateRequestParent({ parentId: value.petId, role });
 
-      toast.success("부모 연동 요청이 완료되었습니다.");
+      const notificationData: CreateUserNotificationDto = {
+        receiverId: value.ownerId,
+        type: "PARENT_REQUEST",
+        targetId: value.petId,
+        status: "UNREAD",
+        detailJson: JSON.stringify({
+          message: value.message ?? "",
+        }),
+      };
+
+      //  부모 연동 요청 알림 보내기
+      mutateSendNotification(notificationData);
     } catch {
       toast.error("부모 연동 요청에 실패했습니다.");
     }
@@ -128,7 +163,7 @@ const CardBack = ({ pet }: CardBackProps) => {
   const handleUnlink = (label: "father" | "mother") => {
     try {
       if (!formData[label]?.petId) return;
-      mutateDeleteParent({ target: label });
+      mutateDeleteParent({ parentId: formData[label]?.petId });
 
       toast.success("부모 연동 해제가 완료되었습니다.");
       setFormData((prev) => ({ ...prev, [label]: null }));
@@ -206,6 +241,7 @@ const CardBack = ({ pet }: CardBackProps) => {
                     <InfoItem
                       key={step.field.name}
                       label={step.title}
+                      className={step.field.type === "textarea" ? "" : "flex items-center gap-4"}
                       value={
                         <FormField
                           field={step.field}
@@ -234,8 +270,16 @@ const CardBack = ({ pet }: CardBackProps) => {
   );
 };
 
-const InfoItem = ({ label, value }: { label: string; value: React.ReactNode }) => (
-  <div className="flex items-center gap-4 py-1">
+const InfoItem = ({
+  label,
+  value,
+  className,
+}: {
+  label: string;
+  value: React.ReactNode;
+  className?: string;
+}) => (
+  <div className={cn("py-1", className)}>
     <dt className="min-w-[80px] shrink-0 text-[16px] text-gray-500">{label}</dt>
     <dd className="flex-1">{value}</dd>
   </div>

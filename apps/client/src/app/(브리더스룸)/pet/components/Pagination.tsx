@@ -33,9 +33,9 @@ export function Pagination<TData>({ table, pagination }: PaginationProps<TData>)
         >
           <ChevronLeft />
         </Button>
-        <span className="mx-2">{pagination.page}</span>
+        <span className="mx-2 font-semibold">{pagination.page}</span>
         <span>/</span>
-        <span className="mx-2 font-semibold">{pagination.totalPage}</span>
+        <span className="mx-2">{pagination.totalPage}</span>
 
         <Button
           variant="outline"

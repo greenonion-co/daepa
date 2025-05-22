@@ -4,10 +4,11 @@ import * as React from "react";
 import { useEffect, useRef } from "react";
 import CardFront from "./(펫카드)/CardFront";
 import CardBack from "./(펫카드)/CardBack";
-import { PetSummaryDto } from "@repo/api-client";
+import { PetDto } from "@repo/api-client";
+import { ChevronDown } from "lucide-react";
 
 interface PetDetailProps {
-  pet: PetSummaryDto;
+  pet: PetDto;
 }
 
 const PetDetail = ({ pet }: PetDetailProps) => {
@@ -69,10 +70,16 @@ const PetDetail = ({ pet }: PetDetailProps) => {
   }, []);
 
   return (
-    <div className="mx-auto w-full max-w-[700px] px-4">
+    <div className="mx-auto w-full max-w-[500px] px-4">
+      <div className="mb-4 flex justify-center">
+        <span className="inline-flex animate-bounce items-center gap-2 rounded-full bg-blue-50 px-4 py-2 text-sm text-blue-600 dark:bg-blue-900/80 dark:text-blue-200">
+          <ChevronDown className="h-4 w-4" />
+          카드를 스크롤하여 상세 정보 보기
+        </span>
+      </div>
       <div
         ref={containerRef}
-        className="scrollbar-hide relative h-[600px] w-full overflow-y-auto scroll-smooth rounded-lg border-gray-300 bg-white shadow-xl [-ms-overflow-style:'none'] [scrollbar-width:none] dark:bg-[#18181B] [&::-webkit-scrollbar]:hidden"
+        className="scrollbar-hide relative h-[700px] w-full overflow-y-auto scroll-smooth rounded-lg border-gray-300 bg-white shadow-xl [-ms-overflow-style:'none'] [scrollbar-width:none] dark:bg-[#18181B] [&::-webkit-scrollbar]:hidden"
       >
         <div className="flex flex-col">
           <div className="h-[700px] shrink-0">

@@ -23,4 +23,5 @@ export interface PetSummaryDto {
   traits?: string[];
   /** 펫 성별(수컷, 암컷, 미구분) */
   sex?: PetSummaryDtoSex;
+  /** 펫 상태 */
 }

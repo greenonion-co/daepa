@@ -4,25 +4,33 @@ import { useState, useEffect, useRef } from "react";
 import BottomSheet from "@/components/common/BottomSheet";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
-import { PetSummaryDto } from "@repo/api-client";
+import { PetParentDto } from "@repo/api-client";
 import { ChevronRight, Send } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { petControllerFindAll } from "@repo/api-client";
 
 interface ParentSearchProps {
   isOpen: boolean;
+  sex?: "M" | "F";
   onClose: () => void;
-  onSelect: (item: PetSummaryDto) => void;
+  onSelect: (item: PetParentDto & { message: string }) => void;
 }
 
-export default function ParentSearchSelector({ isOpen, onClose, onSelect }: ParentSearchProps) {
+export default function ParentSearchSelector({
+  isOpen,
+  sex = "F",
+  onClose,
+  onSelect,
+}: ParentSearchProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [step, setStep] = useState(1);
-  const [selectedPet, setSelectedPet] = useState<PetSummaryDto | null>(null);
+  const [selectedPet, setSelectedPet] = useState<PetParentDto | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const { data } = useQuery({
     queryKey: ["petList"],
     queryFn: () => petControllerFindAll(),
+    select: (data) => data.data.data.filter((item) => item.sex?.toString() === sex),
   });
 
   // step이 변경될 때마다 스크롤 최상단으로 이동
@@ -32,12 +40,18 @@ export default function ParentSearchSelector({ isOpen, onClose, onSelect }: Pare
     }
   }, [step]);
 
+  const defaultMessage = (pet: PetParentDto) => {
+    return `안녕하세요, ${pet.ownerId}님.\n${pet.name}를 ${
+      pet.sex?.toString() === "M" ? "부" : "모"
+    } 개체로 등록하고 싶습니다.`;
+  };
+
   // TODO: 실제 검색 API 연동
-  const searchResults = data?.data?.data?.filter((item) =>
+  const searchResults = data?.filter((item) =>
     item.name.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
-  const handlePetSelect = (pet: PetSummaryDto) => {
+  const handlePetSelect = (pet: PetParentDto) => {
     setSelectedPet(pet);
     setStep(2);
   };
@@ -146,7 +160,7 @@ export default function ParentSearchSelector({ isOpen, onClose, onSelect }: Pare
                     {selectedPet.sex?.toString() === "M" ? "수컷" : "암컷"}
                   </Badge>
                 </div>
-                <p className="text-gray-600">소유자: {selectedPet.owner}</p>
+                <p className="text-gray-600">소유자: {selectedPet.ownerId}</p>
               </div>
 
               <div className="space-y-3">
@@ -187,7 +201,7 @@ export default function ParentSearchSelector({ isOpen, onClose, onSelect }: Pare
                 <Send className="h-3 w-3" />
               </div>
               <p className="text-xs text-gray-500">
-                {selectedPet.owner}님에게 부모 개체 연결을 요청합니다.
+                {selectedPet.ownerId}님에게 부모 개체 연결을 요청합니다.
               </p>
             </div>
 
@@ -195,7 +209,8 @@ export default function ParentSearchSelector({ isOpen, onClose, onSelect }: Pare
               <textarea
                 className="w-full rounded-lg bg-gray-100 p-3 text-sm focus:border-blue-500 focus:outline-none dark:bg-gray-800 dark:placeholder:text-gray-500"
                 rows={3}
-                placeholder={`안녕하세요, ${selectedPet.owner}님.\n${selectedPet.name}를 부모 개체로 등록하고 싶습니다.`}
+                value={message ?? defaultMessage(selectedPet)}
+                onChange={(e) => setMessage(e.target.value)}
               />
               <p className="text-xs text-gray-500">
                 * 요청이 수락되면 해당 개체가 부모로 등록됩니다.
@@ -210,7 +225,12 @@ export default function ParentSearchSelector({ isOpen, onClose, onSelect }: Pare
                 취소
               </button>
               <button
-                onClick={() => onSelect(selectedPet)}
+                onClick={() =>
+                  onSelect({
+                    ...selectedPet,
+                    message: message ?? defaultMessage(selectedPet),
+                  })
+                }
                 className="flex-1 rounded-xl bg-blue-500 py-3 font-medium text-white hover:bg-blue-600"
               >
                 연결 요청하기

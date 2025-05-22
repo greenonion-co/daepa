@@ -1,11 +1,13 @@
-import { Search, X } from "lucide-react";
+import { BadgeCheck, Search, X } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { overlay } from "overlay-kit";
 import ParentSearchSelector from "../../components/ParentSearchSelector";
 import { Button } from "@/components/ui/button";
 import Dialog from "../../components/Form/Dialog";
-import { PetSummaryDto } from "@repo/api-client";
+import { PetParentDto } from "@repo/api-client";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 const ParentLink = ({
   label,
@@ -13,9 +15,9 @@ const ParentLink = ({
   onSelect,
   onUnlink,
 }: {
-  label: string;
-  data?: PetSummaryDto;
-  onSelect: (item: PetSummaryDto | null) => void;
+  label: "부" | "모";
+  data?: PetParentDto;
+  onSelect: (item: PetParentDto & { message: string }) => void;
   onUnlink: () => void;
 }) => {
   const deleteParent = () => {
@@ -43,7 +45,24 @@ const ParentLink = ({
 
   return (
     <div className="flex-1">
-      <dt className="mb-2 text-xs font-medium text-gray-500 dark:text-gray-400">{label}</dt>
+      <dt className="mb-2 flex items-center gap-2 text-xs font-medium text-gray-500 dark:text-gray-400">
+        {label}
+
+        {data?.status && (
+          <Badge
+            variant="outline"
+            className={cn(
+              STATUS_MAP[data?.status].color,
+              "rounded-full font-semibold text-gray-100",
+            )}
+          >
+            {data?.status === "approved" && <BadgeCheck className="h-4 w-4 text-gray-100" />}
+
+            {STATUS_MAP[data?.status].label}
+          </Badge>
+        )}
+      </dt>
+
       {data?.petId ? (
         <div className="group relative block h-full w-full transition-opacity hover:opacity-95">
           <Button
@@ -84,6 +103,7 @@ const ParentLink = ({
                     close();
                     onSelect(item);
                   }}
+                  sex={label === "부" ? "M" : "F"}
                 />
               ));
             }}
@@ -97,3 +117,26 @@ const ParentLink = ({
 };
 
 export default ParentLink;
+
+const STATUS_MAP = {
+  pending: {
+    label: "요청 대기중",
+    color: "bg-yellow-600 ",
+  },
+  rejected: {
+    label: "요청 거절됨",
+    color: "bg-red-700",
+  },
+  approved: {
+    label: "연동됨",
+    color: "bg-green-700",
+  },
+  deleted: {
+    label: "삭제됨",
+    color: "bg-red-700",
+  },
+  cancelled: {
+    label: "취소됨",
+    color: "bg-gray-600",
+  },
+};

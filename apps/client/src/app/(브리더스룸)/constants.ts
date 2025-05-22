@@ -235,21 +235,21 @@ export const SIDEBAR_ITEMS = [
     url: "/register/1",
     icon: Inbox,
   },
-  {
-    title: "해칭룸",
-    url: "/hatching",
-    icon: Egg,
-  },
-  {
-    title: "메이팅룸",
-    url: "/mating",
-    icon: Heart,
-  },
-  {
-    title: "분양룸",
-    url: "/sales",
-    icon: DollarSign,
-  },
+  // {
+  //   title: "해칭룸",
+  //   url: "/hatching",
+  //   icon: Egg,
+  // },
+  // {
+  //   title: "메이팅룸",
+  //   url: "/mating",
+  //   icon: Heart,
+  // },
+  // {
+  //   title: "분양룸",
+  //   url: "/sales",
+  //   icon: DollarSign,
+  // },
 ];
 
 export const FOOD_BADGE_COLORS: Record<FOOD, string> = {
@@ -264,4 +264,9 @@ export const FOOD_BADGE_TEXT_COLORS: Record<FOOD, string> = {
   귀뚜라미: "text-gray-900",
   누에: "text-yellow-900",
   "지렙 인섹트": "text-blue-900",
+};
+
+export const NOTIFICATION_TYPE = {
+  PARENT_REQUEST: "부모 연동 요청",
+  SYSTEM: "시스템 알림",
 };

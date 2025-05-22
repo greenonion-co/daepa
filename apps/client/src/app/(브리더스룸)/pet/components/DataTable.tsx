@@ -6,7 +6,6 @@ import {
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
-  getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
@@ -20,7 +19,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { SearchFilter } from "./SearchFilter";
-import { Pagination } from "./Pagination";
 import useTableStore from "../store/table";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -30,15 +28,18 @@ import { PetDto } from "@repo/api-client";
 interface DataTableProps<TData> {
   columns: ColumnDef<TData>[];
   data: TData[];
-  pagination: {
-    page: number;
-    setPage: (page: number) => void;
-    totalPage?: number;
-    hasNextPage?: boolean;
-    hasPreviousPage?: boolean;
-  };
+  hasMore?: boolean;
+  isFetchingMore?: boolean;
+  loaderRefAction: (node?: Element | null) => void;
 }
-export const DataTable = ({ columns, data, pagination }: DataTableProps<PetDto>) => {
+
+export const DataTable = ({
+  columns,
+  data,
+  hasMore,
+  isFetchingMore,
+  loaderRefAction,
+}: DataTableProps<PetDto>) => {
   const {
     sorting,
     columnFilters,
@@ -58,7 +59,6 @@ export const DataTable = ({ columns, data, pagination }: DataTableProps<PetDto>)
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
@@ -105,20 +105,36 @@ export const DataTable = ({ columns, data, pagination }: DataTableProps<PetDto>)
             </TableHeader>
             <TableBody>
               {table.getRowModel().rows?.length ? (
-                table.getRowModel().rows.map((row) => (
-                  <TableRow
-                    key={row.id}
-                    data-state={row.getIsSelected() && "selected"}
-                    className="cursor-pointer"
-                    onClick={(e) => handleRowClick({ e, id: row.original.petId })}
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                <>
+                  {table.getRowModel().rows.map((row) => (
+                    <TableRow
+                      key={row.id}
+                      data-state={row.getIsSelected() && "selected"}
+                      className="cursor-pointer"
+                      onClick={(e) => handleRowClick({ e, id: row.original.petId })}
+                    >
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell key={cell.id}>
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))}
+                  {/* 무한 스크롤 로더 */}
+                  {hasMore && (
+                    <TableRow ref={loaderRefAction}>
+                      <TableCell colSpan={columns.length} className="h-20 text-center">
+                        {isFetchingMore ? (
+                          <div className="flex items-center justify-center">
+                            <div className="h-6 w-6 animate-spin rounded-full border-b-2 border-blue-500" />
+                          </div>
+                        ) : (
+                          "더 불러오는 중..."
+                        )}
                       </TableCell>
-                    ))}
-                  </TableRow>
-                ))
+                    </TableRow>
+                  )}
+                </>
               ) : (
                 <TableRow>
                   <TableCell colSpan={columns.length} className="h-24 text-center">
@@ -129,8 +145,6 @@ export const DataTable = ({ columns, data, pagination }: DataTableProps<PetDto>)
             </TableBody>
           </Table>
         </div>
-
-        <Pagination table={table} pagination={pagination} />
       </div>
 
       <Button
