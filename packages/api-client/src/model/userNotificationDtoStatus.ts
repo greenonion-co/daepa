@@ -8,6 +8,9 @@
 
 /**
  * 알림 상태
+      - unread: 읽지 않음
+      - read: 읽음
+      - deleted: 삭제
  */
 export type UserNotificationDtoStatus =
   (typeof UserNotificationDtoStatus)[keyof typeof UserNotificationDtoStatus];

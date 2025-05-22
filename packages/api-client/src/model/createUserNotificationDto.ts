@@ -5,13 +5,14 @@
  * Project Daepa API description
  * OpenAPI spec version: 1.0
  */
+import type { CreateUserNotificationDtoType } from "./createUserNotificationDtoType";
 import type { CreateUserNotificationDtoDetailJson } from "./createUserNotificationDtoDetailJson";
 
 export interface CreateUserNotificationDto {
   /** 알림 수신 유저 아이디 */
   receiverId: string;
   /** 알림 타입 */
-  type: string;
+  type: CreateUserNotificationDtoType;
   /** 알림 대상 이벤트 아이디 ex) 부모 개체 아이디, 댓글 아이디 등 */
   targetId?: string;
   /** 알림 상세 정보 JSON */

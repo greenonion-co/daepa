@@ -310,7 +310,14 @@ export const getUserNotificationControllerFindAllResponseMock = (
   data: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
     id: faker.number.int({ min: undefined, max: undefined }),
     receiverId: faker.string.alpha(20),
-    type: faker.string.alpha(20),
+    type: faker.helpers.arrayElement([
+      "parent_request",
+      "parent_accept",
+      "parent_reject",
+      "owner_transfer",
+      "owner_accept",
+      "owner_reject",
+    ] as const),
     targetId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
     status: faker.helpers.arrayElement(["read", "unread", "deleted"] as const),
     detailJson: {},

@@ -1,11 +1,11 @@
-export const USER_NOTIFICATION_TYPE = {
-  PARENT_REQUEST: 'PARENT_REQUEST',
-  PARENT_ACCEPT: 'PARENT_ACCEPT',
-  PARENT_REJECT: 'PARENT_REJECT',
-  OWNER_TRANSFER: 'OWNER_TRANSFER',
-  OWNER_ACCEPT: 'OWNER_ACCEPT',
-  OWNER_REJECT: 'OWNER_REJECT',
-} as const;
+export enum USER_NOTIFICATION_TYPE {
+  PARENT_REQUEST = 'parent_request',
+  PARENT_ACCEPT = 'parent_accept',
+  PARENT_REJECT = 'parent_reject',
+  OWNER_TRANSFER = 'owner_transfer',
+  OWNER_ACCEPT = 'owner_accept',
+  OWNER_REJECT = 'owner_reject',
+}
 
 export enum USER_NOTIFICATION_STATUS {
   READ = 'read',
