@@ -22,10 +22,15 @@ export class ParentEntity {
   @Column()
   parent_id: string;
 
-  @Column()
+  @Column({
+    type: 'enum',
+    enum: PARENT_ROLE,
+  })
   role: PARENT_ROLE;
 
   @Column({
+    type: 'enum',
+    enum: PARENT_STATUS,
     default: PARENT_STATUS.PENDING,
     nullable: true,
   })
