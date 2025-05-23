@@ -1,11 +1,6 @@
 "use client";
 
-import { cn } from "@/lib/utils";
-import {
-  userNotificationControllerFindAll,
-  UserNotificationDtoStatus,
-  UserNotificationDtoType,
-} from "@repo/api-client";
+import { userNotificationControllerFindAll, UserNotificationDtoStatus } from "@repo/api-client";
 import { useQuery } from "@tanstack/react-query";
 import { Bell } from "lucide-react";
 import Link from "next/link";
@@ -16,6 +11,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { Tooltip } from "@/components/ui/tooltip";
 import { TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { NOTIFICATION_TYPE } from "@/app/(브리더스룸)/constants";
+
 const ringBell = keyframes`
   0% { transform: rotate(0); }
   20% { transform: rotate(15deg); }
@@ -26,7 +22,10 @@ const ringBell = keyframes`
 `;
 
 const AnimatedBell = styled(Bell)`
-  animation: ${ringBell} 0.5s ease-in-out;
+  animation: none;
+  &:hover {
+    animation: ${ringBell} 0.5s ease-in-out;
+  }
 `;
 
 const NotiButton = () => {
