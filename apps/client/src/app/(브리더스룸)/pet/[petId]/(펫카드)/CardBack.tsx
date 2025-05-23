@@ -15,8 +15,6 @@ import {
   parentControllerCreateParent,
   userNotificationControllerCreate,
   CreateUserNotificationDto,
-  petControllerFindOne,
-  UserNotificationDtoStatus,
   UserNotificationDtoType,
 } from "@repo/api-client";
 import { toast } from "sonner";
@@ -25,12 +23,15 @@ import { overlay } from "overlay-kit";
 import Dialog from "@/app/(브리더스룸)/components/Form/Dialog";
 import { useMutation } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
+import useParentLinkStore from "../../store/parentLink";
 interface CardBackProps {
   pet: PetSummaryDto;
 }
 
 const CardBack = ({ pet }: CardBackProps) => {
   const { formData, errors, setFormData } = useFormStore();
+  const { selectedParent, setSelectedParent } = useParentLinkStore();
+
   const [isEditing, setIsEditing] = useState(false);
   const router = useRouter();
   const { mutate: mutateDeletePet } = useMutation({
@@ -39,6 +40,9 @@ const CardBack = ({ pet }: CardBackProps) => {
       router.push("/pet");
 
       toast.success("펫이 삭제되었습니다.");
+    },
+    onError: () => {
+      toast.error("펫 삭제에 실패했습니다.");
     },
   });
 
@@ -51,27 +55,24 @@ const CardBack = ({ pet }: CardBackProps) => {
 
   const { mutate: mutateRequestParent } = useMutation({
     mutationFn: ({ parentId, role }: { parentId: string; role: "father" | "mother" }) =>
-      parentControllerCreateParent(parentId, {
+      parentControllerCreateParent(pet.petId, {
         parentId,
         role,
       }),
     onSuccess: () => {
-      // mutateGetPetDetail(pet.petId);
+      toast.success("부모 연동 요청이 완료되었습니다.");
+      const role = selectedParent?.sex === "M" ? "father" : "mother";
+      setFormData((prev) => ({ ...prev, [role]: { ...selectedParent, status: "pending" } }));
+      setSelectedParent(null);
     },
-  });
-
-  const { mutate: mutateGetPetDetail } = useMutation({
-    mutationFn: (petId: string) => petControllerFindOne(petId),
+    onError: () => {
+      toast.error("부모 연동 요청에 실패했습니다.");
+      setSelectedParent(null);
+    },
   });
 
   const { mutate: mutateSendNotification } = useMutation({
     mutationFn: (data: CreateUserNotificationDto) => userNotificationControllerCreate(data),
-    onSuccess: () => {
-      toast.success("부모 연동 요청이 완료되었습니다.");
-    },
-    onError: () => {
-      toast.error("부모 연동 요청에 실패했습니다.");
-    },
   });
 
   useEffect(() => {
@@ -117,23 +118,22 @@ const CardBack = ({ pet }: CardBackProps) => {
     value: PetSummaryDto & { message: string },
   ) => {
     try {
-      //부모 연동 요청
+      // 부모 연동 요청
       mutateRequestParent({ parentId: value.petId, role });
-
       const notificationData: CreateUserNotificationDto = {
         receiverId: value.ownerId,
         type: UserNotificationDtoType.parent_request,
-        targetId: value.petId,
-        status: UserNotificationDtoStatus.unread,
+        targetId: pet.petId,
         detailJson: JSON.stringify({
           message: value.message ?? "",
+          parentId: value.petId,
         }),
       };
 
-      //  부모 연동 요청 알림 보내기
+      // //  부모 연동 요청 알림 보내기
       mutateSendNotification(notificationData);
-    } catch {
-      toast.error("부모 연동 요청에 실패했습니다.");
+    } catch (error) {
+      console.error("Failed to send notification:", error);
     }
   };
 
@@ -142,8 +142,8 @@ const CardBack = ({ pet }: CardBackProps) => {
       if (!pet.petId) return;
 
       mutateDeletePet(pet.petId);
-    } catch {
-      toast.error("펫 삭제에 실패했습니다.");
+    } catch (error) {
+      console.error("Failed to delete pet:", error);
     }
   };
 
