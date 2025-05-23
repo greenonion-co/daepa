@@ -28,7 +28,7 @@ export default function ParentSearchSelector({
   const [message, setMessage] = useState<string | null>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const { data } = useQuery({
-    queryKey: ["petList"],
+    queryKey: [petControllerFindAll.name],
     queryFn: () => petControllerFindAll(),
     select: (data) => data.data.data.filter((item) => item.sex?.toString() === sex),
   });
@@ -57,7 +57,7 @@ export default function ParentSearchSelector({
   };
 
   const renderHeader = () => (
-    <div className="sticky top-[-12px] z-20 bg-white pb-4 pt-4 dark:bg-[#18181B]">
+    <div className="sticky -top-[12px] z-20 bg-white pb-4 pt-4 dark:bg-[#18181B]">
       <div className="flex items-center gap-2 pl-2">
         <button
           onClick={() => step === 2 && setStep(1)}
@@ -108,7 +108,7 @@ export default function ParentSearchSelector({
               </div>
               <div className="flex w-full flex-col items-center gap-1">
                 <div className="relative">
-                  <span className="relative font-semibold after:absolute after:bottom-[-1px] after:left-1 after:h-[12px] after:w-full after:bg-transparent after:opacity-40 after:content-[''] group-hover:after:bg-[#247DFE]">
+                  <span className="relative font-semibold after:absolute after:-bottom-[1px] after:left-1 after:h-[12px] after:w-full after:bg-transparent after:opacity-40 after:content-[''] group-hover:after:bg-[#247DFE]">
                     {item.name}
                   </span>
                 </div>

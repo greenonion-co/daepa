@@ -35,7 +35,7 @@ export function NotiDisplay() {
   });
 
   const handleUpdate = (status: ParentDtoStatus) => {
-    if (!item?.detailJson.requestPet.petId || !item?.detailJson.targetPet.petId) return;
+    if (!item?.detailJson?.requestPet?.petId || !item?.detailJson?.targetPet?.petId) return;
 
     updateParentStatus({
       petId: item.detailJson.requestPet.petId,

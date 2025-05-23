@@ -86,7 +86,7 @@ const CardFront = ({ pet }: { pet: PetDto }) => {
           )}
 
           {/* 왼쪽 상단 태그 */}
-          <div className="absolute -left-[45px] top-[15px] z-10 rotate-[-45deg] transform">
+          <div className="absolute -left-[45px] top-[15px] z-10 -rotate-[45deg] transform">
             <div
               className={`w-[140px] py-1 text-center ${
                 isExpanded
