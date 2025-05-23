@@ -8,7 +8,6 @@ import Dialog from "../../components/Form/Dialog";
 import { PetParentDto } from "@repo/api-client";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import useParentLinkStore from "../store/parentLink";
 
 const ParentLink = ({
   label,
@@ -21,8 +20,6 @@ const ParentLink = ({
   onSelect: (item: PetParentDto & { message: string }) => void;
   onUnlink: () => void;
 }) => {
-  const { setSelectedParent } = useParentLinkStore();
-
   const deleteParent = () => {
     if (!data?.petId) return;
 
@@ -104,7 +101,6 @@ const ParentLink = ({
                   onClose={close}
                   onSelect={(item) => {
                     close();
-                    setSelectedParent(item);
                     onSelect(item);
                   }}
                   sex={label === "부" ? "M" : "F"}

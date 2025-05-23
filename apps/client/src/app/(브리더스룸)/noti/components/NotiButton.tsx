@@ -1,7 +1,11 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { userNotificationControllerFindAll, UserNotificationDtoStatus } from "@repo/api-client";
+import {
+  userNotificationControllerFindAll,
+  UserNotificationDtoStatus,
+  UserNotificationDtoType,
+} from "@repo/api-client";
 import { useQuery } from "@tanstack/react-query";
 import { Bell } from "lucide-react";
 import Link from "next/link";
@@ -44,7 +48,7 @@ const NotiButton = () => {
     .slice(0, 4)
     .map((n) => ({
       title: NOTIFICATION_TYPE[n.type as keyof typeof NOTIFICATION_TYPE],
-      message: (n.detailJson as { message: string }).message.substring(0, 50) + "...",
+      message: (n.detailJson.targetPet as { message: string }).message.substring(0, 50) + "...",
     }));
 
   if (isNotiPage) return;
@@ -53,13 +57,13 @@ const NotiButton = () => {
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <Link href="/noti" className={cn("relative flex items-center")}>
+          <Link href="/noti" className="relative">
             <AnimatedBell
               className="h-5 w-5 text-sky-900"
               fill={hasNotification ? "currentColor" : "none"}
             />
             {hasNotification && (
-              <span className="absolute -right-2 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-medium text-white">
+              <span className="absolute -right-2 top-0 flex h-4 w-4 translate-y-[-25%] items-center justify-center rounded-full bg-red-500 text-[10px] font-medium text-white">
                 {unreadCount}
               </span>
             )}

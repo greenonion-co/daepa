@@ -1,3 +1,5 @@
+import { PetDto } from "@repo/api-client";
+
 export interface PetSummaryDto {
   petId: string;
   name: string;
@@ -56,3 +58,8 @@ export interface CreatePetDto {
   mating?: PetMatingDto;
   sales?: PetSalesDto;
 }
+
+export type DetailJson = {
+  targetPet: PetSummaryDto & { message: string };
+  requestPet: PetSummaryDto;
+};

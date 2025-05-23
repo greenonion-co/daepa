@@ -30,7 +30,7 @@ const NotiList = ({
   };
 
   return (
-    <ScrollArea>
+    <ScrollArea className="h-[calc(100vh-200px)]">
       <div className="flex flex-col gap-2 p-4 pt-0">
         {items.map((item) => (
           <button
@@ -44,7 +44,7 @@ const NotiList = ({
             <div className="flex w-full flex-col gap-1">
               <div className="flex items-center">
                 <div className="flex items-center gap-2">
-                  <div className="font-semibold">{item.targetId}</div>
+                  <div className="font-semibold">To. {item.detailJson.targetPet.name}</div>
                   {item.status === UserNotificationDtoStatus.unread && (
                     <span className="flex h-2 w-2 rounded-full bg-blue-600" />
                   )}

@@ -118,15 +118,24 @@ const CardBack = ({ pet }: CardBackProps) => {
     value: PetSummaryDto & { message: string },
   ) => {
     try {
+      setSelectedParent({
+        ...value,
+        // 요청을 보낸 펫의 데이터
+        status: "pending",
+      });
+
+      // 부모 연동 요청
       // 부모 연동 요청
       mutateRequestParent({ parentId: value.petId, role });
       const notificationData: CreateUserNotificationDto = {
-        receiverId: value.ownerId,
+        receiverId: "ZUCOPIA",
+        // TODO: 로그인 기능 붙인 후 수정
+        // receiverId: value.ownerId,
         type: UserNotificationDtoType.parent_request,
         targetId: pet.petId,
         detailJson: JSON.stringify({
-          message: value.message ?? "",
-          parentId: value.petId,
+          targetPet: value,
+          requestPet: pet,
         }),
       };
 

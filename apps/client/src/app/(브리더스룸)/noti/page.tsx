@@ -57,7 +57,7 @@ export default function NotificationsPage() {
       onLayout={(sizes: number[]) => {
         document.cookie = `react-resizable-panels:layout:noti=${JSON.stringify(sizes)}`;
       }}
-      className="h-full max-h-[800px] items-stretch"
+      className="h-full items-stretch"
     >
       <ResizablePanel defaultSize={defaultLayout[0]} minSize={30}>
         <Tabs defaultValue="all">

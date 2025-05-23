@@ -4,14 +4,19 @@ import { Trash2 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { format, formatDistanceToNow } from "date-fns";
 import { ko } from "date-fns/locale";
+import { ArrowUpRight } from "lucide-react";
+import Image from "next/image";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useNotiStore } from "../store/noti";
 import { useMutation } from "@tanstack/react-query";
-import { parentControllerUpdateParentStatus, UpdateParentDto } from "@repo/api-client";
-
-// WARNING: 추후에 server type 으로 교체
-export type PARENT_STATUS = "pending" | "approved" | "rejected" | "deleted" | "cancelled";
+import {
+  parentControllerUpdateParentStatus,
+  ParentDtoStatus,
+  UpdateParentDto,
+  UserNotificationDtoType,
+} from "@repo/api-client";
+import Link from "next/link";
 
 export function NotiDisplay() {
   const { selected: item } = useNotiStore();
@@ -21,7 +26,7 @@ export function NotiDisplay() {
       parentControllerUpdateParentStatus(petId, data),
   });
 
-  const handleUpdate = (status: PARENT_STATUS) => {
+  const handleUpdate = (status: ParentDtoStatus) => {
     if (!item?.targetId) return;
     updateParentStatus({
       petId: item.targetId,
@@ -41,7 +46,7 @@ export function NotiDisplay() {
           <TooltipContent>삭제</TooltipContent>
         </Tooltip>
 
-        {item?.type === "PARENT_REQUEST" && (
+        {item?.type === UserNotificationDtoType.parent_request && (
           <form>
             <div className="grid gap-4">
               <div className="flex items-center gap-2">
@@ -81,8 +86,29 @@ export function NotiDisplay() {
                 <AvatarFallback>A</AvatarFallback>
               </Avatar>
               <div className="grid gap-1">
-                <div className="font-semibold">보내는 사람</div>
-                <div className="line-clamp-1 text-xs">{item.targetId}</div>
+                <div className="font-semibold">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Link
+                        href={`/pet/${item.detailJson.targetPet.petId}`}
+                        className="inline-flex items-center gap-1 rounded-md bg-blue-100 px-1 py-0.5 text-blue-600 hover:bg-blue-200 dark:bg-blue-900/50 dark:text-blue-400 dark:hover:bg-blue-900"
+                      >
+                        {item.detailJson.targetPet.name}
+                        <ArrowUpRight className="h-3 w-3" />
+                      </Link>
+                    </TooltipTrigger>
+                    <TooltipContent>펫 상세 페이지로 이동</TooltipContent>
+                  </Tooltip>{" "}
+                  의 펫{" "}
+                  <span className="text-sky-600 dark:text-sky-400">
+                    {item.detailJson.requestPet.name}
+                  </span>{" "}
+                  의{" "}
+                  <span className="text-sky-600 dark:text-sky-400">
+                    {item.detailJson.targetPet.sex === "M" ? "부" : "모"}
+                  </span>{" "}
+                  연동 요청
+                </div>
               </div>
             </div>
             {item.createdAt && (
@@ -101,8 +127,41 @@ export function NotiDisplay() {
             )}
           </div>
           <Separator />
+
+          {/* 광고 배너 형태의 링크 */}
+          <Link
+            href={`/pet/${item.detailJson.requestPet.petId}`}
+            className="bg-card hover:bg-accent group mx-4 mt-4 flex items-center justify-between rounded-lg border p-3 shadow-sm transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              {item.detailJson.requestPet.photo ? (
+                <div className="relative h-10 w-10 overflow-hidden rounded-full">
+                  <Image
+                    src={item.detailJson.requestPet.photo ?? "/default-pet-image.png"}
+                    alt={item.detailJson.requestPet.name ?? "펫 이미지"}
+                    fill
+                    className="object-cover"
+                    sizes="40px"
+                  />
+                </div>
+              ) : (
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900">
+                  <span className="text-lg">🔗</span>
+                </div>
+              )}
+              <div className="flex flex-col gap-0.5">
+                <span className="text-sm font-medium">
+                  {item.detailJson.requestPet.name} 펫 프로필로 이동
+                </span>
+                <span className="text-muted-foreground text-xs">클릭하여 자세한 정보 확인하기</span>
+              </div>
+            </div>
+            <ArrowUpRight className="text-muted-foreground h-5 w-5 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+          </Link>
+
+          {/* 메시지 내용 */}
           <div className="flex-1 whitespace-pre-wrap p-4 text-sm">
-            {(item.detailJson as { message: string }).message}
+            {item.detailJson.targetPet.message}
           </div>
         </div>
       ) : (
