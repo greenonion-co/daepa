@@ -20,6 +20,7 @@ const ParentLink = ({
   onSelect: (item: PetParentDto & { message: string }) => void;
   onUnlink: () => void;
 }) => {
+  console.log("🚀 ~ data:", data);
   const deleteParent = () => {
     if (!data?.petId) return;
 

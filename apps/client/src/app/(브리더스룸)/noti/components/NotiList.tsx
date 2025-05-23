@@ -5,16 +5,17 @@ import {
   UserNotificationDtoStatus,
 } from "@repo/api-client";
 import { formatDistanceToNow } from "date-fns";
-import { useNotiStore } from "../store/noti";
+import { ExtendedUserNotificationDto, useNotiStore } from "../store/noti";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ko } from "date-fns/locale";
 import { NOTIFICATION_TYPE } from "@/app/(브리더스룸)/constants";
+import { Badge } from "@/components/ui/badge";
 
 const NotiList = ({
   items,
   handleUpdate,
 }: {
-  items: UserNotificationDto[];
+  items: ExtendedUserNotificationDto[];
   handleUpdate: (item: UpdateUserNotificationDto) => void;
 }) => {
   const { selected, setSelected } = useNotiStore();
@@ -61,13 +62,13 @@ const NotiList = ({
                   })}
                 </div>
               </div>
-              <div className="text-xs font-medium">
+              <Badge variant="outline" className="text-xs font-medium">
                 {NOTIFICATION_TYPE[item.type as keyof typeof NOTIFICATION_TYPE]}
-              </div>
+              </Badge>
             </div>
-            {(item.detailJson as { message: string })?.message && (
+            {item.detailJson.targetPet?.message && (
               <div className="text-muted-foreground line-clamp-2 text-xs">
-                {(item.detailJson as { message: string }).message.substring(0, 300)}
+                {item.detailJson.targetPet.message.substring(0, 300)}
               </div>
             )}
           </button>
