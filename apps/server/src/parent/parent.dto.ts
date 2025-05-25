@@ -1,4 +1,10 @@
-import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
+import {
+  IsBoolean,
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { ApiProperty, PickType } from '@nestjs/swagger';
 import { PARENT_ROLE, PARENT_STATUS } from './parent.constant';
 
@@ -44,6 +50,16 @@ export class CreateParentDto {
   @IsNotEmpty()
   @IsEnum(PARENT_ROLE)
   role: PARENT_ROLE;
+
+  @ApiProperty({ description: '본인 소유 펫 여부', default: false })
+  @IsBoolean()
+  @IsOptional()
+  isMyPet?: boolean;
+
+  @ApiProperty({ description: '부모 관계 요청 메시지', required: false })
+  @IsString()
+  @IsOptional()
+  message?: string;
 }
 
 export class UpdateParentDto {
