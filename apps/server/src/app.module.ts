@@ -14,8 +14,10 @@ import { UserNotificationController } from './user_notification/user_notificatio
 import { BrPetController } from './pet/br/br.pet.controller';
 import { ParentEntity } from './parent/parent.entity';
 import { ParentService } from './parent/parent.service';
+import { UserEntity } from './user/user.entity';
+import { UserService } from './user/user.service';
 
-const ENTITIES = [PetEntity, UserNotificationEntity, ParentEntity];
+const ENTITIES = [UserEntity, PetEntity, UserNotificationEntity, ParentEntity];
 
 @Module({
   imports: [
@@ -42,7 +44,13 @@ const ENTITIES = [PetEntity, UserNotificationEntity, ParentEntity];
     UserNotificationController,
     BrPetController,
   ],
-  providers: [AppService, PetService, UserNotificationService, ParentService],
+  providers: [
+    AppService,
+    UserService,
+    PetService,
+    UserNotificationService,
+    ParentService,
+  ],
 })
 export class AppModule {
   constructor(private dataSource: DataSource) {}
