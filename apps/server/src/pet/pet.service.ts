@@ -41,14 +41,7 @@ export class PetService {
     pageOptionsDto: PageOptionsDto,
     dtoClass: new () => T,
   ): Promise<{ data: T[]; pageMeta: PageMetaDto }> {
-    const queryBuilder = this.petRepository
-      .createQueryBuilder('pets')
-      .leftJoinAndMapOne(
-        'pets.owner',
-        'users',
-        'users',
-        'users.user_id = pets.owner_id',
-      );
+    const queryBuilder = this.createPetWithOwnerQueryBuilder();
 
     queryBuilder
       .orderBy('pets.id', pageOptionsDto.order)
@@ -103,14 +96,8 @@ export class PetService {
   }
 
   async getPet(petId: string): Promise<PetDto | null> {
-    const petEntity = await this.petRepository
-      .createQueryBuilder('pets')
-      .leftJoinAndMapOne(
-        'pets.owner',
-        'users',
-        'users',
-        'users.user_id = pets.owner_id',
-      )
+    const queryBuilder = this.createPetWithOwnerQueryBuilder();
+    const petEntity = await queryBuilder
       .where('pets.pet_id = :petId', { petId })
       .getOne();
 
@@ -148,14 +135,8 @@ export class PetService {
   }
 
   async getPetSummary(petId: string): Promise<PetSummaryDto | null> {
-    const petEntity = await this.petRepository
-      .createQueryBuilder('pets')
-      .leftJoinAndMapOne(
-        'pets.owner',
-        'users',
-        'users',
-        'users.user_id = pets.owner_id',
-      )
+    const queryBuilder = this.createPetWithOwnerQueryBuilder();
+    const petEntity = await queryBuilder
       .where('pets.pet_id = :petId', { petId })
       .getOne();
 
@@ -205,5 +186,16 @@ export class PetService {
         role: PARENT_ROLE.MOTHER,
       });
     }
+  }
+
+  private createPetWithOwnerQueryBuilder() {
+    return this.petRepository
+      .createQueryBuilder('pets')
+      .leftJoinAndMapOne(
+        'pets.owner',
+        'users',
+        'users',
+        'users.user_id = pets.owner_id',
+      );
   }
 }
