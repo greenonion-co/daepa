@@ -14,7 +14,6 @@ import { PetDto } from './pet.dto';
 import { ParentService } from 'src/parent/parent.service';
 import { ParentDto } from 'src/parent/parent.dto';
 import { PARENT_ROLE } from 'src/parent/parent.constant';
-import { UserDto } from 'src/user/user.dto';
 
 @Injectable()
 export class PetService {
