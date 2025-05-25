@@ -14,7 +14,6 @@ import { PetDto } from './pet.dto';
 import { ParentService } from 'src/parent/parent.service';
 import { ParentDto } from 'src/parent/parent.dto';
 import { PARENT_ROLE } from 'src/parent/parent.constant';
-import { USER_ROLE } from 'src/user/user.constant';
 
 @Injectable()
 export class PetService {
@@ -104,22 +103,22 @@ export class PetService {
   }
 
   async getPet(petId: string): Promise<PetDto | null> {
-    const petEntity = await this.petRepository.findOneBy({ pet_id: petId });
+    const petEntity = await this.petRepository
+      .createQueryBuilder('pets')
+      .leftJoinAndMapOne(
+        'pets.owner',
+        'users',
+        'users',
+        'users.user_id = pets.owner_id',
+      )
+      .where('pets.pet_id = :petId', { petId })
+      .getOne();
+
     if (!petEntity) {
       return null;
     }
 
-    const { owner_id, ...pet } = instanceToPlain(petEntity);
-
-    // TODO: owner_id를 사용하여 UserService에서 주인 정보 할당
-    const owner = {
-      userId: 'ADMIN',
-      name: '관리자',
-      role: USER_ROLE.ADMIN,
-    };
-    if (owner) {
-      pet.owner = owner;
-    }
+    const pet = instanceToPlain(petEntity);
 
     if (typeof pet.petId === 'string') {
       pet.father = await this.getParent(pet.petId, PARENT_ROLE.FATHER);
@@ -149,21 +148,22 @@ export class PetService {
   }
 
   async getPetSummary(petId: string): Promise<PetSummaryDto | null> {
-    const petEntity = await this.petRepository.findOneBy({ pet_id: petId });
+    const petEntity = await this.petRepository
+      .createQueryBuilder('pets')
+      .leftJoinAndMapOne(
+        'pets.owner',
+        'users',
+        'users',
+        'users.user_id = pets.owner_id',
+      )
+      .where('pets.pet_id = :petId', { petId })
+      .getOne();
+
     if (!petEntity) {
       return null;
     }
 
-    const { owner_id, ...pet } = instanceToPlain(petEntity);
-    // TODO: owner_id를 사용하여 UserService에서 주인 정보 할당
-    const owner = {
-      userId: 'ADMIN',
-      name: '관리자',
-      role: USER_ROLE.ADMIN,
-    };
-    if (owner) {
-      pet.owner = owner;
-    }
+    const pet = instanceToPlain(petEntity);
 
     return plainToInstance(PetSummaryDto, pet);
   }
