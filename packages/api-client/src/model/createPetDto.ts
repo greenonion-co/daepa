@@ -7,6 +7,7 @@
  */
 import type { CreatePetDtoSpecies } from "./createPetDtoSpecies";
 import type { CreatePetDtoSex } from "./createPetDtoSex";
+import type { CreateParentDto } from "./createParentDto";
 
 export interface CreatePetDto {
   /** 펫 이름 */
@@ -29,8 +30,8 @@ export interface CreatePetDto {
   foods?: string[];
   /** 펫 소개말 */
   desc?: string;
-  /** 아빠 개체 아이디 */
-  fatherId?: string;
-  /** 엄마 개체 아이디 */
-  motherId?: string;
+  /** 아빠 개체 정보 */
+  father?: CreateParentDto;
+  /** 엄마 개체 정보 */
+  mother?: CreateParentDto;
 }
