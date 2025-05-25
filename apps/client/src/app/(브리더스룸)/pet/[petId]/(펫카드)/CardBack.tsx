@@ -24,6 +24,8 @@ import Dialog from "@/app/(브리더스룸)/components/Form/Dialog";
 import { useMutation } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import useParentLinkStore from "../../store/parentLink";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 interface CardBackProps {
   pet: PetSummaryDto;
 }
@@ -33,6 +35,8 @@ const CardBack = ({ pet }: CardBackProps) => {
   const { selectedParent, setSelectedParent } = useParentLinkStore();
 
   const [isEditing, setIsEditing] = useState(false);
+  const [isPublic, setIsPublic] = useState(false);
+
   const router = useRouter();
   const { mutate: mutateDeletePet } = useMutation({
     mutationFn: (petId: string) => petControllerDelete(petId),
@@ -183,10 +187,26 @@ const CardBack = ({ pet }: CardBackProps) => {
     }
   };
 
+  const onToggle = () => {
+    setIsPublic(!isPublic);
+  };
+
   return (
     <div className="relative h-full w-full">
       <div className="h-full">
         <div className="px-6 pb-20">
+          <div className="flex items-center gap-2">
+            <Switch
+              id="visibility"
+              className="data-[state=checked]:bg-blue-600"
+              checked={isPublic}
+              onCheckedChange={onToggle}
+            />
+            <Label htmlFor="visibility" className="text-muted-foreground text-sm">
+              다른 브리더에게 공개
+            </Label>
+          </div>
+
           {/* 혈통 정보 */}
           <div className="pb-4 pt-4">
             <h2 className="mb-3 text-xl font-bold">혈통 정보</h2>
