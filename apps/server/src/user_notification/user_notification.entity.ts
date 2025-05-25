@@ -39,7 +39,7 @@ export class UserNotificationEntity {
   status: USER_NOTIFICATION_STATUS; // 알림 상태
 
   @Expose({ name: 'detailJson' })
-  @Column('json')
+  @Column({ type: 'json', nullable: true })
   detail_json: Record<string, any>;
 
   @Expose({ name: 'createdAt' })

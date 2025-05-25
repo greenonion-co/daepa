@@ -58,8 +58,9 @@ export class UserNotificationDto {
     description: '알림 상세 정보 JSON',
     example: {},
   })
+  @IsOptional()
   @IsJSON()
-  detailJson: Record<string, any>;
+  detailJson?: Record<string, any>;
 
   @ApiProperty({
     description: '알림 생성 시간',
