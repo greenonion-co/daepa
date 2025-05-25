@@ -50,6 +50,8 @@ export * from "./updatePetDtoSex";
 export * from "./updatePetDtoSpecies";
 export * from "./updateUserNotificationDto";
 export * from "./updateUserNotificationDtoStatus";
+export * from "./userDto";
+export * from "./userDtoRole";
 export * from "./userNotificationControllerFindAll200";
 export * from "./userNotificationControllerFindAllOrder";
 export * from "./userNotificationControllerFindAllParams";

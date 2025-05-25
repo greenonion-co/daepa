@@ -19,5 +19,5 @@ export type UserNotificationDtoStatus =
 export const UserNotificationDtoStatus = {
   read: "read",
   unread: "unread",
-  deleted: "deleted", // NOTE: 추후 기능 추가 시 사용
+  deleted: "deleted",
 } as const;

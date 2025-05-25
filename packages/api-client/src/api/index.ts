@@ -175,7 +175,13 @@ export const getPetControllerFindAllResponseMock = (
 ): PetControllerFindAll200 => ({
   data: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
     petId: faker.string.alpha(20),
-    ownerId: faker.string.alpha(20),
+    owner: {
+      ...{
+        userId: faker.string.alpha(20),
+        name: faker.string.alpha(20),
+        role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
+      },
+    },
     name: faker.string.alpha(20),
     species: {},
     morphs: faker.helpers.arrayElement([
@@ -207,7 +213,13 @@ export const getPetControllerFindOneResponseMock = (
   overrideResponse: Partial<PetDto> = {},
 ): PetDto => ({
   petId: faker.string.alpha(20),
-  ownerId: faker.string.alpha(20),
+  owner: {
+    ...{
+      userId: faker.string.alpha(20),
+      name: faker.string.alpha(20),
+      role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
+    },
+  },
   name: faker.string.alpha(20),
   species: {},
   morphs: faker.helpers.arrayElement([
@@ -240,7 +252,16 @@ export const getPetControllerFindOneResponseMock = (
     {
       ...{
         petId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
-        ownerId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+        owner: faker.helpers.arrayElement([
+          {
+            ...{
+              userId: faker.string.alpha(20),
+              name: faker.string.alpha(20),
+              role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
+            },
+          },
+          undefined,
+        ]),
         name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
         species: faker.helpers.arrayElement([{}, undefined]),
         morphs: faker.helpers.arrayElement([
@@ -265,7 +286,16 @@ export const getPetControllerFindOneResponseMock = (
     {
       ...{
         petId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
-        ownerId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+        owner: faker.helpers.arrayElement([
+          {
+            ...{
+              userId: faker.string.alpha(20),
+              name: faker.string.alpha(20),
+              role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
+            },
+          },
+          undefined,
+        ]),
         name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
         species: faker.helpers.arrayElement([{}, undefined]),
         morphs: faker.helpers.arrayElement([
@@ -340,7 +370,13 @@ export const getBrPetControllerFindAllResponseMock = (
 ): BrPetControllerFindAll200 => ({
   data: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
     petId: faker.string.alpha(20),
-    ownerId: faker.string.alpha(20),
+    owner: {
+      ...{
+        userId: faker.string.alpha(20),
+        name: faker.string.alpha(20),
+        role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
+      },
+    },
     name: faker.string.alpha(20),
     species: {},
     morphs: faker.helpers.arrayElement([
@@ -373,7 +409,16 @@ export const getBrPetControllerFindAllResponseMock = (
       {
         ...{
           petId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
-          ownerId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+          owner: faker.helpers.arrayElement([
+            {
+              ...{
+                userId: faker.string.alpha(20),
+                name: faker.string.alpha(20),
+                role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
+              },
+            },
+            undefined,
+          ]),
           name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
           species: faker.helpers.arrayElement([{}, undefined]),
           morphs: faker.helpers.arrayElement([
@@ -398,7 +443,16 @@ export const getBrPetControllerFindAllResponseMock = (
       {
         ...{
           petId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
-          ownerId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+          owner: faker.helpers.arrayElement([
+            {
+              ...{
+                userId: faker.string.alpha(20),
+                name: faker.string.alpha(20),
+                role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
+              },
+            },
+            undefined,
+          ]),
           name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
           species: faker.helpers.arrayElement([{}, undefined]),
           morphs: faker.helpers.arrayElement([
