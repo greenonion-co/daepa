@@ -1,5 +1,5 @@
 export enum USER_ROLE {
-  NORMAL = 'user',
+  USER = 'user',
   BREEDER = 'breeder',
   ADMIN = 'admin',
 }
