@@ -7,6 +7,7 @@ interface NumberFieldProps {
   value: string;
   setValue: (value: { type: FieldName; value: string }) => void;
   disabled?: boolean;
+  placeholder?: string;
 }
 
 const NumberField = ({
@@ -15,6 +16,7 @@ const NumberField = ({
   value,
   setValue,
   disabled = false,
+  placeholder,
 }: NumberFieldProps) => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = e.target.value;
@@ -44,6 +46,7 @@ const NumberField = ({
         onChange={handleChange}
         onKeyPress={handleKeyPress}
         min="0"
+        placeholder={placeholder}
       />
       <p className="absolute bottom-2 right-1 text-xl text-gray-400">g</p>
     </div>
