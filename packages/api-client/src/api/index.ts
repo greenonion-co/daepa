@@ -350,7 +350,7 @@ export const getUserNotificationControllerFindAllResponseMock = (
     ] as const),
     targetId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
     status: faker.helpers.arrayElement(["read", "unread", "deleted"] as const),
-    detailJson: {},
+    detailJson: faker.helpers.arrayElement([{}, undefined]),
     createdAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
     updatedAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
   })),

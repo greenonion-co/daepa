@@ -55,6 +55,7 @@ export class UserNotificationDto {
   status: USER_NOTIFICATION_STATUS;
 
   @ApiProperty({
+    required: false,
     description: '알림 상세 정보 JSON',
     example: {},
   })
