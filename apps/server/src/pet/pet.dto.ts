@@ -12,6 +12,7 @@ import { ApiProperty, OmitType, PartialType, PickType } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { PARENT_STATUS } from 'src/parent/parent.constant';
 import { UserDto } from 'src/user/user.dto';
+import { CreateParentDto } from 'src/parent/parent.dto';
 
 export class PetBaseDto {
   @ApiProperty({
@@ -202,22 +203,22 @@ export class CreatePetDto extends OmitType(PetBaseDto, [
   declare ownerId: string;
 
   @ApiProperty({
-    description: '아빠 개체 아이디',
+    description: '아빠 개체 정보',
     example: 'XXXXXXXX',
     required: false,
   })
   @IsOptional()
-  @IsString()
-  fatherId?: string;
+  @IsObject()
+  father?: CreateParentDto;
 
   @ApiProperty({
-    description: '엄마 개체 아이디',
+    description: '엄마 개체 정보',
     example: 'XXXXXXXX',
     required: false,
   })
   @IsOptional()
-  @IsString()
-  motherId?: string;
+  @IsObject()
+  mother?: CreateParentDto;
 }
 
 export class UpdatePetDto extends PartialType(CreatePetDto) {}

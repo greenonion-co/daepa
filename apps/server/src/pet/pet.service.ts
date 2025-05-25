@@ -30,11 +30,18 @@ export class PetService {
     const petData = plainToInstance(PetEntity, inputPetData);
     await this.petRepository.insert(petData);
 
-    await this.createParentInfo({
-      petId: inputPetData.petId,
-      fatherId: inputPetData.fatherId,
-      motherId: inputPetData.motherId,
-    });
+    if (inputPetData.father) {
+      await this.parentService.createParent(
+        inputPetData.petId,
+        inputPetData.father,
+      );
+    }
+    if (inputPetData.mother) {
+      await this.parentService.createParent(
+        inputPetData.petId,
+        inputPetData.mother,
+      );
+    }
   }
 
   async getPetList<T extends PetDto | PetSummaryDto>(
@@ -119,15 +126,16 @@ export class PetService {
   }
 
   async updatePet(petId: string, updatePetDto: UpdatePetDto): Promise<void> {
-    const { fatherId, motherId, ...updateData } = updatePetDto;
+    const { father, mother, ...updateData } = updatePetDto;
 
     await this.petRepository.update({ pet_id: petId }, updateData);
 
-    await this.createParentInfo({
-      petId,
-      fatherId,
-      motherId,
-    });
+    if (father) {
+      await this.parentService.createParent(petId, father);
+    }
+    if (mother) {
+      await this.parentService.createParent(petId, mother);
+    }
   }
 
   async deletePet(petId: string): Promise<DeleteResult> {
@@ -163,29 +171,6 @@ export class PetService {
       ...parentPetSummary,
       status: parentInfo.status,
     };
-  }
-
-  private async createParentInfo({
-    petId,
-    fatherId,
-    motherId,
-  }: {
-    petId: string;
-    fatherId?: string;
-    motherId?: string;
-  }): Promise<void> {
-    if (fatherId) {
-      await this.parentService.createParent(petId, {
-        parentId: fatherId,
-        role: PARENT_ROLE.FATHER,
-      });
-    }
-    if (motherId) {
-      await this.parentService.createParent(petId, {
-        parentId: motherId,
-        role: PARENT_ROLE.MOTHER,
-      });
-    }
   }
 
   private createPetWithOwnerQueryBuilder() {

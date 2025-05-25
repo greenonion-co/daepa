@@ -51,7 +51,11 @@ export class CreateParentDto {
   @IsEnum(PARENT_ROLE)
   role: PARENT_ROLE;
 
-  @ApiProperty({ description: '본인 소유 펫 여부', default: false })
+  @ApiProperty({
+    description: '본인 소유 펫 여부',
+    required: false,
+    default: false,
+  })
   @IsBoolean()
   @IsOptional()
   isMyPet?: boolean;
