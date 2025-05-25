@@ -1,12 +1,4 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Post,
-  Query,
-} from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { ParentService } from './parent.service';
 import {
   CreateParentDto,
@@ -69,7 +61,7 @@ export class ParentController {
     };
   }
 
-  @Delete('delete/:relationId')
+  @Post('delete/:relationId')
   @ApiParam({
     name: 'relationId',
     description: '부모자식 관계 ID (parents 테이블의 id)',

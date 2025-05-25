@@ -107,7 +107,7 @@ export const parentControllerDeleteParent = <TData = AxiosResponse<void>>(
   relationId: string,
   options?: AxiosRequestConfig,
 ): Promise<TData> => {
-  return axios.delete(`http://localhost:4000/api/v1/parent/delete/${relationId}`, options);
+  return axios.post(`http://localhost:4000/api/v1/parent/delete/${relationId}`, undefined, options);
 };
 
 export const userNotificationControllerFindAll = <
@@ -623,14 +623,14 @@ export const getParentControllerUpdateParentRequestMockHandler = (
 export const getParentControllerDeleteParentMockHandler = (
   overrideResponse?:
     | void
-    | ((info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<void> | void),
+    | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<void> | void),
 ) => {
-  return http.delete("*/api/v1/parent/delete/:relationId", async (info) => {
+  return http.post("*/api/v1/parent/delete/:relationId", async (info) => {
     await delay(1000);
     if (typeof overrideResponse === "function") {
       await overrideResponse(info);
     }
-    return new HttpResponse(null, { status: 200 });
+    return new HttpResponse(null, { status: 201 });
   });
 };
 
