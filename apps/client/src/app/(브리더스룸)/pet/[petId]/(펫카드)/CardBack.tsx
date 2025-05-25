@@ -161,7 +161,7 @@ const CardBack = ({ pet }: CardBackProps) => {
   };
 
   const handleDelete = () => {
-    overlay.open(({ isOpen, close }) => (
+    overlay.open(({ isOpen, close, unmount }) => (
       <Dialog
         isOpen={isOpen}
         onCloseAction={close}
@@ -169,6 +169,7 @@ const CardBack = ({ pet }: CardBackProps) => {
           deletePet();
           close();
         }}
+        onExit={unmount}
         title="개체 삭제 안내"
         description={`정말로 삭제하시겠습니까? \n 삭제 후 복구할 수 없습니다.`}
       />
@@ -272,7 +273,7 @@ const CardBack = ({ pet }: CardBackProps) => {
                     <InfoItem
                       key={step.field.name}
                       label={step.title}
-                      className={step.field.type === "textarea" ? "" : "flex items-center gap-4"}
+                      className={step.field.type === "textarea" ? "" : "flex gap-4"}
                       value={
                         <FormField
                           field={step.field}
@@ -311,7 +312,9 @@ const InfoItem = ({
   className?: string;
 }) => (
   <div className={cn("py-1", className)}>
-    <dt className="min-w-[80px] shrink-0 text-[16px] text-gray-500">{label}</dt>
+    <dt className="flex max-h-[36px] min-w-[80px] shrink-0 items-center text-[16px] text-gray-500">
+      {label}
+    </dt>
     <dd className="flex-1">{value}</dd>
   </div>
 );

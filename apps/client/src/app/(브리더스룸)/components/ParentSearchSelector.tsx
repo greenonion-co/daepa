@@ -14,6 +14,7 @@ interface ParentSearchProps {
   sex?: "M" | "F";
   onClose: () => void;
   onSelect: (item: PetParentDto & { message: string }) => void;
+  onExit: () => void;
 }
 
 export default function ParentSearchSelector({
@@ -21,6 +22,7 @@ export default function ParentSearchSelector({
   sex = "F",
   onClose,
   onSelect,
+  onExit,
 }: ParentSearchProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [step, setStep] = useState(1);
@@ -39,6 +41,11 @@ export default function ParentSearchSelector({
       contentRef.current.scrollTop = 0;
     }
   }, [step]);
+
+  useEffect(() => {
+    return () => onExit();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const defaultMessage = (pet: PetParentDto) => {
     return `안녕하세요, ${pet.ownerId}님.\n${pet.name}를 ${

@@ -7,6 +7,7 @@ import {
   AlertDialogFooter,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { useEffect } from "react";
 
 const Dialog = ({
   title,
@@ -14,13 +15,20 @@ const Dialog = ({
   isOpen,
   onCloseAction,
   onConfirmAction,
+  onExit,
 }: {
   title: string;
   description: string;
   isOpen: boolean;
   onCloseAction: () => void;
   onConfirmAction: () => void;
+  onExit: () => void;
 }) => {
+  useEffect(() => {
+    return () => onExit();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <AlertDialog open={isOpen}>
       <AlertDialogContent>

@@ -12,7 +12,7 @@ import { useFormStore } from "../store/form";
 import { overlay } from "overlay-kit";
 import MultipleSelector from "../../components/selector/multiple";
 import Selector from "../../components/selector";
-import { CreatePetDto, petControllerCreate } from "@repo/api-client";
+import { CreatePetDto, PetSummaryDto, petControllerCreate } from "@repo/api-client";
 import { useMutation } from "@tanstack/react-query";
 import Dialog from "../../components/Form/Dialog";
 import { toast } from "sonner";
@@ -99,7 +99,7 @@ export const useRegisterForm = () => {
       }
 
       if (step === FORM_STEPS.length && validateStep(newFormData)) {
-        router.push("/register/2");
+        router.push("/register/2?from=register");
         return;
       }
 
@@ -111,14 +111,14 @@ export const useRegisterForm = () => {
   );
 
   const handleNext = useCallback(
-    ({ type, value }: { type: FieldName; value: string | string[] }) => {
+    ({ type, value }: { type: FieldName; value: string | string[] | PetSummaryDto }) => {
       if (
         type === "species" &&
         formData.species !== value &&
         Array.isArray(formData.morphs) &&
         formData.morphs.length > 0
       ) {
-        overlay.open(({ isOpen, close }) => (
+        overlay.open(({ isOpen, close, unmount }) => (
           <Dialog
             isOpen={isOpen}
             onCloseAction={close}
@@ -128,6 +128,7 @@ export const useRegisterForm = () => {
             }}
             title="종 변경 안내"
             description={`종을 변경하면 선택된 모프가 초기화됩니다. \n 계속하시겠습니까?`}
+            onExit={unmount}
           />
         ));
         return;
@@ -157,7 +158,7 @@ export const useRegisterForm = () => {
 
   const handleMultipleSelect = useCallback(
     (type: FieldName) => {
-      overlay.open(({ isOpen, close }) => (
+      overlay.open(({ isOpen, close, unmount }) => (
         <MultipleSelector
           isOpen={isOpen}
           onCloseAction={close}
@@ -167,6 +168,7 @@ export const useRegisterForm = () => {
           }}
           selectList={getSelectList(type) || []}
           initialValue={formData[type]}
+          onExit={unmount}
         />
       ));
     },
@@ -174,23 +176,28 @@ export const useRegisterForm = () => {
   );
 
   const handleSelect = useCallback(
-    (type: SELECTOR_TYPE) => {
-      const config = SELECTOR_CONFIGS[type];
+    (type: FieldName) => {
+      if (type === "species" || type === "growth" || type === "sex") {
+        const config = SELECTOR_CONFIGS[type];
 
-      overlay.open(({ isOpen, close }) => (
-        <Selector
-          isOpen={isOpen}
-          onCloseAction={close}
-          onSelectAction={(value) => {
-            handleNext({ type, value });
-            close();
-          }}
-          selectList={config.selectList}
-          title={config.title}
-          currentValue={formData[type]}
-          type={type}
-        />
-      ));
+        overlay.open(({ isOpen, close, unmount }) => {
+          return (
+            <Selector
+              isOpen={isOpen}
+              onCloseAction={close}
+              onSelectAction={(value) => {
+                handleNext({ type, value });
+                close();
+              }}
+              selectList={config.selectList}
+              title={config.title}
+              currentValue={formData[type]}
+              type={type}
+              onExit={unmount}
+            />
+          );
+        });
+      }
     },
     [formData, handleNext],
   );

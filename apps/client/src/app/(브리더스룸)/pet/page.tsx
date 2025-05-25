@@ -6,6 +6,7 @@ import DataTable from "./components/DataTable";
 import { brPetControllerFindAll } from "@repo/api-client";
 import { useInView } from "react-intersection-observer";
 import { useEffect } from "react";
+import Loading from "@/components/common/Loading";
 
 export default function PetPage() {
   const { ref, inView } = useInView();
@@ -34,7 +35,7 @@ export default function PetPage() {
     }
   }, [inView, fetchNextPage, hasNextPage, isFetchingNextPage]);
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) return <Loading />;
 
   // 모든 페이지의 데이터를 하나의 배열로 합치기
   const allPets = data?.pages.flatMap((page) => page.data.data) ?? [];

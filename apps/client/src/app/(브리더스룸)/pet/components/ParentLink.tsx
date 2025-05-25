@@ -29,7 +29,7 @@ const ParentLink = ({
   const handleUnlink = (e: React.MouseEvent) => {
     e.stopPropagation();
 
-    overlay.open(({ isOpen, close }) => (
+    overlay.open(({ isOpen, close, unmount }) => (
       <Dialog
         isOpen={isOpen}
         onCloseAction={close}
@@ -39,6 +39,7 @@ const ParentLink = ({
         }}
         title="부모 연동 해제"
         description={`${label} 개체와의 연동을 해제하시겠습니까?`}
+        onExit={unmount}
       />
     ));
   };
@@ -85,7 +86,12 @@ const ParentLink = ({
                 className="object-cover"
               />
             </div>
-            <span className="relative font-bold after:absolute after:bottom-0 after:left-0 after:-z-10 after:h-[15px] after:w-full after:bg-[#247DFE] after:opacity-40">
+            <span
+              className={cn(
+                "relative font-bold after:absolute after:bottom-0 after:left-0 after:-z-10 after:h-[15px] after:w-full after:opacity-40",
+                label === "모" ? "after:bg-red-400" : "after:bg-[#247DFE]",
+              )}
+            >
               {data.name || "-"}
             </span>
           </Link>
@@ -97,7 +103,7 @@ const ParentLink = ({
             onClick={(e) => {
               e.stopPropagation();
 
-              overlay.open(({ isOpen, close }) => (
+              overlay.open(({ isOpen, close, unmount }) => (
                 <ParentSearchSelector
                   isOpen={isOpen}
                   onClose={close}
@@ -106,6 +112,7 @@ const ParentLink = ({
                     onSelect(item);
                   }}
                   sex={label === "부" ? "M" : "F"}
+                  onExit={unmount}
                 />
               ));
             }}

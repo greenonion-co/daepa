@@ -10,21 +10,46 @@ import SubmitButton from "../../components/Form/SubmitButton";
 import { useEffect, use } from "react";
 import { useSidebar } from "@/components/ui/sidebar";
 import { FormField } from "../../components/Form/FormField";
+import Dialog from "../../components/Form/Dialog";
+import { overlay } from "overlay-kit";
+import { useSearchParams } from "next/navigation";
 
 export default function RegisterPage({ params }: { params: Promise<{ funnel: string }> }) {
   const { handleNext, goNext, handleSelect, handleMultipleSelect } = useRegisterForm();
   const { formData, step, errors, resetForm } = useFormStore();
+  console.log("🚀 ~ RegisterPage ~ step:", { formData, step });
   const { state, isMobile } = useSidebar();
-
+  const searchParams = useSearchParams();
+  const from = searchParams.get("from");
   const resolvedParams = use(params);
   const funnel = Number(resolvedParams.funnel);
   const visibleSteps = FORM_STEPS.slice(-step - 1);
 
   useEffect(() => {
-    if (funnel === REGISTER_PAGE.SECOND) return;
-    if (step === 0) {
-      resetForm();
+    // 작성 중인 정보가 있는 경우 모달 띄우기
+    if (from === "register") return;
+
+    if (Object.keys(formData).length > 0) {
+      overlay.open(({ isOpen, close, unmount }) => (
+        <Dialog
+          isOpen={isOpen}
+          onConfirmAction={close}
+          onCloseAction={() => {
+            resetForm();
+            close();
+          }}
+          title="등록"
+          description="작성 중인 정보가 있습니다. 계속 진행하시겠습니까?"
+          onExit={unmount}
+        />
+      ));
     }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (funnel === REGISTER_PAGE.SECOND) return;
 
     const currentStep = FORM_STEPS[FORM_STEPS.length - step - 1];
     if (!currentStep) return;
@@ -37,6 +62,7 @@ export default function RegisterPage({ params }: { params: Promise<{ funnel: str
     } else if (field.type === "multipleSelect") {
       handleMultipleSelect(field.name);
     }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [step]);
 
@@ -54,7 +80,7 @@ export default function RegisterPage({ params }: { params: Promise<{ funnel: str
               const { title, field } = step;
               return (
                 <div key={title}>
-                  <h2 className="text-lg text-gray-500">{title}</h2>
+                  <h2 className="text-gray-500">{title}</h2>
                   <FormField
                     field={field}
                     handleChange={handleNext}
@@ -77,13 +103,13 @@ export default function RegisterPage({ params }: { params: Promise<{ funnel: str
           <>
             {OPTION_STEPS.map((step) => (
               <div key={step.title} className="mb-6 space-y-2">
-                <h2 className="text-lg text-gray-500">{step.title}</h2>
                 <div key={step.field.name}>
                   <FormField
                     field={step.field}
                     handleChange={handleNext}
                     formData={formData}
                     errors={errors}
+                    label={step.title}
                   />
                 </div>
               </div>

@@ -9,6 +9,7 @@ interface MultipleSelectorProps {
   selectList: string[];
   onCloseAction: () => void;
   onSelectAction: (selectedItems: string[]) => void;
+  onExit: () => void;
 }
 
 export default function MultipleSelector({
@@ -17,6 +18,7 @@ export default function MultipleSelector({
   selectList,
   onCloseAction,
   onSelectAction,
+  onExit,
 }: MultipleSelectorProps) {
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
 
@@ -24,6 +26,11 @@ export default function MultipleSelector({
     if (!initialValue) return;
     setSelectedItems(initialValue);
   }, [initialValue]);
+
+  useEffect(() => {
+    return () => onExit();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleMultipleSelect = (item: string) => {
     setSelectedItems((prev) => {

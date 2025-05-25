@@ -2,6 +2,7 @@
 
 import BottomSheet from "@/components/common/BottomSheet";
 import { GENDER_KOREAN_INFO, SPECIES_KOREAN_INFO } from "../../constants";
+import { useEffect } from "react";
 
 interface SelectorProps {
   isOpen: boolean;
@@ -11,6 +12,7 @@ interface SelectorProps {
   currentValue?: string;
   selectList: string[];
   type?: string;
+  onExit: () => void;
 }
 
 const SelectButton = ({
@@ -49,7 +51,13 @@ export default function Selector({
   currentValue,
   selectList,
   type,
+  onExit,
 }: SelectorProps) {
+  useEffect(() => {
+    return () => onExit();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <BottomSheet isOpen={isOpen} onClose={onCloseAction}>
       <div className="space-y-4">
