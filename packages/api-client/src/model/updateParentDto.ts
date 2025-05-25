@@ -8,6 +8,8 @@
 import type { UpdateParentDtoStatus } from "./updateParentDtoStatus";
 
 export interface UpdateParentDto {
+  /** 부모 관계 ID (parents 테이블의 id) */
+  relationId: number;
   /** 업데이트 할 부모 관계 상태 */
   status: UpdateParentDtoStatus;
   /** 상대방 유저 ID */

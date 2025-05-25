@@ -92,22 +92,17 @@ export const parentControllerCreateParent = <TData = AxiosResponse<void>>(
 };
 
 export const parentControllerUpdateParentRequest = <TData = AxiosResponse<void>>(
-  relationId: string,
   updateParentDto: UpdateParentDto,
   options?: AxiosRequestConfig,
 ): Promise<TData> => {
-  return axios.post(
-    `http://localhost:4000/api/v1/parent/update/${relationId}`,
-    updateParentDto,
-    options,
-  );
+  return axios.patch(`http://localhost:4000/api/v1/parent/update`, updateParentDto, options);
 };
 
 export const parentControllerDeleteParent = <TData = AxiosResponse<void>>(
   relationId: string,
   options?: AxiosRequestConfig,
 ): Promise<TData> => {
-  return axios.post(`http://localhost:4000/api/v1/parent/delete/${relationId}`, undefined, options);
+  return axios.delete(`http://localhost:4000/api/v1/parent/delete/${relationId}`, options);
 };
 
 export const userNotificationControllerFindAll = <
@@ -609,28 +604,28 @@ export const getParentControllerCreateParentMockHandler = (
 export const getParentControllerUpdateParentRequestMockHandler = (
   overrideResponse?:
     | void
-    | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<void> | void),
+    | ((info: Parameters<Parameters<typeof http.patch>[1]>[0]) => Promise<void> | void),
 ) => {
-  return http.post("*/api/v1/parent/update/:relationId", async (info) => {
+  return http.patch("*/api/v1/parent/update", async (info) => {
     await delay(1000);
     if (typeof overrideResponse === "function") {
       await overrideResponse(info);
     }
-    return new HttpResponse(null, { status: 201 });
+    return new HttpResponse(null, { status: 200 });
   });
 };
 
 export const getParentControllerDeleteParentMockHandler = (
   overrideResponse?:
     | void
-    | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<void> | void),
+    | ((info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<void> | void),
 ) => {
-  return http.post("*/api/v1/parent/delete/:relationId", async (info) => {
+  return http.delete("*/api/v1/parent/delete/:relationId", async (info) => {
     await delay(1000);
     if (typeof overrideResponse === "function") {
       await overrideResponse(info);
     }
-    return new HttpResponse(null, { status: 201 });
+    return new HttpResponse(null, { status: 200 });
   });
 };
 
