@@ -11,6 +11,7 @@ import { PET_SEX, PET_SPECIES } from './pet.constants';
 import { ApiProperty, OmitType, PartialType, PickType } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { PARENT_STATUS } from 'src/parent/parent.constant';
+import { UserDto } from 'src/user/user.dto';
 
 export class PetBaseDto {
   @ApiProperty({
@@ -21,11 +22,10 @@ export class PetBaseDto {
   petId: string;
 
   @ApiProperty({
-    description: '펫 주인 아이디',
-    example: 'XXXXXXXX',
+    description: '펫 주인 정보',
   })
-  @IsString()
-  ownerId: string;
+  @IsObject()
+  owner: UserDto;
 
   @ApiProperty({
     description: '펫 이름',
@@ -122,13 +122,16 @@ export class PetBaseDto {
 export class PetSummaryDto extends PickType(PetBaseDto, [
   'petId',
   'name',
-  'ownerId',
+  'owner',
   'species',
   'morphs',
   'traits',
   'sex',
   'photos',
 ]) {
+  @Exclude()
+  declare ownerId: string;
+
   @Exclude()
   declare birthdate?: string;
 
@@ -179,6 +182,9 @@ export class PetDto extends PetBaseDto {
   mother?: PetParentDto;
 
   @Exclude()
+  declare ownerId: string;
+
+  @Exclude()
   declare createdAt?: Date;
 
   @Exclude()
@@ -187,7 +193,7 @@ export class PetDto extends PetBaseDto {
 
 export class CreatePetDto extends OmitType(PetBaseDto, [
   'petId',
-  'ownerId',
+  'owner',
 ] as const) {
   @Exclude()
   declare petId: string;

@@ -124,9 +124,9 @@ export class ParentService {
     };
 
     await this.userNotificationService.createUserNotification(
-      senderPetSummary.ownerId,
+      senderPetSummary.owner.userId,
       {
-        receiverId: receiverPetSummary.ownerId,
+        receiverId: receiverPetSummary.owner.userId,
         type: USER_NOTIFICATION_TYPE.PARENT_REQUEST,
         detailJson: notificationDetail,
       },
