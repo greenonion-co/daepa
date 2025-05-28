@@ -67,7 +67,7 @@ export class ParentService {
 
     if (!createParentDto.isMyPet) {
       await this.createParentRequestNotification({
-        relationId: result.identifiers[0].id,
+        relationId: result.identifiers[0].id as number,
         senderPetId: petId,
         receiverPetId: createParentDto.parentId,
         message: createParentDto.message,
