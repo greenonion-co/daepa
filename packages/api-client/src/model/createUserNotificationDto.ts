@@ -16,5 +16,5 @@ export interface CreateUserNotificationDto {
   /** 알림 대상 이벤트 아이디 ex) 부모 개체 아이디, 댓글 아이디 등 */
   targetId?: string;
   /** 알림 상세 정보 JSON */
-  detailJson: CreateUserNotificationDtoDetailJson;
+  detailJson?: CreateUserNotificationDtoDetailJson;
 }

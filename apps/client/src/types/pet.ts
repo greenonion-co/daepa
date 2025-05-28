@@ -1,7 +1,11 @@
 export interface PetSummaryDto {
   petId: string;
   name: string;
-  owner: any;
+  owner: {
+    userId: string;
+    name: string;
+    role: string;
+  };
   morphs: string[];
   traits: string[];
   sex: "M" | "F" | "N";
@@ -58,6 +62,7 @@ export interface CreatePetDto {
 }
 
 export type PetDetailJson = {
-  targetPet: PetSummaryDto & { message: string };
-  requestPet: PetSummaryDto;
+  receiverPet: PetSummaryDto;
+  senderPet: PetSummaryDto;
+  message: string;
 };

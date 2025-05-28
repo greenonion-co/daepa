@@ -9,6 +9,8 @@ import type { ParentDtoRole } from "./parentDtoRole";
 import type { ParentDtoStatus } from "./parentDtoStatus";
 
 export interface ParentDto {
+  /** 부모 관계 테이블 row id */
+  relationId: number;
   /** 부모 ID */
   parentId: string;
   /** 부모 구분 */

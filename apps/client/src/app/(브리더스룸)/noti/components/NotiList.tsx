@@ -1,9 +1,5 @@
 import { cn } from "@/lib/utils";
-import {
-  UpdateUserNotificationDto,
-  UserNotificationDto,
-  UserNotificationDtoStatus,
-} from "@repo/api-client";
+import { UpdateUserNotificationDto, UserNotificationDtoStatus } from "@repo/api-client";
 import { formatDistanceToNow } from "date-fns";
 import { ExtendedUserNotificationDto, useNotiStore } from "../store/noti";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -20,7 +16,7 @@ const NotiList = ({
 }) => {
   const { selected, setSelected } = useNotiStore();
 
-  const handleItemClick = (item: UserNotificationDto) => {
+  const handleItemClick = (item: ExtendedUserNotificationDto) => {
     setSelected(item);
     // NOTE: 테스트 코드
     // return handleUpdate({ id: item.id, status: UserNotificationDtoStatus.read });
@@ -45,7 +41,7 @@ const NotiList = ({
             <div className="flex w-full flex-col gap-1">
               <div className="flex items-center">
                 <div className="flex items-center gap-2">
-                  <div className="font-semibold">To. {item.detailJson.targetPet.name}</div>
+                  <div className="font-semibold">To. {item?.detailJson?.receiverPet?.name}</div>
                   {item.status === UserNotificationDtoStatus.unread && (
                     <span className="flex h-2 w-2 rounded-full bg-blue-600" />
                   )}
@@ -66,9 +62,9 @@ const NotiList = ({
                 {NOTIFICATION_TYPE[item.type as keyof typeof NOTIFICATION_TYPE]}
               </Badge>
             </div>
-            {item.detailJson.targetPet?.message && (
+            {item?.detailJson?.message && (
               <div className="text-muted-foreground line-clamp-2 text-xs">
-                {item.detailJson.targetPet.message.substring(0, 300)}
+                {item.detailJson.message.substring(0, 300)}
               </div>
             )}
           </button>

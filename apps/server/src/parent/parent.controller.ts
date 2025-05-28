@@ -11,12 +11,11 @@ import {
 import { ParentService } from './parent.service';
 import {
   CreateParentDto,
-  DeleteParentDto,
   FindParentDto,
   ParentDto,
   UpdateParentDto,
 } from './parent.dto';
-import { ApiResponse } from '@nestjs/swagger';
+import { ApiResponse, ApiParam } from '@nestjs/swagger';
 
 @Controller('/v1/parent')
 export class ParentController {
@@ -48,24 +47,29 @@ export class ParentController {
     };
   }
 
-  @Patch('/:petId')
-  async updateParentStatus(
-    @Param('petId') petId: string,
-    @Body() updateParentDto: UpdateParentDto,
-  ) {
-    await this.parentService.updateParentStatus(petId, updateParentDto);
+  @Patch('/update')
+  async updateParentRequest(@Body() updateParentDto: UpdateParentDto) {
+    const userId = 'ZUCOPIA';
+    const { message } = await this.parentService.updateParentStatus({
+      myId: userId,
+      updateParentDto,
+    });
     return {
       success: true,
-      message: '부모 관계가 정상적으로 수정되었습니다.',
+      message,
     };
   }
 
-  @Delete('/:petId')
-  async deleteParent(
-    @Param('petId') petId: string,
-    @Body() deleteParentDto: DeleteParentDto,
-  ) {
-    await this.parentService.deleteParent(petId, deleteParentDto);
+  @Delete('delete/:relationId')
+  @ApiParam({
+    name: 'relationId',
+    description: '부모자식 관계 ID (parents 테이블의 id)',
+    type: 'string',
+    required: true,
+  })
+  async deleteParent(@Param('relationId') relationId: string) {
+    // TODO: 상대방한테도 알림을 줄 것 인가?
+    await this.parentService.deleteParent(Number(relationId));
     return {
       success: true,
       message: '부모 관계가 정상적으로 삭제되었습니다.',

@@ -31,6 +31,7 @@ import {
 import Link from "next/link";
 import { PetDto } from "@repo/api-client";
 import { formatDate } from "@/lib/utils";
+import LinkButton from "../../components/LinkButton";
 
 function TableHeaderSelect({
   column,
@@ -208,9 +209,11 @@ export const columns: ColumnDef<PetDto>[] = [
     cell: ({ row }) => {
       const mother = row.original.mother;
       return mother?.petId ? (
-        <Button variant="ghost" asChild>
-          <Link href={`/detail/${mother.petId}`}>{mother.name}</Link>
-        </Button>
+        <LinkButton
+          href={`/pet/${mother.petId}`}
+          label={mother.name ?? ""}
+          tooltip="펫 상세 페이지로 이동"
+        />
       ) : (
         <span>-</span>
       );
@@ -222,9 +225,11 @@ export const columns: ColumnDef<PetDto>[] = [
     cell: ({ row }) => {
       const father = row.original.father;
       return father?.petId ? (
-        <Button variant="ghost" asChild>
-          <Link href={`/detail/${father.petId}`}>{father.name}</Link>
-        </Button>
+        <LinkButton
+          href={`/pet/${father.petId}`}
+          label={father.name ?? ""}
+          tooltip="펫 상세 페이지로 이동"
+        />
       ) : (
         <span>-</span>
       );

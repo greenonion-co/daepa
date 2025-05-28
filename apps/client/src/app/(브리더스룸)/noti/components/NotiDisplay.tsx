@@ -19,6 +19,7 @@ import {
 } from "@repo/api-client";
 import Link from "next/link";
 import { toast } from "sonner";
+import LinkButton from "../../components/LinkButton";
 
 export function NotiDisplay() {
   const { selected: item } = useNotiStore();
@@ -35,11 +36,11 @@ export function NotiDisplay() {
   });
 
   const handleUpdate = (status: ParentDtoStatus) => {
-    if (!item?.detailJson?.requestPet?.petId || !item?.detailJson?.targetPet?.petId) return;
+    if (!item?.detailJson?.senderPet?.petId || !item?.detailJson?.receiverPet?.petId) return;
 
     updateParentStatus({
-      petId: item.detailJson.requestPet.petId,
-      data: { parentId: item.detailJson.targetPet.petId, updateStatus: status },
+      petId: item.detailJson.senderPet.petId,
+      data: { parentId: item.detailJson.receiverPet.petId, updateStatus: status },
     });
   };
 
@@ -97,25 +98,18 @@ export function NotiDisplay() {
               </Avatar>
               <div className="grid gap-1">
                 <div className="font-semibold">
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Link
-                        href={`/pet/${item.detailJson.targetPet.petId}`}
-                        className="inline-flex items-center gap-1 rounded-md bg-sky-100 py-0.5 pl-2 pr-1 text-sky-600 hover:bg-sky-200 dark:bg-sky-900/50 dark:text-sky-400 dark:hover:bg-sky-900"
-                      >
-                        {item.detailJson.targetPet.name}
-                        <ArrowUpRight className="h-3 w-3" />
-                      </Link>
-                    </TooltipTrigger>
-                    <TooltipContent>펫 상세 페이지로 이동</TooltipContent>
-                  </Tooltip>{" "}
+                  <LinkButton
+                    href={`/pet/${item.detailJson.receiverPet.petId}`}
+                    label={item.detailJson.receiverPet.name}
+                    tooltip="펫 상세 페이지로 이동"
+                  />{" "}
                   의 펫{" "}
                   <span className="text-sky-600 dark:text-sky-400">
-                    {item.detailJson.requestPet.name}
+                    {item.detailJson.senderPet.name}
                   </span>{" "}
                   의{" "}
                   <span className="text-sky-600 dark:text-sky-400">
-                    {item.detailJson.targetPet.sex === "M" ? "부" : "모"}
+                    {item.detailJson.receiverPet.sex === "M" ? "부" : "모"}
                   </span>{" "}
                   연동 요청
                 </div>
@@ -140,15 +134,15 @@ export function NotiDisplay() {
 
           {/* 광고 배너 형태의 링크 */}
           <Link
-            href={`/pet/${item.detailJson.requestPet.petId}`}
+            href={`/pet/${item.detailJson.senderPet.petId}`}
             className="group mx-4 mt-4 flex items-center justify-between rounded-lg bg-blue-100 p-3 shadow-sm transition-all duration-200 hover:scale-[1.02] hover:bg-blue-200 hover:shadow-md"
           >
             <div className="flex items-center gap-3">
-              {item.detailJson.requestPet.photo ? (
+              {item.detailJson.senderPet.photo ? (
                 <div className="relative h-10 w-10 overflow-hidden rounded-full">
                   <Image
-                    src={item.detailJson.requestPet.photo ?? "/default-pet-image.png"}
-                    alt={item.detailJson.requestPet.name ?? "펫 이미지"}
+                    src={item.detailJson.senderPet.photo ?? "/default-pet-image.png"}
+                    alt={item.detailJson.senderPet.name ?? "펫 이미지"}
                     fill
                     className="object-cover"
                     sizes="40px"
@@ -161,7 +155,7 @@ export function NotiDisplay() {
               )}
               <div className="flex flex-col gap-0.5">
                 <span className="text-sm font-medium">
-                  {item.detailJson.requestPet.name} 펫 프로필로 이동
+                  {item.detailJson.senderPet.name} 펫 프로필로 이동
                 </span>
                 <span className="text-muted-foreground text-xs">클릭하여 자세한 정보 확인하기</span>
               </div>
@@ -170,9 +164,7 @@ export function NotiDisplay() {
           </Link>
 
           {/* 메시지 내용 */}
-          <div className="flex-1 whitespace-pre-wrap p-4 text-sm">
-            {item.detailJson.targetPet.message}
-          </div>
+          <div className="flex-1 whitespace-pre-wrap p-4 text-sm">{item.detailJson.message}</div>
         </div>
       ) : (
         <div className="text-muted-foreground p-8 text-center">알림을 선택해주세요. </div>

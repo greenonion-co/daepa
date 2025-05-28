@@ -5,12 +5,12 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Expose, Exclude } from 'class-transformer';
+import { Expose } from 'class-transformer';
 import { PARENT_STATUS, PARENT_ROLE } from './parent.constant';
 
 @Entity({ name: 'parents' })
 export class ParentEntity {
-  @Exclude()
+  @Expose({ name: 'relationId' })
   @PrimaryGeneratedColumn()
   id: number;
 

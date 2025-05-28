@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import BottomSheet from "@/components/common/BottomSheet";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
-import { PetParentDto } from "@repo/api-client";
+import { PetSummaryDto } from "@repo/api-client";
 import { ChevronRight, Send } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { petControllerFindAll } from "@repo/api-client";
@@ -13,7 +13,8 @@ interface ParentSearchProps {
   isOpen: boolean;
   sex?: "M" | "F";
   onClose: () => void;
-  onSelect: (item: PetParentDto & { message: string }) => void;
+  onSelect: (item: PetSummaryDto & { message: string }) => void;
+  onExit: () => void;
 }
 
 export default function ParentSearchSelector({
@@ -21,10 +22,11 @@ export default function ParentSearchSelector({
   sex = "F",
   onClose,
   onSelect,
+  onExit,
 }: ParentSearchProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [step, setStep] = useState(1);
-  const [selectedPet, setSelectedPet] = useState<PetParentDto | null>(null);
+  const [selectedPet, setSelectedPet] = useState<PetSummaryDto | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const { data } = useQuery({
@@ -40,8 +42,13 @@ export default function ParentSearchSelector({
     }
   }, [step]);
 
-  const defaultMessage = (pet: PetParentDto) => {
-    return `안녕하세요, ${pet.ownerId}님.\n${pet.name}를 ${
+  useEffect(() => {
+    return () => onExit();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const defaultMessage = (pet: PetSummaryDto) => {
+    return `안녕하세요, ${pet.name}님.\n${pet.name}를 ${
       pet.sex?.toString() === "M" ? "부" : "모"
     } 개체로 등록하고 싶습니다.`;
   };
@@ -51,7 +58,7 @@ export default function ParentSearchSelector({
     item.name.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
-  const handlePetSelect = (pet: PetParentDto) => {
+  const handlePetSelect = (pet: PetSummaryDto) => {
     setSelectedPet(pet);
     setStep(2);
   };
@@ -146,7 +153,7 @@ export default function ParentSearchSelector({
             <div className="relative aspect-square w-72 overflow-hidden rounded-xl">
               <Image
                 src="/default-pet-image.png"
-                alt={selectedPet.name}
+                alt={selectedPet.name ?? ""}
                 fill
                 className="object-cover"
               />
@@ -160,7 +167,7 @@ export default function ParentSearchSelector({
                     {selectedPet.sex?.toString() === "M" ? "수컷" : "암컷"}
                   </Badge>
                 </div>
-                <p className="text-gray-600">소유자: {selectedPet.ownerId}</p>
+                <p className="text-gray-600">소유자: {selectedPet.owner?.name}</p>
               </div>
 
               <div className="space-y-3">
@@ -201,7 +208,7 @@ export default function ParentSearchSelector({
                 <Send className="h-3 w-3" />
               </div>
               <p className="text-xs text-gray-500">
-                {selectedPet.ownerId}님에게 부모 개체 연결을 요청합니다.
+                {selectedPet.owner?.name}님에게 부모 개체 연결을 요청합니다.
               </p>
             </div>
 

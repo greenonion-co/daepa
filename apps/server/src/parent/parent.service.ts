@@ -9,7 +9,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import {
   CreateParentDto,
-  DeleteParentDto,
   FindParentDto,
   ParentDto,
   UpdateParentDto,
@@ -17,7 +16,10 @@ import {
 import { instanceToPlain, plainToInstance } from 'class-transformer';
 import { PARENT_STATUS } from './parent.constant';
 import { PetService } from 'src/pet/pet.service';
-import { USER_NOTIFICATION_TYPE } from 'src/user_notification/user_notification.constant';
+import {
+  USER_NOTIFICATION_STATUS,
+  USER_NOTIFICATION_TYPE,
+} from 'src/user_notification/user_notification.constant';
 import { UserNotificationService } from 'src/user_notification/user_notification.service';
 
 @Injectable()
@@ -32,7 +34,7 @@ export class ParentService {
 
   async findOne(petId: string, findParentDto: FindParentDto) {
     const parentEntity = await this.parentRepository.findOne({
-      select: ['parent_id', 'role', 'status'],
+      select: ['id', 'parent_id', 'role', 'status'],
       where: {
         pet_id: petId,
         role: findParentDto.role,
@@ -48,11 +50,12 @@ export class ParentService {
     }
 
     const parent = instanceToPlain(parentEntity);
+
     return plainToInstance(ParentDto, parent);
   }
 
   async createParent(petId: string, createParentDto: CreateParentDto) {
-    await this.parentRepository.insert({
+    const result = await this.parentRepository.insert({
       pet_id: petId,
       parent_id: createParentDto.parentId,
       role: createParentDto.role,
@@ -64,6 +67,7 @@ export class ParentService {
 
     if (!createParentDto.isMyPet) {
       await this.createParentRequestNotification({
+        relationId: result.identifiers[0].id as number,
         senderPetId: petId,
         receiverPetId: createParentDto.parentId,
         message: createParentDto.message,
@@ -71,22 +75,76 @@ export class ParentService {
     }
   }
 
-  async updateParentStatus(petId: string, updateParentDto: UpdateParentDto) {
-    return await this.parentRepository.update(
+  async updateParentStatus({
+    myId,
+    updateParentDto,
+  }: {
+    myId: string;
+    updateParentDto: UpdateParentDto;
+  }) {
+    const { status, opponentId, relationId } = updateParentDto;
+    await this.parentRepository.update(
       {
-        pet_id: petId,
-        parent_id: updateParentDto.parentId,
+        id: relationId,
       },
       {
-        status: updateParentDto.updateStatus,
+        status,
       },
     );
+
+    // 부모 요청 수락인 경우
+    if (status === PARENT_STATUS.APPROVED) {
+      await this.userNotificationService.createUserNotification(myId, {
+        targetId: relationId.toString(),
+        receiverId: opponentId,
+        type: USER_NOTIFICATION_TYPE.PARENT_ACCEPT,
+      });
+      return {
+        message: '부모 요청을 정상적으로 승인하였습니다.',
+        // TODO: detailJson에 필요정보 담기
+      };
+    }
+
+    // 부모 요청 셀프 취소인 경우
+    if (status === PARENT_STATUS.CANCELLED) {
+      // 상대방의 user_notification을 DELETED 상태로 변경하여 상대방 알림 삭제
+      await this.userNotificationService.updateWhere(
+        {
+          sender_id: myId,
+          receiver_id: opponentId,
+          type: USER_NOTIFICATION_TYPE.PARENT_REQUEST,
+          target_id: relationId.toString(),
+        },
+        { status: USER_NOTIFICATION_STATUS.DELETED },
+      );
+      return {
+        message: '부모 요청을 정상적으로 취소하였습니다.',
+      };
+    }
+
+    // 부모 요청 거절인 경우
+    if (status === PARENT_STATUS.REJECTED) {
+      // 부모 요청자에게 거절 user-notification 생성
+      await this.userNotificationService.createUserNotification(myId, {
+        targetId: relationId.toString(),
+        receiverId: opponentId,
+        type: USER_NOTIFICATION_TYPE.PARENT_REJECT,
+        // TODO: detailJson에 거절 사유 담기
+      });
+      return {
+        message: '부모 요청을 정상적으로 거절하였습니다.',
+      };
+    }
+
+    return {
+      message: '부모 관계 상태 업데이트 중 오류 발생',
+    };
   }
-  async deleteParent(petId: string, deleteParentDto: DeleteParentDto) {
-    return await this.parentRepository.update(
+
+  async deleteParent(relationId: number) {
+    await this.parentRepository.update(
       {
-        pet_id: petId,
-        parent_id: deleteParentDto.parentId,
+        id: relationId,
       },
       {
         status: PARENT_STATUS.DELETED,
@@ -95,10 +153,12 @@ export class ParentService {
   }
 
   private async createParentRequestNotification({
+    relationId,
     senderPetId,
     receiverPetId,
     message,
   }: {
+    relationId: number;
     senderPetId: string;
     receiverPetId: string;
     message?: string;
@@ -126,6 +186,7 @@ export class ParentService {
     await this.userNotificationService.createUserNotification(
       senderPetSummary.owner.userId,
       {
+        targetId: relationId.toString(),
         receiverId: receiverPetSummary.owner.userId,
         type: USER_NOTIFICATION_TYPE.PARENT_REQUEST,
         detailJson: notificationDetail,

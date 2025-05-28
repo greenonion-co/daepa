@@ -43,6 +43,7 @@ export * from "./petSummaryDto";
 export * from "./petSummaryDtoSex";
 export * from "./petSummaryDtoSpecies";
 export * from "./updateParentDto";
+export * from "./updateParentDtoStatus";
 export * from "./updateParentDtoTarget";
 export * from "./updateParentDtoUpdateStatus";
 export * from "./updatePetDto";

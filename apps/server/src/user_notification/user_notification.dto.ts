@@ -21,6 +21,13 @@ export class UserNotificationDto {
   id: number;
 
   @ApiProperty({
+    description: '알림 발신 유저 아이디',
+    example: 'XXXXXXXX',
+  })
+  @IsString()
+  senderId: string;
+
+  @ApiProperty({
     description: '알림 수신 유저 아이디',
     example: 'XXXXXXXX',
   })
@@ -55,11 +62,13 @@ export class UserNotificationDto {
   status: USER_NOTIFICATION_STATUS;
 
   @ApiProperty({
+    required: false,
     description: '알림 상세 정보 JSON',
     example: {},
   })
+  @IsOptional()
   @IsJSON()
-  detailJson: Record<string, any>;
+  detailJson?: Record<string, any>;
 
   @ApiProperty({
     description: '알림 생성 시간',
@@ -78,6 +87,7 @@ export class UserNotificationDto {
 
 export class CreateUserNotificationDto extends OmitType(UserNotificationDto, [
   'id',
+  'senderId',
   'status',
   'createdAt',
   'updatedAt',

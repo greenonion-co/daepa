@@ -5,7 +5,7 @@ import { overlay } from "overlay-kit";
 import ParentSearchSelector from "../../components/ParentSearchSelector";
 import { Button } from "@/components/ui/button";
 import Dialog from "../../components/Form/Dialog";
-import { ParentDtoStatus, PetParentDto } from "@repo/api-client";
+import { ParentDtoStatus, PetParentDto, PetSummaryDto } from "@repo/api-client";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
@@ -17,7 +17,7 @@ const ParentLink = ({
 }: {
   label: "부" | "모";
   data?: PetParentDto;
-  onSelect: (item: PetParentDto & { message: string }) => void;
+  onSelect: (item: PetSummaryDto & { message: string }) => void;
   onUnlink: () => void;
 }) => {
   const deleteParent = () => {
@@ -29,7 +29,7 @@ const ParentLink = ({
   const handleUnlink = (e: React.MouseEvent) => {
     e.stopPropagation();
 
-    overlay.open(({ isOpen, close }) => (
+    overlay.open(({ isOpen, close, unmount }) => (
       <Dialog
         isOpen={isOpen}
         onCloseAction={close}
@@ -39,6 +39,7 @@ const ParentLink = ({
         }}
         title="부모 연동 해제"
         description={`${label} 개체와의 연동을 해제하시겠습니까?`}
+        onExit={unmount}
       />
     ));
   };
@@ -52,7 +53,7 @@ const ParentLink = ({
           <Badge
             variant="outline"
             className={cn(
-              STATUS_MAP[data?.status].color,
+              STATUS_MAP[data?.status as keyof typeof STATUS_MAP].color,
               "rounded-full font-semibold text-gray-100",
             )}
           >
@@ -60,7 +61,7 @@ const ParentLink = ({
               <BadgeCheck className="h-4 w-4 text-gray-100" />
             )}
 
-            {STATUS_MAP[data?.status].label}
+            {STATUS_MAP[data?.status as keyof typeof STATUS_MAP].label}
           </Badge>
         )}
       </dt>
@@ -85,7 +86,12 @@ const ParentLink = ({
                 className="object-cover"
               />
             </div>
-            <span className="relative font-bold after:absolute after:bottom-0 after:left-0 after:-z-10 after:h-[15px] after:w-full after:bg-[#247DFE] after:opacity-40">
+            <span
+              className={cn(
+                "relative font-bold after:absolute after:bottom-0 after:left-0 after:-z-10 after:h-[15px] after:w-full after:opacity-40",
+                label === "모" ? "after:bg-red-400" : "after:bg-[#247DFE]",
+              )}
+            >
               {data.name || "-"}
             </span>
           </Link>
@@ -97,7 +103,7 @@ const ParentLink = ({
             onClick={(e) => {
               e.stopPropagation();
 
-              overlay.open(({ isOpen, close }) => (
+              overlay.open(({ isOpen, close, unmount }) => (
                 <ParentSearchSelector
                   isOpen={isOpen}
                   onClose={close}
@@ -106,6 +112,7 @@ const ParentLink = ({
                     onSelect(item);
                   }}
                   sex={label === "부" ? "M" : "F"}
+                  onExit={unmount}
                 />
               ));
             }}

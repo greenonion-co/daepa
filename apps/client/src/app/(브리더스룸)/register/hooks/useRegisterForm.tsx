@@ -12,7 +12,7 @@ import { useFormStore } from "../store/form";
 import { overlay } from "overlay-kit";
 import MultipleSelector from "../../components/selector/multiple";
 import Selector from "../../components/selector";
-import { CreatePetDto, petControllerCreate } from "@repo/api-client";
+import { CreatePetDto, PetSummaryDto, petControllerCreate } from "@repo/api-client";
 import { useMutation } from "@tanstack/react-query";
 import Dialog from "../../components/Form/Dialog";
 import { toast } from "sonner";
@@ -67,26 +67,48 @@ export const useRegisterForm = () => {
 
   const createPet = useCallback(
     (formData: FormData) => {
-      const transformedFormData = { ...formData };
-      if (transformedFormData.sex && typeof transformedFormData.sex === "string") {
-        const genderEntry = Object.entries(GENDER_KOREAN_INFO).find(
-          ([_, koreanValue]) => koreanValue === transformedFormData.sex,
-        );
-        if (genderEntry) {
-          transformedFormData.sex = genderEntry[0];
+      try {
+        const transformedFormData = { ...formData };
+        if (transformedFormData.sex && typeof transformedFormData.sex === "string") {
+          const genderEntry = Object.entries(GENDER_KOREAN_INFO).find(
+            ([_, koreanValue]) => koreanValue === transformedFormData.sex,
+          );
+          if (genderEntry) {
+            transformedFormData.sex = genderEntry[0];
+          }
         }
+
+        const { father, mother, photo, weight, ...rest } = transformedFormData;
+
+        const requestData: CreatePetDto = {
+          ...rest,
+          ...(weight && { weight: Number(weight) }),
+          ...(father?.petId && {
+            father: {
+              parentId: father.petId,
+              role: "father",
+              // TODO: 회원가입 기능 적용 후 수정
+              // isMyPet: father.owner.userId === 내 id,
+              isMyPet: false,
+              message: father.message,
+            },
+          }),
+          ...(mother?.petId && {
+            mother: {
+              parentId: mother.petId,
+              role: "mother",
+              // TODO: 회원가입 기능 적용 후 수정
+              // isMyPet: mother.owner.userId === 내 id,
+              isMyPet: false,
+              message: mother.message,
+            },
+          }),
+        };
+
+        mutateCreatePet(requestData);
+      } catch (error) {
+        console.error("Failed to create pet:", error);
       }
-
-      const { father, mother, photo, weight, ...rest } = transformedFormData;
-
-      const requestData: CreatePetDto = {
-        ...rest,
-        ...(weight && { weight: Number(weight) }),
-        ...(father?.petId && { fatherId: father.petId }),
-        ...(mother?.petId && { motherId: mother.petId }),
-      };
-
-      mutateCreatePet(requestData);
     },
     [mutateCreatePet],
   );
@@ -99,7 +121,7 @@ export const useRegisterForm = () => {
       }
 
       if (step === FORM_STEPS.length && validateStep(newFormData)) {
-        router.push("/register/2");
+        router.push("/register/2?from=register");
         return;
       }
 
@@ -111,14 +133,14 @@ export const useRegisterForm = () => {
   );
 
   const handleNext = useCallback(
-    ({ type, value }: { type: FieldName; value: string | string[] }) => {
+    ({ type, value }: { type: FieldName; value: string | string[] | PetSummaryDto }) => {
       if (
         type === "species" &&
         formData.species !== value &&
         Array.isArray(formData.morphs) &&
         formData.morphs.length > 0
       ) {
-        overlay.open(({ isOpen, close }) => (
+        overlay.open(({ isOpen, close, unmount }) => (
           <Dialog
             isOpen={isOpen}
             onCloseAction={close}
@@ -128,6 +150,7 @@ export const useRegisterForm = () => {
             }}
             title="종 변경 안내"
             description={`종을 변경하면 선택된 모프가 초기화됩니다. \n 계속하시겠습니까?`}
+            onExit={unmount}
           />
         ));
         return;
@@ -157,7 +180,7 @@ export const useRegisterForm = () => {
 
   const handleMultipleSelect = useCallback(
     (type: FieldName) => {
-      overlay.open(({ isOpen, close }) => (
+      overlay.open(({ isOpen, close, unmount }) => (
         <MultipleSelector
           isOpen={isOpen}
           onCloseAction={close}
@@ -167,6 +190,7 @@ export const useRegisterForm = () => {
           }}
           selectList={getSelectList(type) || []}
           initialValue={formData[type]}
+          onExit={unmount}
         />
       ));
     },
@@ -174,23 +198,28 @@ export const useRegisterForm = () => {
   );
 
   const handleSelect = useCallback(
-    (type: SELECTOR_TYPE) => {
-      const config = SELECTOR_CONFIGS[type];
+    (type: FieldName) => {
+      if (type === "species" || type === "growth" || type === "sex") {
+        const config = SELECTOR_CONFIGS[type];
 
-      overlay.open(({ isOpen, close }) => (
-        <Selector
-          isOpen={isOpen}
-          onCloseAction={close}
-          onSelectAction={(value) => {
-            handleNext({ type, value });
-            close();
-          }}
-          selectList={config.selectList}
-          title={config.title}
-          currentValue={formData[type]}
-          type={type}
-        />
-      ));
+        overlay.open(({ isOpen, close, unmount }) => {
+          return (
+            <Selector
+              isOpen={isOpen}
+              onCloseAction={close}
+              onSelectAction={(value) => {
+                handleNext({ type, value });
+                close();
+              }}
+              selectList={config.selectList}
+              title={config.title}
+              currentValue={formData[type]}
+              type={type}
+              onExit={unmount}
+            />
+          );
+        });
+      }
     },
     [formData, handleNext],
   );
