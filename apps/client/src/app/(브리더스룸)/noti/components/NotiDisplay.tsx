@@ -11,10 +11,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useNotiStore } from "../store/noti";
 import { useMutation } from "@tanstack/react-query";
 import {
-  parentControllerUpdateParentStatus,
-  ParentDtoStatus,
+  parentControllerUpdateParentRequest,
   UpdateParentDto,
-  UpdateParentDtoUpdateStatus,
+  UpdateParentDtoStatus,
   UserNotificationDtoType,
 } from "@repo/api-client";
 import Link from "next/link";
@@ -25,8 +24,8 @@ export function NotiDisplay() {
   const { selected: item } = useNotiStore();
 
   const { mutate: updateParentStatus } = useMutation({
-    mutationFn: ({ petId, data }: { petId: string; data: UpdateParentDto }) =>
-      parentControllerUpdateParentStatus(petId, data),
+    mutationFn: ({ relationId, status, opponentId }: UpdateParentDto) =>
+      parentControllerUpdateParentRequest({ relationId, status, opponentId }),
     onSuccess: () => {
       toast.success("부모 연동 요청이 수락되었습니다.");
     },
@@ -35,12 +34,13 @@ export function NotiDisplay() {
     },
   });
 
-  const handleUpdate = (status: ParentDtoStatus) => {
+  const handleUpdate = (status: UpdateParentDtoStatus) => {
     if (!item?.detailJson?.senderPet?.petId || !item?.detailJson?.receiverPet?.petId) return;
 
     updateParentStatus({
-      petId: item.detailJson.senderPet.petId,
-      data: { parentId: item.detailJson.receiverPet.petId, updateStatus: status },
+      relationId: Number(item.targetId),
+      status,
+      opponentId: item.detailJson.senderPet.petId,
     });
   };
 
@@ -63,7 +63,7 @@ export function NotiDisplay() {
                 <Button
                   onClick={(e) => {
                     e.preventDefault();
-                    handleUpdate(UpdateParentDtoUpdateStatus.rejected);
+                    handleUpdate(UpdateParentDtoStatus.rejected);
                     // TODO: 거절 notification 보내기
                   }}
                   variant="outline"
@@ -75,7 +75,7 @@ export function NotiDisplay() {
                 <Button
                   onClick={(e) => {
                     e.preventDefault();
-                    handleUpdate(UpdateParentDtoUpdateStatus.approved);
+                    handleUpdate(UpdateParentDtoStatus.approved);
                   }}
                   size="sm"
                   className="ml-auto"

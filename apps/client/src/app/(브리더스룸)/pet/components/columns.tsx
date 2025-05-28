@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal } from "lucide-react";
+import { BadgeCheck, MoreHorizontal } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
   FOOD_BADGE_COLORS,
@@ -19,6 +19,7 @@ import {
   GENDER_KOREAN_INFO,
   SALE_KOREAN_INFO,
   SPECIES_KOREAN_INFO,
+  STATUS_MAP,
   TABLE_HEADER,
 } from "../../constants";
 import {
@@ -29,7 +30,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import Link from "next/link";
-import { PetDto } from "@repo/api-client";
+import { ParentDtoStatus, PetDto } from "@repo/api-client";
 import { formatDate } from "@/lib/utils";
 import LinkButton from "../../components/LinkButton";
 
@@ -213,6 +214,12 @@ export const columns: ColumnDef<PetDto>[] = [
           href={`/pet/${mother.petId}`}
           label={mother.name ?? ""}
           tooltip="펫 상세 페이지로 이동"
+          className={`${STATUS_MAP[mother.status as keyof typeof STATUS_MAP].color} hover:text-accent/80 font-semibold text-white`}
+          icon={
+            mother.status === ParentDtoStatus.approved ? (
+              <BadgeCheck className="h-4 w-4 text-gray-100" />
+            ) : null
+          }
         />
       ) : (
         <span>-</span>
@@ -229,6 +236,12 @@ export const columns: ColumnDef<PetDto>[] = [
           href={`/pet/${father.petId}`}
           label={father.name ?? ""}
           tooltip="펫 상세 페이지로 이동"
+          className={`${STATUS_MAP[father.status as keyof typeof STATUS_MAP].color} hover:text-accent/80 font-semibold text-white`}
+          icon={
+            father.status === ParentDtoStatus.approved ? (
+              <BadgeCheck className="h-4 w-4 text-gray-100" />
+            ) : null
+          }
         />
       ) : (
         <span>-</span>

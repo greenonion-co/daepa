@@ -5,9 +5,9 @@ import { overlay } from "overlay-kit";
 import ParentSearchSelector from "../../components/ParentSearchSelector";
 import { Button } from "@/components/ui/button";
 import Dialog from "../../components/Form/Dialog";
-import { ParentDtoStatus, PetParentDto, PetSummaryDto } from "@repo/api-client";
-import { Badge } from "@/components/ui/badge";
+import { PetParentDto, PetSummaryDto } from "@repo/api-client";
 import { cn } from "@/lib/utils";
+import ParentStatusBadge from "../../components/ParentStatusBadge";
 
 const ParentLink = ({
   label,
@@ -49,21 +49,7 @@ const ParentLink = ({
       <dt className="mb-2 flex items-center gap-2 text-xs font-medium text-gray-500 dark:text-gray-400">
         {label}
 
-        {data?.status && (
-          <Badge
-            variant="outline"
-            className={cn(
-              STATUS_MAP[data?.status as keyof typeof STATUS_MAP].color,
-              "rounded-full font-semibold text-gray-100",
-            )}
-          >
-            {data?.status === ParentDtoStatus.approved && (
-              <BadgeCheck className="h-4 w-4 text-gray-100" />
-            )}
-
-            {STATUS_MAP[data?.status as keyof typeof STATUS_MAP].label}
-          </Badge>
-        )}
+        {data?.status && <ParentStatusBadge status={data.status} />}
       </dt>
 
       {data?.petId ? (
@@ -126,26 +112,3 @@ const ParentLink = ({
 };
 
 export default ParentLink;
-
-const STATUS_MAP = {
-  pending: {
-    label: "요청 대기중",
-    color: "bg-yellow-600 ",
-  },
-  rejected: {
-    label: "요청 거절됨",
-    color: "bg-red-700",
-  },
-  approved: {
-    label: "연동됨",
-    color: "bg-green-700",
-  },
-  deleted: {
-    label: "삭제됨",
-    color: "bg-red-700",
-  },
-  cancelled: {
-    label: "취소됨",
-    color: "bg-gray-600",
-  },
-};

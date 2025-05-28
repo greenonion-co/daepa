@@ -18,7 +18,7 @@ export default function PetPage() {
       brPetControllerFindAll({
         page: pageParam,
         itemPerPage,
-        order: "ASC",
+        order: "DESC",
       }),
     initialPageParam: 1,
     getNextPageParam: (lastPage) => {

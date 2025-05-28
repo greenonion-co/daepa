@@ -29,46 +29,60 @@ const NotiList = ({
   return (
     <ScrollArea className="h-[calc(100vh-200px)]">
       <div className="flex flex-col gap-2 p-4 pt-0">
-        {items.map((item) => (
-          <button
-            key={item.id}
-            className={cn(
-              "hover:bg-accent flex flex-col items-start gap-2 rounded-lg border p-3 text-left text-sm transition-all duration-200 hover:scale-[1.01] hover:shadow-md",
-              selected?.id === item.id && "bg-blue-50",
-            )}
-            onClick={() => handleItemClick(item)}
-          >
-            <div className="flex w-full flex-col gap-1">
-              <div className="flex items-center">
-                <div className="flex items-center gap-2">
-                  <div className="font-semibold">To. {item?.detailJson?.receiverPet?.name}</div>
-                  {item.status === UserNotificationDtoStatus.unread && (
-                    <span className="flex h-2 w-2 rounded-full bg-blue-600" />
-                  )}
+        {items.map((item) => {
+          const role = item.detailJson.receiverPet.sex === "M" ? "father" : "mother";
+
+          return (
+            <button
+              key={item.id}
+              className={cn(
+                "hover:bg-accent flex flex-col items-start gap-2 rounded-lg border p-3 text-left text-sm shadow-sm transition-all duration-200 hover:scale-[1.01] hover:shadow-md",
+                selected?.id === item.id && "bg-blue-50",
+              )}
+              onClick={() => handleItemClick(item)}
+            >
+              <div className="flex w-full flex-col gap-1">
+                <div className="flex items-center">
+                  <div className="flex items-center gap-2">
+                    <div className="font-semibold">{item?.detailJson?.receiverPet?.name}</div>
+                    {item.status === UserNotificationDtoStatus.unread && (
+                      <span className="flex h-2 w-2 rounded-full bg-red-500" />
+                    )}
+                  </div>
+                  <div
+                    className={cn(
+                      "ml-auto text-xs",
+                      selected?.id === item.id ? "text-foreground" : "text-muted-foreground",
+                    )}
+                  >
+                    {formatDistanceToNow(new Date(item.createdAt), {
+                      addSuffix: true,
+                      locale: ko,
+                    })}
+                  </div>
                 </div>
-                <div
-                  className={cn(
-                    "ml-auto text-xs",
-                    selected?.id === item.id ? "text-foreground" : "text-muted-foreground",
-                  )}
-                >
-                  {formatDistanceToNow(new Date(item.createdAt), {
-                    addSuffix: true,
-                    locale: ko,
-                  })}
+                <div className="flex gap-2">
+                  <span
+                    className={cn(
+                      "relative font-bold after:absolute after:bottom-1 after:left-0.5 after:-z-10 after:h-[10px] after:w-full after:opacity-40",
+                      role === "mother" ? "after:bg-red-400" : "after:bg-[#247DFE]",
+                    )}
+                  >
+                    {role === "mother" ? "모" : "부"}
+                  </span>
+                  <Badge variant="outline" className="text-xs font-medium">
+                    {NOTIFICATION_TYPE[item.type as keyof typeof NOTIFICATION_TYPE]}
+                  </Badge>
                 </div>
               </div>
-              <Badge variant="outline" className="text-xs font-medium">
-                {NOTIFICATION_TYPE[item.type as keyof typeof NOTIFICATION_TYPE]}
-              </Badge>
-            </div>
-            {item?.detailJson?.message && (
-              <div className="text-muted-foreground line-clamp-2 text-xs">
-                {item.detailJson.message.substring(0, 300)}
-              </div>
-            )}
-          </button>
-        ))}
+              {item?.detailJson?.message && (
+                <div className="text-muted-foreground line-clamp-2 text-xs">
+                  {item.detailJson.message.substring(0, 300)}
+                </div>
+              )}
+            </button>
+          );
+        })}
       </div>
     </ScrollArea>
   );

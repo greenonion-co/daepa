@@ -1,4 +1,4 @@
-import { Bell, DollarSign, Egg, Heart, Home, Inbox } from "lucide-react";
+import { Bell, Home, Inbox } from "lucide-react";
 import { FormStep, SelectorConfig } from "./register/types";
 import { FOOD } from "@/types/pet";
 
@@ -277,4 +277,27 @@ export const FOOD_BADGE_TEXT_COLORS: Record<FOOD, string> = {
 export const NOTIFICATION_TYPE = {
   parent_request: "부모 연동 요청",
   system: "시스템 알림",
+};
+
+export const STATUS_MAP = {
+  pending: {
+    label: "요청 대기중",
+    color: "bg-yellow-600 ",
+  },
+  rejected: {
+    label: "요청 거절됨",
+    color: "bg-red-700",
+  },
+  approved: {
+    label: "연동됨",
+    color: "bg-green-700",
+  },
+  deleted: {
+    label: "삭제됨",
+    color: "bg-red-700",
+  },
+  cancelled: {
+    label: "취소됨",
+    color: "bg-gray-600",
+  },
 };

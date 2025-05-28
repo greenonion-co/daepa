@@ -23,7 +23,10 @@ export default function NotificationsPage() {
 
   const { data: notification } = useQuery({
     queryKey: [userNotificationControllerFindAll.name],
-    queryFn: () => userNotificationControllerFindAll(),
+    queryFn: () =>
+      userNotificationControllerFindAll({
+        order: "ASC",
+      }),
     select: (response) => response.data.data,
   });
 
