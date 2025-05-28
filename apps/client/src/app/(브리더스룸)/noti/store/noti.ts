@@ -1,15 +1,9 @@
-import { PetDetailJson } from "@/types/pet";
 import { UserNotificationDto } from "@repo/api-client";
 import { create } from "zustand";
 
-// UserNotificationDto 타입 확장
-export interface ExtendedUserNotificationDto extends Omit<UserNotificationDto, "detailJson"> {
-  detailJson: PetDetailJson;
-}
-
 interface NotiStore {
-  selected: ExtendedUserNotificationDto | null;
-  setSelected: (selected: ExtendedUserNotificationDto | null) => void;
+  selected: UserNotificationDto | null;
+  setSelected: (selected: UserNotificationDto | null) => void;
 }
 
 export const useNotiStore = create<NotiStore>((set) => ({

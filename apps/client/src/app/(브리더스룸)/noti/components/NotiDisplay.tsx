@@ -40,7 +40,7 @@ export function NotiDisplay() {
     updateParentStatus({
       relationId: Number(item.targetId),
       status,
-      opponentId: item.detailJson.senderPet.petId,
+      opponentId: item.senderId,
     });
   };
 
