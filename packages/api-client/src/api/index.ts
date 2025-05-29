@@ -228,7 +228,10 @@ export const getPetControllerFindOneResponseMock = (
     ),
     undefined,
   ]),
-  birthdate: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+  birthdate: faker.helpers.arrayElement([
+    faker.number.int({ min: undefined, max: undefined }),
+    undefined,
+  ]),
   growth: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
   sex: faker.helpers.arrayElement([{}, undefined]),
   weight: faker.helpers.arrayElement([
@@ -387,7 +390,10 @@ export const getBrPetControllerFindAllResponseMock = (
       ),
       undefined,
     ]),
-    birthdate: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+    birthdate: faker.helpers.arrayElement([
+      faker.number.int({ min: undefined, max: undefined }),
+      undefined,
+    ]),
     growth: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
     sex: faker.helpers.arrayElement([{}, undefined]),
     weight: faker.helpers.arrayElement([

@@ -24,7 +24,7 @@ export interface PetDto {
   /** 펫 형질 */
   traits?: string[];
   /** 펫 출생일 */
-  birthdate?: string;
+  birthdate?: number;
   /** 펫 성장단계 */
   growth?: string;
   /** 펫 성별(수컷, 암컷, 미구분) */
