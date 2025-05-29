@@ -10,6 +10,7 @@ import type { AxiosRequestConfig, AxiosResponse } from "axios";
 
 import type {
   BrPetControllerFindAllParams,
+  CreateEggDto,
   CreateParentDto,
   CreatePetDto,
   CreateUserNotificationDto,
@@ -149,6 +150,13 @@ export const brPetControllerFindAll = <TData = AxiosResponse<BrPetControllerFind
   });
 };
 
+export const eggControllerCreate = <TData = AxiosResponse<void>>(
+  createEggDto: CreateEggDto,
+  options?: AxiosRequestConfig,
+): Promise<TData> => {
+  return axios.post(`http://localhost:4000/api/v1/egg`, createEggDto, options);
+};
+
 export type PetControllerFindAllResult = AxiosResponse<PetControllerFindAll200>;
 export type PetControllerCreateResult = AxiosResponse<void>;
 export type PetControllerFindOneResult = AxiosResponse<PetDto>;
@@ -163,6 +171,7 @@ export type UserNotificationControllerFindAllResult =
 export type UserNotificationControllerCreateResult = AxiosResponse<void>;
 export type UserNotificationControllerUpdateResult = AxiosResponse<void>;
 export type BrPetControllerFindAllResult = AxiosResponse<BrPetControllerFindAll200>;
+export type EggControllerCreateResult = AxiosResponse<void>;
 
 export const getPetControllerFindAllResponseMock = (
   overrideResponse: Partial<PetControllerFindAll200> = {},
@@ -709,6 +718,20 @@ export const getBrPetControllerFindAllMockHandler = (
     );
   });
 };
+
+export const getEggControllerCreateMockHandler = (
+  overrideResponse?:
+    | void
+    | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<void> | void),
+) => {
+  return http.post("*/api/v1/egg", async (info) => {
+    await delay(1000);
+    if (typeof overrideResponse === "function") {
+      await overrideResponse(info);
+    }
+    return new HttpResponse(null, { status: 201 });
+  });
+};
 export const getProjectDaepaAPIMock = () => [
   getPetControllerFindAllMockHandler(),
   getPetControllerCreateMockHandler(),
@@ -723,4 +746,5 @@ export const getProjectDaepaAPIMock = () => [
   getUserNotificationControllerCreateMockHandler(),
   getUserNotificationControllerUpdateMockHandler(),
   getBrPetControllerFindAllMockHandler(),
+  getEggControllerCreateMockHandler(),
 ];

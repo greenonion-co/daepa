@@ -9,6 +9,7 @@
 export * from "./brPetControllerFindAll200";
 export * from "./brPetControllerFindAllOrder";
 export * from "./brPetControllerFindAllParams";
+export * from "./createEggDto";
 export * from "./createParentDto";
 export * from "./createParentDtoRole";
 export * from "./createPetDto";
