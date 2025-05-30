@@ -9,10 +9,11 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { EggService } from './egg.service';
-import { CreateEggDto } from './egg.dto';
+import { CreateEggDto, EggDto } from './egg.dto';
 import { nanoid } from 'nanoid';
 import { isMySQLError } from 'src/common/error';
 import { ExcludeNilInterceptor } from 'src/interceptors/exclude-nil';
+import { ApiResponse } from '@nestjs/swagger';
 
 @Controller('/v1/egg')
 @UseInterceptors(ExcludeNilInterceptor)
@@ -20,6 +21,11 @@ export class EggController {
   constructor(private readonly eggService: EggService) {}
 
   @Get(':eggId')
+  @ApiResponse({
+    status: 200,
+    description: '알 정보 조회 성공',
+    type: EggDto,
+  })
   async findOne(@Param('eggId') eggId: string) {
     return await this.eggService.getEgg(eggId);
   }
