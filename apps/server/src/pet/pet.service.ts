@@ -14,9 +14,14 @@ import { PetDto } from './pet.dto';
 import { ParentService } from 'src/parent/parent.service';
 import { ParentDto } from 'src/parent/parent.dto';
 import { PARENT_ROLE } from 'src/parent/parent.constant';
+import { HttpException, HttpStatus } from '@nestjs/common';
+import { nanoid } from 'nanoid';
+import { isMySQLError } from 'src/common/error';
 
 @Injectable()
 export class PetService {
+  private readonly MAX_RETRIES = 3;
+
   constructor(
     @InjectRepository(PetEntity)
     private readonly petRepository: Repository<PetEntity>,
@@ -24,23 +29,58 @@ export class PetService {
     private readonly parentService: ParentService,
   ) {}
 
-  async createPet(
-    inputPetData: { petId: string; ownerId: string } & CreatePetDto,
-  ): Promise<void> {
-    const petData = plainToInstance(PetEntity, inputPetData);
-    await this.petRepository.insert(petData);
-
-    if (inputPetData.father) {
-      await this.parentService.createParent(
-        inputPetData.petId,
-        inputPetData.father,
-      );
+  private async generateUniquePetId(): Promise<string> {
+    let attempts = 0;
+    while (attempts < this.MAX_RETRIES) {
+      const petId = nanoid(8);
+      const existingPet = await this.petRepository.findOne({
+        where: { pet_id: petId },
+      });
+      if (!existingPet) {
+        return petId;
+      }
+      attempts++;
     }
-    if (inputPetData.mother) {
-      await this.parentService.createParent(
-        inputPetData.petId,
-        inputPetData.mother,
-      );
+    throw new HttpException(
+      {
+        statusCode: HttpStatus.CONFLICT,
+        message:
+          '펫 아이디 생성 중 오류가 발생했습니다. 나중에 다시 시도해주세요.',
+      },
+      HttpStatus.CONFLICT,
+    );
+  }
+
+  async createPet(
+    inputPetData: { ownerId: string } & CreatePetDto,
+  ): Promise<{ petId: string }> {
+    const petId = await this.generateUniquePetId();
+    const petData = plainToInstance(PetEntity, { ...inputPetData, petId });
+
+    try {
+      await this.petRepository.insert(petData);
+
+      if (inputPetData.father) {
+        await this.parentService.createParent(petId, inputPetData.father);
+      }
+      if (inputPetData.mother) {
+        await this.parentService.createParent(petId, inputPetData.mother);
+      }
+
+      return { petId };
+    } catch (error) {
+      if (isMySQLError(error) && error.code === 'ER_DUP_ENTRY') {
+        if (error.message.includes('UNIQUE_OWNER_PET_NAME')) {
+          throw new HttpException(
+            {
+              statusCode: HttpStatus.CONFLICT,
+              message: '이미 존재하는 펫 이름입니다.',
+            },
+            HttpStatus.CONFLICT,
+          );
+        }
+      }
+      throw error;
     }
   }
 

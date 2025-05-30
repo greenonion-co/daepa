@@ -3,8 +3,6 @@ import {
   Controller,
   Delete,
   Get,
-  HttpException,
-  HttpStatus,
   Param,
   Patch,
   Post,
@@ -13,11 +11,9 @@ import {
 } from '@nestjs/common';
 import { CreatePetDto, PetDto, PetSummaryDto, UpdatePetDto } from './pet.dto';
 import { PetService } from './pet.service';
-import { nanoid } from 'nanoid';
 import { PageOptionsDto, PageDto, PageMetaDto } from 'src/common/page.dto';
 import { ApiExtraModels, ApiResponse, getSchemaPath } from '@nestjs/swagger';
 import { ExcludeNilInterceptor } from 'src/interceptors/exclude-nil';
-import { isMySQLError } from 'src/common/error';
 
 @Controller('/v1/pet')
 @UseInterceptors(ExcludeNilInterceptor)
@@ -61,47 +57,16 @@ export class PetController {
   async create(@Body() createPetDto: CreatePetDto) {
     // TODO: userId를 ownerId로 사용
     const tempOwnerId = 'ADMIN';
-    const maxRetries = 3;
-    let attempts = 0;
 
-    while (attempts < maxRetries) {
-      const petId = nanoid(8);
-      try {
-        await this.petService.createPet({
-          ...createPetDto,
-          petId,
-          ownerId: tempOwnerId,
-        });
-        return {
-          success: true,
-          message: '펫 등록이 완료되었습니다. petId: ' + petId,
-        };
-      } catch (error: unknown) {
-        if (isMySQLError(error)) {
-          if (error.code === 'ER_DUP_ENTRY') {
-            const response = {
-              statusCode: HttpStatus.CONFLICT,
-              message: '',
-            };
-            if (error.message.includes('UNIQUE_OWNER_PET_NAME')) {
-              response.message = '이미 존재하는 펫 이름입니다.';
-              throw new HttpException(response, HttpStatus.CONFLICT);
-            }
-            if (error.message.includes('UNIQUE_PET_ID')) {
-              attempts++;
-              if (attempts >= maxRetries) {
-                response.message =
-                  '펫 아이디 생성 중 오류가 발생했습니다. 나중에 다시 시도해주세요.';
-                throw new HttpException(response, HttpStatus.CONFLICT);
-              }
-              continue;
-            }
-          }
-          throw error;
-        }
-        throw error;
-      }
-    }
+    const { petId } = await this.petService.createPet({
+      ...createPetDto,
+      ownerId: tempOwnerId,
+    });
+
+    return {
+      success: true,
+      message: '펫 등록이 완료되었습니다. petId: ' + petId,
+    };
   }
 
   @Patch(':petId')
