@@ -9,6 +9,7 @@
 export * from "./brPetControllerFindAll200";
 export * from "./brPetControllerFindAllOrder";
 export * from "./brPetControllerFindAllParams";
+export * from "./createEggDto";
 export * from "./createParentDto";
 export * from "./createParentDtoRole";
 export * from "./createPetDto";
@@ -60,3 +61,7 @@ export * from "./userNotificationDto";
 export * from "./userNotificationDtoDetailJson";
 export * from "./userNotificationDtoStatus";
 export * from "./userNotificationDtoType";
+export * from "./brEggControllerFindAll200";
+export * from "./brEggControllerFindAllOrder";
+export * from "./brEggControllerFindAllParams";
+export * from "./eggDto";

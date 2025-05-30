@@ -38,7 +38,7 @@ export class PetEntity {
   traits?: string[]; // 형질
 
   @Column({ nullable: true })
-  birthdate?: string; // 생년월일
+  birthdate?: number; // 생년월일 (yyyyMMdd)
 
   @Column({ nullable: true })
   growth?: string; // 성장단계

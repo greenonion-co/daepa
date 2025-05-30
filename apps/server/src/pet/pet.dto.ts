@@ -68,7 +68,7 @@ export class PetBaseDto {
   })
   @IsOptional()
   @IsDateString()
-  birthdate?: string;
+  birthdate?: number;
 
   @ApiProperty({
     description: '펫 성장단계',

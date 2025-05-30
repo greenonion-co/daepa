@@ -16,8 +16,18 @@ import { ParentEntity } from './parent/parent.entity';
 import { ParentService } from './parent/parent.service';
 import { UserEntity } from './user/user.entity';
 import { UserService } from './user/user.service';
+import { EggEntity } from './egg/egg.entity';
+import { EggController } from './egg/egg.controller';
+import { EggService } from './egg/egg.service';
+import { BrEggController } from './egg/br/br.egg.controller';
 
-const ENTITIES = [UserEntity, PetEntity, UserNotificationEntity, ParentEntity];
+const ENTITIES = [
+  UserEntity,
+  PetEntity,
+  UserNotificationEntity,
+  ParentEntity,
+  EggEntity,
+];
 
 @Module({
   imports: [
@@ -43,6 +53,8 @@ const ENTITIES = [UserEntity, PetEntity, UserNotificationEntity, ParentEntity];
     ParentController,
     UserNotificationController,
     BrPetController,
+    EggController,
+    BrEggController,
   ],
   providers: [
     AppService,
@@ -50,6 +62,7 @@ const ENTITIES = [UserEntity, PetEntity, UserNotificationEntity, ParentEntity];
     PetService,
     UserNotificationService,
     ParentService,
+    EggService,
   ],
 })
 export class AppModule {

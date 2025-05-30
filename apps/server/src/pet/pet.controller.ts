@@ -17,26 +17,7 @@ import { nanoid } from 'nanoid';
 import { PageOptionsDto, PageDto, PageMetaDto } from 'src/common/page.dto';
 import { ApiExtraModels, ApiResponse, getSchemaPath } from '@nestjs/swagger';
 import { ExcludeNilInterceptor } from 'src/interceptors/exclude-nil';
-
-class MySQLError extends Error {
-  code: string;
-
-  constructor(message: string, code: string) {
-    super(message);
-    this.code = code;
-  }
-}
-
-function isMySQLError(error: unknown): error is MySQLError {
-  return (
-    error instanceof MySQLError ||
-    (error instanceof Error &&
-      typeof error === 'object' &&
-      error !== null &&
-      'code' in error &&
-      typeof error.code === 'string')
-  );
-}
+import { isMySQLError } from 'src/common/error';
 
 @Controller('/v1/pet')
 @UseInterceptors(ExcludeNilInterceptor)
