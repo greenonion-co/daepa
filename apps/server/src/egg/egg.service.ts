@@ -127,6 +127,10 @@ export class EggService {
     }
   }
 
+  async deleteEgg(eggId: string): Promise<void> {
+    await this.eggRepository.update({ egg_id: eggId }, { is_deleted: true });
+  }
+
   private async getParent(
     eggId: string,
     role: PARENT_ROLE,

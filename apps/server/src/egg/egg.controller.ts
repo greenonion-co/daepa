@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpException,
   HttpStatus,
@@ -88,6 +89,15 @@ export class EggController {
     return {
       success: true,
       message: '알 수정이 완료되었습니다. eggId: ' + eggId,
+    };
+  }
+
+  @Delete(':eggId')
+  async delete(@Param('eggId') eggId: string) {
+    await this.eggService.deleteEgg(eggId);
+    return {
+      success: true,
+      message: '알 삭제가 완료되었습니다. eggId: ' + eggId,
     };
   }
 }

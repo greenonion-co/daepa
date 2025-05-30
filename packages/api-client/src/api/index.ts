@@ -169,6 +169,13 @@ export const eggControllerUpdate = <TData = AxiosResponse<void>>(
   return axios.patch(`http://localhost:4000/api/v1/egg/${eggId}`, updateEggDto, options);
 };
 
+export const eggControllerDelete = <TData = AxiosResponse<void>>(
+  eggId: string,
+  options?: AxiosRequestConfig,
+): Promise<TData> => {
+  return axios.delete(`http://localhost:4000/api/v1/egg/${eggId}`, options);
+};
+
 export const eggControllerCreate = <TData = AxiosResponse<void>>(
   createEggDto: CreateEggDto,
   options?: AxiosRequestConfig,
@@ -202,6 +209,7 @@ export type UserNotificationControllerUpdateResult = AxiosResponse<void>;
 export type BrPetControllerFindAllResult = AxiosResponse<BrPetControllerFindAll200>;
 export type EggControllerFindOneResult = AxiosResponse<EggDto>;
 export type EggControllerUpdateResult = AxiosResponse<void>;
+export type EggControllerDeleteResult = AxiosResponse<void>;
 export type EggControllerCreateResult = AxiosResponse<void>;
 export type BrEggControllerFindAllResult = AxiosResponse<BrEggControllerFindAll200>;
 
@@ -974,6 +982,20 @@ export const getEggControllerUpdateMockHandler = (
   });
 };
 
+export const getEggControllerDeleteMockHandler = (
+  overrideResponse?:
+    | void
+    | ((info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<void> | void),
+) => {
+  return http.delete("*/api/v1/egg/:eggId", async (info) => {
+    await delay(1000);
+    if (typeof overrideResponse === "function") {
+      await overrideResponse(info);
+    }
+    return new HttpResponse(null, { status: 200 });
+  });
+};
+
 export const getEggControllerCreateMockHandler = (
   overrideResponse?:
     | void
@@ -1026,6 +1048,7 @@ export const getProjectDaepaAPIMock = () => [
   getBrPetControllerFindAllMockHandler(),
   getEggControllerFindOneMockHandler(),
   getEggControllerUpdateMockHandler(),
+  getEggControllerDeleteMockHandler(),
   getEggControllerCreateMockHandler(),
   getBrEggControllerFindAllMockHandler(),
 ];
