@@ -5,11 +5,12 @@ import {
   HttpException,
   HttpStatus,
   Param,
+  Patch,
   Post,
   UseInterceptors,
 } from '@nestjs/common';
 import { EggService } from './egg.service';
-import { CreateEggDto, EggDto } from './egg.dto';
+import { CreateEggDto, EggDto, UpdateEggDto } from './egg.dto';
 import { nanoid } from 'nanoid';
 import { isMySQLError } from 'src/common/error';
 import { ExcludeNilInterceptor } from 'src/interceptors/exclude-nil';
@@ -76,5 +77,17 @@ export class EggController {
         throw error;
       }
     }
+  }
+
+  @Patch(':eggId')
+  async update(
+    @Param('eggId') eggId: string,
+    @Body() updateEggDto: UpdateEggDto,
+  ) {
+    await this.eggService.updateEgg(eggId, updateEggDto);
+    return {
+      success: true,
+      message: '알 수정이 완료되었습니다. eggId: ' + eggId,
+    };
   }
 }

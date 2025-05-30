@@ -2,7 +2,7 @@ import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { EggEntity } from './egg.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CreateEggDto, EggDto } from './egg.dto';
+import { CreateEggDto, EggDto, UpdateEggDto } from './egg.dto';
 import { instanceToPlain, plainToInstance } from 'class-transformer';
 import { ParentService } from 'src/parent/parent.service';
 import { PageDto, PageMetaDto, PageOptionsDto } from 'src/common/page.dto';
@@ -112,6 +112,19 @@ export class EggService {
 
     const eggDto = plainToInstance(EggDto, egg);
     return eggDto;
+  }
+
+  async updateEgg(eggId: string, updateEggDto: UpdateEggDto): Promise<void> {
+    const { father, mother, ...updateData } = updateEggDto;
+
+    await this.eggRepository.update({ egg_id: eggId }, updateData);
+
+    if (father) {
+      await this.parentService.createParent(eggId, father);
+    }
+    if (mother) {
+      await this.parentService.createParent(eggId, mother);
+    }
   }
 
   private async getParent(
