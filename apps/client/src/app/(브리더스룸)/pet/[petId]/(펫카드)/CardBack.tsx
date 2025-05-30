@@ -28,7 +28,7 @@ interface CardBackProps {
 }
 
 const CardBack = ({ pet }: CardBackProps) => {
-  const { formData, errors, setFormData } = useFormStore();
+  const { formData, errors, setFormData, setPage } = useFormStore();
   const { selectedParent, setSelectedParent } = useParentLinkStore();
 
   const [isEditing, setIsEditing] = useState(false);
@@ -86,7 +86,8 @@ const CardBack = ({ pet }: CardBackProps) => {
 
   useEffect(() => {
     setFormData(pet);
-  }, [pet, setFormData]);
+    setPage("detail");
+  }, [pet, setFormData, setPage]);
 
   const visibleFields = [
     ...[...FORM_STEPS].reverse(),

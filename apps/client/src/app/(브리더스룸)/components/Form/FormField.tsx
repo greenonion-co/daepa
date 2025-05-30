@@ -46,7 +46,7 @@ export const FormField = ({
     value: PetSummaryDto & { message: string },
   ) => {
     handleChange({ type, value });
-    toast.success("부모 선택 해제가 완료되었습니다.");
+    toast.success("부모 선택이 완료되었습니다.");
   };
 
   const handleUnlink = (type: "father" | "mother") => {

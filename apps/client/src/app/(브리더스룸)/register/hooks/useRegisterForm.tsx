@@ -17,6 +17,7 @@ import { useMutation } from "@tanstack/react-query";
 import Dialog from "../../components/Form/Dialog";
 import { toast } from "sonner";
 import { AxiosError } from "axios";
+import { formatDateToYYYYMMDD } from "@/lib/utils";
 
 type SELECTOR_TYPE = "species" | "growth" | "sex";
 
@@ -78,10 +79,11 @@ export const useRegisterForm = () => {
           }
         }
 
-        const { father, mother, photo, weight, ...rest } = transformedFormData;
+        const { birthdate, father, mother, photo, weight, ...rest } = transformedFormData;
 
         const requestData: CreatePetDto = {
           ...rest,
+          birthdate: formatDateToYYYYMMDD(birthdate ?? ""),
           ...(weight && { weight: Number(weight) }),
           ...(father?.petId && {
             father: {
@@ -121,7 +123,7 @@ export const useRegisterForm = () => {
       }
 
       if (step === FORM_STEPS.length && validateStep(newFormData)) {
-        router.push("/register/2?from=register");
+        router.push("/register/2");
         return;
       }
 
@@ -159,11 +161,11 @@ export const useRegisterForm = () => {
       const newFormData = { ...formData, [type]: value };
       setFormData(newFormData);
 
-      if (Number(funnel) === REGISTER_PAGE.FIRST) {
+      if (Number(funnel) === REGISTER_PAGE.FIRST && step <= FORM_STEPS.length - 1) {
         goNext(newFormData);
       }
     },
-    [formData, funnel, goNext, setFormData],
+    [formData, funnel, goNext, setFormData, step],
   );
 
   const getSelectList = useCallback(

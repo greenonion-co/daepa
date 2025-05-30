@@ -67,7 +67,7 @@ export class PetBaseDto {
     required: false,
   })
   @IsOptional()
-  @IsDateString()
+  @IsNumber()
   birthdate?: number;
 
   @ApiProperty({

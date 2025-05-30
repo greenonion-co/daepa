@@ -31,3 +31,7 @@ export const generateQRCode = async (url: string) => {
     throw err;
   }
 };
+
+export const formatDateToYYYYMMDD = (dateString: string): number => {
+  return Number(dateString.replace(/-/g, ""));
+};
