@@ -14,6 +14,8 @@ export interface CreateParentDto {
   role: CreateParentDtoRole;
   /** 본인 소유 펫 여부 */
   isMyPet?: boolean;
+  /** 알에서 펫 전환 상황인지 여부 */
+  isEggToPet?: boolean;
   /** 부모 관계 요청 메시지 */
   message?: string;
 }

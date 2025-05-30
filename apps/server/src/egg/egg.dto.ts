@@ -2,7 +2,7 @@ import { ApiProperty, OmitType, PartialType } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { IsNumber, IsObject, IsOptional, IsString } from 'class-validator';
 import { CreateParentDto } from 'src/parent/parent.dto';
-import { PetParentDto } from 'src/pet/pet.dto';
+import { CreatePetDto, PetParentDto } from 'src/pet/pet.dto';
 import { UserDto } from 'src/user/user.dto';
 
 export class EggBaseDto {
@@ -142,3 +142,10 @@ export class CreateEggDto extends OmitType(EggBaseDto, [
 }
 
 export class UpdateEggDto extends PartialType(CreateEggDto) {}
+
+export class CreateEggHatchDto extends OmitType(CreatePetDto, [
+  'growth',
+  'sex',
+  'father',
+  'mother',
+] as const) {}

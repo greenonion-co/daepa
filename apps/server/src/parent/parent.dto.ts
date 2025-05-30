@@ -66,6 +66,15 @@ export class CreateParentDto {
   @IsOptional()
   isMyPet?: boolean;
 
+  @ApiProperty({
+    description: '알에서 펫 전환 상황인지 여부',
+    required: false,
+    default: false,
+  })
+  @IsBoolean()
+  @IsOptional()
+  isEggToPet?: boolean;
+
   @ApiProperty({ description: '부모 관계 요청 메시지', required: false })
   @IsString()
   @IsOptional()

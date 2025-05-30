@@ -11,7 +11,12 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { EggService } from './egg.service';
-import { CreateEggDto, EggDto, UpdateEggDto } from './egg.dto';
+import {
+  CreateEggDto,
+  CreateEggHatchDto,
+  EggDto,
+  UpdateEggDto,
+} from './egg.dto';
 import { nanoid } from 'nanoid';
 import { isMySQLError } from 'src/common/error';
 import { ExcludeNilInterceptor } from 'src/interceptors/exclude-nil';
@@ -98,6 +103,23 @@ export class EggController {
     return {
       success: true,
       message: '알 삭제가 완료되었습니다. eggId: ' + eggId,
+    };
+  }
+
+  @Post(':eggId/hatch')
+  async hatch(
+    @Param('eggId') eggId: string,
+    @Body() createEggHatchDto: CreateEggHatchDto,
+  ) {
+    const tempOwnerId = 'ADMIN';
+    const { petId } = await this.eggService.convertEggToPet(
+      eggId,
+      tempOwnerId,
+      createEggHatchDto,
+    );
+    return {
+      success: true,
+      message: '알이 펫으로 전환되었습니다. petId: ' + petId,
     };
   }
 }

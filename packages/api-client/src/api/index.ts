@@ -12,6 +12,7 @@ import type {
   BrEggControllerFindAllParams,
   BrPetControllerFindAllParams,
   CreateEggDto,
+  CreateEggHatchDto,
   CreateParentDto,
   CreatePetDto,
   CreateUserNotificationDto,
@@ -183,6 +184,14 @@ export const eggControllerCreate = <TData = AxiosResponse<void>>(
   return axios.post(`http://localhost:4000/api/v1/egg`, createEggDto, options);
 };
 
+export const eggControllerHatch = <TData = AxiosResponse<void>>(
+  eggId: string,
+  createEggHatchDto: CreateEggHatchDto,
+  options?: AxiosRequestConfig,
+): Promise<TData> => {
+  return axios.post(`http://localhost:4000/api/v1/egg/${eggId}/hatch`, createEggHatchDto, options);
+};
+
 export const brEggControllerFindAll = <TData = AxiosResponse<BrEggControllerFindAll200>>(
   params?: BrEggControllerFindAllParams,
   options?: AxiosRequestConfig,
@@ -211,6 +220,7 @@ export type EggControllerFindOneResult = AxiosResponse<EggDto>;
 export type EggControllerUpdateResult = AxiosResponse<void>;
 export type EggControllerDeleteResult = AxiosResponse<void>;
 export type EggControllerCreateResult = AxiosResponse<void>;
+export type EggControllerHatchResult = AxiosResponse<void>;
 export type BrEggControllerFindAllResult = AxiosResponse<BrEggControllerFindAll200>;
 
 export const getPetControllerFindAllResponseMock = (
@@ -1010,6 +1020,20 @@ export const getEggControllerCreateMockHandler = (
   });
 };
 
+export const getEggControllerHatchMockHandler = (
+  overrideResponse?:
+    | void
+    | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<void> | void),
+) => {
+  return http.post("*/api/v1/egg/:eggId/hatch", async (info) => {
+    await delay(1000);
+    if (typeof overrideResponse === "function") {
+      await overrideResponse(info);
+    }
+    return new HttpResponse(null, { status: 201 });
+  });
+};
+
 export const getBrEggControllerFindAllMockHandler = (
   overrideResponse?:
     | BrEggControllerFindAll200
@@ -1050,5 +1074,6 @@ export const getProjectDaepaAPIMock = () => [
   getEggControllerUpdateMockHandler(),
   getEggControllerDeleteMockHandler(),
   getEggControllerCreateMockHandler(),
+  getEggControllerHatchMockHandler(),
   getBrEggControllerFindAllMockHandler(),
 ];

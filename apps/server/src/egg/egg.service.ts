@@ -2,7 +2,12 @@ import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { EggEntity } from './egg.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CreateEggDto, EggDto, UpdateEggDto } from './egg.dto';
+import {
+  CreateEggDto,
+  CreateEggHatchDto,
+  EggDto,
+  UpdateEggDto,
+} from './egg.dto';
 import { instanceToPlain, plainToInstance } from 'class-transformer';
 import { ParentService } from 'src/parent/parent.service';
 import { PageDto, PageMetaDto, PageOptionsDto } from 'src/common/page.dto';
@@ -111,6 +116,7 @@ export class EggService {
     }
 
     const eggDto = plainToInstance(EggDto, egg);
+
     return eggDto;
   }
 
@@ -129,6 +135,49 @@ export class EggService {
 
   async deleteEgg(eggId: string): Promise<void> {
     await this.eggRepository.update({ egg_id: eggId }, { is_deleted: true });
+  }
+
+  async convertEggToPet(
+    eggId: string,
+    ownerId: string,
+    createEggHatchDto: CreateEggHatchDto,
+  ): Promise<{ petId: string }> {
+    const { father, mother } = await this.parentService.findParents(eggId);
+
+    const { petId } = await this.petService.createPet({
+      ...createEggHatchDto,
+      growth: '베이비',
+      sex: 'N',
+      ownerId,
+    });
+
+    if (father) {
+      await this.parentService.createParent(petId, {
+        parentId: father.parent_id,
+        role: PARENT_ROLE.FATHER,
+        isMyPet: father.is_my_pet,
+        isEggToPet: true,
+      });
+    }
+    if (mother) {
+      await this.parentService.createParent(petId, {
+        parentId: mother.parent_id,
+        role: PARENT_ROLE.MOTHER,
+        isMyPet: mother.is_my_pet,
+        isEggToPet: true,
+      });
+    }
+
+    await this.eggRepository.update(
+      { egg_id: eggId },
+      {
+        pet_id: petId,
+        hatching_date: createEggHatchDto.birthdate,
+        is_deleted: true,
+      },
+    );
+
+    return { petId };
   }
 
   private async getParent(
