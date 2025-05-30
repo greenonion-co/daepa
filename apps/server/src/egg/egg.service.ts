@@ -158,6 +158,7 @@ export class EggService {
         'users',
         'users',
         'users.user_id = eggs.owner_id',
-      );
+      )
+      .where('eggs.is_deleted = :isDeleted', { isDeleted: false });
   }
 }

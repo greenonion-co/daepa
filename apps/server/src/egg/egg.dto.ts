@@ -104,6 +104,9 @@ export class EggDto extends EggBaseDto {
 
   @Exclude()
   declare updatedAt?: Date;
+
+  @Exclude()
+  declare isDeleted?: boolean;
 }
 
 export class CreateEggDto extends OmitType(EggBaseDto, [
