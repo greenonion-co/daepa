@@ -1,4 +1,4 @@
-import { BadgeCheck, Search, X } from "lucide-react";
+import { Search, X } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { overlay } from "overlay-kit";

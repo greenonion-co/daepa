@@ -8,6 +8,7 @@ import { useRegisterForm } from "../../register/hooks/useRegisterForm";
 import { GENDER_KOREAN_INFO, SPECIES_KOREAN_INFO } from "../../constants";
 import { toast } from "sonner";
 import { PetSummaryDto } from "@repo/api-client";
+import { InfoIcon } from "lucide-react";
 interface FormFieldProps {
   label?: string;
   field: FormStep["field"];
@@ -192,8 +193,16 @@ export const FormField = ({
   };
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col">
       {label && <h2 className="text-lg text-gray-500">{label}</h2>}
+      {field?.info ? (
+        <div className="mb-2 flex items-center gap-1">
+          <InfoIcon className="h-3.5 w-3.5 text-green-600" />
+          <p className="text-sm text-green-600">{field.info}</p>
+        </div>
+      ) : (
+        <div className="h-1" />
+      )}
       {renderField()}
     </div>
   );

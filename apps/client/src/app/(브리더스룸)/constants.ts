@@ -1,4 +1,4 @@
-import { Bell, Home, Inbox } from "lucide-react";
+import { Bell, Egg, Home, Inbox } from "lucide-react";
 import { FormStep, SelectorConfig } from "./register/types";
 import { FOOD } from "@/types/pet";
 
@@ -97,6 +97,7 @@ export const OPTION_STEPS: FormStep[] = [
       name: "weight",
       type: "number",
       required: true,
+      unit: "g",
       placeholder: "체중을 입력해주세요",
       validation: (value) => !isNaN(Number(value)) && Number(value) > 0,
     },
@@ -131,6 +132,69 @@ export const OPTION_STEPS: FormStep[] = [
   },
 ];
 
+export const EGG_REGISTER_STEPS: FormStep[] = [
+  {
+    title: "상세 설명",
+    field: {
+      name: "desc",
+      type: "textarea",
+      required: false,
+    },
+  },
+  {
+    title: "이름/관리번호",
+    field: {
+      name: "name",
+      type: "text",
+      required: true,
+      placeholder: "개체 이름/관리번호를 입력해주세요",
+      validation: (value) => value.length > 0,
+    },
+  },
+  {
+    title: "수량",
+    field: {
+      name: "quantity",
+      type: "number",
+      unit: "개",
+      required: true,
+      placeholder: "수량을 입력해주세요",
+      validation: (value) => !isNaN(Number(value)) && Number(value) > 0,
+    },
+  },
+
+  {
+    title: "차수",
+    field: {
+      name: "order",
+      type: "number",
+      unit: "차",
+      required: true,
+      placeholder: "차수를 입력해주세요",
+      validation: (value) => !isNaN(Number(value)) && Number(value) > 0,
+    },
+  },
+  {
+    title: "부모 개체 정보",
+    field: {
+      name: "parents",
+      info: "최소 1개 이상 선택해주세요",
+      type: "parentSearch",
+      required: true,
+      validation: (value) => value.length > 0,
+    },
+  },
+  {
+    title: "해칭일",
+    field: {
+      name: "birthdate",
+      type: "date",
+      required: true,
+      placeholder: "해칭일을 입력해주세요",
+      validation: (value) => value.length > 0,
+    },
+  },
+];
 export const MORPH_LIST_BY_SPECIES: Record<keyof typeof SPECIES_KOREAN_INFO, string[]> = {
   CR: [
     "노멀",
@@ -232,6 +296,11 @@ export const SIDEBAR_ITEMS = [
     title: "마이펫",
     url: "/pet",
     icon: Home,
+  },
+  {
+    title: "알 등록",
+    url: "/register",
+    icon: Egg,
   },
   {
     title: "개체 등록",

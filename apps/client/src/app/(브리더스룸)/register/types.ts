@@ -22,6 +22,8 @@ export type FormStep = {
     name: FieldName;
     type: string;
     required?: boolean;
+    info?: string;
+    unit?: string;
     placeholder?: string;
     validation?: (value: string) => boolean;
   };
