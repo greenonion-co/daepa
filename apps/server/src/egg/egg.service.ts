@@ -80,6 +80,7 @@ export class EggService {
         ...createEggInput,
         name: eggName,
         eggId,
+        clutchOrder: index,
       });
       try {
         await this.eggRepository.insert(eggEntity);
