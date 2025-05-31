@@ -7,15 +7,15 @@
  */
 import type { CreateParentDto } from "./createParentDto";
 
-export interface CreateEggDto {
+export interface UpdateEggDto {
   /** 산란일(yyyyMMdd) */
-  layingDate: number;
+  layingDate?: number;
   /** 차수(클러치) */
   clutch?: number;
   /** 동배 번호(차수 내 구분 - 순서 무관) */
-  clutchOrder: number;
+  clutchOrder?: number;
   /** 알 이름 */
-  name: string;
+  name?: string;
   /** 알 정보 */
   desc?: string;
   /** 아빠 개체 정보 */

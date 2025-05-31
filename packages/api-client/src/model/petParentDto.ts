@@ -12,13 +12,13 @@ import { ParentDtoStatus } from "./parentDtoStatus";
 
 export interface PetParentDto {
   /** 펫 아이디 */
-  petId?: string;
+  petId: string;
   /** 펫 주인 정보 */
-  owner?: UserDto;
+  owner: UserDto;
   /** 펫 이름 */
-  name?: string;
+  name: string;
   /** 펫 종 */
-  species?: PetParentDtoSpecies;
+  species: PetParentDtoSpecies;
   /** 펫 모프 */
   morphs?: string[];
   /** 펫 형질 */

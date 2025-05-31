@@ -131,9 +131,6 @@ export class PetSummaryDto extends PickType(PetBaseDto, [
   'photos',
 ]) {
   @Exclude()
-  declare ownerId: string;
-
-  @Exclude()
   declare birthdate?: string;
 
   @Exclude()
@@ -153,9 +150,43 @@ export class PetSummaryDto extends PickType(PetBaseDto, [
 
   @Exclude()
   declare updatedAt?: Date;
+
+  @Exclude()
+  declare isDeleted?: boolean;
 }
 
 export class PetParentDto extends PartialType(PetSummaryDto) {
+  @ApiProperty({
+    description: '펫 아이디',
+    example: 'XXXXXXXX',
+    required: true,
+  })
+  @IsString()
+  petId: string;
+
+  @ApiProperty({
+    description: '펫 주인 정보',
+    required: true,
+  })
+  @IsObject()
+  owner: UserDto;
+
+  @ApiProperty({
+    description: '펫 이름',
+    example: '대파',
+    required: true,
+  })
+  @IsString()
+  name: string;
+
+  @ApiProperty({
+    description: '펫 종',
+    example: '크레스티드게코',
+    required: true,
+  })
+  @IsEnum(PET_SPECIES)
+  species: keyof typeof PET_SPECIES;
+
   @ApiProperty({
     description: '부모 관계 상태',
   })
@@ -183,9 +214,6 @@ export class PetDto extends PetBaseDto {
   mother?: PetParentDto;
 
   @Exclude()
-  declare ownerId: string;
-
-  @Exclude()
   declare createdAt?: Date;
 
   @Exclude()
@@ -198,9 +226,6 @@ export class CreatePetDto extends OmitType(PetBaseDto, [
 ] as const) {
   @Exclude()
   declare petId: string;
-
-  @Exclude()
-  declare ownerId: string;
 
   @ApiProperty({
     description: '아빠 개체 정보',

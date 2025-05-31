@@ -27,16 +27,16 @@ export class EggEntity {
   owner_id: string;
 
   @Expose({ name: 'layingDate' })
-  @Column({ nullable: true })
-  laying_date?: number; // 산란일
+  @Column()
+  laying_date: number; // 산란일
 
   @Expose({ name: 'clutch' })
   @Column({ type: 'tinyint', nullable: true })
   clutch?: number; // 차수(클러치)
 
   @Expose({ name: 'clutchOrder' })
-  @Column({ nullable: true })
-  clutch_order?: number; // 동배 번호(같은 차수 내 구분)
+  @Column({ type: 'tinyint' })
+  clutch_order: number; // 동배 번호(같은 차수 내 구분)
 
   @Column()
   name: string;
@@ -59,4 +59,8 @@ export class EggEntity {
   @Expose({ name: 'updatedAt' })
   @UpdateDateColumn()
   updated_at: Date;
+
+  @Expose({ name: 'isDeleted' })
+  @Column({ default: false })
+  is_deleted: boolean;
 }

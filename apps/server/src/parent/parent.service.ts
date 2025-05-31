@@ -14,13 +14,14 @@ import {
   UpdateParentDto,
 } from './parent.dto';
 import { instanceToPlain, plainToInstance } from 'class-transformer';
-import { PARENT_STATUS } from './parent.constant';
+import { PARENT_ROLE, PARENT_STATUS } from './parent.constant';
 import { PetService } from 'src/pet/pet.service';
 import {
   USER_NOTIFICATION_STATUS,
   USER_NOTIFICATION_TYPE,
 } from 'src/user_notification/user_notification.constant';
 import { UserNotificationService } from 'src/user_notification/user_notification.service';
+import { EggService } from 'src/egg/egg.service';
 
 @Injectable()
 export class ParentService {
@@ -29,6 +30,8 @@ export class ParentService {
     private readonly parentRepository: Repository<ParentEntity>,
     @Inject(forwardRef(() => PetService))
     private readonly petService: PetService,
+    @Inject(forwardRef(() => EggService))
+    private readonly eggService: EggService,
     private readonly userNotificationService: UserNotificationService,
   ) {}
 
@@ -54,13 +57,37 @@ export class ParentService {
     return plainToInstance(ParentDto, parent);
   }
 
-  async createParent(petId: string, createParentDto: CreateParentDto) {
+  async findParents(petId: string) {
+    const parentEntities = await this.parentRepository.find({
+      where: {
+        pet_id: petId,
+        status: PARENT_STATUS.APPROVED,
+      },
+    });
+
+    return {
+      father: parentEntities.find(
+        (parent) => parent.role === PARENT_ROLE.FATHER,
+      ),
+      mother: parentEntities.find(
+        (parent) => parent.role === PARENT_ROLE.MOTHER,
+      ),
+    };
+  }
+
+  async createParent(
+    petId: string,
+    createParentDto: CreateParentDto,
+    createOptions: {
+      isDirectApprove: boolean; // 부모 요청을 skip하고 바로 관계 생성 시
+    },
+  ) {
     const result = await this.parentRepository.insert({
       pet_id: petId,
       parent_id: createParentDto.parentId,
       role: createParentDto.role,
       is_my_pet: createParentDto.isMyPet ?? false,
-      status: createParentDto.isMyPet
+      status: createOptions.isDirectApprove
         ? PARENT_STATUS.APPROVED
         : PARENT_STATUS.PENDING,
     });
@@ -157,13 +184,17 @@ export class ParentService {
     senderPetId,
     receiverPetId,
     message,
+    isEgg,
   }: {
     relationId: number;
     senderPetId: string;
     receiverPetId: string;
     message?: string;
+    isEgg?: boolean;
   }) {
-    const senderPetSummary = await this.petService.getPetSummary(senderPetId);
+    const senderPetSummary = isEgg
+      ? await this.eggService.getEgg(senderPetId)
+      : await this.petService.getPetSummary(senderPetId);
     if (!senderPetSummary) {
       throw new NotFoundException(
         'Sender pet(id: ' + senderPetId + ') not found',

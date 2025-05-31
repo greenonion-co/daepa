@@ -12,11 +12,13 @@ import type {
   BrEggControllerFindAllParams,
   BrPetControllerFindAllParams,
   CreateEggDto,
+  CreateEggHatchDto,
   CreateParentDto,
   CreatePetDto,
   CreateUserNotificationDto,
   ParentControllerFindParentParams,
   PetControllerFindAllParams,
+  UpdateEggDto,
   UpdateParentDto,
   UpdatePetDto,
   UpdateUserNotificationDto,
@@ -30,6 +32,7 @@ import { HttpResponse, delay, http } from "msw";
 import type {
   BrEggControllerFindAll200,
   BrPetControllerFindAll200,
+  EggDto,
   ParentDto,
   PetControllerFindAll200,
   PetDto,
@@ -152,11 +155,41 @@ export const brPetControllerFindAll = <TData = AxiosResponse<BrPetControllerFind
   });
 };
 
+export const eggControllerFindOne = <TData = AxiosResponse<EggDto>>(
+  eggId: string,
+  options?: AxiosRequestConfig,
+): Promise<TData> => {
+  return axios.get(`http://localhost:4000/api/v1/egg/${eggId}`, options);
+};
+
+export const eggControllerUpdate = <TData = AxiosResponse<void>>(
+  eggId: string,
+  updateEggDto: UpdateEggDto,
+  options?: AxiosRequestConfig,
+): Promise<TData> => {
+  return axios.patch(`http://localhost:4000/api/v1/egg/${eggId}`, updateEggDto, options);
+};
+
+export const eggControllerDelete = <TData = AxiosResponse<void>>(
+  eggId: string,
+  options?: AxiosRequestConfig,
+): Promise<TData> => {
+  return axios.delete(`http://localhost:4000/api/v1/egg/${eggId}`, options);
+};
+
 export const eggControllerCreate = <TData = AxiosResponse<void>>(
   createEggDto: CreateEggDto,
   options?: AxiosRequestConfig,
 ): Promise<TData> => {
   return axios.post(`http://localhost:4000/api/v1/egg`, createEggDto, options);
+};
+
+export const eggControllerHatch = <TData = AxiosResponse<void>>(
+  eggId: string,
+  createEggHatchDto: CreateEggHatchDto,
+  options?: AxiosRequestConfig,
+): Promise<TData> => {
+  return axios.post(`http://localhost:4000/api/v1/egg/${eggId}/hatch`, createEggHatchDto, options);
 };
 
 export const brEggControllerFindAll = <TData = AxiosResponse<BrEggControllerFindAll200>>(
@@ -183,7 +216,11 @@ export type UserNotificationControllerFindAllResult =
 export type UserNotificationControllerCreateResult = AxiosResponse<void>;
 export type UserNotificationControllerUpdateResult = AxiosResponse<void>;
 export type BrPetControllerFindAllResult = AxiosResponse<BrPetControllerFindAll200>;
+export type EggControllerFindOneResult = AxiosResponse<EggDto>;
+export type EggControllerUpdateResult = AxiosResponse<void>;
+export type EggControllerDeleteResult = AxiosResponse<void>;
 export type EggControllerCreateResult = AxiosResponse<void>;
+export type EggControllerHatchResult = AxiosResponse<void>;
 export type BrEggControllerFindAllResult = AxiosResponse<BrEggControllerFindAll200>;
 
 export const getPetControllerFindAllResponseMock = (
@@ -270,19 +307,16 @@ export const getPetControllerFindOneResponseMock = (
   father: faker.helpers.arrayElement([
     {
       ...{
-        petId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
-        owner: faker.helpers.arrayElement([
-          {
-            ...{
-              userId: faker.string.alpha(20),
-              name: faker.string.alpha(20),
-              role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
-            },
+        petId: faker.string.alpha(20),
+        owner: {
+          ...{
+            userId: faker.string.alpha(20),
+            name: faker.string.alpha(20),
+            role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
           },
-          undefined,
-        ]),
-        name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
-        species: faker.helpers.arrayElement([{}, undefined]),
+        },
+        name: faker.string.alpha(20),
+        species: {},
         morphs: faker.helpers.arrayElement([
           Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
             faker.string.alpha(20),
@@ -304,19 +338,16 @@ export const getPetControllerFindOneResponseMock = (
   mother: faker.helpers.arrayElement([
     {
       ...{
-        petId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
-        owner: faker.helpers.arrayElement([
-          {
-            ...{
-              userId: faker.string.alpha(20),
-              name: faker.string.alpha(20),
-              role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
-            },
+        petId: faker.string.alpha(20),
+        owner: {
+          ...{
+            userId: faker.string.alpha(20),
+            name: faker.string.alpha(20),
+            role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
           },
-          undefined,
-        ]),
-        name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
-        species: faker.helpers.arrayElement([{}, undefined]),
+        },
+        name: faker.string.alpha(20),
+        species: {},
         morphs: faker.helpers.arrayElement([
           Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
             faker.string.alpha(20),
@@ -432,19 +463,16 @@ export const getBrPetControllerFindAllResponseMock = (
     father: faker.helpers.arrayElement([
       {
         ...{
-          petId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
-          owner: faker.helpers.arrayElement([
-            {
-              ...{
-                userId: faker.string.alpha(20),
-                name: faker.string.alpha(20),
-                role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
-              },
+          petId: faker.string.alpha(20),
+          owner: {
+            ...{
+              userId: faker.string.alpha(20),
+              name: faker.string.alpha(20),
+              role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
             },
-            undefined,
-          ]),
-          name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
-          species: faker.helpers.arrayElement([{}, undefined]),
+          },
+          name: faker.string.alpha(20),
+          species: {},
           morphs: faker.helpers.arrayElement([
             Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
               faker.string.alpha(20),
@@ -466,19 +494,16 @@ export const getBrPetControllerFindAllResponseMock = (
     mother: faker.helpers.arrayElement([
       {
         ...{
-          petId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
-          owner: faker.helpers.arrayElement([
-            {
-              ...{
-                userId: faker.string.alpha(20),
-                name: faker.string.alpha(20),
-                role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
-              },
+          petId: faker.string.alpha(20),
+          owner: {
+            ...{
+              userId: faker.string.alpha(20),
+              name: faker.string.alpha(20),
+              role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
             },
-            undefined,
-          ]),
-          name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
-          species: faker.helpers.arrayElement([{}, undefined]),
+          },
+          name: faker.string.alpha(20),
+          species: {},
           morphs: faker.helpers.arrayElement([
             Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
               faker.string.alpha(20),
@@ -509,6 +534,95 @@ export const getBrPetControllerFindAllResponseMock = (
   ...overrideResponse,
 });
 
+export const getEggControllerFindOneResponseMock = (
+  overrideResponse: Partial<EggDto> = {},
+): EggDto => ({
+  eggId: faker.string.alpha(20),
+  owner: {
+    ...{
+      userId: faker.string.alpha(20),
+      name: faker.string.alpha(20),
+      role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
+    },
+  },
+  layingDate: faker.number.int({ min: undefined, max: undefined }),
+  clutch: faker.helpers.arrayElement([
+    faker.number.int({ min: undefined, max: undefined }),
+    undefined,
+  ]),
+  clutchOrder: faker.number.int({ min: undefined, max: undefined }),
+  name: faker.string.alpha(20),
+  desc: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+  hatchingDate: faker.helpers.arrayElement([
+    faker.number.int({ min: undefined, max: undefined }),
+    undefined,
+  ]),
+  petId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+  father: faker.helpers.arrayElement([
+    {
+      ...{
+        petId: faker.string.alpha(20),
+        owner: {
+          ...{
+            userId: faker.string.alpha(20),
+            name: faker.string.alpha(20),
+            role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
+          },
+        },
+        name: faker.string.alpha(20),
+        species: {},
+        morphs: faker.helpers.arrayElement([
+          Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+            faker.string.alpha(20),
+          ),
+          undefined,
+        ]),
+        traits: faker.helpers.arrayElement([
+          Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+            faker.string.alpha(20),
+          ),
+          undefined,
+        ]),
+        sex: faker.helpers.arrayElement([{}, undefined]),
+        status: faker.string.alpha(20),
+      },
+    },
+    undefined,
+  ]),
+  mother: faker.helpers.arrayElement([
+    {
+      ...{
+        petId: faker.string.alpha(20),
+        owner: {
+          ...{
+            userId: faker.string.alpha(20),
+            name: faker.string.alpha(20),
+            role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
+          },
+        },
+        name: faker.string.alpha(20),
+        species: {},
+        morphs: faker.helpers.arrayElement([
+          Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+            faker.string.alpha(20),
+          ),
+          undefined,
+        ]),
+        traits: faker.helpers.arrayElement([
+          Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+            faker.string.alpha(20),
+          ),
+          undefined,
+        ]),
+        sex: faker.helpers.arrayElement([{}, undefined]),
+        status: faker.string.alpha(20),
+      },
+    },
+    undefined,
+  ]),
+  ...overrideResponse,
+});
+
 export const getBrEggControllerFindAllResponseMock = (
   overrideResponse: Partial<BrEggControllerFindAll200> = {},
 ): BrEggControllerFindAll200 => ({
@@ -521,18 +635,12 @@ export const getBrEggControllerFindAllResponseMock = (
         role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
       },
     },
-    layingDate: faker.helpers.arrayElement([
-      faker.number.int({ min: undefined, max: undefined }),
-      undefined,
-    ]),
+    layingDate: faker.number.int({ min: undefined, max: undefined }),
     clutch: faker.helpers.arrayElement([
       faker.number.int({ min: undefined, max: undefined }),
       undefined,
     ]),
-    clutchOrder: faker.helpers.arrayElement([
-      faker.number.int({ min: undefined, max: undefined }),
-      undefined,
-    ]),
+    clutchOrder: faker.number.int({ min: undefined, max: undefined }),
     name: faker.string.alpha(20),
     desc: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
     hatchingDate: faker.helpers.arrayElement([
@@ -543,19 +651,16 @@ export const getBrEggControllerFindAllResponseMock = (
     father: faker.helpers.arrayElement([
       {
         ...{
-          petId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
-          owner: faker.helpers.arrayElement([
-            {
-              ...{
-                userId: faker.string.alpha(20),
-                name: faker.string.alpha(20),
-                role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
-              },
+          petId: faker.string.alpha(20),
+          owner: {
+            ...{
+              userId: faker.string.alpha(20),
+              name: faker.string.alpha(20),
+              role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
             },
-            undefined,
-          ]),
-          name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
-          species: faker.helpers.arrayElement([{}, undefined]),
+          },
+          name: faker.string.alpha(20),
+          species: {},
           morphs: faker.helpers.arrayElement([
             Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
               faker.string.alpha(20),
@@ -577,19 +682,16 @@ export const getBrEggControllerFindAllResponseMock = (
     mother: faker.helpers.arrayElement([
       {
         ...{
-          petId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
-          owner: faker.helpers.arrayElement([
-            {
-              ...{
-                userId: faker.string.alpha(20),
-                name: faker.string.alpha(20),
-                role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
-              },
+          petId: faker.string.alpha(20),
+          owner: {
+            ...{
+              userId: faker.string.alpha(20),
+              name: faker.string.alpha(20),
+              role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
             },
-            undefined,
-          ]),
-          name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
-          species: faker.helpers.arrayElement([{}, undefined]),
+          },
+          name: faker.string.alpha(20),
+          species: {},
           morphs: faker.helpers.arrayElement([
             Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
               faker.string.alpha(20),
@@ -843,12 +945,75 @@ export const getBrPetControllerFindAllMockHandler = (
   });
 };
 
+export const getEggControllerFindOneMockHandler = (
+  overrideResponse?:
+    | EggDto
+    | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<EggDto> | EggDto),
+) => {
+  return http.get("*/api/v1/egg/:eggId", async (info) => {
+    await delay(1000);
+
+    return new HttpResponse(
+      JSON.stringify(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getEggControllerFindOneResponseMock(),
+      ),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+  });
+};
+
+export const getEggControllerUpdateMockHandler = (
+  overrideResponse?:
+    | void
+    | ((info: Parameters<Parameters<typeof http.patch>[1]>[0]) => Promise<void> | void),
+) => {
+  return http.patch("*/api/v1/egg/:eggId", async (info) => {
+    await delay(1000);
+    if (typeof overrideResponse === "function") {
+      await overrideResponse(info);
+    }
+    return new HttpResponse(null, { status: 200 });
+  });
+};
+
+export const getEggControllerDeleteMockHandler = (
+  overrideResponse?:
+    | void
+    | ((info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<void> | void),
+) => {
+  return http.delete("*/api/v1/egg/:eggId", async (info) => {
+    await delay(1000);
+    if (typeof overrideResponse === "function") {
+      await overrideResponse(info);
+    }
+    return new HttpResponse(null, { status: 200 });
+  });
+};
+
 export const getEggControllerCreateMockHandler = (
   overrideResponse?:
     | void
     | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<void> | void),
 ) => {
   return http.post("*/api/v1/egg", async (info) => {
+    await delay(1000);
+    if (typeof overrideResponse === "function") {
+      await overrideResponse(info);
+    }
+    return new HttpResponse(null, { status: 201 });
+  });
+};
+
+export const getEggControllerHatchMockHandler = (
+  overrideResponse?:
+    | void
+    | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<void> | void),
+) => {
+  return http.post("*/api/v1/egg/:eggId/hatch", async (info) => {
     await delay(1000);
     if (typeof overrideResponse === "function") {
       await overrideResponse(info);
@@ -893,6 +1058,10 @@ export const getProjectDaepaAPIMock = () => [
   getUserNotificationControllerCreateMockHandler(),
   getUserNotificationControllerUpdateMockHandler(),
   getBrPetControllerFindAllMockHandler(),
+  getEggControllerFindOneMockHandler(),
+  getEggControllerUpdateMockHandler(),
+  getEggControllerDeleteMockHandler(),
   getEggControllerCreateMockHandler(),
+  getEggControllerHatchMockHandler(),
   getBrEggControllerFindAllMockHandler(),
 ];
