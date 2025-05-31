@@ -13,7 +13,7 @@ interface FormFieldProps {
   label?: string;
   field: FormStep["field"];
   formData: FormData;
-  errors: FormErrors;
+  errors?: FormErrors;
   disabled?: boolean;
   handleChange: (value: {
     type: FieldName;
@@ -33,7 +33,7 @@ export const FormField = ({
   const { name, placeholder, type } = field;
   const value = formData[name];
 
-  const error = errors[name];
+  const error = errors?.[name];
   const inputClassName = cn(
     `text-[16px] w-full h-9 pr-1 text-left focus:outline-none focus:ring-0 text-gray-400 dark:text-gray-400
     transition-all duration-300 ease-in-out placeholder:text-gray-400`,

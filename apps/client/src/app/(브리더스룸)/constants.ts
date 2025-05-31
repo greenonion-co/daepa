@@ -1,4 +1,4 @@
-import { Bell, Egg, Home, Inbox } from "lucide-react";
+import { Bell, Bubbles, Egg, Home, Inbox } from "lucide-react";
 import { FormStep, SelectorConfig } from "./register/types";
 import { FOOD } from "@/types/pet";
 
@@ -10,6 +10,16 @@ export const REGISTER_PAGE = {
 };
 
 export const FORM_STEPS: FormStep[] = [
+  {
+    title: "개체 이름/관리번호",
+    field: {
+      name: "name",
+      type: "text",
+      required: true,
+      placeholder: "개체 이름/관리번호를 입력해주세요",
+      validation: (value) => value.length > 0,
+    },
+  },
   {
     title: "성별",
     field: {
@@ -112,16 +122,7 @@ export const OPTION_STEPS: FormStep[] = [
       validation: (value) => value.length > 0,
     },
   },
-  {
-    title: "개체 이름/관리번호",
-    field: {
-      name: "name",
-      type: "text",
-      required: true,
-      placeholder: "개체 이름/관리번호를 입력해주세요",
-      validation: (value) => value.length > 0,
-    },
-  },
+
   {
     title: "상세 설명",
     field: {
@@ -154,7 +155,7 @@ export const EGG_REGISTER_STEPS: FormStep[] = [
   {
     title: "수량",
     field: {
-      name: "quantity",
+      name: "clutchOrder",
       type: "number",
       unit: "개",
       required: true,
@@ -166,10 +167,10 @@ export const EGG_REGISTER_STEPS: FormStep[] = [
   {
     title: "차수",
     field: {
-      name: "order",
+      name: "clutch",
       type: "number",
       unit: "차",
-      required: true,
+      required: false,
       placeholder: "차수를 입력해주세요",
       validation: (value) => !isNaN(Number(value)) && Number(value) > 0,
     },
@@ -187,7 +188,7 @@ export const EGG_REGISTER_STEPS: FormStep[] = [
   {
     title: "해칭일",
     field: {
-      name: "birthdate",
+      name: "layingDate",
       type: "date",
       required: true,
       placeholder: "해칭일을 입력해주세요",
@@ -312,11 +313,11 @@ export const SIDEBAR_ITEMS = [
     url: "/noti",
     icon: Bell,
   },
-  // {
-  //   title: "해칭룸",
-  //   url: "/hatching",
-  //   icon: Egg,
-  // },
+  {
+    title: "해칭룸",
+    url: "/hatching",
+    icon: Bubbles,
+  },
   // {
   //   title: "메이팅룸",
   //   url: "/mating",
