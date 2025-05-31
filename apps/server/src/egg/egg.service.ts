@@ -1,4 +1,10 @@
-import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import {
+  forwardRef,
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 import { EggEntity } from './egg.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -14,11 +20,15 @@ import { ParentService } from 'src/parent/parent.service';
 import { PageDto, PageMetaDto, PageOptionsDto } from 'src/common/page.dto';
 import { PARENT_ROLE } from 'src/parent/parent.constant';
 import { PetParentDto } from 'src/pet/pet.dto';
-import { ParentDto } from 'src/parent/parent.dto';
+import { CreateParentDto, ParentDto } from 'src/parent/parent.dto';
 import { PetService } from 'src/pet/pet.service';
+import { nanoid } from 'nanoid';
+import { isMySQLError } from 'src/common/error';
 
 @Injectable()
 export class EggService {
+  private readonly MAX_RETRIES = 3;
+
   constructor(
     @InjectRepository(EggEntity)
     private readonly eggRepository: Repository<EggEntity>,
@@ -28,31 +38,85 @@ export class EggService {
     private readonly petService: PetService,
   ) {}
 
-  async createEgg(
-    inputEggData: { eggId: string; ownerId: string } & CreateEggDto,
-  ): Promise<void> {
-    const eggData = plainToInstance(EggEntity, inputEggData);
-    await this.eggRepository.insert(eggData);
+  private async generateUniqueEggId(): Promise<string> {
+    let attempts = 0;
+    while (attempts < this.MAX_RETRIES) {
+      const eggId = nanoid(8);
+      const existingEgg = await this.eggRepository.findOne({
+        where: { egg_id: eggId },
+      });
+      if (!existingEgg) {
+        return eggId;
+      }
+      attempts++;
+    }
+    throw new HttpException(
+      {
+        statusCode: HttpStatus.CONFLICT,
+        message:
+          '알 아이디 생성 중 오류가 발생했습니다. 나중에 다시 시도해주세요.',
+      },
+      HttpStatus.CONFLICT,
+    );
+  }
 
-    // TODO: is_egg = true
-    if (inputEggData.father) {
-      await this.parentService.createParent(
-        inputEggData.eggId,
-        inputEggData.father,
-        {
-          isDirectApprove: !!inputEggData.father.isMyPet,
-        },
-      );
+  async createEgg(
+    inputEggData: { ownerId: string } & CreateEggDto,
+  ): Promise<{ eggId: string }[]> {
+    const { clutchCount, ...createEggInput } = inputEggData;
+    const { father, mother, clutch, layingDate } = createEggInput;
+
+    const createdEggs = [] as { eggId: string }[];
+    for (let index = 1; index <= clutchCount; index++) {
+      const eggId = await this.generateUniqueEggId();
+      const eggName = await this.createEggName({
+        father,
+        mother,
+        clutch,
+        clutchOrder: index,
+      });
+
+      const eggEntity = plainToInstance(EggEntity, {
+        ...createEggInput,
+        name: eggName,
+        egg_id: eggId,
+      });
+      try {
+        await this.eggRepository.insert(eggEntity);
+
+        if (father) {
+          await this.parentService.createParent(eggId, father, {
+            isDirectApprove: !!father.isMyPet,
+            isEgg: true,
+          });
+        }
+        if (mother) {
+          await this.parentService.createParent(eggId, mother, {
+            isDirectApprove: !!mother.isMyPet,
+            isEgg: true,
+          });
+        }
+
+        createdEggs.push({ eggId });
+      } catch (error) {
+        if (isMySQLError(error) && error.code === 'ER_DUP_ENTRY') {
+          if (error.message.includes('UNIQUE_CLUTCH')) {
+            throw new HttpException(
+              {
+                statusCode: HttpStatus.CONFLICT,
+                message:
+                  '중복되는 알 정보가 있습니다.' +
+                  `(father: ${father?.parentId}, mother: ${mother?.parentId}, layingDate: ${layingDate}, clutch: ${clutch}, clutchOrder: ${index})`,
+              },
+              HttpStatus.CONFLICT,
+            );
+          }
+        }
+        throw error;
+      }
     }
-    if (inputEggData.mother) {
-      await this.parentService.createParent(
-        inputEggData.eggId,
-        inputEggData.mother,
-        {
-          isDirectApprove: !!inputEggData.mother.isMyPet,
-        },
-      );
-    }
+
+    return createdEggs;
   }
 
   async getEggListFull(
@@ -234,6 +298,35 @@ export class EggService {
       relationId: parentInfo.relationId,
       status: parentInfo.status,
     };
+  }
+
+  private async createEggName({
+    father,
+    mother,
+    clutch,
+    clutchOrder,
+  }: {
+    father?: CreateParentDto;
+    mother?: CreateParentDto;
+    clutch?: number;
+    clutchOrder: number;
+  }) {
+    let fatherName = '@';
+    let motherName = '@';
+    if (father?.parentId) {
+      const petName = await this.petService.getPetName(father.parentId);
+      if (petName) {
+        fatherName = petName;
+      }
+    }
+    if (mother?.parentId) {
+      const petName = await this.petService.getPetName(mother.parentId);
+      if (petName) {
+        motherName = petName;
+      }
+    }
+
+    return `${fatherName}x${motherName}(${clutch ?? '@'}-${clutchOrder})`;
   }
 
   private createEggWithOwnerQueryBuilder() {
