@@ -79,7 +79,7 @@ export class EggService {
       const eggEntity = plainToInstance(EggEntity, {
         ...createEggInput,
         name: eggName,
-        egg_id: eggId,
+        eggId,
       });
       try {
         await this.eggRepository.insert(eggEntity);
