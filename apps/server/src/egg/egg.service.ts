@@ -38,12 +38,18 @@ export class EggService {
       await this.parentService.createParent(
         inputEggData.eggId,
         inputEggData.father,
+        {
+          isDirectApprove: !!inputEggData.father.isMyPet,
+        },
       );
     }
     if (inputEggData.mother) {
       await this.parentService.createParent(
         inputEggData.eggId,
         inputEggData.mother,
+        {
+          isDirectApprove: !!inputEggData.mother.isMyPet,
+        },
       );
     }
   }
@@ -126,10 +132,14 @@ export class EggService {
     await this.eggRepository.update({ egg_id: eggId }, updateData);
 
     if (father) {
-      await this.parentService.createParent(eggId, father);
+      await this.parentService.createParent(eggId, father, {
+        isDirectApprove: !!father.isMyPet,
+      });
     }
     if (mother) {
-      await this.parentService.createParent(eggId, mother);
+      await this.parentService.createParent(eggId, mother, {
+        isDirectApprove: !!mother.isMyPet,
+      });
     }
   }
 
@@ -152,20 +162,30 @@ export class EggService {
     });
 
     if (father) {
-      await this.parentService.createParent(petId, {
-        parentId: father.parent_id,
-        role: PARENT_ROLE.FATHER,
-        isMyPet: father.is_my_pet,
-        isEggToPet: true,
-      });
+      await this.parentService.createParent(
+        petId,
+        {
+          parentId: father.parent_id,
+          role: PARENT_ROLE.FATHER,
+          isMyPet: father.is_my_pet,
+        },
+        {
+          isDirectApprove: true,
+        },
+      );
     }
     if (mother) {
-      await this.parentService.createParent(petId, {
-        parentId: mother.parent_id,
-        role: PARENT_ROLE.MOTHER,
-        isMyPet: mother.is_my_pet,
-        isEggToPet: true,
-      });
+      await this.parentService.createParent(
+        petId,
+        {
+          parentId: mother.parent_id,
+          role: PARENT_ROLE.MOTHER,
+          isMyPet: mother.is_my_pet,
+        },
+        {
+          isDirectApprove: true,
+        },
+      );
     }
 
     await this.eggRepository.update(

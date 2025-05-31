@@ -72,16 +72,21 @@ export class ParentService {
     };
   }
 
-  async createParent(petId: string, createParentDto: CreateParentDto) {
+  async createParent(
+    petId: string,
+    createParentDto: CreateParentDto,
+    createOptions: {
+      isDirectApprove: boolean; // 부모 요청을 skip하고 바로 관계 생성 시
+    },
+  ) {
     const result = await this.parentRepository.insert({
       pet_id: petId,
       parent_id: createParentDto.parentId,
       role: createParentDto.role,
       is_my_pet: createParentDto.isMyPet ?? false,
-      status:
-        createParentDto.isMyPet || createParentDto.isEggToPet
-          ? PARENT_STATUS.APPROVED
-          : PARENT_STATUS.PENDING,
+      status: createOptions.isDirectApprove
+        ? PARENT_STATUS.APPROVED
+        : PARENT_STATUS.PENDING,
     });
 
     if (!createParentDto.isMyPet) {

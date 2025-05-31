@@ -61,10 +61,14 @@ export class PetService {
       await this.petRepository.insert(petData);
 
       if (inputPetData.father) {
-        await this.parentService.createParent(petId, inputPetData.father);
+        await this.parentService.createParent(petId, inputPetData.father, {
+          isDirectApprove: !!inputPetData.father.isMyPet,
+        });
       }
       if (inputPetData.mother) {
-        await this.parentService.createParent(petId, inputPetData.mother);
+        await this.parentService.createParent(petId, inputPetData.mother, {
+          isDirectApprove: !!inputPetData.mother.isMyPet,
+        });
       }
 
       return { petId };
@@ -171,10 +175,14 @@ export class PetService {
     await this.petRepository.update({ pet_id: petId }, updateData);
 
     if (father) {
-      await this.parentService.createParent(petId, father);
+      await this.parentService.createParent(petId, father, {
+        isDirectApprove: !!father.isMyPet,
+      });
     }
     if (mother) {
-      await this.parentService.createParent(petId, mother);
+      await this.parentService.createParent(petId, mother, {
+        isDirectApprove: !!mother.isMyPet,
+      });
     }
   }
 

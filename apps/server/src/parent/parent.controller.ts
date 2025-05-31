@@ -40,7 +40,9 @@ export class ParentController {
     @Param('petId') petId: string,
     @Body() createParentDto: CreateParentDto,
   ) {
-    await this.parentService.createParent(petId, createParentDto);
+    await this.parentService.createParent(petId, createParentDto, {
+      isDirectApprove: !!createParentDto.isMyPet,
+    });
     return {
       success: true,
       message: '부모 관계가 정상적으로 생성되었습니다.',
