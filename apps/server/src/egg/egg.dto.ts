@@ -44,7 +44,7 @@ export class EggBaseDto {
 
   @ApiProperty({
     description: '알 이름',
-    example: '대파아빠_대파엄마_1',
+    example: '대파아빠x대파엄마(1-1)',
   })
   @IsString()
   name: string;
@@ -131,6 +131,7 @@ export class EggDto extends EggBaseDto {
 
 export class CreateEggDto extends OmitType(EggBaseDto, [
   'eggId',
+  'name',
   'owner',
   'hatchingDate',
   'petId',

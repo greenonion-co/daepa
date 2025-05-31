@@ -79,7 +79,8 @@ export class ParentService {
     petId: string,
     createParentDto: CreateParentDto,
     createOptions: {
-      isDirectApprove: boolean; // 부모 요청을 skip하고 바로 관계 생성 시
+      isEgg?: boolean;
+      isDirectApprove?: boolean; // 부모 요청을 skip하고 바로 관계 생성 시
     },
   ) {
     const result = await this.parentRepository.insert({
@@ -98,6 +99,7 @@ export class ParentService {
         senderPetId: petId,
         receiverPetId: createParentDto.parentId,
         message: createParentDto.message,
+        isEgg: createOptions.isEgg,
       });
     }
   }

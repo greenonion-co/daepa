@@ -169,6 +169,17 @@ export class PetService {
     return petDto;
   }
 
+  async getPetName(petId: string): Promise<string | null> {
+    // TODO: hidden 펫 제외
+    const result = await this.petRepository
+      .createQueryBuilder('pets')
+      .select('pets.name')
+      .where('pets.pet_id = :petId', { petId })
+      .getOne();
+
+    return result?.name ?? null;
+  }
+
   async updatePet(petId: string, updatePetDto: UpdatePetDto): Promise<void> {
     const { father, mother, ...updateData } = updatePetDto;
 

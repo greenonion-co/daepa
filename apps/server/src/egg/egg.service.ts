@@ -31,16 +31,21 @@ export class EggService {
   async createEgg(
     inputEggData: { eggId: string; ownerId: string } & CreateEggDto,
   ): Promise<void> {
-    const eggData = plainToInstance(EggEntity, inputEggData);
+    const eggName = await this.createEggName(inputEggData);
+
+    const eggData = plainToInstance(EggEntity, {
+      ...inputEggData,
+      name: eggName,
+    });
     await this.eggRepository.insert(eggData);
 
-    // TODO: is_egg = true
     if (inputEggData.father) {
       await this.parentService.createParent(
         inputEggData.eggId,
         inputEggData.father,
         {
           isDirectApprove: !!inputEggData.father.isMyPet,
+          isEgg: true,
         },
       );
     }
@@ -50,6 +55,7 @@ export class EggService {
         inputEggData.mother,
         {
           isDirectApprove: !!inputEggData.mother.isMyPet,
+          isEgg: true,
         },
       );
     }
@@ -234,6 +240,32 @@ export class EggService {
       relationId: parentInfo.relationId,
       status: parentInfo.status,
     };
+  }
+
+  private async createEggName(inputEggData: CreateEggDto) {
+    let fatherName = '@';
+    let motherName = '@';
+    if (inputEggData.father?.parentId) {
+      const petName = await this.petService.getPetName(
+        inputEggData.father.parentId,
+      );
+      if (petName) {
+        fatherName = petName;
+      }
+    }
+    if (inputEggData.mother?.parentId) {
+      const petName = await this.petService.getPetName(
+        inputEggData.mother.parentId,
+      );
+      if (petName) {
+        motherName = petName;
+      }
+    }
+
+    const clutch = inputEggData.clutch ?? '@';
+    const clutchOrder = inputEggData.clutchOrder ?? '@';
+
+    return `${fatherName}x${motherName}(${clutch}-${clutchOrder})`;
   }
 
   private createEggWithOwnerQueryBuilder() {
