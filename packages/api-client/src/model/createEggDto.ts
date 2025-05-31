@@ -9,11 +9,11 @@ import type { CreateParentDto } from "./createParentDto";
 
 export interface CreateEggDto {
   /** 산란일(yyyyMMdd) */
-  layingDate?: number;
+  layingDate: number;
   /** 차수(클러치) */
   clutch?: number;
-  /** 동배 번호(차수 내 순서) */
-  clutchOrder?: number;
+  /** 동배 번호(차수 내 구분 - 순서 무관) */
+  clutchOrder: number;
   /** 알 이름 */
   name: string;
   /** 알 정보 */

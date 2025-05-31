@@ -545,18 +545,12 @@ export const getEggControllerFindOneResponseMock = (
       role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
     },
   },
-  layingDate: faker.helpers.arrayElement([
-    faker.number.int({ min: undefined, max: undefined }),
-    undefined,
-  ]),
+  layingDate: faker.number.int({ min: undefined, max: undefined }),
   clutch: faker.helpers.arrayElement([
     faker.number.int({ min: undefined, max: undefined }),
     undefined,
   ]),
-  clutchOrder: faker.helpers.arrayElement([
-    faker.number.int({ min: undefined, max: undefined }),
-    undefined,
-  ]),
+  clutchOrder: faker.number.int({ min: undefined, max: undefined }),
   name: faker.string.alpha(20),
   desc: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
   hatchingDate: faker.helpers.arrayElement([
@@ -641,18 +635,12 @@ export const getBrEggControllerFindAllResponseMock = (
         role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
       },
     },
-    layingDate: faker.helpers.arrayElement([
-      faker.number.int({ min: undefined, max: undefined }),
-      undefined,
-    ]),
+    layingDate: faker.number.int({ min: undefined, max: undefined }),
     clutch: faker.helpers.arrayElement([
       faker.number.int({ min: undefined, max: undefined }),
       undefined,
     ]),
-    clutchOrder: faker.helpers.arrayElement([
-      faker.number.int({ min: undefined, max: undefined }),
-      undefined,
-    ]),
+    clutchOrder: faker.number.int({ min: undefined, max: undefined }),
     name: faker.string.alpha(20),
     desc: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
     hatchingDate: faker.helpers.arrayElement([

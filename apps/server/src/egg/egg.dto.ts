@@ -22,11 +22,9 @@ export class EggBaseDto {
   @ApiProperty({
     description: '산란일(yyyyMMdd)',
     example: 20250101,
-    required: false,
   })
-  @IsOptional()
   @IsNumber()
-  layingDate?: number;
+  layingDate: number;
 
   @ApiProperty({
     description: '차수(클러치)',
@@ -38,13 +36,11 @@ export class EggBaseDto {
   clutch?: number;
 
   @ApiProperty({
-    description: '동배 번호(차수 내 순서)',
+    description: '동배 번호(차수 내 구분 - 순서 무관)',
     example: 1,
-    required: false,
   })
-  @IsOptional()
   @IsNumber()
-  clutchOrder?: number;
+  clutchOrder: number;
 
   @ApiProperty({
     description: '알 이름',
@@ -86,10 +82,8 @@ export class EggSummaryDto extends PickType(EggBaseDto, [
   'owner',
   'layingDate',
   'clutch',
+  'clutchOrder',
 ]) {
-  @Exclude()
-  declare clutchOrder?: number;
-
   @Exclude()
   declare hatchingDate?: number;
 
