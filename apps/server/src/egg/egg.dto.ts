@@ -133,6 +133,7 @@ export class CreateEggDto extends OmitType(EggBaseDto, [
   'eggId',
   'name',
   'owner',
+  'clutchOrder',
   'hatchingDate',
   'petId',
 ] as const) {
@@ -140,10 +141,19 @@ export class CreateEggDto extends OmitType(EggBaseDto, [
   declare eggId: string;
 
   @Exclude()
+  declare clutchOrder: number;
+
+  @Exclude()
   declare hatchingDate?: number;
 
   @Exclude()
   declare petId?: string;
+
+  @ApiProperty({
+    description: '해당 클러치 알 개수',
+  })
+  @IsNumber()
+  clutchCount: number;
 
   @ApiProperty({
     description: '아빠 개체 정보',
@@ -162,6 +172,8 @@ export class CreateEggDto extends OmitType(EggBaseDto, [
   mother?: CreateParentDto;
 }
 
+// TODO: 알 정보 수정 시, clutchCount는 입력 못하게 해야함
+// clutch를 바꾸었을 때 기존 clutch 정보와 안 겹치나?
 export class UpdateEggDto extends PartialType(CreateEggDto) {}
 
 export class CreateEggHatchDto extends OmitType(CreatePetDto, [

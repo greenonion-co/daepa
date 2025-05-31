@@ -12,12 +12,10 @@ export interface UpdateEggDto {
   layingDate?: number;
   /** 차수(클러치) */
   clutch?: number;
-  /** 동배 번호(차수 내 구분 - 순서 무관) */
-  clutchOrder?: number;
-  /** 알 이름 */
-  name?: string;
   /** 알 정보 */
   desc?: string;
+  /** 해당 클러치 알 개수 */
+  clutchCount?: number;
   /** 아빠 개체 정보 */
   father?: CreateParentDto;
   /** 엄마 개체 정보 */

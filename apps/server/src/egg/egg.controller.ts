@@ -38,14 +38,16 @@ export class EggController {
     // TODO: userId를 ownerId로 사용
     const tempOwnerId = 'ADMIN';
 
-    const { eggId } = await this.eggService.createEgg({
+    const createdEggs = await this.eggService.createEgg({
       ...createEggDto,
       ownerId: tempOwnerId,
     });
 
     return {
       success: true,
-      message: '알 등록이 완료되었습니다. eggId: ' + eggId,
+      message:
+        '알 등록이 완료되었습니다. eggIds: ' +
+        createdEggs.map((egg) => egg.eggId).join(', '),
     };
   }
 
