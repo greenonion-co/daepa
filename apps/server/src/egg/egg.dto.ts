@@ -73,22 +73,13 @@ export class EggBaseDto {
   desc?: string;
 
   @ApiProperty({
-    description: '해칭일(yyyyMMdd)',
-    example: 20250202,
-    required: false,
-  })
-  @IsOptional()
-  @IsNumber()
-  hatchingDate?: number;
-
-  @ApiProperty({
-    description: '펫 아이디',
+    description: '해칭된 펫 아이디',
     example: 'XXXXXXXX',
     required: false,
   })
   @IsOptional()
   @IsString()
-  petId?: string;
+  hatchedPetId?: string;
 }
 
 export class EggSummaryDto extends PickType(EggBaseDto, [
@@ -101,10 +92,7 @@ export class EggSummaryDto extends PickType(EggBaseDto, [
   'clutchOrder',
 ]) {
   @Exclude()
-  declare hatchingDate?: number;
-
-  @Exclude()
-  declare petId?: string;
+  declare hatchedPetId?: string;
 
   @Exclude()
   declare desc?: string;
@@ -150,8 +138,7 @@ export class CreateEggDto extends OmitType(EggBaseDto, [
   'name',
   'owner',
   'clutchOrder',
-  'hatchingDate',
-  'petId',
+  'hatchedPetId',
 ] as const) {
   @Exclude()
   declare eggId: string;
@@ -160,10 +147,7 @@ export class CreateEggDto extends OmitType(EggBaseDto, [
   declare clutchOrder: number;
 
   @Exclude()
-  declare hatchingDate?: number;
-
-  @Exclude()
-  declare petId?: string;
+  declare hatchedPetId?: string;
 
   @ApiProperty({
     description: '해당 클러치 알 개수',
