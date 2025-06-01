@@ -1,6 +1,6 @@
 import { petControllerFindOne } from "@repo/api-client";
 import PetDetail from "./petDetail";
-import { generateQRCode } from "@/lib/utils";
+import { generateQRCode, formatDateToYYYYMMDDString } from "@/lib/utils";
 import { notFound } from "next/navigation";
 interface PetDetailPageProps {
   params: {
@@ -15,9 +15,16 @@ async function PetDetailPage({ params }: PetDetailPageProps) {
     notFound();
   }
 
+  const formattedData = {
+    ...pet.data,
+    ...(pet.data.birthdate && {
+      birthdate: formatDateToYYYYMMDDString(pet.data.birthdate),
+    }),
+  };
+
   const qrCodeDataUrl = await generateQRCode(`${"http://192.168.45.46:3000"}/pet/${params.petId}`);
 
-  return <PetDetail pet={pet.data} qrCodeDataUrl={qrCodeDataUrl} />;
+  return <PetDetail pet={formattedData} qrCodeDataUrl={qrCodeDataUrl} />;
 }
 
 export default PetDetailPage;

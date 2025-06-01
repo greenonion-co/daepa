@@ -23,6 +23,7 @@ import useParentLinkStore from "../../store/parentLink";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import InfoItem from "@/app/(브리더스룸)/components/Form/InfoItem";
+import { cn, formatDateToYYYYMMDD } from "@/lib/utils";
 interface CardBackProps {
   pet: PetSummaryDto;
 }
@@ -48,10 +49,8 @@ const CardBack = ({ pet }: CardBackProps) => {
   });
 
   const { mutate: mutateDeleteParent } = useMutation({
-    mutationFn: ({ parentId }: { parentId: string }) =>
-      parentControllerDeleteParent(pet.petId, {
-        parentId,
-      }),
+    mutationFn: ({ relationId }: { relationId: number }) =>
+      parentControllerDeleteParent(relationId),
   });
 
   const { mutate: mutateRequestParent } = useMutation({
@@ -75,6 +74,7 @@ const CardBack = ({ pet }: CardBackProps) => {
     onSuccess: () => {
       toast.success("부모 연동 요청이 완료되었습니다.");
       const role = selectedParent?.sex?.toString() === "M" ? "father" : "mother";
+      // TODO: isMyPet인 경우에는 status를 '"approved"로 설정
       setFormData((prev) => ({ ...prev, [role]: { ...selectedParent, status: "pending" } }));
       setSelectedParent(null);
     },
@@ -106,15 +106,24 @@ const CardBack = ({ pet }: CardBackProps) => {
 
   const handleSave = async () => {
     try {
-      const { petId, ownerId, father, mother, weight, ...restFormData } = formData;
+      const {
+        petId,
+        birthdate,
+        ownerId,
+        owner,
+        isDeleted,
+        father,
+        mother,
+        weight,
+        ...restFormData
+      } = formData;
 
       if (!petId) return;
 
       const updateData = {
         ...restFormData,
+        ...(birthdate && { birthdate: formatDateToYYYYMMDD(birthdate) }),
         ...(weight && { weight: Number(weight) }),
-        ...(father?.petId && { fatherId: father.petId }),
-        ...(mother?.petId && { motherId: mother.petId }),
       };
 
       await petControllerUpdate(petId, updateData as UpdatePetDto);
@@ -177,7 +186,7 @@ const CardBack = ({ pet }: CardBackProps) => {
   const handleUnlink = (label: "father" | "mother") => {
     try {
       if (!formData[label]?.petId) return;
-      mutateDeleteParent({ parentId: formData[label]?.petId });
+      mutateDeleteParent({ relationId: formData[label]?.relationId });
 
       toast.success("부모 연동 해제가 완료되었습니다.");
       setFormData((prev) => ({ ...prev, [label]: null }));
@@ -233,23 +242,7 @@ const CardBack = ({ pet }: CardBackProps) => {
 
               {/* 수정 버튼 */}
               <div className="sticky top-0 z-10 flex justify-end bg-white p-2 dark:bg-[#18181B]">
-                {isEditing ? (
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      className="h-8 rounded-xl"
-                      onClick={() => {
-                        setFormData(pet);
-                        setIsEditing(false);
-                      }}
-                    >
-                      취소
-                    </Button>
-                    <Button className="h-8 rounded-xl bg-[#1A56B3]" onClick={handleSave}>
-                      저장하기
-                    </Button>
-                  </div>
-                ) : (
+                {!isEditing && (
                   <Button
                     variant="outline"
                     size="icon"
@@ -290,10 +283,33 @@ const CardBack = ({ pet }: CardBackProps) => {
         </div>
 
         {/* 하단 고정 버튼 영역 */}
-        <div className="sticky bottom-0 left-0 right-0 flex justify-between p-4">
-          <Button variant="destructive" size="sm" onClick={handleDelete} className="text-white">
-            삭제하기
-          </Button>
+        <div
+          className={cn(
+            "sticky bottom-0 left-0 flex p-4",
+            isEditing ? "justify-end" : "justify-between",
+          )}
+        >
+          {isEditing ? (
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                className="h-8 rounded-xl"
+                onClick={() => {
+                  setFormData(pet);
+                  setIsEditing(false);
+                }}
+              >
+                취소
+              </Button>
+              <Button className="h-8 rounded-xl bg-[#1A56B3]" onClick={handleSave}>
+                저장하기
+              </Button>
+            </div>
+          ) : (
+            <Button variant="destructive" size="sm" onClick={handleDelete} className="text-white">
+              삭제하기
+            </Button>
+          )}
         </div>
       </div>
     </div>
