@@ -1,12 +1,10 @@
 import {
   IsArray,
-  IsDateString,
   IsString,
   IsEnum,
   IsNumber,
   IsObject,
   IsOptional,
-  IsBoolean,
 } from 'class-validator';
 import { PET_SEX, PET_SPECIES } from './pet.constants';
 import { ApiProperty, OmitType, PartialType, PickType } from '@nestjs/swagger';

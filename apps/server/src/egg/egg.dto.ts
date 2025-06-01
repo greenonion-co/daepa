@@ -214,6 +214,7 @@ export class UpdateEggDto extends PartialType(
 }
 
 export class CreateEggHatchDto extends OmitType(CreatePetDto, [
+  'species',
   'growth',
   'sex',
   'father',

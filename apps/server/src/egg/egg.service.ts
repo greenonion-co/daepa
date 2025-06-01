@@ -251,11 +251,20 @@ export class EggService {
   ): Promise<{ petId: string }> {
     const { father, mother } = await this.parentService.findParents(eggId);
 
+    const egg = await this.getEgg(eggId);
+    if (!egg) {
+      throw new HttpException(
+        { statusCode: HttpStatus.NOT_FOUND, message: '알을 찾을 수 없습니다.' },
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
     const { petId } = await this.petService.createPet({
       ...createEggHatchDto,
       growth: '베이비',
       sex: 'N',
       ownerId,
+      species: egg.species,
     });
 
     if (father) {
