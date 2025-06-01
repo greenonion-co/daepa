@@ -219,11 +219,13 @@ export class EggService {
     if (father) {
       await this.parentService.createParent(eggId, father, {
         isDirectApprove: !!father.isMyPet,
+        isEgg: true,
       });
     }
     if (mother) {
       await this.parentService.createParent(eggId, mother, {
         isDirectApprove: !!mother.isMyPet,
+        isEgg: true,
       });
     }
   }

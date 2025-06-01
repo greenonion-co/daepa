@@ -10,3 +10,8 @@ export enum PARENT_STATUS {
   DELETED = 'deleted',
   CANCELLED = 'cancelled',
 }
+
+export enum CHILD_TYPE {
+  EGG = 'egg',
+  PET = 'pet',
+}

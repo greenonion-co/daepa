@@ -7,7 +7,7 @@ import {
   IsString,
 } from 'class-validator';
 import { ApiProperty, PickType } from '@nestjs/swagger';
-import { PARENT_ROLE, PARENT_STATUS } from './parent.constant';
+import { CHILD_TYPE, PARENT_ROLE, PARENT_STATUS } from './parent.constant';
 
 export class ParentDto {
   @ApiProperty({ description: '부모 관계 테이블 row id' })
@@ -76,6 +76,15 @@ export class CreateParentDto {
   @IsString()
   @IsOptional()
   message?: string;
+
+  @ApiProperty({
+    description: '펫인지 알인지 여부',
+    enum: CHILD_TYPE,
+    required: false,
+  })
+  @IsOptional()
+  @IsEnum(CHILD_TYPE)
+  childType?: CHILD_TYPE;
 }
 
 export class UpdateParentDto {
