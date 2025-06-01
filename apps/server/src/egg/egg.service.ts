@@ -211,7 +211,10 @@ export class EggService {
   async updateEgg(eggId: string, updateEggDto: UpdateEggDto): Promise<void> {
     const { father, mother, ...updateData } = updateEggDto;
 
-    await this.eggRepository.update({ egg_id: eggId }, updateData);
+    await this.eggRepository.update(
+      { egg_id: eggId },
+      plainToInstance(EggEntity, updateData),
+    );
 
     if (father) {
       await this.parentService.createParent(eggId, father, {
