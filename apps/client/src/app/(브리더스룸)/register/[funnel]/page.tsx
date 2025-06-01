@@ -9,9 +9,11 @@ import { FormField } from "../../components/Form/FormField";
 
 import FloatingButton from "../../components/FloatingButton";
 import { InfoIcon } from "lucide-react";
+import { useSelect } from "../hooks/useSelect";
 
 export default function RegisterPage({ params }: { params: Promise<{ funnel: string }> }) {
-  const { handleNext, goNext, handleSelect, handleMultipleSelect } = useRegisterForm();
+  const { handleNext, goNext, handleMultipleSelect } = useRegisterForm();
+  const { handleSelect } = useSelect();
   const { formData, step, errors, resetForm, page, setPage } = useFormStore();
   const resolvedParams = use(params);
   const funnel = Number(resolvedParams.funnel);
@@ -34,7 +36,11 @@ export default function RegisterPage({ params }: { params: Promise<{ funnel: str
     if (formData[field.name]) return;
 
     if (field.type === "select") {
-      handleSelect(field.name);
+      handleSelect({
+        type: field.name,
+        value: formData[field.name],
+        handleNext,
+      });
     } else if (field.type === "multipleSelect") {
       handleMultipleSelect(field.name);
     }

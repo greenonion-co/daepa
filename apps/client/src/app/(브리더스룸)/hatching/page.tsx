@@ -73,7 +73,8 @@ const HatchingPage = () => {
       }
       return undefined;
     },
-    select: (data) => data.pages.flatMap((page) => page.data.data),
+    select: (data) =>
+      data.pages.flatMap((page) => page.data.data).filter((item) => !item.hatchedPetId),
   });
 
   return (

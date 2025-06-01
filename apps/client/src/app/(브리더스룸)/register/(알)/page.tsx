@@ -16,8 +16,9 @@ import { Check, InfoIcon } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { AxiosError } from "axios";
-
+import { useRouter } from "next/navigation";
 type FormData = {
+  species: null | string;
   layingDate: string;
   father?: CreateParentDto & { petId: string; name: string };
   mother?: CreateParentDto & { petId: string; name: string };
@@ -27,7 +28,9 @@ type FormData = {
 };
 
 const EggRegisterPage = () => {
+  const router = useRouter();
   const [formData, setFormData] = useState<FormData>({
+    species: null,
     layingDate: "",
     clutchCount: 0,
   });
@@ -39,6 +42,7 @@ const EggRegisterPage = () => {
     mutationFn: (data: CreateEggDto) => eggControllerCreate(data),
     onSuccess: () => {
       toast.success("알 등록이 완료되었습니다.");
+      router.push("/hatching");
     },
     onError: (error: AxiosError<{ message: string }>) => {
       console.error("Failed to create pet:", error);
@@ -60,7 +64,7 @@ const EggRegisterPage = () => {
     const newFormData = { ...formData, [type]: value };
     setFormData(newFormData);
 
-    if (type === "layingDate") {
+    if (["layingDate", "species"].includes(type)) {
       handleNext();
     }
   };
@@ -76,6 +80,7 @@ const EggRegisterPage = () => {
 
     if (step >= EGG_REGISTER_STEPS.length - 1) {
       createEgg({
+        species: formData.species,
         layingDate: formatDateToYYYYMMDD(formData.layingDate ?? ""),
         ...(formData.father?.petId && {
           father: {
@@ -154,14 +159,14 @@ const StepIndicator = ({ steps, formData }: { steps: FormStep[]; formData: FormD
     switch (stepId) {
       case "layingDate":
         return !!formData.layingDate;
+      case "species":
+        return !!formData.species;
       case "parents":
         return !!(formData.father || formData.mother);
       case "clutchCount":
         return !!formData.clutchCount;
       case "clutch":
         return !!formData.clutch;
-      case "name":
-        return !!formData.name;
       case "desc":
         return !!formData.desc;
       default:

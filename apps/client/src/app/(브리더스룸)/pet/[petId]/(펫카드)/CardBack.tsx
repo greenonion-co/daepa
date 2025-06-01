@@ -223,12 +223,14 @@ const CardBack = ({ pet }: CardBackProps) => {
               <ParentLink
                 label="부"
                 data={formData.father}
+                currentPetOwnerId={pet.owner.userId}
                 onSelect={(item) => handleParentSelect("father", item)}
                 onUnlink={() => handleUnlink("father")}
               />
               <ParentLink
                 label="모"
                 data={formData.mother}
+                currentPetOwnerId={pet.owner.userId}
                 onSelect={(item) => handleParentSelect("mother", item)}
                 onUnlink={() => handleUnlink("mother")}
               />
@@ -246,7 +248,7 @@ const CardBack = ({ pet }: CardBackProps) => {
                   <Button
                     variant="outline"
                     size="icon"
-                    className="h-7 w-7"
+                    className="h-6 w-6"
                     onClick={() => {
                       setIsEditing(true);
                     }}

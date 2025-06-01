@@ -1,6 +1,7 @@
 import { Bell, Bubbles, Egg, Home, Inbox } from "lucide-react";
 import { FormStep, SelectorConfig } from "./register/types";
 import { FOOD } from "@/types/pet";
+import { UserNotificationDtoType } from "@repo/api-client";
 
 export const USER_NAME = "낸시";
 
@@ -195,6 +196,16 @@ export const EGG_REGISTER_STEPS: FormStep[] = [
       validation: (value) => value.length > 0,
     },
   },
+  {
+    title: "종",
+    field: {
+      name: "species",
+      type: "select",
+      required: true,
+      placeholder: "종을 선택해주세요",
+      validation: (value) => value.length > 0,
+    },
+  },
 ];
 
 export const EGG_EDIT_STEPS: FormStep[] = [
@@ -208,6 +219,16 @@ export const EGG_EDIT_STEPS: FormStep[] = [
   //     validation: (value) => value.length > 0,
   //   },
   // },
+  {
+    title: "종",
+    field: {
+      name: "species",
+      type: "select",
+      required: true,
+      placeholder: "종을 선택해주세요",
+      validation: (value) => value.length > 0,
+    },
+  },
   {
     title: "해칭일",
     field: {
@@ -398,9 +419,13 @@ export const FOOD_BADGE_TEXT_COLORS: Record<FOOD, string> = {
   "지렙 인섹트": "text-blue-900",
 };
 
-export const NOTIFICATION_TYPE = {
+export const NOTIFICATION_TYPE: Record<UserNotificationDtoType, string> = {
   parent_request: "부모 연동 요청",
-  system: "시스템 알림",
+  parent_accept: "부모 연동 수락",
+  parent_reject: "부모 연동 거절",
+  owner_transfer: "주인 이전",
+  owner_accept: "주인 수락",
+  owner_reject: "주인 거절",
 };
 
 export const STATUS_MAP = {

@@ -11,7 +11,6 @@ import {
 import { useFormStore } from "../store/form";
 import { overlay } from "overlay-kit";
 import MultipleSelector from "../../components/selector/multiple";
-import Selector from "../../components/selector";
 import { CreatePetDto, PetSummaryDto, petControllerCreate } from "@repo/api-client";
 import { useMutation } from "@tanstack/react-query";
 import Dialog from "../../components/Form/Dialog";
@@ -199,40 +198,12 @@ export const useRegisterForm = () => {
     [getSelectList, handleNext, formData],
   );
 
-  const handleSelect = useCallback(
-    (type: FieldName) => {
-      if (type === "species" || type === "growth" || type === "sex") {
-        const config = SELECTOR_CONFIGS[type];
-
-        overlay.open(({ isOpen, close, unmount }) => {
-          return (
-            <Selector
-              isOpen={isOpen}
-              onCloseAction={close}
-              onSelectAction={(value) => {
-                handleNext({ type, value });
-                close();
-              }}
-              selectList={config.selectList}
-              title={config.title}
-              currentValue={formData[type]}
-              type={type}
-              onExit={unmount}
-            />
-          );
-        });
-      }
-    },
-    [formData, handleNext],
-  );
-
   return useMemo(
     () => ({
       handleNext,
       goNext,
-      handleSelect,
       handleMultipleSelect,
     }),
-    [handleNext, goNext, handleSelect, handleMultipleSelect],
+    [handleNext, goNext, handleMultipleSelect],
   );
 };

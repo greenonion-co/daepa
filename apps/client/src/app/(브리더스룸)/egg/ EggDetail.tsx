@@ -1,7 +1,9 @@
 "use client";
 
 import {
+  CreateParentDto,
   eggControllerDelete,
+  eggControllerHatched,
   eggControllerUpdate,
   EggDto,
   parentControllerCreateParent,
@@ -23,7 +25,9 @@ import { EGG_EDIT_STEPS } from "../constants";
 import useParentLinkStore from "../pet/store/parentLink";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { formatDateToYYYYMMDD } from "@/lib/utils";
+import { cn, formatDateToYYYYMMDD } from "@/lib/utils";
+import FloatingButton from "../components/FloatingButton";
+import { AxiosError } from "axios";
 
 type EggDetailDto = Omit<EggDto, "layingDate"> & {
   layingDate: string;
@@ -39,6 +43,24 @@ const EggDetail = ({ egg }: EggDetailProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [isPublic, setIsPublic] = useState(false);
   const { selectedParent, setSelectedParent } = useParentLinkStore();
+
+  const { mutate: mutateHatched } = useMutation({
+    mutationFn: (eggId: string) => eggControllerHatched(eggId),
+    onSuccess: (response) => {
+      if (response?.data?.hatchedPetId) {
+        toast.success("해칭 완료");
+        router.push(`/pet/${response.data.hatchedPetId}`);
+      }
+    },
+    onError: (error: AxiosError<{ message: string }>) => {
+      console.error("Failed to hatch egg:", error);
+      if (error.response?.data?.message) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error("펫 등록에 실패했습니다.");
+      }
+    },
+  });
 
   const { mutate: mutateDeleteEgg } = useMutation({
     mutationFn: (eggId: string) => eggControllerDelete(eggId),
@@ -58,28 +80,17 @@ const EggDetail = ({ egg }: EggDetailProps) => {
   });
 
   const { mutate: mutateRequestParent } = useMutation({
-    mutationFn: ({
-      parentId,
-      role,
-      isMyPet,
-      message,
-    }: {
-      parentId: string;
-      role: "father" | "mother";
-      isMyPet: boolean;
-      message: string;
-    }) =>
+    mutationFn: ({ parentId, role, message }: CreateParentDto) =>
       parentControllerCreateParent(egg.eggId, {
         parentId,
         role,
-        isMyPet,
         message,
         childType: "egg",
       }),
     onSuccess: () => {
       toast.success("부모 연동 요청이 완료되었습니다.");
       const role = selectedParent?.sex?.toString() === "M" ? "father" : "mother";
-      setFormData((prev) => ({ ...prev, [role]: { ...selectedParent, status: "pending" } }));
+      setFormData((prev) => ({ ...prev, [role]: selectedParent }));
       setSelectedParent(null);
     },
     onError: () => {
@@ -120,16 +131,17 @@ const EggDetail = ({ egg }: EggDetailProps) => {
     value: PetParentDto & { message: string },
   ) => {
     try {
+      const isMyPet = value.owner.userId === egg.owner.userId;
       setSelectedParent({
         ...value,
-        status: "pending",
+        isMyPet,
+        status: isMyPet ? "approved" : "pending",
       });
 
       // 부모 연동 요청
       mutateRequestParent({
         parentId: value.petId,
         role,
-        isMyPet: value.owner.userId === egg.owner.userId,
         message: value.message,
       });
     } catch (error) {
@@ -179,15 +191,40 @@ const EggDetail = ({ egg }: EggDetailProps) => {
     setIsPublic(!isPublic);
   };
 
+  const handleHatching = () => {
+    overlay.open(({ isOpen, close, unmount }) => (
+      <Dialog
+        isOpen={isOpen}
+        onCloseAction={close}
+        onConfirmAction={() => {
+          mutateHatched(egg.eggId);
+          close();
+        }}
+        onExit={unmount}
+        title="해칭 안내"
+        description={`정말로 해칭 완료하시겠습니까? \n 해칭 후 복구할 수 없습니다.`}
+      />
+    ));
+  };
+
   return (
-    <div className="mx-auto w-full max-w-[500px] px-4">
+    <div className="mx-auto w-full max-w-[500px] px-2">
       <div className="h-[700px] shrink-0 pt-6">
         <div className="h-full">
-          <div className="px-6 pb-20">
-            <div className="mb-6">
+          <div className="pb-20">
+            <div className="mb-2 flex justify-between">
               <span className="relative text-2xl font-bold after:absolute after:bottom-0 after:left-0 after:-z-10 after:h-[15px] after:w-full after:bg-[#247DFE] after:opacity-40">
                 {formData.name}
               </span>
+
+              <Button
+                variant="destructive"
+                size="sm"
+                className="h-8 rounded-xl"
+                onClick={handleDelete}
+              >
+                삭제하기
+              </Button>
             </div>
 
             <div className="flex items-center gap-2">
@@ -212,12 +249,14 @@ const EggDetail = ({ egg }: EggDetailProps) => {
                   data={formData.father}
                   onSelect={(item) => handleParentSelect("father", item)}
                   onUnlink={() => handleUnlink("father")}
+                  currentPetOwnerId={egg.owner.userId}
                 />
                 <ParentLink
                   label="모"
                   data={formData.mother}
                   onSelect={(item) => handleParentSelect("mother", item)}
                   onUnlink={() => handleUnlink("mother")}
+                  currentPetOwnerId={egg.owner.userId}
                 />
               </div>
             </div>
@@ -229,27 +268,11 @@ const EggDetail = ({ egg }: EggDetailProps) => {
 
                 {/* 수정 버튼 */}
                 <div className="sticky top-0 z-10 flex justify-end bg-white p-2 dark:bg-[#18181B]">
-                  {isEditing ? (
-                    <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        className="h-8 rounded-xl"
-                        onClick={() => {
-                          setFormData(egg);
-                          setIsEditing(false);
-                        }}
-                      >
-                        취소
-                      </Button>
-                      <Button className="h-8 rounded-xl bg-[#1A56B3]" onClick={handleSave}>
-                        저장하기
-                      </Button>
-                    </div>
-                  ) : (
+                  {!isEditing && (
                     <Button
                       variant="outline"
                       size="icon"
-                      className="h-7 w-7"
+                      className="h-6 w-6"
                       onClick={() => {
                         setIsEditing(true);
                       }}
@@ -286,10 +309,32 @@ const EggDetail = ({ egg }: EggDetailProps) => {
           </div>
 
           {/* 하단 고정 버튼 영역 */}
-          <div className="sticky bottom-0 left-0 right-0 flex justify-between p-4">
-            <Button variant="destructive" size="sm" onClick={handleDelete} className="text-white">
-              삭제하기
-            </Button>
+
+          <div
+            className={cn(
+              "sticky bottom-0 left-0 flex p-4",
+              isEditing ? "justify-end" : "justify-between",
+            )}
+          >
+            {isEditing ? (
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  className="h-8 rounded-xl"
+                  onClick={() => {
+                    setFormData(egg);
+                    setIsEditing(false);
+                  }}
+                >
+                  취소
+                </Button>
+                <Button className="h-8 rounded-xl bg-[#1A56B3]" onClick={handleSave}>
+                  저장하기
+                </Button>
+              </div>
+            ) : (
+              <FloatingButton label="해칭 완료" onClick={handleHatching} />
+            )}
           </div>
         </div>
       </div>

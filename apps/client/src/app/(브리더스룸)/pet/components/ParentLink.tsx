@@ -11,11 +11,13 @@ import ParentStatusBadge from "../../components/ParentStatusBadge";
 
 const ParentLink = ({
   label,
+  currentPetOwnerId = "",
   data,
   onSelect,
   onUnlink,
 }: {
   label: "부" | "모";
+  currentPetOwnerId?: string;
   data?: PetParentDto;
   onSelect: (item: PetSummaryDto & { message: string }) => void;
   onUnlink: () => void;
@@ -49,7 +51,12 @@ const ParentLink = ({
       <dt className="mb-2 flex items-center gap-2 text-xs font-medium text-gray-500 dark:text-gray-400">
         {label}
 
-        {data?.status && <ParentStatusBadge status={data.status} />}
+        {data?.status && (
+          <ParentStatusBadge
+            status={data.status}
+            isMyPet={data.owner.userId === currentPetOwnerId}
+          />
+        )}
       </dt>
 
       {data?.petId ? (

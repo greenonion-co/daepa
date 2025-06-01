@@ -9,6 +9,7 @@ import { GENDER_KOREAN_INFO, SPECIES_KOREAN_INFO } from "../../constants";
 import { toast } from "sonner";
 import { PetSummaryDto } from "@repo/api-client";
 import { InfoIcon } from "lucide-react";
+import { useSelect } from "../../register/hooks/useSelect";
 interface FormFieldProps {
   label?: string;
   field: FormStep["field"];
@@ -29,7 +30,8 @@ export const FormField = ({
   disabled,
   handleChange,
 }: FormFieldProps) => {
-  const { handleSelect, handleMultipleSelect } = useRegisterForm();
+  const { handleMultipleSelect } = useRegisterForm();
+  const { handleSelect } = useSelect();
   const { name, placeholder, type } = field;
   const value = formData[name];
 
@@ -128,7 +130,13 @@ export const FormField = ({
           <button
             className={cn(inputClassName, `${value && "text-black"}`)}
             disabled={disabled}
-            onClick={() => handleSelect(name)}
+            onClick={() =>
+              handleSelect({
+                type: name,
+                value: value as string,
+                handleNext: handleChange,
+              })
+            }
           >
             {name === "sex"
               ? (GENDER_KOREAN_INFO[value as string as keyof typeof GENDER_KOREAN_INFO] ??

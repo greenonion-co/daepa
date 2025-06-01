@@ -1,22 +1,34 @@
 import { cn } from "@/lib/utils";
-import { UpdateUserNotificationDto, UserNotificationDtoStatus } from "@repo/api-client";
+import {
+  UpdateUserNotificationDto,
+  UserNotificationDto,
+  UserNotificationDtoStatus,
+} from "@repo/api-client";
 import { formatDistanceToNow } from "date-fns";
-import { ExtendedUserNotificationDto, useNotiStore } from "../store/noti";
+import { useNotiStore } from "../store/noti";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ko } from "date-fns/locale";
 import { NOTIFICATION_TYPE } from "@/app/(브리더스룸)/constants";
 import { Badge } from "@/components/ui/badge";
 
+interface NotiListProps {
+  items: UserNotificationDto[];
+  handleUpdate: (item: UpdateUserNotificationDto) => void;
+  hasMore: boolean;
+  isFetchingMore: boolean;
+  loaderRefAction: (node?: Element | null) => void;
+}
+
 const NotiList = ({
   items,
   handleUpdate,
-}: {
-  items: ExtendedUserNotificationDto[];
-  handleUpdate: (item: UpdateUserNotificationDto) => void;
-}) => {
+  hasMore,
+  isFetchingMore,
+  loaderRefAction,
+}: NotiListProps) => {
   const { selected, setSelected } = useNotiStore();
 
-  const handleItemClick = (item: ExtendedUserNotificationDto) => {
+  const handleItemClick = (item: UserNotificationDto) => {
     setSelected(item);
     // NOTE: 테스트 코드
     // return handleUpdate({ id: item.id, status: UserNotificationDtoStatus.read });
@@ -30,7 +42,7 @@ const NotiList = ({
     <ScrollArea className="h-[calc(100vh-200px)]">
       <div className="flex flex-col gap-2 p-4 pt-0">
         {items.map((item) => {
-          const role = item.detailJson.receiverPet.sex === "M" ? "father" : "mother";
+          const role = item?.detailJson?.receiverPet?.sex === "M" ? "father" : "mother";
 
           return (
             <button
@@ -83,6 +95,19 @@ const NotiList = ({
             </button>
           );
         })}
+
+        {/* 무한 스크롤 로더 */}
+        {hasMore && (
+          <div ref={loaderRefAction} className="h-20 text-center">
+            {isFetchingMore ? (
+              <div className="flex items-center justify-center">
+                <div className="h-6 w-6 animate-spin rounded-full border-b-2 border-blue-500" />
+              </div>
+            ) : (
+              "더 불러오는 중..."
+            )}
+          </div>
+        )}
       </div>
     </ScrollArea>
   );

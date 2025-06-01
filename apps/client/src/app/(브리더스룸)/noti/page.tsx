@@ -2,14 +2,14 @@
 
 import { Search } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation } from "@tanstack/react-query";
 import {
   UpdateUserNotificationDto,
   userNotificationControllerFindAll,
   userNotificationControllerUpdate,
   UserNotificationDtoStatus,
 } from "@repo/api-client";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { ResizableHandle, ResizablePanel } from "@/components/ui/resizable";
 import { ResizablePanelGroup } from "@/components/ui/resizable";
@@ -17,24 +17,32 @@ import NotiList from "./components/NotiList";
 import NotiDisplay from "./components/NotiDisplay";
 import { useState, useEffect } from "react";
 import { UserNotificationDto } from "@repo/api-client";
+import { useInView } from "react-intersection-observer";
+import Loading from "@/components/common/Loading";
 
 export default function NotificationsPage() {
   const [items, setItems] = useState<UserNotificationDto[]>([]);
 
-  const { data: notification } = useQuery({
-    queryKey: [userNotificationControllerFindAll.name],
-    queryFn: () =>
-      userNotificationControllerFindAll({
-        order: "ASC",
-      }),
-    select: (response) => response.data.data,
-  });
+  const { ref, inView } = useInView();
+  const itemPerPage = 10;
+  const defaultLayout = [32, 48];
 
-  useEffect(() => {
-    if (notification) {
-      setItems(notification);
-    }
-  }, [notification]);
+  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
+    queryKey: [userNotificationControllerFindAll.name, itemPerPage],
+    queryFn: ({ pageParam = 1 }) =>
+      userNotificationControllerFindAll({
+        page: pageParam,
+        itemPerPage,
+        order: "DESC",
+      }),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => {
+      if (lastPage.data.meta.hasNextPage) {
+        return lastPage.data.meta.page + 1;
+      }
+      return undefined;
+    },
+  });
 
   const { mutate: updateNotification } = useMutation({
     mutationFn: (data: UpdateUserNotificationDto) => userNotificationControllerUpdate(data),
@@ -52,7 +60,19 @@ export default function NotificationsPage() {
     },
   });
 
-  const defaultLayout = [32, 48];
+  useEffect(() => {
+    if (inView && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [inView, fetchNextPage, hasNextPage, isFetchingNextPage]);
+
+  useEffect(() => {
+    if (data?.pages) {
+      setItems(data?.pages.flatMap((page) => page.data.data) ?? []);
+    }
+  }, [data?.pages]);
+
+  if (isLoading) return <Loading />;
 
   return (
     <ResizablePanelGroup
@@ -66,14 +86,6 @@ export default function NotificationsPage() {
         <Tabs defaultValue="all">
           <div className="flex items-center px-4 py-1">
             <h1 className="text-xl font-bold">알림</h1>
-            <TabsList className="ml-auto">
-              <TabsTrigger value="all" className="text-zinc-600 dark:text-zinc-200">
-                전체
-              </TabsTrigger>
-              <TabsTrigger value="unread" className="text-zinc-600 dark:text-zinc-200">
-                안읽음
-              </TabsTrigger>
-            </TabsList>
           </div>
           <Separator />
           <div className="bg-background/95 supports-[backdrop-filter]:bg-background/60 p-4 backdrop-blur">
@@ -84,17 +96,13 @@ export default function NotificationsPage() {
               </div>
             </form>
           </div>
-          <TabsContent value="all" className="m-0">
-            <NotiList items={items} handleUpdate={updateNotification} />
-          </TabsContent>
-          <TabsContent value="unread" className="m-0">
-            <NotiList
-              items={
-                items?.filter((item) => item.status === UserNotificationDtoStatus.unread) ?? []
-              }
-              handleUpdate={updateNotification}
-            />
-          </TabsContent>
+          <NotiList
+            items={items}
+            handleUpdate={updateNotification}
+            hasMore={hasNextPage}
+            isFetchingMore={isFetchingNextPage}
+            loaderRefAction={ref}
+          />
         </Tabs>
       </ResizablePanel>
       <ResizableHandle withHandle />
