@@ -26,10 +26,8 @@ export interface EggDto {
   name: string;
   /** 알 정보 */
   desc?: string;
-  /** 해칭일(yyyyMMdd) */
-  hatchingDate?: number;
-  /** 펫 아이디 */
-  petId?: string;
+  /** 해칭된 펫 아이디 */
+  hatchedPetId?: string;
   /** 아빠 개체 정보 */
   father?: PetParentDto;
   /** 엄마 개체 정보 */

@@ -556,11 +556,7 @@ export const getEggControllerFindOneResponseMock = (
   clutchOrder: faker.number.int({ min: undefined, max: undefined }),
   name: faker.string.alpha(20),
   desc: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
-  hatchingDate: faker.helpers.arrayElement([
-    faker.number.int({ min: undefined, max: undefined }),
-    undefined,
-  ]),
-  petId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+  hatchedPetId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
   father: faker.helpers.arrayElement([
     {
       ...{
@@ -649,11 +645,7 @@ export const getBrEggControllerFindAllResponseMock = (
     clutchOrder: faker.number.int({ min: undefined, max: undefined }),
     name: faker.string.alpha(20),
     desc: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
-    hatchingDate: faker.helpers.arrayElement([
-      faker.number.int({ min: undefined, max: undefined }),
-      undefined,
-    ]),
-    petId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+    hatchedPetId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
     father: faker.helpers.arrayElement([
       {
         ...{
