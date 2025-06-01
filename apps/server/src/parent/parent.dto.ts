@@ -37,6 +37,12 @@ export class ParentDto {
   @IsNotEmpty()
   @IsEnum(PARENT_STATUS)
   status: PARENT_STATUS;
+
+  @ApiProperty({
+    description: '본인 소유 펫 여부',
+  })
+  @IsBoolean()
+  isMyPet: boolean;
 }
 
 export class FindParentDto extends PickType(ParentDto, ['role']) {

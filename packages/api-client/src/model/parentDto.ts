@@ -22,4 +22,6 @@ export interface ParentDto {
       - deleted: approved 이후, 부모 정보 변경을 위해 삭제
       - cancelled: 승인 전, 전송자의 요청 취소 */
   status: ParentDtoStatus;
+  /** 본인 소유 펫 여부 */
+  isMyPet: boolean;
 }

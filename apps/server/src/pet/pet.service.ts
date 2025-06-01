@@ -230,6 +230,7 @@ export class PetService {
       ...parentPetSummary,
       relationId: parentInfo.relationId,
       status: parentInfo.status,
+      isMyPet: parentInfo.isMyPet,
     };
   }
 
