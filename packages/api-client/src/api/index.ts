@@ -105,7 +105,7 @@ export const parentControllerUpdateParentRequest = <TData = AxiosResponse<void>>
 };
 
 export const parentControllerDeleteParent = <TData = AxiosResponse<void>>(
-  relationId: string,
+  relationId: number,
   options?: AxiosRequestConfig,
 ): Promise<TData> => {
   return axios.delete(`http://localhost:4000/api/v1/parent/delete/${relationId}`, options);
@@ -330,6 +330,7 @@ export const getPetControllerFindOneResponseMock = (
           undefined,
         ]),
         sex: faker.helpers.arrayElement([{}, undefined]),
+        relationId: faker.number.int({ min: undefined, max: undefined }),
         status: faker.string.alpha(20),
       },
     },
@@ -361,6 +362,7 @@ export const getPetControllerFindOneResponseMock = (
           undefined,
         ]),
         sex: faker.helpers.arrayElement([{}, undefined]),
+        relationId: faker.number.int({ min: undefined, max: undefined }),
         status: faker.string.alpha(20),
       },
     },
@@ -486,6 +488,7 @@ export const getBrPetControllerFindAllResponseMock = (
             undefined,
           ]),
           sex: faker.helpers.arrayElement([{}, undefined]),
+          relationId: faker.number.int({ min: undefined, max: undefined }),
           status: faker.string.alpha(20),
         },
       },
@@ -517,6 +520,7 @@ export const getBrPetControllerFindAllResponseMock = (
             undefined,
           ]),
           sex: faker.helpers.arrayElement([{}, undefined]),
+          relationId: faker.number.int({ min: undefined, max: undefined }),
           status: faker.string.alpha(20),
         },
       },
@@ -584,6 +588,7 @@ export const getEggControllerFindOneResponseMock = (
           undefined,
         ]),
         sex: faker.helpers.arrayElement([{}, undefined]),
+        relationId: faker.number.int({ min: undefined, max: undefined }),
         status: faker.string.alpha(20),
       },
     },
@@ -615,6 +620,7 @@ export const getEggControllerFindOneResponseMock = (
           undefined,
         ]),
         sex: faker.helpers.arrayElement([{}, undefined]),
+        relationId: faker.number.int({ min: undefined, max: undefined }),
         status: faker.string.alpha(20),
       },
     },
@@ -674,6 +680,7 @@ export const getBrEggControllerFindAllResponseMock = (
             undefined,
           ]),
           sex: faker.helpers.arrayElement([{}, undefined]),
+          relationId: faker.number.int({ min: undefined, max: undefined }),
           status: faker.string.alpha(20),
         },
       },
@@ -705,6 +712,7 @@ export const getBrEggControllerFindAllResponseMock = (
             undefined,
           ]),
           sex: faker.helpers.arrayElement([{}, undefined]),
+          relationId: faker.number.int({ min: undefined, max: undefined }),
           status: faker.string.alpha(20),
         },
       },

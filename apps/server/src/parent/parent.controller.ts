@@ -66,12 +66,12 @@ export class ParentController {
   @ApiParam({
     name: 'relationId',
     description: '부모자식 관계 ID (parents 테이블의 id)',
-    type: 'string',
+    type: 'number',
     required: true,
   })
-  async deleteParent(@Param('relationId') relationId: string) {
+  async deleteParent(@Param('relationId') relationId: number) {
     // TODO: 상대방한테도 알림을 줄 것 인가?
-    await this.parentService.deleteParent(Number(relationId));
+    await this.parentService.deleteParent(relationId);
     return {
       success: true,
       message: '부모 관계가 정상적으로 삭제되었습니다.',

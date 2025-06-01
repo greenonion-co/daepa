@@ -164,6 +164,10 @@ export class PetParentDto extends PartialType(PetSummaryDto) {
   @IsString()
   petId: string;
 
+  @ApiProperty({ description: '부모 관계 테이블 row id' })
+  @IsNumber()
+  relationId: number;
+
   @ApiProperty({
     description: '펫 주인 정보',
     required: true,

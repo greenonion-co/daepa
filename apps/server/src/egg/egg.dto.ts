@@ -172,9 +172,30 @@ export class CreateEggDto extends OmitType(EggBaseDto, [
   mother?: CreateParentDto;
 }
 
-// TODO: 알 정보 수정 시, clutchCount는 입력 못하게 해야함
-// clutch를 바꾸었을 때 기존 clutch 정보와 안 겹치나?
-export class UpdateEggDto extends PartialType(CreateEggDto) {}
+export class UpdateEggDto extends PartialType(
+  PickType(EggBaseDto, [
+    'layingDate',
+    'clutch',
+    'clutchOrder',
+    'desc',
+  ] as const),
+) {
+  @ApiProperty({
+    description: '아빠 개체 정보',
+    required: false,
+  })
+  @IsOptional()
+  @IsObject()
+  father?: CreateParentDto;
+
+  @ApiProperty({
+    description: '엄마 개체 정보',
+    required: false,
+  })
+  @IsOptional()
+  @IsObject()
+  mother?: CreateParentDto;
+}
 
 export class CreateEggHatchDto extends OmitType(CreatePetDto, [
   'growth',
