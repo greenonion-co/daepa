@@ -8,22 +8,17 @@ import {
 import { EggEntity } from './egg.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import {
-  CreateEggDto,
-  CreateEggHatchDto,
-  EggDto,
-  EggSummaryDto,
-  UpdateEggDto,
-} from './egg.dto';
+import { CreateEggDto, EggDto, EggSummaryDto, UpdateEggDto } from './egg.dto';
 import { instanceToPlain, plainToInstance } from 'class-transformer';
 import { ParentService } from 'src/parent/parent.service';
 import { PageDto, PageMetaDto, PageOptionsDto } from 'src/common/page.dto';
 import { PARENT_ROLE } from 'src/parent/parent.constant';
-import { PetParentDto } from 'src/pet/pet.dto';
+import { CreatePetDto, PetParentDto } from 'src/pet/pet.dto';
 import { CreateParentDto, ParentDto } from 'src/parent/parent.dto';
 import { PetService } from 'src/pet/pet.service';
 import { nanoid } from 'nanoid';
 import { isMySQLError } from 'src/common/error';
+import { PET_SEX } from 'src/pet/pet.constants';
 
 @Injectable()
 export class EggService {
@@ -247,9 +242,8 @@ export class EggService {
   async convertEggToPet(
     eggId: string,
     ownerId: string,
-    createEggHatchDto: CreateEggHatchDto,
   ): Promise<{ petId: string }> {
-    const { father, mother } = await this.parentService.findParents(eggId);
+    // TODO: 본인 소유 알 여부 검증
 
     const egg = await this.getEgg(eggId);
     if (!egg) {
@@ -259,47 +253,37 @@ export class EggService {
       );
     }
 
-    const { petId } = await this.petService.createPet({
-      ...createEggHatchDto,
-      growth: '베이비',
-      sex: 'N',
-      ownerId,
+    const createPetDto: CreatePetDto = {
+      name: egg.name,
       species: egg.species,
-    });
+      sex: PET_SEX.N,
+      growth: '베이비',
+    };
 
+    const { father, mother } = await this.parentService.findParents(eggId);
     if (father) {
-      await this.parentService.createParent(
-        ownerId,
-        petId,
-        {
-          parentId: father.parent_id,
-          role: PARENT_ROLE.FATHER,
-        },
-        {
-          isDirectApprove: true, // 알 상태에서 이미 부모의 승인을 받은 케이스. 추가적인 승인 미필요
-        },
-      );
+      createPetDto.father = {
+        parentId: father.parentId,
+        role: father.role,
+      };
     }
     if (mother) {
-      await this.parentService.createParent(
-        ownerId,
-        petId,
-        {
-          parentId: mother.parent_id,
-          role: PARENT_ROLE.MOTHER,
-        },
-        {
-          isDirectApprove: true,
-        },
-      );
+      createPetDto.mother = {
+        parentId: mother.parentId,
+        role: mother.role,
+      };
     }
+
+    const { petId } = await this.petService.createPet({
+      ownerId,
+      isHatchingFromEgg: true,
+      ...createPetDto,
+    });
 
     await this.eggRepository.update(
       { egg_id: eggId },
       {
-        pet_id: petId,
-        hatching_date: createEggHatchDto.birthdate,
-        is_deleted: true,
+        hatched_pet_id: petId,
       },
     );
 

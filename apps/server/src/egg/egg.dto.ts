@@ -9,7 +9,7 @@ import {
 } from 'class-validator';
 import { CreateParentDto } from 'src/parent/parent.dto';
 import { PET_SPECIES } from 'src/pet/pet.constants';
-import { CreatePetDto, PetParentDto } from 'src/pet/pet.dto';
+import { PetParentDto } from 'src/pet/pet.dto';
 import { UserDto } from 'src/user/user.dto';
 
 export class EggBaseDto {
@@ -212,11 +212,3 @@ export class UpdateEggDto extends PartialType(
   @IsObject()
   mother?: CreateParentDto;
 }
-
-export class CreateEggHatchDto extends OmitType(CreatePetDto, [
-  'species',
-  'growth',
-  'sex',
-  'father',
-  'mother',
-] as const) {}

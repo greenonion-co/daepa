@@ -52,7 +52,10 @@ export class PetService {
   }
 
   async createPet(
-    inputPetData: { ownerId: string } & CreatePetDto,
+    inputPetData: {
+      ownerId: string;
+      isHatchingFromEgg?: boolean;
+    } & CreatePetDto,
   ): Promise<{ petId: string }> {
     const petId = await this.generateUniquePetId();
     const petData = plainToInstance(PetEntity, { ...inputPetData, petId });
@@ -65,7 +68,9 @@ export class PetService {
           inputPetData.ownerId,
           petId,
           inputPetData.father,
-          {},
+          {
+            isDirectApprove: inputPetData.isHatchingFromEgg,
+          },
         );
       }
       if (inputPetData.mother) {
@@ -73,7 +78,9 @@ export class PetService {
           inputPetData.ownerId,
           petId,
           inputPetData.mother,
-          {},
+          {
+            isDirectApprove: inputPetData.isHatchingFromEgg,
+          },
         );
       }
 

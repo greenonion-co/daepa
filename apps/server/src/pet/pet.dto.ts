@@ -227,9 +227,6 @@ export class CreatePetDto extends OmitType(PetBaseDto, [
   'petId',
   'owner',
 ] as const) {
-  @Exclude()
-  declare petId: string;
-
   @ApiProperty({
     description: '아빠 개체 정보',
     required: false,

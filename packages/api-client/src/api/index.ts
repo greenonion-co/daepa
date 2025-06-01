@@ -12,7 +12,6 @@ import type {
   BrEggControllerFindAllParams,
   BrPetControllerFindAllParams,
   CreateEggDto,
-  CreateEggHatchDto,
   CreateParentDto,
   CreatePetDto,
   CreateUserNotificationDto,
@@ -184,12 +183,11 @@ export const eggControllerCreate = <TData = AxiosResponse<void>>(
   return axios.post(`http://localhost:4000/api/v1/egg`, createEggDto, options);
 };
 
-export const eggControllerHatch = <TData = AxiosResponse<void>>(
+export const eggControllerHatched = <TData = AxiosResponse<void>>(
   eggId: string,
-  createEggHatchDto: CreateEggHatchDto,
   options?: AxiosRequestConfig,
 ): Promise<TData> => {
-  return axios.post(`http://localhost:4000/api/v1/egg/${eggId}/hatch`, createEggHatchDto, options);
+  return axios.get(`http://localhost:4000/api/v1/egg/${eggId}/hatched`, options);
 };
 
 export const brEggControllerFindAll = <TData = AxiosResponse<BrEggControllerFindAll200>>(
@@ -220,7 +218,7 @@ export type EggControllerFindOneResult = AxiosResponse<EggDto>;
 export type EggControllerUpdateResult = AxiosResponse<void>;
 export type EggControllerDeleteResult = AxiosResponse<void>;
 export type EggControllerCreateResult = AxiosResponse<void>;
-export type EggControllerHatchResult = AxiosResponse<void>;
+export type EggControllerHatchedResult = AxiosResponse<void>;
 export type BrEggControllerFindAllResult = AxiosResponse<BrEggControllerFindAll200>;
 
 export const getPetControllerFindAllResponseMock = (
@@ -1018,17 +1016,17 @@ export const getEggControllerCreateMockHandler = (
   });
 };
 
-export const getEggControllerHatchMockHandler = (
+export const getEggControllerHatchedMockHandler = (
   overrideResponse?:
     | void
-    | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<void> | void),
+    | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<void> | void),
 ) => {
-  return http.post("*/api/v1/egg/:eggId/hatch", async (info) => {
+  return http.get("*/api/v1/egg/:eggId/hatched", async (info) => {
     await delay(1000);
     if (typeof overrideResponse === "function") {
       await overrideResponse(info);
     }
-    return new HttpResponse(null, { status: 201 });
+    return new HttpResponse(null, { status: 200 });
   });
 };
 
@@ -1072,6 +1070,6 @@ export const getProjectDaepaAPIMock = () => [
   getEggControllerUpdateMockHandler(),
   getEggControllerDeleteMockHandler(),
   getEggControllerCreateMockHandler(),
-  getEggControllerHatchMockHandler(),
+  getEggControllerHatchedMockHandler(),
   getBrEggControllerFindAllMockHandler(),
 ];

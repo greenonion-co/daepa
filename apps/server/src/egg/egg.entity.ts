@@ -48,14 +48,6 @@ export class EggEntity {
   @Column({ type: 'varchar', length: 500, nullable: true })
   desc?: string; // 알 정보
 
-  @Expose({ name: 'hatchingDate' })
-  @Column({ nullable: true })
-  hatching_date?: number; // 해칭일
-
-  @Expose({ name: 'petId' })
-  @Column({ nullable: true })
-  pet_id?: string; // 펫으로 등록된 경우, pets 테이블로부터 업데이트
-
   @Expose({ name: 'createdAt' })
   @CreateDateColumn()
   created_at: Date;
@@ -63,6 +55,10 @@ export class EggEntity {
   @Expose({ name: 'updatedAt' })
   @UpdateDateColumn()
   updated_at: Date;
+
+  @Expose({ name: 'hatchedPetId' })
+  @Column({ nullable: true })
+  hatched_pet_id?: string; // 해칭 여부 판단 시에도 사용
 
   @Expose({ name: 'isDeleted' })
   @Column({ default: false })

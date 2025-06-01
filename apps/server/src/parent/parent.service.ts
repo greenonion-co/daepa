@@ -65,13 +65,20 @@ export class ParentService {
       },
     });
 
+    const fatherEntity = parentEntities.find(
+      (parent) => parent.role === PARENT_ROLE.FATHER,
+    );
+    const motherEntity = parentEntities.find(
+      (parent) => parent.role === PARENT_ROLE.MOTHER,
+    );
+
     return {
-      father: parentEntities.find(
-        (parent) => parent.role === PARENT_ROLE.FATHER,
-      ),
-      mother: parentEntities.find(
-        (parent) => parent.role === PARENT_ROLE.MOTHER,
-      ),
+      father: fatherEntity
+        ? plainToInstance(ParentDto, instanceToPlain(fatherEntity))
+        : null,
+      mother: motherEntity
+        ? plainToInstance(ParentDto, instanceToPlain(motherEntity))
+        : null,
     };
   }
 
