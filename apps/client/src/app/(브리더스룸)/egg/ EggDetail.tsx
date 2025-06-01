@@ -74,6 +74,7 @@ const EggDetail = ({ egg }: EggDetailProps) => {
         role,
         isMyPet,
         message,
+        childType: "egg",
       }),
     onSuccess: () => {
       toast.success("부모 연동 요청이 완료되었습니다.");
