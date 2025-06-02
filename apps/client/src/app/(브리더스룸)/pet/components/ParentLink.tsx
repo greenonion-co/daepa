@@ -2,7 +2,7 @@ import { Search, X } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { overlay } from "overlay-kit";
-import ParentSearchSelector from "../../components/ParentSearchSelector";
+import ParentSearchSelector from "../../components/selector/parentSearch";
 import { Button } from "@/components/ui/button";
 import Dialog from "../../components/Form/Dialog";
 import { PetParentDto, PetSummaryDto } from "@repo/api-client";

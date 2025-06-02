@@ -9,7 +9,7 @@ import {
   userNotificationControllerUpdate,
   UserNotificationDtoStatus,
 } from "@repo/api-client";
-import { Tabs } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { ResizableHandle, ResizablePanel } from "@/components/ui/resizable";
 import { ResizablePanelGroup } from "@/components/ui/resizable";
@@ -22,6 +22,7 @@ import Loading from "@/components/common/Loading";
 
 export default function NotificationsPage() {
   const [items, setItems] = useState<UserNotificationDto[]>([]);
+  const [tab, setTab] = useState<"all" | "unread">("all");
 
   const { ref, inView } = useInView();
   const itemPerPage = 10;
@@ -67,10 +68,17 @@ export default function NotificationsPage() {
   }, [inView, fetchNextPage, hasNextPage, isFetchingNextPage]);
 
   useEffect(() => {
-    if (data?.pages) {
+    if (!data?.pages) return;
+    if (tab === "all") {
       setItems(data?.pages.flatMap((page) => page.data.data) ?? []);
+    } else {
+      setItems(
+        data?.pages
+          .flatMap((page) => page.data.data)
+          ?.filter((item) => item.status === UserNotificationDtoStatus.unread) ?? [],
+      );
     }
-  }, [data?.pages]);
+  }, [data?.pages, tab]);
 
   if (isLoading) return <Loading />;
 
@@ -83,9 +91,22 @@ export default function NotificationsPage() {
       className="h-full items-stretch"
     >
       <ResizablePanel defaultSize={defaultLayout[0]} minSize={30}>
-        <Tabs defaultValue="all">
+        <Tabs
+          defaultValue="all"
+          onValueChange={(value) => {
+            setTab(value as "all" | "unread");
+          }}
+        >
           <div className="flex items-center px-4 py-1">
             <h1 className="text-xl font-bold">알림</h1>
+            <TabsList className="ml-auto">
+              <TabsTrigger value="all" className="text-zinc-600 dark:text-zinc-200">
+                전체
+              </TabsTrigger>
+              <TabsTrigger value="unread" className="text-zinc-600 dark:text-zinc-200">
+                안읽음
+              </TabsTrigger>
+            </TabsList>
           </div>
           <Separator />
           <div className="bg-background/95 supports-[backdrop-filter]:bg-background/60 p-4 backdrop-blur">
@@ -96,6 +117,7 @@ export default function NotificationsPage() {
               </div>
             </form>
           </div>
+
           <NotiList
             items={items}
             handleUpdate={updateNotification}
