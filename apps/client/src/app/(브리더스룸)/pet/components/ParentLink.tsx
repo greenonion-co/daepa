@@ -5,11 +5,12 @@ import { overlay } from "overlay-kit";
 import ParentSearchSelector from "../../components/selector/parentSearch";
 import { Button } from "@/components/ui/button";
 import Dialog from "../../components/Form/Dialog";
-import { PetParentDto, PetSummaryDto } from "@repo/api-client";
+import { PetParentDto } from "@repo/api-client";
 import { cn } from "@/lib/utils";
 import ParentStatusBadge from "../../components/ParentStatusBadge";
 import { Badge } from "@/components/ui/badge";
 import { usePathname } from "next/navigation";
+import { PetParentDtoWithMessage } from "../store/parentLink";
 
 const ParentLink = ({
   label,
@@ -23,7 +24,7 @@ const ParentLink = ({
   currentPetOwnerId?: string;
   data?: PetParentDto;
   editable?: boolean;
-  onSelect?: (item: PetSummaryDto & { message?: string }) => void;
+  onSelect?: (item: PetParentDtoWithMessage) => void;
   onUnlink?: () => void;
 }) => {
   const pathname = usePathname();
@@ -60,14 +61,14 @@ const ParentLink = ({
         {data?.status && (
           <ParentStatusBadge
             status={data.status}
-            isMyPet={data.owner.userId === currentPetOwnerId}
+            isMyPet={data?.owner?.userId === currentPetOwnerId}
           />
         )}
       </dt>
 
       {data?.petId ? (
         <div className="group relative block h-full w-full transition-opacity hover:opacity-95">
-          {!data?.status && data.owner.userId === currentPetOwnerId && (
+          {!data?.status && data?.owner?.userId === currentPetOwnerId && (
             <Badge
               variant="outline"
               className="absolute left-1 top-1 z-10 bg-blue-50 text-xs font-bold"

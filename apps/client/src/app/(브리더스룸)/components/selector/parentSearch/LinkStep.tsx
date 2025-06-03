@@ -1,20 +1,20 @@
+import { PetParentDtoWithMessage } from "@/app/(브리더스룸)/pet/store/parentLink";
 import { Badge } from "@/components/ui/badge";
-import { PetSummaryDto } from "@repo/api-client";
 import { Send } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 
 interface LinkStepProps {
-  selectedPet: PetSummaryDto;
+  selectedPet: PetParentDtoWithMessage;
   currentUserId: string;
-  onSelect: (pet: PetSummaryDto & { message?: string }) => void;
+  onSelect: (pet: PetParentDtoWithMessage) => void;
   onClose: () => void;
 }
 
 const LinkStep = ({ selectedPet, currentUserId, onSelect, onClose }: LinkStepProps) => {
   const [message, setMessage] = useState<string | null>(null);
 
-  const defaultMessage = (pet: PetSummaryDto) => {
+  const defaultMessage = (pet: PetParentDtoWithMessage) => {
     return `안녕하세요, ${pet.name}님.\n${pet.name}를 ${
       pet.sex?.toString() === "M" ? "부" : "모"
     } 개체로 등록하고 싶습니다.`;

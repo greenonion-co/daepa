@@ -1,6 +1,13 @@
 import { create } from "zustand";
-import { FormData, FormErrors } from "../types";
+import { FormErrors } from "../types";
+import { PetDto, PetDtoSpecies, UserDto } from "@repo/api-client";
 
+export interface FormData extends Omit<PetDto, "petId" | "owner" | "name" | "species"> {
+  petId?: string;
+  owner?: UserDto;
+  name?: string;
+  species?: PetDtoSpecies;
+}
 interface FormStore {
   formData: FormData;
   errors: FormErrors;

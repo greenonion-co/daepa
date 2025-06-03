@@ -1,13 +1,13 @@
 import { Badge } from "@/components/ui/badge";
-import { PetSummaryDto } from "@repo/api-client";
+import { PetParentDtoWithMessage } from "@/app/(브리더스룸)/pet/store/parentLink";
 import Image from "next/image";
 
 const PetItem = ({
   item,
   handlePetSelect,
 }: {
-  item: PetSummaryDto;
-  handlePetSelect: (pet: PetSummaryDto) => void;
+  item: PetParentDtoWithMessage;
+  handlePetSelect: (pet: PetParentDtoWithMessage) => void;
 }) => {
   return (
     <button

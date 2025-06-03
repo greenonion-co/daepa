@@ -1,14 +1,15 @@
+import { ParentStatus, PetDto } from "@repo/api-client";
 import { create } from "zustand";
-import { PetParentDto } from "@repo/api-client";
+
+export type PetParentDtoWithMessage = PetDto & { message: string; status?: ParentStatus };
 interface ParentState {
-  selectedParent: PetParentDto | null;
-  setSelectedParent: (parent: PetParentDto | null) => void;
+  selectedParent: PetParentDtoWithMessage | null;
+  setSelectedParent: (parent: PetParentDtoWithMessage | null) => void;
 }
 
 const createParentLinkStore = () =>
   create<ParentState>((set) => ({
     selectedParent: null,
-
     setSelectedParent: (parent) => set({ selectedParent: parent }),
   }));
 

@@ -1,9 +1,9 @@
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PetItem from "../PetItem";
-import { PetSummaryDto } from "@repo/api-client";
 import { useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import Loading from "@/components/common/Loading";
+import { PetParentDtoWithMessage } from "@/app/(브리더스룸)/pet/store/parentLink";
 
 const SelectStep = ({
   pets,
@@ -13,9 +13,9 @@ const SelectStep = ({
   isFetchingMore,
   loaderRefAction,
 }: {
-  pets: PetSummaryDto[];
+  pets: PetParentDtoWithMessage[];
   currentUserId: string;
-  handlePetSelect: (pet: PetSummaryDto) => void;
+  handlePetSelect: (pet: PetParentDtoWithMessage) => void;
   hasMore: boolean;
   isFetchingMore: boolean;
   loaderRefAction: (node?: Element | null) => void;

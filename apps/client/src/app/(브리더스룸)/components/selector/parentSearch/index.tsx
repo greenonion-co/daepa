@@ -2,23 +2,23 @@
 
 import { useState, useEffect, useRef } from "react";
 import BottomSheet from "@/components/common/BottomSheet";
-import { PetSummaryDto } from "@repo/api-client";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { petControllerFindAll } from "@repo/api-client";
 import SelectStep from "./SelectStep";
 import LinkStep from "./LinkStep";
 import Header from "./Header";
 import { useInView } from "react-intersection-observer";
+import { PetParentDtoWithMessage } from "@/app/(브리더스룸)/pet/store/parentLink";
 
 interface ParentSearchProps {
   isOpen: boolean;
   onClose: () => void;
-  onSelect: (item: PetSummaryDto & { message?: string }) => void;
+  onSelect: (item: PetParentDtoWithMessage) => void;
   onExit: () => void;
   sex?: "M" | "F";
 }
 
-const currentUserId = "ZUCOPIA";
+const currentUserId = "ADMIN";
 
 export default function ParentSearchSelector({
   isOpen,
@@ -29,7 +29,7 @@ export default function ParentSearchSelector({
 }: ParentSearchProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [step, setStep] = useState(1);
-  const [selectedPet, setSelectedPet] = useState<PetSummaryDto | null>(null);
+  const [selectedPet, setSelectedPet] = useState<PetParentDtoWithMessage | null>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const { ref, inView } = useInView();
   const itemPerPage = 10;
@@ -50,7 +50,8 @@ export default function ParentSearchSelector({
       return undefined;
     },
     staleTime: 5 * 60 * 1000, // 5분 동안 데이터를 'fresh'하게 유지
-    select: (data) => data.pages.flatMap((page) => page.data.data).filter((pet) => pet.sex === sex),
+    select: (data) =>
+      data.pages.flatMap((page) => page.data.data).filter((pet) => pet.sex?.toString() === sex),
   });
 
   useEffect(() => {
@@ -74,7 +75,7 @@ export default function ParentSearchSelector({
   //   item.name.toLowerCase().includes(searchQuery.toLowerCase()),
   // );
 
-  const handlePetSelect = (pet: PetSummaryDto) => {
+  const handlePetSelect = (pet: PetParentDtoWithMessage) => {
     setSelectedPet(pet);
     setStep(2);
   };
@@ -85,14 +86,14 @@ export default function ParentSearchSelector({
         <Header
           step={step}
           setStep={setStep}
-          selectedPet={selectedPet ?? ({} as PetSummaryDto)}
+          selectedPet={selectedPet ?? ({} as PetParentDtoWithMessage)}
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
         />
         <div ref={contentRef} className="relative flex-1">
           {step === 1 ? (
             <SelectStep
-              pets={data ?? []}
+              pets={data as PetParentDtoWithMessage[]}
               currentUserId={currentUserId}
               handlePetSelect={handlePetSelect}
               hasMore={hasNextPage}
@@ -101,7 +102,7 @@ export default function ParentSearchSelector({
             />
           ) : (
             <LinkStep
-              selectedPet={selectedPet ?? ({} as PetSummaryDto)}
+              selectedPet={selectedPet ?? ({} as PetParentDtoWithMessage)}
               currentUserId={currentUserId}
               onSelect={onSelect}
               onClose={onClose}
