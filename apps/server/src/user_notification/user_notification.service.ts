@@ -1,11 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { UserNotificationEntity } from './user_notification.entity';
-import {
-  DeepPartial,
-  FindOptionsWhere,
-  Repository,
-  UpdateResult,
-} from 'typeorm';
+import { FindOptionsWhere, Repository, UpdateResult } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PageDto, PageMetaDto, PageOptionsDto } from 'src/common/page.dto';
 import {
@@ -65,8 +60,14 @@ export class UserNotificationService {
 
   async updateWhere(
     where: FindOptionsWhere<UserNotificationEntity>,
-    payload: DeepPartial<UserNotificationEntity>,
+    payload: Partial<UserNotificationEntity>,
   ) {
-    return await this.userNotificationRepository.update(where, payload);
+    await this.userNotificationRepository.update(where, payload);
+    return await this.userNotificationRepository.findOne({
+      where: {
+        ...where,
+        ...payload,
+      },
+    });
   }
 }

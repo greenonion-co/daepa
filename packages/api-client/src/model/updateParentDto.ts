@@ -14,4 +14,6 @@ export interface UpdateParentDto {
   status: UpdateParentDtoStatus;
   /** 상대방 유저 ID */
   opponentId: string;
+  /** 거절 사유 */
+  rejectReason?: string;
 }
