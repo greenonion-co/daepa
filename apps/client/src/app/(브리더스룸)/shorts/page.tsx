@@ -6,6 +6,7 @@ import { brPetControllerFindAll } from "@repo/api-client";
 import { useEffect } from "react";
 import Loading from "@/components/common/Loading";
 import ShortsCard from "../pet/[petId]/(펫카드)/Shorts";
+import { toast } from "sonner";
 
 export default function ShortsPage() {
   const { ref, inView } = useInView();
@@ -28,6 +29,12 @@ export default function ShortsPage() {
     },
     select: (data) => data.pages.flatMap((page) => page.data.data),
   });
+
+  useEffect(() => {
+    if (!hasNextPage && inView) {
+      toast.info("더 이상 개체가 없습니다.");
+    }
+  }, [hasNextPage, inView]);
 
   useEffect(() => {
     if (inView && hasNextPage && !isFetchingNextPage) {
