@@ -48,7 +48,7 @@ const NumberField = ({
         min="0"
         placeholder={placeholder}
       />
-      <p className="absolute bottom-2 right-1 text-xl text-gray-400">g</p>
+      <p className="absolute bottom-2 right-1 text-[16px] text-gray-400">{field?.unit}</p>
     </div>
   );
 };

@@ -65,35 +65,47 @@ export class ParentService {
       },
     });
 
+    const fatherEntity = parentEntities.find(
+      (parent) => parent.role === PARENT_ROLE.FATHER,
+    );
+    const motherEntity = parentEntities.find(
+      (parent) => parent.role === PARENT_ROLE.MOTHER,
+    );
+
     return {
-      father: parentEntities.find(
-        (parent) => parent.role === PARENT_ROLE.FATHER,
-      ),
-      mother: parentEntities.find(
-        (parent) => parent.role === PARENT_ROLE.MOTHER,
-      ),
+      father: fatherEntity
+        ? plainToInstance(ParentDto, instanceToPlain(fatherEntity))
+        : null,
+      mother: motherEntity
+        ? plainToInstance(ParentDto, instanceToPlain(motherEntity))
+        : null,
     };
   }
 
   async createParent(
+    userId: string,
     petId: string,
     createParentDto: CreateParentDto,
     createOptions: {
       isEgg?: boolean;
-      isDirectApprove?: boolean; // 부모 요청을 skip하고 바로 관계 생성 시
+      isDirectApprove?: boolean; // 부모 요청을 skip하고 바로 approved 상태로 생성
     },
   ) {
+    const parentOwnerId = await this.petService.getPetOwnerId(petId);
+    const isMyPet = parentOwnerId === userId;
+
     const result = await this.parentRepository.insert({
       pet_id: petId,
       parent_id: createParentDto.parentId,
       role: createParentDto.role,
-      is_my_pet: createParentDto.isMyPet ?? false,
-      status: createOptions.isDirectApprove
-        ? PARENT_STATUS.APPROVED
-        : PARENT_STATUS.PENDING,
+      is_my_pet: isMyPet,
+      status:
+        isMyPet || createOptions.isDirectApprove
+          ? PARENT_STATUS.APPROVED
+          : PARENT_STATUS.PENDING,
     });
 
-    if (!createParentDto.isMyPet) {
+    if (!isMyPet) {
       await this.createParentRequestNotification({
         relationId: result.identifiers[0].id as number,
         senderPetId: petId,

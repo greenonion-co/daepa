@@ -8,22 +8,17 @@ import {
 import { EggEntity } from './egg.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import {
-  CreateEggDto,
-  CreateEggHatchDto,
-  EggDto,
-  EggSummaryDto,
-  UpdateEggDto,
-} from './egg.dto';
+import { CreateEggDto, EggDto, EggSummaryDto, UpdateEggDto } from './egg.dto';
 import { instanceToPlain, plainToInstance } from 'class-transformer';
 import { ParentService } from 'src/parent/parent.service';
 import { PageDto, PageMetaDto, PageOptionsDto } from 'src/common/page.dto';
 import { PARENT_ROLE } from 'src/parent/parent.constant';
-import { PetParentDto } from 'src/pet/pet.dto';
+import { CreatePetDto, PetParentDto } from 'src/pet/pet.dto';
 import { CreateParentDto, ParentDto } from 'src/parent/parent.dto';
 import { PetService } from 'src/pet/pet.service';
 import { nanoid } from 'nanoid';
 import { isMySQLError } from 'src/common/error';
+import { PET_SEX } from 'src/pet/pet.constants';
 
 @Injectable()
 export class EggService {
@@ -86,16 +81,24 @@ export class EggService {
         await this.eggRepository.insert(eggEntity);
 
         if (father) {
-          await this.parentService.createParent(eggId, father, {
-            isDirectApprove: !!father.isMyPet,
-            isEgg: true,
-          });
+          await this.parentService.createParent(
+            inputEggData.ownerId,
+            eggId,
+            father,
+            {
+              isEgg: true,
+            },
+          );
         }
         if (mother) {
-          await this.parentService.createParent(eggId, mother, {
-            isDirectApprove: !!mother.isMyPet,
-            isEgg: true,
-          });
+          await this.parentService.createParent(
+            inputEggData.ownerId,
+            eggId,
+            mother,
+            {
+              isEgg: true,
+            },
+          );
         }
 
         createdEggs.push({ eggId });
@@ -208,19 +211,26 @@ export class EggService {
     return eggSummaryDto;
   }
 
-  async updateEgg(eggId: string, updateEggDto: UpdateEggDto): Promise<void> {
+  async updateEgg(
+    userId: string,
+    eggId: string,
+    updateEggDto: UpdateEggDto,
+  ): Promise<void> {
     const { father, mother, ...updateData } = updateEggDto;
 
-    await this.eggRepository.update({ egg_id: eggId }, updateData);
+    await this.eggRepository.update(
+      { egg_id: eggId },
+      plainToInstance(EggEntity, updateData),
+    );
 
     if (father) {
-      await this.parentService.createParent(eggId, father, {
-        isDirectApprove: !!father.isMyPet,
+      await this.parentService.createParent(userId, eggId, father, {
+        isEgg: true,
       });
     }
     if (mother) {
-      await this.parentService.createParent(eggId, mother, {
-        isDirectApprove: !!mother.isMyPet,
+      await this.parentService.createParent(userId, eggId, mother, {
+        isEgg: true,
       });
     }
   }
@@ -232,50 +242,48 @@ export class EggService {
   async convertEggToPet(
     eggId: string,
     ownerId: string,
-    createEggHatchDto: CreateEggHatchDto,
   ): Promise<{ petId: string }> {
-    const { father, mother } = await this.parentService.findParents(eggId);
+    // TODO: 본인 소유 알 여부 검증
 
-    const { petId } = await this.petService.createPet({
-      ...createEggHatchDto,
-      growth: '베이비',
-      sex: 'N',
-      ownerId,
-    });
-
-    if (father) {
-      await this.parentService.createParent(
-        petId,
-        {
-          parentId: father.parent_id,
-          role: PARENT_ROLE.FATHER,
-          isMyPet: father.is_my_pet,
-        },
-        {
-          isDirectApprove: true,
-        },
+    const egg = await this.getEgg(eggId);
+    if (!egg) {
+      throw new HttpException(
+        { statusCode: HttpStatus.NOT_FOUND, message: '알을 찾을 수 없습니다.' },
+        HttpStatus.NOT_FOUND,
       );
+    }
+
+    const createPetDto: CreatePetDto = {
+      name: egg.name,
+      species: egg.species,
+      sex: PET_SEX.N,
+      growth: '베이비',
+    };
+
+    const { father, mother } = await this.parentService.findParents(eggId);
+    if (father) {
+      createPetDto.father = {
+        parentId: father.parentId,
+        role: father.role,
+      };
     }
     if (mother) {
-      await this.parentService.createParent(
-        petId,
-        {
-          parentId: mother.parent_id,
-          role: PARENT_ROLE.MOTHER,
-          isMyPet: mother.is_my_pet,
-        },
-        {
-          isDirectApprove: true,
-        },
-      );
+      createPetDto.mother = {
+        parentId: mother.parentId,
+        role: mother.role,
+      };
     }
+
+    const { petId } = await this.petService.createPet({
+      ownerId,
+      isHatchingFromEgg: true,
+      ...createPetDto,
+    });
 
     await this.eggRepository.update(
       { egg_id: eggId },
       {
-        pet_id: petId,
-        hatching_date: createEggHatchDto.birthdate,
-        is_deleted: true,
+        hatched_pet_id: petId,
       },
     );
 

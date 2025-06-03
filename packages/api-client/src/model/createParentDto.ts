@@ -6,14 +6,15 @@
  * OpenAPI spec version: 1.0
  */
 import type { CreateParentDtoRole } from "./createParentDtoRole";
+import type { CreateParentDtoChildType } from "./createParentDtoChildType";
 
 export interface CreateParentDto {
   /** 부모 ID */
   parentId: string;
   /** 부모 구분 */
   role: CreateParentDtoRole;
-  /** 본인 소유 펫 여부 */
-  isMyPet?: boolean;
   /** 부모 관계 요청 메시지 */
   message?: string;
+  /** 펫인지 알인지 여부 */
+  childType?: CreateParentDtoChildType;
 }

@@ -5,9 +5,12 @@
  * Project Daepa API description
  * OpenAPI spec version: 1.0
  */
+import type { CreateEggDtoSpecies } from "./createEggDtoSpecies";
 import type { CreateParentDto } from "./createParentDto";
 
 export interface CreateEggDto {
+  /** 알 종 */
+  species: CreateEggDtoSpecies;
   /** 산란일(yyyyMMdd) */
   layingDate: number;
   /** 차수(클러치) */

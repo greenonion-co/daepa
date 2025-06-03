@@ -31,3 +31,17 @@ export const generateQRCode = async (url: string) => {
     throw err;
   }
 };
+
+export const formatDateToYYYYMMDD = (dateString: string): number => {
+  return Number(dateString.replace(/-/g, ""));
+};
+
+export const formatDateToYYYYMMDDString = (dateString: number) => {
+  if (!dateString) return "";
+  return `${dateString.toString().slice(0, 4)}-${dateString.toString().slice(4, 6)}-${dateString.toString().slice(6, 8)}`;
+};
+
+export const formatDateToShortString = (dateString: string) => {
+  if (!dateString) return "";
+  return `${dateString.toString().slice(2, 4)}-${dateString.toString().slice(4, 6)}-${dateString.toString().slice(6, 8)}`;
+};

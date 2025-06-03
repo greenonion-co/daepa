@@ -16,6 +16,7 @@ import {
   UpdateParentDto,
 } from './parent.dto';
 import { ApiResponse, ApiParam } from '@nestjs/swagger';
+import { CHILD_TYPE } from './parent.constant';
 
 @Controller('/v1/parent')
 export class ParentController {
@@ -40,8 +41,9 @@ export class ParentController {
     @Param('petId') petId: string,
     @Body() createParentDto: CreateParentDto,
   ) {
-    await this.parentService.createParent(petId, createParentDto, {
-      isDirectApprove: !!createParentDto.isMyPet,
+    const tempUserId = 'ADMIN';
+    await this.parentService.createParent(tempUserId, petId, createParentDto, {
+      isEgg: createParentDto.childType === CHILD_TYPE.EGG,
     });
     return {
       success: true,

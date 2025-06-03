@@ -1,29 +1,37 @@
-import { BadgeCheck, Search, X } from "lucide-react";
+import { Search, X } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { overlay } from "overlay-kit";
-import ParentSearchSelector from "../../components/ParentSearchSelector";
+import ParentSearchSelector from "../../components/selector/parentSearch";
 import { Button } from "@/components/ui/button";
 import Dialog from "../../components/Form/Dialog";
-import { ParentDtoStatus, PetParentDto, PetSummaryDto } from "@repo/api-client";
-import { Badge } from "@/components/ui/badge";
+import { PetParentDto, PetSummaryDto } from "@repo/api-client";
 import { cn } from "@/lib/utils";
+import ParentStatusBadge from "../../components/ParentStatusBadge";
+import { Badge } from "@/components/ui/badge";
+import { usePathname } from "next/navigation";
 
 const ParentLink = ({
   label,
+  currentPetOwnerId = "",
   data,
+  editable = true,
   onSelect,
   onUnlink,
 }: {
   label: "부" | "모";
+  currentPetOwnerId?: string;
   data?: PetParentDto;
-  onSelect: (item: PetSummaryDto & { message: string }) => void;
-  onUnlink: () => void;
+  editable?: boolean;
+  onSelect?: (item: PetSummaryDto & { message?: string }) => void;
+  onUnlink?: () => void;
 }) => {
+  const pathname = usePathname();
+  const isRegisterPage = pathname.includes("register");
   const deleteParent = () => {
     if (!data?.petId) return;
 
-    onUnlink();
+    onUnlink?.();
   };
 
   const handleUnlink = (e: React.MouseEvent) => {
@@ -50,34 +58,44 @@ const ParentLink = ({
         {label}
 
         {data?.status && (
-          <Badge
-            variant="outline"
-            className={cn(
-              STATUS_MAP[data?.status as keyof typeof STATUS_MAP].color,
-              "rounded-full font-semibold text-gray-100",
-            )}
-          >
-            {data?.status === ParentDtoStatus.approved && (
-              <BadgeCheck className="h-4 w-4 text-gray-100" />
-            )}
-
-            {STATUS_MAP[data?.status as keyof typeof STATUS_MAP].label}
-          </Badge>
+          <ParentStatusBadge
+            status={data.status}
+            isMyPet={data.owner.userId === currentPetOwnerId}
+          />
         )}
       </dt>
 
       {data?.petId ? (
         <div className="group relative block h-full w-full transition-opacity hover:opacity-95">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="absolute right-1 top-1 z-10 h-6 w-6 rounded-full bg-black/50 p-0 hover:bg-black/70"
-            onClick={handleUnlink}
-          >
-            <X className="h-4 w-4 text-white" />
-          </Button>
+          {!data?.status && data.owner.userId === currentPetOwnerId && (
+            <Badge
+              variant="outline"
+              className="absolute left-1 top-1 z-10 bg-blue-50 text-xs font-bold"
+            >
+              My
+            </Badge>
+          )}
 
-          <Link href={`/pet/${data.petId}`} className="flex flex-col items-center gap-2">
+          {editable && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="absolute right-1 top-1 z-10 h-6 w-6 rounded-full bg-black/50 p-0 hover:bg-black/70"
+              onClick={handleUnlink}
+            >
+              <X className="h-4 w-4 text-white" />
+            </Button>
+          )}
+
+          <Link
+            href={`/pet/${data.petId}`}
+            passHref={false}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (isRegisterPage) e.preventDefault();
+            }}
+            className="flex flex-col items-center gap-2"
+          >
             <div className="relative aspect-square w-full overflow-hidden rounded-lg">
               <Image
                 src={data.photo || "/default-pet-image.png"}
@@ -102,6 +120,7 @@ const ParentLink = ({
             className="relative aspect-square w-full cursor-pointer overflow-hidden rounded-lg bg-gray-100 transition-colors hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700"
             onClick={(e) => {
               e.stopPropagation();
+              if (!editable) return;
 
               overlay.open(({ isOpen, close, unmount }) => (
                 <ParentSearchSelector
@@ -109,7 +128,7 @@ const ParentLink = ({
                   onClose={close}
                   onSelect={(item) => {
                     close();
-                    onSelect(item);
+                    onSelect?.(item);
                   }}
                   sex={label === "부" ? "M" : "F"}
                   onExit={unmount}
@@ -117,7 +136,11 @@ const ParentLink = ({
               ));
             }}
           >
-            <Search className="absolute left-1/2 top-1/2 h-6 w-6 -translate-x-1/2 -translate-y-1/2 text-gray-400" />
+            {editable ? (
+              <Search className="absolute left-1/2 top-1/2 h-6 w-6 -translate-x-1/2 -translate-y-1/2 text-gray-400" />
+            ) : (
+              <div className="text-center text-sm text-gray-400">미등록</div>
+            )}
           </button>
         </div>
       )}
@@ -126,26 +149,3 @@ const ParentLink = ({
 };
 
 export default ParentLink;
-
-const STATUS_MAP = {
-  pending: {
-    label: "요청 대기중",
-    color: "bg-yellow-600 ",
-  },
-  rejected: {
-    label: "요청 거절됨",
-    color: "bg-red-700",
-  },
-  approved: {
-    label: "연동됨",
-    color: "bg-green-700",
-  },
-  deleted: {
-    label: "삭제됨",
-    color: "bg-red-700",
-  },
-  cancelled: {
-    label: "취소됨",
-    color: "bg-gray-600",
-  },
-};

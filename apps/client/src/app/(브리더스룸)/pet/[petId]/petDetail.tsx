@@ -7,8 +7,11 @@ import CardBack from "./(펫카드)/CardBack";
 import { PetDto } from "@repo/api-client";
 import { ChevronDown } from "lucide-react";
 
+type PetDetailDto = Omit<PetDto, "birthdate"> & {
+  birthdate?: string;
+};
 interface PetDetailProps {
-  pet: PetDto;
+  pet: PetDetailDto;
   qrCodeDataUrl: string;
 }
 

@@ -1,6 +1,7 @@
-import { Bell, DollarSign, Egg, Heart, Home, Inbox } from "lucide-react";
+import { Bell, Bubbles, Egg, Film, Home, Inbox } from "lucide-react";
 import { FormStep, SelectorConfig } from "./register/types";
 import { FOOD } from "@/types/pet";
+import { UserNotificationDtoType } from "@repo/api-client";
 
 export const USER_NAME = "낸시";
 
@@ -10,6 +11,16 @@ export const REGISTER_PAGE = {
 };
 
 export const FORM_STEPS: FormStep[] = [
+  {
+    title: "개체 이름 /관리번호",
+    field: {
+      name: "name",
+      type: "text",
+      required: true,
+      placeholder: "개체 이름 /관리번호를 입력해주세요",
+      validation: (value) => value.length > 0,
+    },
+  },
   {
     title: "성별",
     field: {
@@ -97,6 +108,7 @@ export const OPTION_STEPS: FormStep[] = [
       name: "weight",
       type: "number",
       required: true,
+      unit: "g",
       placeholder: "체중을 입력해주세요",
       validation: (value) => !isNaN(Number(value)) && Number(value) > 0,
     },
@@ -111,14 +123,142 @@ export const OPTION_STEPS: FormStep[] = [
       validation: (value) => value.length > 0,
     },
   },
+
   {
-    title: "개체 이름/관리번호",
+    title: "상세 설명",
     field: {
-      name: "name",
-      type: "text",
+      name: "desc",
+      type: "textarea",
+      required: false,
+    },
+  },
+];
+
+export const EGG_REGISTER_STEPS: FormStep[] = [
+  {
+    title: "상세 설명",
+    field: {
+      name: "desc",
+      type: "textarea",
+      required: false,
+    },
+  },
+  // {
+  //   title: "이름/관리번호",
+  //   field: {
+  //     name: "name",
+  //     type: "text",
+  //     required: true,
+  //     placeholder: "개체 이름/관리번호를 입력해주세요",
+  //     validation: (value) => value.length > 0,
+  //   },
+  // },
+  {
+    title: "수량",
+    field: {
+      name: "clutchCount",
+      type: "number",
+      unit: "개",
       required: true,
-      placeholder: "개체 이름/관리번호를 입력해주세요",
+      placeholder: "수량을 입력해주세요",
+      validation: (value) => !isNaN(Number(value)) && Number(value) > 0,
+    },
+  },
+
+  {
+    title: "차수",
+    field: {
+      name: "clutch",
+      type: "number",
+      unit: "차",
+      required: false,
+      placeholder: "차수를 입력해주세요",
+      validation: (value) => !isNaN(Number(value)) && Number(value) > 0,
+    },
+  },
+  {
+    title: "부모 개체 정보",
+    field: {
+      name: "parents",
+      info: "최소 1개 이상 선택해주세요",
+      type: "parentSearch",
+      required: true,
       validation: (value) => value.length > 0,
+    },
+  },
+  {
+    title: "해칭일",
+    field: {
+      name: "layingDate",
+      type: "date",
+      required: true,
+      placeholder: "해칭일을 입력해주세요",
+      validation: (value) => value.length > 0,
+    },
+  },
+  {
+    title: "종",
+    field: {
+      name: "species",
+      type: "select",
+      required: true,
+      placeholder: "종을 선택해주세요",
+      validation: (value) => value.length > 0,
+    },
+  },
+];
+
+export const EGG_EDIT_STEPS: FormStep[] = [
+  // {
+  //   title: "이름/관리번호",
+  //   field: {
+  //     name: "name",
+  //     type: "text",
+  //     required: true,
+  //     placeholder: "개체 이름/관리번호를 입력해주세요",
+  //     validation: (value) => value.length > 0,
+  //   },
+  // },
+  {
+    title: "종",
+    field: {
+      name: "species",
+      type: "select",
+      required: true,
+      placeholder: "종을 선택해주세요",
+      validation: (value) => value.length > 0,
+    },
+  },
+  {
+    title: "해칭일",
+    field: {
+      name: "layingDate",
+      type: "date",
+      required: true,
+      placeholder: "해칭일을 입력해주세요",
+      validation: (value) => value.length > 0,
+    },
+  },
+  {
+    title: "차수",
+    field: {
+      name: "clutch",
+      type: "number",
+      unit: "차",
+      required: false,
+      placeholder: "차수를 입력해주세요",
+      validation: (value) => !isNaN(Number(value)) && Number(value) > 0,
+    },
+  },
+  {
+    title: "수량",
+    field: {
+      name: "clutchOrder",
+      type: "number",
+      unit: "개",
+      required: true,
+      placeholder: "수량을 입력해주세요",
+      validation: (value) => !isNaN(Number(value)) && Number(value) > 0,
     },
   },
   {
@@ -234,6 +374,11 @@ export const SIDEBAR_ITEMS = [
     icon: Home,
   },
   {
+    title: "알 등록",
+    url: "/register/egg",
+    icon: Egg,
+  },
+  {
     title: "개체 등록",
     url: "/register/1",
     icon: Inbox,
@@ -243,11 +388,16 @@ export const SIDEBAR_ITEMS = [
     url: "/noti",
     icon: Bell,
   },
-  // {
-  //   title: "해칭룸",
-  //   url: "/hatching",
-  //   icon: Egg,
-  // },
+  {
+    title: "해칭룸",
+    url: "/hatching",
+    icon: Bubbles,
+  },
+  {
+    title: "쇼츠",
+    url: "/shorts",
+    icon: Film,
+  },
   // {
   //   title: "메이팅룸",
   //   url: "/mating",
@@ -274,7 +424,34 @@ export const FOOD_BADGE_TEXT_COLORS: Record<FOOD, string> = {
   "지렙 인섹트": "text-blue-900",
 };
 
-export const NOTIFICATION_TYPE = {
+export const NOTIFICATION_TYPE: Record<UserNotificationDtoType, string> = {
   parent_request: "부모 연동 요청",
-  system: "시스템 알림",
+  parent_accept: "부모 연동 수락",
+  parent_reject: "부모 연동 거절",
+  owner_transfer: "주인 이전",
+  owner_accept: "주인 수락",
+  owner_reject: "주인 거절",
+};
+
+export const STATUS_MAP = {
+  pending: {
+    label: "요청 대기중",
+    color: "bg-yellow-600 ",
+  },
+  rejected: {
+    label: "요청 거절됨",
+    color: "bg-red-700",
+  },
+  approved: {
+    label: "연동됨",
+    color: "bg-green-700",
+  },
+  deleted: {
+    label: "삭제됨",
+    color: "bg-red-700",
+  },
+  cancelled: {
+    label: "취소됨",
+    color: "bg-gray-600",
+  },
 };

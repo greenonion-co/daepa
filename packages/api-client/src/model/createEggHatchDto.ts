@@ -5,13 +5,10 @@
  * Project Daepa API description
  * OpenAPI spec version: 1.0
  */
-import type { CreateEggHatchDtoSpecies } from "./createEggHatchDtoSpecies";
 
 export interface CreateEggHatchDto {
   /** 펫 이름 */
   name: string;
-  /** 펫 종 */
-  species: CreateEggHatchDtoSpecies;
   /** 펫 모프 */
   morphs?: string[];
   /** 펫 형질 */

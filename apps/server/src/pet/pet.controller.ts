@@ -74,7 +74,8 @@ export class PetController {
     @Param('petId') petId: string,
     @Body() updatePetDto: UpdatePetDto,
   ) {
-    await this.petService.updatePet(petId, updatePetDto);
+    const tempOwnerId = 'ADMIN';
+    await this.petService.updatePet(tempOwnerId, petId, updatePetDto);
     return {
       success: true,
       message: '펫 수정이 완료되었습니다. petId: ' + petId,

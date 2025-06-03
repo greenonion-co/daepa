@@ -1,4 +1,3 @@
-import { PetSummaryDto } from "@/types/pet";
 import { PetParentDto } from "@repo/api-client";
 
 export type FieldName =
@@ -14,7 +13,12 @@ export type FieldName =
   | "desc"
   | "photos"
   | "father"
-  | "mother";
+  | "mother"
+  | "clutchCount"
+  | "clutchOrder"
+  | "clutch"
+  | "parents"
+  | "layingDate";
 
 export type FormStep = {
   title: string;
@@ -22,6 +26,8 @@ export type FormStep = {
     name: FieldName;
     type: string;
     required?: boolean;
+    info?: string;
+    unit?: string;
     placeholder?: string;
     validation?: (value: string) => boolean;
   };
@@ -45,6 +51,9 @@ export interface FormData {
   mother?: PetParentDto & { message: string };
   petId?: string;
   ownerId?: string;
+  clutch?: number;
+  clutchCount?: number;
+  layingDate?: string;
 }
 
 export interface FormErrors {

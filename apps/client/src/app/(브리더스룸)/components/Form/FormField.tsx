@@ -8,11 +8,13 @@ import { useRegisterForm } from "../../register/hooks/useRegisterForm";
 import { GENDER_KOREAN_INFO, SPECIES_KOREAN_INFO } from "../../constants";
 import { toast } from "sonner";
 import { PetSummaryDto } from "@repo/api-client";
+import { InfoIcon } from "lucide-react";
+import { useSelect } from "../../register/hooks/useSelect";
 interface FormFieldProps {
   label?: string;
   field: FormStep["field"];
   formData: FormData;
-  errors: FormErrors;
+  errors?: FormErrors;
   disabled?: boolean;
   handleChange: (value: {
     type: FieldName;
@@ -28,11 +30,12 @@ export const FormField = ({
   disabled,
   handleChange,
 }: FormFieldProps) => {
-  const { handleSelect, handleMultipleSelect } = useRegisterForm();
+  const { handleMultipleSelect } = useRegisterForm();
+  const { handleSelect } = useSelect();
   const { name, placeholder, type } = field;
   const value = formData[name];
 
-  const error = errors[name];
+  const error = errors?.[name];
   const inputClassName = cn(
     `text-[16px] w-full h-9 pr-1 text-left focus:outline-none focus:ring-0 text-gray-400 dark:text-gray-400
     transition-all duration-300 ease-in-out placeholder:text-gray-400`,
@@ -45,7 +48,7 @@ export const FormField = ({
     value: PetSummaryDto & { message: string },
   ) => {
     handleChange({ type, value });
-    toast.success("부모 선택 해제가 완료되었습니다.");
+    toast.success("부모 선택이 완료되었습니다.");
   };
 
   const handleUnlink = (type: "father" | "mother") => {
@@ -82,6 +85,8 @@ export const FormField = ({
               onUnlink={() => {
                 handleUnlink("father");
               }}
+              // TODO: 로그인/회원가입 후 현재 유저 아이디 전달
+              currentPetOwnerId={"ZUCOPIA"}
             />
             <ParentLink
               label="모"
@@ -92,6 +97,8 @@ export const FormField = ({
               onUnlink={() => {
                 handleUnlink("mother");
               }}
+              // TODO: 로그인/회원가입 후 현재 유저 아이디 전달
+              currentPetOwnerId={"ZUCOPIA"}
             />
           </div>
         );
@@ -127,7 +134,13 @@ export const FormField = ({
           <button
             className={cn(inputClassName, `${value && "text-black"}`)}
             disabled={disabled}
-            onClick={() => handleSelect(name)}
+            onClick={() =>
+              handleSelect({
+                type: name,
+                value: value as string,
+                handleNext: handleChange,
+              })
+            }
           >
             {name === "sex"
               ? (GENDER_KOREAN_INFO[value as string as keyof typeof GENDER_KOREAN_INFO] ??
@@ -192,8 +205,16 @@ export const FormField = ({
   };
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col">
       {label && <h2 className="text-lg text-gray-500">{label}</h2>}
+      {field?.info ? (
+        <div className="mb-2 flex items-center gap-1">
+          <InfoIcon className="h-3.5 w-3.5 text-green-600" />
+          <p className="text-sm text-green-600">{field.info}</p>
+        </div>
+      ) : (
+        <div className="h-1" />
+      )}
       {renderField()}
     </div>
   );

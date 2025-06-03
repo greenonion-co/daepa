@@ -52,7 +52,10 @@ export class PetService {
   }
 
   async createPet(
-    inputPetData: { ownerId: string } & CreatePetDto,
+    inputPetData: {
+      ownerId: string;
+      isHatchingFromEgg?: boolean;
+    } & CreatePetDto,
   ): Promise<{ petId: string }> {
     const petId = await this.generateUniquePetId();
     const petData = plainToInstance(PetEntity, { ...inputPetData, petId });
@@ -61,14 +64,24 @@ export class PetService {
       await this.petRepository.insert(petData);
 
       if (inputPetData.father) {
-        await this.parentService.createParent(petId, inputPetData.father, {
-          isDirectApprove: !!inputPetData.father.isMyPet,
-        });
+        await this.parentService.createParent(
+          inputPetData.ownerId,
+          petId,
+          inputPetData.father,
+          {
+            isDirectApprove: inputPetData.isHatchingFromEgg,
+          },
+        );
       }
       if (inputPetData.mother) {
-        await this.parentService.createParent(petId, inputPetData.mother, {
-          isDirectApprove: !!inputPetData.mother.isMyPet,
-        });
+        await this.parentService.createParent(
+          inputPetData.ownerId,
+          petId,
+          inputPetData.mother,
+          {
+            isDirectApprove: inputPetData.isHatchingFromEgg,
+          },
+        );
       }
 
       return { petId };
@@ -180,20 +193,20 @@ export class PetService {
     return result?.name ?? null;
   }
 
-  async updatePet(petId: string, updatePetDto: UpdatePetDto): Promise<void> {
+  async updatePet(
+    userId: string,
+    petId: string,
+    updatePetDto: UpdatePetDto,
+  ): Promise<void> {
     const { father, mother, ...updateData } = updatePetDto;
 
     await this.petRepository.update({ pet_id: petId }, updateData);
 
     if (father) {
-      await this.parentService.createParent(petId, father, {
-        isDirectApprove: !!father.isMyPet,
-      });
+      await this.parentService.createParent(userId, petId, father, {});
     }
     if (mother) {
-      await this.parentService.createParent(petId, mother, {
-        isDirectApprove: !!mother.isMyPet,
-      });
+      await this.parentService.createParent(userId, petId, mother, {});
     }
   }
 

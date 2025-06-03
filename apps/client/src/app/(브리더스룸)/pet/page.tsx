@@ -18,7 +18,7 @@ export default function PetPage() {
       brPetControllerFindAll({
         page: pageParam,
         itemPerPage,
-        order: "ASC",
+        order: "DESC",
       }),
     initialPageParam: 1,
     getNextPageParam: (lastPage) => {
@@ -27,6 +27,7 @@ export default function PetPage() {
       }
       return undefined;
     },
+    select: (data) => data.pages.flatMap((page) => page.data.data),
   });
 
   useEffect(() => {
@@ -37,14 +38,11 @@ export default function PetPage() {
 
   if (isLoading) return <Loading />;
 
-  // 모든 페이지의 데이터를 하나의 배열로 합치기
-  const allPets = data?.pages.flatMap((page) => page.data.data) ?? [];
-
   return (
-    <div className="container mx-auto py-10">
+    <div className="container mx-auto">
       <DataTable
         columns={columns}
-        data={allPets}
+        data={data ?? []}
         hasMore={hasNextPage}
         isFetchingMore={isFetchingNextPage}
         loaderRefAction={ref}

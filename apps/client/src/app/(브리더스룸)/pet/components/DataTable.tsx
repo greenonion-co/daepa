@@ -24,6 +24,8 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import Add from "@mui/icons-material/Add";
 import { PetDto } from "@repo/api-client";
+import Loading from "@/components/common/Loading";
+import { cn } from "@/lib/utils";
 
 interface DataTableProps<TData> {
   columns: ColumnDef<TData>[];
@@ -110,7 +112,8 @@ export const DataTable = ({
                     <TableRow
                       key={row.id}
                       data-state={row.getIsSelected() && "selected"}
-                      className="cursor-pointer"
+                      // TODO: 공개 여부 필드 추가 후 조건 수정 예정
+                      className={cn("cursor-pointer", row.original.isPublic ? "bg-blue-100" : "")}
                       onClick={(e) => handleRowClick({ e, id: row.original.petId })}
                     >
                       {row.getVisibleCells().map((cell) => (
@@ -129,7 +132,7 @@ export const DataTable = ({
                             <div className="h-6 w-6 animate-spin rounded-full border-b-2 border-blue-500" />
                           </div>
                         ) : (
-                          "더 불러오는 중..."
+                          <Loading />
                         )}
                       </TableCell>
                     </TableRow>

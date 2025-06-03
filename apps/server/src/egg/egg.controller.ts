@@ -9,12 +9,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { EggService } from './egg.service';
-import {
-  CreateEggDto,
-  CreateEggHatchDto,
-  EggDto,
-  UpdateEggDto,
-} from './egg.dto';
+import { CreateEggDto, EggDto, UpdateEggDto } from './egg.dto';
 import { ExcludeNilInterceptor } from 'src/interceptors/exclude-nil';
 import { ApiResponse } from '@nestjs/swagger';
 
@@ -56,7 +51,8 @@ export class EggController {
     @Param('eggId') eggId: string,
     @Body() updateEggDto: UpdateEggDto,
   ) {
-    await this.eggService.updateEgg(eggId, updateEggDto);
+    const tempOwnerId = 'ADMIN';
+    await this.eggService.updateEgg(tempOwnerId, eggId, updateEggDto);
     return {
       success: true,
       message: '알 수정이 완료되었습니다. eggId: ' + eggId,
@@ -72,20 +68,14 @@ export class EggController {
     };
   }
 
-  @Post(':eggId/hatch')
-  async hatch(
-    @Param('eggId') eggId: string,
-    @Body() createEggHatchDto: CreateEggHatchDto,
-  ) {
+  @Get(':eggId/hatched')
+  async hatched(@Param('eggId') eggId: string) {
     const tempOwnerId = 'ADMIN';
-    const { petId } = await this.eggService.convertEggToPet(
-      eggId,
-      tempOwnerId,
-      createEggHatchDto,
-    );
+    const { petId } = await this.eggService.convertEggToPet(eggId, tempOwnerId);
     return {
       success: true,
-      message: '알이 펫으로 전환되었습니다. petId: ' + petId,
+      message: '알이 펫으로 전환되었습니다.',
+      hatchedPetId: petId,
     };
   }
 }
