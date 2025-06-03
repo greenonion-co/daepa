@@ -211,7 +211,10 @@ export class PetService {
   }
 
   async deletePet(petId: string): Promise<DeleteResult> {
-    return await this.petRepository.delete({ pet_id: petId });
+    return await this.petRepository.update(
+      { pet_id: petId },
+      { is_deleted: true },
+    );
   }
 
   async getPetSummary(petId: string): Promise<PetSummaryDto | null> {
