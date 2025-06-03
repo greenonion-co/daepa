@@ -31,7 +31,7 @@ import {
 } from "@/components/ui/select";
 import Link from "next/link";
 import { ParentDtoStatus, PetDto } from "@repo/api-client";
-import { formatDate } from "@/lib/utils";
+import { formatDateToYYYYMMDDString } from "@/lib/utils";
 import LinkButton from "../../components/LinkButton";
 
 function TableHeaderSelect({
@@ -200,8 +200,12 @@ export const columns: ColumnDef<PetDto>[] = [
     accessorKey: "birthdate",
     header: TABLE_HEADER.birthdate,
     cell: ({ row }) => {
-      const birthdate = row.getValue("birthdate") as string;
-      return <div className="capitalize">{birthdate ? formatDate(birthdate) : "-"}</div>;
+      const birthdate = row.getValue("birthdate");
+      return (
+        <div className="capitalize">
+          {birthdate ? formatDateToYYYYMMDDString(Number(birthdate)) : "-"}
+        </div>
+      );
     },
   },
   {
