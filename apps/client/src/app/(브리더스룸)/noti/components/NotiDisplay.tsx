@@ -12,19 +12,24 @@ import { useNotiStore } from "../store/noti";
 import { useMutation } from "@tanstack/react-query";
 import {
   parentControllerUpdateParentRequest,
+  PetSummaryDto,
   UpdateParentDto,
   UpdateParentDtoStatus,
   UserNotificationDtoType,
 } from "@repo/api-client";
 import Link from "next/link";
 import { toast } from "sonner";
-import LinkButton from "../../components/LinkButton";
 import { NOTIFICATION_TYPE } from "../../constants";
 import { Badge } from "@/components/ui/badge";
 import { AxiosError, AxiosResponse } from "axios";
+import NotiTitle from "./NotiTitle";
+import { formatDateToYYYYMMDDString } from "@/lib/utils";
 
 export function NotiDisplay() {
   const { selected: item } = useNotiStore();
+  const receiverPet = item?.detailJson?.receiverPet as PetSummaryDto;
+  const senderPet = item?.detailJson?.senderPet as PetSummaryDto;
+  const isEgg = senderPet?.eggId;
 
   const { mutate: updateParentStatus } = useMutation<
     AxiosResponse<{ success: boolean; message: string }>,
@@ -103,30 +108,16 @@ export function NotiDisplay() {
       {item ? (
         <div className="flex flex-1 flex-col">
           <div className="flex items-start p-4">
-            <div className="flex items-start gap-4 text-sm">
+            <div className="flex items-center gap-4 text-sm">
               <Avatar>
                 <AvatarImage alt="보내는 사람" />
-                <AvatarFallback>{item?.detailJson?.senderPet?.eggId ? "🐣" : "A"}</AvatarFallback>
+                <AvatarFallback>{isEgg ? "🐣" : "A"}</AvatarFallback>
               </Avatar>
-              <div className="grid gap-1">
-                <Badge variant="outline" className="text-xs font-medium">
+              <div className="flex flex-col">
+                <div className="text-sm font-bold">
                   {NOTIFICATION_TYPE[item.type as keyof typeof NOTIFICATION_TYPE]}
-                </Badge>{" "}
-                <div className="font-semibold">
-                  <LinkButton
-                    href={`/pet/${item.detailJson?.receiverPet?.petId}`}
-                    label={item.detailJson?.receiverPet?.name}
-                    tooltip="펫 상세 페이지로 이동"
-                  />{" "}
-                  의 펫{" "}
-                  <span className="text-sky-600 dark:text-sky-400">
-                    {item.detailJson?.senderPet?.name}
-                  </span>{" "}
-                  의{" "}
-                  <span className="text-sky-600 dark:text-sky-400">
-                    {item.detailJson?.receiverPet?.sex === "M" ? "부" : "모"}
-                  </span>{" "}
                 </div>
+                <NotiTitle hasLink receiverPet={receiverPet} senderPet={senderPet} />
               </div>
             </div>
             {item.createdAt && (
@@ -146,39 +137,68 @@ export function NotiDisplay() {
           </div>
           <Separator />
 
-          {/* 광고 배너 형태의 링크 */}
+          {/* 메시지 내용 */}
+          <div className="whitespace-pre-wrap p-4 text-sm">
+            {(item?.detailJson?.message as string)?.substring(0, 300)}
+          </div>
+
           <Link
-            href={`/pet/${item.detailJson?.senderPet?.petId}`}
-            className="group mx-4 mt-4 flex items-center justify-between rounded-lg bg-blue-100 p-3 shadow-sm transition-all duration-200 hover:scale-[1.02] hover:bg-blue-200 hover:shadow-md"
+            href={`/${isEgg ? "egg" : "pet"}/${senderPet?.eggId ?? senderPet?.petId}`}
+            className="group mx-4 mt-4 flex flex-col rounded-lg border p-3 shadow-sm transition-all duration-200 hover:scale-[1.02] hover:shadow-md"
           >
-            <div className="flex items-center gap-3">
-              {item.detailJson?.senderPet?.photo ? (
-                <div className="relative h-10 w-10 overflow-hidden rounded-full">
+            <div className="flex flex-col gap-3">
+              {senderPet?.photo ? (
+                <div className="relative h-48 w-full overflow-hidden rounded-lg">
                   <Image
-                    src={item.detailJson?.senderPet?.photo ?? "/default-pet-image.png"}
-                    alt={item.detailJson?.senderPet?.name ?? "펫 이미지"}
+                    src={senderPet?.photo ?? "/default-pet-image.png"}
+                    alt={senderPet?.name ?? "펫 이미지"}
                     fill
                     className="object-cover"
-                    sizes="40px"
+                    sizes="(max-width: 768px) 100vw, 384px"
                   />
                 </div>
               ) : (
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-sky-50 dark:bg-blue-900">
-                  <span className="text-lg">🔗</span>
+                <div className="bg-foreground/70 flex h-48 w-full items-center justify-center rounded-lg">
+                  <span className="text-4xl">{isEgg ? "🥚" : "🔗"}</span>
                 </div>
               )}
-              <div className="flex flex-col gap-0.5">
-                <span className="text-sm font-medium">
-                  {item.detailJson?.senderPet?.name} 펫 프로필로 이동
-                </span>
-                <span className="text-muted-foreground text-xs">클릭하여 자세한 정보 확인하기</span>
+              <div className="flex flex-col">
+                <div className="flex items-center justify-between">
+                  <span className="text-base">
+                    <span className="font-bold">{senderPet?.name}</span>
+                    {isEgg ? " 알 " : " 펫 "}
+                    프로필로 이동
+                  </span>
+                  <ArrowUpRight className="text-muted-foreground h-5 w-5 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                </div>
+                <div className="flex gap-1">
+                  {senderPet?.morphs?.map((morph) => (
+                    <Badge
+                      key={morph}
+                      className="whitespace-nowrap bg-yellow-500/80 font-bold text-black backdrop-blur-sm"
+                    >
+                      {morph}
+                    </Badge>
+                  ))}
+                  {senderPet?.traits?.map((trait) => (
+                    <Badge
+                      variant="outline"
+                      key={trait}
+                      className="whitespace-nowrap bg-white font-bold text-black backdrop-blur-sm"
+                    >
+                      {trait}
+                    </Badge>
+                  ))}
+                  <span className="text-muted-foreground text-xs">
+                    {senderPet?.layingDate && formatDateToYYYYMMDDString(senderPet?.layingDate)}
+                    {senderPet?.clutch && `◦ ${senderPet?.clutch}개`}
+                    {senderPet?.clutchOrder && `◦ ${senderPet?.clutchOrder}번째`}
+                  </span>
+                </div>
+                {senderPet?.desc && <div className="mt-2 text-sm">{senderPet?.desc}</div>}
               </div>
             </div>
-            <ArrowUpRight className="text-muted-foreground h-5 w-5 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
           </Link>
-
-          {/* 메시지 내용 */}
-          <div className="flex-1 whitespace-pre-wrap p-4 text-sm">{item.detailJson?.message}</div>
         </div>
       ) : (
         <div className="text-muted-foreground p-8 text-center">알림을 선택해주세요. </div>

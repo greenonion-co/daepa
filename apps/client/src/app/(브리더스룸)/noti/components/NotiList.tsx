@@ -9,8 +9,9 @@ import { useNotiStore } from "../store/noti";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ko } from "date-fns/locale";
 import { NOTIFICATION_TYPE } from "@/app/(브리더스룸)/constants";
-import { Badge } from "@/components/ui/badge";
 import Loading from "@/components/common/Loading";
+import NotiTitle from "./NotiTitle";
+import { PetSummaryDto } from "@/types/pet";
 
 interface NotiListProps {
   items: UserNotificationDto[];
@@ -42,9 +43,23 @@ const NotiList = ({
   return (
     <ScrollArea className="h-[calc(100vh-200px)]">
       <div className="flex flex-col gap-2 p-4 pt-0">
-        {items.map((item) => {
-          const role = item?.detailJson?.receiverPet?.sex === "M" ? "father" : "mother";
+        {/* 역할별 색상 안내 추가 */}
+        <div className="text-muted-foreground mb-2 flex items-center gap-4 text-xs">
+          <div className="flex items-center gap-1">
+            <span className="h-2 w-2 rounded-full bg-red-400/70" />
+            <span>모</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <span className="h-2 w-2 rounded-full bg-[#247DFE]/70" />
+            <span>부</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <span className="bg-muted-foreground/50 h-2 w-2 rounded-full" />
+            <span>미구분</span>
+          </div>
+        </div>
 
+        {items.map((item) => {
           return (
             <button
               key={item.id}
@@ -57,7 +72,9 @@ const NotiList = ({
               <div className="flex w-full flex-col gap-1">
                 <div className="flex items-center">
                   <div className="flex items-center gap-2">
-                    <div className="font-semibold">{item?.detailJson?.receiverPet?.name}</div>
+                    <div className="font-semibold">
+                      {NOTIFICATION_TYPE[item.type as keyof typeof NOTIFICATION_TYPE]}
+                    </div>
                     {item.status === UserNotificationDtoStatus.unread && (
                       <span className="flex h-2 w-2 rounded-full bg-red-500" />
                     )}
@@ -74,25 +91,14 @@ const NotiList = ({
                     })}
                   </div>
                 </div>
-                <div className="flex gap-2">
-                  <span
-                    className={cn(
-                      "relative font-bold after:absolute after:bottom-1 after:left-0.5 after:-z-10 after:h-[10px] after:w-full after:opacity-40",
-                      role === "mother" ? "after:bg-red-400" : "after:bg-[#247DFE]",
-                    )}
-                  >
-                    {role === "mother" ? "모" : "부"}
-                  </span>
-                  <Badge variant="outline" className="text-xs font-medium">
-                    {NOTIFICATION_TYPE[item.type as keyof typeof NOTIFICATION_TYPE]}
-                  </Badge>
-                </div>
+                <NotiTitle
+                  receiverPet={item?.detailJson?.receiverPet as PetSummaryDto}
+                  senderPet={item?.detailJson?.senderPet as PetSummaryDto}
+                />
               </div>
-              {item?.detailJson?.message && (
-                <div className="text-muted-foreground line-clamp-2 text-xs">
-                  {item.detailJson.message.substring(0, 300)}
-                </div>
-              )}
+              <div className="text-muted-foreground line-clamp-2 text-xs">
+                {(item.detailJson?.message as string)?.substring(0, 300)}
+              </div>
             </button>
           );
         })}
