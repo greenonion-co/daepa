@@ -33,9 +33,12 @@ export function NotiDisplay() {
   >({
     mutationFn: ({ relationId, status, opponentId }: UpdateParentDto) =>
       parentControllerUpdateParentRequest({ relationId, status, opponentId }),
-    onSuccess: (res) => {
+    onSuccess: (res, variables) => {
       if (res?.data?.success) {
-        toast.success(res?.data?.message ?? "부모 연동 상태가 변경되었습니다.");
+        toast.success(
+          res?.data?.message ??
+            `부모 연동이 ${variables.status === UpdateParentDtoStatus.approved ? "수락" : variables.status === UpdateParentDtoStatus.cancelled ? "취소" : "거절"} 되었습니다.`,
+        );
       }
     },
     onError: () => {
