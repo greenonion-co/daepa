@@ -11,6 +11,7 @@ import { InfoIcon } from "lucide-react";
 import { useSelect } from "../../register/hooks/useSelect";
 import { FormData } from "../../register/store/form";
 import { PetParentDtoWithMessage } from "../../pet/store/parentLink";
+import { usePathname } from "next/navigation";
 interface FormFieldProps {
   label?: string;
   field: FormStep["field"];
@@ -35,6 +36,7 @@ export const FormField = ({
   const { handleSelect } = useSelect();
   const { name, placeholder, type } = field;
   const value = formData[name as keyof FormData];
+  const isRegister = usePathname().includes("register");
 
   const error = errors?.[name];
   const inputClassName = cn(
@@ -132,13 +134,18 @@ export const FormField = ({
           <button
             className={cn(inputClassName, `${value && "text-black"}`)}
             disabled={disabled}
-            onClick={() =>
+            onClick={() => {
+              if (!isRegister && name === "species") {
+                toast.error("종은 변경할 수 없습니다.");
+                return;
+              }
+
               handleSelect({
                 type: name,
                 value: value as string,
                 handleNext: handleChange,
-              })
-            }
+              });
+            }}
           >
             {name === "sex"
               ? (GENDER_KOREAN_INFO[value as string as keyof typeof GENDER_KOREAN_INFO] ??
