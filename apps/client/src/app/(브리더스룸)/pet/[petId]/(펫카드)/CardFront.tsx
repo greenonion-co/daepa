@@ -3,10 +3,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import Image from "next/image";
 import { GENDER_KOREAN_INFO, SPECIES_KOREAN_INFO } from "@/app/(브리더스룸)/constants";
-import { formatDate } from "@/lib/utils";
 import { Expand, Shrink } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 const CardFront = ({ pet, qrCodeDataUrl }: { pet: PetDto; qrCodeDataUrl?: string }) => {
   const [isExpanded, setIsExpanded] = useState(true);
@@ -140,51 +140,62 @@ const CardFront = ({ pet, qrCodeDataUrl }: { pet: PetDto; qrCodeDataUrl?: string
           />
         )}
 
-        <div className="mb-4 flex flex-col gap-2">
+        <div className="mb-4 flex flex-col gap-1">
+          <Badge className="whitespace-nowrap bg-slate-700 font-bold text-white backdrop-blur-sm">
+            {pet.owner.name}
+          </Badge>
           <div className="flex items-center gap-2">
-            <h1 className={`shrink-0 text-3xl font-bold ${!isExpanded && "dark:text-white"}`}>
-              {pet.name}
-            </h1>
-            <div className="scrollbar-hide overflow-x-auto">
-              <div className="flex gap-1">
-                {pet.morphs?.map((morph) => (
-                  <Badge
-                    key={morph}
-                    className={`whitespace-nowrap bg-yellow-500/80 font-bold text-black ${
-                      isExpanded ? "backdrop-blur-sm" : ""
-                    }`}
-                  >
-                    {morph}
-                  </Badge>
-                ))}
+            <h1 className="text-2xl font-bold">{pet.name}</h1>
+            <div
+              className={cn(
+                "whitespace-nowrap text-[12px] font-semibold",
+                isExpanded && "text-gray-300",
+                !isExpanded && "text-gray-600",
+              )}
+            >
+              <div>
+                {pet.weight &&
+                  (() => {
+                    const weight = Number(pet.weight);
+                    return `${Number.isInteger(weight) ? weight : weight.toFixed(1)}g`;
+                  })()}
+                {pet.birthdate ? ` / ${pet.birthdate}` : "-"}
               </div>
+              {SPECIES_KOREAN_INFO[pet.species]} / {GENDER_KOREAN_INFO[pet.sex]}
             </div>
           </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm dark:text-white">
-          <div>
-            <p className={isExpanded ? "text-gray-300" : "text-gray-500 dark:text-gray-400"}>종</p>
-            <div>{SPECIES_KOREAN_INFO[pet.species]}</div>
+          <div className="scrollbar-hide overflow-x-auto">
+            <div className="flex gap-1">
+              {pet.morphs?.map((morph) => (
+                <Badge
+                  key={morph}
+                  className="whitespace-nowrap bg-yellow-500/80 font-bold text-black backdrop-blur-sm"
+                >
+                  {morph}
+                </Badge>
+              ))}
+              {pet.traits?.map((trait) => (
+                <Badge
+                  variant="outline"
+                  key={trait}
+                  className="whitespace-nowrap bg-white font-bold text-black backdrop-blur-sm"
+                >
+                  {trait}
+                </Badge>
+              ))}
+            </div>
           </div>
-          <div>
-            <p className={isExpanded ? "text-gray-300" : "text-gray-500 dark:text-gray-400"}>
-              성별
-            </p>
-            <div>{GENDER_KOREAN_INFO[pet.sex]}</div>
-          </div>
-          <div>
-            <p className={isExpanded ? "text-gray-300" : "text-gray-500 dark:text-gray-400"}>
-              무게
-            </p>
-            <div>{pet.weight ? `${pet.weight}g` : "-"}</div>
-          </div>
-          <div>
-            <p className={isExpanded ? "text-gray-300" : "text-gray-500 dark:text-gray-400"}>
-              생년월일
-            </p>
-            <div>{pet.birthdate ? formatDate(pet.birthdate ?? "") : "-"}</div>
-          </div>
+          {pet.desc && (
+            <div
+              className={cn(
+                "mt-4 text-sm text-gray-300",
+                isExpanded && "line-clamp-1 text-white",
+                !isExpanded && "text-gray-800",
+              )}
+            >
+              {pet.desc}
+            </div>
+          )}
         </div>
       </motion.div>
 
