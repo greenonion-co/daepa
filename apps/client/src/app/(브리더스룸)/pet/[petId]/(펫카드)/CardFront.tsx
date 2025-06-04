@@ -8,11 +8,7 @@ import { Expand, Shrink } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
-type PetDetailDto = Omit<PetDto, "birthdate"> & {
-  birthdate?: string;
-};
-
-const CardFront = ({ pet, qrCodeDataUrl }: { pet: PetDetailDto; qrCodeDataUrl?: string }) => {
+const CardFront = ({ pet, qrCodeDataUrl }: { pet: PetDto; qrCodeDataUrl?: string }) => {
   const [isExpanded, setIsExpanded] = useState(true);
   const [dragStart, setDragStart] = useState(0);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);

@@ -27,9 +27,10 @@ import InfoItem from "@/app/(브리더스룸)/components/Form/InfoItem";
 import { cn, formatDateToYYYYMMDD } from "@/lib/utils";
 interface CardBackProps {
   pet: PetDto;
+  from: string | null;
 }
 
-const CardBack = ({ pet }: CardBackProps) => {
+const CardBack = ({ pet, from }: CardBackProps) => {
   const { formData, errors, setFormData, setPage } = useFormStore();
   const { selectedParent, setSelectedParent } = useParentLinkStore();
 
@@ -83,6 +84,12 @@ const CardBack = ({ pet }: CardBackProps) => {
   });
 
   useEffect(() => {
+    if (from === "egg") {
+      setIsEditing(true);
+    }
+  }, [from]);
+
+  useEffect(() => {
     setFormData(pet);
     setPage("detail");
   }, [pet, setFormData, setPage]);
@@ -93,6 +100,11 @@ const CardBack = ({ pet }: CardBackProps) => {
       ["traits", "foods", "birthdate", "weight", "name", "desc"].includes(step.field.name),
     ),
   ];
+
+  const highlightField = (fieldName: string) => {
+    if (from !== "egg") return false;
+    return ["birthdate", "name", "morphs"].includes(fieldName);
+  };
 
   const handleChange = (value: {
     type: FieldName;
@@ -128,6 +140,8 @@ const CardBack = ({ pet }: CardBackProps) => {
     } catch (error) {
       console.error("Failed to update pet:", error);
       toast.error("펫 정보 수정에 실패했습니다.");
+    } finally {
+      router.push(`/pet/${pet.petId}`);
     }
   };
 
@@ -254,11 +268,14 @@ const CardBack = ({ pet }: CardBackProps) => {
             <div className="space-y-4">
               <div>
                 {visibleFields.map((step) => {
+                  const shouldHighlight = highlightField(step.field.name);
+
                   return (
                     <InfoItem
                       key={step.field.name}
                       label={step.title}
                       className={step.field.type === "textarea" ? "" : "flex gap-4"}
+                      shouldHighlight={shouldHighlight}
                       value={
                         <FormField
                           field={step.field}

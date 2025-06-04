@@ -49,7 +49,7 @@ const EggDetail = ({ egg }: EggDetailProps) => {
     onSuccess: (response) => {
       if (response?.data?.hatchedPetId) {
         toast.success("해칭 완료");
-        router.push(`/pet/${response.data.hatchedPetId}`);
+        router.push(`/pet/${response.data.hatchedPetId}?from=egg`);
       }
     },
     onError: (error: AxiosError<{ message: string }>) => {
