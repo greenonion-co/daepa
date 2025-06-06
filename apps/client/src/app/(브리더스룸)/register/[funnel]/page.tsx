@@ -1,23 +1,46 @@
 "use client";
 
-import { FORM_STEPS, OPTION_STEPS, REGISTER_PAGE } from "../../constants";
+import { FORM_STEPS, GENDER_KOREAN_INFO, OPTION_STEPS, REGISTER_PAGE } from "../../constants";
 import { FormHeader } from "../../components/Form/FormHeader";
 import { useRegisterForm } from "../hooks/useRegisterForm";
-import { useFormStore } from "../store/form";
+import { FormData, usePetStore } from "../store/pet";
 import { useEffect, use } from "react";
 import { FormField } from "../../components/Form/FormField";
 
 import FloatingButton from "../../components/FloatingButton";
-import { InfoIcon } from "lucide-react";
 import { useSelect } from "../hooks/useSelect";
+import { useMutation } from "@tanstack/react-query";
+import { CreatePetDto, petControllerCreate } from "@repo/api-client";
+import { toast } from "sonner";
+import { AxiosError } from "axios";
+import { useRouter } from "next/navigation";
+import { formatDateToYYYYMMDD } from "@/lib/utils";
 
 export default function RegisterPage({ params }: { params: Promise<{ funnel: string }> }) {
-  const { handleNext, goNext, handleMultipleSelect } = useRegisterForm();
+  const router = useRouter();
   const { handleSelect } = useSelect();
-  const { formData, step, errors, resetForm, page, setPage } = useFormStore();
+  const { formData, step, setStep, setFormData, errors, setErrors, resetForm, page, setPage } =
+    usePetStore();
   const resolvedParams = use(params);
   const funnel = Number(resolvedParams.funnel);
   const visibleSteps = FORM_STEPS.slice(-step - 1);
+
+  const { mutate: mutateCreatePet } = useMutation({
+    mutationFn: (data: CreatePetDto) => petControllerCreate(data),
+    onSuccess: () => {
+      toast.success("개체 등록이 완료되었습니다.");
+      router.push(`/pet`);
+      resetForm();
+    },
+    onError: (error: AxiosError<{ message: string }>) => {
+      console.error("Failed to create pet:", error);
+      if (error.response?.data?.message) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error("개체 등록에 실패했습니다.");
+      }
+    },
+  });
 
   useEffect(() => {
     if (page !== "register") {
@@ -48,9 +71,67 @@ export default function RegisterPage({ params }: { params: Promise<{ funnel: str
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [step]);
 
+  const createPet = (formData: FormData) => {
+    try {
+      const transformedFormData = { ...formData };
+      if (transformedFormData.sex && typeof transformedFormData.sex === "string") {
+        const genderEntry = Object.entries(GENDER_KOREAN_INFO).find(
+          ([_, koreanValue]) => koreanValue === transformedFormData.sex,
+        );
+        if (genderEntry) {
+          transformedFormData.sex = genderEntry[0];
+        }
+      }
+
+      const { growth, morphs, name, sex, species, ...rest } = transformedFormData;
+
+      const requestData: CreatePetDto = {
+        growth,
+        morphs,
+        name,
+        sex,
+        species,
+        ...(rest?.birthdate && {
+          birthdate: formatDateToYYYYMMDD(rest.birthdate.toString()),
+        }),
+        ...(rest?.weight && { weight: Number(rest.weight) }),
+        ...(rest?.father?.petId && {
+          father: {
+            parentId: rest.father.petId,
+            role: "father",
+            isMyPet: false,
+            message: rest.father?.message,
+          },
+        }),
+        ...(rest?.mother?.petId && {
+          mother: {
+            parentId: rest.mother.petId,
+            role: "mother",
+            isMyPet: false,
+            message: rest.mother?.message,
+          },
+        }),
+      };
+
+      mutateCreatePet(requestData);
+    } catch (error) {
+      console.error("Failed to create pet:", error);
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
   };
+
+  const { handleNext, goNext, handleMultipleSelect } = useRegisterForm({
+    formStep: FORM_STEPS,
+    formData,
+    step,
+    setErrors,
+    setStep,
+    setFormData,
+    handleSubmit: createPet,
+  });
 
   return (
     <div className="relative mx-auto min-h-screen max-w-[640px] p-4 pb-20">
@@ -68,13 +149,8 @@ export default function RegisterPage({ params }: { params: Promise<{ funnel: str
                     handleChange={handleNext}
                     formData={formData}
                     errors={errors}
+                    handleMultipleSelect={handleMultipleSelect}
                   />
-                  {errors[field.name] && (
-                    <div className="mt-1 flex items-center gap-1">
-                      <InfoIcon className="h-4 w-4 text-red-500" />
-                      <p className="text-sm text-red-500">{errors[field.name]}</p>
-                    </div>
-                  )}
                 </div>
               );
             })}
@@ -92,6 +168,7 @@ export default function RegisterPage({ params }: { params: Promise<{ funnel: str
                     formData={formData}
                     errors={errors}
                     label={step.title}
+                    handleMultipleSelect={handleMultipleSelect}
                   />
                 </div>
               </div>

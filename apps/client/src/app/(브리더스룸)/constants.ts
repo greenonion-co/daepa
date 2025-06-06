@@ -143,16 +143,6 @@ export const EGG_REGISTER_STEPS: FormStep[] = [
       required: false,
     },
   },
-  // {
-  //   title: "이름/관리번호",
-  //   field: {
-  //     name: "name",
-  //     type: "text",
-  //     required: true,
-  //     placeholder: "개체 이름/관리번호를 입력해주세요",
-  //     validation: (value) => value.length > 0,
-  //   },
-  // },
   {
     title: "수량",
     field: {
@@ -173,7 +163,6 @@ export const EGG_REGISTER_STEPS: FormStep[] = [
       unit: "차",
       required: false,
       placeholder: "차수를 입력해주세요",
-      validation: (value) => !isNaN(Number(value)) && Number(value) > 0,
     },
   },
   {
@@ -182,8 +171,7 @@ export const EGG_REGISTER_STEPS: FormStep[] = [
       name: "parents",
       info: "최소 1개 이상 선택해주세요",
       type: "parentSearch",
-      required: true,
-      validation: (value) => value.length > 0,
+      required: false,
     },
   },
   {
@@ -251,11 +239,11 @@ export const EGG_EDIT_STEPS: FormStep[] = [
     },
   },
   {
-    title: "수량",
+    title: "구분",
     field: {
       name: "clutchOrder",
       type: "number",
-      unit: "개",
+      unit: "번",
       required: true,
       placeholder: "수량을 입력해주세요",
       validation: (value) => !isNaN(Number(value)) && Number(value) > 0,

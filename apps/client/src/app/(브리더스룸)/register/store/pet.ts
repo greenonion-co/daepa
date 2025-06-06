@@ -1,18 +1,12 @@
 import { create } from "zustand";
-import { FormErrors } from "../types";
-import { PetDto, PetDtoSpecies, UserDto } from "@repo/api-client";
+import { FieldName, FormErrors } from "../types";
 
-export interface FormData extends Omit<PetDto, "petId" | "owner" | "name" | "species"> {
-  petId?: string;
-  owner?: UserDto;
-  name?: string;
-  species?: PetDtoSpecies;
-}
-interface FormStore {
+export type FormData = Partial<Record<FieldName, any>>;
+export interface FormStore {
   formData: FormData;
-  errors: FormErrors;
   step: number;
   page: "register" | "detail";
+  errors: FormErrors;
   setErrors: (errors: FormErrors) => void;
   setStep: (step: number) => void;
   setPage: (page: "register" | "detail") => void;
@@ -22,7 +16,7 @@ interface FormStore {
 
 const initialFormData: FormData = {};
 
-export const useFormStore = create<FormStore>((set) => ({
+export const usePetStore = create<FormStore>((set) => ({
   formData: initialFormData,
   errors: {},
   page: "register",

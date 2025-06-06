@@ -40,7 +40,7 @@ export const formatDateToYYYYMMDD = (dateString: string): number => {
 export const formatDateToYYYYMMDDString = (
   dateNumber: number,
   formatType: string = "yyyy-MM-dd",
-) => {
+): string => {
   const parsedDate = parse(dateNumber.toString(), "yyyyMMdd", new Date());
   const formattedDate = format(parsedDate, formatType);
   return formattedDate;

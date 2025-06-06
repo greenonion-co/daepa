@@ -4,12 +4,11 @@ import FileField from "./FileField";
 import NumberField from "./NumberField";
 import Close from "@mui/icons-material/Close";
 import ParentLink from "../../pet/components/ParentLink";
-import { useRegisterForm } from "../../register/hooks/useRegisterForm";
 import { GENDER_KOREAN_INFO, SPECIES_KOREAN_INFO } from "../../constants";
 import { toast } from "sonner";
 import { InfoIcon } from "lucide-react";
 import { useSelect } from "../../register/hooks/useSelect";
-import { FormData } from "../../register/store/form";
+import { FormData } from "../../register/store/pet";
 import { PetParentDtoWithMessage } from "../../pet/store/parentLink";
 import { usePathname } from "next/navigation";
 interface FormFieldProps {
@@ -18,32 +17,31 @@ interface FormFieldProps {
   formData: FormData;
   errors?: FormErrors;
   disabled?: boolean;
-  handleChange: (value: {
-    type: FieldName;
-    value: string | string[] | PetParentDtoWithMessage | null;
-  }) => void;
+  handleChange: (value: { type: FieldName; value: any }) => void;
+  handleMultipleSelect?: (type: FieldName) => void;
 }
 
 export const FormField = ({
   label,
   field,
   formData,
-  errors,
+  errors = {},
   disabled,
   handleChange,
+  handleMultipleSelect,
 }: FormFieldProps) => {
-  const { handleMultipleSelect } = useRegisterForm();
   const { handleSelect } = useSelect();
   const { name, placeholder, type } = field;
   const value = formData[name as keyof FormData];
   const isRegister = usePathname().includes("register");
 
   const error = errors?.[name];
+
   const inputClassName = cn(
     `text-[16px] w-full h-9 pr-1 text-left focus:outline-none focus:ring-0 text-gray-400 dark:text-gray-400
     transition-all duration-300 ease-in-out placeholder:text-gray-400`,
-    !disabled && "border-b-[1.2px] border-b-gray-200 focus:border-b-[2px] focus:border-[#1A56B3]",
-    error && "border-b-red-500",
+    !disabled && "border-b-[1.2px] border-b-gray-200 focus:border-b-[1.8px] focus:border-[#1A56B3]",
+    error && "border-b-red-500 focus:border-b-red-500",
   );
 
   const handleSelectParent = (type: "father" | "mother", value: PetParentDtoWithMessage) => {
@@ -160,7 +158,7 @@ export const FormField = ({
         return (
           <div className="flex flex-col gap-2">
             {!disabled && (
-              <button className={inputClassName} onClick={() => handleMultipleSelect(name)}>
+              <button className={inputClassName} onClick={() => handleMultipleSelect?.(name)}>
                 {placeholder}
               </button>
             )}
@@ -221,6 +219,12 @@ export const FormField = ({
         <div className="h-1" />
       )}
       {renderField()}
+      {error && (
+        <div className="mt-1 flex items-center gap-1">
+          <InfoIcon className="h-4 w-4 text-red-500" />
+          <p className="text-sm text-red-500">{error}</p>
+        </div>
+      )}
     </div>
   );
 };

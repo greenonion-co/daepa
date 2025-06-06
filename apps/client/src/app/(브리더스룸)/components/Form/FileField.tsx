@@ -1,10 +1,10 @@
-import { useFormStore } from "../../register/store/form";
+import { usePetStore } from "../../register/store/pet";
 import { PhotoViewer } from "./PhotoViewer";
 
 import Add from "@mui/icons-material/Add";
 
 const FileField = () => {
-  const { formData, setFormData } = useFormStore();
+  const { formData, setFormData } = usePetStore();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
