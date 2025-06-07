@@ -35,18 +35,23 @@ export class ParentService {
     private readonly userNotificationService: UserNotificationService,
   ) {}
 
+  private createParentQueryBuilder(petId: string) {
+    return this.parentRepository
+      .createQueryBuilder('parent')
+      .select(['parent.id', 'parent.parent_id', 'parent.role', 'parent.status'])
+      .innerJoin('pets', 'pet', 'pet.pet_id = parent.parent_id')
+      .where('parent.pet_id = :petId', { petId })
+      .andWhere('pet.is_deleted = :isDeleted', { isDeleted: false });
+  }
+
   async findOne(petId: string, findParentDto: FindParentDto) {
-    const parentEntity = await this.parentRepository.findOne({
-      select: ['id', 'parent_id', 'role', 'status'],
-      where: {
-        pet_id: petId,
-        role: findParentDto.role,
-        status: In(['pending', 'approved']),
-      },
-      order: {
-        created_at: 'DESC',
-      },
-    });
+    const parentEntity = await this.createParentQueryBuilder(petId)
+      .andWhere('parent.role = :role', { role: findParentDto.role })
+      .andWhere('parent.status IN (:...statuses)', {
+        statuses: ['pending', 'approved'],
+      })
+      .orderBy('parent.created_at', 'DESC')
+      .getOne();
 
     if (!parentEntity) {
       return null;
@@ -58,12 +63,9 @@ export class ParentService {
   }
 
   async findParents(petId: string) {
-    const parentEntities = await this.parentRepository.find({
-      where: {
-        pet_id: petId,
-        status: PARENT_STATUS.APPROVED,
-      },
-    });
+    const parentEntities = await this.createParentQueryBuilder(petId)
+      .andWhere('parent.status = :status', { status: PARENT_STATUS.APPROVED })
+      .getMany();
 
     const fatherEntity = parentEntities.find(
       (parent) => parent.role === PARENT_ROLE.FATHER,
