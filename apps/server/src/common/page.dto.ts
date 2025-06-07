@@ -56,6 +56,22 @@ export class PageOptionsDto {
   }
 }
 
+export class PageOptionsDtoWithDateRange extends PageOptionsDto {
+  @ApiProperty({
+    description: '조회 범위 시작일',
+    type: Number,
+    required: false,
+  })
+  readonly startYmd?: number;
+
+  @ApiProperty({
+    description: '조회 범위 종료일',
+    type: Number,
+    required: false,
+  })
+  readonly endYmd?: number;
+}
+
 export class PageMetaDto {
   @ApiProperty({
     description: '페이지 번호',

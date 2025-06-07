@@ -11,7 +11,12 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CreateEggDto, EggDto, EggSummaryDto, UpdateEggDto } from './egg.dto';
 import { instanceToPlain, plainToInstance } from 'class-transformer';
 import { ParentService } from 'src/parent/parent.service';
-import { PageDto, PageMetaDto, PageOptionsDto } from 'src/common/page.dto';
+import {
+  PageDto,
+  PageMetaDto,
+  PageOptionsDto,
+  PageOptionsDtoWithDateRange,
+} from 'src/common/page.dto';
 import { PARENT_ROLE } from 'src/parent/parent.constant';
 import { CreatePetDto, PetParentDto } from 'src/pet/pet.dto';
 import { CreateParentDto, ParentDto } from 'src/parent/parent.dto';
@@ -19,6 +24,7 @@ import { PetService } from 'src/pet/pet.service';
 import { nanoid } from 'nanoid';
 import { isMySQLError } from 'src/common/error';
 import { PET_SEX } from 'src/pet/pet.constants';
+import { format, startOfMonth, endOfMonth } from 'date-fns';
 
 @Injectable()
 export class EggService {
@@ -124,11 +130,13 @@ export class EggService {
   }
 
   async getEggListFull(
-    pageOptionsDto: PageOptionsDto,
+    eggListPageOptionsDto: PageOptionsDtoWithDateRange,
   ): Promise<PageDto<EggDto>> {
+    const { startYmd, endYmd, ...pageOptionsDto } = eggListPageOptionsDto;
     const { data, pageMeta } = await this.getEggList<EggDto>(
-      pageOptionsDto,
+      pageOptionsDto as PageOptionsDto,
       EggDto,
+      { startYmd, endYmd },
     );
 
     const eggListFullWithParent = await Promise.all(
@@ -151,10 +159,23 @@ export class EggService {
   async getEggList<T extends EggDto>(
     pageOptionsDto: PageOptionsDto,
     dtoClass: new () => T,
+    dateRange?: { startYmd?: number; endYmd?: number },
   ): Promise<{ data: T[]; pageMeta: PageMetaDto }> {
     const queryBuilder = this.createEggWithOwnerQueryBuilder();
 
+    const layingDateFrom =
+      dateRange?.startYmd ??
+      Number(format(startOfMonth(new Date()), 'yyyyMMdd'));
+    const layingDateTo =
+      dateRange?.endYmd ?? Number(format(endOfMonth(new Date()), 'yyyyMMdd'));
+
     queryBuilder
+      .andWhere('eggs.laying_date >= :startYmd', {
+        startYmd: layingDateFrom,
+      })
+      .andWhere('eggs.laying_date <= :endYmd', {
+        endYmd: layingDateTo,
+      })
       .orderBy('eggs.id', pageOptionsDto.order)
       .skip(pageOptionsDto.skip)
       .take(pageOptionsDto.itemPerPage);
