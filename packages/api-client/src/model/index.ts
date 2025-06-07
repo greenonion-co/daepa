@@ -74,3 +74,4 @@ export * from "./userNotificationDto";
 export * from "./userNotificationDtoDetailJson";
 export * from "./userNotificationDtoStatus";
 export * from "./userNotificationDtoType";
+export * from "./deleteUserNotificationDto";

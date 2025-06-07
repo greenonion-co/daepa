@@ -96,3 +96,8 @@ export class UpdateUserNotificationDto extends PickType(UserNotificationDto, [
   'id',
   'status',
 ]) {}
+
+export class DeleteUserNotificationDto extends PickType(UserNotificationDto, [
+  'id',
+  'receiverId',
+]) {}

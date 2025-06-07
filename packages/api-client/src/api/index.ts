@@ -15,6 +15,7 @@ import type {
   CreateParentDto,
   CreatePetDto,
   CreateUserNotificationDto,
+  DeleteUserNotificationDto,
   ParentControllerFindParentParams,
   PetControllerFindAllParams,
   UpdateEggDto,
@@ -144,6 +145,16 @@ export const userNotificationControllerUpdate = <TData = AxiosResponse<void>>(
   );
 };
 
+export const userNotificationControllerDelete = <TData = AxiosResponse<void>>(
+  deleteUserNotificationDto: DeleteUserNotificationDto,
+  options?: AxiosRequestConfig,
+): Promise<TData> => {
+  return axios.delete(`http://localhost:4000/api/v1/user-notification`, {
+    data: deleteUserNotificationDto,
+    ...options,
+  });
+};
+
 export const brPetControllerFindAll = <TData = AxiosResponse<BrPetControllerFindAll200>>(
   params?: BrPetControllerFindAllParams,
   options?: AxiosRequestConfig,
@@ -213,6 +224,7 @@ export type UserNotificationControllerFindAllResult =
   AxiosResponse<UserNotificationControllerFindAll200>;
 export type UserNotificationControllerCreateResult = AxiosResponse<void>;
 export type UserNotificationControllerUpdateResult = AxiosResponse<void>;
+export type UserNotificationControllerDeleteResult = AxiosResponse<void>;
 export type BrPetControllerFindAllResult = AxiosResponse<BrPetControllerFindAll200>;
 export type EggControllerFindOneResult = AxiosResponse<EggDto>;
 export type EggControllerUpdateResult = AxiosResponse<void>;
@@ -922,6 +934,20 @@ export const getUserNotificationControllerUpdateMockHandler = (
   });
 };
 
+export const getUserNotificationControllerDeleteMockHandler = (
+  overrideResponse?:
+    | void
+    | ((info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<void> | void),
+) => {
+  return http.delete("*/api/v1/user-notification", async (info) => {
+    await delay(1000);
+    if (typeof overrideResponse === "function") {
+      await overrideResponse(info);
+    }
+    return new HttpResponse(null, { status: 200 });
+  });
+};
+
 export const getBrPetControllerFindAllMockHandler = (
   overrideResponse?:
     | BrPetControllerFindAll200
@@ -1057,6 +1083,7 @@ export const getProjectDaepaAPIMock = () => [
   getUserNotificationControllerFindAllMockHandler(),
   getUserNotificationControllerCreateMockHandler(),
   getUserNotificationControllerUpdateMockHandler(),
+  getUserNotificationControllerDeleteMockHandler(),
   getBrPetControllerFindAllMockHandler(),
   getEggControllerFindOneMockHandler(),
   getEggControllerUpdateMockHandler(),
