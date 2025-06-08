@@ -323,6 +323,9 @@ importers:
       class-validator:
         specifier: ^0.14.2
         version: 0.14.2
+      date-fns:
+        specifier: ^4.1.0
+        version: 4.1.0
       mysql2:
         specifier: ^3.14.1
         version: 3.14.1

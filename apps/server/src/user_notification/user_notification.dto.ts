@@ -10,7 +10,7 @@ import {
   USER_NOTIFICATION_STATUS,
   USER_NOTIFICATION_TYPE,
 } from './user_notification.constant';
-import { ApiProperty, OmitType, PickType } from '@nestjs/swagger';
+import { ApiProperty, PickType } from '@nestjs/swagger';
 
 export class UserNotificationDto {
   @ApiProperty({
@@ -85,15 +85,19 @@ export class UserNotificationDto {
   updatedAt: Date;
 }
 
-export class CreateUserNotificationDto extends OmitType(UserNotificationDto, [
-  'id',
-  'senderId',
-  'status',
-  'createdAt',
-  'updatedAt',
+export class CreateUserNotificationDto extends PickType(UserNotificationDto, [
+  'receiverId',
+  'type',
+  'targetId',
+  'detailJson',
 ]) {}
 
 export class UpdateUserNotificationDto extends PickType(UserNotificationDto, [
   'id',
   'status',
+]) {}
+
+export class DeleteUserNotificationDto extends PickType(UserNotificationDto, [
+  'id',
+  'receiverId',
 ]) {}

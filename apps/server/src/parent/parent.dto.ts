@@ -93,4 +93,9 @@ export class UpdateParentDto {
   @IsString()
   @IsNotEmpty()
   opponentId: string;
+
+  @ApiProperty({ description: '거절 사유', required: false })
+  @IsString()
+  @IsOptional()
+  rejectReason?: string;
 }

@@ -49,4 +49,8 @@ export class UserNotificationEntity {
   @Expose({ name: 'updatedAt' })
   @UpdateDateColumn()
   updated_at: Date;
+
+  @Expose({ name: 'isDeleted' })
+  @Column({ default: false })
+  is_deleted: boolean;
 }

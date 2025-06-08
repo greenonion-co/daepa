@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { UserNotificationEntity } from './user_notification.entity';
 import {
-  DeepPartial,
+  DeleteResult,
   FindOptionsWhere,
   Repository,
   UpdateResult,
@@ -10,6 +10,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { PageDto, PageMetaDto, PageOptionsDto } from 'src/common/page.dto';
 import {
   CreateUserNotificationDto,
+  DeleteUserNotificationDto,
   UpdateUserNotificationDto,
 } from './user_notification.dto';
 import { plainToInstance } from 'class-transformer';
@@ -41,6 +42,9 @@ export class UserNotificationService {
 
     queryBuilder
       .where('user_notification.receiver_id = :userId', { userId })
+      .andWhere('user_notification.is_deleted = :isDeleted', {
+        isDeleted: false,
+      })
       .orderBy('user_notification.created_at', dto.order)
       .skip(dto.skip)
       .take(dto.itemPerPage);
@@ -65,8 +69,23 @@ export class UserNotificationService {
 
   async updateWhere(
     where: FindOptionsWhere<UserNotificationEntity>,
-    payload: DeepPartial<UserNotificationEntity>,
+    payload: Partial<UserNotificationEntity>,
   ) {
-    return await this.userNotificationRepository.update(where, payload);
+    await this.userNotificationRepository.update(where, payload);
+    return await this.userNotificationRepository.findOne({
+      where: {
+        ...where,
+        ...payload,
+      },
+    });
+  }
+
+  async deleteUserNotification(
+    dto: DeleteUserNotificationDto,
+  ): Promise<DeleteResult> {
+    return await this.userNotificationRepository.update(
+      { id: dto.id, receiver_id: dto.receiverId, is_deleted: false },
+      { is_deleted: true },
+    );
   }
 }

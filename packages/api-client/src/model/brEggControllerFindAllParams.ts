@@ -20,4 +20,12 @@ export type BrEggControllerFindAllParams = {
    * 페이지당 항목 수
    */
   itemPerPage?: number;
+  /**
+   * 조회 범위 시작일
+   */
+  startYmd?: number;
+  /**
+   * 조회 범위 종료일
+   */
+  endYmd?: number;
 };

@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { ParentEntity } from './parent.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import {
   CreateParentDto,
   FindParentDto,
@@ -35,18 +35,23 @@ export class ParentService {
     private readonly userNotificationService: UserNotificationService,
   ) {}
 
+  private createParentQueryBuilder(petId: string) {
+    return this.parentRepository
+      .createQueryBuilder('parent')
+      .select(['parent.id', 'parent.parent_id', 'parent.role', 'parent.status'])
+      .innerJoin('pets', 'pet', 'pet.pet_id = parent.parent_id')
+      .where('parent.pet_id = :petId', { petId })
+      .andWhere('pet.is_deleted = :isDeleted', { isDeleted: false });
+  }
+
   async findOne(petId: string, findParentDto: FindParentDto) {
-    const parentEntity = await this.parentRepository.findOne({
-      select: ['id', 'parent_id', 'role', 'status'],
-      where: {
-        pet_id: petId,
-        role: findParentDto.role,
-        status: In(['pending', 'approved']),
-      },
-      order: {
-        created_at: 'DESC',
-      },
-    });
+    const parentEntity = await this.createParentQueryBuilder(petId)
+      .andWhere('parent.role = :role', { role: findParentDto.role })
+      .andWhere('parent.status IN (:...statuses)', {
+        statuses: ['pending', 'approved'],
+      })
+      .orderBy('parent.created_at', 'DESC')
+      .getOne();
 
     if (!parentEntity) {
       return null;
@@ -58,12 +63,9 @@ export class ParentService {
   }
 
   async findParents(petId: string) {
-    const parentEntities = await this.parentRepository.find({
-      where: {
-        pet_id: petId,
-        status: PARENT_STATUS.APPROVED,
-      },
-    });
+    const parentEntities = await this.createParentQueryBuilder(petId)
+      .andWhere('parent.status = :status', { status: PARENT_STATUS.APPROVED })
+      .getMany();
 
     const fatherEntity = parentEntities.find(
       (parent) => parent.role === PARENT_ROLE.FATHER,
@@ -91,7 +93,10 @@ export class ParentService {
       isDirectApprove?: boolean; // 부모 요청을 skip하고 바로 approved 상태로 생성
     },
   ) {
-    const parentOwnerId = await this.petService.getPetOwnerId(petId);
+    const parentOwnerId = await this.petService.getPetOwnerId(
+      createParentDto.parentId,
+    );
+
     const isMyPet = parentOwnerId === userId;
 
     const result = await this.parentRepository.insert({
@@ -135,10 +140,28 @@ export class ParentService {
 
     // 부모 요청 수락인 경우
     if (status === PARENT_STATUS.APPROVED) {
+      // 본인 수신 notification 상태 수정
+      const requestedInfo = await this.userNotificationService.updateWhere(
+        {
+          sender_id: opponentId,
+          receiver_id: myId,
+          type: USER_NOTIFICATION_TYPE.PARENT_REQUEST,
+          target_id: relationId.toString(),
+        },
+        { type: USER_NOTIFICATION_TYPE.PARENT_ACCEPT },
+      );
+      if (!requestedInfo) {
+        throw new NotFoundException('Updated user_notification info not found');
+      }
+      // 상대방에게 새로운 notification 발신
       await this.userNotificationService.createUserNotification(myId, {
         targetId: relationId.toString(),
         receiverId: opponentId,
         type: USER_NOTIFICATION_TYPE.PARENT_ACCEPT,
+        detailJson: {
+          senderPet: requestedInfo.detail_json.receiverPet,
+          receiverPet: requestedInfo.detail_json.senderPet,
+        },
       });
       return {
         message: '부모 요청을 정상적으로 승인하였습니다.',
@@ -165,12 +188,29 @@ export class ParentService {
 
     // 부모 요청 거절인 경우
     if (status === PARENT_STATUS.REJECTED) {
-      // 부모 요청자에게 거절 user-notification 생성
+      // 본인 수신 notification 상태 수정
+      const requestedInfo = await this.userNotificationService.updateWhere(
+        {
+          sender_id: opponentId,
+          receiver_id: myId,
+          type: USER_NOTIFICATION_TYPE.PARENT_REQUEST,
+          target_id: relationId.toString(),
+        },
+        { type: USER_NOTIFICATION_TYPE.PARENT_REJECT },
+      );
+      if (!requestedInfo) {
+        throw new NotFoundException('Updated user_notification info not found');
+      }
+      // 상대방에게 새로운 notification 발신
       await this.userNotificationService.createUserNotification(myId, {
         targetId: relationId.toString(),
         receiverId: opponentId,
         type: USER_NOTIFICATION_TYPE.PARENT_REJECT,
-        // TODO: detailJson에 거절 사유 담기
+        detailJson: {
+          message: updateParentDto.rejectReason,
+          senderPet: requestedInfo.detail_json.receiverPet,
+          receiverPet: requestedInfo.detail_json.senderPet,
+        },
       });
       return {
         message: '부모 요청을 정상적으로 거절하였습니다.',

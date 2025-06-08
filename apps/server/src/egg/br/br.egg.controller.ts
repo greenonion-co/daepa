@@ -1,6 +1,10 @@
 import { Controller, Get, Query, UseInterceptors } from '@nestjs/common';
 import { EggService } from '../egg.service';
-import { PageDto, PageMetaDto, PageOptionsDto } from 'src/common/page.dto';
+import {
+  PageDto,
+  PageMetaDto,
+  PageOptionsDtoWithDateRange,
+} from 'src/common/page.dto';
 import { ApiResponse, getSchemaPath } from '@nestjs/swagger';
 import { EggDto } from '../egg.dto';
 import { ApiExtraModels } from '@nestjs/swagger';
@@ -29,8 +33,8 @@ export class BrEggController {
     },
   })
   async findAll(
-    @Query() pageOptionsDto: PageOptionsDto,
+    @Query() options: PageOptionsDtoWithDateRange,
   ): Promise<PageDto<EggDto>> {
-    return this.eggService.getEggListFull(pageOptionsDto);
+    return this.eggService.getEggListFull(options);
   }
 }

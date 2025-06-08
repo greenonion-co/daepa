@@ -1,8 +1,18 @@
-import { Body, Controller, Get, Patch, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  ForbiddenException,
+  Get,
+  Patch,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { UserNotificationService } from './user_notification.service';
 import { PageMetaDto, PageOptionsDto } from 'src/common/page.dto';
 import {
   CreateUserNotificationDto,
+  DeleteUserNotificationDto,
   UpdateUserNotificationDto,
   UserNotificationDto,
 } from './user_notification.dto';
@@ -65,5 +75,24 @@ export class UserNotificationController {
       success: true,
       message: '알림 상태가 변경되었습니다.',
     };
+  }
+
+  @Delete()
+  @ApiResponse({
+    status: 200,
+    description: '알림을 논리적으로 삭제합니다 (is_deleted = true)',
+  })
+  async delete(@Body() deleteUserNotificationDto: DeleteUserNotificationDto) {
+    // TODO: 권한 체크
+    // const isMyNotification =
+    //   deleteUserNotificationDto.receiverId === 'JWT token id';
+    const isMyNotification = true;
+    if (!isMyNotification) {
+      throw new ForbiddenException('권한이 없습니다.');
+    }
+
+    await this.userNotificationService.deleteUserNotification(
+      deleteUserNotificationDto,
+    );
   }
 }
