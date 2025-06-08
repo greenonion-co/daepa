@@ -6,27 +6,39 @@ import CardFront from "./(펫카드)/CardFront";
 import CardBack from "./(펫카드)/CardBack";
 import { PetDto } from "@repo/api-client";
 import { ChevronDown } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 
-type PetDetailDto = Omit<PetDto, "birthdate"> & {
-  birthdate?: string;
-};
 interface PetDetailProps {
-  pet: PetDetailDto;
+  pet: PetDto;
   qrCodeDataUrl: string;
 }
 
 const PetDetail = ({ pet, qrCodeDataUrl }: PetDetailProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const isScrollingRef = useRef(false);
+  const searchParams = useSearchParams();
+  const from = searchParams.get("from");
 
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
+    if (from === "egg") {
+      setTimeout(() => {
+        container.scrollTo({
+          top: 700,
+          behavior: "smooth",
+        });
+      }, 500);
+    }
+
     let lastScrollTop = 0;
     let lastScrollTime = Date.now();
 
     const handleScroll = () => {
+      const container = containerRef.current;
+      if (!container) return;
+
       if (isScrollingRef.current) return;
 
       const currentTime = Date.now();
@@ -71,7 +83,7 @@ const PetDetail = ({ pet, qrCodeDataUrl }: PetDetailProps) => {
 
     container.addEventListener("scroll", handleScroll);
     return () => container.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [from]);
 
   return (
     <div className="mx-auto w-full max-w-[500px] px-4">
@@ -90,7 +102,7 @@ const PetDetail = ({ pet, qrCodeDataUrl }: PetDetailProps) => {
             <CardFront pet={pet} qrCodeDataUrl={qrCodeDataUrl} />
           </div>
           <div className="h-[700px] shrink-0 pt-6">
-            <CardBack pet={pet} />
+            <CardBack pet={pet} from={from} />
           </div>
         </div>
       </div>

@@ -1,4 +1,4 @@
-import { EggDto, PetParentDto } from "@repo/api-client";
+import { EggDto, ParentDtoStatus, PetParentDto } from "@repo/api-client";
 import { useRouter } from "next/navigation";
 import ParentStatusBadge from "./ParentStatusBadge";
 
@@ -25,12 +25,12 @@ export const TreeView = ({ node }: { node: EggDto }) => {
             <ParentInfo
               type="father"
               parent={node.father}
-              isMyPet={node.owner.userId === node.father?.owner.userId}
+              isMyPet={node.owner.userId === node.father?.owner?.userId}
             />
             <ParentInfo
               type="mother"
               parent={node.mother}
-              isMyPet={node.owner.userId === node.mother?.owner.userId}
+              isMyPet={node.owner.userId === node.mother?.owner?.userId}
             />
           </div>
         </div>
@@ -57,7 +57,7 @@ const ParentInfo = ({
             {parentLabel}: {parent.name}
           </span>
 
-          <ParentStatusBadge status={parent.status} isMyPet={isMyPet} />
+          <ParentStatusBadge status={parent.status as ParentDtoStatus} isMyPet={isMyPet} />
         </div>
       ) : (
         <span className="">{parentLabel}: -</span>

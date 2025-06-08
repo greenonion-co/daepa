@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import Image from "next/image";
 import { GENDER_KOREAN_INFO, SPECIES_KOREAN_INFO } from "@/app/(브리더스룸)/constants";
-import { formatDateToShortString } from "@/lib/utils";
+import { formatDateToYYYYMMDDString } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 
 const CardFront = ({ pet, qrCodeDataUrl }: { pet: PetDto; qrCodeDataUrl?: string }) => {
@@ -133,7 +133,7 @@ const CardFront = ({ pet, qrCodeDataUrl }: { pet: PetDto; qrCodeDataUrl?: string
                       const weight = Number(pet.weight);
                       return `${Number.isInteger(weight) ? weight : weight.toFixed(1)}g / `;
                     })()}
-                  {pet.birthdate ? formatDateToShortString(pet.birthdate) : "-"}
+                  {pet.birthdate ? formatDateToYYYYMMDDString(pet.birthdate, "yy.MM.dd") : "-"}
                 </div>
                 {SPECIES_KOREAN_INFO[pet.species]} / {GENDER_KOREAN_INFO[pet.sex]}
               </div>

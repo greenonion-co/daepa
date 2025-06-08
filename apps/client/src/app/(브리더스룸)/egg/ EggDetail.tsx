@@ -28,6 +28,7 @@ import { useRouter } from "next/navigation";
 import { cn, formatDateToYYYYMMDD } from "@/lib/utils";
 import FloatingButton from "../components/FloatingButton";
 import { AxiosError } from "axios";
+import Loading from "@/components/common/Loading";
 
 type EggDetailDto = Omit<EggDto, "layingDate"> & {
   layingDate: string;
@@ -44,12 +45,12 @@ const EggDetail = ({ egg }: EggDetailProps) => {
   const [isPublic, setIsPublic] = useState(false);
   const { selectedParent, setSelectedParent } = useParentLinkStore();
 
-  const { mutate: mutateHatched } = useMutation({
+  const { mutate: mutateHatched, isPending: isHatching } = useMutation({
     mutationFn: (eggId: string) => eggControllerHatched(eggId),
     onSuccess: (response) => {
       if (response?.data?.hatchedPetId) {
         toast.success("해칭 완료");
-        router.push(`/pet/${response.data.hatchedPetId}`);
+        router.push(`/pet/${response.data.hatchedPetId}?from=egg`);
       }
     },
     onError: (error: AxiosError<{ message: string }>) => {
@@ -62,7 +63,7 @@ const EggDetail = ({ egg }: EggDetailProps) => {
     },
   });
 
-  const { mutate: mutateDeleteEgg } = useMutation({
+  const { mutate: mutateDeleteEgg, isPending: isDeletingEgg } = useMutation({
     mutationFn: (eggId: string) => eggControllerDelete(eggId),
     onSuccess: () => {
       router.push("/hatching");
@@ -207,11 +208,31 @@ const EggDetail = ({ egg }: EggDetailProps) => {
     ));
   };
 
+  if (isHatching || isDeletingEgg) return <Loading />;
+
   return (
     <div className="mx-auto w-full max-w-[500px] px-2">
       <div className="h-[700px] shrink-0 pt-6">
         <div className="h-full">
-          <div className="pb-20">
+          <div>
+            {egg.hatchedPetId && (
+              <div className="mb-4 flex items-center justify-between rounded-lg bg-blue-50 p-4 dark:bg-blue-900/20">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-blue-700 dark:text-blue-300">
+                    해칭이 완료되었습니다
+                  </span>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 rounded-xl border-blue-200 text-blue-700 hover:bg-blue-100 dark:border-blue-800 dark:text-blue-300 dark:hover:bg-blue-900/30"
+                  onClick={() => router.push(`/pet/${egg.hatchedPetId}`)}
+                >
+                  펫 상세보기
+                </Button>
+              </div>
+            )}
+
             <div className="mb-2 flex justify-between">
               <span className="relative text-2xl font-bold after:absolute after:bottom-0 after:left-0 after:-z-10 after:h-[15px] after:w-full after:bg-[#247DFE] after:opacity-40">
                 {formData.name}

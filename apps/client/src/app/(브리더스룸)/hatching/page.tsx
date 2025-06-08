@@ -25,39 +25,12 @@ import { TreeView } from "../components/TreeView";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useInView } from "react-intersection-observer";
 import Loading from "@/components/common/Loading";
-const chartData = [
-  { month: "1월", desktop: 186 },
-  { month: "2월", desktop: 305 },
-  { month: "3월", desktop: 237 },
-  { month: "4월", desktop: 73 },
-  { month: "5월", desktop: 209 },
-  { month: "6월", desktop: 214 },
-  { month: "7월", desktop: 150 },
-  { month: "8월", desktop: 100 },
-  { month: "9월", desktop: 176 },
-  { month: "10월", desktop: 100 },
-  { month: "11월", desktop: 192 },
-  { month: "12월", desktop: 320 },
-];
-
-const chartConfig = {
-  desktop: {
-    label: "Desktop",
-    color: "hsl(var(--chart-1))",
-  },
-} satisfies ChartConfig;
-
-const eggCounts = {
-  "2025-05-01": 2,
-  "2025-05-02": 3,
-  "2025-05-03": 2,
-  "2025-05-04": 4,
-  "2025-05-05": 6,
-};
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const HatchingPage = () => {
   const [date, setDate] = useState<Date>(new Date());
   const [month, setMonth] = useState<Date>(new Date());
+  const [tab, setTab] = useState<"hached" | "noHatched">("noHatched");
   const { ref, inView } = useInView();
   const itemPerPage = 10;
 
@@ -76,8 +49,7 @@ const HatchingPage = () => {
       }
       return undefined;
     },
-    select: (data) =>
-      data.pages.flatMap((page) => page.data.data).filter((item) => !item.hatchedPetId),
+    select: (data) => data.pages.flatMap((page) => page.data.data),
   });
 
   useEffect(() => {
@@ -99,10 +71,20 @@ const HatchingPage = () => {
           eggCounts={eggCounts}
         />
 
-        <ScrollArea className="flex h-[416px] w-full gap-2 rounded-xl border p-2 shadow">
-          {data?.map((egg) => {
-            return <TreeView key={egg.eggId} node={egg} />;
-          })}
+        <ScrollArea className="relative flex h-[416px] w-full gap-2 rounded-xl border p-2 shadow">
+          <Tabs
+            defaultValue="noHatched"
+            onValueChange={(value) => setTab(value as "hached" | "noHatched")}
+            className="sticky top-0 z-10 bg-white pb-2"
+          >
+            <TabsList>
+              <TabsTrigger value="noHatched">해칭되지 않은 알</TabsTrigger>
+              <TabsTrigger value="hached">해칭된 알</TabsTrigger>
+            </TabsList>
+          </Tabs>
+          {data
+            ?.filter((egg) => (tab === "noHatched" ? !egg.hatchedPetId : egg.hatchedPetId))
+            ?.map((egg) => <TreeView key={egg.eggId} node={egg} />)}
           {hasNextPage && (
             <div ref={ref} className="h-20 text-center">
               {isFetchingNextPage ? (
@@ -159,3 +141,33 @@ const HatchingPage = () => {
 };
 
 export default HatchingPage;
+
+const chartData = [
+  { month: "1월", desktop: 186 },
+  { month: "2월", desktop: 305 },
+  { month: "3월", desktop: 237 },
+  { month: "4월", desktop: 73 },
+  { month: "5월", desktop: 209 },
+  { month: "6월", desktop: 214 },
+  { month: "7월", desktop: 150 },
+  { month: "8월", desktop: 100 },
+  { month: "9월", desktop: 176 },
+  { month: "10월", desktop: 100 },
+  { month: "11월", desktop: 192 },
+  { month: "12월", desktop: 320 },
+];
+
+const chartConfig = {
+  desktop: {
+    label: "Desktop",
+    color: "hsl(var(--chart-1))",
+  },
+} satisfies ChartConfig;
+
+const eggCounts = {
+  "2025-05-01": 2,
+  "2025-05-02": 3,
+  "2025-05-03": 2,
+  "2025-05-04": 4,
+  "2025-05-05": 6,
+};

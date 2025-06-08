@@ -1,6 +1,7 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import QRCode from "qrcode";
+import { format, parse } from "date-fns";
 
 export const cn = (...inputs: ClassValue[]) => twMerge(clsx(inputs));
 
@@ -36,12 +37,11 @@ export const formatDateToYYYYMMDD = (dateString: string): number => {
   return Number(dateString.replace(/-/g, ""));
 };
 
-export const formatDateToYYYYMMDDString = (dateString: number) => {
-  if (!dateString) return "";
-  return `${dateString.toString().slice(0, 4)}-${dateString.toString().slice(4, 6)}-${dateString.toString().slice(6, 8)}`;
-};
-
-export const formatDateToShortString = (dateString: string) => {
-  if (!dateString) return "";
-  return `${dateString.toString().slice(2, 4)}-${dateString.toString().slice(4, 6)}-${dateString.toString().slice(6, 8)}`;
+export const formatDateToYYYYMMDDString = (
+  dateNumber: number,
+  formatType: string = "yyyy-MM-dd",
+) => {
+  const parsedDate = parse(dateNumber.toString(), "yyyyMMdd", new Date());
+  const formattedDate = format(parsedDate, formatType);
+  return formattedDate;
 };
