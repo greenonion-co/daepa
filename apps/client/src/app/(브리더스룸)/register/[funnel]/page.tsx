@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
 import { formatDateToYYYYMMDD } from "@/lib/utils";
+import Loading from "@/components/common/Loading";
 
 export default function RegisterPage({ params }: { params: Promise<{ funnel: string }> }) {
   const router = useRouter();
@@ -25,7 +26,7 @@ export default function RegisterPage({ params }: { params: Promise<{ funnel: str
   const funnel = Number(resolvedParams.funnel);
   const visibleSteps = FORM_STEPS.slice(-step - 1);
 
-  const { mutate: mutateCreatePet } = useMutation({
+  const { mutate: mutateCreatePet, isPending } = useMutation({
     mutationFn: (data: CreatePetDto) => petControllerCreate(data),
     onSuccess: () => {
       toast.success("개체 등록이 완료되었습니다.");
@@ -70,6 +71,23 @@ export default function RegisterPage({ params }: { params: Promise<{ funnel: str
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [step]);
+
+  useEffect(() => {
+    if (funnel === REGISTER_PAGE.SECOND) return;
+
+    const currentStep = FORM_STEPS[FORM_STEPS.length - step - 1];
+    if (!currentStep) return;
+
+    const { field } = currentStep;
+    if (field.type === "text") {
+      const inputElement = document.querySelector(
+        `input[name="${field.name}"]`,
+      ) as HTMLInputElement;
+      if (inputElement) {
+        inputElement.focus();
+      }
+    }
+  }, [step, funnel]);
 
   const createPet = (formData: FormData) => {
     try {
@@ -133,6 +151,10 @@ export default function RegisterPage({ params }: { params: Promise<{ funnel: str
     handleSubmit: createPet,
   });
 
+  if (isPending) {
+    return <Loading />;
+  }
+
   return (
     <div className="relative mx-auto min-h-screen max-w-[640px] p-4 pb-20">
       <FormHeader funnel={funnel} />
@@ -175,12 +197,11 @@ export default function RegisterPage({ params }: { params: Promise<{ funnel: str
             ))}
           </>
         )}
+        <FloatingButton
+          label={funnel === REGISTER_PAGE.SECOND ? "완료" : "다음"}
+          onClick={() => goNext()}
+        />
       </form>
-
-      <FloatingButton
-        label={funnel === REGISTER_PAGE.SECOND ? "완료" : "다음"}
-        onClick={() => goNext()}
-      />
     </div>
   );
 }

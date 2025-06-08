@@ -6,11 +6,14 @@ import Close from "@mui/icons-material/Close";
 import ParentLink from "../../pet/components/ParentLink";
 import { GENDER_KOREAN_INFO, SPECIES_KOREAN_INFO } from "../../constants";
 import { toast } from "sonner";
-import { InfoIcon } from "lucide-react";
+import { CalendarIcon, InfoIcon } from "lucide-react";
 import { useSelect } from "../../register/hooks/useSelect";
 import { FormData } from "../../register/store/pet";
 import { PetParentDtoWithMessage } from "../../pet/store/parentLink";
 import { usePathname } from "next/navigation";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { format } from "date-fns";
+import { Calendar } from "@/components/ui/calendar";
 interface FormFieldProps {
   label?: string;
   field: FormStep["field"];
@@ -39,7 +42,7 @@ export const FormField = ({
 
   const inputClassName = cn(
     `text-[16px] w-full h-9 pr-1 text-left focus:outline-none focus:ring-0 text-gray-400 dark:text-gray-400
-    transition-all duration-300 ease-in-out placeholder:text-gray-400`,
+    transition-all duration-300 ease-in-out placeholder:text-gray-400 flex items-center `,
     !disabled && "border-b-[1.2px] border-b-gray-200 focus:border-b-[1.8px] focus:border-[#1A56B3]",
     error && "border-b-red-500 focus:border-b-red-500",
   );
@@ -107,6 +110,7 @@ export const FormField = ({
         return (
           <div className="relative pt-2">
             <textarea
+              name={name}
               className={`min-h-[160px] w-full rounded-xl bg-gray-100 p-4 text-left text-[18px] focus:outline-none focus:ring-0 dark:bg-gray-600/50 dark:text-white`}
               value={String(value || "")}
               maxLength={maxLength}
@@ -129,9 +133,8 @@ export const FormField = ({
       }
       case "select":
         return (
-          <button
+          <div
             className={cn(inputClassName, `${value && "text-black"}`)}
-            disabled={disabled}
             onClick={() => {
               if (!isRegister && name === "species") {
                 toast.error("종은 변경할 수 없습니다.");
@@ -152,15 +155,15 @@ export const FormField = ({
                 ? (SPECIES_KOREAN_INFO[value as string as keyof typeof SPECIES_KOREAN_INFO] ??
                   placeholder)
                 : ((value as string) ?? placeholder)}
-          </button>
+          </div>
         );
       case "multipleSelect":
         return (
           <div className="flex flex-col gap-2">
             {!disabled && (
-              <button className={inputClassName} onClick={() => handleMultipleSelect?.(name)}>
+              <div className={inputClassName} onClick={() => handleMultipleSelect?.(name)}>
                 {placeholder}
-              </button>
+              </div>
             )}
             <div className="flex flex-wrap gap-1">
               {Array.isArray(value) &&
@@ -193,10 +196,48 @@ export const FormField = ({
             </div>
           </div>
         );
+      case "date":
+        return (
+          <Popover>
+            <PopoverTrigger asChild>
+              <button
+                data-field-name={field.name}
+                className={cn(
+                  inputClassName,
+                  "flex w-full items-center justify-between",
+                  value && "text-black",
+                )}
+              >
+                {value ? format(new Date(value), "yyyy년 MM월 dd일") : placeholder}
+                <CalendarIcon className="h-4 w-4 opacity-50" />
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="single"
+                selected={value ? new Date(value) : undefined}
+                onSelect={(date) => {
+                  if (date) {
+                    handleChange({ type: field.name, value: date.toISOString() });
+
+                    const trigger = document.querySelector(
+                      `button[data-field-name="${field.name}"]`,
+                    );
+                    if (trigger) {
+                      (trigger as HTMLButtonElement).click();
+                    }
+                  }
+                }}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
+        );
       default:
         return (
           <input
             disabled={disabled}
+            name={name}
             type={field.type}
             className={cn(inputClassName, "text-black dark:text-white")}
             value={String(value || "")}

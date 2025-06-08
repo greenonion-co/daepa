@@ -181,7 +181,6 @@ export const EGG_REGISTER_STEPS: FormStep[] = [
       type: "date",
       required: true,
       placeholder: "해칭일을 입력해주세요",
-      validation: (value) => value.length > 0,
     },
   },
   {

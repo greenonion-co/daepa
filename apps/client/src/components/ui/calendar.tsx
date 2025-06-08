@@ -15,7 +15,7 @@ function Calendar({
   eggCounts = {} as Record<string, number>,
   onMonthChange,
   ...props
-}: React.ComponentProps<typeof DayPicker> & { eggCounts: Record<string, number> }) {
+}: React.ComponentProps<typeof DayPicker> & { eggCounts?: Record<string, number> }) {
   const koreanWeekdays = ["일", "월", "화", "수", "목", "금", "토"];
 
   const currentYear = new Date().getFullYear();

@@ -103,8 +103,8 @@ export const useRegisterForm = ({
       setFormData(newFormData);
 
       if (
-        (isEggRegister || Number(funnel) === REGISTER_PAGE.FIRST) &&
-        step <= formStep.length - 1
+        (isEggRegister && step < formStep.length - 1) ||
+        (!isEggRegister && Number(funnel) === REGISTER_PAGE.FIRST && step <= formStep.length - 1)
       ) {
         goNext(newFormData);
       }

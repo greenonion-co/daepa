@@ -38,6 +38,7 @@ const NumberField = ({
     <div className="relative">
       <input
         type="tel"
+        name={field.name}
         inputMode="decimal"
         pattern="[0-9]*[.,]?[0-9]*"
         className={cn(inputClassName, "text-black dark:text-white")}

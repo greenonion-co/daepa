@@ -17,15 +17,15 @@ import { useRegisterForm } from "../../hooks/useRegisterForm";
 import { useEffect } from "react";
 import { useSelect } from "../../hooks/useSelect";
 import { FormData } from "../../store/pet";
+import Loading from "@/components/common/Loading";
 
 const EggRegisterPage = () => {
   const router = useRouter();
-  const { formData, setFormData, step, setStep, errors, setErrors, page, setPage, resetForm } =
-    useEggStore();
+  const { formData, setFormData, step, setStep, errors, setErrors, resetForm } = useEggStore();
   const { handleSelect } = useSelect();
   const visibleSteps = EGG_REGISTER_STEPS.slice(-step - 1);
 
-  const { mutate: mutateCreateEgg } = useMutation({
+  const { mutate: mutateCreateEgg, isPending } = useMutation({
     mutationFn: (data: CreateEggDto) => eggControllerCreate(data),
     onSuccess: () => {
       toast.success("알 등록이 완료되었습니다.");
@@ -62,12 +62,42 @@ const EggRegisterPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [step]);
 
+  useEffect(() => {
+    const currentStep = EGG_REGISTER_STEPS[EGG_REGISTER_STEPS.length - step - 1];
+
+    if (!currentStep) return;
+
+    const { field } = currentStep;
+
+    if (field.type === "date") {
+      // date 타입인 경우 캘린더를 열기 위한 상태 업데이트
+      const calendarButton = document.querySelector(`button[data-field-name="${field.name}"]`);
+      if (calendarButton) {
+        (calendarButton as HTMLButtonElement).click();
+      }
+    } else if (field.type === "textarea") {
+      const textareaElement = document.querySelector(
+        `textarea[name="${field.name}"]`,
+      ) as HTMLTextAreaElement;
+      if (textareaElement) {
+        textareaElement.focus();
+      }
+    } else if (["text", "number"].includes(field.type)) {
+      const inputElement = document.querySelector(
+        `input[name="${field.name}"]`,
+      ) as HTMLInputElement;
+      if (inputElement) {
+        inputElement.focus();
+      }
+    }
+  }, [step]);
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
   };
 
   const createEgg = (newFormData: FormData) => {
-    if (!newFormData?.father?.petId || !newFormData?.mother?.petId) {
+    if (!newFormData?.father?.petId && !newFormData?.mother?.petId) {
       toast.error("부모 개체 정보를 하나 이상 선택해주세요.");
 
       return;
@@ -76,7 +106,7 @@ const EggRegisterPage = () => {
     try {
       const formattedData = {
         species: newFormData.species,
-        layingDate: formatDateToYYYYMMDD(newFormData.layingDate ?? ""),
+        layingDate: formatDateToYYYYMMDD(newFormData.layingDate?.split("T")[0] ?? ""),
         ...(newFormData.father?.petId && {
           father: {
             parentId: newFormData.father.petId,
@@ -116,6 +146,8 @@ const EggRegisterPage = () => {
     handleSubmit: createEgg,
   });
 
+  if (isPending) return <Loading />;
+
   return (
     <div className="relative mx-auto min-h-screen max-w-[640px] p-4 pb-20">
       <div className={"mb-8 text-2xl"}>
@@ -145,7 +177,7 @@ const EggRegisterPage = () => {
 
         <FloatingButton
           label={step === EGG_REGISTER_STEPS.length - 1 ? "등록" : "다음"}
-          onClick={() => goNext()}
+          onClick={() => goNext(formData)}
         />
       </form>
     </div>
