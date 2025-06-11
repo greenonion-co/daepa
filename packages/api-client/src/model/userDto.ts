@@ -6,6 +6,8 @@
  * OpenAPI spec version: 1.0
  */
 import type { UserDtoRole } from "./userDtoRole";
+import type { UserDtoProvider } from "./userDtoProvider";
+import type { UserDtoStatus } from "./userDtoStatus";
 
 export interface UserDto {
   /** 회원 고유 ID */
@@ -14,4 +16,20 @@ export interface UserDto {
   name: string;
   /** 회원 역할 */
   role: UserDtoRole;
+  /** Oauth 제공자 */
+  provider: UserDtoProvider;
+  /** Oauth 제공자 ID */
+  providerId: string;
+  /** refresh token */
+  refreshToken: string;
+  /** refresh token 만료 시간 */
+  refreshTokenExpiresAt: string;
+  /** 유저 상태 */
+  status: UserDtoStatus;
+  /** 마지막 로그인 시간 */
+  lastLoginAt: string;
+  /** 생성 시간 */
+  createdAt: string;
+  /** 수정 시간 */
+  updatedAt: string;
 }
