@@ -62,6 +62,8 @@ export class PageOptionsDtoWithDateRange extends PageOptionsDto {
     type: Number,
     required: false,
   })
+  @IsOptional()
+  @Type(() => Number)
   readonly startYmd?: number;
 
   @ApiProperty({
@@ -69,6 +71,8 @@ export class PageOptionsDtoWithDateRange extends PageOptionsDto {
     type: Number,
     required: false,
   })
+  @IsOptional()
+  @Type(() => Number)
   readonly endYmd?: number;
 }
 

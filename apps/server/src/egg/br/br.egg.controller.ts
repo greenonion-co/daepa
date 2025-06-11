@@ -1,4 +1,11 @@
-import { Controller, Get, Query, UseInterceptors } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  HttpException,
+  HttpStatus,
+  Query,
+  UseInterceptors,
+} from '@nestjs/common';
 import { EggService } from '../egg.service';
 import {
   PageDto,
@@ -9,6 +16,7 @@ import { ApiResponse, getSchemaPath } from '@nestjs/swagger';
 import { EggDto } from '../egg.dto';
 import { ApiExtraModels } from '@nestjs/swagger';
 import { ExcludeNilInterceptor } from 'src/interceptors/exclude-nil';
+import { DateRangeValidationPipe } from 'src/common/pipes/date-range.pipe';
 
 @Controller('/v1/br/egg')
 @UseInterceptors(ExcludeNilInterceptor)
@@ -33,8 +41,9 @@ export class BrEggController {
     },
   })
   async findAll(
-    @Query() options: PageOptionsDtoWithDateRange,
+    @Query(new DateRangeValidationPipe())
+    pageOptionsDtoWithDateRange: PageOptionsDtoWithDateRange,
   ): Promise<PageDto<EggDto>> {
-    return this.eggService.getEggListFull(options);
+    return this.eggService.getEggListFull(pageOptionsDtoWithDateRange);
   }
 }
