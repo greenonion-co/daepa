@@ -17,10 +17,13 @@ const SignInPage = () => {
             <span className="text-[16px] font-semibold">구글로 시작하기</span>
           </button>
 
-          <button className="flex h-[46px] w-full items-center justify-center gap-3 rounded-[12px] bg-[#FEE500]">
+          <a
+            className="flex h-[46px] w-full items-center justify-center gap-3 rounded-[12px] bg-[#FEE500]"
+            href={"http://localhost:4000/api/auth/sign-in/kakao"}
+          >
             <Image src="/kakao_icon.svg" alt="Kakao" width={18} height={18} />
             <span className="text-[16px] font-semibold">카카오로 시작하기</span>
-          </button>
+          </a>
         </div>
       </div>
     </div>

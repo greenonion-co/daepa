@@ -211,6 +211,12 @@ export const brEggControllerFindAll = <TData = AxiosResponse<BrEggControllerFind
   });
 };
 
+export const authControllerKakaoLogin = <TData = AxiosResponse<unknown>>(
+  options?: AxiosRequestConfig,
+): Promise<TData> => {
+  return axios.get(`http://localhost:4000/api/auth/sign-in/kakao`, options);
+};
+
 export type PetControllerFindAllResult = AxiosResponse<PetControllerFindAll200>;
 export type PetControllerCreateResult = AxiosResponse<void>;
 export type PetControllerFindOneResult = AxiosResponse<PetDto>;
@@ -232,6 +238,7 @@ export type EggControllerDeleteResult = AxiosResponse<void>;
 export type EggControllerCreateResult = AxiosResponse<void>;
 export type EggControllerHatchedResult = AxiosResponse<void>;
 export type BrEggControllerFindAllResult = AxiosResponse<BrEggControllerFindAll200>;
+export type AuthControllerKakaoLoginResult = AxiosResponse<unknown>;
 
 export const getPetControllerFindAllResponseMock = (
   overrideResponse: Partial<PetControllerFindAll200> = {},
@@ -243,6 +250,20 @@ export const getPetControllerFindAllResponseMock = (
         userId: faker.string.alpha(20),
         name: faker.string.alpha(20),
         role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
+        provider: {},
+        providerId: faker.string.alpha(20),
+        refreshToken: faker.string.alpha(20),
+        refreshTokenExpiresAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+        status: faker.helpers.arrayElement([
+          "pending",
+          "active",
+          "inactive",
+          "suspended",
+          "deleted",
+        ] as const),
+        lastLoginAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+        createdAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+        updatedAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
       },
     },
     name: faker.string.alpha(20),
@@ -281,6 +302,20 @@ export const getPetControllerFindOneResponseMock = (
       userId: faker.string.alpha(20),
       name: faker.string.alpha(20),
       role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
+      provider: {},
+      providerId: faker.string.alpha(20),
+      refreshToken: faker.string.alpha(20),
+      refreshTokenExpiresAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+      status: faker.helpers.arrayElement([
+        "pending",
+        "active",
+        "inactive",
+        "suspended",
+        "deleted",
+      ] as const),
+      lastLoginAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+      createdAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+      updatedAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
     },
   },
   name: faker.string.alpha(20),
@@ -323,6 +358,20 @@ export const getPetControllerFindOneResponseMock = (
             userId: faker.string.alpha(20),
             name: faker.string.alpha(20),
             role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
+            provider: {},
+            providerId: faker.string.alpha(20),
+            refreshToken: faker.string.alpha(20),
+            refreshTokenExpiresAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+            status: faker.helpers.arrayElement([
+              "pending",
+              "active",
+              "inactive",
+              "suspended",
+              "deleted",
+            ] as const),
+            lastLoginAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+            createdAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+            updatedAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
           },
         },
         name: faker.string.alpha(20),
@@ -355,6 +404,20 @@ export const getPetControllerFindOneResponseMock = (
             userId: faker.string.alpha(20),
             name: faker.string.alpha(20),
             role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
+            provider: {},
+            providerId: faker.string.alpha(20),
+            refreshToken: faker.string.alpha(20),
+            refreshTokenExpiresAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+            status: faker.helpers.arrayElement([
+              "pending",
+              "active",
+              "inactive",
+              "suspended",
+              "deleted",
+            ] as const),
+            lastLoginAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+            createdAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+            updatedAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
           },
         },
         name: faker.string.alpha(20),
@@ -439,6 +502,20 @@ export const getBrPetControllerFindAllResponseMock = (
         userId: faker.string.alpha(20),
         name: faker.string.alpha(20),
         role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
+        provider: {},
+        providerId: faker.string.alpha(20),
+        refreshToken: faker.string.alpha(20),
+        refreshTokenExpiresAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+        status: faker.helpers.arrayElement([
+          "pending",
+          "active",
+          "inactive",
+          "suspended",
+          "deleted",
+        ] as const),
+        lastLoginAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+        createdAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+        updatedAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
       },
     },
     name: faker.string.alpha(20),
@@ -481,6 +558,20 @@ export const getBrPetControllerFindAllResponseMock = (
               userId: faker.string.alpha(20),
               name: faker.string.alpha(20),
               role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
+              provider: {},
+              providerId: faker.string.alpha(20),
+              refreshToken: faker.string.alpha(20),
+              refreshTokenExpiresAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+              status: faker.helpers.arrayElement([
+                "pending",
+                "active",
+                "inactive",
+                "suspended",
+                "deleted",
+              ] as const),
+              lastLoginAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+              createdAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+              updatedAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
             },
           },
           name: faker.string.alpha(20),
@@ -513,6 +604,20 @@ export const getBrPetControllerFindAllResponseMock = (
               userId: faker.string.alpha(20),
               name: faker.string.alpha(20),
               role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
+              provider: {},
+              providerId: faker.string.alpha(20),
+              refreshToken: faker.string.alpha(20),
+              refreshTokenExpiresAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+              status: faker.helpers.arrayElement([
+                "pending",
+                "active",
+                "inactive",
+                "suspended",
+                "deleted",
+              ] as const),
+              lastLoginAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+              createdAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+              updatedAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
             },
           },
           name: faker.string.alpha(20),
@@ -557,6 +662,20 @@ export const getEggControllerFindOneResponseMock = (
       userId: faker.string.alpha(20),
       name: faker.string.alpha(20),
       role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
+      provider: {},
+      providerId: faker.string.alpha(20),
+      refreshToken: faker.string.alpha(20),
+      refreshTokenExpiresAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+      status: faker.helpers.arrayElement([
+        "pending",
+        "active",
+        "inactive",
+        "suspended",
+        "deleted",
+      ] as const),
+      lastLoginAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+      createdAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+      updatedAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
     },
   },
   species: {},
@@ -578,6 +697,20 @@ export const getEggControllerFindOneResponseMock = (
             userId: faker.string.alpha(20),
             name: faker.string.alpha(20),
             role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
+            provider: {},
+            providerId: faker.string.alpha(20),
+            refreshToken: faker.string.alpha(20),
+            refreshTokenExpiresAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+            status: faker.helpers.arrayElement([
+              "pending",
+              "active",
+              "inactive",
+              "suspended",
+              "deleted",
+            ] as const),
+            lastLoginAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+            createdAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+            updatedAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
           },
         },
         name: faker.string.alpha(20),
@@ -610,6 +743,20 @@ export const getEggControllerFindOneResponseMock = (
             userId: faker.string.alpha(20),
             name: faker.string.alpha(20),
             role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
+            provider: {},
+            providerId: faker.string.alpha(20),
+            refreshToken: faker.string.alpha(20),
+            refreshTokenExpiresAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+            status: faker.helpers.arrayElement([
+              "pending",
+              "active",
+              "inactive",
+              "suspended",
+              "deleted",
+            ] as const),
+            lastLoginAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+            createdAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+            updatedAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
           },
         },
         name: faker.string.alpha(20),
@@ -646,6 +793,20 @@ export const getBrEggControllerFindAllResponseMock = (
         userId: faker.string.alpha(20),
         name: faker.string.alpha(20),
         role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
+        provider: {},
+        providerId: faker.string.alpha(20),
+        refreshToken: faker.string.alpha(20),
+        refreshTokenExpiresAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+        status: faker.helpers.arrayElement([
+          "pending",
+          "active",
+          "inactive",
+          "suspended",
+          "deleted",
+        ] as const),
+        lastLoginAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+        createdAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+        updatedAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
       },
     },
     species: {},
@@ -667,6 +828,20 @@ export const getBrEggControllerFindAllResponseMock = (
               userId: faker.string.alpha(20),
               name: faker.string.alpha(20),
               role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
+              provider: {},
+              providerId: faker.string.alpha(20),
+              refreshToken: faker.string.alpha(20),
+              refreshTokenExpiresAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+              status: faker.helpers.arrayElement([
+                "pending",
+                "active",
+                "inactive",
+                "suspended",
+                "deleted",
+              ] as const),
+              lastLoginAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+              createdAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+              updatedAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
             },
           },
           name: faker.string.alpha(20),
@@ -699,6 +874,20 @@ export const getBrEggControllerFindAllResponseMock = (
               userId: faker.string.alpha(20),
               name: faker.string.alpha(20),
               role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
+              provider: {},
+              providerId: faker.string.alpha(20),
+              refreshToken: faker.string.alpha(20),
+              refreshTokenExpiresAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+              status: faker.helpers.arrayElement([
+                "pending",
+                "active",
+                "inactive",
+                "suspended",
+                "deleted",
+              ] as const),
+              lastLoginAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+              createdAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+              updatedAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
             },
           },
           name: faker.string.alpha(20),
@@ -1070,6 +1259,20 @@ export const getBrEggControllerFindAllMockHandler = (
     );
   });
 };
+
+export const getAuthControllerKakaoLoginMockHandler = (
+  overrideResponse?:
+    | unknown
+    | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<unknown> | unknown),
+) => {
+  return http.get("*/api/auth/sign-in/kakao", async (info) => {
+    await delay(1000);
+    if (typeof overrideResponse === "function") {
+      await overrideResponse(info);
+    }
+    return new HttpResponse(null, { status: 200 });
+  });
+};
 export const getProjectDaepaAPIMock = () => [
   getPetControllerFindAllMockHandler(),
   getPetControllerCreateMockHandler(),
@@ -1091,4 +1294,5 @@ export const getProjectDaepaAPIMock = () => [
   getEggControllerCreateMockHandler(),
   getEggControllerHatchedMockHandler(),
   getBrEggControllerFindAllMockHandler(),
+  getAuthControllerKakaoLoginMockHandler(),
 ];

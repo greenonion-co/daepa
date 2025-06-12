@@ -20,6 +20,12 @@ import { EggEntity } from './egg/egg.entity';
 import { EggController } from './egg/egg.controller';
 import { EggService } from './egg/egg.service';
 import { BrEggController } from './egg/br/br.egg.controller';
+import { AuthController } from './auth/auth.controller';
+import { AuthService } from './auth/auth.service';
+import { KakaoStrategy } from './auth/strategies/kakao.strategy';
+import { PassportModule } from '@nestjs/passport';
+import { JwtStrategy } from './auth/strategies/jwt.strategy';
+import { JwtModule } from '@nestjs/jwt';
 
 const ENTITIES = [
   UserEntity,
@@ -46,6 +52,11 @@ const ENTITIES = [
       synchronize: true,
     }),
     TypeOrmModule.forFeature(ENTITIES),
+    PassportModule,
+    JwtModule.register({
+      secret: process.env.JWT_SECRET ?? '',
+      signOptions: { expiresIn: '1h' },
+    }),
   ],
   controllers: [
     AppController,
@@ -55,6 +66,7 @@ const ENTITIES = [
     BrPetController,
     EggController,
     BrEggController,
+    AuthController,
   ],
   providers: [
     AppService,
@@ -63,6 +75,9 @@ const ENTITIES = [
     UserNotificationService,
     ParentService,
     EggService,
+    AuthService,
+    KakaoStrategy,
+    JwtStrategy,
   ],
 })
 export class AppModule {
