@@ -1,9 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { UserService } from 'src/user/user.service';
 import { ProviderInfo } from './auth.types';
-import { UserDto } from 'src/user/user.dto';
 import { JwtService } from '@nestjs/jwt';
 import { USER_STATUS } from 'src/user/user.constant';
+import * as bcrypt from 'bcrypt';
+import { JwtPayload } from './strategies/jwt.strategy';
 
 @Injectable()
 export class AuthService {
@@ -25,48 +26,101 @@ export class AuthService {
         providerInfo,
         USER_STATUS.PENDING_REFRESH_TOKEN,
       );
-      return userCreated;
+      return userCreated.userId;
     }
 
-    return userFound;
+    return userFound.userId;
   }
 
-  async getJwtToken(user: UserDto) {
-    const payload = { username: user.name, sub: user.userId };
-    const accessToken = this.jwtService.sign(payload);
-    const refreshToken = this.jwtService.sign(payload, {
-      expiresIn: '1y',
-      secret: process.env.JWT_REFRESH_SECRET ?? '',
+  createJwtAccessToken(userId: string) {
+    const accessToken = this.jwtService.sign({
+      sub: userId,
     });
-
-    await this.updateUserRefreshToken(user.userId, refreshToken);
-
-    return { accessToken, refreshToken };
+    return accessToken;
   }
 
-  async createJwtRefreshToken(user: UserDto) {
-    const payload = { username: user.name, sub: user.userId };
-    const refreshToken = this.jwtService.sign(payload, {
-      expiresIn: '180d',
-      secret: process.env.JWT_REFRESH_SECRET ?? '',
-    });
+  async createJwtRefreshToken(userId: string) {
+    const refreshToken = this.jwtService.sign(
+      { sub: userId },
+      {
+        expiresIn: '180d',
+        secret: process.env.JWT_REFRESH_SECRET ?? '',
+      },
+    );
 
-    await this.updateUserRefreshToken(user.userId, refreshToken);
+    const hashedRefreshToken = await this.updateUserRefreshToken(
+      userId,
+      refreshToken,
+    );
+    return hashedRefreshToken;
+  }
 
-    return refreshToken;
+  async refreshToken(refreshToken: string) {
+    try {
+      const tokenPayload = this.jwtService.verify<JwtPayload>(refreshToken, {
+        secret: process.env.JWT_REFRESH_SECRET ?? '',
+      });
+
+      const user = await this.userService.findOne({
+        user_id: tokenPayload.sub,
+      });
+      if (!user) {
+        throw new UnauthorizedException('사용자를 찾을 수 없습니다.');
+      }
+
+      const isRefreshTokenValid = await bcrypt.compare(
+        refreshToken,
+        user.refreshToken ?? '',
+      );
+      if (!isRefreshTokenValid) {
+        throw new UnauthorizedException('유효하지 않은 refresh token입니다.');
+      }
+
+      if (
+        user.refreshTokenExpiresAt &&
+        user.refreshTokenExpiresAt < new Date()
+      ) {
+        throw new UnauthorizedException('refresh token이 만료되었습니다.');
+      }
+
+      const newAccessToken = this.createJwtAccessToken(user.userId);
+
+      const oneWeekFromNow = new Date();
+      oneWeekFromNow.setDate(oneWeekFromNow.getDate() + 7);
+
+      let newRefreshToken: string | undefined;
+      if (
+        user.refreshTokenExpiresAt &&
+        user.refreshTokenExpiresAt <= oneWeekFromNow
+      ) {
+        // TODO: 짧은 기간으로 설정하여 테스트해볼것
+        newRefreshToken = await this.createJwtRefreshToken(user.userId);
+      }
+
+      return {
+        newAccessToken,
+        newRefreshToken,
+      };
+    } catch (error) {
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+
+      throw new UnauthorizedException('refresh token 검증에 실패했습니다.');
+    }
   }
 
   async updateUserRefreshToken(
     userId: string,
     refreshToken: string,
-  ): Promise<void> {
+  ): Promise<string> {
     const user = await this.userService.findOne({ user_id: userId });
     if (!user) {
       throw new Error('User not found');
     }
 
     // TODO: refresh token 해싱 하여 저장 필요
-    // const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
+    const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
 
     // TODO: expire date의 end of day 계산하여 저장
     // TODO: duration을 환경변수화
@@ -86,8 +140,10 @@ export class AuthService {
       expiresAt.setFullYear(expiresAt.getFullYear() + duration);
 
     await this.userService.update(user.userId, {
-      refreshToken: refreshToken,
+      refreshToken: hashedRefreshToken,
       refreshTokenExpiresAt: expiresAt,
     });
+
+    return hashedRefreshToken;
   }
 }
