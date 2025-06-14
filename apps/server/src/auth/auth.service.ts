@@ -6,6 +6,11 @@ import { USER_STATUS } from 'src/user/user.constant';
 import * as bcrypt from 'bcrypt';
 import { JwtPayload } from './strategies/jwt.strategy';
 
+export type ValidatedUser = {
+  userId: string;
+  isNew?: boolean;
+};
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -13,7 +18,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async validateUser(providerInfo: ProviderInfo) {
+  async validateUser(providerInfo: ProviderInfo): Promise<ValidatedUser> {
     const { provider, providerId } = providerInfo;
 
     const userFound = await this.userService.findOne({
@@ -26,10 +31,15 @@ export class AuthService {
         providerInfo,
         USER_STATUS.PENDING_REFRESH_TOKEN,
       );
-      return userCreated.userId;
+      return {
+        userId: userCreated.userId,
+        isNew: true,
+      };
     }
 
-    return userFound.userId;
+    return {
+      userId: userFound.userId,
+    };
   }
 
   async getJwtToken(userId: string) {

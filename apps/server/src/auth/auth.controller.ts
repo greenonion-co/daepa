@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { AuthGuard } from '@nestjs/passport';
-import { AuthService } from './auth.service';
+import { AuthService, ValidatedUser } from './auth.service';
 import { ApiResponse } from '@nestjs/swagger';
 import { UserDto } from 'src/user/user.dto';
 import { OAuthAuthenticatedUser } from './auth.decorator';
@@ -25,15 +25,16 @@ export class AuthController {
   })
   @UseGuards(AuthGuard('kakao'))
   async kakaoLogin(
-    @OAuthAuthenticatedUser() userId: string,
+    @OAuthAuthenticatedUser() validatedUser: ValidatedUser,
     @Res() res: Response,
   ) {
-    if (!userId) {
+    if (!validatedUser) {
       throw new UnauthorizedException('로그인 실패');
     }
 
-    const { accessToken, refreshToken } =
-      await this.authService.getJwtToken(userId);
+    const { accessToken, refreshToken } = await this.authService.getJwtToken(
+      validatedUser.userId,
+    );
 
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
@@ -41,26 +42,24 @@ export class AuthController {
       sameSite: 'lax',
       maxAge: 180 * 24 * 60 * 60 * 1000, // 180일
     });
-    // TODO: 클라이언트에서 status가 pending인 경우 이름 입력으로, 아닌 경우 서비스로
-    return res.redirect(
-      `http://localhost:3000/sign-in/auth?token=${encodeURIComponent(
-        accessToken,
-      )}`,
-    );
+
+    const queryParams = `?token=${encodeURIComponent(accessToken)}${validatedUser.isNew ? '&isNew=true' : ''}`;
+    return res.redirect(`http://localhost:3000/sign-in/auth${queryParams}`);
   }
 
   @Get('sign-in/google')
   @UseGuards(AuthGuard('google'))
   async googleLogin(
-    @OAuthAuthenticatedUser() userId: string,
+    @OAuthAuthenticatedUser() validatedUser: ValidatedUser,
     @Res() res: Response,
   ) {
-    if (!userId) {
+    if (!validatedUser) {
       throw new UnauthorizedException('로그인 실패');
     }
 
-    const { accessToken, refreshToken } =
-      await this.authService.getJwtToken(userId);
+    const { accessToken, refreshToken } = await this.authService.getJwtToken(
+      validatedUser.userId,
+    );
 
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
@@ -68,12 +67,9 @@ export class AuthController {
       sameSite: 'lax',
       maxAge: 180 * 24 * 60 * 60 * 1000, // 180일
     });
-    // TODO: 클라이언트에서 status가 pending인 경우 이름 입력으로, 아닌 경우 서비스로
-    return res.redirect(
-      `http://localhost:3000/sign-in/auth?token=${encodeURIComponent(
-        accessToken,
-      )}`,
-    );
+
+    const queryParams = `?token=${encodeURIComponent(accessToken)}${validatedUser.isNew ? '&isNew=true' : ''}`;
+    return res.redirect(`http://localhost:3000/sign-in/auth${queryParams}`);
   }
 
   @Get('refresh')
