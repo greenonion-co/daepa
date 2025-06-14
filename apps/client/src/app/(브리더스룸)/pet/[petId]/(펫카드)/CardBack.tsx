@@ -24,8 +24,9 @@ import useParentLinkStore, { PetParentDtoWithMessage } from "../../store/parentL
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import InfoItem from "@/app/(브리더스룸)/components/Form/InfoItem";
-import { cn, formatDateToYYYYMMDD } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { format } from "date-fns";
 interface CardBackProps {
   pet: PetDto;
   from: string | null;
@@ -131,7 +132,7 @@ const CardBack = ({ pet, from }: CardBackProps) => {
         ...(sex && { sex }),
         ...(foods && { foods }),
         ...(desc && { desc }),
-        ...(birthdate && { birthdate: formatDateToYYYYMMDD(birthdate.toString()) }),
+        ...(birthdate && { birthdate: format(birthdate, "yyyyMMdd") }),
         ...(weight && { weight: Number(weight) }),
       };
 

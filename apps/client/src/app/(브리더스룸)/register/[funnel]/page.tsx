@@ -14,8 +14,8 @@ import { CreatePetDto, petControllerCreate } from "@repo/api-client";
 import { toast } from "sonner";
 import { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
-import { formatDateToYYYYMMDD } from "@/lib/utils";
 import Loading from "@/components/common/Loading";
+import { format } from "date-fns";
 
 export default function RegisterPage({ params }: { params: Promise<{ funnel: string }> }) {
   const router = useRouter();
@@ -110,7 +110,7 @@ export default function RegisterPage({ params }: { params: Promise<{ funnel: str
         sex,
         species,
         ...(rest?.birthdate && {
-          birthdate: formatDateToYYYYMMDD(rest.birthdate.toString()),
+          birthdate: format(rest.birthdate, "yyyyMMdd"),
         }),
         ...(rest?.weight && { weight: Number(rest.weight) }),
         ...(rest?.father?.petId && {

@@ -14,6 +14,7 @@ interface PetDetailProps {
 }
 
 const PetDetail = ({ pet, qrCodeDataUrl }: PetDetailProps) => {
+  console.log("🚀 ~ PetDetail ~ pet:", pet);
   const containerRef = useRef<HTMLDivElement>(null);
   const isScrollingRef = useRef(false);
   const searchParams = useSearchParams();

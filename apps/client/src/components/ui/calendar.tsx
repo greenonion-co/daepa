@@ -3,6 +3,7 @@
 import * as React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { DayPicker } from "react-day-picker";
+import { format } from "date-fns";
 
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
@@ -72,7 +73,7 @@ function Calendar({
       }}
       components={{
         DayContent: ({ date }: { date: Date }) => {
-          const dateKey = date.toISOString().split("T")[0] as string;
+          const dateKey = format(date, "yyyyMMdd");
           const count = eggCounts[dateKey] || 0;
 
           return (

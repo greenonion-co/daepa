@@ -4,7 +4,7 @@ import { EGG_REGISTER_STEPS, USER_NAME } from "../../../constants";
 import { CreateEggDto, eggControllerCreate } from "@repo/api-client";
 import { FormField } from "../../../components/Form/FormField";
 
-import { cn, formatDateToYYYYMMDD } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { Check } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -18,6 +18,7 @@ import { useEffect } from "react";
 import { useSelect } from "../../hooks/useSelect";
 import { FormData } from "../../store/pet";
 import Loading from "@/components/common/Loading";
+import { format } from "date-fns";
 
 const EggRegisterPage = () => {
   const router = useRouter();
@@ -106,7 +107,7 @@ const EggRegisterPage = () => {
     try {
       const formattedData = {
         species: newFormData.species,
-        layingDate: formatDateToYYYYMMDD(newFormData.layingDate?.split("T")[0] ?? ""),
+        layingDate: format(newFormData.layingDate, "yyyyMMdd"),
         ...(newFormData.father?.petId && {
           father: {
             parentId: newFormData.father.petId,

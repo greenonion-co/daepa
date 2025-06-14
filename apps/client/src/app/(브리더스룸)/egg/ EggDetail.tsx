@@ -25,10 +25,11 @@ import { EGG_EDIT_STEPS } from "../constants";
 import useParentLinkStore from "../pet/store/parentLink";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { cn, formatDateToYYYYMMDD } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import FloatingButton from "../components/FloatingButton";
 import { AxiosError } from "axios";
 import Loading from "@/components/common/Loading";
+import { format } from "date-fns";
 
 type EggDetailDto = Omit<EggDto, "layingDate"> & {
   layingDate: string;
@@ -111,7 +112,7 @@ const EggDetail = ({ egg }: EggDetailProps) => {
       if (!egg.eggId) return;
 
       const updateData = {
-        ...(layingDate && { layingDate: formatDateToYYYYMMDD(String(layingDate)) }),
+        ...(layingDate && { layingDate: Number(format(layingDate, "yyyyMMdd")) }),
         clutch: Number(clutch),
         clutchOrder: Number(clutchOrder),
         ...(desc && { desc }),
@@ -330,7 +331,7 @@ const EggDetail = ({ egg }: EggDetailProps) => {
 
         <div
           className={cn(
-            "sticky bottom-0 left-0 flex p-4",
+            "sticky bottom-0 left-0 flex pt-4",
             isEditing ? "justify-end" : "justify-between",
           )}
         >

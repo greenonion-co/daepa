@@ -209,7 +209,7 @@ export const FormField = ({
                 )}
               >
                 {value ? format(new Date(value), "yyyy년 MM월 dd일") : placeholder}
-                <CalendarIcon className="h-4 w-4 opacity-50" />
+                {!disabled && <CalendarIcon className="h-4 w-4 opacity-50" />}
               </button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
