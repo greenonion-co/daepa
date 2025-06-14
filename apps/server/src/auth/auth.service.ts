@@ -32,6 +32,12 @@ export class AuthService {
     return userFound.userId;
   }
 
+  async getJwtToken(userId: string) {
+    const accessToken = this.createJwtAccessToken(userId);
+    const refreshToken = await this.createJwtRefreshToken(userId);
+    return { accessToken, refreshToken };
+  }
+
   createJwtAccessToken(userId: string) {
     const accessToken = this.jwtService.sign({
       sub: userId,
@@ -55,7 +61,7 @@ export class AuthService {
     return hashedRefreshToken;
   }
 
-  async getJwtAccessToken(refreshToken: string) {
+  async refresh(refreshToken: string) {
     try {
       const tokenPayload = this.jwtService.verify<JwtPayload>(refreshToken, {
         secret: process.env.JWT_REFRESH_SECRET ?? '',

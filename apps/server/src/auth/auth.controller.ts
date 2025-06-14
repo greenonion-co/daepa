@@ -32,17 +32,21 @@ export class AuthController {
       throw new UnauthorizedException('로그인 실패');
     }
 
-    const refreshToken = await this.authService.createJwtRefreshToken(userId);
-    // 쿠키에 refreshToken 설정
+    const { accessToken, refreshToken } =
+      await this.authService.getJwtToken(userId);
+
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge: 180 * 24 * 60 * 60 * 1000, // 180일
     });
-
     // TODO: 클라이언트에서 status가 pending인 경우 이름 입력으로, 아닌 경우 서비스로
-    return res.redirect('http://localhost:3000/sign-in/auth');
+    return res.redirect(
+      `http://localhost:3000/sign-in/auth?token=${encodeURIComponent(
+        accessToken,
+      )}`,
+    );
   }
 
   @Get('sign-in/google')
@@ -55,33 +59,37 @@ export class AuthController {
       throw new UnauthorizedException('로그인 실패');
     }
 
-    const refreshToken = await this.authService.createJwtRefreshToken(userId);
-    // 쿠키에 refreshToken 설정
+    const { accessToken, refreshToken } =
+      await this.authService.getJwtToken(userId);
+
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge: 180 * 24 * 60 * 60 * 1000, // 180일
     });
-
     // TODO: 클라이언트에서 status가 pending인 경우 이름 입력으로, 아닌 경우 서비스로
-    return res.redirect('http://localhost:3000/sign-in/auth');
+    return res.redirect(
+      `http://localhost:3000/sign-in/auth?token=${encodeURIComponent(
+        accessToken,
+      )}`,
+    );
   }
 
-  @Get('token')
+  @Get('refresh')
   @ApiResponse({
     status: 200,
     description: 'refresh token 재발급 성공',
     type: String,
   })
-  async getToken(@Req() req: Request, @Res() res: Response) {
+  async refreshToken(@Req() req: Request, @Res() res: Response) {
     const refreshToken = req.cookies.refreshToken;
     if (!refreshToken || typeof refreshToken !== 'string') {
       throw new UnauthorizedException('Refresh token이 유효하지 않습니다.');
     }
 
     const { newAccessToken, newRefreshToken } =
-      await this.authService.getJwtAccessToken(refreshToken);
+      await this.authService.refresh(refreshToken);
 
     if (newRefreshToken) {
       res.cookie('refreshToken', newRefreshToken, {
@@ -93,7 +101,7 @@ export class AuthController {
     }
 
     return {
-      accessToken: newAccessToken,
+      token: newAccessToken,
     };
   }
 }

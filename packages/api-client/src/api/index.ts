@@ -223,10 +223,10 @@ export const authControllerGoogleLogin = <TData = AxiosResponse<void>>(
   return axios.get(`http://localhost:4000/api/auth/sign-in/google`, options);
 };
 
-export const authControllerGetToken = <TData = AxiosResponse<string>>(
+export const authControllerRefreshToken = <TData = AxiosResponse<string>>(
   options?: AxiosRequestConfig,
 ): Promise<TData> => {
-  return axios.get(`http://localhost:4000/api/auth/token`, options);
+  return axios.get(`http://localhost:4000/api/auth/refresh`, options);
 };
 
 export type PetControllerFindAllResult = AxiosResponse<PetControllerFindAll200>;
@@ -252,7 +252,7 @@ export type EggControllerHatchedResult = AxiosResponse<void>;
 export type BrEggControllerFindAllResult = AxiosResponse<BrEggControllerFindAll200>;
 export type AuthControllerKakaoLoginResult = AxiosResponse<unknown>;
 export type AuthControllerGoogleLoginResult = AxiosResponse<void>;
-export type AuthControllerGetTokenResult = AxiosResponse<string>;
+export type AuthControllerRefreshTokenResult = AxiosResponse<string>;
 
 export const getPetControllerFindAllResponseMock = (
   overrideResponse: Partial<PetControllerFindAll200> = {},
@@ -950,7 +950,7 @@ export const getBrEggControllerFindAllResponseMock = (
   ...overrideResponse,
 });
 
-export const getAuthControllerGetTokenResponseMock = (): string => faker.word.sample();
+export const getAuthControllerRefreshTokenResponseMock = (): string => faker.word.sample();
 
 export const getPetControllerFindAllMockHandler = (
   overrideResponse?:
@@ -1317,12 +1317,12 @@ export const getAuthControllerGoogleLoginMockHandler = (
   });
 };
 
-export const getAuthControllerGetTokenMockHandler = (
+export const getAuthControllerRefreshTokenMockHandler = (
   overrideResponse?:
     | string
     | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<string> | string),
 ) => {
-  return http.get("*/api/auth/token", async (info) => {
+  return http.get("*/api/auth/refresh", async (info) => {
     await delay(1000);
 
     return new HttpResponse(
@@ -1331,7 +1331,7 @@ export const getAuthControllerGetTokenMockHandler = (
           ? typeof overrideResponse === "function"
             ? await overrideResponse(info)
             : overrideResponse
-          : getAuthControllerGetTokenResponseMock(),
+          : getAuthControllerRefreshTokenResponseMock(),
       ),
       { status: 200, headers: { "Content-Type": "application/json" } },
     );
@@ -1360,5 +1360,5 @@ export const getProjectDaepaAPIMock = () => [
   getBrEggControllerFindAllMockHandler(),
   getAuthControllerKakaoLoginMockHandler(),
   getAuthControllerGoogleLoginMockHandler(),
-  getAuthControllerGetTokenMockHandler(),
+  getAuthControllerRefreshTokenMockHandler(),
 ];
