@@ -12,10 +12,13 @@ const SignInPage = () => {
         </div>
 
         <div>
-          <button className="mb-2 flex h-[46px] w-full items-center justify-center gap-3 rounded-[12px] bg-[#F2F2F2]">
+          <a
+            className="mb-2 flex h-[46px] w-full items-center justify-center gap-3 rounded-[12px] bg-[#F2F2F2]"
+            href={"http://localhost:4000/api/auth/sign-in/google"}
+          >
             <Image src="/google_icon.svg" alt="Google" width={36} height={36} />
             <span className="text-[16px] font-semibold">구글로 시작하기</span>
-          </button>
+          </a>
 
           <a
             className="flex h-[46px] w-full items-center justify-center gap-3 rounded-[12px] bg-[#FEE500]"

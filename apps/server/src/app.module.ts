@@ -26,6 +26,7 @@ import { KakaoStrategy } from './auth/strategies/kakao.strategy';
 import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './auth/strategies/jwt.strategy';
 import { JwtModule } from '@nestjs/jwt';
+import { GoogleStrategy } from './auth/strategies/google.strategy';
 
 const ENTITIES = [
   UserEntity,
@@ -77,6 +78,7 @@ const ENTITIES = [
     EggService,
     AuthService,
     KakaoStrategy,
+    GoogleStrategy,
     JwtStrategy,
   ],
 })

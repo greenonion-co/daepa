@@ -31,11 +31,7 @@ export class AuthController {
       throw new UnauthorizedException('로그인 실패');
     }
 
-    const { accessToken, refreshToken } =
-      await this.authService.getJwtToken(user);
-
-    // TODO: access token 어떻게?
-
+    const refreshToken = await this.authService.createJwtRefreshToken(user);
     // 쿠키에 refreshToken 설정
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
@@ -45,6 +41,29 @@ export class AuthController {
     });
 
     // TODO: 클라이언트에서 status가 pending인 경우 이름 입력으로, 아닌 경우 서비스로
-    return res.redirect('http://localhost:3000/sign-in/success');
+    return res.redirect('http://localhost:3000/sign-in/auth');
+  }
+
+  @Get('sign-in/google')
+  @UseGuards(AuthGuard('google'))
+  async googleLogin(
+    @OAuthAuthenticatedUser() user: UserDto,
+    @Res() res: Response,
+  ) {
+    if (!user) {
+      throw new UnauthorizedException('로그인 실패');
+    }
+
+    const refreshToken = await this.authService.createJwtRefreshToken(user);
+    // 쿠키에 refreshToken 설정
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 180 * 24 * 60 * 60 * 1000, // 180일
+    });
+
+    // TODO: 클라이언트에서 status가 pending인 경우 이름 입력으로, 아닌 경우 서비스로
+    return res.redirect('http://localhost:3000/sign-in/auth');
   }
 }
