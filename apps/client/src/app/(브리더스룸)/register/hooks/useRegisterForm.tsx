@@ -9,6 +9,7 @@ import Dialog from "../../components/Form/Dialog";
 
 import { validateStep } from "@/lib/form";
 import { FormData } from "../store/pet";
+import { toast } from "sonner";
 
 type SELECTOR_TYPE = "species" | "growth" | "sex";
 
@@ -46,7 +47,10 @@ export const useRegisterForm = ({
 
       setErrors(errors);
 
-      if (!isValid) return;
+      if (!isValid) {
+        toast.error("에러를 확인해주세요.");
+        return;
+      }
 
       if (isEggRegister) {
         if (step + 1 >= formStep.length) {
@@ -103,7 +107,7 @@ export const useRegisterForm = ({
       setFormData(newFormData);
 
       if (
-        (isEggRegister && step < formStep.length - 1) ||
+        (["father", "mother"].includes(type) && isEggRegister && step < formStep.length - 1) ||
         (!isEggRegister && Number(funnel) === REGISTER_PAGE.FIRST && step <= formStep.length - 1)
       ) {
         goNext(newFormData);
