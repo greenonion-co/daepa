@@ -193,7 +193,7 @@ export class EggService {
   }
 
   async getEggListByDate(dateRange: { startYmd?: number; endYmd?: number }) {
-    const queryBuilder = this.createEggWithOwnerQueryBuilder();
+    const queryBuilder = this.createEggWithOwnerAndParentQueryBuilder();
 
     const layingDateFrom =
       dateRange?.startYmd ??
@@ -210,9 +210,21 @@ export class EggService {
       });
 
     const { entities } = await queryBuilder.getRawAndEntities();
-    const eggList = entities.map((entity) =>
-      plainToInstance(EggDto, instanceToPlain(entity)),
-    );
+    const eggList = entities.map((entity) => {
+      const egg = instanceToPlain(entity);
+      const { parents, ...eggData } = egg;
+      const father = parents.find(
+        (parent) => parent.role === PARENT_ROLE.FATHER,
+      );
+      const mother = parents.find(
+        (parent) => parent.role === PARENT_ROLE.MOTHER,
+      );
+      return plainToInstance(EggDto, {
+        ...eggData,
+        father,
+        mother,
+      });
+    });
     const eggDtosByDate = eggList.reduce(
       (acc, eggDto) => {
         const layingDate = eggDto.layingDate;
@@ -403,6 +415,24 @@ export class EggService {
         'users',
         'users',
         'users.user_id = eggs.owner_id',
+      )
+      .where('eggs.is_deleted = :isDeleted', { isDeleted: false });
+  }
+
+  private createEggWithOwnerAndParentQueryBuilder() {
+    return this.eggRepository
+      .createQueryBuilder('eggs')
+      .leftJoinAndMapOne(
+        'eggs.owner',
+        'users',
+        'users',
+        'users.user_id = eggs.owner_id',
+      )
+      .leftJoinAndMapMany(
+        'eggs.parents',
+        'parents',
+        'parents',
+        'parents.pet_id = eggs.egg_id',
       )
       .where('eggs.is_deleted = :isDeleted', { isDeleted: false });
   }
