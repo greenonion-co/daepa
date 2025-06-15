@@ -30,7 +30,7 @@ export class UserEntity {
     type: 'enum',
     enum: USER_ROLE,
   })
-  role: (typeof USER_ROLE)[keyof typeof USER_ROLE];
+  role: USER_ROLE;
 
   @Column({
     type: 'enum',

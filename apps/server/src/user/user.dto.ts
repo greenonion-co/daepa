@@ -19,9 +19,10 @@ class UserBaseDto {
   @ApiProperty({
     description: '회원 역할',
     enum: USER_ROLE,
+    'x-enumNames': Object.keys(USER_ROLE),
   })
   @IsEnum(USER_ROLE)
-  role: (typeof USER_ROLE)[keyof typeof USER_ROLE];
+  role: USER_ROLE;
 
   @ApiProperty({
     description: 'Oauth 제공자',
