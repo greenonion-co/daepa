@@ -192,6 +192,42 @@ export class EggService {
     };
   }
 
+  async getEggListByDate(dateRange: { startYmd?: number; endYmd?: number }) {
+    const queryBuilder = this.createEggWithOwnerQueryBuilder();
+
+    const layingDateFrom =
+      dateRange?.startYmd ??
+      Number(format(startOfMonth(new Date()), 'yyyyMMdd'));
+    const layingDateTo =
+      dateRange?.endYmd ?? Number(format(endOfMonth(new Date()), 'yyyyMMdd'));
+
+    queryBuilder
+      .andWhere('eggs.laying_date >= :startYmd', {
+        startYmd: layingDateFrom,
+      })
+      .andWhere('eggs.laying_date <= :endYmd', {
+        endYmd: layingDateTo,
+      });
+
+    const { entities } = await queryBuilder.getRawAndEntities();
+    const eggList = entities.map((entity) =>
+      plainToInstance(EggDto, instanceToPlain(entity)),
+    );
+    const eggDtosByDate = eggList.reduce(
+      (acc, eggDto) => {
+        const layingDate = eggDto.layingDate;
+        if (!acc[layingDate]) {
+          acc[layingDate] = [];
+        }
+        acc[layingDate].push(eggDto);
+        return acc;
+      },
+      {} as Record<number, EggDto[]>,
+    );
+
+    return eggDtosByDate;
+  }
+
   async getEgg(eggId: string): Promise<EggDto | null> {
     const queryBuilder = this.createEggWithOwnerQueryBuilder();
     const eggEntity = await queryBuilder

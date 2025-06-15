@@ -5,21 +5,8 @@
  * Project Daepa API description
  * OpenAPI spec version: 1.0
  */
-import type { BrEggControllerFindAllOrder } from "./brEggControllerFindAllOrder";
 
 export type BrEggControllerFindAllParams = {
-  /**
-   * 정렬 순서
-   */
-  order?: BrEggControllerFindAllOrder;
-  /**
-   * 페이지 번호
-   */
-  page?: number;
-  /**
-   * 페이지당 항목 수
-   */
-  itemPerPage?: number;
   /**
    * 조회 범위 시작일
    */
