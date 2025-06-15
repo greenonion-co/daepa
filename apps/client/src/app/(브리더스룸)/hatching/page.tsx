@@ -43,7 +43,7 @@ const HatchingPage = () => {
     from: new Date(),
     to: new Date(),
   });
-  const [tab, setTab] = useState<"hached" | "noHatched">("noHatched");
+  const [tab, setTab] = useState<"hatched" | "noHatched">("noHatched");
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
 
   const { data: yearData } = useQuery({
@@ -146,7 +146,7 @@ const HatchingPage = () => {
         <ScrollArea className="relative flex h-[613px] w-full gap-2 rounded-xl border p-2 shadow">
           <Tabs
             defaultValue="noHatched"
-            onValueChange={(value) => setTab(value as "hached" | "noHatched")}
+            onValueChange={(value) => setTab(value as "hatched" | "noHatched")}
             className="sticky top-0 z-10 bg-white pb-2"
           >
             <TabsList>
@@ -157,7 +157,7 @@ const HatchingPage = () => {
                   .filter((egg) => !egg.hatchedPetId).length || 0}
                 )
               </TabsTrigger>
-              <TabsTrigger value="hached">
+              <TabsTrigger value="hatched">
                 해칭된 알 (
                 {Object.values(selectedData || {})
                   .flat()
@@ -179,7 +179,7 @@ const HatchingPage = () => {
                 </h3>
                 <div className="space-y-2">
                   {eggs
-                    .filter((egg) => (tab === "noHatched" ? !egg.hatchedPetId : egg.hatchedPetId))
+                    .filter((egg) => (tab === "hatched" ? egg.hatchedPetId : !egg.hatchedPetId))
                     .map((egg) => (
                       <TreeView key={egg.eggId} node={egg} />
                     ))}

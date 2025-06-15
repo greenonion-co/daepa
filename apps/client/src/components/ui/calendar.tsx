@@ -86,14 +86,14 @@ function Calendar({
             <div className="flex flex-col items-center gap-1">
               <span className="text-sm font-medium">{date.getDate()}</span>
               <div className="flex flex-col items-center gap-0.5">
-                {count.hatched > 0 && (
+                {count.notHatched > 0 && (
                   <span className="rounded-full bg-gray-100 px-1.5 py-0.5 text-xs font-medium text-gray-700">
-                    🥚 {count.hatched}
+                    🥚 {count.notHatched}
                   </span>
                 )}
-                {count.notHatched > 0 && (
+                {count.hatched > 0 && (
                   <span className="rounded-full bg-yellow-50 px-1.5 py-0.5 text-xs font-medium text-yellow-700">
-                    🐣 {count.notHatched}
+                    🐣 {count.hatched}
                   </span>
                 )}
               </div>
