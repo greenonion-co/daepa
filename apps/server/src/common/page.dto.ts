@@ -153,3 +153,23 @@ export class PageDto<T> {
     this.meta = meta;
   }
 }
+
+export class DateRangeDto {
+  @ApiProperty({
+    description: '조회 범위 시작일',
+    type: Number,
+    required: false,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  readonly startYmd?: number;
+
+  @ApiProperty({
+    description: '조회 범위 종료일',
+    type: Number,
+    required: false,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  readonly endYmd?: number;
+}
