@@ -27,7 +27,6 @@ import { faker } from "@faker-js/faker";
 import { HttpResponse, delay, http } from "msw";
 
 import type {
-  BrEggControllerFindAll200,
   BrPetControllerFindAll200,
   EggDto,
   ParentDto,
@@ -36,7 +35,7 @@ import type {
   UserNotificationControllerFindAll200,
 } from "../model";
 
-import { useCustomInstance } from "./mutator/use-custom-instance.ts";
+import { useCustomInstance } from "./mutator/use-custom-instance";
 export const petControllerFindAll = (params?: PetControllerFindAllParams) => {
   return useCustomInstance<PetControllerFindAll200>({
     url: `http://localhost:4000/api/v1/pet`,
@@ -204,7 +203,7 @@ export const eggControllerHatched = (eggId: string) => {
 };
 
 export const brEggControllerFindAll = (params?: BrEggControllerFindAllParams) => {
-  return useCustomInstance<BrEggControllerFindAll200>({
+  return useCustomInstance<void>({
     url: `http://localhost:4000/api/v1/br/egg`,
     method: "GET",
     params,
@@ -855,144 +854,6 @@ export const getEggControllerFindOneResponseMock = (
   ...overrideResponse,
 });
 
-export const getBrEggControllerFindAllResponseMock = (
-  overrideResponse: Partial<BrEggControllerFindAll200> = {},
-): BrEggControllerFindAll200 => ({
-  "20250101": faker.helpers.arrayElement([
-    Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-      eggId: faker.string.alpha(20),
-      owner: {
-        ...{
-          userId: faker.string.alpha(20),
-          name: faker.string.alpha(20),
-          role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
-          provider: {},
-          providerId: faker.string.alpha(20),
-          refreshToken: faker.string.alpha(20),
-          refreshTokenExpiresAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
-          status: faker.helpers.arrayElement([
-            "pending_refresh_token",
-            "pending_access_token",
-            "active",
-            "inactive",
-            "suspended",
-            "deleted",
-          ] as const),
-          lastLoginAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
-          createdAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
-          updatedAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
-        },
-      },
-      species: {},
-      layingDate: faker.number.int({ min: undefined, max: undefined }),
-      clutch: faker.helpers.arrayElement([
-        faker.number.int({ min: undefined, max: undefined }),
-        undefined,
-      ]),
-      clutchOrder: faker.number.int({ min: undefined, max: undefined }),
-      name: faker.string.alpha(20),
-      desc: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
-      hatchedPetId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
-      father: faker.helpers.arrayElement([
-        {
-          ...{
-            petId: faker.string.alpha(20),
-            owner: {
-              ...{
-                userId: faker.string.alpha(20),
-                name: faker.string.alpha(20),
-                role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
-                provider: {},
-                providerId: faker.string.alpha(20),
-                refreshToken: faker.string.alpha(20),
-                refreshTokenExpiresAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
-                status: faker.helpers.arrayElement([
-                  "pending_refresh_token",
-                  "pending_access_token",
-                  "active",
-                  "inactive",
-                  "suspended",
-                  "deleted",
-                ] as const),
-                lastLoginAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
-                createdAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
-                updatedAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
-              },
-            },
-            name: faker.string.alpha(20),
-            species: {},
-            morphs: faker.helpers.arrayElement([
-              Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-                () => faker.string.alpha(20),
-              ),
-              undefined,
-            ]),
-            traits: faker.helpers.arrayElement([
-              Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-                () => faker.string.alpha(20),
-              ),
-              undefined,
-            ]),
-            sex: faker.helpers.arrayElement([{}, undefined]),
-            relationId: faker.number.int({ min: undefined, max: undefined }),
-            status: faker.string.alpha(20),
-          },
-        },
-        undefined,
-      ]),
-      mother: faker.helpers.arrayElement([
-        {
-          ...{
-            petId: faker.string.alpha(20),
-            owner: {
-              ...{
-                userId: faker.string.alpha(20),
-                name: faker.string.alpha(20),
-                role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
-                provider: {},
-                providerId: faker.string.alpha(20),
-                refreshToken: faker.string.alpha(20),
-                refreshTokenExpiresAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
-                status: faker.helpers.arrayElement([
-                  "pending_refresh_token",
-                  "pending_access_token",
-                  "active",
-                  "inactive",
-                  "suspended",
-                  "deleted",
-                ] as const),
-                lastLoginAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
-                createdAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
-                updatedAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
-              },
-            },
-            name: faker.string.alpha(20),
-            species: {},
-            morphs: faker.helpers.arrayElement([
-              Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-                () => faker.string.alpha(20),
-              ),
-              undefined,
-            ]),
-            traits: faker.helpers.arrayElement([
-              Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-                () => faker.string.alpha(20),
-              ),
-              undefined,
-            ]),
-            sex: faker.helpers.arrayElement([{}, undefined]),
-            relationId: faker.number.int({ min: undefined, max: undefined }),
-            status: faker.string.alpha(20),
-          },
-        },
-        undefined,
-      ]),
-    })),
-    undefined,
-  ]),
-  ...overrideResponse,
-});
-
 export const getAuthControllerRefreshTokenResponseMock = (): string => faker.word.sample();
 
 export const getPetControllerFindAllMockHandler = (
@@ -1311,24 +1172,15 @@ export const getEggControllerHatchedMockHandler = (
 
 export const getBrEggControllerFindAllMockHandler = (
   overrideResponse?:
-    | BrEggControllerFindAll200
-    | ((
-        info: Parameters<Parameters<typeof http.get>[1]>[0],
-      ) => Promise<BrEggControllerFindAll200> | BrEggControllerFindAll200),
+    | void
+    | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<void> | void),
 ) => {
   return http.get("*/api/v1/br/egg", async (info) => {
     await delay(1000);
-
-    return new HttpResponse(
-      JSON.stringify(
-        overrideResponse !== undefined
-          ? typeof overrideResponse === "function"
-            ? await overrideResponse(info)
-            : overrideResponse
-          : getBrEggControllerFindAllResponseMock(),
-      ),
-      { status: 200, headers: { "Content-Type": "application/json" } },
-    );
+    if (typeof overrideResponse === "function") {
+      await overrideResponse(info);
+    }
+    return new HttpResponse(null, { status: 200 });
   });
 };
 

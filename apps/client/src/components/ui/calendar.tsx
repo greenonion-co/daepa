@@ -8,20 +8,28 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./select";
+import { useEffect } from "react";
+type EggCounts = Record<string, { hatched: number; notHatched: number; total: number }>;
 
 function Calendar({
   className,
   classNames,
   showOutsideDays = true,
-  eggCounts = {} as Record<string, number>,
+  eggCounts = {} as EggCounts,
+  onMonthChange,
   ...props
-}: React.ComponentProps<typeof DayPicker> & { eggCounts?: Record<string, number> }) {
+}: React.ComponentProps<typeof DayPicker> & { eggCounts?: EggCounts }) {
   const [currentMonth, setCurrentMonth] = React.useState<Date>(new Date());
+  console.log("🚀 ~ currentMonth:", currentMonth);
   const koreanWeekdays = ["일", "월", "화", "수", "목", "금", "토"];
 
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 11 }, (_, i) => currentYear - 10 + i);
   const months = Array.from({ length: 12 }, (_, i) => i + 1);
+
+  useEffect(() => {
+    onMonthChange?.(currentMonth);
+  }, [currentMonth, onMonthChange]);
 
   return (
     <DayPicker
@@ -79,8 +87,14 @@ function Calendar({
           return (
             <div className="flex flex-col items-center">
               <span className="text-sm">{date.getDate()}</span>
-
-              {count > 0 && <span className="mt-1 text-xs font-medium">🥚 {count}</span>}
+              <div className="flex flex-col items-center">
+                {count.hatched > 0 && (
+                  <span className="text-xs font-medium text-gray-500">🥚 {count.hatched}</span>
+                )}
+                {count.notHatched > 0 && (
+                  <span className="text-xs font-medium text-yellow-600">🐣 {count.notHatched}</span>
+                )}
+              </div>
             </div>
           );
         },

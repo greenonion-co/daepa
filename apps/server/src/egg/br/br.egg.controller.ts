@@ -12,21 +12,6 @@ export class BrEggController {
   constructor(private readonly eggService: EggService) {}
 
   @Get()
-  @ApiResponse({
-    status: 200,
-    description: 'BR룸 알 목록 조회 성공',
-    schema: {
-      type: 'object',
-      properties: {
-        20250101: {
-          type: 'array',
-          items: {
-            $ref: getSchemaPath(EggDto),
-          },
-        },
-      },
-    },
-  })
   async findAll(
     @Query(new DateRangeValidationPipe())
     dateRange: DateRangeDto,

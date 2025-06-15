@@ -18,47 +18,66 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import { brEggControllerFindAll } from "@repo/api-client";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { TreeView } from "../components/TreeView";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useInView } from "react-intersection-observer";
-import Loading from "@/components/common/Loading";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format } from "date-fns";
+import Loading from "@/components/common/Loading";
 
 const HatchingPage = () => {
+  const [month, setMonth] = useState<Date>(new Date());
   const [date, setDate] = useState<Date>(new Date());
   const [tab, setTab] = useState<"hached" | "noHatched">("noHatched");
-  const { ref, inView } = useInView();
-  const itemPerPage = 10;
 
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isPending } = useInfiniteQuery({
-    queryKey: [brEggControllerFindAll.name, date],
-    queryFn: ({ pageParam = 1 }) =>
-      brEggControllerFindAll({
-        page: pageParam,
-        itemPerPage,
-        order: "DESC",
-        startYmd: Number(format(date, "yyyyMMdd")),
-        endYmd: Number(format(date, "yyyyMMdd")),
-      }),
-    initialPageParam: 1,
-    getNextPageParam: (lastPage) => {
-      if (lastPage.data.meta.hasNextPage) {
-        return lastPage.data.meta.page + 1;
-      }
-      return undefined;
+  const selectedDate = Number(format(date, "yyyyMMdd"));
+
+  const { data: monthlyData, isPending } = useQuery({
+    queryKey: [brEggControllerFindAll.name, month],
+    queryFn: () => {
+      const startDate = new Date(month.getFullYear(), month.getMonth(), 1);
+      const endDate = new Date(month.getFullYear(), month.getMonth() + 1, 0);
+      return brEggControllerFindAll({
+        startYmd: Number(format(startDate, "yyyyMMdd")),
+        endYmd: Number(format(endDate, "yyyyMMdd")),
+      });
     },
-    select: (data) => data.pages.flatMap((page) => page.data.data),
+    select: (data) => data.data,
   });
 
-  useEffect(() => {
-    if (inView && hasNextPage && !isFetchingNextPage) {
-      fetchNextPage();
-    }
-  }, [inView, fetchNextPage, hasNextPage, isFetchingNextPage]);
+  const { data: todayData, isPending: todayIsPending } = useQuery({
+    queryKey: [brEggControllerFindAll.name, selectedDate],
+    queryFn: () =>
+      brEggControllerFindAll({
+        startYmd: selectedDate,
+        endYmd: selectedDate,
+      }),
+    select: (data) => data.data?.[selectedDate],
+  });
+
+  const eggCounts = useMemo(() => {
+    if (!monthlyData) return {};
+
+    return Object.entries(monthlyData).reduce(
+      (acc, [date, eggs]) => {
+        // 해칭된 알과 해칭되지 않은 알 개수 계산
+        const hatchedCount = eggs.filter((egg) => egg.hatchedPetId).length;
+        const notHatchedCount = eggs.filter((egg) => !egg.hatchedPetId).length;
+
+        // 날짜별로 해칭된 알과 해칭되지 않은 알 개수를 객체로 저장
+        acc[date] = {
+          hatched: hatchedCount,
+          notHatched: notHatchedCount,
+          total: eggs.length,
+        };
+
+        return acc;
+      },
+      {} as Record<string, { hatched: number; notHatched: number; total: number }>,
+    );
+  }, [monthlyData]);
 
   return (
     <div className="flex flex-col gap-4">
@@ -69,6 +88,7 @@ const HatchingPage = () => {
           onSelect={(day) => setDate(day as Date)}
           className="rounded-xl border shadow"
           eggCounts={eggCounts}
+          onMonthChange={setMonth}
         />
 
         <ScrollArea className="relative flex h-[416px] w-full gap-2 rounded-xl border p-2 shadow">
@@ -79,26 +99,19 @@ const HatchingPage = () => {
           >
             <TabsList>
               <TabsTrigger value="noHatched">
-                해칭되지 않은 알 ({data?.filter((egg) => !egg.hatchedPetId).length || 0})
+                해칭되지 않은 알 ({todayData?.filter((egg) => !egg.hatchedPetId).length || 0})
               </TabsTrigger>
               <TabsTrigger value="hached">
-                해칭된 알 ({data?.filter((egg) => egg.hatchedPetId).length || 0})
+                해칭된 알 ({todayData?.filter((egg) => egg.hatchedPetId).length || 0})
               </TabsTrigger>
             </TabsList>
           </Tabs>
-          {data
-            ?.filter((egg) => (tab === "noHatched" ? !egg.hatchedPetId : egg.hatchedPetId))
-            ?.map((egg) => <TreeView key={egg.eggId} node={egg} />)}
-          {hasNextPage && (
-            <div ref={ref} className="h-20 text-center">
-              {isFetchingNextPage ? (
-                <div className="flex items-center justify-center">
-                  <div className="h-6 w-6 animate-spin rounded-full border-b-2 border-blue-500" />
-                </div>
-              ) : (
-                <Loading />
-              )}
-            </div>
+          {todayIsPending ? (
+            <Loading />
+          ) : (
+            todayData
+              ?.filter((egg) => (tab === "noHatched" ? !egg.hatchedPetId : egg.hatchedPetId))
+              ?.map((egg) => <TreeView key={egg.eggId} node={egg} />)
           )}
         </ScrollArea>
       </div>
@@ -167,11 +180,3 @@ const chartConfig = {
     color: "hsl(var(--chart-1))",
   },
 } satisfies ChartConfig;
-
-const eggCounts = {
-  "2025-05-01": 2,
-  "2025-05-02": 3,
-  "2025-05-03": 2,
-  "2025-05-04": 4,
-  "2025-05-05": 6,
-};
