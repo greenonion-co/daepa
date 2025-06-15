@@ -269,8 +269,7 @@ export const getPetControllerFindAllResponseMock = (
         refreshToken: faker.string.alpha(20),
         refreshTokenExpiresAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
         status: faker.helpers.arrayElement([
-          "pending_refresh_token",
-          "pending_access_token",
+          "pending",
           "active",
           "inactive",
           "suspended",
@@ -325,8 +324,7 @@ export const getPetControllerFindOneResponseMock = (
       refreshToken: faker.string.alpha(20),
       refreshTokenExpiresAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
       status: faker.helpers.arrayElement([
-        "pending_refresh_token",
-        "pending_access_token",
+        "pending",
         "active",
         "inactive",
         "suspended",
@@ -385,8 +383,7 @@ export const getPetControllerFindOneResponseMock = (
             refreshToken: faker.string.alpha(20),
             refreshTokenExpiresAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
             status: faker.helpers.arrayElement([
-              "pending_refresh_token",
-              "pending_access_token",
+              "pending",
               "active",
               "inactive",
               "suspended",
@@ -435,8 +432,7 @@ export const getPetControllerFindOneResponseMock = (
             refreshToken: faker.string.alpha(20),
             refreshTokenExpiresAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
             status: faker.helpers.arrayElement([
-              "pending_refresh_token",
-              "pending_access_token",
+              "pending",
               "active",
               "inactive",
               "suspended",
@@ -537,8 +533,7 @@ export const getBrPetControllerFindAllResponseMock = (
         refreshToken: faker.string.alpha(20),
         refreshTokenExpiresAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
         status: faker.helpers.arrayElement([
-          "pending_refresh_token",
-          "pending_access_token",
+          "pending",
           "active",
           "inactive",
           "suspended",
@@ -597,8 +592,7 @@ export const getBrPetControllerFindAllResponseMock = (
               refreshToken: faker.string.alpha(20),
               refreshTokenExpiresAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
               status: faker.helpers.arrayElement([
-                "pending_refresh_token",
-                "pending_access_token",
+                "pending",
                 "active",
                 "inactive",
                 "suspended",
@@ -647,8 +641,7 @@ export const getBrPetControllerFindAllResponseMock = (
               refreshToken: faker.string.alpha(20),
               refreshTokenExpiresAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
               status: faker.helpers.arrayElement([
-                "pending_refresh_token",
-                "pending_access_token",
+                "pending",
                 "active",
                 "inactive",
                 "suspended",
@@ -709,8 +702,7 @@ export const getEggControllerFindOneResponseMock = (
       refreshToken: faker.string.alpha(20),
       refreshTokenExpiresAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
       status: faker.helpers.arrayElement([
-        "pending_refresh_token",
-        "pending_access_token",
+        "pending",
         "active",
         "inactive",
         "suspended",
@@ -745,8 +737,7 @@ export const getEggControllerFindOneResponseMock = (
             refreshToken: faker.string.alpha(20),
             refreshTokenExpiresAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
             status: faker.helpers.arrayElement([
-              "pending_refresh_token",
-              "pending_access_token",
+              "pending",
               "active",
               "inactive",
               "suspended",
@@ -795,8 +786,7 @@ export const getEggControllerFindOneResponseMock = (
             refreshToken: faker.string.alpha(20),
             refreshTokenExpiresAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
             status: faker.helpers.arrayElement([
-              "pending_refresh_token",
-              "pending_access_token",
+              "pending",
               "active",
               "inactive",
               "suspended",
@@ -850,8 +840,7 @@ export const getBrEggControllerFindAllResponseMock = (
           refreshToken: faker.string.alpha(20),
           refreshTokenExpiresAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
           status: faker.helpers.arrayElement([
-            "pending_refresh_token",
-            "pending_access_token",
+            "pending",
             "active",
             "inactive",
             "suspended",
@@ -891,8 +880,7 @@ export const getBrEggControllerFindAllResponseMock = (
                 refreshToken: faker.string.alpha(20),
                 refreshTokenExpiresAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
                 status: faker.helpers.arrayElement([
-                  "pending_refresh_token",
-                  "pending_access_token",
+                  "pending",
                   "active",
                   "inactive",
                   "suspended",
@@ -946,8 +934,7 @@ export const getBrEggControllerFindAllResponseMock = (
                 refreshToken: faker.string.alpha(20),
                 refreshTokenExpiresAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
                 status: faker.helpers.arrayElement([
-                  "pending_refresh_token",
-                  "pending_access_token",
+                  "pending",
                   "active",
                   "inactive",
                   "suspended",

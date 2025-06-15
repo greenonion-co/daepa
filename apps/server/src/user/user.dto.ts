@@ -55,9 +55,10 @@ class UserBaseDto {
   @ApiProperty({
     description: '유저 상태',
     enum: USER_STATUS,
+    'x-enumNames': Object.keys(USER_STATUS),
   })
   @IsEnum(USER_STATUS)
-  status: (typeof USER_STATUS)[keyof typeof USER_STATUS];
+  status: USER_STATUS;
 
   @ApiProperty({
     description: '마지막 로그인 시간',

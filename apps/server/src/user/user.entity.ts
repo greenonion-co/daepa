@@ -54,7 +54,7 @@ export class UserEntity {
     type: 'enum',
     enum: USER_STATUS,
   })
-  status: (typeof USER_STATUS)[keyof typeof USER_STATUS];
+  status: USER_STATUS;
 
   @Expose({ name: 'lastLoginAt' })
   @Column({ nullable: true })
