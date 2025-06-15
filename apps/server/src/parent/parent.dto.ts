@@ -36,6 +36,7 @@ export class ParentDto {
       - deleted: approved 이후, 부모 정보 변경을 위해 삭제
       - cancelled: 승인 전, 전송자의 요청 취소`,
     enum: PARENT_STATUS,
+    'x-enumNames': Object.keys(PARENT_STATUS),
   })
   @IsNotEmpty()
   @IsEnum(PARENT_STATUS)
@@ -91,11 +92,8 @@ export class UpdateParentDto {
 
   @ApiProperty({
     description: '업데이트 할 부모 관계 상태',
-    enum: [
-      PARENT_STATUS.APPROVED,
-      PARENT_STATUS.CANCELLED,
-      PARENT_STATUS.REJECTED,
-    ],
+    enum: PARENT_STATUS,
+    'x-enumNames': Object.keys(PARENT_STATUS),
   })
   @IsEnum(PARENT_STATUS)
   @IsNotEmpty()

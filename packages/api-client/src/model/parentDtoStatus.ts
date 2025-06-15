@@ -18,9 +18,9 @@ export type ParentDtoStatus = (typeof ParentDtoStatus)[keyof typeof ParentDtoSta
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const ParentDtoStatus = {
-  pending: "pending",
-  approved: "approved",
-  rejected: "rejected",
-  deleted: "deleted",
-  cancelled: "cancelled",
+  PENDING: "pending",
+  APPROVED: "approved",
+  REJECTED: "rejected",
+  DELETED: "deleted",
+  CANCELLED: "cancelled",
 } as const;
