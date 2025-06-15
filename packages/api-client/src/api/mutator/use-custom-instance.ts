@@ -1,4 +1,4 @@
-import Axios, { AxiosError, AxiosRequestConfig } from "axios";
+import Axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 
 export const AXIOS_INSTANCE = Axios.create({ baseURL: "http://localhost:4000" });
 
