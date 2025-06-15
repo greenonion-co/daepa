@@ -1,8 +1,8 @@
-export const PET_SEX = {
-  M: 'M',
-  F: 'F',
-  N: 'N',
-} as const;
+export enum PET_SEX {
+  MALE = 'M',
+  FEMALE = 'F',
+  NON = 'N',
+}
 
 export enum PET_SPECIES {
   CRESTED = 'CR', // 크레스티드게코

@@ -84,10 +84,12 @@ export class PetBaseDto {
     description: '펫 성별(수컷, 암컷, 미구분)',
     example: 'M',
     required: false,
+    enum: PET_SEX,
+    'x-enumNames': Object.keys(PET_SEX),
   })
   @IsOptional()
   @IsEnum(PET_SEX)
-  sex?: keyof typeof PET_SEX;
+  sex?: PET_SEX;
 
   @ApiProperty({
     description: '펫 몸무게(g)',

@@ -313,7 +313,7 @@ export class EggService {
     const createPetDto: CreatePetDto = {
       name: egg.name,
       species: egg.species,
-      sex: PET_SEX.N,
+      sex: PET_SEX.NON,
       growth: '베이비',
     };
 

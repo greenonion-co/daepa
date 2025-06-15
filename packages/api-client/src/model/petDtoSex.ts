@@ -9,4 +9,11 @@
 /**
  * 펫 성별(수컷, 암컷, 미구분)
  */
-export type PetDtoSex = { [key: string]: unknown };
+export type PetDtoSex = (typeof PetDtoSex)[keyof typeof PetDtoSex];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const PetDtoSex = {
+  MALE: "M",
+  FEMALE: "F",
+  NON: "N",
+} as const;

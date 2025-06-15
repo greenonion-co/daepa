@@ -44,7 +44,7 @@ export class PetEntity {
   growth?: string; // 성장단계
 
   @Column({ type: 'enum', enum: PET_SEX, nullable: true })
-  sex?: keyof typeof PET_SEX; // 성별
+  sex?: PET_SEX; // 성별
 
   @Column({ type: 'decimal', precision: 10, scale: 1, nullable: true })
   weight?: number; // 몸무게(g)
