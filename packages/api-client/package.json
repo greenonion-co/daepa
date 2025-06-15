@@ -4,8 +4,8 @@
   "private": true,
   "exports": {
     ".": {
-      "default": "./index.ts",
-      "types": "./index.ts"
+      "types": "./index.ts",
+      "default": "./index.ts"
     }
   },
   "dependencies": {

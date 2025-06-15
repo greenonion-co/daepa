@@ -7,6 +7,13 @@ module.exports = {
       target: "src/api/index.ts",
       schemas: "src/model",
       mock: true,
+      override: {
+        mutator: {
+          path: "./src/api/mutator/use-custom-instance.ts",
+          name: "useCustomInstance",
+          extension: ".ts",
+        },
+      },
     },
     hooks: {
       afterAllFilesWrite: "prettier --write",
