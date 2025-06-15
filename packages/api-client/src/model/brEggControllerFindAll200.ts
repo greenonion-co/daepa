@@ -6,9 +6,7 @@
  * OpenAPI spec version: 1.0
  */
 import type { EggDto } from "./eggDto";
-import type { PageMetaDto } from "./pageMetaDto";
 
 export type BrEggControllerFindAll200 = {
-  data: EggDto[];
-  meta: PageMetaDto;
+  "20250101"?: EggDto[];
 };

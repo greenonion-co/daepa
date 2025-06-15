@@ -810,143 +810,138 @@ export const getEggControllerFindOneResponseMock = (
 export const getBrEggControllerFindAllResponseMock = (
   overrideResponse: Partial<BrEggControllerFindAll200> = {},
 ): BrEggControllerFindAll200 => ({
-  data: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-    eggId: faker.string.alpha(20),
-    owner: {
-      ...{
-        userId: faker.string.alpha(20),
-        name: faker.string.alpha(20),
-        role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
-        provider: {},
-        providerId: faker.string.alpha(20),
-        refreshToken: faker.string.alpha(20),
-        refreshTokenExpiresAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
-        status: faker.helpers.arrayElement([
-          "pending_refresh_token",
-          "pending_access_token",
-          "active",
-          "inactive",
-          "suspended",
-          "deleted",
-        ] as const),
-        lastLoginAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
-        createdAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
-        updatedAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
-      },
-    },
-    species: {},
-    layingDate: faker.number.int({ min: undefined, max: undefined }),
-    clutch: faker.helpers.arrayElement([
-      faker.number.int({ min: undefined, max: undefined }),
-      undefined,
-    ]),
-    clutchOrder: faker.number.int({ min: undefined, max: undefined }),
-    name: faker.string.alpha(20),
-    desc: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
-    hatchedPetId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
-    father: faker.helpers.arrayElement([
-      {
+  "20250101": faker.helpers.arrayElement([
+    Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+      eggId: faker.string.alpha(20),
+      owner: {
         ...{
-          petId: faker.string.alpha(20),
-          owner: {
-            ...{
-              userId: faker.string.alpha(20),
-              name: faker.string.alpha(20),
-              role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
-              provider: {},
-              providerId: faker.string.alpha(20),
-              refreshToken: faker.string.alpha(20),
-              refreshTokenExpiresAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
-              status: faker.helpers.arrayElement([
-                "pending_refresh_token",
-                "pending_access_token",
-                "active",
-                "inactive",
-                "suspended",
-                "deleted",
-              ] as const),
-              lastLoginAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
-              createdAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
-              updatedAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
-            },
-          },
+          userId: faker.string.alpha(20),
           name: faker.string.alpha(20),
-          species: {},
-          morphs: faker.helpers.arrayElement([
-            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-            undefined,
-          ]),
-          traits: faker.helpers.arrayElement([
-            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-            undefined,
-          ]),
-          sex: faker.helpers.arrayElement([{}, undefined]),
-          relationId: faker.number.int({ min: undefined, max: undefined }),
-          status: faker.string.alpha(20),
+          role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
+          provider: {},
+          providerId: faker.string.alpha(20),
+          refreshToken: faker.string.alpha(20),
+          refreshTokenExpiresAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+          status: faker.helpers.arrayElement([
+            "pending_refresh_token",
+            "pending_access_token",
+            "active",
+            "inactive",
+            "suspended",
+            "deleted",
+          ] as const),
+          lastLoginAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+          createdAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+          updatedAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
         },
       },
-      undefined,
-    ]),
-    mother: faker.helpers.arrayElement([
-      {
-        ...{
-          petId: faker.string.alpha(20),
-          owner: {
-            ...{
-              userId: faker.string.alpha(20),
-              name: faker.string.alpha(20),
-              role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
-              provider: {},
-              providerId: faker.string.alpha(20),
-              refreshToken: faker.string.alpha(20),
-              refreshTokenExpiresAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
-              status: faker.helpers.arrayElement([
-                "pending_refresh_token",
-                "pending_access_token",
-                "active",
-                "inactive",
-                "suspended",
-                "deleted",
-              ] as const),
-              lastLoginAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
-              createdAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
-              updatedAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+      species: {},
+      layingDate: faker.number.int({ min: undefined, max: undefined }),
+      clutch: faker.helpers.arrayElement([
+        faker.number.int({ min: undefined, max: undefined }),
+        undefined,
+      ]),
+      clutchOrder: faker.number.int({ min: undefined, max: undefined }),
+      name: faker.string.alpha(20),
+      desc: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+      hatchedPetId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+      father: faker.helpers.arrayElement([
+        {
+          ...{
+            petId: faker.string.alpha(20),
+            owner: {
+              ...{
+                userId: faker.string.alpha(20),
+                name: faker.string.alpha(20),
+                role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
+                provider: {},
+                providerId: faker.string.alpha(20),
+                refreshToken: faker.string.alpha(20),
+                refreshTokenExpiresAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+                status: faker.helpers.arrayElement([
+                  "pending_refresh_token",
+                  "pending_access_token",
+                  "active",
+                  "inactive",
+                  "suspended",
+                  "deleted",
+                ] as const),
+                lastLoginAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+                createdAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+                updatedAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+              },
             },
+            name: faker.string.alpha(20),
+            species: {},
+            morphs: faker.helpers.arrayElement([
+              Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => faker.string.alpha(20),
+              ),
+              undefined,
+            ]),
+            traits: faker.helpers.arrayElement([
+              Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => faker.string.alpha(20),
+              ),
+              undefined,
+            ]),
+            sex: faker.helpers.arrayElement([{}, undefined]),
+            relationId: faker.number.int({ min: undefined, max: undefined }),
+            status: faker.string.alpha(20),
           },
-          name: faker.string.alpha(20),
-          species: {},
-          morphs: faker.helpers.arrayElement([
-            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-            undefined,
-          ]),
-          traits: faker.helpers.arrayElement([
-            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-            undefined,
-          ]),
-          sex: faker.helpers.arrayElement([{}, undefined]),
-          relationId: faker.number.int({ min: undefined, max: undefined }),
-          status: faker.string.alpha(20),
         },
-      },
-      undefined,
-    ]),
-  })),
-  meta: {
-    page: faker.number.int({ min: undefined, max: undefined }),
-    itemPerPage: faker.number.int({ min: undefined, max: undefined }),
-    totalCount: faker.number.int({ min: undefined, max: undefined }),
-    totalPage: faker.number.int({ min: undefined, max: undefined }),
-    hasPreviousPage: faker.datatype.boolean(),
-    hasNextPage: faker.datatype.boolean(),
-  },
+        undefined,
+      ]),
+      mother: faker.helpers.arrayElement([
+        {
+          ...{
+            petId: faker.string.alpha(20),
+            owner: {
+              ...{
+                userId: faker.string.alpha(20),
+                name: faker.string.alpha(20),
+                role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
+                provider: {},
+                providerId: faker.string.alpha(20),
+                refreshToken: faker.string.alpha(20),
+                refreshTokenExpiresAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+                status: faker.helpers.arrayElement([
+                  "pending_refresh_token",
+                  "pending_access_token",
+                  "active",
+                  "inactive",
+                  "suspended",
+                  "deleted",
+                ] as const),
+                lastLoginAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+                createdAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+                updatedAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+              },
+            },
+            name: faker.string.alpha(20),
+            species: {},
+            morphs: faker.helpers.arrayElement([
+              Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => faker.string.alpha(20),
+              ),
+              undefined,
+            ]),
+            traits: faker.helpers.arrayElement([
+              Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => faker.string.alpha(20),
+              ),
+              undefined,
+            ]),
+            sex: faker.helpers.arrayElement([{}, undefined]),
+            relationId: faker.number.int({ min: undefined, max: undefined }),
+            status: faker.string.alpha(20),
+          },
+        },
+        undefined,
+      ]),
+    })),
+    undefined,
+  ]),
   ...overrideResponse,
 });
 
