@@ -155,9 +155,9 @@ export const DataTable = ({
 
       <Link
         href="/register/1"
-        className="fixed bottom-6 right-6 h-14 w-14 rounded-full bg-blue-500 shadow-lg hover:bg-blue-600"
+        className="fixed bottom-6 right-6 flex h-14 w-14 items-center justify-center rounded-full bg-blue-500 shadow-lg hover:bg-blue-600"
       >
-        <Add fontSize="large" />
+        <Add fontSize="large" className="text-white" />
       </Link>
     </div>
   );
