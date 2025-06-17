@@ -29,7 +29,7 @@ export class AuthService {
     if (!userFound) {
       const userCreated = await this.userService.createUser(
         providerInfo,
-        USER_STATUS.PENDING_REFRESH_TOKEN,
+        USER_STATUS.PENDING,
       );
       return {
         userId: userCreated.userId,

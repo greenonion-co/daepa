@@ -1,14 +1,14 @@
-export const PET_SEX = {
-  M: 'M',
-  F: 'F',
-  N: 'N',
-} as const;
+export enum PET_SEX {
+  MALE = 'M',
+  FEMALE = 'F',
+  NON = 'N',
+}
 
-export const PET_SPECIES = {
-  CR: 'CR', // 크레스티드게코
-  LE: 'LE', // 레오파드게코
-  PT: 'PT', // 펫테일게코
-  KN: 'KN', // 납테일게코
-  LC: 'LC', // 리키에너스
-  GG: 'GG', // 가고일게코
-} as const;
+export enum PET_SPECIES {
+  CRESTED = 'CR', // 크레스티드게코
+  LEOPARD = 'LE', // 레오파드게코
+  FATTAIL = 'FT', // 펫테일게코
+  KNOPTAIL = 'KN', // 납테일게코
+  LEACH = 'LC', // 리키에너스
+  GARGO = 'GG', // 가고일게코
+}

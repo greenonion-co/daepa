@@ -13,6 +13,6 @@ export type CreateParentDtoRole = (typeof CreateParentDtoRole)[keyof typeof Crea
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const CreateParentDtoRole = {
-  father: "father",
-  mother: "mother",
+  FATHER: "father",
+  MOTHER: "mother",
 } as const;

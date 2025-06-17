@@ -13,6 +13,6 @@ export type ParentDtoRole = (typeof ParentDtoRole)[keyof typeof ParentDtoRole];
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const ParentDtoRole = {
-  father: "father",
-  mother: "mother",
+  FATHER: "father",
+  MOTHER: "mother",
 } as const;

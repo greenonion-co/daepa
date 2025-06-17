@@ -14,7 +14,9 @@ export type UpdateParentDtoStatus =
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const UpdateParentDtoStatus = {
-  approved: "approved",
-  cancelled: "cancelled",
-  rejected: "rejected",
+  PENDING: "pending",
+  APPROVED: "approved",
+  REJECTED: "rejected",
+  DELETED: "deleted",
+  CANCELLED: "cancelled",
 } as const;

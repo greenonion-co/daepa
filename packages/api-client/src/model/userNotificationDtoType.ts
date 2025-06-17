@@ -14,10 +14,10 @@ export type UserNotificationDtoType =
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const UserNotificationDtoType = {
-  parent_request: "parent_request",
-  parent_accept: "parent_accept",
-  parent_reject: "parent_reject",
-  owner_transfer: "owner_transfer",
-  owner_accept: "owner_accept",
-  owner_reject: "owner_reject",
+  PARENT_REQUEST: "parent_request",
+  PARENT_ACCEPT: "parent_accept",
+  PARENT_REJECT: "parent_reject",
+  OWNER_TRANSFER: "owner_transfer",
+  OWNER_ACCEPT: "owner_accept",
+  OWNER_REJECT: "owner_reject",
 } as const;

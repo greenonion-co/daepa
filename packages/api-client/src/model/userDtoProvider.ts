@@ -9,4 +9,12 @@
 /**
  * Oauth 제공자
  */
-export type UserDtoProvider = { [key: string]: unknown };
+export type UserDtoProvider = (typeof UserDtoProvider)[keyof typeof UserDtoProvider];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const UserDtoProvider = {
+  KAKAO: "kakao",
+  GOOGLE: "google",
+  NAVER: "naver",
+  APPLE: "apple",
+} as const;

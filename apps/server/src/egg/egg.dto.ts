@@ -29,10 +29,12 @@ export class EggBaseDto {
   @ApiProperty({
     description: '알 종',
     example: '크레스티드게코',
+    enum: PET_SPECIES,
+    'x-enumNames': Object.keys(PET_SPECIES),
   })
   @IsString()
   @IsEnum(PET_SPECIES)
-  species: keyof typeof PET_SPECIES;
+  species: PET_SPECIES;
 
   @ApiProperty({
     description: '산란일(yyyyMMdd)',

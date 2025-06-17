@@ -30,13 +30,13 @@ export class UserEntity {
     type: 'enum',
     enum: USER_ROLE,
   })
-  role: (typeof USER_ROLE)[keyof typeof USER_ROLE];
+  role: USER_ROLE;
 
   @Column({
     type: 'enum',
     enum: OAUTH_PROVIDER,
   })
-  provider: (typeof OAUTH_PROVIDER)[keyof typeof OAUTH_PROVIDER];
+  provider: OAUTH_PROVIDER;
 
   @Expose({ name: 'providerId' })
   @Column()
@@ -54,7 +54,7 @@ export class UserEntity {
     type: 'enum',
     enum: USER_STATUS,
   })
-  status: (typeof USER_STATUS)[keyof typeof USER_STATUS];
+  status: USER_STATUS;
 
   @Expose({ name: 'lastLoginAt' })
   @Column({ nullable: true })

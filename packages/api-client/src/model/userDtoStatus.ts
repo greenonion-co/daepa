@@ -13,10 +13,9 @@ export type UserDtoStatus = (typeof UserDtoStatus)[keyof typeof UserDtoStatus];
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const UserDtoStatus = {
-  pending_refresh_token: "pending_refresh_token",
-  pending_access_token: "pending_access_token",
-  active: "active",
-  inactive: "inactive",
-  suspended: "suspended",
-  deleted: "deleted",
+  PENDING: "pending",
+  ACTIVE: "active",
+  INACTIVE: "inactive",
+  SUSPENDED: "suspended",
+  DELETED: "deleted",
 } as const;

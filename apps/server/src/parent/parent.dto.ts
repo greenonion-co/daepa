@@ -19,7 +19,11 @@ export class ParentDto {
   @IsNotEmpty()
   parentId: string;
 
-  @ApiProperty({ description: '부모 구분', enum: PARENT_ROLE })
+  @ApiProperty({
+    description: '부모 구분',
+    enum: PARENT_ROLE,
+    'x-enumNames': Object.keys(PARENT_ROLE),
+  })
   @IsNotEmpty()
   @IsEnum(PARENT_ROLE)
   role: PARENT_ROLE;
@@ -32,6 +36,7 @@ export class ParentDto {
       - deleted: approved 이후, 부모 정보 변경을 위해 삭제
       - cancelled: 승인 전, 전송자의 요청 취소`,
     enum: PARENT_STATUS,
+    'x-enumNames': Object.keys(PARENT_STATUS),
   })
   @IsNotEmpty()
   @IsEnum(PARENT_STATUS)
@@ -39,7 +44,11 @@ export class ParentDto {
 }
 
 export class FindParentDto extends PickType(ParentDto, ['role']) {
-  @ApiProperty({ description: '부모 구분' })
+  @ApiProperty({
+    description: '부모 구분',
+    enum: PARENT_ROLE,
+    'x-enumNames': Object.keys(PARENT_ROLE),
+  })
   @IsNotEmpty()
   @IsEnum(PARENT_ROLE)
   role: PARENT_ROLE;
@@ -51,7 +60,11 @@ export class CreateParentDto {
   @IsNotEmpty()
   parentId: string;
 
-  @ApiProperty({ description: '부모 구분', enum: PARENT_ROLE })
+  @ApiProperty({
+    description: '부모 구분',
+    enum: PARENT_ROLE,
+    'x-enumNames': Object.keys(PARENT_ROLE),
+  })
   @IsNotEmpty()
   @IsEnum(PARENT_ROLE)
   role: PARENT_ROLE;
@@ -64,6 +77,7 @@ export class CreateParentDto {
   @ApiProperty({
     description: '펫인지 알인지 여부',
     enum: CHILD_TYPE,
+    'x-enumNames': Object.keys(CHILD_TYPE),
     required: false,
   })
   @IsOptional()
@@ -79,11 +93,8 @@ export class UpdateParentDto {
 
   @ApiProperty({
     description: '업데이트 할 부모 관계 상태',
-    enum: [
-      PARENT_STATUS.APPROVED,
-      PARENT_STATUS.CANCELLED,
-      PARENT_STATUS.REJECTED,
-    ],
+    enum: PARENT_STATUS,
+    'x-enumNames': Object.keys(PARENT_STATUS),
   })
   @IsEnum(PARENT_STATUS)
   @IsNotEmpty()

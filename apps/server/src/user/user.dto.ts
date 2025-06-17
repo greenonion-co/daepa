@@ -19,15 +19,18 @@ class UserBaseDto {
   @ApiProperty({
     description: '회원 역할',
     enum: USER_ROLE,
+    'x-enumNames': Object.keys(USER_ROLE),
   })
   @IsEnum(USER_ROLE)
-  role: (typeof USER_ROLE)[keyof typeof USER_ROLE];
+  role: USER_ROLE;
 
   @ApiProperty({
     description: 'Oauth 제공자',
+    enum: OAUTH_PROVIDER,
+    'x-enumNames': Object.keys(OAUTH_PROVIDER),
   })
   @IsEnum(OAUTH_PROVIDER)
-  provider: (typeof OAUTH_PROVIDER)[keyof typeof OAUTH_PROVIDER];
+  provider: OAUTH_PROVIDER;
 
   @ApiProperty({
     description: 'Oauth 제공자 ID',
@@ -52,9 +55,10 @@ class UserBaseDto {
   @ApiProperty({
     description: '유저 상태',
     enum: USER_STATUS,
+    'x-enumNames': Object.keys(USER_STATUS),
   })
   @IsEnum(USER_STATUS)
-  status: (typeof USER_STATUS)[keyof typeof USER_STATUS];
+  status: USER_STATUS;
 
   @ApiProperty({
     description: '마지막 로그인 시간',

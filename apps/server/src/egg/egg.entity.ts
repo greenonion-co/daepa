@@ -28,7 +28,7 @@ export class EggEntity {
   owner_id: string;
 
   @Column({ type: 'enum', enum: PET_SPECIES })
-  species: keyof typeof PET_SPECIES; // 종
+  species: PET_SPECIES; // 종
 
   @Expose({ name: 'layingDate' })
   @Column()

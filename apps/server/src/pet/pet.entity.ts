@@ -29,7 +29,7 @@ export class PetEntity {
   name: string; // 이름
 
   @Column({ type: 'enum', enum: PET_SPECIES })
-  species: keyof typeof PET_SPECIES; // 종
+  species: PET_SPECIES; // 종
 
   @Column('json', { nullable: true })
   morphs?: string[]; // 모프
@@ -44,7 +44,7 @@ export class PetEntity {
   growth?: string; // 성장단계
 
   @Column({ type: 'enum', enum: PET_SEX, nullable: true })
-  sex?: keyof typeof PET_SEX; // 성별
+  sex?: PET_SEX; // 성별
 
   @Column({ type: 'decimal', precision: 10, scale: 1, nullable: true })
   weight?: number; // 몸무게(g)

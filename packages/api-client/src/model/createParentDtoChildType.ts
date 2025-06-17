@@ -14,6 +14,6 @@ export type CreateParentDtoChildType =
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const CreateParentDtoChildType = {
-  egg: "egg",
-  pet: "pet",
+  EGG: "egg",
+  PET: "pet",
 } as const;

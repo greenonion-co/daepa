@@ -9,4 +9,14 @@
 /**
  * 알 종
  */
-export type CreateEggDtoSpecies = { [key: string]: unknown };
+export type CreateEggDtoSpecies = (typeof CreateEggDtoSpecies)[keyof typeof CreateEggDtoSpecies];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const CreateEggDtoSpecies = {
+  CRESTED: "CR",
+  LEOPARD: "LE",
+  FATTAIL: "FT",
+  KNOPTAIL: "KN",
+  LEACH: "LC",
+  GARGO: "GG",
+} as const;

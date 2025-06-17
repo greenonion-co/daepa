@@ -9,4 +9,14 @@
 /**
  * 펫 종
  */
-export type UpdatePetDtoSpecies = { [key: string]: unknown };
+export type UpdatePetDtoSpecies = (typeof UpdatePetDtoSpecies)[keyof typeof UpdatePetDtoSpecies];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const UpdatePetDtoSpecies = {
+  CRESTED: "CR",
+  LEOPARD: "LE",
+  FATTAIL: "FT",
+  KNOPTAIL: "KN",
+  LEACH: "LC",
+  GARGO: "GG",
+} as const;

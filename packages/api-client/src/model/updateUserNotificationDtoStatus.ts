@@ -17,7 +17,7 @@ export type UpdateUserNotificationDtoStatus =
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const UpdateUserNotificationDtoStatus = {
-  read: "read",
-  unread: "unread",
-  deleted: "deleted",
+  READ: "read",
+  UNREAD: "unread",
+  DELETED: "deleted",
 } as const;
