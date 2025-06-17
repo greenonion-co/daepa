@@ -31,14 +31,16 @@ const NotiTitle = ({
           tooltip="프로필로 이동"
         />
       ) : (
-        <div className={nameStyle("sex" in receiverPet ? receiverPet.sex : "N")}>
+        <div className={nameStyle("sex" in receiverPet ? receiverPet.sex : PetDtoSex.NON)}>
           {receiverPet?.name}
         </div>
       )}
       <ArrowLeftRight className="h-4 w-4" />
       <div className="flex items-center">
         {"eggId" in senderPet && <span className="text-xs">🥚</span>}
-        <div className={nameStyle("sex" in senderPet ? senderPet.sex : "N")}>{senderPet?.name}</div>
+        <div className={nameStyle("sex" in senderPet ? senderPet.sex : PetDtoSex.NON)}>
+          {senderPet?.name}
+        </div>
       </div>
     </div>
   );
