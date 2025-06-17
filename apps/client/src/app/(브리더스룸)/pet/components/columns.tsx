@@ -253,6 +253,12 @@ export const columns: ColumnDef<PetDto>[] = [
   {
     accessorKey: "desc",
     header: TABLE_HEADER.desc,
+    cell: ({ row }) => {
+      const desc = row.getValue("desc") as string;
+      return (
+        <div className="capitalize">{desc?.length > 10 ? `${desc.slice(0, 10)}...` : desc}</div>
+      );
+    },
   },
   {
     accessorKey: "foods",
