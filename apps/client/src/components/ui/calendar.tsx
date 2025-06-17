@@ -80,7 +80,7 @@ function Calendar({
       components={{
         DayContent: ({ date }: { date: Date }) => {
           const dateKey = format(date, "yyyyMMdd");
-          const count = eggCounts?.[dateKey] || 0;
+          const count = eggCounts?.[dateKey] ?? { hatched: 0, notHatched: 0, total: 0 };
 
           return (
             <div className="flex flex-col items-center gap-1">

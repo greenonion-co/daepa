@@ -10,11 +10,10 @@ const CardFront = ({ pet, qrCodeDataUrl }: { pet: PetDto; qrCodeDataUrl?: string
   const [dragStart, setDragStart] = useState(0);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-  const allImages = pet.photos || [
-    "/default-pet-image.png",
-    "/default-pet-image_1.png",
-    "/default-pet-image_2.png",
-  ];
+  const allImages =
+    "photos" in pet && pet.photos && Array.isArray(pet.photos)
+      ? pet.photos
+      : ["/default-pet-image.png", "/default-pet-image_1.png", "/default-pet-image_2.png"];
 
   const changeImage = (direction: "prev" | "next") => {
     if (direction === "prev") {
@@ -135,7 +134,7 @@ const CardFront = ({ pet, qrCodeDataUrl }: { pet: PetDto; qrCodeDataUrl?: string
                     })()}
                   {pet.birthdate ? formatDateToYYYYMMDDString(pet.birthdate, "yy.MM.dd") : "-"}
                 </div>
-                {SPECIES_KOREAN_INFO[pet.species]} / {GENDER_KOREAN_INFO[pet.sex]}
+                {SPECIES_KOREAN_INFO[pet.species]} / {GENDER_KOREAN_INFO[pet.sex ?? "N"]}
               </div>
             </div>
             <div className="scrollbar-hide overflow-x-auto">

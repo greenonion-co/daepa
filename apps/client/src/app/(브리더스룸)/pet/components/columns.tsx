@@ -17,7 +17,6 @@ import {
   FOOD_BADGE_COLORS,
   FOOD_BADGE_TEXT_COLORS,
   GENDER_KOREAN_INFO,
-  SALE_KOREAN_INFO,
   SPECIES_KOREAN_INFO,
   STATUS_MAP,
   TABLE_HEADER,
@@ -29,7 +28,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import Link from "next/link";
 import { ParentDtoStatus, PetDto } from "@repo/api-client";
 import { formatDateToYYYYMMDDString } from "@/lib/utils";
 import LinkButton from "../../components/LinkButton";
@@ -220,7 +218,7 @@ export const columns: ColumnDef<PetDto>[] = [
           tooltip="펫 상세 페이지로 이동"
           className={`${STATUS_MAP[mother.status as keyof typeof STATUS_MAP].color} hover:text-accent/80 font-semibold text-white`}
           icon={
-            mother.status === ParentDtoStatus.approved ? (
+            mother.status === ParentDtoStatus.APPROVED ? (
               <BadgeCheck className="h-4 w-4 text-gray-100" />
             ) : null
           }
@@ -242,7 +240,7 @@ export const columns: ColumnDef<PetDto>[] = [
           tooltip="펫 상세 페이지로 이동"
           className={`${STATUS_MAP[father.status as keyof typeof STATUS_MAP].color} hover:text-accent/80 font-semibold text-white`}
           icon={
-            father.status === ParentDtoStatus.approved ? (
+            father.status === ParentDtoStatus.APPROVED ? (
               <BadgeCheck className="h-4 w-4 text-gray-100" />
             ) : null
           }
@@ -267,9 +265,7 @@ export const columns: ColumnDef<PetDto>[] = [
           {foods?.map((food) => (
             <Badge
               key={food}
-              className={`font-bold ${FOOD_BADGE_COLORS[food as FOOD]} ${
-                FOOD_BADGE_TEXT_COLORS[food as FOOD]
-              }`}
+              className={`font-bold ${FOOD_BADGE_COLORS[food]} ${FOOD_BADGE_TEXT_COLORS[food]}`}
             >
               {food}
             </Badge>
@@ -278,81 +274,81 @@ export const columns: ColumnDef<PetDto>[] = [
       );
     },
   },
-  {
-    accessorKey: "canBreed",
-    header: ({ column }) => {
-      return (
-        <TableHeaderSelect
-          column={column}
-          title={TABLE_HEADER.canBreed}
-          items={["true", "false"]}
-          renderItem={(item) => (item === "true" ? "O" : "X")}
-        />
-      );
-    },
-    cell: ({ row }) => <div className="capitalize">{row.getValue("canBreed") ? "O" : "X"}</div>,
-    filterFn: (row, id, filterValue) => {
-      if (filterValue === "") return true;
-      return row.getValue(id) === (filterValue === "true");
-    },
-  },
-  {
-    accessorKey: "breedingCount",
-    header: TABLE_HEADER.breedingCount,
-    cell: ({ row }) => {
-      const mating = row.original.mating;
+  // {
+  //   accessorKey: "canBreed",
+  //   header: ({ column }) => {
+  //     return (
+  //       <TableHeaderSelect
+  //         column={column}
+  //         title={TABLE_HEADER.canBreed}
+  //         items={["true", "false"]}
+  //         renderItem={(item) => (item === "true" ? "O" : "X")}
+  //       />
+  //     );
+  //   },
+  //   cell: ({ row }) => <div className="capitalize">{row.getValue("canBreed") ? "O" : "X"}</div>,
+  //   filterFn: (row, id, filterValue) => {
+  //     if (filterValue === "") return true;
+  //     return row.getValue(id) === (filterValue === "true");
+  //   },
+  // },
+  // {
+  //   accessorKey: "breedingCount",
+  //   header: TABLE_HEADER.breedingCount,
+  //   cell: ({ row }) => {
+  //     const mating = row.original.mating;
 
-      return mating?.deliveryCount ? (
-        <div className="capitalize">{mating.deliveryCount + "회"}</div>
-      ) : (
-        <span>-</span>
-      );
-    },
-  },
-  {
-    accessorKey: "pairing",
-    header: TABLE_HEADER.pairing,
-    cell: ({ row }) => {
-      const mating = row.original.mating;
+  //     return mating?.deliveryCount ? (
+  //       <div className="capitalize">{mating.deliveryCount + "회"}</div>
+  //     ) : (
+  //       <span>-</span>
+  //     );
+  //   },
+  // },
+  // {
+  //   accessorKey: "pairing",
+  //   header: TABLE_HEADER.pairing,
+  //   cell: ({ row }) => {
+  //     const mating = row.original.mating;
 
-      return mating?.pair ? (
-        <Button variant="ghost" asChild>
-          {mating.pair.map((pet) => (
-            <Link key={pet.petId} href={`/detail/${pet.petId}`}>
-              {pet.name}
-            </Link>
-          ))}
-        </Button>
-      ) : (
-        <span>-</span>
-      );
-    },
-  },
-  {
-    accessorKey: "saleInfo",
-    header: ({ column, table }) => {
-      const uniqueSaleInfos = Array.from(
-        new Set(table.getCoreRowModel().rows.map((row) => row.getValue("saleInfo") as string)),
-      ).filter(Boolean);
+  //     return mating?.pair ? (
+  //       <Button variant="ghost" asChild>
+  //         {mating.pair.map((pet) => (
+  //           <Link key={pet.petId} href={`/detail/${pet.petId}`}>
+  //             {pet.name}
+  //           </Link>
+  //         ))}
+  //       </Button>
+  //     ) : (
+  //       <span>-</span>
+  //     );
+  //   },
+  // },
+  // {
+  //   accessorKey: "saleInfo",
+  //   header: ({ column, table }) => {
+  //     const uniqueSaleInfos = Array.from(
+  //       new Set(table.getCoreRowModel().rows.map((row) => row.getValue("saleInfo") as string)),
+  //     ).filter(Boolean);
 
-      return (
-        <TableHeaderSelect
-          column={column}
-          title={TABLE_HEADER.saleInfo}
-          items={uniqueSaleInfos}
-          renderItem={(item) => SALE_KOREAN_INFO[item as keyof typeof SALE_KOREAN_INFO]}
-        />
-      );
-    },
-    cell: ({ row }) => {
-      const saleInfo = row.getValue("saleInfo") as string;
-      return (
-        <div className="capitalize">
-          {SALE_KOREAN_INFO[saleInfo as keyof typeof SALE_KOREAN_INFO]}
-        </div>
-      );
-    },
-  },
+  //     return (
+  //       <TableHeaderSelect
+  //         column={column}
+  //         title={TABLE_HEADER.saleInfo}
+  //         items={uniqueSaleInfos}
+  //         renderItem={(item) => SALE_KOREAN_INFO[item as keyof typeof SALE_KOREAN_INFO]}
+  //       />
+  //     );
+  //   },
+  //   cell: ({ row }) => {
+  //     const saleInfo = row.getValue("saleInfo") as string;
+  //     return (
+  //       <div className="capitalize">
+  //         {SALE_KOREAN_INFO[saleInfo as keyof typeof SALE_KOREAN_INFO]}
+  //       </div>
+  //     );
+  //   },
+  // },
   {
     id: "actions",
     enableHiding: false,

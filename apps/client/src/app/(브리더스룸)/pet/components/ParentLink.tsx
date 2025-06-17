@@ -99,7 +99,11 @@ const ParentLink = ({
           >
             <div className="relative aspect-square w-full overflow-hidden rounded-lg">
               <Image
-                src={data.photo || "/default-pet-image.png"}
+                src={
+                  "photos" in data && data.photos && Array.isArray(data.photos)
+                    ? data.photos[0]
+                    : "/default-pet-image.png"
+                }
                 alt={String(data.petId) || "-"}
                 fill
                 className="object-cover"

@@ -118,10 +118,10 @@ const CardBack = ({ pet, from }: CardBackProps) => {
 
   const handleSave = async () => {
     try {
-      const { name, species, morphs, traits, growth, sex, foods, desc, petId, birthdate, weight } =
+      const { name, species, morphs, traits, growth, sex, foods, desc, birthdate, weight } =
         formData;
 
-      if (!petId) return;
+      if (!pet.petId) return;
 
       const updateData = {
         ...(name && { name }),
@@ -136,7 +136,7 @@ const CardBack = ({ pet, from }: CardBackProps) => {
         ...(weight && { weight: Number(weight) }),
       };
 
-      await petControllerUpdate(petId, updateData as UpdatePetDto);
+      await petControllerUpdate(pet.petId, updateData as UpdatePetDto);
       setIsEditing(false);
       toast.success("펫 정보 수정이 완료되었습니다.");
     } catch (error) {

@@ -72,7 +72,9 @@ export default function Selector({
           break;
         case "Enter":
           e.preventDefault();
-          onSelectAction(selectList[selectedIndex]);
+          if (selectList[selectedIndex]) {
+            onSelectAction(selectList[selectedIndex]);
+          }
           break;
       }
     };

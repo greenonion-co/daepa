@@ -8,7 +8,6 @@ import {
   EggDto,
   parentControllerCreateParent,
   parentControllerDeleteParent,
-  PetParentDto,
 } from "@repo/api-client";
 import ParentLink from "../pet/components/ParentLink";
 import { Label } from "@/components/ui/label";
@@ -22,7 +21,7 @@ import { toast } from "sonner";
 import { overlay } from "overlay-kit";
 import Dialog from "../components/Form/Dialog";
 import { EGG_EDIT_STEPS } from "../constants";
-import useParentLinkStore from "../pet/store/parentLink";
+import useParentLinkStore, { PetParentDtoWithMessage } from "../pet/store/parentLink";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -101,7 +100,7 @@ const EggDetail = ({ egg }: EggDetailProps) => {
     },
   });
 
-  const handleChange = (value: { type; value }) => {
+  const handleChange = (value: { type: string; value: string }) => {
     if (!isEditing) return;
     setFormData((prev) => ({ ...prev, [value.type]: value.value }));
   };
@@ -128,10 +127,7 @@ const EggDetail = ({ egg }: EggDetailProps) => {
     }
   };
 
-  const handleParentSelect = (
-    role: "father" | "mother",
-    value: PetParentDto & { message: string },
-  ) => {
+  const handleParentSelect = (role: "father" | "mother", value: PetParentDtoWithMessage) => {
     try {
       const isMyPet = value.owner.userId === egg.owner.userId;
       setSelectedParent({

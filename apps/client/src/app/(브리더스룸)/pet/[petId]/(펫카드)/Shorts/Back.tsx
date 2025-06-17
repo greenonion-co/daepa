@@ -10,9 +10,11 @@ import ParentLink from "../../../components/ParentLink";
 import { PetDto } from "@repo/api-client";
 import { FormStep } from "@/app/(브리더스룸)/register/types";
 import { formatDateToYYYYMMDDString } from "@/lib/utils";
-
+interface ExtendedPetDto extends PetDto {
+  [key: string]: any;
+}
 interface CardBackProps {
-  pet: PetDto;
+  pet: ExtendedPetDto;
   setIsFlipped: (isFlipped: boolean) => void;
 }
 
@@ -58,7 +60,7 @@ const CardBack = ({ pet, setIsFlipped }: CardBackProps) => {
             <div className="flex flex-wrap gap-1">
               {Array.isArray(pet[field.name]) &&
                 pet[field.name].length > 0 &&
-                pet[field.name].map((item) => (
+                pet[field.name].map((item: string) => (
                   <div
                     className="border-1 mb-1 flex items-center gap-2 rounded-full rounded-xl border-[#1A56B3] border-gray-200 bg-gray-100 px-3 py-1 text-[14px] text-[#1A56B3] text-black dark:bg-gray-600/50 dark:text-white"
                     key={item}
@@ -70,7 +72,7 @@ const CardBack = ({ pet, setIsFlipped }: CardBackProps) => {
           </div>
         );
       case "date":
-        return <div>{formatDateToYYYYMMDDString(pet[field.name] as string)}</div>;
+        return <div>{formatDateToYYYYMMDDString(pet[field.name] as number)}</div>;
       default:
         return <div>{pet[field.name]}</div>;
     }
