@@ -4,7 +4,7 @@ import { FieldName, FormStep } from "../types";
 import { MORPH_LIST_BY_SPECIES, REGISTER_PAGE, SELECTOR_CONFIGS } from "../../constants";
 import { overlay } from "overlay-kit";
 import MultipleSelector from "../../components/selector/multiple";
-import { PetSummaryDto } from "@repo/api-client";
+import { ParentDtoRole, PetSummaryDto } from "@repo/api-client";
 import Dialog from "../../components/Form/Dialog";
 
 import { validateStep } from "@/lib/form";
@@ -107,7 +107,9 @@ export const useRegisterForm = ({
       setFormData(newFormData);
 
       if (
-        (!["father", "mother"].includes(type) && isEggRegister && step < formStep.length - 1) ||
+        (![ParentDtoRole.FATHER, ParentDtoRole.MOTHER].includes(type as ParentDtoRole) &&
+          isEggRegister &&
+          step < formStep.length - 1) ||
         (!isEggRegister && Number(funnel) === REGISTER_PAGE.FIRST && step <= formStep.length - 1)
       ) {
         goNext(newFormData);

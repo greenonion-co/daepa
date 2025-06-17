@@ -1,5 +1,6 @@
 import { PetParentDtoWithMessage } from "@/app/(브리더스룸)/pet/store/parentLink";
 import { Badge } from "@/components/ui/badge";
+import { PetDtoSex } from "@repo/api-client";
 import { Send } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
@@ -16,7 +17,7 @@ const LinkStep = ({ selectedPet, currentUserId, onSelect, onClose }: LinkStepPro
 
   const defaultMessage = (pet: PetParentDtoWithMessage) => {
     return `안녕하세요, ${pet.name}님.\n${pet.name}를 ${
-      pet.sex?.toString() === "M" ? "부" : "모"
+      pet.sex?.toString() === PetDtoSex.MALE ? "부" : "모"
     } 개체로 등록하고 싶습니다.`;
   };
 
@@ -40,7 +41,7 @@ const LinkStep = ({ selectedPet, currentUserId, onSelect, onClose }: LinkStepPro
                 <div className="mb-2 flex items-center gap-2">
                   <h3 className="text-2xl font-bold">{selectedPet.name}</h3>
                   <Badge variant="outline" className="bg-blue-50 text-black">
-                    {selectedPet.sex?.toString() === "M" ? "수컷" : "암컷"}
+                    {selectedPet.sex?.toString() === PetDtoSex.MALE ? "수컷" : "암컷"}
                   </Badge>
                 </div>
                 <p className="text-gray-600">소유자: {selectedPet.owner?.name}</p>

@@ -14,6 +14,9 @@ import {
   parentControllerDeleteParent,
   parentControllerCreateParent,
   PetDto,
+  ParentDtoRole,
+  PetDtoSex,
+  ParentDtoStatus,
 } from "@repo/api-client";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -65,7 +68,7 @@ const CardBack = ({ pet, from }: CardBackProps) => {
       message,
     }: {
       parentId: string;
-      role: "father" | "mother";
+      role: ParentDtoRole;
       message: string;
     }) =>
       parentControllerCreateParent(pet.petId, {
@@ -75,9 +78,14 @@ const CardBack = ({ pet, from }: CardBackProps) => {
       }),
     onSuccess: () => {
       toast.success("부모 연동 요청이 완료되었습니다.");
-      const role = selectedParent?.sex?.toString() === "M" ? "father" : "mother";
-      // TODO: isMyPet인 경우에는 status를 '"approved"로 설정
-      setFormData((prev) => ({ ...prev, [role]: { ...selectedParent, status: "pending" } }));
+      const role =
+        selectedParent?.sex?.toString() === PetDtoSex.MALE
+          ? ParentDtoRole.FATHER
+          : ParentDtoRole.MOTHER;
+      setFormData((prev) => ({
+        ...prev,
+        [role]: { ...selectedParent, status: ParentDtoStatus.PENDING },
+      }));
       setSelectedParent(null);
     },
     onError: () => {
@@ -145,11 +153,11 @@ const CardBack = ({ pet, from }: CardBackProps) => {
     }
   };
 
-  const handleParentSelect = (role: "father" | "mother", value: PetParentDtoWithMessage) => {
+  const handleParentSelect = (role: ParentDtoRole, value: PetParentDtoWithMessage) => {
     try {
       setSelectedParent({
         ...value,
-        status: "pending",
+        status: ParentDtoStatus.PENDING,
       });
 
       // 부모 연동 요청
@@ -189,7 +197,7 @@ const CardBack = ({ pet, from }: CardBackProps) => {
     ));
   };
 
-  const handleUnlink = (label: "father" | "mother") => {
+  const handleUnlink = (label: ParentDtoRole) => {
     try {
       if (!formData[label]?.petId) return;
       mutateDeleteParent({ relationId: formData[label]?.relationId });
@@ -230,15 +238,15 @@ const CardBack = ({ pet, from }: CardBackProps) => {
                 label="부"
                 data={formData.father}
                 currentPetOwnerId={pet.owner.userId}
-                onSelect={(item) => handleParentSelect("father", item)}
-                onUnlink={() => handleUnlink("father")}
+                onSelect={(item) => handleParentSelect(ParentDtoRole.FATHER, item)}
+                onUnlink={() => handleUnlink(ParentDtoRole.FATHER)}
               />
               <ParentLink
                 label="모"
                 data={formData.mother}
                 currentPetOwnerId={pet.owner.userId}
-                onSelect={(item) => handleParentSelect("mother", item)}
-                onUnlink={() => handleUnlink("mother")}
+                onSelect={(item) => handleParentSelect(ParentDtoRole.MOTHER, item)}
+                onUnlink={() => handleUnlink(ParentDtoRole.MOTHER)}
               />
             </div>
           </div>

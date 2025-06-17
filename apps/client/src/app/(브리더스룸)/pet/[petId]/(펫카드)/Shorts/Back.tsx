@@ -7,7 +7,7 @@ import {
 
 import InfoItem from "@/app/(브리더스룸)/components/Form/InfoItem";
 import ParentLink from "../../../components/ParentLink";
-import { PetDto } from "@repo/api-client";
+import { PetDto, PetDtoSex, PetDtoSpecies } from "@repo/api-client";
 import { FormStep } from "@/app/(브리더스룸)/register/types";
 import { formatDateToYYYYMMDDString } from "@/lib/utils";
 interface ExtendedPetDto extends PetDto {
@@ -45,12 +45,9 @@ const CardBack = ({ pet, setIsFlipped }: CardBackProps) => {
         return (
           <div>
             {field.name === "sex"
-              ? (GENDER_KOREAN_INFO[pet[field.name] as string as keyof typeof GENDER_KOREAN_INFO] ??
-                "")
+              ? (GENDER_KOREAN_INFO[pet[field.name] as PetDtoSex] ?? "")
               : field.name === "species"
-                ? (SPECIES_KOREAN_INFO[
-                    pet[field.name] as string as keyof typeof SPECIES_KOREAN_INFO
-                  ] ?? "")
+                ? (SPECIES_KOREAN_INFO[pet[field.name] as PetDtoSpecies] ?? "")
                 : ((pet[field.name] as string) ?? "")}
           </div>
         );

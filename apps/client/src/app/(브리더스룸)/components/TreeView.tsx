@@ -1,4 +1,4 @@
-import { EggDto, ParentDtoStatus, PetParentDto } from "@repo/api-client";
+import { EggDto, ParentDtoRole, ParentDtoStatus, PetParentDto } from "@repo/api-client";
 import Link from "next/link";
 import ParentStatusBadge from "./ParentStatusBadge";
 
@@ -19,12 +19,12 @@ export const TreeView = ({ node }: { node: EggDto }) => {
         <div className="flex items-center gap-2">
           <div className="min-w-15 flex flex-col gap-1.5">
             <ParentInfo
-              type="father"
+              type={ParentDtoRole.FATHER}
               parent={node.father}
               isMyPet={node.owner.userId === node.father?.owner?.userId}
             />
             <ParentInfo
-              type="mother"
+              type={ParentDtoRole.MOTHER}
               parent={node.mother}
               isMyPet={node.owner.userId === node.mother?.owner?.userId}
             />
@@ -40,11 +40,11 @@ const ParentInfo = ({
   parent,
   isMyPet,
 }: {
-  type: "father" | "mother";
+  type: ParentDtoRole;
   parent: PetParentDto | undefined;
   isMyPet: boolean;
 }) => {
-  const parentLabel = type === "father" ? "부" : "모";
+  const parentLabel = type === ParentDtoRole.FATHER ? "부" : "모";
   return (
     <>
       {parent ? (

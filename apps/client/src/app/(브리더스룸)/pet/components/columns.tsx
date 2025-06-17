@@ -28,7 +28,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ParentDtoStatus, PetDto } from "@repo/api-client";
+import { ParentDtoStatus, PetDto, PetDtoSpecies } from "@repo/api-client";
 import { formatDateToYYYYMMDDString } from "@/lib/utils";
 import LinkButton from "../../components/LinkButton";
 
@@ -108,17 +108,13 @@ export const columns: ColumnDef<PetDto>[] = [
           column={column}
           title={TABLE_HEADER.species}
           items={uniqueSpecies}
-          renderItem={(item) => SPECIES_KOREAN_INFO[item as keyof typeof SPECIES_KOREAN_INFO]}
+          renderItem={(item) => SPECIES_KOREAN_INFO[item as PetDtoSpecies]}
         />
       );
     },
     cell: ({ row }) => {
-      const species = row.getValue("species") as string;
-      return (
-        <div className="capitalize">
-          {SPECIES_KOREAN_INFO[species as keyof typeof SPECIES_KOREAN_INFO]}
-        </div>
-      );
+      const species = row.getValue("species") as PetDtoSpecies;
+      return <div className="capitalize">{SPECIES_KOREAN_INFO[species]}</div>;
     },
   },
   {

@@ -14,6 +14,7 @@ import { usePathname } from "next/navigation";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
+import { ParentDtoRole, PetDtoSex, PetDtoSpecies } from "@repo/api-client";
 interface FormFieldProps {
   label?: string;
   field: FormStep["field"];
@@ -47,12 +48,12 @@ export const FormField = ({
     error && "border-b-red-500 focus:border-b-red-500",
   );
 
-  const handleSelectParent = (type: "father" | "mother", value: PetParentDtoWithMessage) => {
+  const handleSelectParent = (type: ParentDtoRole, value: PetParentDtoWithMessage) => {
     handleChange({ type, value });
     toast.success("부모 선택이 완료되었습니다.");
   };
 
-  const handleUnlink = (type: "father" | "mother") => {
+  const handleUnlink = (type: ParentDtoRole) => {
     handleChange({ type, value: null });
     toast.success("부모 선택 해제가 완료되었습니다.");
   };
@@ -81,10 +82,10 @@ export const FormField = ({
               label="부"
               data={formData.father}
               onSelect={(item) => {
-                handleSelectParent("father", item);
+                handleSelectParent(ParentDtoRole.FATHER, item);
               }}
               onUnlink={() => {
-                handleUnlink("father");
+                handleUnlink(ParentDtoRole.FATHER);
               }}
               // TODO: 로그인/회원가입 후 현재 유저 아이디 전달
               currentPetOwnerId={"ADMIN"}
@@ -93,10 +94,10 @@ export const FormField = ({
               label="모"
               data={formData.mother}
               onSelect={(item) => {
-                handleSelectParent("mother", item);
+                handleSelectParent(ParentDtoRole.MOTHER, item);
               }}
               onUnlink={() => {
-                handleUnlink("mother");
+                handleUnlink(ParentDtoRole.MOTHER);
               }}
               // TODO: 로그인/회원가입 후 현재 유저 아이디 전달
               currentPetOwnerId={"ADMIN"}
@@ -149,11 +150,9 @@ export const FormField = ({
             }}
           >
             {name === "sex"
-              ? (GENDER_KOREAN_INFO[value as string as keyof typeof GENDER_KOREAN_INFO] ??
-                placeholder)
+              ? (GENDER_KOREAN_INFO[value as PetDtoSex] ?? placeholder)
               : name === "species"
-                ? (SPECIES_KOREAN_INFO[value as string as keyof typeof SPECIES_KOREAN_INFO] ??
-                  placeholder)
+                ? (SPECIES_KOREAN_INFO[value as PetDtoSpecies] ?? placeholder)
                 : ((value as string) ?? placeholder)}
           </div>
         );
