@@ -34,7 +34,10 @@ const NotiButton = () => {
 
   const { data: notifications } = useQuery({
     queryKey: [userNotificationControllerFindAll.name],
-    queryFn: () => userNotificationControllerFindAll(),
+    queryFn: () =>
+      userNotificationControllerFindAll({
+        order: "DESC",
+      }),
     select: (response) => response.data.data,
   });
 
@@ -46,8 +49,9 @@ const NotiButton = () => {
     ?.filter((n) => n.status === UserNotificationDtoStatus.unread)
     .slice(0, 4)
     .map((n) => ({
-      title: NOTIFICATION_TYPE[n.type as keyof typeof NOTIFICATION_TYPE],
+      title: NOTIFICATION_TYPE[n.type as keyof typeof NOTIFICATION_TYPE].label,
       message: (n?.detailJson as { message: string })?.message.substring(0, 50) + "...",
+      id: n.id,
     }));
 
   if (isNotiPage) return;
@@ -78,10 +82,14 @@ const NotiButton = () => {
             <div className="flex flex-col gap-2 p-1 pb-4 pt-2">
               <p className="font-medium">최근 알림</p>
               {recentNotifications.map((noti, index) => (
-                <div key={index} className="rounded-md border border-gray-500 p-2 text-sm">
+                <Link
+                  href={`/noti?id=${noti.id}`}
+                  key={index}
+                  className="cursor-pointer rounded-md border border-gray-500 p-2 text-sm"
+                >
                   <p className="font-medium text-gray-200">{noti.title}</p>
                   <p className="text-xs text-gray-400">{noti.message}</p>
-                </div>
+                </Link>
               ))}
               {unreadCount > 3 && (
                 <p className="text-muted-foreground text-right text-xs">

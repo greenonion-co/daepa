@@ -1,16 +1,12 @@
 import { EggDto, ParentDtoStatus, PetParentDto } from "@repo/api-client";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import ParentStatusBadge from "./ParentStatusBadge";
 
 export const TreeView = ({ node }: { node: EggDto }) => {
-  const router = useRouter();
-
   return (
-    <button
+    <Link
       className="hover:bg-accent mb-2 flex w-full cursor-pointer flex-col items-start gap-2 rounded-xl border p-3 text-left text-sm shadow-sm transition-all duration-200 hover:scale-[1.01] hover:shadow-md"
-      onClick={() => {
-        router.push(`/egg/${node.eggId}`);
-      }}
+      href={`/egg/${node.eggId}`}
     >
       <div className="flex w-full items-center justify-between gap-3">
         <div className="flex items-center gap-2">
@@ -35,7 +31,7 @@ export const TreeView = ({ node }: { node: EggDto }) => {
           </div>
         </div>
       </div>
-    </button>
+    </Link>
   );
 };
 

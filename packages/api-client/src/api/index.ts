@@ -5,9 +5,6 @@
  * Project Daepa API description
  * OpenAPI spec version: 1.0
  */
-import axios from "axios";
-import type { AxiosRequestConfig, AxiosResponse } from "axios";
-
 import type {
   BrEggControllerFindAllParams,
   BrPetControllerFindAllParams,
@@ -39,220 +36,271 @@ import type {
   UserNotificationControllerFindAll200,
 } from "../model";
 
-export const petControllerFindAll = <TData = AxiosResponse<PetControllerFindAll200>>(
-  params?: PetControllerFindAllParams,
-  options?: AxiosRequestConfig,
-): Promise<TData> => {
-  return axios.get(`http://localhost:4000/api/v1/pet`, {
-    ...options,
-    params: { ...params, ...options?.params },
+import { useCustomInstance } from "./mutator/use-custom-instance.ts";
+export const petControllerFindAll = (params?: PetControllerFindAllParams) => {
+  return useCustomInstance<PetControllerFindAll200>({
+    url: `http://localhost:4000/api/v1/pet`,
+    method: "GET",
+    params,
   });
 };
 
-export const petControllerCreate = <TData = AxiosResponse<void>>(
-  createPetDto: CreatePetDto,
-  options?: AxiosRequestConfig,
-): Promise<TData> => {
-  return axios.post(`http://localhost:4000/api/v1/pet`, createPetDto, options);
+export const petControllerCreate = (createPetDto: CreatePetDto) => {
+  return useCustomInstance<void>({
+    url: `http://localhost:4000/api/v1/pet`,
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    data: createPetDto,
+  });
 };
 
-export const petControllerFindOne = <TData = AxiosResponse<PetDto>>(
-  petId: string,
-  options?: AxiosRequestConfig,
-): Promise<TData> => {
-  return axios.get(`http://localhost:4000/api/v1/pet/${petId}`, options);
+export const petControllerFindOne = (petId: string) => {
+  return useCustomInstance<PetDto>({
+    url: `http://localhost:4000/api/v1/pet/${petId}`,
+    method: "GET",
+  });
 };
 
-export const petControllerUpdate = <TData = AxiosResponse<void>>(
-  petId: string,
-  updatePetDto: UpdatePetDto,
-  options?: AxiosRequestConfig,
-): Promise<TData> => {
-  return axios.patch(`http://localhost:4000/api/v1/pet/${petId}`, updatePetDto, options);
+export const petControllerUpdate = (petId: string, updatePetDto: UpdatePetDto) => {
+  return useCustomInstance<void>({
+    url: `http://localhost:4000/api/v1/pet/${petId}`,
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    data: updatePetDto,
+  });
 };
 
-export const petControllerDelete = <TData = AxiosResponse<void>>(
-  petId: string,
-  options?: AxiosRequestConfig,
-): Promise<TData> => {
-  return axios.delete(`http://localhost:4000/api/v1/pet/${petId}`, options);
+export const petControllerDelete = (petId: string) => {
+  return useCustomInstance<void>({
+    url: `http://localhost:4000/api/v1/pet/${petId}`,
+    method: "DELETE",
+  });
 };
 
-export const parentControllerFindParent = <TData = AxiosResponse<ParentDto>>(
+export const parentControllerFindParent = (
   petId: string,
   params: ParentControllerFindParentParams,
-  options?: AxiosRequestConfig,
-): Promise<TData> => {
-  return axios.get(`http://localhost:4000/api/v1/parent/${petId}`, {
-    ...options,
-    params: { ...params, ...options?.params },
+) => {
+  return useCustomInstance<ParentDto>({
+    url: `http://localhost:4000/api/v1/parent/${petId}`,
+    method: "GET",
+    params,
   });
 };
 
-export const parentControllerCreateParent = <TData = AxiosResponse<void>>(
-  petId: string,
-  createParentDto: CreateParentDto,
-  options?: AxiosRequestConfig,
-): Promise<TData> => {
-  return axios.post(`http://localhost:4000/api/v1/parent/${petId}`, createParentDto, options);
+export const parentControllerCreateParent = (petId: string, createParentDto: CreateParentDto) => {
+  return useCustomInstance<void>({
+    url: `http://localhost:4000/api/v1/parent/${petId}`,
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    data: createParentDto,
+  });
 };
 
-export const parentControllerUpdateParentRequest = <TData = AxiosResponse<void>>(
-  updateParentDto: UpdateParentDto,
-  options?: AxiosRequestConfig,
-): Promise<TData> => {
-  return axios.patch(`http://localhost:4000/api/v1/parent/update`, updateParentDto, options);
+export const parentControllerUpdateParentRequest = (updateParentDto: UpdateParentDto) => {
+  return useCustomInstance<void>({
+    url: `http://localhost:4000/api/v1/parent/update`,
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    data: updateParentDto,
+  });
 };
 
-export const parentControllerDeleteParent = <TData = AxiosResponse<void>>(
-  relationId: number,
-  options?: AxiosRequestConfig,
-): Promise<TData> => {
-  return axios.delete(`http://localhost:4000/api/v1/parent/delete/${relationId}`, options);
+export const parentControllerDeleteParent = (relationId: number) => {
+  return useCustomInstance<void>({
+    url: `http://localhost:4000/api/v1/parent/delete/${relationId}`,
+    method: "DELETE",
+  });
 };
 
-export const userNotificationControllerFindAll = <
-  TData = AxiosResponse<UserNotificationControllerFindAll200>,
->(
+export const userNotificationControllerFindAll = (
   params?: UserNotificationControllerFindAllParams,
-  options?: AxiosRequestConfig,
-): Promise<TData> => {
-  return axios.get(`http://localhost:4000/api/v1/user-notification`, {
-    ...options,
-    params: { ...params, ...options?.params },
+) => {
+  return useCustomInstance<UserNotificationControllerFindAll200>({
+    url: `http://localhost:4000/api/v1/user-notification`,
+    method: "GET",
+    params,
   });
 };
 
-export const userNotificationControllerCreate = <TData = AxiosResponse<void>>(
+export const userNotificationControllerCreate = (
   createUserNotificationDto: CreateUserNotificationDto,
-  options?: AxiosRequestConfig,
-): Promise<TData> => {
-  return axios.post(
-    `http://localhost:4000/api/v1/user-notification`,
-    createUserNotificationDto,
-    options,
-  );
+) => {
+  return useCustomInstance<void>({
+    url: `http://localhost:4000/api/v1/user-notification`,
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    data: createUserNotificationDto,
+  });
 };
 
-export const userNotificationControllerUpdate = <TData = AxiosResponse<void>>(
+export const userNotificationControllerUpdate = (
   updateUserNotificationDto: UpdateUserNotificationDto,
-  options?: AxiosRequestConfig,
-): Promise<TData> => {
-  return axios.patch(
-    `http://localhost:4000/api/v1/user-notification`,
-    updateUserNotificationDto,
-    options,
-  );
+) => {
+  return useCustomInstance<void>({
+    url: `http://localhost:4000/api/v1/user-notification`,
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    data: updateUserNotificationDto,
+  });
 };
 
-export const userNotificationControllerDelete = <TData = AxiosResponse<void>>(
+export const userNotificationControllerDelete = (
   deleteUserNotificationDto: DeleteUserNotificationDto,
-  options?: AxiosRequestConfig,
-): Promise<TData> => {
-  return axios.delete(`http://localhost:4000/api/v1/user-notification`, {
+) => {
+  return useCustomInstance<void>({
+    url: `http://localhost:4000/api/v1/user-notification`,
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
     data: deleteUserNotificationDto,
-    ...options,
   });
 };
 
-export const brPetControllerFindAll = <TData = AxiosResponse<BrPetControllerFindAll200>>(
-  params?: BrPetControllerFindAllParams,
-  options?: AxiosRequestConfig,
-): Promise<TData> => {
-  return axios.get(`http://localhost:4000/api/v1/br/pet`, {
-    ...options,
-    params: { ...params, ...options?.params },
+export const brPetControllerFindAll = (params?: BrPetControllerFindAllParams) => {
+  return useCustomInstance<BrPetControllerFindAll200>({
+    url: `http://localhost:4000/api/v1/br/pet`,
+    method: "GET",
+    params,
   });
 };
 
-export const eggControllerFindOne = <TData = AxiosResponse<EggDto>>(
-  eggId: string,
-  options?: AxiosRequestConfig,
-): Promise<TData> => {
-  return axios.get(`http://localhost:4000/api/v1/egg/${eggId}`, options);
-};
-
-export const eggControllerUpdate = <TData = AxiosResponse<void>>(
-  eggId: string,
-  updateEggDto: UpdateEggDto,
-  options?: AxiosRequestConfig,
-): Promise<TData> => {
-  return axios.patch(`http://localhost:4000/api/v1/egg/${eggId}`, updateEggDto, options);
-};
-
-export const eggControllerDelete = <TData = AxiosResponse<void>>(
-  eggId: string,
-  options?: AxiosRequestConfig,
-): Promise<TData> => {
-  return axios.delete(`http://localhost:4000/api/v1/egg/${eggId}`, options);
-};
-
-export const eggControllerCreate = <TData = AxiosResponse<void>>(
-  createEggDto: CreateEggDto,
-  options?: AxiosRequestConfig,
-): Promise<TData> => {
-  return axios.post(`http://localhost:4000/api/v1/egg`, createEggDto, options);
-};
-
-export const eggControllerHatched = <TData = AxiosResponse<void>>(
-  eggId: string,
-  options?: AxiosRequestConfig,
-): Promise<TData> => {
-  return axios.get(`http://localhost:4000/api/v1/egg/${eggId}/hatched`, options);
-};
-
-export const brEggControllerFindAll = <TData = AxiosResponse<BrEggControllerFindAll200>>(
-  params?: BrEggControllerFindAllParams,
-  options?: AxiosRequestConfig,
-): Promise<TData> => {
-  return axios.get(`http://localhost:4000/api/v1/br/egg`, {
-    ...options,
-    params: { ...params, ...options?.params },
+export const eggControllerFindOne = (eggId: string) => {
+  return useCustomInstance<EggDto>({
+    url: `http://localhost:4000/api/v1/egg/${eggId}`,
+    method: "GET",
   });
 };
 
-export const authControllerKakaoLogin = <TData = AxiosResponse<unknown>>(
-  options?: AxiosRequestConfig,
-): Promise<TData> => {
-  return axios.get(`http://localhost:4000/api/auth/sign-in/kakao`, options);
+export const eggControllerUpdate = (eggId: string, updateEggDto: UpdateEggDto) => {
+  return useCustomInstance<void>({
+    url: `http://localhost:4000/api/v1/egg/${eggId}`,
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    data: updateEggDto,
+  });
 };
 
-export const authControllerGoogleLogin = <TData = AxiosResponse<void>>(
-  options?: AxiosRequestConfig,
-): Promise<TData> => {
-  return axios.get(`http://localhost:4000/api/auth/sign-in/google`, options);
+export const eggControllerDelete = (eggId: string) => {
+  return useCustomInstance<void>({
+    url: `http://localhost:4000/api/v1/egg/${eggId}`,
+    method: "DELETE",
+  });
 };
 
-export const authControllerRefreshToken = <TData = AxiosResponse<string>>(
-  options?: AxiosRequestConfig,
-): Promise<TData> => {
-  return axios.get(`http://localhost:4000/api/auth/refresh`, options);
+export const eggControllerCreate = (createEggDto: CreateEggDto) => {
+  return useCustomInstance<void>({
+    url: `http://localhost:4000/api/v1/egg`,
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    data: createEggDto,
+  });
 };
 
-export type PetControllerFindAllResult = AxiosResponse<PetControllerFindAll200>;
-export type PetControllerCreateResult = AxiosResponse<void>;
-export type PetControllerFindOneResult = AxiosResponse<PetDto>;
-export type PetControllerUpdateResult = AxiosResponse<void>;
-export type PetControllerDeleteResult = AxiosResponse<void>;
-export type ParentControllerFindParentResult = AxiosResponse<ParentDto>;
-export type ParentControllerCreateParentResult = AxiosResponse<void>;
-export type ParentControllerUpdateParentRequestResult = AxiosResponse<void>;
-export type ParentControllerDeleteParentResult = AxiosResponse<void>;
-export type UserNotificationControllerFindAllResult =
-  AxiosResponse<UserNotificationControllerFindAll200>;
-export type UserNotificationControllerCreateResult = AxiosResponse<void>;
-export type UserNotificationControllerUpdateResult = AxiosResponse<void>;
-export type UserNotificationControllerDeleteResult = AxiosResponse<void>;
-export type BrPetControllerFindAllResult = AxiosResponse<BrPetControllerFindAll200>;
-export type EggControllerFindOneResult = AxiosResponse<EggDto>;
-export type EggControllerUpdateResult = AxiosResponse<void>;
-export type EggControllerDeleteResult = AxiosResponse<void>;
-export type EggControllerCreateResult = AxiosResponse<void>;
-export type EggControllerHatchedResult = AxiosResponse<void>;
-export type BrEggControllerFindAllResult = AxiosResponse<BrEggControllerFindAll200>;
-export type AuthControllerKakaoLoginResult = AxiosResponse<unknown>;
-export type AuthControllerGoogleLoginResult = AxiosResponse<void>;
-export type AuthControllerRefreshTokenResult = AxiosResponse<string>;
+export const eggControllerHatched = (eggId: string) => {
+  return useCustomInstance<void>({
+    url: `http://localhost:4000/api/v1/egg/${eggId}/hatched`,
+    method: "GET",
+  });
+};
+
+export const brEggControllerFindAll = (params?: BrEggControllerFindAllParams) => {
+  return useCustomInstance<BrEggControllerFindAll200>({
+    url: `http://localhost:4000/api/v1/br/egg`,
+    method: "GET",
+    params,
+  });
+};
+
+export const authControllerKakaoLogin = () => {
+  return useCustomInstance<unknown>({
+    url: `http://localhost:4000/api/auth/sign-in/kakao`,
+    method: "GET",
+  });
+};
+
+export const authControllerGoogleLogin = () => {
+  return useCustomInstance<void>({
+    url: `http://localhost:4000/api/auth/sign-in/google`,
+    method: "GET",
+  });
+};
+
+export const authControllerRefreshToken = () => {
+  return useCustomInstance<string>({
+    url: `http://localhost:4000/api/auth/refresh`,
+    method: "GET",
+  });
+};
+
+export type PetControllerFindAllResult = NonNullable<
+  Awaited<ReturnType<typeof petControllerFindAll>>
+>;
+export type PetControllerCreateResult = NonNullable<
+  Awaited<ReturnType<typeof petControllerCreate>>
+>;
+export type PetControllerFindOneResult = NonNullable<
+  Awaited<ReturnType<typeof petControllerFindOne>>
+>;
+export type PetControllerUpdateResult = NonNullable<
+  Awaited<ReturnType<typeof petControllerUpdate>>
+>;
+export type PetControllerDeleteResult = NonNullable<
+  Awaited<ReturnType<typeof petControllerDelete>>
+>;
+export type ParentControllerFindParentResult = NonNullable<
+  Awaited<ReturnType<typeof parentControllerFindParent>>
+>;
+export type ParentControllerCreateParentResult = NonNullable<
+  Awaited<ReturnType<typeof parentControllerCreateParent>>
+>;
+export type ParentControllerUpdateParentRequestResult = NonNullable<
+  Awaited<ReturnType<typeof parentControllerUpdateParentRequest>>
+>;
+export type ParentControllerDeleteParentResult = NonNullable<
+  Awaited<ReturnType<typeof parentControllerDeleteParent>>
+>;
+export type UserNotificationControllerFindAllResult = NonNullable<
+  Awaited<ReturnType<typeof userNotificationControllerFindAll>>
+>;
+export type UserNotificationControllerCreateResult = NonNullable<
+  Awaited<ReturnType<typeof userNotificationControllerCreate>>
+>;
+export type UserNotificationControllerUpdateResult = NonNullable<
+  Awaited<ReturnType<typeof userNotificationControllerUpdate>>
+>;
+export type UserNotificationControllerDeleteResult = NonNullable<
+  Awaited<ReturnType<typeof userNotificationControllerDelete>>
+>;
+export type BrPetControllerFindAllResult = NonNullable<
+  Awaited<ReturnType<typeof brPetControllerFindAll>>
+>;
+export type EggControllerFindOneResult = NonNullable<
+  Awaited<ReturnType<typeof eggControllerFindOne>>
+>;
+export type EggControllerUpdateResult = NonNullable<
+  Awaited<ReturnType<typeof eggControllerUpdate>>
+>;
+export type EggControllerDeleteResult = NonNullable<
+  Awaited<ReturnType<typeof eggControllerDelete>>
+>;
+export type EggControllerCreateResult = NonNullable<
+  Awaited<ReturnType<typeof eggControllerCreate>>
+>;
+export type EggControllerHatchedResult = NonNullable<
+  Awaited<ReturnType<typeof eggControllerHatched>>
+>;
+export type BrEggControllerFindAllResult = NonNullable<
+  Awaited<ReturnType<typeof brEggControllerFindAll>>
+>;
+export type AuthControllerKakaoLoginResult = NonNullable<
+  Awaited<ReturnType<typeof authControllerKakaoLogin>>
+>;
+export type AuthControllerGoogleLoginResult = NonNullable<
+  Awaited<ReturnType<typeof authControllerGoogleLogin>>
+>;
+export type AuthControllerRefreshTokenResult = NonNullable<
+  Awaited<ReturnType<typeof authControllerRefreshToken>>
+>;
 
 export const getPetControllerFindAllResponseMock = (
   overrideResponse: Partial<PetControllerFindAll200> = {},

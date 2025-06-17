@@ -143,16 +143,6 @@ export const EGG_REGISTER_STEPS: FormStep[] = [
       required: false,
     },
   },
-  // {
-  //   title: "이름/관리번호",
-  //   field: {
-  //     name: "name",
-  //     type: "text",
-  //     required: true,
-  //     placeholder: "개체 이름/관리번호를 입력해주세요",
-  //     validation: (value) => value.length > 0,
-  //   },
-  // },
   {
     title: "수량",
     field: {
@@ -173,7 +163,6 @@ export const EGG_REGISTER_STEPS: FormStep[] = [
       unit: "차",
       required: false,
       placeholder: "차수를 입력해주세요",
-      validation: (value) => !isNaN(Number(value)) && Number(value) > 0,
     },
   },
   {
@@ -182,8 +171,7 @@ export const EGG_REGISTER_STEPS: FormStep[] = [
       name: "parents",
       info: "최소 1개 이상 선택해주세요",
       type: "parentSearch",
-      required: true,
-      validation: (value) => value.length > 0,
+      required: false,
     },
   },
   {
@@ -193,7 +181,6 @@ export const EGG_REGISTER_STEPS: FormStep[] = [
       type: "date",
       required: true,
       placeholder: "해칭일을 입력해주세요",
-      validation: (value) => value.length > 0,
     },
   },
   {
@@ -251,11 +238,11 @@ export const EGG_EDIT_STEPS: FormStep[] = [
     },
   },
   {
-    title: "수량",
+    title: "구분",
     field: {
       name: "clutchOrder",
       type: "number",
-      unit: "개",
+      unit: "번",
       required: true,
       placeholder: "수량을 입력해주세요",
       validation: (value) => !isNaN(Number(value)) && Number(value) > 0,
@@ -424,14 +411,33 @@ export const FOOD_BADGE_TEXT_COLORS: Record<FOOD, string> = {
   "지렙 인섹트": "text-blue-900",
 };
 
-export const NOTIFICATION_TYPE: Record<UserNotificationDtoType, string> = {
-  parent_request: "부모 연동 요청",
-  parent_accept: "부모 연동 수락",
-  parent_reject: "부모 연동 거절",
-  owner_transfer: "주인 이전",
-  owner_accept: "주인 수락",
-  owner_reject: "주인 거절",
-};
+export const NOTIFICATION_TYPE: Record<UserNotificationDtoType, { label: string; color: string }> =
+  {
+    parent_request: {
+      label: "부모 연동 요청",
+      color: "bg-gray-200 text-gray-900",
+    },
+    parent_accept: {
+      label: "부모 연동 수락",
+      color: "bg-green-600",
+    },
+    parent_reject: {
+      label: "부모 연동 거절",
+      color: "bg-red-600",
+    },
+    owner_transfer: {
+      label: "주인 이전",
+      color: "bg-blue-600",
+    },
+    owner_accept: {
+      label: "주인 수락",
+      color: "bg-green-600",
+    },
+    owner_reject: {
+      label: "주인 거절",
+      color: "bg-red-600",
+    },
+  };
 
 export const STATUS_MAP = {
   pending: {

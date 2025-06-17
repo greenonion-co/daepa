@@ -94,5 +94,9 @@ export class UserNotificationController {
     await this.userNotificationService.deleteUserNotification(
       deleteUserNotificationDto,
     );
+    return {
+      success: true,
+      message: '알림이 삭제되었습니다.',
+    };
   }
 }

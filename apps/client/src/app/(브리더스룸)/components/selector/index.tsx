@@ -2,7 +2,7 @@
 
 import BottomSheet from "@/components/common/BottomSheet";
 import { GENDER_KOREAN_INFO, SPECIES_KOREAN_INFO } from "../../constants";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 interface SelectorProps {
   isOpen: boolean;
@@ -53,6 +53,36 @@ export default function Selector({
   type,
   onExit,
 }: SelectorProps) {
+  const [selectedIndex, setSelectedIndex] = useState(
+    currentValue ? selectList.indexOf(currentValue) : 0,
+  );
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!isOpen) return;
+
+      switch (e.key) {
+        case "ArrowUp":
+          e.preventDefault();
+          setSelectedIndex((prev) => (prev > 0 ? prev - 1 : selectList.length - 1));
+          break;
+        case "ArrowDown":
+          e.preventDefault();
+          setSelectedIndex((prev) => (prev < selectList.length - 1 ? prev + 1 : 0));
+          break;
+        case "Enter":
+          e.preventDefault();
+          onSelectAction(selectList[selectedIndex]);
+          break;
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isOpen, selectList, selectedIndex, onSelectAction]);
+
   useEffect(() => {
     return () => onExit();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -63,11 +93,11 @@ export default function Selector({
       <div className="space-y-4">
         {title && <h2 className="pl-4 text-xl font-bold">{title}</h2>}
         <div className="flex max-h-[60vh] min-h-[200px] flex-col gap-1 overflow-y-auto">
-          {selectList.map((item) => (
+          {selectList.map((item, index) => (
             <SelectButton
               key={item}
               item={item}
-              isSelected={currentValue === item}
+              isSelected={selectedIndex === index}
               onClick={() => onSelectAction(item)}
               type={type}
             />

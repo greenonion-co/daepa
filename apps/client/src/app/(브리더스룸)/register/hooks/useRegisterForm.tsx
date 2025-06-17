@@ -1,138 +1,84 @@
 import { useCallback, useMemo } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { FieldName, FormData, FormErrors } from "../types";
-import {
-  FORM_STEPS,
-  GENDER_KOREAN_INFO,
-  MORPH_LIST_BY_SPECIES,
-  REGISTER_PAGE,
-  SELECTOR_CONFIGS,
-} from "../../constants";
-import { useFormStore } from "../store/form";
+import { useParams, usePathname, useRouter } from "next/navigation";
+import { FieldName, FormStep } from "../types";
+import { MORPH_LIST_BY_SPECIES, REGISTER_PAGE, SELECTOR_CONFIGS } from "../../constants";
 import { overlay } from "overlay-kit";
 import MultipleSelector from "../../components/selector/multiple";
-import { CreatePetDto, PetSummaryDto, petControllerCreate } from "@repo/api-client";
-import { useMutation } from "@tanstack/react-query";
+import { PetSummaryDto } from "@repo/api-client";
 import Dialog from "../../components/Form/Dialog";
+
+import { validateStep } from "@/lib/form";
+import { FormData } from "../store/pet";
 import { toast } from "sonner";
-import { AxiosError } from "axios";
-import { formatDateToYYYYMMDD } from "@/lib/utils";
 
 type SELECTOR_TYPE = "species" | "growth" | "sex";
 
-export const useRegisterForm = () => {
+interface UseRegisterFormProps {
+  formStep: FormStep[];
+  formData: FormData;
+  step: number;
+  setErrors: (errors: Record<string, string>) => void;
+  setStep: (step: number) => void;
+  setFormData: (data: FormData | ((prev: FormData) => FormData)) => void;
+  handleSubmit: (data: FormData) => void;
+}
+
+export const useRegisterForm = ({
+  formStep,
+  formData,
+  step,
+  setErrors,
+  setStep,
+  setFormData,
+  handleSubmit,
+}: UseRegisterFormProps) => {
   const router = useRouter();
   const { funnel } = useParams();
-  const { step, formData, setErrors, setStep, setFormData, resetForm } = useFormStore();
-  const { mutate: mutateCreatePet } = useMutation({
-    mutationFn: (data: CreatePetDto) => petControllerCreate(data),
-    onSuccess: () => {
-      toast.success("개체 등록이 완료되었습니다.");
-      router.push(`/pet`);
-      resetForm();
-    },
-    onError: (error: AxiosError<{ message: string }>) => {
-      console.error("Failed to create pet:", error);
-      if (error.response?.data?.message) {
-        toast.error(error.response.data.message);
-      } else {
-        toast.error("개체 등록에 실패했습니다.");
-      }
-    },
-  });
+  const isEggRegister = usePathname().includes("egg");
 
-  const validateStep = useCallback(
-    (data: FormData) => {
-      const newErrors: FormErrors = {};
-      let isValid = true;
-
-      Object.entries(data).forEach(([key, value]) => {
-        const field = FORM_STEPS.find((step) => step.field.name === key);
-        if (field) {
-          if (field.field.required && !value.length) {
-            newErrors[key] = "필수 입력 항목입니다.";
-            isValid = false;
-          } else if (field.field.validation && !field.field.validation(value as string)) {
-            newErrors[key] = "유효하지 않은 값입니다.";
-            isValid = false;
-          }
-        }
-      });
-
-      setErrors(newErrors);
-      return isValid;
-    },
-    [setErrors],
-  );
-
-  const createPet = useCallback(
-    (formData: FormData) => {
-      try {
-        const transformedFormData = { ...formData };
-        if (transformedFormData.sex && typeof transformedFormData.sex === "string") {
-          const genderEntry = Object.entries(GENDER_KOREAN_INFO).find(
-            ([_, koreanValue]) => koreanValue === transformedFormData.sex,
-          );
-          if (genderEntry) {
-            transformedFormData.sex = genderEntry[0];
-          }
-        }
-
-        const { birthdate, father, mother, photo, weight, ...rest } = transformedFormData;
-
-        const requestData: CreatePetDto = {
-          ...rest,
-          birthdate: formatDateToYYYYMMDD(birthdate ?? ""),
-          ...(weight && { weight: Number(weight) }),
-          ...(father?.petId && {
-            father: {
-              parentId: father.petId,
-              role: "father",
-              // TODO: 회원가입 기능 적용 후 수정
-              // isMyPet: father.owner.userId === 내 id,
-              isMyPet: false,
-              message: father.message,
-            },
-          }),
-          ...(mother?.petId && {
-            mother: {
-              parentId: mother.petId,
-              role: "mother",
-              // TODO: 회원가입 기능 적용 후 수정
-              // isMyPet: mother.owner.userId === 내 id,
-              isMyPet: false,
-              message: mother.message,
-            },
-          }),
-        };
-
-        mutateCreatePet(requestData);
-      } catch (error) {
-        console.error("Failed to create pet:", error);
-      }
-    },
-    [mutateCreatePet],
-  );
-
+  // 다음 단계로 이동
   const goNext = useCallback(
     async (newFormData = formData) => {
-      if (Number(funnel) === REGISTER_PAGE.SECOND && validateStep(newFormData)) {
-        createPet(newFormData);
+      const { errors, isValid } = validateStep({
+        formStep,
+        data: newFormData,
+        currentStep: step,
+      });
+
+      setErrors(errors);
+
+      if (!isValid) {
+        toast.error("에러를 확인해주세요.");
         return;
       }
 
-      if (step === FORM_STEPS.length && validateStep(newFormData)) {
-        router.push("/register/2");
-        return;
-      }
+      if (isEggRegister) {
+        if (step + 1 >= formStep.length) {
+          handleSubmit(newFormData);
+          return;
+        }
 
-      if (step + 1 === Object.keys(newFormData).length && validateStep(newFormData)) {
         setStep(step + 1);
+      } else {
+        if (Number(funnel) === REGISTER_PAGE.SECOND) {
+          handleSubmit(newFormData);
+          return;
+        }
+
+        if (step === formStep.length) {
+          router.push("/register/2");
+          return;
+        }
+
+        if (step + 1 === Object.keys(newFormData).length) {
+          setStep(step + 1);
+        }
       }
     },
-    [step, validateStep, setStep, formData, router, createPet, funnel],
+    [step, setStep, formData, router, handleSubmit, funnel, setErrors, formStep, isEggRegister],
   );
 
+  // 입력 필드 변경
   const handleNext = useCallback(
     ({ type, value }: { type: FieldName; value: string | string[] | PetSummaryDto }) => {
       if (
@@ -160,13 +106,17 @@ export const useRegisterForm = () => {
       const newFormData = { ...formData, [type]: value };
       setFormData(newFormData);
 
-      if (Number(funnel) === REGISTER_PAGE.FIRST && step <= FORM_STEPS.length - 1) {
+      if (
+        (!["father", "mother"].includes(type) && isEggRegister && step < formStep.length - 1) ||
+        (!isEggRegister && Number(funnel) === REGISTER_PAGE.FIRST && step <= formStep.length - 1)
+      ) {
         goNext(newFormData);
       }
     },
-    [formData, funnel, goNext, setFormData, step],
+    [formData, funnel, goNext, setFormData, step, isEggRegister, formStep],
   );
 
+  // 선택 리스트 조회
   const getSelectList = useCallback(
     (type: FieldName) => {
       switch (type) {
@@ -179,6 +129,7 @@ export const useRegisterForm = () => {
     [formData.species],
   );
 
+  // 다중 선택 리스트 오픈
   const handleMultipleSelect = useCallback(
     (type: FieldName) => {
       overlay.open(({ isOpen, close, unmount }) => (

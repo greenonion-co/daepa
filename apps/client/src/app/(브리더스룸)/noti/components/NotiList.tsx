@@ -15,12 +15,16 @@ import Loading from "@/components/common/Loading";
 import NotiTitle from "./NotiTitle";
 import { PetSummaryDto } from "@/types/pet";
 import { useInfiniteQuery, useMutation } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useInView } from "react-intersection-observer";
+import { Badge } from "@/components/ui/badge";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const NotiList = ({ tab }: { tab: "all" | "unread" }) => {
   const [items, setItems] = useState<UserNotificationDto[]>([]);
-
+  const selectedRef = useRef<HTMLButtonElement>(null);
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const { selected, setSelected } = useNotiStore();
   const { ref, inView } = useInView();
 
@@ -59,15 +63,32 @@ const NotiList = ({ tab }: { tab: "all" | "unread" }) => {
     },
   });
 
-  const handleItemClick = (item: UserNotificationDto) => {
-    setSelected(item);
-    // NOTE: 테스트 코드
-    // return handleUpdate({ id: item.id, status: UserNotificationDtoStatus.read });
+  const handleItemClick = useCallback(
+    (item: UserNotificationDto) => {
+      if (item.id) {
+        router.push(`/noti?id=${item.id}`);
+      }
+      setSelected(item);
 
-    if (item.status === UserNotificationDtoStatus.unread) {
-      updateNotification({ id: item.id, status: UserNotificationDtoStatus.read });
+      if (item.status === UserNotificationDtoStatus.unread) {
+        updateNotification({ id: item.id, status: UserNotificationDtoStatus.read });
+      }
+    },
+    [router, setSelected, updateNotification],
+  );
+
+  useEffect(() => {
+    const id = searchParams.get("id");
+    const item = items.find((item) => item.id === Number(id));
+    if (item) {
+      setSelected(item);
+      setTimeout(() => {
+        selectedRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 100);
+    } else {
+      setSelected(null);
     }
-  };
+  }, [searchParams, items, selected, setSelected]);
 
   useEffect(() => {
     if (inView && hasNextPage && !isFetchingNextPage) {
@@ -111,18 +132,24 @@ const NotiList = ({ tab }: { tab: "all" | "unread" }) => {
           return (
             <button
               key={item.id}
+              ref={selected?.id === item.id ? selectedRef : null}
               className={cn(
-                "hover:bg-accent flex flex-col items-start gap-2 rounded-lg border p-3 text-left text-sm shadow-sm transition-all duration-200 hover:scale-[1.01] hover:shadow-md",
-                selected?.id === item.id && "bg-blue-50",
+                "flex flex-col items-start gap-2 rounded-lg border p-3 text-left text-sm shadow-sm transition-all duration-200 hover:scale-[1.01] hover:shadow-md",
+                selected?.id === item.id && "bg-blue-200",
               )}
               onClick={() => handleItemClick(item)}
             >
               <div className="flex w-full flex-col gap-1">
                 <div className="flex items-center">
                   <div className="flex items-center gap-2">
-                    <div className="font-semibold">
-                      {NOTIFICATION_TYPE[item.type as keyof typeof NOTIFICATION_TYPE]}
-                    </div>
+                    <Badge
+                      className={cn(
+                        "my-1 px-2 text-sm font-semibold",
+                        NOTIFICATION_TYPE[item.type as keyof typeof NOTIFICATION_TYPE].color,
+                      )}
+                    >
+                      {NOTIFICATION_TYPE[item.type as keyof typeof NOTIFICATION_TYPE].label}
+                    </Badge>
                     {item.status === UserNotificationDtoStatus.unread && (
                       <span className="flex h-2 w-2 rounded-full bg-red-500" />
                     )}

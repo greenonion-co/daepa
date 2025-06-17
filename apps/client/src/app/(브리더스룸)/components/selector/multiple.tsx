@@ -44,6 +44,12 @@ export default function MultipleSelector({
     });
   };
 
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      onSelectAction(selectedItems);
+    }
+  };
+
   return (
     <>
       <BottomSheet
@@ -52,7 +58,7 @@ export default function MultipleSelector({
         buttonText="선택 완료"
         onClick={() => onSelectAction(selectedItems)}
       >
-        <div className="space-y-4">
+        <div className="space-y-4" onKeyDown={handleKeyPress}>
           <div className="flex items-center gap-2">
             <h2 className="pl-4 text-xl font-bold">모프 선택</h2>
             <span className="text-sm text-gray-500">{selectedItems.length}/5 선택됨</span>

@@ -9,11 +9,12 @@ import { ChevronDown } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 
 interface PetDetailProps {
-  pet: PetDto;
+  pet: PetDto & { birthdate?: string };
   qrCodeDataUrl: string;
 }
 
 const PetDetail = ({ pet, qrCodeDataUrl }: PetDetailProps) => {
+  console.log("🚀 ~ PetDetail ~ pet:", pet);
   const containerRef = useRef<HTMLDivElement>(null);
   const isScrollingRef = useRef(false);
   const searchParams = useSearchParams();

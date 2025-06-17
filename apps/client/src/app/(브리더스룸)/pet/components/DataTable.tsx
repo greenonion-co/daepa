@@ -26,6 +26,7 @@ import Add from "@mui/icons-material/Add";
 import { PetDto } from "@repo/api-client";
 import Loading from "@/components/common/Loading";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 
 interface DataTableProps<TData> {
   columns: ColumnDef<TData>[];
@@ -150,12 +151,12 @@ export const DataTable = ({
         </div>
       </div>
 
-      <Button
+      <Link
+        href="/register/1"
         className="fixed bottom-6 right-6 h-14 w-14 rounded-full bg-blue-500 shadow-lg hover:bg-blue-600"
-        onClick={() => router.push("/register/1")}
       >
         <Add fontSize="large" />
-      </Button>
+      </Link>
     </div>
   );
 };

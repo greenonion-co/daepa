@@ -26,21 +26,23 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useInView } from "react-intersection-observer";
 import Loading from "@/components/common/Loading";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { format } from "date-fns";
 
 const HatchingPage = () => {
   const [date, setDate] = useState<Date>(new Date());
-  const [month, setMonth] = useState<Date>(new Date());
   const [tab, setTab] = useState<"hached" | "noHatched">("noHatched");
   const { ref, inView } = useInView();
   const itemPerPage = 10;
 
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
-    queryKey: [brEggControllerFindAll.name],
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isPending } = useInfiniteQuery({
+    queryKey: [brEggControllerFindAll.name, date],
     queryFn: ({ pageParam = 1 }) =>
       brEggControllerFindAll({
         page: pageParam,
         itemPerPage,
         order: "DESC",
+        startYmd: Number(format(date, "yyyyMMdd")),
+        endYmd: Number(format(date, "yyyyMMdd")),
       }),
     initialPageParam: 1,
     getNextPageParam: (lastPage) => {
@@ -65,8 +67,6 @@ const HatchingPage = () => {
           mode="single"
           selected={date}
           onSelect={(day) => setDate(day as Date)}
-          month={month}
-          onMonthChange={setMonth}
           className="rounded-xl border shadow"
           eggCounts={eggCounts}
         />
@@ -78,8 +78,12 @@ const HatchingPage = () => {
             className="sticky top-0 z-10 bg-white pb-2"
           >
             <TabsList>
-              <TabsTrigger value="noHatched">해칭되지 않은 알</TabsTrigger>
-              <TabsTrigger value="hached">해칭된 알</TabsTrigger>
+              <TabsTrigger value="noHatched">
+                해칭되지 않은 알 ({data?.filter((egg) => !egg.hatchedPetId).length || 0})
+              </TabsTrigger>
+              <TabsTrigger value="hached">
+                해칭된 알 ({data?.filter((egg) => egg.hatchedPetId).length || 0})
+              </TabsTrigger>
             </TabsList>
           </Tabs>
           {data

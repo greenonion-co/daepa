@@ -9,12 +9,14 @@ import Image from "next/image";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useNotiStore } from "../store/noti";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   parentControllerUpdateParentRequest,
   PetSummaryDto,
   UpdateParentDto,
   UpdateParentDtoStatus,
+  userNotificationControllerDelete,
+  userNotificationControllerFindAll,
   UserNotificationDtoType,
 } from "@repo/api-client";
 import Link from "next/link";
@@ -23,10 +25,13 @@ import { NOTIFICATION_TYPE } from "../../constants";
 import { Badge } from "@/components/ui/badge";
 import { AxiosError, AxiosResponse } from "axios";
 import NotiTitle from "./NotiTitle";
-import { formatDateToYYYYMMDDString } from "@/lib/utils";
+import { cn, formatDateToYYYYMMDDString } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 export function NotiDisplay() {
-  const { selected: item } = useNotiStore();
+  const router = useRouter();
+  const { selected: item, setSelected } = useNotiStore();
+  const queryClient = useQueryClient();
   const receiverPet = item?.detailJson?.receiverPet as PetSummaryDto;
   const senderPet = item?.detailJson?.senderPet as PetSummaryDto;
   const isEgg = senderPet?.eggId;
@@ -44,10 +49,41 @@ export function NotiDisplay() {
           res?.data?.message ??
             `부모 연동이 ${variables.status === UpdateParentDtoStatus.approved ? "수락" : variables.status === UpdateParentDtoStatus.cancelled ? "취소" : "거절"} 되었습니다.`,
         );
+        queryClient.invalidateQueries({ queryKey: [userNotificationControllerFindAll.name] });
+
+        if (item) {
+          setSelected({
+            ...item,
+            type:
+              variables.status === UpdateParentDtoStatus.approved
+                ? UserNotificationDtoType.parent_accept
+                : UserNotificationDtoType.parent_reject,
+          });
+        }
       }
     },
     onError: () => {
       toast.error("부모 연동 상태 변경에 실패했습니다.");
+    },
+  });
+
+  const { mutate: deleteNotification } = useMutation<
+    AxiosResponse<{ success: boolean; message: string }>,
+    AxiosError,
+    { id: number; receiverId: string }
+  >({
+    mutationFn: ({ id, receiverId }: { id: number; receiverId: string }) =>
+      userNotificationControllerDelete({ id, receiverId }),
+    onSuccess: (res) => {
+      if (res?.data?.success) {
+        toast.success("알림이 삭제되었습니다.");
+
+        queryClient.invalidateQueries({ queryKey: [userNotificationControllerFindAll.name] });
+        router.push("/noti");
+      }
+    },
+    onError: () => {
+      toast.error("알림 삭제에 실패했습니다.");
     },
   });
 
@@ -66,7 +102,16 @@ export function NotiDisplay() {
       <div className="flex items-center justify-between p-2">
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" disabled={!item}>
+            <Button
+              variant="ghost"
+              size="icon"
+              disabled={!item}
+              onClick={() => {
+                if (item?.id && item?.receiverId) {
+                  deleteNotification({ id: item?.id, receiverId: item?.receiverId });
+                }
+              }}
+            >
               <Trash2 className="h-4 w-4" />
             </Button>
           </TooltipTrigger>
@@ -81,7 +126,6 @@ export function NotiDisplay() {
                   onClick={(e) => {
                     e.preventDefault();
                     handleUpdate(UpdateParentDtoStatus.rejected);
-                    // TODO: 거절 notification 보내기
                   }}
                   variant="outline"
                   size="sm"
@@ -114,9 +158,14 @@ export function NotiDisplay() {
                 <AvatarFallback>{isEgg ? "🐣" : "A"}</AvatarFallback>
               </Avatar>
               <div className="flex flex-col">
-                <div className="text-sm font-bold">
-                  {NOTIFICATION_TYPE[item.type as keyof typeof NOTIFICATION_TYPE]}
-                </div>
+                <Badge
+                  className={cn(
+                    "my-1 px-2 text-sm font-semibold",
+                    NOTIFICATION_TYPE[item.type as keyof typeof NOTIFICATION_TYPE].color,
+                  )}
+                >
+                  {NOTIFICATION_TYPE[item.type as keyof typeof NOTIFICATION_TYPE].label}
+                </Badge>
                 <NotiTitle hasLink receiverPet={receiverPet} senderPet={senderPet} />
               </div>
             </div>
@@ -138,9 +187,14 @@ export function NotiDisplay() {
           <Separator />
 
           {/* 메시지 내용 */}
-          <div className="whitespace-pre-wrap p-4 text-sm">
-            {(item?.detailJson?.message as string)?.substring(0, 300)}
-          </div>
+          {item?.detailJson?.message && (
+            <div className="whitespace-pre-wrap p-4 text-sm">
+              <span className="font-bold">
+                {item?.type !== UserNotificationDtoType.parent_request && "내가 보낸 요청 메시지"}
+              </span>
+              <div>{item?.detailJson?.message as string}</div>
+            </div>
+          )}
 
           <Link
             href={`/${isEgg ? "egg" : "pet"}/${senderPet?.eggId ?? senderPet?.petId}`}

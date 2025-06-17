@@ -1,6 +1,6 @@
 import { FormField } from "@/app/(브리더스룸)/components/Form/FormField";
 import { FORM_STEPS, OPTION_STEPS } from "@/app/(브리더스룸)/constants";
-import { useFormStore } from "@/app/(브리더스룸)/register/store/form";
+import { usePetStore } from "@/app/(브리더스룸)/register/store/pet";
 import { FieldName } from "@/app/(브리더스룸)/register/types";
 import { Button } from "@/components/ui/button";
 import { Edit3, InfoIcon } from "lucide-react";
@@ -24,15 +24,16 @@ import useParentLinkStore, { PetParentDtoWithMessage } from "../../store/parentL
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import InfoItem from "@/app/(브리더스룸)/components/Form/InfoItem";
-import { cn, formatDateToYYYYMMDD } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { format } from "date-fns";
 interface CardBackProps {
   pet: PetDto;
   from: string | null;
 }
 
 const CardBack = ({ pet, from }: CardBackProps) => {
-  const { formData, errors, setFormData, setPage } = useFormStore();
+  const { formData, errors, setFormData, setPage } = usePetStore();
   const { selectedParent, setSelectedParent } = useParentLinkStore();
 
   const [isEditing, setIsEditing] = useState(from === "egg");
@@ -131,7 +132,7 @@ const CardBack = ({ pet, from }: CardBackProps) => {
         ...(sex && { sex }),
         ...(foods && { foods }),
         ...(desc && { desc }),
-        ...(birthdate && { birthdate: formatDateToYYYYMMDD(birthdate.toString()) }),
+        ...(birthdate && { birthdate: format(birthdate, "yyyyMMdd") }),
         ...(weight && { weight: Number(weight) }),
       };
 

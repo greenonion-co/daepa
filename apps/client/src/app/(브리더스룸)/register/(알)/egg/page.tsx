@@ -1,45 +1,32 @@
 "use client";
 
 import { EGG_REGISTER_STEPS, USER_NAME } from "../../../constants";
-import {
-  CreateEggDto,
-  CreateParentDto,
-  eggControllerCreate,
-  PetSummaryDto,
-} from "@repo/api-client";
+import { CreateEggDto, eggControllerCreate } from "@repo/api-client";
 import { FormField } from "../../../components/Form/FormField";
-import { useState } from "react";
 
-import { cn, formatDateToYYYYMMDD } from "@/lib/utils";
-import { Check, InfoIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Check } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
-import { FieldName, FormErrors, FormStep } from "../../types";
+import { FormStep } from "../../types";
 import FloatingButton from "@/app/(브리더스룸)/components/FloatingButton";
-type FormData = {
-  species: null | string;
-  layingDate: string;
-  father?: CreateParentDto & { petId: string; name: string };
-  mother?: CreateParentDto & { petId: string; name: string };
-  clutch?: number;
-  clutchCount: number;
-  desc?: string;
-};
+import { useEggStore } from "../../store/egg";
+import { useRegisterForm } from "../../hooks/useRegisterForm";
+import { useEffect } from "react";
+import { useSelect } from "../../hooks/useSelect";
+import { FormData } from "../../store/pet";
+import Loading from "@/components/common/Loading";
+import { format } from "date-fns";
 
 const EggRegisterPage = () => {
   const router = useRouter();
-  const [formData, setFormData] = useState<FormData>({
-    species: null,
-    layingDate: "",
-    clutchCount: 0,
-  });
-  const [step, setStep] = useState(0);
-  const [errors, setErrors] = useState<FormErrors>({});
+  const { formData, setFormData, step, setStep, errors, setErrors, resetForm } = useEggStore();
+  const { handleSelect } = useSelect();
   const visibleSteps = EGG_REGISTER_STEPS.slice(-step - 1);
 
-  const { mutate: createEgg } = useMutation({
+  const { mutate: mutateCreateEgg, isPending } = useMutation({
     mutationFn: (data: CreateEggDto) => eggControllerCreate(data),
     onSuccess: () => {
       toast.success("알 등록이 완료되었습니다.");
@@ -55,61 +42,112 @@ const EggRegisterPage = () => {
     },
   });
 
-  const handleChange = ({
-    type,
-    value,
-  }: {
-    type: FieldName;
-    value: string | string[] | PetSummaryDto | null;
-  }) => {
-    const newFormData = { ...formData, [type]: value };
-    setFormData(newFormData);
+  useEffect(() => {
+    resetForm();
+  }, [resetForm]);
 
-    if (["layingDate", "species"].includes(type)) {
-      handleNext();
+  useEffect(() => {
+    const currentStep = EGG_REGISTER_STEPS[EGG_REGISTER_STEPS.length - step - 1];
+    if (!currentStep) return;
+
+    const { field } = currentStep;
+    if (formData[field.name]) return;
+
+    if (field.type === "select") {
+      handleSelect({
+        type: field.name,
+        value: formData[field.name],
+        handleNext,
+      });
     }
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step]);
+
+  useEffect(() => {
+    const currentStep = EGG_REGISTER_STEPS[EGG_REGISTER_STEPS.length - step - 1];
+
+    if (!currentStep) return;
+
+    const { field } = currentStep;
+
+    if (field.type === "date") {
+      // date 타입인 경우 캘린더를 열기 위한 상태 업데이트
+      const calendarButton = document.querySelector(`button[data-field-name="${field.name}"]`);
+      if (calendarButton) {
+        (calendarButton as HTMLButtonElement).click();
+      }
+    } else if (field.type === "textarea") {
+      const textareaElement = document.querySelector(
+        `textarea[name="${field.name}"]`,
+      ) as HTMLTextAreaElement;
+      if (textareaElement) {
+        textareaElement.focus();
+      }
+    } else if (["text", "number"].includes(field.type)) {
+      const inputElement = document.querySelector(
+        `input[name="${field.name}"]`,
+      ) as HTMLInputElement;
+      if (inputElement) {
+        inputElement.focus();
+      }
+    }
+  }, [step]);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
   };
 
-  const handleNext = () => {
-    // const { errors, isValid } = validateStep(formData, EGG_REGISTER_STEPS);
-    // setErrors(errors);
-    // if (!isValid) return;
+  const createEgg = (newFormData: FormData) => {
+    if (!newFormData?.father?.petId && !newFormData?.mother?.petId) {
+      toast.error("부모 개체 정보를 하나 이상 선택해주세요.");
 
-    if (step >= EGG_REGISTER_STEPS.length - 1) {
-      createEgg({
-        species: formData.species,
-        layingDate: formatDateToYYYYMMDD(formData.layingDate ?? ""),
-        ...(formData.father?.petId && {
-          father: {
-            parentId: formData.father.petId,
-            role: "father",
-            // TODO: 로그인/회원가입 후 수정
-            isMyPet: false,
-            message: formData.father?.message ?? "",
-          },
-        }),
-        ...(formData.mother?.petId && {
-          mother: {
-            parentId: formData.mother.petId,
-            role: "mother",
-            // TODO: 로그인/회원가입 후 수정
-            isMyPet: false,
-            message: formData.mother?.message ?? "",
-          },
-        }),
-        clutch: Number(formData.clutch),
-        clutchCount: Number(formData.clutchCount),
-        desc: formData.desc,
-      });
       return;
     }
 
-    setStep(step + 1);
+    try {
+      const formattedData = {
+        species: newFormData.species,
+        layingDate: format(newFormData.layingDate, "yyyyMMdd"),
+        ...(newFormData.father?.petId && {
+          father: {
+            parentId: newFormData.father.petId,
+            role: "father",
+            // TODO: 로그인/회원가입 후 수정
+            isMyPet: false,
+            message: newFormData.father?.message ?? "",
+          },
+        }),
+        ...(newFormData.mother?.petId && {
+          mother: {
+            parentId: newFormData.mother.petId,
+            role: "mother",
+            // TODO: 로그인/회원가입 후 수정
+            isMyPet: false,
+            message: newFormData.mother?.message ?? "",
+          },
+        }),
+
+        ...(newFormData.clutch && { clutch: Number(newFormData.clutch) }),
+        clutchCount: Number(newFormData.clutchCount),
+        desc: newFormData.desc,
+      };
+      mutateCreateEgg(formattedData);
+    } catch (error) {
+      console.error("Failed to create egg:", error);
+    }
   };
+
+  const { handleNext, goNext } = useRegisterForm({
+    formStep: EGG_REGISTER_STEPS,
+    formData,
+    step,
+    setErrors,
+    setStep,
+    setFormData,
+    handleSubmit: createEgg,
+  });
+
+  if (isPending) return <Loading />;
 
   return (
     <div className="relative mx-auto min-h-screen max-w-[640px] p-4 pb-20">
@@ -129,24 +167,18 @@ const EggRegisterPage = () => {
             <div key={step.field.name}>
               <FormField
                 field={step.field}
-                handleChange={handleChange}
+                handleChange={handleNext}
                 formData={formData}
                 label={step.title}
+                errors={errors}
               />
-              {errors[step.field.name] && (
-                <div className="mt-1 flex items-center gap-1">
-                  <InfoIcon className="h-4 w-4 text-red-500" />
-                  <p className="text-sm text-red-500">{errors[step.field.name]}</p>
-                </div>
-              )}
             </div>
           </div>
         ))}
 
         <FloatingButton
           label={step === EGG_REGISTER_STEPS.length - 1 ? "등록" : "다음"}
-          onClick={handleNext}
-          // disabled={!formData[visibleSteps[step].field.name]}
+          onClick={() => goNext(formData)}
         />
       </form>
     </div>

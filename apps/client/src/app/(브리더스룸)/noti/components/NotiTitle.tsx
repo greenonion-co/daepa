@@ -16,10 +16,10 @@ const NotiTitle = ({
     cn(
       "relative font-bold after:absolute after:bottom-1 after:left-0.5 after:-z-10 after:h-[70%] after:w-full after:opacity-40",
       sex === "F"
-        ? "after:bg-red-400/70"
+        ? "after:bg-red-400/60"
         : sex === "M"
-          ? "after:bg-[#247DFE]/70"
-          : "after:bg-muted-foreground/50",
+          ? "after:bg-[#247DFE]/50"
+          : "after:bg-muted-foreground/30",
     );
   return (
     <div className="flex items-center gap-2">
