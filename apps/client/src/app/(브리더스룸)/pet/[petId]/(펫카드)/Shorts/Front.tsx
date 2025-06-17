@@ -1,4 +1,4 @@
-import { PetDto } from "@repo/api-client";
+import { PetDto, PetDtoSex } from "@repo/api-client";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import Image from "next/image";
@@ -134,7 +134,7 @@ const CardFront = ({ pet, qrCodeDataUrl }: { pet: PetDto; qrCodeDataUrl?: string
                     })()}
                   {pet.birthdate ? formatDateToYYYYMMDDString(pet.birthdate, "yy.MM.dd") : "-"}
                 </div>
-                {SPECIES_KOREAN_INFO[pet.species]} / {GENDER_KOREAN_INFO[pet.sex ?? "N"]}
+                {SPECIES_KOREAN_INFO[pet.species]} / {GENDER_KOREAN_INFO[pet.sex ?? PetDtoSex.NON]}
               </div>
             </div>
             <div className="scrollbar-hide overflow-x-auto">
