@@ -17,6 +17,7 @@ import {
 } from './parent.dto';
 import { ApiResponse, ApiParam } from '@nestjs/swagger';
 import { CHILD_TYPE } from './parent.constant';
+import { CommonResponseDto } from 'src/common/response.dto';
 
 @Controller('/v1/parent')
 export class ParentController {
@@ -37,6 +38,11 @@ export class ParentController {
 
   // TODO: 본인 개체 권한 확인
   @Post('/:petId')
+  @ApiResponse({
+    status: 200,
+    description: '부모 관계가 정상적으로 생성되었습니다.',
+    type: CommonResponseDto,
+  })
   async createParent(
     @Param('petId') petId: string,
     @Body() createParentDto: CreateParentDto,
@@ -52,6 +58,11 @@ export class ParentController {
   }
 
   @Patch('/update')
+  @ApiResponse({
+    status: 200,
+    description: '부모 요청을 정상적으로 승인하였습니다.',
+    type: CommonResponseDto,
+  })
   async updateParentRequest(@Body() updateParentDto: UpdateParentDto) {
     const userId = 'ZUCOPIA';
     const { message } = await this.parentService.updateParentStatus({
@@ -70,6 +81,11 @@ export class ParentController {
     description: '부모자식 관계 ID (parents 테이블의 id)',
     type: 'number',
     required: true,
+  })
+  @ApiResponse({
+    status: 200,
+    description: '부모 관계가 정상적으로 삭제되었습니다.',
+    type: CommonResponseDto,
   })
   async deleteParent(@Param('relationId') relationId: number) {
     // TODO: 상대방한테도 알림을 줄 것 인가?
