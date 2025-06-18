@@ -1,7 +1,6 @@
 import { Bell, Bubbles, Egg, Film, Home, Inbox } from "lucide-react";
 import { FormStep, SelectorConfig } from "./register/types";
-import { FOOD } from "@/types/pet";
-import { UserNotificationDtoType } from "@repo/api-client";
+import { PetDtoSex, PetDtoSpecies, UserNotificationDtoType } from "@repo/api-client";
 
 export const USER_NAME = "낸시";
 
@@ -279,7 +278,7 @@ export const MORPH_LIST_BY_SPECIES: Record<keyof typeof SPECIES_KOREAN_INFO, str
     "100%헷초초",
   ],
   LE: ["노멀", "하리퀸", "다크", "파이어", "트라이컬러", "기타"],
-  PT: ["노멀", "하리퀸", "다크", "파이어", "트라이컬러", "기타"],
+  FT: ["노멀", "하리퀸", "다크", "파이어", "트라이컬러", "기타"],
   KN: ["노멀", "하리퀸", "다크", "파이어", "트라이컬러", "기타"],
   LC: ["노멀", "하리퀸", "다크", "파이어", "트라이컬러", "기타"],
   GG: ["노멀", "하리퀸", "다크", "파이어", "트라이컬러", "기타"],
@@ -313,16 +312,16 @@ export const TABLE_HEADER = {
   saleInfo: "판매 상태",
 };
 
-export const SPECIES_KOREAN_INFO = {
+export const SPECIES_KOREAN_INFO: Record<PetDtoSpecies, string> = {
   CR: "크레스티드 게코",
   LE: "레오파드 게코",
-  PT: "펫테일 게코",
+  FT: "펫테일 게코",
   KN: "납테일 게코",
   LC: "리키에너스",
   GG: "가고일 게코",
 };
 
-export const GENDER_KOREAN_INFO = {
+export const GENDER_KOREAN_INFO: Record<PetDtoSex, string> = {
   M: "수컷",
   F: "암컷",
   N: "미구분",
@@ -397,14 +396,14 @@ export const SIDEBAR_ITEMS = [
   // },
 ];
 
-export const FOOD_BADGE_COLORS: Record<FOOD, string> = {
+export const FOOD_BADGE_COLORS: Record<string, string> = {
   "판게아 인섹트": "bg-indigo-300",
   귀뚜라미: "bg-gray-300",
   누에: "bg-yellow-300",
   "지렙 인섹트": "bg-blue-100",
 };
 
-export const FOOD_BADGE_TEXT_COLORS: Record<FOOD, string> = {
+export const FOOD_BADGE_TEXT_COLORS: Record<string, string> = {
   "판게아 인섹트": "text-indigo-900",
   귀뚜라미: "text-gray-900",
   누에: "text-yellow-900",

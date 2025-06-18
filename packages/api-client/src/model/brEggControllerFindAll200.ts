@@ -7,6 +7,4 @@
  */
 import type { EggDto } from "./eggDto";
 
-export type BrEggControllerFindAll200 = {
-  "20250101"?: EggDto[];
-};
+export type BrEggControllerFindAll200 = { [key: string]: EggDto[] };

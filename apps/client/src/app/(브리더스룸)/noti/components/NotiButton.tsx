@@ -42,11 +42,11 @@ const NotiButton = () => {
   });
 
   const unreadCount =
-    notifications?.filter((n) => n.status === UserNotificationDtoStatus.unread).length || 0;
+    notifications?.filter((n) => n.status === UserNotificationDtoStatus.UNREAD).length || 0;
   const hasNotification = unreadCount > 0;
 
   const recentNotifications = notifications
-    ?.filter((n) => n.status === UserNotificationDtoStatus.unread)
+    ?.filter((n) => n.status === UserNotificationDtoStatus.UNREAD)
     .slice(0, 4)
     .map((n) => ({
       title: NOTIFICATION_TYPE[n.type as keyof typeof NOTIFICATION_TYPE].label,

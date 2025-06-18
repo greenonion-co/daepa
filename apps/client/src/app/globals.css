@@ -104,6 +104,8 @@ body {
   --sidebar-accent-foreground: oklch(0.21 0.006 285.885);
   --sidebar-border: oklch(0.92 0.004 286.32);
   --sidebar-ring: oklch(0.705 0.015 286.067);
+  --color-hatched: oklch(44.6% 0.043 257.281); /* 해칭된 알 색상 */
+  --color-notHatched: oklch(86.9% 0.022 252.894); /* 해칭되지 않은 알 색상 */
 }
 
 .dark {

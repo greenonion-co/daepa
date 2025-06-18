@@ -1,19 +1,20 @@
 import { cn } from "@/lib/utils";
 import {
+  EggDto,
+  PetDto,
+  PetSummaryDto,
   UpdateUserNotificationDto,
   userNotificationControllerFindAll,
   userNotificationControllerUpdate,
-  UserNotificationDto,
   UserNotificationDtoStatus,
 } from "@repo/api-client";
 import { formatDistanceToNow } from "date-fns";
-import { useNotiStore } from "../store/noti";
+import { NotificationDetail, useNotiStore } from "../store/noti";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ko } from "date-fns/locale";
 import { NOTIFICATION_TYPE } from "@/app/(브리더스룸)/constants";
 import Loading from "@/components/common/Loading";
 import NotiTitle from "./NotiTitle";
-import { PetSummaryDto } from "@/types/pet";
 import { useInfiniteQuery, useMutation } from "@tanstack/react-query";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useInView } from "react-intersection-observer";
@@ -21,7 +22,7 @@ import { Badge } from "@/components/ui/badge";
 import { useRouter, useSearchParams } from "next/navigation";
 
 const NotiList = ({ tab }: { tab: "all" | "unread" }) => {
-  const [items, setItems] = useState<UserNotificationDto[]>([]);
+  const [items, setItems] = useState<NotificationDetail[]>([]);
   const selectedRef = useRef<HTMLButtonElement>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -53,7 +54,7 @@ const NotiList = ({ tab }: { tab: "all" | "unread" }) => {
       // 낙관적 업데이트
       setItems((prev) =>
         prev.map((item) =>
-          item.id === newData.id ? { ...item, status: UserNotificationDtoStatus.read } : item,
+          item.id === newData.id ? { ...item, status: UserNotificationDtoStatus.READ } : item,
         ),
       );
     },
@@ -64,14 +65,14 @@ const NotiList = ({ tab }: { tab: "all" | "unread" }) => {
   });
 
   const handleItemClick = useCallback(
-    (item: UserNotificationDto) => {
+    (item: NotificationDetail) => {
       if (item.id) {
         router.push(`/noti?id=${item.id}`);
       }
       setSelected(item);
 
-      if (item.status === UserNotificationDtoStatus.unread) {
-        updateNotification({ id: item.id, status: UserNotificationDtoStatus.read });
+      if (item.status === UserNotificationDtoStatus.UNREAD) {
+        updateNotification({ id: item.id, status: UserNotificationDtoStatus.READ });
       }
     },
     [router, setSelected, updateNotification],
@@ -99,12 +100,12 @@ const NotiList = ({ tab }: { tab: "all" | "unread" }) => {
   useEffect(() => {
     if (!data?.pages) return;
     if (tab === "all") {
-      setItems(data?.pages.flatMap((page) => page.data.data) ?? []);
+      setItems(data?.pages.flatMap((page) => page.data.data as NotificationDetail[]) ?? []);
     } else {
       setItems(
         data?.pages
-          .flatMap((page) => page.data.data)
-          ?.filter((item) => item.status === UserNotificationDtoStatus.unread) ?? [],
+          .flatMap((page) => page.data.data as NotificationDetail[])
+          ?.filter((item) => item.status === UserNotificationDtoStatus.UNREAD) ?? [],
       );
     }
   }, [data?.pages, tab]);
@@ -150,7 +151,7 @@ const NotiList = ({ tab }: { tab: "all" | "unread" }) => {
                     >
                       {NOTIFICATION_TYPE[item.type as keyof typeof NOTIFICATION_TYPE].label}
                     </Badge>
-                    {item.status === UserNotificationDtoStatus.unread && (
+                    {item.status === UserNotificationDtoStatus.UNREAD && (
                       <span className="flex h-2 w-2 rounded-full bg-red-500" />
                     )}
                   </div>
@@ -167,8 +168,8 @@ const NotiList = ({ tab }: { tab: "all" | "unread" }) => {
                   </div>
                 </div>
                 <NotiTitle
-                  receiverPet={item?.detailJson?.receiverPet as PetSummaryDto}
-                  senderPet={item?.detailJson?.senderPet as PetSummaryDto}
+                  receiverPet={item?.detailJson?.receiverPet as PetDto | PetSummaryDto | EggDto}
+                  senderPet={item?.detailJson?.senderPet as PetDto | PetSummaryDto | EggDto}
                 />
               </div>
               <div className="text-muted-foreground line-clamp-2 text-xs">

@@ -21,7 +21,6 @@ import {
 import { SearchFilter } from "./SearchFilter";
 import useTableStore from "../store/table";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
 import Add from "@mui/icons-material/Add";
 import { PetDto } from "@repo/api-client";
 import Loading from "@/components/common/Loading";
@@ -114,7 +113,10 @@ export const DataTable = ({
                       key={row.id}
                       data-state={row.getIsSelected() && "selected"}
                       // TODO: 공개 여부 필드 추가 후 조건 수정 예정
-                      className={cn("cursor-pointer", row.original.isPublic ? "bg-blue-100" : "")}
+                      className={cn(
+                        "cursor-pointer",
+                        "isPublic" in row.original && row.original.isPublic ? "bg-blue-100" : "",
+                      )}
                       onClick={(e) => handleRowClick({ e, id: row.original.petId })}
                     >
                       {row.getVisibleCells().map((cell) => (
@@ -153,9 +155,9 @@ export const DataTable = ({
 
       <Link
         href="/register/1"
-        className="fixed bottom-6 right-6 h-14 w-14 rounded-full bg-blue-500 shadow-lg hover:bg-blue-600"
+        className="fixed bottom-6 right-6 flex h-14 w-14 items-center justify-center rounded-full bg-blue-500 shadow-lg hover:bg-blue-600"
       >
-        <Add fontSize="large" />
+        <Add fontSize="large" className="text-white" />
       </Link>
     </div>
   );

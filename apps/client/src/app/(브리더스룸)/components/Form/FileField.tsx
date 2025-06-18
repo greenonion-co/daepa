@@ -9,7 +9,7 @@ const FileField = () => {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (files.length > 0) {
-      const newPhotos = [...((formData.photo as string[]) || [])];
+      const newPhotos = [...((formData.photos as string[]) || [])];
       const promises = files.map((file) => {
         return new Promise<string>((resolve) => {
           const reader = new FileReader();
@@ -22,15 +22,15 @@ const FileField = () => {
 
       Promise.all(promises).then((results) => {
         const updatedPhotos = [...newPhotos, ...results].slice(0, 3);
-        setFormData({ ...formData, photo: updatedPhotos });
+        setFormData({ ...formData, photos: updatedPhotos });
       });
     }
   };
 
   const handleDelete = (index: number) => {
-    const updatedPhotos = [...(formData.photo as string[])];
+    const updatedPhotos = [...(formData.photos as string[])];
     updatedPhotos.splice(index, 1);
-    setFormData({ ...formData, photo: updatedPhotos });
+    setFormData({ ...formData, photos: updatedPhotos });
   };
 
   return (
@@ -44,8 +44,8 @@ const FileField = () => {
         multiple
         onChange={handleFileChange}
       />
-      {formData.photo && (formData.photo as string[]).length > 0 ? (
-        <PhotoViewer photos={formData.photo as string[]} onDelete={handleDelete} />
+      {formData.photos && (formData.photos as string[]).length > 0 ? (
+        <PhotoViewer photos={formData.photos as string[]} onDelete={handleDelete} />
       ) : (
         <label
           htmlFor="photo-upload"

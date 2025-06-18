@@ -1,7 +1,11 @@
 import { ParentStatus, PetDto } from "@repo/api-client";
 import { create } from "zustand";
 
-export type PetParentDtoWithMessage = PetDto & { message: string; status?: ParentStatus };
+export type PetParentDtoWithMessage = PetDto & {
+  message: string;
+  status?: ParentStatus;
+  isMyPet?: boolean;
+};
 interface ParentState {
   selectedParent: PetParentDtoWithMessage | null;
   setSelectedParent: (parent: PetParentDtoWithMessage | null) => void;

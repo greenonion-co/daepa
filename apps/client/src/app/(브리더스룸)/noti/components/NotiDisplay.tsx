@@ -12,7 +12,6 @@ import { useNotiStore } from "../store/noti";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   parentControllerUpdateParentRequest,
-  PetSummaryDto,
   UpdateParentDto,
   UpdateParentDtoStatus,
   userNotificationControllerDelete,
@@ -23,7 +22,6 @@ import Link from "next/link";
 import { toast } from "sonner";
 import { NOTIFICATION_TYPE } from "../../constants";
 import { Badge } from "@/components/ui/badge";
-import { AxiosError, AxiosResponse } from "axios";
 import NotiTitle from "./NotiTitle";
 import { cn, formatDateToYYYYMMDDString } from "@/lib/utils";
 import { useRouter } from "next/navigation";
@@ -32,22 +30,19 @@ export function NotiDisplay() {
   const router = useRouter();
   const { selected: item, setSelected } = useNotiStore();
   const queryClient = useQueryClient();
-  const receiverPet = item?.detailJson?.receiverPet as PetSummaryDto;
-  const senderPet = item?.detailJson?.senderPet as PetSummaryDto;
-  const isEgg = senderPet?.eggId;
+  const receiverPet = item?.detailJson?.receiverPet;
+  const senderPet = item?.detailJson?.senderPet;
+  const isEgg = senderPet && "eggId" in senderPet;
+  const isPet = senderPet && "petId" in senderPet;
 
-  const { mutate: updateParentStatus } = useMutation<
-    AxiosResponse<{ success: boolean; message: string }>,
-    AxiosError,
-    UpdateParentDto
-  >({
+  const { mutate: updateParentStatus } = useMutation({
     mutationFn: ({ relationId, status, opponentId }: UpdateParentDto) =>
       parentControllerUpdateParentRequest({ relationId, status, opponentId }),
     onSuccess: (res, variables) => {
       if (res?.data?.success) {
         toast.success(
           res?.data?.message ??
-            `부모 연동이 ${variables.status === UpdateParentDtoStatus.approved ? "수락" : variables.status === UpdateParentDtoStatus.cancelled ? "취소" : "거절"} 되었습니다.`,
+            `부모 연동이 ${variables.status === UpdateParentDtoStatus.APPROVED ? "수락" : variables.status === UpdateParentDtoStatus.CANCELLED ? "취소" : "거절"} 되었습니다.`,
         );
         queryClient.invalidateQueries({ queryKey: [userNotificationControllerFindAll.name] });
 
@@ -55,9 +50,9 @@ export function NotiDisplay() {
           setSelected({
             ...item,
             type:
-              variables.status === UpdateParentDtoStatus.approved
-                ? UserNotificationDtoType.parent_accept
-                : UserNotificationDtoType.parent_reject,
+              variables.status === UpdateParentDtoStatus.APPROVED
+                ? UserNotificationDtoType.PARENT_ACCEPT
+                : UserNotificationDtoType.PARENT_REJECT,
           });
         }
       }
@@ -67,11 +62,7 @@ export function NotiDisplay() {
     },
   });
 
-  const { mutate: deleteNotification } = useMutation<
-    AxiosResponse<{ success: boolean; message: string }>,
-    AxiosError,
-    { id: number; receiverId: string }
-  >({
+  const { mutate: deleteNotification } = useMutation({
     mutationFn: ({ id, receiverId }: { id: number; receiverId: string }) =>
       userNotificationControllerDelete({ id, receiverId }),
     onSuccess: (res) => {
@@ -118,14 +109,14 @@ export function NotiDisplay() {
           <TooltipContent>삭제</TooltipContent>
         </Tooltip>
 
-        {item?.type === UserNotificationDtoType.parent_request && (
+        {item?.type === UserNotificationDtoType.PARENT_REQUEST && (
           <form>
             <div className="grid gap-4">
               <div className="flex items-center gap-2">
                 <Button
                   onClick={(e) => {
                     e.preventDefault();
-                    handleUpdate(UpdateParentDtoStatus.rejected);
+                    handleUpdate(UpdateParentDtoStatus.REJECTED);
                   }}
                   variant="outline"
                   size="sm"
@@ -136,7 +127,7 @@ export function NotiDisplay() {
                 <Button
                   onClick={(e) => {
                     e.preventDefault();
-                    handleUpdate(UpdateParentDtoStatus.approved);
+                    handleUpdate(UpdateParentDtoStatus.APPROVED);
                   }}
                   size="sm"
                   className="ml-auto"
@@ -186,25 +177,26 @@ export function NotiDisplay() {
           </div>
           <Separator />
 
-          {/* 메시지 내용 */}
-          {item?.detailJson?.message && (
-            <div className="whitespace-pre-wrap p-4 text-sm">
-              <span className="font-bold">
-                {item?.type !== UserNotificationDtoType.parent_request && "내가 보낸 요청 메시지"}
-              </span>
-              <div>{item?.detailJson?.message as string}</div>
-            </div>
-          )}
+          <div className="whitespace-pre-wrap p-4 text-sm">
+            <span className="font-bold">
+              {item?.type !== UserNotificationDtoType.PARENT_REQUEST && "내가 보낸 요청 메시지"}
+            </span>
+            <div>{String(item?.detailJson?.message)}</div>
+          </div>
 
           <Link
-            href={`/${isEgg ? "egg" : "pet"}/${senderPet?.eggId ?? senderPet?.petId}`}
+            href={`/${isEgg ? "egg" : "pet"}/${isEgg ? senderPet?.eggId : senderPet?.petId}`}
             className="group mx-4 mt-4 flex flex-col rounded-lg border p-3 shadow-sm transition-all duration-200 hover:scale-[1.02] hover:shadow-md"
           >
             <div className="flex flex-col gap-3">
-              {senderPet?.photo ? (
+              {senderPet && "photos" in senderPet && senderPet?.photos ? (
                 <div className="relative h-48 w-full overflow-hidden rounded-lg">
                   <Image
-                    src={senderPet?.photo ?? "/default-pet-image.png"}
+                    src={
+                      "photos" in senderPet && Array.isArray(senderPet.photos)
+                        ? (senderPet.photos[0] ?? "/default-pet-image.png")
+                        : "/default-pet-image.png"
+                    }
                     alt={senderPet?.name ?? "펫 이미지"}
                     fill
                     className="object-cover"
@@ -226,30 +218,36 @@ export function NotiDisplay() {
                   <ArrowUpRight className="text-muted-foreground h-5 w-5 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
                 </div>
                 <div className="flex gap-1">
-                  {senderPet?.morphs?.map((morph) => (
-                    <Badge
-                      key={morph}
-                      className="whitespace-nowrap bg-yellow-500/80 font-bold text-black backdrop-blur-sm"
-                    >
-                      {morph}
-                    </Badge>
-                  ))}
-                  {senderPet?.traits?.map((trait) => (
-                    <Badge
-                      variant="outline"
-                      key={trait}
-                      className="whitespace-nowrap bg-white font-bold text-black backdrop-blur-sm"
-                    >
-                      {trait}
-                    </Badge>
-                  ))}
+                  {isPet &&
+                    senderPet?.morphs?.map((morph) => (
+                      <Badge
+                        key={morph}
+                        className="whitespace-nowrap bg-yellow-500/80 font-bold text-black backdrop-blur-sm"
+                      >
+                        {morph}
+                      </Badge>
+                    ))}
+                  {isPet &&
+                    senderPet?.traits?.map((trait) => (
+                      <Badge
+                        variant="outline"
+                        key={trait}
+                        className="whitespace-nowrap bg-white font-bold text-black backdrop-blur-sm"
+                      >
+                        {trait}
+                      </Badge>
+                    ))}
                   <span className="text-muted-foreground text-xs">
-                    {senderPet?.layingDate && formatDateToYYYYMMDDString(senderPet?.layingDate)}
-                    {senderPet?.clutch && `◦ ${senderPet?.clutch}개`}
-                    {senderPet?.clutchOrder && `◦ ${senderPet?.clutchOrder}번째`}
+                    {isEgg &&
+                      senderPet?.layingDate &&
+                      formatDateToYYYYMMDDString(senderPet?.layingDate)}
+                    {isEgg && senderPet?.clutch && `◦ ${senderPet?.clutch}개`}
+                    {isEgg && senderPet?.clutchOrder && `◦ ${senderPet?.clutchOrder}번째`}
                   </span>
                 </div>
-                {senderPet?.desc && <div className="mt-2 text-sm">{senderPet?.desc}</div>}
+                {senderPet && "desc" in senderPet && senderPet?.desc && (
+                  <div className="mt-2 text-sm">{senderPet?.desc}</div>
+                )}
               </div>
             </div>
           </Link>

@@ -3,6 +3,8 @@
 import BottomSheet from "@/components/common/BottomSheet";
 import { GENDER_KOREAN_INFO, SPECIES_KOREAN_INFO } from "../../constants";
 import { useEffect, useState } from "react";
+import { PetDtoSpecies } from "@repo/api-client";
+import { PetDtoSex } from "@repo/api-client";
 
 interface SelectorProps {
   isOpen: boolean;
@@ -36,9 +38,9 @@ const SelectButton = ({
     onClick={onClick}
   >
     {type === "sex"
-      ? GENDER_KOREAN_INFO[item as keyof typeof GENDER_KOREAN_INFO]
+      ? GENDER_KOREAN_INFO[item as PetDtoSex]
       : type === "species"
-        ? SPECIES_KOREAN_INFO[item as keyof typeof SPECIES_KOREAN_INFO]
+        ? SPECIES_KOREAN_INFO[item as PetDtoSpecies]
         : item}
   </button>
 );
@@ -72,7 +74,9 @@ export default function Selector({
           break;
         case "Enter":
           e.preventDefault();
-          onSelectAction(selectList[selectedIndex]);
+          if (selectList[selectedIndex]) {
+            onSelectAction(selectList[selectedIndex]);
+          }
           break;
       }
     };

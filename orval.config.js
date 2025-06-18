@@ -11,7 +11,6 @@ module.exports = {
         mutator: {
           path: "./src/api/mutator/use-custom-instance.ts",
           name: "useCustomInstance",
-          extension: ".ts",
         },
       },
     },

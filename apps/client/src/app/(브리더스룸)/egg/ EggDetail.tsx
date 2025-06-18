@@ -8,7 +8,9 @@ import {
   EggDto,
   parentControllerCreateParent,
   parentControllerDeleteParent,
-  PetParentDto,
+  ParentDtoRole,
+  ParentDtoStatus,
+  PetDtoSex,
 } from "@repo/api-client";
 import ParentLink from "../pet/components/ParentLink";
 import { Label } from "@/components/ui/label";
@@ -22,7 +24,7 @@ import { toast } from "sonner";
 import { overlay } from "overlay-kit";
 import Dialog from "../components/Form/Dialog";
 import { EGG_EDIT_STEPS } from "../constants";
-import useParentLinkStore from "../pet/store/parentLink";
+import useParentLinkStore, { PetParentDtoWithMessage } from "../pet/store/parentLink";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -91,7 +93,10 @@ const EggDetail = ({ egg }: EggDetailProps) => {
       }),
     onSuccess: () => {
       toast.success("부모 연동 요청이 완료되었습니다.");
-      const role = selectedParent?.sex?.toString() === "M" ? "father" : "mother";
+      const role =
+        selectedParent?.sex?.toString() === PetDtoSex.MALE
+          ? ParentDtoRole.FATHER
+          : ParentDtoRole.MOTHER;
       setFormData((prev) => ({ ...prev, [role]: selectedParent }));
       setSelectedParent(null);
     },
@@ -101,7 +106,7 @@ const EggDetail = ({ egg }: EggDetailProps) => {
     },
   });
 
-  const handleChange = (value: { type; value }) => {
+  const handleChange = (value: { type: string; value: string }) => {
     if (!isEditing) return;
     setFormData((prev) => ({ ...prev, [value.type]: value.value }));
   };
@@ -128,16 +133,13 @@ const EggDetail = ({ egg }: EggDetailProps) => {
     }
   };
 
-  const handleParentSelect = (
-    role: "father" | "mother",
-    value: PetParentDto & { message: string },
-  ) => {
+  const handleParentSelect = (role: ParentDtoRole, value: PetParentDtoWithMessage) => {
     try {
       const isMyPet = value.owner.userId === egg.owner.userId;
       setSelectedParent({
         ...value,
         isMyPet,
-        status: isMyPet ? "approved" : "pending",
+        status: isMyPet ? ParentDtoStatus.APPROVED : ParentDtoStatus.PENDING,
       });
 
       // 부모 연동 요청
@@ -177,7 +179,7 @@ const EggDetail = ({ egg }: EggDetailProps) => {
     ));
   };
 
-  const handleUnlink = (label: "father" | "mother") => {
+  const handleUnlink = (label: ParentDtoRole) => {
     try {
       if (!formData[label]?.relationId) return;
       mutateDeleteParent({ relationId: formData[label]?.relationId });
@@ -270,15 +272,15 @@ const EggDetail = ({ egg }: EggDetailProps) => {
               <ParentLink
                 label="부"
                 data={formData.father}
-                onSelect={(item) => handleParentSelect("father", item)}
-                onUnlink={() => handleUnlink("father")}
+                onSelect={(item) => handleParentSelect(ParentDtoRole.FATHER, item)}
+                onUnlink={() => handleUnlink(ParentDtoRole.FATHER)}
                 currentPetOwnerId={egg.owner.userId}
               />
               <ParentLink
                 label="모"
                 data={formData.mother}
-                onSelect={(item) => handleParentSelect("mother", item)}
-                onUnlink={() => handleUnlink("mother")}
+                onSelect={(item) => handleParentSelect(ParentDtoRole.MOTHER, item)}
+                onUnlink={() => handleUnlink(ParentDtoRole.MOTHER)}
                 currentPetOwnerId={egg.owner.userId}
               />
             </div>
