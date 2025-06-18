@@ -228,10 +228,7 @@ export const authControllerGoogleLogin = () => {
 };
 
 export const authControllerRefreshToken = () => {
-  return useCustomInstance<string>({
-    url: `http://localhost:4000/api/auth/refresh`,
-    method: "GET",
-  });
+  return useCustomInstance<void>({ url: `http://localhost:4000/api/auth/refresh`, method: "GET" });
 };
 
 export type PetControllerFindAllResult = NonNullable<
@@ -1109,8 +1106,6 @@ export const getBrEggControllerFindAllResponseMock = (): BrEggControllerFindAll2
   })),
 });
 
-export const getAuthControllerRefreshTokenResponseMock = (): string => faker.word.sample();
-
 export const getPetControllerFindAllMockHandler = (
   overrideResponse?:
     | PetControllerFindAll200
@@ -1586,22 +1581,15 @@ export const getAuthControllerGoogleLoginMockHandler = (
 
 export const getAuthControllerRefreshTokenMockHandler = (
   overrideResponse?:
-    | string
-    | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<string> | string),
+    | void
+    | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<void> | void),
 ) => {
   return http.get("*/api/auth/refresh", async (info) => {
     await delay(1000);
-
-    return new HttpResponse(
-      JSON.stringify(
-        overrideResponse !== undefined
-          ? typeof overrideResponse === "function"
-            ? await overrideResponse(info)
-            : overrideResponse
-          : getAuthControllerRefreshTokenResponseMock(),
-      ),
-      { status: 200, headers: { "Content-Type": "application/json" } },
-    );
+    if (typeof overrideResponse === "function") {
+      await overrideResponse(info);
+    }
+    return new HttpResponse(null, { status: 200 });
   });
 };
 export const getProjectDaepaAPIMock = () => [

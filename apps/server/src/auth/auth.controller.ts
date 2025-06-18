@@ -76,7 +76,6 @@ export class AuthController {
   @ApiResponse({
     status: 200,
     description: 'refresh token 재발급 성공',
-    type: String,
   })
   async refreshToken(@Req() req: Request, @Res() res: Response) {
     const refreshToken = req.cookies.refreshToken;
