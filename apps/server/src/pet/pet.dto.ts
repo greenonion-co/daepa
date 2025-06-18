@@ -198,8 +198,10 @@ export class PetParentDto extends PartialType(PetSummaryDto) {
 
   @ApiProperty({
     description: '부모 관계 상태',
+    enum: PARENT_STATUS,
+    'x-enumNames': Object.keys(PARENT_STATUS),
   })
-  @IsString()
+  @IsEnum(PARENT_STATUS)
   status: PARENT_STATUS;
 }
 

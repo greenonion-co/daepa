@@ -8,6 +8,7 @@
 import type { UserDto } from "./userDto";
 import type { PetParentDtoSpecies } from "./petParentDtoSpecies";
 import type { PetParentDtoSex } from "./petParentDtoSex";
+import type { PetParentDtoStatus } from "./petParentDtoStatus";
 
 export interface PetParentDto {
   /** 펫 아이디 */
@@ -27,5 +28,5 @@ export interface PetParentDto {
   /** 부모 관계 테이블 row id */
   relationId: number;
   /** 부모 관계 상태 */
-  status: string;
+  status: PetParentDtoStatus;
 }
