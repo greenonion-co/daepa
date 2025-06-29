@@ -43,33 +43,29 @@ export class AuthService {
     };
   }
 
-  async getJwtToken(userId: string) {
-    const accessToken = this.createJwtAccessToken(userId);
-    const refreshToken = await this.createJwtRefreshToken(userId);
-    return { accessToken, refreshToken };
-  }
-
   createJwtAccessToken(userId: string) {
     const accessToken = this.jwtService.sign({
       sub: userId,
+      status: 'authenticated',
     });
     return accessToken;
   }
 
   async createJwtRefreshToken(userId: string) {
     const refreshToken = this.jwtService.sign(
-      { sub: userId },
+      {
+        sub: userId,
+        status: 'authenticated',
+      },
       {
         expiresIn: '180d',
         secret: process.env.JWT_REFRESH_SECRET ?? '',
       },
     );
 
-    const hashedRefreshToken = await this.updateUserRefreshToken(
-      userId,
-      refreshToken,
-    );
-    return hashedRefreshToken;
+    await this.updateUserRefreshToken(userId, refreshToken);
+
+    return refreshToken;
   }
 
   async refresh(refreshToken: string) {
@@ -81,6 +77,7 @@ export class AuthService {
       const user = await this.userService.findOne({
         user_id: tokenPayload.sub,
       });
+
       if (!user) {
         throw new UnauthorizedException('사용자를 찾을 수 없습니다.');
       }
@@ -89,6 +86,7 @@ export class AuthService {
         refreshToken,
         user.refreshToken ?? '',
       );
+
       if (!isRefreshTokenValid) {
         throw new UnauthorizedException('유효하지 않은 refresh token입니다.');
       }
@@ -130,7 +128,7 @@ export class AuthService {
   async updateUserRefreshToken(
     userId: string,
     refreshToken: string,
-  ): Promise<string> {
+  ): Promise<void> {
     const user = await this.userService.findOne({ user_id: userId });
     if (!user) {
       throw new Error('User not found');
@@ -160,7 +158,5 @@ export class AuthService {
       refreshToken: hashedRefreshToken,
       refreshTokenExpiresAt: expiresAt,
     });
-
-    return hashedRefreshToken;
   }
 }
