@@ -6,6 +6,7 @@ export type JwtPayload = {
   sub: string;
   iat?: number;
   exp?: number;
+  status: 'authenticated' | 'anonymous'; // TODO: 비로그인 사용자 세션 관리 시 사용
 };
 
 @Injectable()

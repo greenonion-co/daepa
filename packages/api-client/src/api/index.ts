@@ -35,6 +35,7 @@ import type {
   ParentDto,
   PetControllerFindAll200,
   PetDto,
+  TokenResponseDto,
   UserNotificationControllerFindAll200,
 } from "../model";
 
@@ -227,8 +228,11 @@ export const authControllerGoogleLogin = () => {
   });
 };
 
-export const authControllerRefreshToken = () => {
-  return useCustomInstance<void>({ url: `http://localhost:4000/api/auth/refresh`, method: "GET" });
+export const authControllerGetToken = () => {
+  return useCustomInstance<TokenResponseDto>({
+    url: `http://localhost:4000/api/auth/token`,
+    method: "GET",
+  });
 };
 
 export type PetControllerFindAllResult = NonNullable<
@@ -297,8 +301,8 @@ export type AuthControllerKakaoLoginResult = NonNullable<
 export type AuthControllerGoogleLoginResult = NonNullable<
   Awaited<ReturnType<typeof authControllerGoogleLogin>>
 >;
-export type AuthControllerRefreshTokenResult = NonNullable<
-  Awaited<ReturnType<typeof authControllerRefreshToken>>
+export type AuthControllerGetTokenResult = NonNullable<
+  Awaited<ReturnType<typeof authControllerGetToken>>
 >;
 
 export const getPetControllerFindAllResponseMock = (
@@ -1154,6 +1158,15 @@ export const getBrEggControllerFindAllResponseMock = (): BrEggControllerFindAll2
   })),
 });
 
+export const getAuthControllerGetTokenResponseMock = (
+  overrideResponse: Partial<TokenResponseDto> = {},
+): TokenResponseDto => ({
+  success: faker.datatype.boolean(),
+  message: faker.string.alpha(20),
+  token: faker.string.alpha(20),
+  ...overrideResponse,
+});
+
 export const getPetControllerFindAllMockHandler = (
   overrideResponse?:
     | PetControllerFindAll200
@@ -1627,17 +1640,26 @@ export const getAuthControllerGoogleLoginMockHandler = (
   });
 };
 
-export const getAuthControllerRefreshTokenMockHandler = (
+export const getAuthControllerGetTokenMockHandler = (
   overrideResponse?:
-    | void
-    | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<void> | void),
+    | TokenResponseDto
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<TokenResponseDto> | TokenResponseDto),
 ) => {
-  return http.get("*/api/auth/refresh", async (info) => {
+  return http.get("*/api/auth/token", async (info) => {
     await delay(1000);
-    if (typeof overrideResponse === "function") {
-      await overrideResponse(info);
-    }
-    return new HttpResponse(null, { status: 200 });
+
+    return new HttpResponse(
+      JSON.stringify(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getAuthControllerGetTokenResponseMock(),
+      ),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
   });
 };
 export const getProjectDaepaAPIMock = () => [
@@ -1663,5 +1685,5 @@ export const getProjectDaepaAPIMock = () => [
   getBrEggControllerFindAllMockHandler(),
   getAuthControllerKakaoLoginMockHandler(),
   getAuthControllerGoogleLoginMockHandler(),
-  getAuthControllerRefreshTokenMockHandler(),
+  getAuthControllerGetTokenMockHandler(),
 ];

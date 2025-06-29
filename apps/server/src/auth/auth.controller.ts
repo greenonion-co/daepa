@@ -12,6 +12,7 @@ import { AuthService, ValidatedUser } from './auth.service';
 import { ApiResponse } from '@nestjs/swagger';
 import { UserDto } from 'src/user/user.dto';
 import { OAuthAuthenticatedUser } from './auth.decorator';
+import { TokenResponseDto } from './auth.dto';
 
 @Controller('/auth')
 export class AuthController {
@@ -32,7 +33,7 @@ export class AuthController {
       throw new UnauthorizedException('로그인 실패');
     }
 
-    const { accessToken, refreshToken } = await this.authService.getJwtToken(
+    const refreshToken = await this.authService.createJwtRefreshToken(
       validatedUser.userId,
     );
 
@@ -58,7 +59,7 @@ export class AuthController {
       throw new UnauthorizedException('로그인 실패');
     }
 
-    const { accessToken, refreshToken } = await this.authService.getJwtToken(
+    const refreshToken = await this.authService.createJwtRefreshToken(
       validatedUser.userId,
     );
 
@@ -74,13 +75,18 @@ export class AuthController {
     );
   }
 
-  @Get('refresh')
+  @Get('token')
   @ApiResponse({
     status: 200,
-    description: 'refresh token 재발급 성공',
+    description: 'token 발급 성공',
+    type: TokenResponseDto,
   })
-  async refreshToken(@Req() req: Request, @Res() res: Response) {
+  async getToken(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     const refreshToken = req.cookies.refreshToken;
+
     if (!refreshToken || typeof refreshToken !== 'string') {
       throw new UnauthorizedException('Refresh token이 유효하지 않습니다.');
     }
