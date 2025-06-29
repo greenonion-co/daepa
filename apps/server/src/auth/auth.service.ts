@@ -8,7 +8,7 @@ import { JwtPayload } from './strategies/jwt.strategy';
 
 export type ValidatedUser = {
   userId: string;
-  isNew?: boolean;
+  status: USER_STATUS;
 };
 
 @Injectable()
@@ -33,12 +33,13 @@ export class AuthService {
       );
       return {
         userId: userCreated.userId,
-        isNew: true,
+        status: userCreated.status,
       };
     }
 
     return {
       userId: userFound.userId,
+      status: userFound.status,
     };
   }
 

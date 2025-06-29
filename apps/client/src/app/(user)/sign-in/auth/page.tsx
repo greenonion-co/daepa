@@ -1,6 +1,7 @@
 "use client";
 
 import LoadingScreen from "@/app/loading";
+import { UserDtoStatus } from "@repo/api-client";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 import { toast } from "sonner";
@@ -8,17 +9,22 @@ import { toast } from "sonner";
 const AuthPage = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const token = searchParams.get("token");
+  const userStatus = searchParams.get("status");
 
   useEffect(() => {
-    if (token) {
-      localStorage.setItem("accessToken", token);
-      router.replace("/pet");
+    if (userStatus) {
+      // localStorage.setItem("accessToken", token);
+      if (userStatus === UserDtoStatus.PENDING) {
+        router.replace("/sign-in/register");
+      }
+      if (userStatus === UserDtoStatus.ACTIVE) {
+        router.replace("/pet");
+      }
     } else {
       router.replace("/sign-in");
       toast.error("로그인에 실패했습니다.");
     }
-  }, [token, router]);
+  }, [userStatus, router]);
 
   return <LoadingScreen />;
 };

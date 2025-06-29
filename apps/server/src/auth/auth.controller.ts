@@ -43,8 +43,9 @@ export class AuthController {
       maxAge: 180 * 24 * 60 * 60 * 1000, // 180일
     });
 
-    const queryParams = `?token=${encodeURIComponent(accessToken)}${validatedUser.isNew ? '&isNew=true' : ''}`;
-    return res.redirect(`http://localhost:3000/sign-in/auth${queryParams}`);
+    return res.redirect(
+      `http://localhost:3000/sign-in/auth?status=${validatedUser.status}`,
+    );
   }
 
   @Get('sign-in/google')
@@ -68,8 +69,9 @@ export class AuthController {
       maxAge: 180 * 24 * 60 * 60 * 1000, // 180일
     });
 
-    const queryParams = `?token=${encodeURIComponent(accessToken)}${validatedUser.isNew ? '&isNew=true' : ''}`;
-    return res.redirect(`http://localhost:3000/sign-in/auth${queryParams}`);
+    return res.redirect(
+      `http://localhost:3000/sign-in/auth?status=${validatedUser.status}`,
+    );
   }
 
   @Get('refresh')
