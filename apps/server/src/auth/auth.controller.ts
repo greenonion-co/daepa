@@ -5,6 +5,7 @@ import {
   Res,
   UnauthorizedException,
   UseGuards,
+  Post,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { AuthGuard } from '@nestjs/passport';
@@ -105,6 +106,33 @@ export class AuthController {
 
     return {
       token: newAccessToken,
+    };
+  }
+
+  @Post('sign-out')
+  @ApiResponse({
+    status: 200,
+    description: '로그아웃 성공',
+  })
+  async signOut(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const refreshToken = req.cookies.refreshToken;
+
+    if (refreshToken && typeof refreshToken === 'string') {
+      await this.authService.invalidateRefreshToken(refreshToken);
+    }
+
+    res.clearCookie('refreshToken', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+    });
+
+    return {
+      success: true,
+      message: '로그아웃되었습니다.',
     };
   }
 }

@@ -43,14 +43,14 @@ class UserBaseDto {
   })
   @IsString()
   @IsOptional()
-  refreshToken?: string;
+  refreshToken?: string | null;
 
   @ApiProperty({
     description: 'refresh token 만료 시간',
   })
   @IsDate()
   @IsOptional()
-  refreshTokenExpiresAt?: Date;
+  refreshTokenExpiresAt?: Date | null;
 
   @ApiProperty({
     description: '유저 상태',

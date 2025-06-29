@@ -159,4 +159,19 @@ export class AuthService {
       refreshTokenExpiresAt: expiresAt,
     });
   }
+
+  async invalidateRefreshToken(refreshToken: string): Promise<void> {
+    try {
+      const tokenPayload = this.jwtService.verify<JwtPayload>(refreshToken, {
+        secret: process.env.JWT_REFRESH_SECRET ?? '',
+      });
+
+      await this.userService.update(tokenPayload.sub, {
+        refreshToken: null,
+        refreshTokenExpiresAt: null,
+      });
+    } catch (error) {
+      // 토큰이 이미 만료되었거나 유효하지 않은 경우 무시
+    }
+  }
 }

@@ -235,6 +235,13 @@ export const authControllerGetToken = () => {
   });
 };
 
+export const authControllerSignOut = () => {
+  return useCustomInstance<void>({
+    url: `http://localhost:4000/api/auth/sign-out`,
+    method: "POST",
+  });
+};
+
 export type PetControllerFindAllResult = NonNullable<
   Awaited<ReturnType<typeof petControllerFindAll>>
 >;
@@ -304,6 +311,9 @@ export type AuthControllerGoogleLoginResult = NonNullable<
 export type AuthControllerGetTokenResult = NonNullable<
   Awaited<ReturnType<typeof authControllerGetToken>>
 >;
+export type AuthControllerSignOutResult = NonNullable<
+  Awaited<ReturnType<typeof authControllerSignOut>>
+>;
 
 export const getPetControllerFindAllResponseMock = (
   overrideResponse: Partial<PetControllerFindAll200> = {},
@@ -317,8 +327,8 @@ export const getPetControllerFindAllResponseMock = (
         role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
         provider: faker.helpers.arrayElement(["kakao", "google", "naver", "apple"] as const),
         providerId: faker.string.alpha(20),
-        refreshToken: faker.string.alpha(20),
-        refreshTokenExpiresAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+        refreshToken: {},
+        refreshTokenExpiresAt: {},
         status: faker.helpers.arrayElement([
           "pending",
           "active",
@@ -380,8 +390,8 @@ export const getPetControllerFindOneResponseMock = (
       role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
       provider: faker.helpers.arrayElement(["kakao", "google", "naver", "apple"] as const),
       providerId: faker.string.alpha(20),
-      refreshToken: faker.string.alpha(20),
-      refreshTokenExpiresAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+      refreshToken: {},
+      refreshTokenExpiresAt: {},
       status: faker.helpers.arrayElement([
         "pending",
         "active",
@@ -439,8 +449,8 @@ export const getPetControllerFindOneResponseMock = (
             role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
             provider: faker.helpers.arrayElement(["kakao", "google", "naver", "apple"] as const),
             providerId: faker.string.alpha(20),
-            refreshToken: faker.string.alpha(20),
-            refreshTokenExpiresAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+            refreshToken: {},
+            refreshTokenExpiresAt: {},
             status: faker.helpers.arrayElement([
               "pending",
               "active",
@@ -494,8 +504,8 @@ export const getPetControllerFindOneResponseMock = (
             role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
             provider: faker.helpers.arrayElement(["kakao", "google", "naver", "apple"] as const),
             providerId: faker.string.alpha(20),
-            refreshToken: faker.string.alpha(20),
-            refreshTokenExpiresAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+            refreshToken: {},
+            refreshTokenExpiresAt: {},
             status: faker.helpers.arrayElement([
               "pending",
               "active",
@@ -657,8 +667,8 @@ export const getBrPetControllerFindAllResponseMock = (
         role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
         provider: faker.helpers.arrayElement(["kakao", "google", "naver", "apple"] as const),
         providerId: faker.string.alpha(20),
-        refreshToken: faker.string.alpha(20),
-        refreshTokenExpiresAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+        refreshToken: {},
+        refreshTokenExpiresAt: {},
         status: faker.helpers.arrayElement([
           "pending",
           "active",
@@ -716,8 +726,8 @@ export const getBrPetControllerFindAllResponseMock = (
               role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
               provider: faker.helpers.arrayElement(["kakao", "google", "naver", "apple"] as const),
               providerId: faker.string.alpha(20),
-              refreshToken: faker.string.alpha(20),
-              refreshTokenExpiresAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+              refreshToken: {},
+              refreshTokenExpiresAt: {},
               status: faker.helpers.arrayElement([
                 "pending",
                 "active",
@@ -771,8 +781,8 @@ export const getBrPetControllerFindAllResponseMock = (
               role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
               provider: faker.helpers.arrayElement(["kakao", "google", "naver", "apple"] as const),
               providerId: faker.string.alpha(20),
-              refreshToken: faker.string.alpha(20),
-              refreshTokenExpiresAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+              refreshToken: {},
+              refreshTokenExpiresAt: {},
               status: faker.helpers.arrayElement([
                 "pending",
                 "active",
@@ -838,8 +848,8 @@ export const getEggControllerFindOneResponseMock = (
       role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
       provider: faker.helpers.arrayElement(["kakao", "google", "naver", "apple"] as const),
       providerId: faker.string.alpha(20),
-      refreshToken: faker.string.alpha(20),
-      refreshTokenExpiresAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+      refreshToken: {},
+      refreshTokenExpiresAt: {},
       status: faker.helpers.arrayElement([
         "pending",
         "active",
@@ -873,8 +883,8 @@ export const getEggControllerFindOneResponseMock = (
             role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
             provider: faker.helpers.arrayElement(["kakao", "google", "naver", "apple"] as const),
             providerId: faker.string.alpha(20),
-            refreshToken: faker.string.alpha(20),
-            refreshTokenExpiresAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+            refreshToken: {},
+            refreshTokenExpiresAt: {},
             status: faker.helpers.arrayElement([
               "pending",
               "active",
@@ -928,8 +938,8 @@ export const getEggControllerFindOneResponseMock = (
             role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
             provider: faker.helpers.arrayElement(["kakao", "google", "naver", "apple"] as const),
             providerId: faker.string.alpha(20),
-            refreshToken: faker.string.alpha(20),
-            refreshTokenExpiresAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+            refreshToken: {},
+            refreshTokenExpiresAt: {},
             status: faker.helpers.arrayElement([
               "pending",
               "active",
@@ -1021,8 +1031,8 @@ export const getBrEggControllerFindAllResponseMock = (): BrEggControllerFindAll2
         role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
         provider: faker.helpers.arrayElement(["kakao", "google", "naver", "apple"] as const),
         providerId: faker.string.alpha(20),
-        refreshToken: faker.string.alpha(20),
-        refreshTokenExpiresAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+        refreshToken: {},
+        refreshTokenExpiresAt: {},
         status: faker.helpers.arrayElement([
           "pending",
           "active",
@@ -1056,8 +1066,8 @@ export const getBrEggControllerFindAllResponseMock = (): BrEggControllerFindAll2
               role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
               provider: faker.helpers.arrayElement(["kakao", "google", "naver", "apple"] as const),
               providerId: faker.string.alpha(20),
-              refreshToken: faker.string.alpha(20),
-              refreshTokenExpiresAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+              refreshToken: {},
+              refreshTokenExpiresAt: {},
               status: faker.helpers.arrayElement([
                 "pending",
                 "active",
@@ -1111,8 +1121,8 @@ export const getBrEggControllerFindAllResponseMock = (): BrEggControllerFindAll2
               role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
               provider: faker.helpers.arrayElement(["kakao", "google", "naver", "apple"] as const),
               providerId: faker.string.alpha(20),
-              refreshToken: faker.string.alpha(20),
-              refreshTokenExpiresAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+              refreshToken: {},
+              refreshTokenExpiresAt: {},
               status: faker.helpers.arrayElement([
                 "pending",
                 "active",
@@ -1662,6 +1672,20 @@ export const getAuthControllerGetTokenMockHandler = (
     );
   });
 };
+
+export const getAuthControllerSignOutMockHandler = (
+  overrideResponse?:
+    | void
+    | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<void> | void),
+) => {
+  return http.post("*/api/auth/sign-out", async (info) => {
+    await delay(1000);
+    if (typeof overrideResponse === "function") {
+      await overrideResponse(info);
+    }
+    return new HttpResponse(null, { status: 200 });
+  });
+};
 export const getProjectDaepaAPIMock = () => [
   getPetControllerFindAllMockHandler(),
   getPetControllerCreateMockHandler(),
@@ -1686,4 +1710,5 @@ export const getProjectDaepaAPIMock = () => [
   getAuthControllerKakaoLoginMockHandler(),
   getAuthControllerGoogleLoginMockHandler(),
   getAuthControllerGetTokenMockHandler(),
+  getAuthControllerSignOutMockHandler(),
 ];

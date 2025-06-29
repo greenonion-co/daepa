@@ -72,6 +72,8 @@ export * from "./updateUserNotificationDtoStatus";
 export * from "./updateUserNotificationDtoType";
 export * from "./userDto";
 export * from "./userDtoProvider";
+export * from "./userDtoRefreshToken";
+export * from "./userDtoRefreshTokenExpiresAt";
 export * from "./userDtoRole";
 export * from "./userDtoStatus";
 export * from "./userNotificationControllerFindAll200";

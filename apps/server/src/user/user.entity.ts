@@ -43,12 +43,12 @@ export class UserEntity {
   provider_id: string;
 
   @Expose({ name: 'refreshToken' })
-  @Column({ nullable: true })
-  refresh_token?: string;
+  @Column({ type: 'varchar', nullable: true })
+  refresh_token?: string | null;
 
   @Expose({ name: 'refreshTokenExpiresAt' })
-  @Column({ nullable: true })
-  refresh_token_expires_at?: Date;
+  @Column({ type: 'datetime', nullable: true })
+  refresh_token_expires_at?: Date | null;
 
   @Column({
     type: 'enum',
