@@ -39,8 +39,8 @@ export class UserEntity {
   provider: OAUTH_PROVIDER;
 
   @Expose({ name: 'providerId' })
-  @Column()
-  provider_id: string;
+  @Column({ type: 'varchar', nullable: true })
+  provider_id: string | null;
 
   @Expose({ name: 'refreshToken' })
   @Column({ type: 'varchar', nullable: true })

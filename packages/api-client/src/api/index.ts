@@ -222,7 +222,7 @@ export const authControllerKakaoLogin = () => {
 };
 
 export const authControllerGoogleLogin = () => {
-  return useCustomInstance<void>({
+  return useCustomInstance<unknown>({
     url: `http://localhost:4000/api/auth/sign-in/google`,
     method: "GET",
   });
@@ -238,6 +238,13 @@ export const authControllerGetToken = () => {
 export const authControllerSignOut = () => {
   return useCustomInstance<void>({
     url: `http://localhost:4000/api/auth/sign-out`,
+    method: "POST",
+  });
+};
+
+export const authControllerDeleteAccount = () => {
+  return useCustomInstance<void>({
+    url: `http://localhost:4000/api/auth/delete-account`,
     method: "POST",
   });
 };
@@ -314,6 +321,9 @@ export type AuthControllerGetTokenResult = NonNullable<
 export type AuthControllerSignOutResult = NonNullable<
   Awaited<ReturnType<typeof authControllerSignOut>>
 >;
+export type AuthControllerDeleteAccountResult = NonNullable<
+  Awaited<ReturnType<typeof authControllerDeleteAccount>>
+>;
 
 export const getPetControllerFindAllResponseMock = (
   overrideResponse: Partial<PetControllerFindAll200> = {},
@@ -326,7 +336,7 @@ export const getPetControllerFindAllResponseMock = (
         name: faker.string.alpha(20),
         role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
         provider: faker.helpers.arrayElement(["kakao", "google", "naver", "apple"] as const),
-        providerId: faker.string.alpha(20),
+        providerId: {},
         refreshToken: {},
         refreshTokenExpiresAt: {},
         status: faker.helpers.arrayElement([
@@ -389,7 +399,7 @@ export const getPetControllerFindOneResponseMock = (
       name: faker.string.alpha(20),
       role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
       provider: faker.helpers.arrayElement(["kakao", "google", "naver", "apple"] as const),
-      providerId: faker.string.alpha(20),
+      providerId: {},
       refreshToken: {},
       refreshTokenExpiresAt: {},
       status: faker.helpers.arrayElement([
@@ -448,7 +458,7 @@ export const getPetControllerFindOneResponseMock = (
             name: faker.string.alpha(20),
             role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
             provider: faker.helpers.arrayElement(["kakao", "google", "naver", "apple"] as const),
-            providerId: faker.string.alpha(20),
+            providerId: {},
             refreshToken: {},
             refreshTokenExpiresAt: {},
             status: faker.helpers.arrayElement([
@@ -503,7 +513,7 @@ export const getPetControllerFindOneResponseMock = (
             name: faker.string.alpha(20),
             role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
             provider: faker.helpers.arrayElement(["kakao", "google", "naver", "apple"] as const),
-            providerId: faker.string.alpha(20),
+            providerId: {},
             refreshToken: {},
             refreshTokenExpiresAt: {},
             status: faker.helpers.arrayElement([
@@ -666,7 +676,7 @@ export const getBrPetControllerFindAllResponseMock = (
         name: faker.string.alpha(20),
         role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
         provider: faker.helpers.arrayElement(["kakao", "google", "naver", "apple"] as const),
-        providerId: faker.string.alpha(20),
+        providerId: {},
         refreshToken: {},
         refreshTokenExpiresAt: {},
         status: faker.helpers.arrayElement([
@@ -725,7 +735,7 @@ export const getBrPetControllerFindAllResponseMock = (
               name: faker.string.alpha(20),
               role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
               provider: faker.helpers.arrayElement(["kakao", "google", "naver", "apple"] as const),
-              providerId: faker.string.alpha(20),
+              providerId: {},
               refreshToken: {},
               refreshTokenExpiresAt: {},
               status: faker.helpers.arrayElement([
@@ -780,7 +790,7 @@ export const getBrPetControllerFindAllResponseMock = (
               name: faker.string.alpha(20),
               role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
               provider: faker.helpers.arrayElement(["kakao", "google", "naver", "apple"] as const),
-              providerId: faker.string.alpha(20),
+              providerId: {},
               refreshToken: {},
               refreshTokenExpiresAt: {},
               status: faker.helpers.arrayElement([
@@ -847,7 +857,7 @@ export const getEggControllerFindOneResponseMock = (
       name: faker.string.alpha(20),
       role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
       provider: faker.helpers.arrayElement(["kakao", "google", "naver", "apple"] as const),
-      providerId: faker.string.alpha(20),
+      providerId: {},
       refreshToken: {},
       refreshTokenExpiresAt: {},
       status: faker.helpers.arrayElement([
@@ -882,7 +892,7 @@ export const getEggControllerFindOneResponseMock = (
             name: faker.string.alpha(20),
             role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
             provider: faker.helpers.arrayElement(["kakao", "google", "naver", "apple"] as const),
-            providerId: faker.string.alpha(20),
+            providerId: {},
             refreshToken: {},
             refreshTokenExpiresAt: {},
             status: faker.helpers.arrayElement([
@@ -937,7 +947,7 @@ export const getEggControllerFindOneResponseMock = (
             name: faker.string.alpha(20),
             role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
             provider: faker.helpers.arrayElement(["kakao", "google", "naver", "apple"] as const),
-            providerId: faker.string.alpha(20),
+            providerId: {},
             refreshToken: {},
             refreshTokenExpiresAt: {},
             status: faker.helpers.arrayElement([
@@ -1030,7 +1040,7 @@ export const getBrEggControllerFindAllResponseMock = (): BrEggControllerFindAll2
         name: faker.string.alpha(20),
         role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
         provider: faker.helpers.arrayElement(["kakao", "google", "naver", "apple"] as const),
-        providerId: faker.string.alpha(20),
+        providerId: {},
         refreshToken: {},
         refreshTokenExpiresAt: {},
         status: faker.helpers.arrayElement([
@@ -1065,7 +1075,7 @@ export const getBrEggControllerFindAllResponseMock = (): BrEggControllerFindAll2
               name: faker.string.alpha(20),
               role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
               provider: faker.helpers.arrayElement(["kakao", "google", "naver", "apple"] as const),
-              providerId: faker.string.alpha(20),
+              providerId: {},
               refreshToken: {},
               refreshTokenExpiresAt: {},
               status: faker.helpers.arrayElement([
@@ -1120,7 +1130,7 @@ export const getBrEggControllerFindAllResponseMock = (): BrEggControllerFindAll2
               name: faker.string.alpha(20),
               role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
               provider: faker.helpers.arrayElement(["kakao", "google", "naver", "apple"] as const),
-              providerId: faker.string.alpha(20),
+              providerId: {},
               refreshToken: {},
               refreshTokenExpiresAt: {},
               status: faker.helpers.arrayElement([
@@ -1638,8 +1648,8 @@ export const getAuthControllerKakaoLoginMockHandler = (
 
 export const getAuthControllerGoogleLoginMockHandler = (
   overrideResponse?:
-    | void
-    | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<void> | void),
+    | unknown
+    | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<unknown> | unknown),
 ) => {
   return http.get("*/api/auth/sign-in/google", async (info) => {
     await delay(1000);
@@ -1686,6 +1696,20 @@ export const getAuthControllerSignOutMockHandler = (
     return new HttpResponse(null, { status: 200 });
   });
 };
+
+export const getAuthControllerDeleteAccountMockHandler = (
+  overrideResponse?:
+    | void
+    | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<void> | void),
+) => {
+  return http.post("*/api/auth/delete-account", async (info) => {
+    await delay(1000);
+    if (typeof overrideResponse === "function") {
+      await overrideResponse(info);
+    }
+    return new HttpResponse(null, { status: 200 });
+  });
+};
 export const getProjectDaepaAPIMock = () => [
   getPetControllerFindAllMockHandler(),
   getPetControllerCreateMockHandler(),
@@ -1711,4 +1735,5 @@ export const getProjectDaepaAPIMock = () => [
   getAuthControllerGoogleLoginMockHandler(),
   getAuthControllerGetTokenMockHandler(),
   getAuthControllerSignOutMockHandler(),
+  getAuthControllerDeleteAccountMockHandler(),
 ];

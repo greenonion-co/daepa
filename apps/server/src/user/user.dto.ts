@@ -36,7 +36,8 @@ class UserBaseDto {
     description: 'Oauth 제공자 ID',
   })
   @IsString()
-  providerId: string;
+  @IsOptional()
+  providerId?: string | null;
 
   @ApiProperty({
     description: 'refresh token',
