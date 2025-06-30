@@ -29,6 +29,8 @@ import { JwtModule } from '@nestjs/jwt';
 import { GoogleStrategy } from './auth/strategies/google.strategy';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/auth.decorator';
+import { HttpModule } from '@nestjs/axios';
+import { OauthService } from './auth/oauth/oauth.service';
 
 const ENTITIES = [
   UserEntity,
@@ -40,6 +42,7 @@ const ENTITIES = [
 
 @Module({
   imports: [
+    HttpModule,
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ['.env'],
@@ -79,6 +82,7 @@ const ENTITIES = [
     ParentService,
     EggService,
     AuthService,
+    OauthService,
     KakaoStrategy,
     GoogleStrategy,
     JwtStrategy,

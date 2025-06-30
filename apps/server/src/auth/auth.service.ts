@@ -9,10 +9,12 @@ import { JwtService } from '@nestjs/jwt';
 import { USER_STATUS } from 'src/user/user.constant';
 import * as bcrypt from 'bcrypt';
 import { JwtPayload } from './strategies/jwt.strategy';
+import { OauthService } from './oauth/oauth.service';
+import { OAUTH_PROVIDER } from './auth.constants';
 
 export type ValidatedUser = {
   userId: string;
-  status: USER_STATUS;
+  userStatus: USER_STATUS;
 };
 
 @Injectable()
@@ -20,6 +22,7 @@ export class AuthService {
   constructor(
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
+    private readonly oauthService: OauthService,
   ) {}
 
   async validateUser(providerInfo: ProviderInfo): Promise<ValidatedUser> {
@@ -37,13 +40,13 @@ export class AuthService {
       );
       return {
         userId: userCreated.userId,
-        status: userCreated.status,
+        userStatus: userCreated.status,
       };
     }
 
     return {
       userId: userFound.userId,
-      status: userFound.status,
+      userStatus: userFound.status,
     };
   }
 
@@ -179,18 +182,31 @@ export class AuthService {
     }
   }
 
-  async deleteUserSoft(userId: string, userStatus: USER_STATUS): Promise<void> {
-    if (userStatus === USER_STATUS.DELETED) {
+  async deleteUser(userId: string): Promise<void> {
+    const user = await this.userService.findOne({ user_id: userId });
+    if (!user) {
+      throw new BadRequestException('사용자를 찾을 수 없습니다.');
+    }
+    if (user.status === USER_STATUS.DELETED) {
       throw new BadRequestException('이미 탈퇴된 회원입니다.');
     }
 
+    if (user.provider === OAUTH_PROVIDER.KAKAO) {
+      const { id: disconnectedId } = await this.oauthService.disconnectKakao(
+        user.providerId ?? '',
+      );
+      if (user.providerId === disconnectedId.toString()) {
+        await this.softDeleteUser(userId);
+      }
+    }
+  }
+
+  private async softDeleteUser(userId: string): Promise<void> {
     await this.userService.update(userId, {
       providerId: null,
       refreshToken: null,
       refreshTokenExpiresAt: null,
       status: USER_STATUS.DELETED,
     });
-
-    // TODO: provider 측 연동 초기화 로직
   }
 }
