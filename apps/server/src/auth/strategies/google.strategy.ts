@@ -22,6 +22,10 @@ export class GoogleStrategy extends PassportStrategy(Strategy) {
     done: (error: any, validatedUser?: ValidatedUser) => void,
   ) {
     try {
+      if (!profile.id) {
+        throw new Error('Google profile id is required');
+      }
+
       const providerInfo = {
         provider: OAUTH_PROVIDER.GOOGLE,
         providerId: profile.id.toString(),
