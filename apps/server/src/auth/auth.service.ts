@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { UserService } from 'src/user/user.service';
 import { ProviderInfo } from './auth.types';
 import { JwtService } from '@nestjs/jwt';
@@ -173,5 +177,20 @@ export class AuthService {
     } catch (error) {
       // 토큰이 이미 만료되었거나 유효하지 않은 경우 무시
     }
+  }
+
+  async deleteUserSoft(userId: string, userStatus: USER_STATUS): Promise<void> {
+    if (userStatus === USER_STATUS.DELETED) {
+      throw new BadRequestException('이미 탈퇴된 회원입니다.');
+    }
+
+    await this.userService.update(userId, {
+      providerId: null,
+      refreshToken: null,
+      refreshTokenExpiresAt: null,
+      status: USER_STATUS.DELETED,
+    });
+
+    // TODO: provider 측 연동 초기화 로직
   }
 }

@@ -12,7 +12,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { AuthService, ValidatedUser } from './auth.service';
 import { ApiResponse } from '@nestjs/swagger';
 import { UserDto } from 'src/user/user.dto';
-import { OAuthAuthenticatedUser } from './auth.decorator';
+import { AuthenticatedUser, Public } from './auth.decorator';
 import { TokenResponseDto } from './auth.dto';
 
 @Controller('/auth')
@@ -20,14 +20,15 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Get('sign-in/kakao')
+  @Public()
+  @UseGuards(AuthGuard('kakao'))
   @ApiResponse({
     status: 302,
     description: '카카오 로그인 성공',
     type: UserDto,
   })
-  @UseGuards(AuthGuard('kakao'))
   async kakaoLogin(
-    @OAuthAuthenticatedUser() validatedUser: ValidatedUser,
+    @AuthenticatedUser() validatedUser: ValidatedUser,
     @Res() res: Response,
   ) {
     if (!validatedUser) {
@@ -51,9 +52,15 @@ export class AuthController {
   }
 
   @Get('sign-in/google')
+  @Public()
   @UseGuards(AuthGuard('google'))
+  @ApiResponse({
+    status: 302,
+    description: '구글 로그인 성공',
+    type: UserDto,
+  })
   async googleLogin(
-    @OAuthAuthenticatedUser() validatedUser: ValidatedUser,
+    @AuthenticatedUser() validatedUser: ValidatedUser,
     @Res() res: Response,
   ) {
     if (!validatedUser) {
@@ -77,6 +84,7 @@ export class AuthController {
   }
 
   @Get('token')
+  @Public()
   @ApiResponse({
     status: 200,
     description: 'token 발급 성공',
@@ -133,6 +141,29 @@ export class AuthController {
     return {
       success: true,
       message: '로그아웃되었습니다.',
+    };
+  }
+
+  @Post('delete-account')
+  @ApiResponse({
+    status: 200,
+    description: '탈퇴가 처리되었습니다.',
+  })
+  async deleteAccount(
+    @AuthenticatedUser() user: ValidatedUser,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    await this.authService.deleteUserSoft(user.userId, user.status);
+
+    res.clearCookie('refreshToken', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+    });
+
+    return {
+      success: true,
+      message: '탈퇴가 처리되었습니다.',
     };
   }
 }
