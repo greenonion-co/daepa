@@ -1,8 +1,8 @@
 import { EggDto, ParentDtoRole, ParentDtoStatus, PetParentDto } from "@repo/api-client";
 import Link from "next/link";
-import ParentStatusBadge from "./ParentStatusBadge";
+import ParentStatusBadge from "../../components/ParentStatusBadge";
 
-export const TreeView = ({ node }: { node: EggDto }) => {
+export const EggItem = ({ node }: { node: EggDto }) => {
   return (
     <Link
       className="hover:bg-accent mb-2 flex w-full cursor-pointer flex-col items-start gap-2 rounded-xl border p-3 text-left text-sm shadow-sm transition-all duration-200 hover:scale-[1.01] hover:shadow-md"

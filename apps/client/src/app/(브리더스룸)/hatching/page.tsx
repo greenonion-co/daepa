@@ -23,7 +23,6 @@ import {
 import { useMemo, useState } from "react";
 import { brEggControllerFindAll } from "@repo/api-client";
 import { useQuery } from "@tanstack/react-query";
-import { TreeView } from "../components/TreeView";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format } from "date-fns";
@@ -36,6 +35,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { DateRange } from "react-day-picker";
+import EggList from "./components/EggList";
 
 const HatchingPage = () => {
   const [month, setMonth] = useState<Date>(new Date());
@@ -166,27 +166,7 @@ const HatchingPage = () => {
               </TabsTrigger>
             </TabsList>
           </Tabs>
-          {todayIsPending ? (
-            <Loading />
-          ) : (
-            Object.entries(selectedData || {}).map(([date, eggs]) => (
-              <div key={date} className="mb-4">
-                <h3 className="mb-2 text-sm font-medium">
-                  {format(
-                    new Date(date.slice(0, 4) + "-" + date.slice(4, 6) + "-" + date.slice(6, 8)),
-                    "yyyy년 MM월 dd일",
-                  )}
-                </h3>
-                <div className="space-y-2">
-                  {eggs
-                    .filter((egg) => (tab === "hatched" ? egg.hatchedPetId : !egg.hatchedPetId))
-                    .map((egg) => (
-                      <TreeView key={egg.eggId} node={egg} />
-                    ))}
-                </div>
-              </div>
-            ))
-          )}
+          {todayIsPending ? <Loading /> : <EggList selectedData={selectedData} tab={tab} />}
         </ScrollArea>
       </div>
       <Card>
@@ -236,10 +216,15 @@ const HatchingPage = () => {
               <Bar
                 dataKey="notHatched"
                 stackId="a"
-                fill="var(--color-notHatched)"
+                fill="oklch(86.9% 0.022 252.894)"
                 radius={[0, 0, 8, 8]}
               />
-              <Bar dataKey="hatched" stackId="a" fill="var(--color-hatched)" radius={[8, 8, 0, 0]}>
+              <Bar
+                dataKey="hatched"
+                stackId="a"
+                fill="oklch(44.6% 0.043 257.281)"
+                radius={[8, 8, 0, 0]}
+              >
                 <LabelList position="top" offset={12} className="fill-foreground" fontSize={12} />
               </Bar>
             </BarChart>
