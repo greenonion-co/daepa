@@ -16,6 +16,19 @@ AXIOS_INSTANCE.interceptors.request.use((config) => {
   return config;
 });
 
+AXIOS_INSTANCE.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response.status === 401) {
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("accessToken");
+        window.location.href = "/sign-in";
+      }
+    }
+    return Promise.reject(error);
+  },
+);
+
 export const useCustomInstance = <T>(config: AxiosRequestConfig): Promise<AxiosResponse<T>> => {
   const source = Axios.CancelToken.source();
   const promise = AXIOS_INSTANCE({ ...config, cancelToken: source.token }).then(
