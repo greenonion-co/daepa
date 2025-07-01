@@ -203,10 +203,12 @@ export class AuthService {
 
   private async softDeleteUser(userId: string): Promise<void> {
     await this.userService.update(userId, {
+      userId: 'DELETED_' + userId,
       providerId: null,
       refreshToken: null,
       refreshTokenExpiresAt: null,
       status: USER_STATUS.DELETED,
     });
+    // TODO: 보관용 테이블에 삭제된 유저의 암호화된 provider_id, provider, deleted_at, expires_at (현재+3년?) 저장
   }
 }
