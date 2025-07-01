@@ -2,6 +2,7 @@ import { ApiProperty, PickType } from '@nestjs/swagger';
 import { USER_ROLE, USER_STATUS } from './user.constant';
 import { IsDate, IsEnum, IsOptional, IsString } from 'class-validator';
 import { OAUTH_PROVIDER } from 'src/auth/auth.constants';
+import { Exclude } from 'class-transformer';
 
 class UserBaseDto {
   @ApiProperty({
@@ -95,3 +96,25 @@ export class UserDto extends PickType(UserBaseDto, [
 ]) {}
 
 export class RegisterUserNameDto extends PickType(UserBaseDto, ['name']) {}
+
+export class UserProfileDto extends PickType(UserBaseDto, [
+  'userId',
+  'name',
+  'role',
+  'provider',
+  'status',
+  'lastLoginAt',
+  'createdAt',
+]) {
+  @Exclude()
+  declare providerId?: string | null;
+
+  @Exclude()
+  declare refreshToken?: string | null;
+
+  @Exclude()
+  declare refreshTokenExpiresAt?: Date | null;
+
+  @Exclude()
+  declare updatedAt?: Date;
+}

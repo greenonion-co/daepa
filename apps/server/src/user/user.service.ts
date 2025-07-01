@@ -1,8 +1,13 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindOptionsWhere, Repository } from 'typeorm';
 import { UserEntity } from './user.entity';
-import { UserDto } from './user.dto';
+import { UserDto, UserProfileDto } from './user.dto';
 import { instanceToPlain, plainToInstance } from 'class-transformer';
 import { ProviderInfo } from 'src/auth/auth.types';
 import { USER_ROLE, USER_STATUS } from './user.constant';
@@ -64,6 +69,19 @@ export class UserService {
 
     const user = instanceToPlain(userEntity);
     return plainToInstance(UserDto, user);
+  }
+
+  async findOneProfile(where: FindOptionsWhere<UserEntity>) {
+    const userEntity = await this.userRepository.findOneBy(where);
+
+    if (!userEntity) {
+      throw new NotFoundException('사용자를 찾을 수 없습니다.');
+    }
+
+    const user = instanceToPlain(userEntity);
+    console.log('plain: ', user);
+    console.log('instance: ', plainToInstance(UserProfileDto, user));
+    return plainToInstance(UserProfileDto, user);
   }
 
   async updateUserName(userId: string, name: string) {

@@ -38,6 +38,7 @@ import type {
   PetDto,
   TokenResponseDto,
   UserNotificationControllerFindAll200,
+  UserProfileDto,
 } from "../model";
 
 import { useCustomInstance } from "./mutator/use-custom-instance";
@@ -250,6 +251,13 @@ export const authControllerDeleteAccount = () => {
   });
 };
 
+export const userControllerGetUserProfile = () => {
+  return useCustomInstance<UserProfileDto>({
+    url: `http://localhost:4000/api/v1/user/profile`,
+    method: "GET",
+  });
+};
+
 export const userControllerRegisterUserName = (
   userId: string,
   registerUserNameDto: RegisterUserNameDto,
@@ -336,6 +344,9 @@ export type AuthControllerSignOutResult = NonNullable<
 >;
 export type AuthControllerDeleteAccountResult = NonNullable<
   Awaited<ReturnType<typeof authControllerDeleteAccount>>
+>;
+export type UserControllerGetUserProfileResult = NonNullable<
+  Awaited<ReturnType<typeof userControllerGetUserProfile>>
 >;
 export type UserControllerRegisterUserNameResult = NonNullable<
   Awaited<ReturnType<typeof userControllerRegisterUserName>>
@@ -1203,6 +1214,25 @@ export const getAuthControllerGetTokenResponseMock = (
   ...overrideResponse,
 });
 
+export const getUserControllerGetUserProfileResponseMock = (
+  overrideResponse: Partial<UserProfileDto> = {},
+): UserProfileDto => ({
+  userId: faker.string.alpha(20),
+  name: faker.string.alpha(20),
+  role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
+  provider: faker.helpers.arrayElement(["kakao", "google", "naver", "apple"] as const),
+  status: faker.helpers.arrayElement([
+    "pending",
+    "active",
+    "inactive",
+    "suspended",
+    "deleted",
+  ] as const),
+  lastLoginAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+  createdAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+  ...overrideResponse,
+});
+
 export const getUserControllerRegisterUserNameResponseMock = (
   overrideResponse: Partial<CommonResponseDto> = {},
 ): CommonResponseDto => ({
@@ -1735,6 +1765,29 @@ export const getAuthControllerDeleteAccountMockHandler = (
   });
 };
 
+export const getUserControllerGetUserProfileMockHandler = (
+  overrideResponse?:
+    | UserProfileDto
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<UserProfileDto> | UserProfileDto),
+) => {
+  return http.get("*/api/v1/user/profile", async (info) => {
+    await delay(1000);
+
+    return new HttpResponse(
+      JSON.stringify(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getUserControllerGetUserProfileResponseMock(),
+      ),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+  });
+};
+
 export const getUserControllerRegisterUserNameMockHandler = (
   overrideResponse?:
     | CommonResponseDto
@@ -1783,5 +1836,6 @@ export const getProjectDaepaAPIMock = () => [
   getAuthControllerGetTokenMockHandler(),
   getAuthControllerSignOutMockHandler(),
   getAuthControllerDeleteAccountMockHandler(),
+  getUserControllerGetUserProfileMockHandler(),
   getUserControllerRegisterUserNameMockHandler(),
 ];

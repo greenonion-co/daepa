@@ -85,3 +85,7 @@ export * from "./userNotificationDto";
 export * from "./userNotificationDtoDetailJson";
 export * from "./userNotificationDtoStatus";
 export * from "./userNotificationDtoType";
+export * from "./userProfileDto";
+export * from "./userProfileDtoProvider";
+export * from "./userProfileDtoRole";
+export * from "./userProfileDtoStatus";
