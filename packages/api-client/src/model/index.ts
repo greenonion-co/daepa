@@ -89,3 +89,4 @@ export * from "./userProfileDto";
 export * from "./userProfileDtoProvider";
 export * from "./userProfileDtoRole";
 export * from "./userProfileDtoStatus";
+export * from "./updateUserNameDto";

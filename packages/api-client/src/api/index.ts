@@ -15,10 +15,10 @@ import type {
   DeleteUserNotificationDto,
   ParentControllerFindParentParams,
   PetControllerFindAllParams,
-  RegisterUserNameDto,
   UpdateEggDto,
   UpdateParentDto,
   UpdatePetDto,
+  UpdateUserNameDto,
   UpdateUserNotificationDto,
   UserNotificationControllerFindAllParams,
 } from "../model";
@@ -258,15 +258,12 @@ export const userControllerGetUserProfile = () => {
   });
 };
 
-export const userControllerRegisterUserName = (
-  userId: string,
-  registerUserNameDto: RegisterUserNameDto,
-) => {
+export const userControllerUpdateUserName = (updateUserNameDto: UpdateUserNameDto) => {
   return useCustomInstance<CommonResponseDto>({
-    url: `http://localhost:4000/api/v1/user/${userId}/name`,
+    url: `http://localhost:4000/api/v1/user/name`,
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    data: registerUserNameDto,
+    data: updateUserNameDto,
   });
 };
 
@@ -348,8 +345,8 @@ export type AuthControllerDeleteAccountResult = NonNullable<
 export type UserControllerGetUserProfileResult = NonNullable<
   Awaited<ReturnType<typeof userControllerGetUserProfile>>
 >;
-export type UserControllerRegisterUserNameResult = NonNullable<
-  Awaited<ReturnType<typeof userControllerRegisterUserName>>
+export type UserControllerUpdateUserNameResult = NonNullable<
+  Awaited<ReturnType<typeof userControllerUpdateUserName>>
 >;
 
 export const getPetControllerFindAllResponseMock = (
@@ -1233,7 +1230,7 @@ export const getUserControllerGetUserProfileResponseMock = (
   ...overrideResponse,
 });
 
-export const getUserControllerRegisterUserNameResponseMock = (
+export const getUserControllerUpdateUserNameResponseMock = (
   overrideResponse: Partial<CommonResponseDto> = {},
 ): CommonResponseDto => ({
   success: faker.datatype.boolean(),
@@ -1788,14 +1785,14 @@ export const getUserControllerGetUserProfileMockHandler = (
   });
 };
 
-export const getUserControllerRegisterUserNameMockHandler = (
+export const getUserControllerUpdateUserNameMockHandler = (
   overrideResponse?:
     | CommonResponseDto
     | ((
         info: Parameters<Parameters<typeof http.post>[1]>[0],
       ) => Promise<CommonResponseDto> | CommonResponseDto),
 ) => {
-  return http.post("*/api/v1/user/:userId/name", async (info) => {
+  return http.post("*/api/v1/user/name", async (info) => {
     await delay(1000);
 
     return new HttpResponse(
@@ -1804,7 +1801,7 @@ export const getUserControllerRegisterUserNameMockHandler = (
           ? typeof overrideResponse === "function"
             ? await overrideResponse(info)
             : overrideResponse
-          : getUserControllerRegisterUserNameResponseMock(),
+          : getUserControllerUpdateUserNameResponseMock(),
       ),
       { status: 200, headers: { "Content-Type": "application/json" } },
     );
@@ -1837,5 +1834,5 @@ export const getProjectDaepaAPIMock = () => [
   getAuthControllerSignOutMockHandler(),
   getAuthControllerDeleteAccountMockHandler(),
   getUserControllerGetUserProfileMockHandler(),
-  getUserControllerRegisterUserNameMockHandler(),
+  getUserControllerUpdateUserNameMockHandler(),
 ];

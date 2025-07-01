@@ -1,15 +1,6 @@
-import {
-  Body,
-  Controller,
-  ForbiddenException,
-  Get,
-  HttpException,
-  HttpStatus,
-  Param,
-  Post,
-} from '@nestjs/common';
+import { Body, Controller, Get, Post } from '@nestjs/common';
 import { UserService } from './user.service';
-import { RegisterUserNameDto, UserProfileDto } from './user.dto';
+import { UpdateUserNameDto, UserProfileDto } from './user.dto';
 import { CommonResponseDto } from 'src/common/response.dto';
 import { ApiResponse } from '@nestjs/swagger';
 import { JwtUser } from 'src/auth/auth.decorator';
@@ -32,17 +23,17 @@ export class UserController {
     return user;
   }
 
-  @Post(':userId/name')
+  @Post('/name')
   @ApiResponse({
     status: 200,
     description: '사용자명 등록 성공',
     type: CommonResponseDto,
   })
-  async registerUserName(
-    @Param('userId') userId: string,
-    @Body() registerUserNameDto: RegisterUserNameDto,
+  async updateUserName(
+    @JwtUser() token: JwtUserPayload,
+    @Body() updateUserNameDto: UpdateUserNameDto,
   ) {
-    await this.userService.updateUserName(userId, registerUserNameDto.name);
+    await this.userService.updateUserName(token.userId, updateUserNameDto.name);
     return {
       success: true,
       message: '사용자명이 성공적으로 등록되었습니다.',
