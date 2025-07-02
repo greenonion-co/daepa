@@ -9,7 +9,7 @@ import { ChevronDown } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 
 interface PetDetailProps {
-  pet: PetDto & { birthdate?: string };
+  pet: PetDto;
   qrCodeDataUrl: string;
 }
 

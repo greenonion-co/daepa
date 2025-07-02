@@ -1,28 +1,43 @@
+"use client";
+
 import { petControllerFindOne, PetDto } from "@repo/api-client";
 import PetDetail from "./petDetail";
 import { generateQRCode, formatDateToYYYYMMDDString } from "@/lib/utils";
-import { notFound } from "next/navigation";
+import { use, useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+
 interface PetDetailPageProps {
-  params: {
+  params: Promise<{
     petId: string;
-  };
+  }>;
 }
 
-async function PetDetailPage({ params }: PetDetailPageProps) {
-  const pet = await petControllerFindOne(params.petId);
+function PetDetailPage({ params }: PetDetailPageProps) {
+  const { petId } = use(params);
+  const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string>("");
 
-  if (!pet.data) {
-    notFound();
-  }
+  const { data } = useQuery({
+    queryKey: [petControllerFindOne.name],
+    queryFn: () => petControllerFindOne(petId),
+    select: (response) => response.data,
+  });
+
+  useEffect(() => {
+    const fetchQrCode = async () => {
+      const qrCode = await generateQRCode(`${"http://192.168.45.46:3000"}/pet/${petId}`);
+      setQrCodeDataUrl(qrCode);
+    };
+    fetchQrCode();
+  }, [petId]);
+
+  if (!data) return null;
 
   const formattedData = {
-    ...pet.data,
-    ...(pet.data.birthdate && {
-      birthdate: formatDateToYYYYMMDDString(pet.data.birthdate),
+    ...data,
+    ...(data?.birthdate && {
+      birthdate: formatDateToYYYYMMDDString(data.birthdate),
     }),
-  } as PetDto & { birthdate?: string };
-
-  const qrCodeDataUrl = await generateQRCode(`${"http://192.168.45.46:3000"}/pet/${params.petId}`);
+  } as PetDto;
 
   return <PetDetail pet={formattedData} qrCodeDataUrl={qrCodeDataUrl} />;
 }

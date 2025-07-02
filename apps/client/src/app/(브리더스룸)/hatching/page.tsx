@@ -23,6 +23,7 @@ import {
 import { useMemo, useState } from "react";
 import { brEggControllerFindAll } from "@repo/api-client";
 import { useQuery } from "@tanstack/react-query";
+import { TreeView } from "../components/TreeView";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format } from "date-fns";
@@ -35,7 +36,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { DateRange } from "react-day-picker";
-import EggList from "./components/EggList";
 
 const HatchingPage = () => {
   const [month, setMonth] = useState<Date>(new Date());
@@ -43,7 +43,8 @@ const HatchingPage = () => {
     from: new Date(),
     to: new Date(),
   });
-  const [tab, setTab] = useState<"hatched" | "noHatched">("noHatched");
+
+  const [tab, setTab] = useState<"all" | "hatched" | "noHatched">("all");
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
 
   const { data: yearData } = useQuery({
@@ -144,12 +145,26 @@ const HatchingPage = () => {
         />
 
         <ScrollArea className="relative flex h-[613px] w-full gap-2 rounded-xl border p-2 shadow">
+          <div className="mb-3 rounded-xl bg-blue-100 px-3 py-2 text-center">
+            <div className="text-sm font-medium text-blue-700">
+              {dateRange?.from && dateRange?.to
+                ? dateRange.from.getTime() === dateRange.to.getTime()
+                  ? format(dateRange.from, "yyyy.MM.dd")
+                  : `${format(dateRange.from, "yyyy.MM.dd")} - ${format(dateRange.to, "yyyy.MM.dd")}`
+                : dateRange?.from
+                  ? format(dateRange.from, "yyyy.MM.dd") + " ~ "
+                  : "날짜를 선택해주세요"}
+            </div>
+          </div>
           <Tabs
             defaultValue="noHatched"
             onValueChange={(value) => setTab(value as "hatched" | "noHatched")}
             className="sticky top-0 z-10 bg-white pb-2"
           >
             <TabsList>
+              <TabsTrigger value="all">
+                전체 ({Object.values(selectedData || {}).flat().length || 0})
+              </TabsTrigger>
               <TabsTrigger value="noHatched">
                 해칭되지 않은 알 (
                 {Object.values(selectedData || {})
@@ -166,7 +181,38 @@ const HatchingPage = () => {
               </TabsTrigger>
             </TabsList>
           </Tabs>
-          {todayIsPending ? <Loading /> : <EggList selectedData={selectedData} tab={tab} />}
+          {todayIsPending ? (
+            <Loading />
+          ) : (
+            Object.entries(selectedData || {})
+              .filter(([, eggs]) => {
+                const filteredEggs = eggs.filter((egg) => {
+                  if (tab === "all") return true;
+                  return tab === "hatched" ? egg.hatchedPetId : !egg.hatchedPetId;
+                });
+                return filteredEggs.length > 0;
+              })
+              .map(([date, eggs]) => (
+                <div key={date} className="mb-4">
+                  <h3 className="mb-2 text-sm font-medium">
+                    {format(
+                      new Date(date.slice(0, 4) + "-" + date.slice(4, 6) + "-" + date.slice(6, 8)),
+                      "yyyy년 MM월 dd일",
+                    )}
+                  </h3>
+                  <div className="space-y-2">
+                    {eggs
+                      .filter((egg) => {
+                        if (tab === "all") return true;
+                        return tab === "hatched" ? egg.hatchedPetId : !egg.hatchedPetId;
+                      })
+                      .map((egg) => (
+                        <TreeView key={egg.eggId} node={egg} />
+                      ))}
+                  </div>
+                </div>
+              ))
+          )}
         </ScrollArea>
       </div>
       <Card>
@@ -199,7 +245,7 @@ const HatchingPage = () => {
               accessibilityLayer
               data={chartData}
               margin={{
-                top: 20,
+                top: 25,
               }}
             >
               <CartesianGrid vertical={false} />
@@ -216,15 +262,10 @@ const HatchingPage = () => {
               <Bar
                 dataKey="notHatched"
                 stackId="a"
-                fill="oklch(86.9% 0.022 252.894)"
+                fill="var(--color-notHatched)"
                 radius={[0, 0, 8, 8]}
               />
-              <Bar
-                dataKey="hatched"
-                stackId="a"
-                fill="oklch(44.6% 0.043 257.281)"
-                radius={[8, 8, 0, 0]}
-              >
+              <Bar dataKey="hatched" stackId="a" fill="var(--color-hatched)" radius={[8, 8, 0, 0]}>
                 <LabelList position="top" offset={12} className="fill-foreground" fontSize={12} />
               </Bar>
             </BarChart>
@@ -232,10 +273,8 @@ const HatchingPage = () => {
         </CardContent>
         <CardFooter className="flex-col items-start gap-2 text-sm">
           <div className="flex gap-2 font-medium leading-none">
-            Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
-          </div>
-          <div className="text-muted-foreground leading-none">
-            Showing total visitors for the last 6 months
+            <TrendingUp className="h-4 w-4" />
+            최근 1년 해칭 현황
           </div>
         </CardFooter>
       </Card>

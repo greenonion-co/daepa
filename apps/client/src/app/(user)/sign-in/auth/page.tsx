@@ -23,13 +23,25 @@ const AuthPage = () => {
 
     localStorage.setItem("accessToken", data.token);
 
+    const redirectUrl = localStorage.getItem("redirectUrl");
+
     switch (userStatus) {
-      case UserDtoStatus.PENDING:
-        router.replace("/sign-in/register");
+      case UserDtoStatus.PENDING: {
+        const registerUrl = redirectUrl
+          ? `/sign-in/register?redirectUrl=${encodeURIComponent(redirectUrl)}`
+          : "/sign-in/register";
+        router.replace(registerUrl);
         break;
+      }
       case UserDtoStatus.ACTIVE:
-        // TODO: 사용자를 기존 페이지로 이동
-        router.replace("/pet");
+        if (redirectUrl) {
+          localStorage.removeItem("redirectUrl");
+          router.replace(redirectUrl);
+        } else {
+          router.replace("/pet");
+        }
+
+        toast.success("로그인에 성공했습니다.");
         break;
       default:
         router.replace("/sign-in");

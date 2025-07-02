@@ -1,26 +1,33 @@
+"use client";
+
 import { eggControllerFindOne } from "@repo/api-client";
-import { notFound } from "next/navigation";
 import EggDetail from "../ EggDetail";
 import { formatDateToYYYYMMDDString } from "@/lib/utils";
-interface PetDetailPageProps {
-  params: {
+import { useQuery } from "@tanstack/react-query";
+import { use } from "react";
+interface EggDetailPageProps {
+  params: Promise<{
     eggId: string;
-  };
+  }>;
 }
 
-async function PetDetailPage({ params }: PetDetailPageProps) {
-  const pet = await eggControllerFindOne(params.eggId);
+const EggDetailPage = ({ params }: EggDetailPageProps) => {
+  const { eggId } = use(params);
 
-  if (!pet.data) {
-    notFound();
-  }
+  const { data } = useQuery({
+    queryKey: [eggControllerFindOne.name],
+    queryFn: () => eggControllerFindOne(eggId),
+    select: (response) => response.data,
+  });
+
+  if (!data) return null;
 
   const formattedData = {
-    ...pet.data,
-    layingDate: formatDateToYYYYMMDDString(pet.data.layingDate),
+    ...data,
+    layingDate: formatDateToYYYYMMDDString(data.layingDate),
   };
 
   return <EggDetail egg={formattedData} />;
-}
+};
 
-export default PetDetailPage;
+export default EggDetailPage;
