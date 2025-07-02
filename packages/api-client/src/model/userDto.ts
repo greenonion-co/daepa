@@ -19,6 +19,8 @@ export interface UserDto {
   name: string;
   /** 회원 역할 */
   role: UserDtoRole;
+  /** 사업자 여부 */
+  isBiz: boolean;
   /** Oauth 제공자 */
   provider: UserDtoProvider;
   /** Oauth 제공자 ID */

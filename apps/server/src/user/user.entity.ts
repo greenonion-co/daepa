@@ -32,6 +32,9 @@ export class UserEntity {
   })
   role: USER_ROLE;
 
+  @Column({ default: false })
+  is_biz: boolean;
+
   @Column({
     type: 'enum',
     enum: OAUTH_PROVIDER,

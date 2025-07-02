@@ -31,6 +31,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/auth.decorator';
 import { HttpModule } from '@nestjs/axios';
 import { OauthService } from './auth/oauth/oauth.service';
+import { UserController } from './user/user.controller';
 
 const ENTITIES = [
   UserEntity,
@@ -73,6 +74,7 @@ const ENTITIES = [
     EggController,
     BrEggController,
     AuthController,
+    UserController,
   ],
   providers: [
     AppService,
