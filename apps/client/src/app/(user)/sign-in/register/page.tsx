@@ -70,7 +70,7 @@ const RegisterPage = () => {
         const redirectUrl = localStorage.getItem("redirectUrl");
         if (redirectUrl) {
           localStorage.removeItem("redirectUrl");
-          window.location.href = redirectUrl;
+          router.replace(redirectUrl);
         } else {
           router.replace("/pet");
         }
