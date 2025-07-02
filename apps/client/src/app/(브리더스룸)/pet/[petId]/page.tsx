@@ -3,9 +3,8 @@
 import { petControllerFindOne, PetDto } from "@repo/api-client";
 import PetDetail from "./petDetail";
 import { generateQRCode, formatDateToYYYYMMDDString } from "@/lib/utils";
-import { notFound } from "next/navigation";
 import { use, useEffect, useState } from "react";
-import Loading from "@/components/common/Loading";
+import { useQuery } from "@tanstack/react-query";
 
 interface PetDetailPageProps {
   params: Promise<{
@@ -15,50 +14,32 @@ interface PetDetailPageProps {
 
 function PetDetailPage({ params }: PetDetailPageProps) {
   const { petId } = use(params);
-  const [pet, setPet] = useState<PetDto | null>(null);
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string>("");
-  const [loading, setLoading] = useState(true);
+
+  const { data } = useQuery({
+    queryKey: [petControllerFindOne.name],
+    queryFn: () => petControllerFindOne(petId),
+    select: (response) => response.data,
+  });
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const petResponse = await petControllerFindOne(petId);
-
-        if (!petResponse.data) {
-          notFound();
-        }
-
-        const formattedData = {
-          ...petResponse.data,
-          ...(petResponse.data.birthdate && {
-            birthdate: formatDateToYYYYMMDDString(petResponse.data.birthdate),
-          }),
-        };
-
-        setPet(formattedData as PetDto);
-
-        const qrCode = await generateQRCode(`${"http://192.168.45.46:3000"}/pet/${petId}`);
-        setQrCodeDataUrl(qrCode);
-      } catch (error) {
-        console.error("Error fetching pet data:", error);
-        notFound();
-      } finally {
-        setLoading(false);
-      }
+    const fetchQrCode = async () => {
+      const qrCode = await generateQRCode(`${"http://192.168.45.46:3000"}/pet/${petId}`);
+      setQrCodeDataUrl(qrCode);
     };
-
-    fetchData();
+    fetchQrCode();
   }, [petId]);
 
-  if (loading) {
-    return <Loading />;
-  }
+  if (!data) return null;
 
-  if (!pet) {
-    return null;
-  }
+  const formattedData = {
+    ...data,
+    ...(data?.birthdate && {
+      birthdate: formatDateToYYYYMMDDString(data.birthdate),
+    }),
+  } as PetDto;
 
-  return <PetDetail pet={pet} qrCodeDataUrl={qrCodeDataUrl} />;
+  return <PetDetail pet={formattedData} qrCodeDataUrl={qrCodeDataUrl} />;
 }
 
 export default PetDetailPage;
