@@ -219,6 +219,16 @@ const SettingsPage = () => {
                 </p>
               </div>
             </div>
+            <div className="flex items-center justify-between rounded-lg bg-gray-50 p-3 dark:bg-gray-800">
+              <div>
+                <Label className="text-sm font-medium">가입일</Label>
+                <p className="text-xs text-gray-500">
+                  {userProfile?.createdAt
+                    ? new Date(userProfile.createdAt).toLocaleDateString()
+                    : "가입일 정보 없음"}
+                </p>
+              </div>
+            </div>
             {/* <Button variant="outline" className="w-full">
               비밀번호 변경
             </Button> */}
