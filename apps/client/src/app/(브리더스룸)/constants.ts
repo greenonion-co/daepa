@@ -1,6 +1,6 @@
 import { Bell, Bubbles, Egg, Film, Home, Inbox } from "lucide-react";
 import { FormStep, SelectorConfig } from "./register/types";
-import { PetDtoSex, PetDtoSpecies, UserNotificationDtoType } from "@repo/api-client";
+import { PetDtoSex, PetDtoSpecies, UserDtoStatus, UserNotificationDtoType } from "@repo/api-client";
 
 export const USER_NAME = "낸시";
 
@@ -459,4 +459,12 @@ export const STATUS_MAP = {
     label: "취소됨",
     color: "bg-gray-600",
   },
+};
+
+export const USER_STATUS_MAP: Record<UserDtoStatus, string> = {
+  pending: "정보 미입력",
+  active: "활성",
+  inactive: "비활성",
+  suspended: "정지",
+  deleted: "삭제",
 };

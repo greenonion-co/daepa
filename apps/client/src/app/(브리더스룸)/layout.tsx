@@ -2,7 +2,6 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./components/AppSidebar";
 import NotiButton from "./noti/components/NotiButton";
 import UserButton from "../(user)/UserButton";
-import Link from "next/link";
 
 export default function BrLayout({
   children,
@@ -18,9 +17,8 @@ export default function BrLayout({
             <SidebarTrigger />
             <NotiButton />
           </div>
-          <UserButton />
           <div>
-            <Link href="/settings">설정</Link>
+            <UserButton />
           </div>
         </div>
         {children}

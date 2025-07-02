@@ -5,7 +5,7 @@ import Image from "next/image";
 
 const SignInPage = () => {
   return (
-    <div className="m-2 flex min-h-screen w-full items-center justify-center">
+    <div className="m-2 flex min-h-screen w-full items-center justify-center bg-[#FAFAFA]">
       <div className="w-full max-w-md">
         {/* 메인 카드 */}
         <Card className="border-1 border-gray-100 bg-white/80 shadow-xl backdrop-blur-sm dark:bg-gray-800/80">

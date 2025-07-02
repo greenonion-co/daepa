@@ -60,14 +60,16 @@ const DeleteAccountButton = () => {
         <AlertDialogHeader>
           <AlertDialogTitle>정말 탈퇴하시겠습니까?</AlertDialogTitle>
           <AlertDialogDescription>
+            <span className="font-bold text-red-500">7일 이내 재가입 불가능합니다.</span>
+            <br />
             이 작업은 되돌릴 수 없습니다. 계정과 관련된 모든 데이터가 영구적으로 삭제됩니다.
             <br />
-            <br />
-            계속하려면 아래에 <strong>"탈퇴"</strong>를 입력해주세요.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <div className="space-y-2">
-          <Label htmlFor="confirm-text">확인 텍스트</Label>
+          <Label htmlFor="confirm-text">
+            계속하려면 아래에 <strong>"탈퇴"</strong>를 입력해주세요.
+          </Label>
           <Input
             id="confirm-text"
             value={confirmText}

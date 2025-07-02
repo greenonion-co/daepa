@@ -22,6 +22,12 @@ import DeleteAccountButton from "./components/DeleteAccountButton";
 import { Switch } from "@/components/ui/switch";
 import { useRouter } from "next/navigation";
 import { useTheme } from "@/contexts/ThemeContext";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { authControllerSignOut, userControllerGetUserProfile } from "@repo/api-client";
+import { toast } from "sonner";
+import Image from "next/image";
+import { USER_STATUS_MAP } from "@/app/(브리더스룸)/constants";
+import { cn } from "@/lib/utils";
 
 const SettingsPage = () => {
   const router = useRouter();
@@ -32,10 +38,20 @@ const SettingsPage = () => {
     marketing: false,
   });
 
-  const handleLogout = () => {
-    localStorage.removeItem("accessToken");
-    router.replace("/sign-in");
-  };
+  const { data: userProfile } = useQuery({
+    queryKey: [userControllerGetUserProfile.name],
+    queryFn: userControllerGetUserProfile,
+    select: (response) => response.data,
+  });
+
+  const { mutate: signOut } = useMutation({
+    mutationFn: authControllerSignOut,
+    onSuccess: () => {
+      localStorage.removeItem("accessToken");
+      toast.success("로그아웃 되었습니다.");
+      router.replace("/pet");
+    },
+  });
 
   const toggleNotification = (type: keyof typeof notifications) => {
     setNotifications((prev) => ({
@@ -52,9 +68,21 @@ const SettingsPage = () => {
     <div className="container mx-auto max-w-4xl space-y-6 p-6">
       {/* 헤더 */}
       <div className="mb-8 flex items-center gap-3">
-        <Settings className="h-8 w-8 text-blue-600" />
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">설정</h1>
+        <Settings className="h-8 w-8" />
+        <div className="flex-1">
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">설정</h1>
+            <Badge
+              className={cn(
+                userProfile?.isBiz
+                  ? "bg-blue-700 hover:bg-blue-800"
+                  : "bg-green-700 hover:bg-green-800",
+                "text-white",
+              )}
+            >
+              {userProfile?.isBiz ? "판매자" : "일반사용자"}
+            </Badge>
+          </div>
           <p className="text-gray-600 dark:text-gray-400">계정 및 앱 설정을 관리하세요</p>
         </div>
       </div>
@@ -72,22 +100,37 @@ const SettingsPage = () => {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="nickname">닉네임</Label>
-              <Input id="nickname" placeholder="닉네임을 입력하세요" defaultValue="사용자" />
+              <Input
+                id="nickname"
+                placeholder="닉네임을 입력하세요"
+                value={userProfile?.name ?? ""}
+                disabled
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="email">이메일</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="이메일을 입력하세요"
-                defaultValue="user@example.com"
-                disabled
-              />
+
+              <div className="relative">
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="이메일을 입력하세요"
+                  defaultValue="user@example.com"
+                  disabled
+                />
+                <Image
+                  src={`/${userProfile?.provider}_icon.svg`}
+                  alt={userProfile?.provider ?? ""}
+                  width={18}
+                  height={18}
+                  className="absolute right-4 top-1/2 -translate-y-1/2"
+                />
+              </div>
               <p className="text-xs text-gray-500">
                 OAuth로 가입한 계정은 이메일 변경이 제한됩니다
               </p>
             </div>
-            <Button className="w-full">정보 수정</Button>
+            {/* <Button className="w-full">정보 수정</Button> */}
           </CardContent>
         </Card>
 
@@ -149,19 +192,36 @@ const SettingsPage = () => {
             <div className="flex items-center justify-between rounded-lg bg-gray-50 p-3 dark:bg-gray-800">
               <div>
                 <Label className="text-sm font-medium">계정 상태</Label>
-                <p className="text-xs text-gray-500">활성</p>
+                <p className="text-xs text-gray-500">
+                  {USER_STATUS_MAP[userProfile?.status ?? "pending"]}
+                </p>
               </div>
               <Badge variant="secondary">정상</Badge>
             </div>
             <div className="flex items-center justify-between rounded-lg bg-gray-50 p-3 dark:bg-gray-800">
               <div>
+                <Label className="text-sm font-medium">판매자 여부</Label>
+              </div>
+
+              <Badge
+                className={cn(userProfile?.isBiz ? "bg-blue-700" : "bg-green-700", "text-white")}
+              >
+                {userProfile?.isBiz ? "사업자" : "일반 사용자"}
+              </Badge>
+            </div>
+            <div className="flex items-center justify-between rounded-lg bg-gray-50 p-3 dark:bg-gray-800">
+              <div>
                 <Label className="text-sm font-medium">마지막 로그인</Label>
-                <p className="text-xs text-gray-500">2024년 1월 15일 14:30</p>
+                <p className="text-xs text-gray-500">
+                  {userProfile?.lastLoginAt
+                    ? new Date(userProfile.lastLoginAt).toLocaleString()
+                    : "로그인 기록 없음"}
+                </p>
               </div>
             </div>
-            <Button variant="outline" className="w-full">
+            {/* <Button variant="outline" className="w-full">
               비밀번호 변경
-            </Button>
+            </Button> */}
           </CardContent>
         </Card>
 
@@ -179,35 +239,27 @@ const SettingsPage = () => {
                 <Label className="text-sm font-medium">
                   다크 모드
                   {theme === "light" ? (
-                    <Sun className="ml-2 h-4 w-4 fill-yellow-500 text-yellow-500" />
+                    <Sun className="h-4 w-4 fill-yellow-500 text-yellow-500" />
                   ) : (
-                    <Moon className="ml-2 h-4 w-4 fill-gray-400 text-gray-400" />
+                    <Moon className="h-4 w-4 fill-gray-200 text-gray-200" />
                   )}
                 </Label>
                 <p className="text-xs text-gray-500">어두운 테마로 전환</p>
               </div>
               <Switch checked={theme === "dark"} onCheckedChange={handleThemeChange} />
             </div>
-            <Separator />
-            <div className="flex items-center justify-between">
-              <div>
-                <Label className="text-sm font-medium">자동 저장</Label>
-                <p className="text-xs text-gray-500">작성 중인 내용 자동 저장</p>
-              </div>
-              <Switch checked={true} />
-            </div>
           </CardContent>
         </Card>
       </div>
 
       {/* 계정 관리 */}
-      <Card className="border-red-200 dark:border-red-800">
+      <Card className="border-red-200 dark:border-red-700">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-red-600 dark:text-red-400">
+          <CardTitle className="flex items-center gap-2 text-red-700 dark:text-red-400">
             <Trash2 className="h-5 w-5" />
             계정 관리
           </CardTitle>
-          <CardDescription className="text-red-600/70 dark:text-red-400/70">
+          <CardDescription className="text-red-600 dark:text-red-400/70">
             계정 관련 중요한 작업을 수행할 수 있습니다
           </CardDescription>
         </CardHeader>
@@ -222,7 +274,7 @@ const SettingsPage = () => {
             <Button
               variant="outline"
               size="sm"
-              onClick={handleLogout}
+              onClick={() => signOut()}
               className="border-red-300 text-red-700 hover:bg-red-100 dark:border-red-700 dark:text-red-300 dark:hover:bg-red-900/30"
             >
               로그아웃
