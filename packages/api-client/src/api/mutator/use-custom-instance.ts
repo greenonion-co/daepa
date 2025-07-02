@@ -1,6 +1,9 @@
 import Axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 
-export const AXIOS_INSTANCE = Axios.create({ baseURL: "http://localhost:4000" });
+export const AXIOS_INSTANCE = Axios.create({
+  baseURL: "http://localhost:4000",
+  withCredentials: true,
+});
 
 // 요청 인터셉터 추가
 AXIOS_INSTANCE.interceptors.request.use((config) => {

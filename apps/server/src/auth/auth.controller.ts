@@ -5,34 +5,38 @@ import {
   Res,
   UnauthorizedException,
   UseGuards,
+  Post,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService, ValidatedUser } from './auth.service';
 import { ApiResponse } from '@nestjs/swagger';
 import { UserDto } from 'src/user/user.dto';
-import { OAuthAuthenticatedUser } from './auth.decorator';
+import { JwtUser, PassportValidatedUser, Public } from './auth.decorator';
+import { TokenResponseDto } from './auth.dto';
+import { JwtUserPayload } from './strategies/jwt.strategy';
 
 @Controller('/auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Get('sign-in/kakao')
+  @Public()
+  @UseGuards(AuthGuard('kakao'))
   @ApiResponse({
     status: 302,
     description: '카카오 로그인 성공',
     type: UserDto,
   })
-  @UseGuards(AuthGuard('kakao'))
   async kakaoLogin(
-    @OAuthAuthenticatedUser() validatedUser: ValidatedUser,
+    @PassportValidatedUser() validatedUser: ValidatedUser,
     @Res() res: Response,
   ) {
     if (!validatedUser) {
       throw new UnauthorizedException('로그인 실패');
     }
 
-    const { accessToken, refreshToken } = await this.authService.getJwtToken(
+    const refreshToken = await this.authService.createJwtRefreshToken(
       validatedUser.userId,
     );
 
@@ -43,21 +47,28 @@ export class AuthController {
       maxAge: 180 * 24 * 60 * 60 * 1000, // 180일
     });
 
-    const queryParams = `?token=${encodeURIComponent(accessToken)}${validatedUser.isNew ? '&isNew=true' : ''}`;
-    return res.redirect(`http://localhost:3000/sign-in/auth${queryParams}`);
+    return res.redirect(
+      `http://localhost:3000/sign-in/auth?status=${validatedUser.userStatus}`,
+    );
   }
 
   @Get('sign-in/google')
+  @Public()
   @UseGuards(AuthGuard('google'))
+  @ApiResponse({
+    status: 302,
+    description: '구글 로그인 성공',
+    type: UserDto,
+  })
   async googleLogin(
-    @OAuthAuthenticatedUser() validatedUser: ValidatedUser,
+    @PassportValidatedUser() validatedUser: ValidatedUser,
     @Res() res: Response,
   ) {
     if (!validatedUser) {
       throw new UnauthorizedException('로그인 실패');
     }
 
-    const { accessToken, refreshToken } = await this.authService.getJwtToken(
+    const refreshToken = await this.authService.createJwtRefreshToken(
       validatedUser.userId,
     );
 
@@ -68,17 +79,24 @@ export class AuthController {
       maxAge: 180 * 24 * 60 * 60 * 1000, // 180일
     });
 
-    const queryParams = `?token=${encodeURIComponent(accessToken)}${validatedUser.isNew ? '&isNew=true' : ''}`;
-    return res.redirect(`http://localhost:3000/sign-in/auth${queryParams}`);
+    return res.redirect(
+      `http://localhost:3000/sign-in/auth?status=${validatedUser.userStatus}`,
+    );
   }
 
-  @Get('refresh')
+  @Get('token')
+  @Public()
   @ApiResponse({
     status: 200,
-    description: 'refresh token 재발급 성공',
+    description: 'token 발급 성공',
+    type: TokenResponseDto,
   })
-  async refreshToken(@Req() req: Request, @Res() res: Response) {
+  async getToken(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     const refreshToken = req.cookies.refreshToken;
+
     if (!refreshToken || typeof refreshToken !== 'string') {
       throw new UnauthorizedException('Refresh token이 유효하지 않습니다.');
     }
@@ -97,6 +115,56 @@ export class AuthController {
 
     return {
       token: newAccessToken,
+    };
+  }
+
+  @Post('sign-out')
+  @ApiResponse({
+    status: 200,
+    description: '로그아웃 성공',
+  })
+  async signOut(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const refreshToken = req.cookies.refreshToken;
+
+    if (refreshToken && typeof refreshToken === 'string') {
+      await this.authService.invalidateRefreshToken(refreshToken);
+    }
+
+    res.clearCookie('refreshToken', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+    });
+
+    return {
+      success: true,
+      message: '로그아웃되었습니다.',
+    };
+  }
+
+  @Post('delete-account')
+  @ApiResponse({
+    status: 200,
+    description: '탈퇴가 처리되었습니다.',
+  })
+  async deleteAccount(
+    @JwtUser() user: JwtUserPayload,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    await this.authService.deleteUser(user.userId);
+
+    res.clearCookie('refreshToken', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+    });
+
+    return {
+      success: true,
+      message: '탈퇴가 처리되었습니다.',
     };
   }
 }

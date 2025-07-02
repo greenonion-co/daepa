@@ -1,14 +1,20 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { UserService } from 'src/user/user.service';
 import { ProviderInfo } from './auth.types';
 import { JwtService } from '@nestjs/jwt';
 import { USER_STATUS } from 'src/user/user.constant';
 import * as bcrypt from 'bcrypt';
 import { JwtPayload } from './strategies/jwt.strategy';
+import { OauthService } from './oauth/oauth.service';
+import { OAUTH_PROVIDER } from './auth.constants';
 
 export type ValidatedUser = {
   userId: string;
-  isNew?: boolean;
+  userStatus: USER_STATUS;
 };
 
 @Injectable()
@@ -16,6 +22,7 @@ export class AuthService {
   constructor(
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
+    private readonly oauthService: OauthService,
   ) {}
 
   async validateUser(providerInfo: ProviderInfo): Promise<ValidatedUser> {
@@ -33,42 +40,39 @@ export class AuthService {
       );
       return {
         userId: userCreated.userId,
-        isNew: true,
+        userStatus: userCreated.status,
       };
     }
 
     return {
       userId: userFound.userId,
+      userStatus: userFound.status,
     };
-  }
-
-  async getJwtToken(userId: string) {
-    const accessToken = this.createJwtAccessToken(userId);
-    const refreshToken = await this.createJwtRefreshToken(userId);
-    return { accessToken, refreshToken };
   }
 
   createJwtAccessToken(userId: string) {
     const accessToken = this.jwtService.sign({
       sub: userId,
+      status: 'authenticated',
     });
     return accessToken;
   }
 
   async createJwtRefreshToken(userId: string) {
     const refreshToken = this.jwtService.sign(
-      { sub: userId },
+      {
+        sub: userId,
+        status: 'authenticated',
+      },
       {
         expiresIn: '180d',
         secret: process.env.JWT_REFRESH_SECRET ?? '',
       },
     );
 
-    const hashedRefreshToken = await this.updateUserRefreshToken(
-      userId,
-      refreshToken,
-    );
-    return hashedRefreshToken;
+    await this.updateUserRefreshToken(userId, refreshToken);
+
+    return refreshToken;
   }
 
   async refresh(refreshToken: string) {
@@ -80,6 +84,7 @@ export class AuthService {
       const user = await this.userService.findOne({
         user_id: tokenPayload.sub,
       });
+
       if (!user) {
         throw new UnauthorizedException('사용자를 찾을 수 없습니다.');
       }
@@ -88,6 +93,7 @@ export class AuthService {
         refreshToken,
         user.refreshToken ?? '',
       );
+
       if (!isRefreshTokenValid) {
         throw new UnauthorizedException('유효하지 않은 refresh token입니다.');
       }
@@ -129,7 +135,7 @@ export class AuthService {
   async updateUserRefreshToken(
     userId: string,
     refreshToken: string,
-  ): Promise<string> {
+  ): Promise<void> {
     const user = await this.userService.findOne({ user_id: userId });
     if (!user) {
       throw new Error('User not found');
@@ -159,7 +165,50 @@ export class AuthService {
       refreshToken: hashedRefreshToken,
       refreshTokenExpiresAt: expiresAt,
     });
+  }
 
-    return hashedRefreshToken;
+  async invalidateRefreshToken(refreshToken: string): Promise<void> {
+    try {
+      const tokenPayload = this.jwtService.verify<JwtPayload>(refreshToken, {
+        secret: process.env.JWT_REFRESH_SECRET ?? '',
+      });
+
+      await this.userService.update(tokenPayload.sub, {
+        refreshToken: null,
+        refreshTokenExpiresAt: null,
+      });
+    } catch (error) {
+      // 토큰이 이미 만료되었거나 유효하지 않은 경우 무시
+    }
+  }
+
+  async deleteUser(userId: string): Promise<void> {
+    const user = await this.userService.findOne({ user_id: userId });
+    if (!user) {
+      throw new BadRequestException('사용자를 찾을 수 없습니다.');
+    }
+    if (user.status === USER_STATUS.DELETED) {
+      throw new BadRequestException('이미 탈퇴된 회원입니다.');
+    }
+
+    if (user.provider === OAUTH_PROVIDER.KAKAO) {
+      const { id: disconnectedId } = await this.oauthService.disconnectKakao(
+        user.providerId ?? '',
+      );
+      if (user.providerId === disconnectedId.toString()) {
+        await this.softDeleteUser(userId);
+      }
+    }
+  }
+
+  private async softDeleteUser(userId: string): Promise<void> {
+    await this.userService.update(userId, {
+      userId: 'DELETED_' + userId,
+      providerId: null,
+      refreshToken: null,
+      refreshTokenExpiresAt: null,
+      status: USER_STATUS.DELETED,
+    });
+    // TODO: 보관용 테이블에 삭제된 유저의 암호화된 provider_id, provider, deleted_at, expires_at (현재+3년?) 저장
   }
 }

@@ -32,6 +32,9 @@ export class UserEntity {
   })
   role: USER_ROLE;
 
+  @Column({ default: false })
+  is_biz: boolean;
+
   @Column({
     type: 'enum',
     enum: OAUTH_PROVIDER,
@@ -39,16 +42,16 @@ export class UserEntity {
   provider: OAUTH_PROVIDER;
 
   @Expose({ name: 'providerId' })
-  @Column()
-  provider_id: string;
+  @Column({ type: 'varchar', nullable: true })
+  provider_id: string | null;
 
   @Expose({ name: 'refreshToken' })
-  @Column({ nullable: true })
-  refresh_token?: string;
+  @Column({ type: 'varchar', nullable: true })
+  refresh_token?: string | null;
 
   @Expose({ name: 'refreshTokenExpiresAt' })
-  @Column({ nullable: true })
-  refresh_token_expires_at?: Date;
+  @Column({ type: 'datetime', nullable: true })
+  refresh_token_expires_at?: Date | null;
 
   @Column({
     type: 'enum',
@@ -60,7 +63,7 @@ export class UserEntity {
   @Column({ nullable: true })
   last_login_at: Date;
 
-  @Exclude()
+  @Expose({ name: 'createdAt' })
   @Column()
   @CreateDateColumn()
   created_at: Date;

@@ -27,6 +27,11 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './auth/strategies/jwt.strategy';
 import { JwtModule } from '@nestjs/jwt';
 import { GoogleStrategy } from './auth/strategies/google.strategy';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtAuthGuard } from './auth/auth.decorator';
+import { HttpModule } from '@nestjs/axios';
+import { OauthService } from './auth/oauth/oauth.service';
+import { UserController } from './user/user.controller';
 
 const ENTITIES = [
   UserEntity,
@@ -38,6 +43,7 @@ const ENTITIES = [
 
 @Module({
   imports: [
+    HttpModule,
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ['.env'],
@@ -68,6 +74,7 @@ const ENTITIES = [
     EggController,
     BrEggController,
     AuthController,
+    UserController,
   ],
   providers: [
     AppService,
@@ -77,9 +84,14 @@ const ENTITIES = [
     ParentService,
     EggService,
     AuthService,
+    OauthService,
     KakaoStrategy,
     GoogleStrategy,
     JwtStrategy,
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
   ],
 })
 export class AppModule {
