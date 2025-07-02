@@ -159,7 +159,7 @@ const HatchingPage = () => {
           <Tabs
             defaultValue="noHatched"
             onValueChange={(value) => setTab(value as "hatched" | "noHatched")}
-            className="sticky top-0 z-10 bg-white pb-2"
+            className="sticky top-0 z-10 pb-2"
           >
             <TabsList>
               <TabsTrigger value="all">

@@ -87,13 +87,13 @@ const NotiButton = () => {
                   key={index}
                   className="cursor-pointer rounded-md border border-gray-500 p-2 text-sm"
                 >
-                  <p className="font-medium text-gray-200">{noti.title}</p>
-                  <p className="text-xs text-gray-400">{noti.message}</p>
+                  <p className="font-medium text-gray-200 dark:text-gray-800">{noti.title}</p>
+                  <p className="text-xs text-gray-400 dark:text-gray-600">{noti.message}</p>
                 </Link>
               ))}
-              {unreadCount > 3 && (
-                <p className="text-muted-foreground text-right text-xs">
-                  외 {unreadCount - 3}개의 알림이 있습니다.
+              {unreadCount > 4 && (
+                <p className="text-muted-foreground text-right text-xs dark:text-gray-800">
+                  외 {unreadCount - 4}개의 알림이 있습니다.
                 </p>
               )}
             </div>
