@@ -63,7 +63,7 @@ export class UserEntity {
   @Column({ nullable: true })
   last_login_at: Date;
 
-  @Exclude()
+  @Expose({ name: 'createdAt' })
   @Column()
   @CreateDateColumn()
   created_at: Date;
