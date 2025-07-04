@@ -100,7 +100,11 @@ export class UserService {
 
       await this.userRepository.update(
         { user_id: userId },
-        { name, is_biz: isBiz },
+        {
+          name,
+          is_biz: isBiz,
+          status: USER_STATUS.ACTIVE,
+        },
       );
     } catch (error) {
       if (isMySQLError(error) && error.code === 'ER_DUP_ENTRY') {
