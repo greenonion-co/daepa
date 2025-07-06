@@ -124,11 +124,6 @@ export class UserService {
     }
   }
 
-  async isEmailExists(email: string): Promise<boolean> {
-    const count = await this.userRepository.count({ where: { email } });
-    return count > 0;
-  }
-
   async update(userId: string, userDto: Partial<UserDto>) {
     const user = instanceToPlain(userDto);
     const userUpdateEntity = plainToInstance(UserEntity, user);

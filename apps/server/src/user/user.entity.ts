@@ -40,10 +40,6 @@ export class UserEntity {
   @Column({ default: false })
   is_biz: boolean;
 
-  @Expose({ name: 'oauthId' })
-  @Column({ nullable: true })
-  oauth_id: number;
-
   @Column({
     type: 'enum',
     enum: OAUTH_PROVIDER,
