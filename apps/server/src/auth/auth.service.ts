@@ -233,20 +233,22 @@ export class AuthService {
       throw new BadRequestException('이미 탈퇴된 회원입니다.');
     }
 
-    if (user.provider === OAUTH_PROVIDER.KAKAO) {
-      const { id: disconnectedId } = await this.oauthService.disconnectKakao(
-        user.providerId ?? '',
-      );
-      if (user.providerId === disconnectedId.toString()) {
-        await this.softDeleteUser(userId);
-      }
-    }
+    // if (user.provider === OAUTH_PROVIDER.KAKAO) {
+    //   const { id: disconnectedId } = await this.oauthService.disconnectKakao(
+    //     user.providerId ?? '',
+    //   );
+    //   if (user.providerId === disconnectedId.toString()) {
+    //     await this.softDeleteUser(userId);
+    //   }
+    // }
+
+    await this.softDeleteUser(userId);
+    // TODO: user.email에 해당되는 정보 oauth 테이블에서 처리하기
   }
 
   private async softDeleteUser(userId: string): Promise<void> {
     await this.userService.update(userId, {
       userId: 'DELETED_' + userId,
-      providerId: null,
       refreshToken: null,
       refreshTokenExpiresAt: null,
       status: USER_STATUS.DELETED,
