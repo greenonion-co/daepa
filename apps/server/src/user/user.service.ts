@@ -53,7 +53,6 @@ export class UserService {
       provider,
       providerId,
       status,
-      lastLoginAt: new Date(),
     });
 
     const savedUserEntity = await this.userRepository.save(userEntity);

@@ -64,10 +64,6 @@ export class UserEntity {
   })
   status: USER_STATUS;
 
-  @Expose({ name: 'lastLoginAt' })
-  @Column({ nullable: true })
-  last_login_at: Date;
-
   @Expose({ name: 'createdAt' })
   @Column()
   @CreateDateColumn()

@@ -82,12 +82,6 @@ class UserBaseDto {
   status: USER_STATUS;
 
   @ApiProperty({
-    description: '마지막 로그인 시간',
-  })
-  @IsDate()
-  lastLoginAt: Date;
-
-  @ApiProperty({
     description: '생성 시간',
   })
   @IsDate()
@@ -111,7 +105,6 @@ export class UserDto extends PickType(UserBaseDto, [
   'refreshToken',
   'refreshTokenExpiresAt',
   'status',
-  'lastLoginAt',
   'createdAt',
   'updatedAt',
 ]) {}
@@ -135,7 +128,6 @@ export class UserProfileDto extends PickType(UserBaseDto, [
   'isBiz',
   'provider',
   'status',
-  'lastLoginAt',
   'createdAt',
 ]) {
   @Exclude()
