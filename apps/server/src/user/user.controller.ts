@@ -17,10 +17,8 @@ export class UserController {
     type: UserProfileDto,
   })
   async getUserProfile(@JwtUser() token: JwtUserPayload) {
-    const user = await this.userService.findOneProfile({
-      user_id: token.userId,
-    });
-    return user;
+    const userProfile = await this.userService.findOneProfile(token.userId);
+    return userProfile;
   }
 
   @Post('/init-info')

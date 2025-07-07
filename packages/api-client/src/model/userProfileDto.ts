@@ -14,6 +14,8 @@ export interface UserProfileDto {
   userId: string;
   /** 회원 이름 */
   name: string;
+  /** 회원 이메일 */
+  email: string;
   /** 회원 역할 */
   role: UserProfileDtoRole;
   /** 사업자 여부 */
@@ -22,8 +24,6 @@ export interface UserProfileDto {
   provider: UserProfileDtoProvider;
   /** 유저 상태 */
   status: UserProfileDtoStatus;
-  /** 마지막 로그인 시간 */
-  lastLoginAt: string;
   /** 생성 시간 */
   createdAt: string;
 }

@@ -7,7 +7,6 @@
  */
 import type { UserDtoRole } from "./userDtoRole";
 import type { UserDtoProvider } from "./userDtoProvider";
-import type { UserDtoProviderId } from "./userDtoProviderId";
 import type { UserDtoRefreshToken } from "./userDtoRefreshToken";
 import type { UserDtoRefreshTokenExpiresAt } from "./userDtoRefreshTokenExpiresAt";
 import type { UserDtoStatus } from "./userDtoStatus";
@@ -17,22 +16,20 @@ export interface UserDto {
   userId: string;
   /** 회원 이름 */
   name: string;
+  /** 회원 이메일 */
+  email: string;
   /** 회원 역할 */
   role: UserDtoRole;
   /** 사업자 여부 */
   isBiz: boolean;
   /** Oauth 제공자 */
   provider: UserDtoProvider;
-  /** Oauth 제공자 ID */
-  providerId: UserDtoProviderId;
   /** refresh token */
   refreshToken: UserDtoRefreshToken;
   /** refresh token 만료 시간 */
   refreshTokenExpiresAt: UserDtoRefreshTokenExpiresAt;
   /** 유저 상태 */
   status: UserDtoStatus;
-  /** 마지막 로그인 시간 */
-  lastLoginAt: string;
   /** 생성 시간 */
   createdAt: string;
   /** 수정 시간 */

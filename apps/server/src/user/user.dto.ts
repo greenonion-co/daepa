@@ -1,6 +1,7 @@
-import { ApiProperty, OmitType, PickType } from '@nestjs/swagger';
+import { ApiProperty, PickType } from '@nestjs/swagger';
 import { USER_ROLE, USER_STATUS } from './user.constant';
 import {
+  IsArray,
   IsBoolean,
   IsDate,
   IsEnum,
@@ -24,6 +25,12 @@ class UserBaseDto {
   name: string;
 
   @ApiProperty({
+    description: '회원 이메일',
+  })
+  @IsString()
+  email: string;
+
+  @ApiProperty({
     description: '회원 역할',
     enum: USER_ROLE,
     'x-enumNames': Object.keys(USER_ROLE),
@@ -43,15 +50,8 @@ class UserBaseDto {
     enum: OAUTH_PROVIDER,
     'x-enumNames': Object.keys(OAUTH_PROVIDER),
   })
-  @IsEnum(OAUTH_PROVIDER)
-  provider: OAUTH_PROVIDER;
-
-  @ApiProperty({
-    description: 'Oauth 제공자 ID',
-  })
-  @IsString()
-  @IsOptional()
-  providerId?: string | null;
+  @IsArray()
+  provider: OAUTH_PROVIDER[];
 
   @ApiProperty({
     description: 'refresh token',
@@ -76,12 +76,6 @@ class UserBaseDto {
   status: USER_STATUS;
 
   @ApiProperty({
-    description: '마지막 로그인 시간',
-  })
-  @IsDate()
-  lastLoginAt: Date;
-
-  @ApiProperty({
     description: '생성 시간',
   })
   @IsDate()
@@ -97,14 +91,13 @@ class UserBaseDto {
 export class UserDto extends PickType(UserBaseDto, [
   'userId',
   'name',
+  'email',
   'role',
   'isBiz',
   'provider',
-  'providerId',
   'refreshToken',
   'refreshTokenExpiresAt',
   'status',
-  'lastLoginAt',
   'createdAt',
   'updatedAt',
 ]) {}
@@ -123,16 +116,13 @@ export class CreateInitUserInfoDto extends PickType(UserBaseDto, ['name']) {
 export class UserProfileDto extends PickType(UserBaseDto, [
   'userId',
   'name',
+  'email',
   'role',
   'isBiz',
   'provider',
   'status',
-  'lastLoginAt',
   'createdAt',
 ]) {
-  @Exclude()
-  declare providerId?: string | null;
-
   @Exclude()
   declare refreshToken?: string | null;
 
@@ -151,10 +141,7 @@ export class UserProfilePublicDto extends PickType(UserBaseDto, [
   'status',
 ]) {
   @Exclude()
-  declare provider?: OAUTH_PROVIDER;
-
-  @Exclude()
-  declare providerId?: string | null;
+  declare provider?: OAUTH_PROVIDER[];
 
   @Exclude()
   declare refreshToken?: string | null;

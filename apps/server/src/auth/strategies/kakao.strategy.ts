@@ -24,8 +24,12 @@ export class KakaoStrategy extends PassportStrategy(Strategy) {
       if (!profile.id) {
         throw new Error('Kakao profile id is required');
       }
+      if (!profile.emails?.[0]?.value) {
+        throw new Error('Kakao email is required');
+      }
 
       const providerInfo = {
+        email: profile.emails[0].value,
         provider: OAUTH_PROVIDER.KAKAO,
         providerId: profile.id.toString(),
       };

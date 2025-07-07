@@ -11,7 +11,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy) {
       clientID: process.env.GOOGLE_CLIENT_ID ?? '',
       clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? '',
       callbackURL: '/api/auth/sign-in/google',
-      scope: ['profile'],
+      scope: ['profile', 'email'],
     });
   }
 
@@ -25,8 +25,12 @@ export class GoogleStrategy extends PassportStrategy(Strategy) {
       if (!profile.id) {
         throw new Error('Google profile id is required');
       }
+      if (!profile.emails?.[0]?.value) {
+        throw new Error('Google email is required');
+      }
 
       const providerInfo = {
+        email: profile.emails[0].value,
         provider: OAUTH_PROVIDER.GOOGLE,
         providerId: profile.id.toString(),
       };

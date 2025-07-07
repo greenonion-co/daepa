@@ -32,9 +32,11 @@ import { JwtAuthGuard } from './auth/auth.decorator';
 import { HttpModule } from '@nestjs/axios';
 import { OauthService } from './auth/oauth/oauth.service';
 import { UserController } from './user/user.controller';
+import { OauthEntity } from './auth/oauth/oauth.entity';
 
 const ENTITIES = [
   UserEntity,
+  OauthEntity,
   PetEntity,
   UserNotificationEntity,
   ParentEntity,
@@ -79,6 +81,7 @@ const ENTITIES = [
   providers: [
     AppService,
     UserService,
+    OauthService,
     PetService,
     UserNotificationService,
     ParentService,

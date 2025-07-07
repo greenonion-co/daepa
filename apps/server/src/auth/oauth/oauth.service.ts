@@ -2,6 +2,14 @@ import { HttpService } from '@nestjs/axios';
 import { Injectable, Logger } from '@nestjs/common';
 import { AxiosError } from 'axios';
 import { catchError, firstValueFrom } from 'rxjs';
+import { ProviderInfo } from '../auth.types';
+import { OauthEntity } from './oauth.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { FindOptionsWhere, Repository } from 'typeorm';
+import { instanceToPlain } from 'class-transformer';
+import { plainToInstance } from 'class-transformer';
+import { OauthDto } from './oauth.dto';
+import { OAUTH_PROVIDER } from '../auth.constants';
 
 type KakaoDisconnectResponse = {
   id: number;
@@ -10,7 +18,43 @@ type KakaoDisconnectResponse = {
 @Injectable()
 export class OauthService {
   private readonly logger = new Logger(OauthService.name);
-  constructor(private readonly httpService: HttpService) {}
+  constructor(
+    @InjectRepository(OauthEntity)
+    private readonly oauthRepository: Repository<OauthEntity>,
+    private readonly httpService: HttpService,
+  ) {}
+
+  async findOne(where: FindOptionsWhere<OauthEntity>) {
+    const oauthEntity = await this.oauthRepository.findOneBy(where);
+    if (!oauthEntity) {
+      return null;
+    }
+
+    const oauth = instanceToPlain(oauthEntity);
+    return plainToInstance(OauthDto, oauth);
+  }
+
+  async findAllProvidersByEmail(email: string): Promise<OAUTH_PROVIDER[]> {
+    const oauthEntities = await this.oauthRepository.find({
+      where: {
+        email,
+      },
+      select: ['provider'],
+    });
+
+    return oauthEntities.map((oauth) => oauth.provider);
+  }
+
+  async createOauthInfo(providerInfo: { userId: string } & ProviderInfo) {
+    const { email, provider, providerId } = providerInfo;
+
+    await this.oauthRepository.insert({
+      email,
+      provider,
+      provider_id: providerId,
+      user_id: providerInfo.userId,
+    });
+  }
 
   async disconnectKakao(providerId: string): Promise<KakaoDisconnectResponse> {
     const response = await firstValueFrom(

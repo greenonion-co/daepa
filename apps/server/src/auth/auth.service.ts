@@ -26,27 +26,68 @@ export class AuthService {
   ) {}
 
   async validateUser(providerInfo: ProviderInfo): Promise<ValidatedUser> {
-    const { provider, providerId } = providerInfo;
+    const { email, provider, providerId } = providerInfo;
 
-    const userFound = await this.userService.findOne({
+    const oauthFound = await this.oauthService.findOne({
+      email,
       provider,
       provider_id: providerId,
     });
+    // 기존 사용자 로그인
+    if (oauthFound) {
+      const userFound = await this.userService.findOne({
+        email,
+      });
 
-    if (!userFound) {
-      const userCreated = await this.userService.createUser(
+      if (userFound) {
+        return {
+          userId: userFound.userId,
+          userStatus: userFound.status,
+        };
+      } else {
+        throw new BadRequestException(
+          'SNS 계정 정보와 사용자 정보가 일치하지 않습니다. 관리자에게 문의해주세요.',
+        );
+      }
+    }
+
+    // 새로운 OAuth 가입
+    let newOAuthUser: { userId: string; status: USER_STATUS };
+
+    const userFoundBySameEmail = await this.userService.findOne({
+      email,
+    });
+    if (userFoundBySameEmail) {
+      // 기존 동일한 이메일을 사용하는 유저가 있는 경우, 해당 유저에 OAuth 추가 연결
+      newOAuthUser = {
+        userId: userFoundBySameEmail.userId,
+        status: userFoundBySameEmail.status,
+      };
+    } else {
+      // 최초 가입
+      const newUserCreated = await this.userService.createUser(
         providerInfo,
         USER_STATUS.PENDING,
       );
-      return {
-        userId: userCreated.userId,
-        userStatus: userCreated.status,
+      newOAuthUser = {
+        userId: newUserCreated.userId,
+        status: newUserCreated.status,
       };
     }
 
+    // OAuth 정보 생성 (공통 로직)
+    await this.oauthService.createOauthInfo({
+      email,
+      provider,
+      providerId,
+      userId: newOAuthUser.userId,
+    });
+
+    // TODO: 둘 중 하나라도 실패하는 경우 회원가입 안되도록 롤백 처리 필요
+
     return {
-      userId: userFound.userId,
-      userStatus: userFound.status,
+      userId: newOAuthUser.userId,
+      userStatus: newOAuthUser.status,
     };
   }
 
@@ -178,6 +219,7 @@ export class AuthService {
         refreshTokenExpiresAt: null,
       });
     } catch (error) {
+      console.error(error);
       // 토큰이 이미 만료되었거나 유효하지 않은 경우 무시
     }
   }
@@ -191,20 +233,22 @@ export class AuthService {
       throw new BadRequestException('이미 탈퇴된 회원입니다.');
     }
 
-    if (user.provider === OAUTH_PROVIDER.KAKAO) {
-      const { id: disconnectedId } = await this.oauthService.disconnectKakao(
-        user.providerId ?? '',
-      );
-      if (user.providerId === disconnectedId.toString()) {
-        await this.softDeleteUser(userId);
-      }
-    }
+    // if (user.provider === OAUTH_PROVIDER.KAKAO) {
+    //   const { id: disconnectedId } = await this.oauthService.disconnectKakao(
+    //     user.providerId ?? '',
+    //   );
+    //   if (user.providerId === disconnectedId.toString()) {
+    //     await this.softDeleteUser(userId);
+    //   }
+    // }
+
+    await this.softDeleteUser(userId);
+    // TODO: user.email에 해당되는 정보 oauth 테이블에서 처리하기
   }
 
   private async softDeleteUser(userId: string): Promise<void> {
     await this.userService.update(userId, {
       userId: 'DELETED_' + userId,
-      providerId: null,
       refreshToken: null,
       refreshTokenExpiresAt: null,
       status: USER_STATUS.DELETED,

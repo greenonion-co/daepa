@@ -1138,6 +1138,7 @@ export const getUserControllerGetUserProfileResponseMock = (
 ): UserProfileDto => ({
   userId: faker.string.alpha(20),
   name: faker.string.alpha(20),
+  email: faker.string.alpha(20),
   role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
   isBiz: faker.datatype.boolean(),
   provider: faker.helpers.arrayElement(["kakao", "google", "naver", "apple"] as const),
@@ -1148,7 +1149,6 @@ export const getUserControllerGetUserProfileResponseMock = (
     "suspended",
     "deleted",
   ] as const),
-  lastLoginAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
   createdAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
   ...overrideResponse,
 });

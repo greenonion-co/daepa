@@ -114,13 +114,15 @@ const SettingsPage = () => {
                 <Input
                   id="email"
                   type="email"
+                  value={userProfile?.email ?? ""}
                   placeholder="이메일을 입력하세요"
                   defaultValue="user@example.com"
                   disabled
                 />
+                {/* TODO: provider가 여러 개인 경우 대응하기 */}
                 <Image
-                  src={`/${userProfile?.provider}_icon.svg`}
-                  alt={userProfile?.provider ?? ""}
+                  src={`/${userProfile?.provider?.[0]}_icon.svg`}
+                  alt={userProfile?.provider?.[0] ?? ""}
                   width={24}
                   height={24}
                   className="absolute right-4 top-1/2 -translate-y-1/2"
