@@ -112,10 +112,11 @@ export const DataTable = ({
                     <TableRow
                       key={row.id}
                       data-state={row.getIsSelected() && "selected"}
-                      // TODO: 공개 여부 필드 추가 후 조건 수정 예정
                       className={cn(
                         "cursor-pointer",
-                        "isPublic" in row.original && row.original.isPublic ? "bg-blue-100" : "",
+                        "isPublic" in row.original && row.original.isPublic
+                          ? "bg-blue-100 hover:bg-blue-200"
+                          : "opacity-60",
                       )}
                       onClick={(e) => handleRowClick({ e, id: row.original.petId })}
                     >

@@ -5,6 +5,7 @@ import {
   IsNumber,
   IsObject,
   IsOptional,
+  IsBoolean,
 } from 'class-validator';
 import { PET_SEX, PET_SPECIES } from './pet.constants';
 import { ApiProperty, OmitType, PartialType, PickType } from '@nestjs/swagger';
@@ -79,6 +80,24 @@ export class PetBaseDto {
   @IsOptional()
   @IsString()
   growth?: string;
+
+  @ApiProperty({
+    description: '펫 판매 여부',
+    example: true,
+    required: false,
+  })
+  @IsOptional()
+  @IsBoolean()
+  nfs?: boolean;
+
+  @ApiProperty({
+    description: '펫 공개 여부',
+    example: false,
+    required: false,
+  })
+  @IsOptional()
+  @IsBoolean()
+  isPublic?: boolean;
 
   @ApiProperty({
     description: '펫 성별(수컷, 암컷, 미구분)',

@@ -17,7 +17,7 @@ function PetDetailPage({ params }: PetDetailPageProps) {
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string>("");
 
   const { data } = useQuery({
-    queryKey: [petControllerFindOne.name],
+    queryKey: [petControllerFindOne.name, petId],
     queryFn: () => petControllerFindOne(petId),
     select: (response) => response.data,
   });

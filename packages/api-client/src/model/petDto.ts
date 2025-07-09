@@ -39,4 +39,8 @@ export interface PetDto {
   father?: PetParentDto;
   /** 엄마 개체 정보 */
   mother?: PetParentDto;
+  /** 판매 가능 여부 */
+  nfs?: boolean;
+  /** 펫 공개 여부 */
+  isPublic?: boolean;
 }

@@ -89,6 +89,16 @@ export const columns: ColumnDef<PetDto>[] = [
     enableHiding: false,
   },
   {
+    accessorKey: "isPublic",
+    header: TABLE_HEADER.isPublic,
+    cell: ({ row }) => <div className="capitalize">{row.original.isPublic ? "✅" : ""}</div>,
+  },
+  {
+    accessorKey: "nfs",
+    header: TABLE_HEADER.nfs,
+    cell: ({ row }) => <div className="capitalize">{row.original.nfs ? "✅" : ""}</div>,
+  },
+  {
     accessorKey: "name",
     header: TABLE_HEADER.name,
     cell: ({ row }) => {

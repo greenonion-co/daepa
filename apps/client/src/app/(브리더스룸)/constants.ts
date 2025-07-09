@@ -309,7 +309,8 @@ export const TABLE_HEADER = {
   canBreed: "발정 여부",
   breedingCount: "산란",
   pairing: "메이팅 상대",
-  saleInfo: "판매 상태",
+  nfs: "판매 가능",
+  isPublic: "공개 여부",
 };
 
 export const SPECIES_KOREAN_INFO: Record<PetDtoSpecies, string> = {

@@ -67,4 +67,12 @@ export class PetEntity {
   @Expose({ name: 'isDeleted' })
   @Column({ default: false })
   is_deleted: boolean;
+
+  @Expose({ name: 'nfs' })
+  @Column({ nullable: true })
+  nfs?: boolean;
+
+  @Expose({ name: 'isPublic' })
+  @Column({ default: false })
+  isPublic?: boolean;
 }

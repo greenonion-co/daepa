@@ -17,12 +17,13 @@ import {
   ParentDtoRole,
   PetDtoSex,
   ParentDtoStatus,
+  petControllerFindOne,
 } from "@repo/api-client";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { overlay } from "overlay-kit";
 import Dialog from "@/app/(브리더스룸)/components/Form/Dialog";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import useParentLinkStore, { PetParentDtoWithMessage } from "../../store/parentLink";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -36,11 +37,11 @@ interface CardBackProps {
 }
 
 const CardBack = ({ pet, from }: CardBackProps) => {
+  const queryClient = useQueryClient();
   const { formData, errors, setFormData, setPage } = usePetStore();
   const { selectedParent, setSelectedParent } = useParentLinkStore();
 
   const [isEditing, setIsEditing] = useState(from === "egg");
-  const [isPublic, setIsPublic] = useState(false);
   const [isTooltipOpen, setIsTooltipOpen] = useState(false);
 
   const router = useRouter();
@@ -209,8 +210,45 @@ const CardBack = ({ pet, from }: CardBackProps) => {
     }
   };
 
-  const onToggle = () => {
-    setIsPublic(!isPublic);
+  const updatePet = async (data: UpdatePetDto, close: () => void) => {
+    try {
+      await petControllerUpdate(pet.petId, data);
+      queryClient.invalidateQueries({
+        queryKey: [petControllerFindOne.name, pet.petId],
+      });
+      toast.success("펫 정보가 변경되었습니다.");
+    } catch (error) {
+      console.error("Failed to update pet:", error);
+      toast.error("펫 정보 수정에 실패했습니다.");
+    } finally {
+      close();
+    }
+  };
+
+  const onPublicChange = () => {
+    overlay.open(({ isOpen, close, unmount }) => (
+      <Dialog
+        isOpen={isOpen}
+        onCloseAction={close}
+        onConfirmAction={() => updatePet({ isPublic: !pet.isPublic } as UpdatePetDto, close)}
+        onExit={unmount}
+        title="펫 공개 여부 변경"
+        description="펫 공개 여부를 변경하시겠습니까?"
+      />
+    ));
+  };
+
+  const onNfsChange = () => {
+    overlay.open(({ isOpen, close, unmount }) => (
+      <Dialog
+        isOpen={isOpen}
+        onCloseAction={close}
+        onConfirmAction={() => updatePet({ nfs: !pet.nfs } as UpdatePetDto, close)}
+        onExit={unmount}
+        title="판매 가능 여부 변경"
+        description="판매 가능 여부를 변경하시겠습니까?"
+      />
+    ));
   };
 
   return (
@@ -221,11 +259,23 @@ const CardBack = ({ pet, from }: CardBackProps) => {
             <Switch
               id="visibility"
               className="data-[state=checked]:bg-blue-600"
-              checked={isPublic}
-              onCheckedChange={onToggle}
+              checked={pet.isPublic ?? false}
+              onCheckedChange={onPublicChange}
             />
             <Label htmlFor="visibility" className="text-muted-foreground text-sm">
               다른 브리더에게 공개
+            </Label>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Switch
+              id="visibility"
+              className="data-[state=checked]:bg-green-600"
+              checked={pet.nfs ?? false}
+              onCheckedChange={onNfsChange}
+            />
+            <Label htmlFor="visibility" className="text-muted-foreground text-sm">
+              판매 가능
             </Label>
           </div>
 

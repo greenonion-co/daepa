@@ -18,7 +18,9 @@ export type FieldName =
   | "clutchOrder"
   | "clutch"
   | "parents"
-  | "layingDate";
+  | "layingDate"
+  | "nfs"
+  | "isPublic";
 
 export type FormStep = {
   title: string;
