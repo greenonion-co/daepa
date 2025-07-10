@@ -17,6 +17,7 @@ import {
   FOOD_BADGE_COLORS,
   FOOD_BADGE_TEXT_COLORS,
   GENDER_KOREAN_INFO,
+  SALE_STATUS_KOREAN_INFO,
   SPECIES_KOREAN_INFO,
   STATUS_MAP,
   TABLE_HEADER,
@@ -91,12 +92,19 @@ export const columns: ColumnDef<PetDto>[] = [
   {
     accessorKey: "isPublic",
     header: TABLE_HEADER.isPublic,
-    cell: ({ row }) => <div className="capitalize">{row.original.isPublic ? "✅" : ""}</div>,
+    cell: ({ cell }) => <div className="capitalize">{cell.getValue() ? "✅" : ""}</div>,
   },
   {
-    accessorKey: "nfs",
-    header: TABLE_HEADER.nfs,
-    cell: ({ row }) => <div className="capitalize">{row.original.nfs ? "✅" : ""}</div>,
+    accessorKey: "saleStatus",
+    header: TABLE_HEADER.saleStatus,
+    cell: ({ cell }) => {
+      const status = cell.getValue() as string;
+      return (
+        <div className="capitalize">
+          {SALE_STATUS_KOREAN_INFO[status as keyof typeof SALE_STATUS_KOREAN_INFO] || "미정"}
+        </div>
+      );
+    },
   },
   {
     accessorKey: "name",

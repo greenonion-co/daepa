@@ -7,7 +7,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { PET_SEX, PET_SPECIES } from './pet.constants';
+import { PET_SALE_STATUS, PET_SEX, PET_SPECIES } from './pet.constants';
 
 @Entity({ name: 'pets' })
 @Index('UNIQUE_PET_ID', ['pet_id'], { unique: true })
@@ -68,9 +68,9 @@ export class PetEntity {
   @Column({ default: false })
   is_deleted: boolean;
 
-  @Expose({ name: 'nfs' })
-  @Column({ nullable: true })
-  nfs?: boolean;
+  @Expose({ name: 'saleStatus' })
+  @Column({ type: 'enum', enum: PET_SALE_STATUS, nullable: true })
+  saleStatus?: PET_SALE_STATUS;
 
   @Expose({ name: 'isPublic' })
   @Column({ default: false })
