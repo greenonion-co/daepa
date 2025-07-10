@@ -1,4 +1,4 @@
-import { Bell, Bubbles, Egg, Film, Home, Inbox } from "lucide-react";
+import { Bell, Bubbles, DollarSign, Egg, Film, Home, Inbox, TreeDeciduous } from "lucide-react";
 import { FormStep, SelectorConfig } from "./register/types";
 import { PetDtoSex, PetDtoSpecies, UserDtoStatus, UserNotificationDtoType } from "@repo/api-client";
 
@@ -284,12 +284,11 @@ export const MORPH_LIST_BY_SPECIES: Record<keyof typeof SPECIES_KOREAN_INFO, str
   GG: ["노멀", "하리퀸", "다크", "파이어", "트라이컬러", "기타"],
 };
 
-export const SALE_KOREAN_INFO = {
+export const SALE_STATUS_KOREAN_INFO = {
   NFS: "판매 안함",
-  SOLD: "판매 완료",
   ON_SALE: "판매 중",
   ON_RESERVATION: "예약 중",
-  TBD: "가격 미정",
+  SOLD: "판매 완료",
 };
 
 export const TABLE_HEADER = {
@@ -309,7 +308,7 @@ export const TABLE_HEADER = {
   canBreed: "발정 여부",
   breedingCount: "산란",
   pairing: "메이팅 상대",
-  nfs: "판매 가능",
+  saleStatus: "판매 상태",
   isPublic: "공개 여부",
 };
 
@@ -371,6 +370,11 @@ export const SIDEBAR_ITEMS = [
     icon: Inbox,
   },
   {
+    title: "분양룸",
+    url: "/sales",
+    icon: DollarSign,
+  },
+  {
     title: "알림",
     url: "/noti",
     icon: Bell,
@@ -385,16 +389,11 @@ export const SIDEBAR_ITEMS = [
     url: "/shorts",
     icon: Film,
   },
-  // {
-  //   title: "메이팅룸",
-  //   url: "/mating",
-  //   icon: Heart,
-  // },
-  // {
-  //   title: "분양룸",
-  //   url: "/sales",
-  //   icon: DollarSign,
-  // },
+  {
+    title: "가족관계도",
+    url: "/familyTree",
+    icon: TreeDeciduous,
+  },
 ];
 
 export const FOOD_BADGE_COLORS: Record<string, string> = {
