@@ -6,6 +6,7 @@ import {
   CreatePetDto,
   PetParentDto,
   PetSummaryDto,
+  ParentWithChildrenDto,
   UpdatePetDto,
 } from './pet.dto';
 import { instanceToPlain, plainToInstance } from 'class-transformer';
@@ -247,6 +248,104 @@ export class PetService {
       relationId: parentInfo.relationId,
       status: parentInfo.status,
     };
+  }
+
+  async getPetsWithChildren(
+    pageOptionsDto: PageOptionsDto,
+  ): Promise<PageDto<ParentWithChildrenDto>> {
+    // 자식이 있는 개체들을 찾기 위한 쿼리
+    const queryBuilder = this.petRepository
+      .createQueryBuilder('pets')
+      .leftJoinAndMapOne(
+        'pets.owner',
+        'users',
+        'users',
+        'users.user_id = pets.owner_id',
+      )
+      .innerJoin('parents', 'parents', 'parents.parent_id = pets.pet_id')
+      .where('pets.is_deleted = :isDeleted', { isDeleted: false })
+      .andWhere('parents.status = :status', { status: 'approved' })
+      .groupBy('pets.id')
+      .addGroupBy('users.user_id')
+      .select([
+        'pets',
+        'users.user_id',
+        'users.name',
+        'users.role',
+        'users.is_biz',
+        'users.status',
+      ])
+      .orderBy('pets.id', pageOptionsDto.order)
+      .skip(pageOptionsDto.skip)
+      .take(pageOptionsDto.itemPerPage);
+
+    const totalCount = await queryBuilder.getCount();
+
+    // 데이터가 없는 경우 빈 배열과 메타 정보만 반환
+    if (totalCount === 0) {
+      const pageMetaDto = new PageMetaDto({ totalCount: 0, pageOptionsDto });
+      return new PageDto([], pageMetaDto);
+    }
+
+    const { entities } = await queryBuilder.getRawAndEntities();
+
+    // 각 부모 펫의 자식들을 가져오기
+    const parentsWithChildrenPromises = entities.map(async (entity) => {
+      const pet = instanceToPlain(entity);
+      const children = await this.getChildren(pet.petId);
+      const childrenCount = children.length;
+
+      // 자식이 있는 경우에만 반환
+      if (childrenCount > 0) {
+        return plainToInstance(ParentWithChildrenDto, {
+          parent: plainToInstance(PetSummaryDto, pet),
+          children,
+          childrenCount,
+        });
+      }
+      return null;
+    });
+
+    const parentsWithChildren = (
+      await Promise.all(parentsWithChildrenPromises)
+    ).filter((item) => item !== null);
+
+    const pageMetaDto = new PageMetaDto({
+      totalCount: parentsWithChildren.length,
+      pageOptionsDto,
+    });
+    return new PageDto(parentsWithChildren, pageMetaDto);
+  }
+
+  private async getChildren(parentId: string): Promise<PetSummaryDto[]> {
+    // 부모 ID로 자식들을 찾기
+    // parents 테이블에서 parent_id가 현재 펫 ID와 일치하는 레코드들의 pet_id를 찾음
+    const childrenQueryBuilder = this.petRepository
+      .createQueryBuilder('pets')
+      .leftJoinAndMapOne(
+        'pets.owner',
+        'users',
+        'users',
+        'users.user_id = pets.owner_id',
+      )
+      // parents 테이블에서 현재 펫이 부모인 자식들을 찾음
+      .leftJoin('parents', 'parents', 'parents.pet_id = pets.pet_id')
+      .where('parents.parent_id = :parentId', { parentId })
+      .andWhere('parents.status = :status', { status: 'approved' })
+      .andWhere('pets.is_deleted = :isDeleted', { isDeleted: false })
+      .select([
+        'pets',
+        'users.user_id',
+        'users.name',
+        'users.role',
+        'users.is_biz',
+        'users.status',
+      ]);
+
+    const { entities } = await childrenQueryBuilder.getRawAndEntities();
+    return entities.map((entity) =>
+      plainToInstance(PetSummaryDto, instanceToPlain(entity)),
+    );
   }
 
   private createPetWithOwnerQueryBuilder() {

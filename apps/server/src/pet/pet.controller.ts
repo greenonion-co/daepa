@@ -15,6 +15,7 @@ import { PageOptionsDto, PageDto, PageMetaDto } from 'src/common/page.dto';
 import { ApiExtraModels, ApiResponse, getSchemaPath } from '@nestjs/swagger';
 import { ExcludeNilInterceptor } from 'src/interceptors/exclude-nil';
 import { CommonResponseDto } from 'src/common/response.dto';
+import { ParentWithChildrenDto } from './pet.dto';
 
 @Controller('/v1/pet')
 @UseInterceptors(ExcludeNilInterceptor)
@@ -42,6 +43,27 @@ export class PetController {
     @Query() pageOptionsDto: PageOptionsDto,
   ): Promise<PageDto<PetSummaryDto>> {
     return await this.petService.getPetListSummary(pageOptionsDto);
+  }
+
+  @Get('children')
+  @ApiExtraModels(ParentWithChildrenDto, PageMetaDto)
+  @ApiResponse({
+    status: 200,
+    description: '자식이 있는 개체 목록 조회 성공',
+    schema: {
+      type: 'object',
+      required: ['data', 'meta'],
+      properties: {
+        data: {
+          type: 'array',
+          items: { $ref: getSchemaPath(ParentWithChildrenDto) },
+        },
+        meta: { $ref: getSchemaPath(PageMetaDto) },
+      },
+    },
+  })
+  async getPetsWithChildren(@Query() pageOptionsDto: PageOptionsDto) {
+    return await this.petService.getPetsWithChildren(pageOptionsDto);
   }
 
   @Get(':petId')

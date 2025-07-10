@@ -137,6 +137,9 @@ export class PageDto<T> {
   @ApiProperty({
     description: '페이징된 데이터',
     type: 'array',
+    items: {
+      type: 'object',
+    },
   })
   @IsArray()
   readonly data: T[];
