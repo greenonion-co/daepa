@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - "**"
+  pull_request:
+    types: [opened, synchronize]
 
 # 동일한 PR에 대한 중복 실행 방지를 위한 concurrency 설정 추가
 concurrency:
