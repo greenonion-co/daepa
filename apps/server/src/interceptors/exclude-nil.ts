@@ -25,7 +25,7 @@ export class ExcludeNilInterceptor implements NestInterceptor {
     if (typeof value === 'object') {
       return Object.fromEntries(
         Object.entries(value)
-          .filter(([_, val]) => val !== undefined && val !== null)
+          .filter(([, val]) => val !== undefined && val !== null)
           .map(([key, val]) => [key, this.excludeNil(val)]),
       );
     }
