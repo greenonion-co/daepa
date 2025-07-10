@@ -74,5 +74,5 @@ export class PetEntity {
 
   @Expose({ name: 'isPublic' })
   @Column({ default: false })
-  isPublic?: boolean;
+  is_public?: boolean;
 }

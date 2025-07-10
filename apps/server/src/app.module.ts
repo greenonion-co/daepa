@@ -33,6 +33,9 @@ import { HttpModule } from '@nestjs/axios';
 import { OauthService } from './auth/oauth/oauth.service';
 import { UserController } from './user/user.controller';
 import { OauthEntity } from './auth/oauth/oauth.entity';
+import { AdoptionEntity } from './adoption/adoption.entity';
+import { AdoptionController } from './adoption/adoption.controller';
+import { AdoptionService } from './adoption/adoption.service';
 
 const ENTITIES = [
   UserEntity,
@@ -41,6 +44,7 @@ const ENTITIES = [
   UserNotificationEntity,
   ParentEntity,
   EggEntity,
+  AdoptionEntity,
 ];
 
 @Module({
@@ -77,6 +81,7 @@ const ENTITIES = [
     BrEggController,
     AuthController,
     UserController,
+    AdoptionController,
   ],
   providers: [
     AppService,
@@ -91,6 +96,7 @@ const ENTITIES = [
     KakaoStrategy,
     GoogleStrategy,
     JwtStrategy,
+    AdoptionService,
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,

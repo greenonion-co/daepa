@@ -26,7 +26,7 @@ export interface CreatePetDto {
   /** 펫 판매 상태 */
   saleStatus?: CreatePetDtoSaleStatus;
   /** 펫 공개 여부 */
-  isPublic?: boolean;
+  is_public?: boolean;
   /** 펫 성별(수컷, 암컷, 미구분) */
   sex?: CreatePetDtoSex;
   /** 펫 몸무게(g) */

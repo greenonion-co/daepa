@@ -201,7 +201,9 @@ export class PetService {
   ): Promise<void> {
     const { father, mother, ...updateData } = updatePetDto;
 
-    await this.petRepository.update({ pet_id: petId }, updateData);
+    const updatePet = instanceToPlain(updateData);
+    const updatePetEntity = plainToInstance(PetEntity, updatePet);
+    await this.petRepository.update({ pet_id: petId }, updatePetEntity);
 
     if (father) {
       await this.parentService.createParent(userId, petId, father, {});

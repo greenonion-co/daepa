@@ -6,6 +6,12 @@
  * OpenAPI spec version: 1.0
  */
 
+export * from "./adoptionControllerGetAllAdoptionsOrder";
+export * from "./adoptionControllerGetAllAdoptionsParams";
+export * from "./adoptionDto";
+export * from "./adoptionDtoStatus";
+export * from "./adoptionSummaryDto";
+export * from "./adoptionSummaryDtoStatus";
 export * from "./brEggControllerFindAll200";
 export * from "./brEggControllerFindAllOrder";
 export * from "./brEggControllerFindAllParams";
@@ -13,6 +19,7 @@ export * from "./brPetControllerFindAll200";
 export * from "./brPetControllerFindAllOrder";
 export * from "./brPetControllerFindAllParams";
 export * from "./commonResponseDto";
+export * from "./createAdoptionDto";
 export * from "./createEggDto";
 export * from "./createEggDtoSpecies";
 export * from "./createEggHatchDto";
@@ -68,6 +75,8 @@ export * from "./registerInitUserInfoDto";
 export * from "./registerInitUserInfoDtoIsBiz";
 export * from "./registerUserNameDto";
 export * from "./tokenResponseDto";
+export * from "./updateAdoptionDto";
+export * from "./updateAdoptionDtoStatus";
 export * from "./updateEggDto";
 export * from "./updateParentDto";
 export * from "./updateParentDtoStatus";
