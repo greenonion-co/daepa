@@ -27,7 +27,7 @@ export class AdoptionEntity {
   pet_id: string;
 
   @Expose({ name: 'price' })
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ nullable: true })
   price?: number; // 가격
 
   @Expose({ name: 'adoptionDate' })
