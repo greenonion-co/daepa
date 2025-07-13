@@ -33,14 +33,13 @@ const CardFront = ({ pet, qrCodeDataUrl }: { pet: PetDto; qrCodeDataUrl?: string
   }, [pet.weight]);
 
   return (
-    <div className="h-full w-full">
+    <div className="relative h-full w-full">
       {/* 이미지 컨테이너 */}
       <motion.div
         animate={{
           height: isExpanded ? "100%" : "65%",
         }}
         transition={{ duration: 0.2 }}
-        className="absolute inset-x-0 top-0"
       >
         {/* 스와이프 가능한 이미지 컨테이너 */}
         <motion.div
@@ -69,7 +68,6 @@ const CardFront = ({ pet, qrCodeDataUrl }: { pet: PetDto; qrCodeDataUrl?: string
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
-              className="absolute h-full w-full"
             >
               <Image
                 src={allImages[currentImageIndex] || "/default-pet-image.png"}
@@ -93,19 +91,6 @@ const CardFront = ({ pet, qrCodeDataUrl }: { pet: PetDto; qrCodeDataUrl?: string
               ))}
             </div>
           )}
-
-          {/* 왼쪽 상단 태그 */}
-          <div className="absolute -left-[45px] top-[15px] z-10 -rotate-[45deg] transform">
-            <div
-              className={`w-[140px] py-1 text-center ${
-                isExpanded
-                  ? "bg-green-500/80 text-white backdrop-blur-sm"
-                  : "bg-green-500 text-white"
-              }`}
-            >
-              <span className="text-sm font-semibold italic">브리더</span>
-            </div>
-          </div>
 
           {qrCodeDataUrl && (
             <Image

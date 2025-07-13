@@ -1,12 +1,13 @@
 "use client";
 
 import * as React from "react";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import CardFront from "./(펫카드)/CardFront";
 import CardBack from "./(펫카드)/CardBack";
 import { PetDto } from "@repo/api-client";
 import { ChevronDown } from "lucide-react";
 import { useSearchParams } from "next/navigation";
+import AdoptionReceipt from "./(펫카드)/components/AdoptionReceipt";
 
 interface PetDetailProps {
   pet: PetDto;
@@ -18,10 +19,23 @@ const PetDetail = ({ pet, qrCodeDataUrl }: PetDetailProps) => {
   const isScrollingRef = useRef(false);
   const searchParams = useSearchParams();
   const from = searchParams.get("from");
+  const [isWideScreen, setIsWideScreen] = useState(false);
+
+  // 화면 크기 감지
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsWideScreen(window.innerWidth >= 1024);
+    };
+
+    checkScreenSize();
+    window.addEventListener("resize", checkScreenSize);
+
+    return () => window.removeEventListener("resize", checkScreenSize);
+  }, []);
 
   useEffect(() => {
     const container = containerRef.current;
-    if (!container) return;
+    if (!container || isWideScreen) return; // 와이드 스크린에서는 스크롤 로직 비활성화
 
     if (from === "egg") {
       setTimeout(() => {
@@ -48,7 +62,6 @@ const PetDetail = ({ pet, qrCodeDataUrl }: PetDetailProps) => {
       const scrollSpeed = Math.abs(scrollDiff) / timeDiff;
       const cardHeight = 700;
 
-      // Front에서 Back으로 이동
       if (scrollTop > 50 && scrollTop < cardHeight && scrollDiff > 0 && scrollSpeed > 0.3) {
         isScrollingRef.current = true;
         container.scrollTo({
@@ -83,7 +96,32 @@ const PetDetail = ({ pet, qrCodeDataUrl }: PetDetailProps) => {
 
     container.addEventListener("scroll", handleScroll);
     return () => container.removeEventListener("scroll", handleScroll);
-  }, [from]);
+  }, [from, isWideScreen]);
+
+  if (isWideScreen) {
+    return (
+      <div className="mx-auto w-full max-w-7xl px-4">
+        <div className="mb-4 flex justify-center">
+          <span className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-4 py-2 text-sm text-blue-600 dark:bg-blue-900/80 dark:text-blue-200">
+            <ChevronDown className="h-4 w-4" />
+            카드 정보를 한눈에 확인하세요
+          </span>
+        </div>
+        <div className="grid grid-cols-2 gap-6">
+          {/* 왼쪽: CardFront */}
+          <div className="h-[700px] w-full rounded-lg border-gray-300 bg-white shadow-xl dark:bg-[#18181B]">
+            <CardFront pet={pet} qrCodeDataUrl={qrCodeDataUrl} />
+
+            {isWideScreen && <AdoptionReceipt pet={pet} />}
+          </div>
+          {/* 오른쪽: CardBack */}
+          <div className="w-full rounded-lg border-gray-300 bg-white shadow-xl dark:bg-[#18181B]">
+            <CardBack pet={pet} from={from} isWideScreen={isWideScreen} />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto w-full max-w-[500px] px-4">
@@ -102,7 +140,7 @@ const PetDetail = ({ pet, qrCodeDataUrl }: PetDetailProps) => {
             <CardFront pet={pet} qrCodeDataUrl={qrCodeDataUrl} />
           </div>
           <div className="h-[700px] shrink-0 pt-6">
-            <CardBack pet={pet} from={from} />
+            <CardBack pet={pet} from={from} isWideScreen={isWideScreen} />
           </div>
         </div>
       </div>
