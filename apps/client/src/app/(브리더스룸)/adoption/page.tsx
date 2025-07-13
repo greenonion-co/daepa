@@ -61,7 +61,7 @@ const SalesPage = () => {
       </div>
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {adoptions?.map((adoption) => (
+        {adoptions?.data?.map((adoption) => (
           <div
             onClick={() => handleViewAdoption(adoption.adoptionId)}
             key={adoption.adoptionId}

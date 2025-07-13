@@ -19,6 +19,7 @@ import { instanceToPlain, plainToInstance } from 'class-transformer';
 import { PageMetaDto, PageOptionsDto } from 'src/common/page.dto';
 import { PageDto } from 'src/common/page.dto';
 import { PET_SALE_STATUS } from 'src/pet/pet.constants';
+import { PetSummaryDto } from 'src/pet/pet.dto';
 
 @Injectable()
 export class AdoptionService {
@@ -142,6 +143,12 @@ export class AdoptionService {
       if (adoption.price !== undefined && adoption.price !== null) {
         adoption.price = Math.floor(Number(adoption.price));
       }
+
+      // pet 정보를 PetSummaryDto로 변환
+      if (adoption.pet) {
+        adoption.pet = plainToInstance(PetSummaryDto, adoption.pet);
+      }
+
       return plainToInstance(AdoptionSummaryDto, adoption);
     });
 

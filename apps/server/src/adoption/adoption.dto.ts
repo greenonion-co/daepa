@@ -9,6 +9,7 @@ import { ApiProperty, OmitType, PartialType } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
 import { UserProfilePublicDto } from '../user/user.dto';
 import { PET_SALE_STATUS } from 'src/pet/pet.constants';
+import { PetDto } from '../pet/pet.dto';
 
 export class AdoptionBaseDto {
   @ApiProperty({
@@ -182,6 +183,11 @@ export class UpdateAdoptionDto extends PartialType(CreateAdoptionDto) {
 export class AdoptionDto extends AdoptionBaseDto {}
 
 export class AdoptionSummaryDto extends OmitType(AdoptionBaseDto, [
-  'memo',
   'location',
-] as const) {}
+] as const) {
+  @ApiProperty({
+    description: '펫 정보',
+  })
+  @Expose({ name: 'pet' })
+  pet: PetDto;
+}
