@@ -39,7 +39,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import CreateAdoptionModal from "@/app/(브리더스룸)/sales/components/CreateAdoptionModal";
+import CreateAdoptionModal from "@/app/(브리더스룸)/adoption/components/CreateAdoptionModal";
 import { ko } from "date-fns/locale";
 
 interface CardBackProps {

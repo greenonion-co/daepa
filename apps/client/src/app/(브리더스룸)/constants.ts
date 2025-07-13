@@ -371,7 +371,7 @@ export const SIDEBAR_ITEMS = [
   },
   {
     title: "분양룸",
-    url: "/sales",
+    url: "/adoption",
     icon: DollarSign,
   },
   {

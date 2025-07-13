@@ -27,22 +27,16 @@ const SalesPage = () => {
   });
 
   const handleViewAdoption = (adoptionId: string) => {
-    overlay.open(({ isOpen, close, unmount }) => (
-      <AdoptionDetailModal
-        isOpen={isOpen}
-        onClose={close}
-        adoptionId={adoptionId}
-        onUnmount={unmount}
-      />
+    overlay.open(({ isOpen, close }) => (
+      <AdoptionDetailModal isOpen={isOpen} onClose={close} adoptionId={adoptionId} />
     ));
   };
 
   const handleCreateAdoption = () => {
-    overlay.open(({ isOpen, close, unmount }) => (
+    overlay.open(({ isOpen, close }) => (
       <CreateAdoptionModal
         isOpen={isOpen}
         onClose={close}
-        onUnmount={unmount}
         onSuccess={() => {
           queryClient.invalidateQueries({ queryKey: [adoptionControllerGetAllAdoptions.name] });
           toast.success("분양이 성공적으로 생성되었습니다.");
