@@ -43,33 +43,20 @@ export class AdoptionController {
     description: '분양 전체 리스트 조회 성공',
     schema: {
       type: 'object',
-      required: ['success', 'message', 'data'],
+      required: ['data', 'meta'],
       properties: {
-        success: { type: 'boolean' },
-        message: { type: 'string' },
         data: {
-          type: 'object',
-          required: ['data', 'meta'],
-          properties: {
-            data: {
-              type: 'array',
-              items: { $ref: getSchemaPath(AdoptionSummaryDto) },
-            },
-            meta: { $ref: getSchemaPath(PageMetaDto) },
-          },
+          type: 'array',
+          items: { $ref: getSchemaPath(AdoptionSummaryDto) },
         },
+        meta: { $ref: getSchemaPath(PageMetaDto) },
       },
     },
   })
   async getAllAdoptions(
     @Query() pageOptionsDto: PageOptionsDto,
-  ): Promise<CommonResponseDto & { data: PageDto<AdoptionSummaryDto> }> {
-    const result = await this.adoptionService.findAll(pageOptionsDto);
-    return {
-      success: true,
-      message: '분양 목록 조회 성공',
-      data: result,
-    };
+  ): Promise<PageDto<AdoptionSummaryDto>> {
+    return this.adoptionService.findAll(pageOptionsDto);
   }
 
   @Get('/:adoptionId')

@@ -5,10 +5,10 @@
  * Project Daepa API description
  * OpenAPI spec version: 1.0
  */
-import type { AdoptionControllerGetAllAdoptions200Data } from "./adoptionControllerGetAllAdoptions200Data";
+import type { AdoptionSummaryDto } from "./adoptionSummaryDto";
+import type { PageMetaDto } from "./pageMetaDto";
 
 export type AdoptionControllerGetAllAdoptions200 = {
-  success: boolean;
-  message: string;
-  data: AdoptionControllerGetAllAdoptions200Data;
+  data: AdoptionSummaryDto[];
+  meta: PageMetaDto;
 };

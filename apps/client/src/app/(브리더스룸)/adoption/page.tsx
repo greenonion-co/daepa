@@ -1,36 +1,48 @@
 "use client";
 
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { adoptionControllerGetAllAdoptions } from "@repo/api-client";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import Loading from "@/components/common/Loading";
+import { useInView } from "react-intersection-observer";
+import { useEffect } from "react";
 
 import { overlay } from "overlay-kit";
-import AdoptionDetailModal from "./components/AdoptionDetailModal";
+
 import CreateAdoptionModal from "./components/CreateAdoptionModal";
-import { getStatusBadge } from "@/lib/utils";
+import { columns } from "./components/columns";
+import DataTable from "./components/DataTable";
 
-const SalesPage = () => {
+const AdoptionPage = () => {
   const queryClient = useQueryClient();
+  const { ref, inView } = useInView();
+  const itemPerPage = 10;
 
-  const { data: adoptions, isLoading } = useQuery({
+  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
     queryKey: [adoptionControllerGetAllAdoptions.name],
-    queryFn: () =>
+    queryFn: ({ pageParam = 1 }) =>
       adoptionControllerGetAllAdoptions({
-        page: 1,
-        itemPerPage: 50,
+        page: pageParam,
+        itemPerPage,
         order: "DESC",
       }),
-    select: (data) => data.data.data,
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => {
+      if (lastPage.data.meta.hasNextPage) {
+        return lastPage.data.meta.page + 1;
+      }
+      return undefined;
+    },
+    select: (data) => data.pages.flatMap((page) => page.data.data),
   });
 
-  const handleViewAdoption = (adoptionId: string) => {
-    overlay.open(({ isOpen, close }) => (
-      <AdoptionDetailModal isOpen={isOpen} onClose={close} adoptionId={adoptionId} />
-    ));
-  };
+  useEffect(() => {
+    if (inView && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [inView, fetchNextPage, hasNextPage, isFetchingNextPage]);
 
   const handleCreateAdoption = () => {
     overlay.open(({ isOpen, close }) => (
@@ -60,92 +72,15 @@ const SalesPage = () => {
         <p className="text-muted-foreground">내 분양 정보를 관리하세요</p>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {adoptions?.data?.map((adoption) => (
-          <div
-            onClick={() => handleViewAdoption(adoption.adoptionId)}
-            key={adoption.adoptionId}
-            className="flex cursor-pointer flex-col justify-between rounded-lg border-2 border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md"
-          >
-            {/* 영수증 헤더 */}
-            <div className="rounded-t-lg border-b border-gray-200 bg-gray-50 px-4 py-3">
-              <div className="text-center">
-                <h3 className="text-lg font-bold text-gray-800">{adoption.pet.name}</h3>
-                <div className="flex flex-col gap-2 text-sm text-gray-600">
-                  {adoption.pet.morphs && adoption.pet.morphs.length > 0 && (
-                    <div className="flex flex-wrap gap-2">
-                      {adoption.pet.morphs.map((morph: string) => `#${morph}`).join(" ")}
-                    </div>
-                  )}
-                  {adoption.pet.birthdate && (
-                    <p>
-                      {(() => {
-                        const dateStr = adoption.pet.birthdate.toString();
-                        const year = dateStr.substring(0, 4);
-                        const month = dateStr.substring(4, 6);
-                        const day = dateStr.substring(6, 8);
-                        return `${year}. ${month}. ${day}`;
-                      })()}
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* 영수증 본문 */}
-            <div className="flex flex-1 flex-col justify-between px-4 py-4">
-              {/* 상태 배지 */}
-              <div>
-                <div className="mb-4 flex justify-center">
-                  {getStatusBadge(adoption.pet.saleStatus)}
-                </div>
-
-                {/* 구매자 정보 */}
-                <div className="mb-4 rounded bg-gray-100 p-3">
-                  <div className="mb-1 text-sm font-medium text-gray-700">구매자</div>
-                  <div className="text-sm text-gray-600">
-                    {adoption.buyer ? adoption.buyer.name : "입양자 정보 없음"}
-                  </div>
-                </div>
-
-                {/* 분양 정보 */}
-                <div className="mb-4 space-y-2">
-                  {adoption.adoptionDate && (
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">분양 날짜</span>
-                      <span className="font-medium">
-                        {new Date(adoption.adoptionDate).toLocaleDateString("ko-KR")}
-                      </span>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* 총액 */}
-              <div>
-                {/* 구분선 */}
-                <div className="my-4 border-t border-gray-200"></div>
-
-                <div className="mb-4 flex items-center justify-between">
-                  <span className="text-lg font-bold text-gray-800">분양 가격</span>
-                  <span className="text-xl font-bold text-blue-600">
-                    {adoption.price ? `${adoption.price.toLocaleString()}원` : "미정"}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* 영수증 푸터 */}
-            {adoption?.memo && (
-              <div className="rounded-b-lg border-t border-gray-200 bg-gray-50 px-4 py-2 text-center">
-                <p className="text-xs text-gray-500">{adoption.memo}</p>
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
+      <DataTable
+        columns={columns}
+        data={data ?? []}
+        hasMore={hasNextPage}
+        isFetchingMore={isFetchingNextPage}
+        loaderRefAction={ref}
+      />
     </div>
   );
 };
 
-export default SalesPage;
+export default AdoptionPage;
