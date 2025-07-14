@@ -161,9 +161,6 @@ export class PetSummaryDto extends PickType(PetBaseDto, [
   'photos',
 ]) {
   @Exclude()
-  declare birthdate?: string;
-
-  @Exclude()
   declare growth?: string;
 
   @Exclude()

@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { AdoptionSummaryDto } from "@repo/api-client";
 import { getStatusBadge } from "@/lib/utils";
 import { formatDateToYYYYMMDDString } from "@/lib/utils";
+import { SPECIES_KOREAN_INFO } from "../../constants";
 
 export const columns: ColumnDef<AdoptionSummaryDto>[] = [
   {
@@ -43,7 +44,7 @@ export const columns: ColumnDef<AdoptionSummaryDto>[] = [
     header: "종",
     cell: ({ row }) => {
       const species = row.original.pet.species;
-      return <div className="capitalize">{species}</div>;
+      return <div className="capitalize">{SPECIES_KOREAN_INFO[species]}</div>;
     },
   },
   {
@@ -64,9 +65,7 @@ export const columns: ColumnDef<AdoptionSummaryDto>[] = [
     cell: ({ row }) => {
       const birthdate = row.original.pet.birthdate;
       return (
-        <div className="capitalize">
-          {birthdate ? formatDateToYYYYMMDDString(Number(birthdate)) : "-"}
-        </div>
+        <div className="capitalize">{birthdate ? formatDateToYYYYMMDDString(birthdate) : "-"}</div>
       );
     },
   },
