@@ -1,17 +1,18 @@
 "use client";
 
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
-import { adoptionControllerGetAllAdoptions } from "@repo/api-client";
+import { adoptionControllerGetAllAdoptions, PetDtoSaleStatus } from "@repo/api-client";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, BarChart3 } from "lucide-react";
 import { toast } from "sonner";
 import Loading from "@/components/common/Loading";
 import { useInView } from "react-intersection-observer";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import { overlay } from "overlay-kit";
 
 import CreateAdoptionModal from "./components/CreateAdoptionModal";
+import AdoptionDashboard from "./components/AdoptionDashboard";
 import { columns } from "./components/columns";
 import DataTable from "./components/DataTable";
 
@@ -19,6 +20,7 @@ const AdoptionPage = () => {
   const queryClient = useQueryClient();
   const { ref, inView } = useInView();
   const itemPerPage = 10;
+  const [showDashboard, setShowDashboard] = useState(true);
 
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
     queryKey: [adoptionControllerGetAllAdoptions.name],
@@ -37,6 +39,8 @@ const AdoptionPage = () => {
     },
     select: (data) => data.pages.flatMap((page) => page.data.data),
   });
+
+  const soldData = data?.filter((item) => item.pet.saleStatus === PetDtoSaleStatus.SOLD);
 
   useEffect(() => {
     if (inView && hasNextPage && !isFetchingNextPage) {
@@ -61,24 +65,35 @@ const AdoptionPage = () => {
 
   return (
     <div className="container mx-auto p-6">
-      <div className="mb-6">
-        <div className="mb-2 flex items-center justify-between">
-          <h1 className="text-2xl font-bold">분양룸</h1>
+      <div className="flex items-center gap-6 pb-6">
+        <h1 className="text-2xl font-bold">분양룸</h1>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            onClick={() => setShowDashboard(!showDashboard)}
+            className="flex items-center gap-2"
+          >
+            <BarChart3 />
+            {showDashboard ? "목록 보기" : "대시보드"}
+          </Button>
           <Button onClick={handleCreateAdoption} className="flex items-center gap-2">
-            <Plus className="h-4 w-4" />
+            <Plus />
             분양 추가
           </Button>
         </div>
-        <p className="text-muted-foreground">내 분양 정보를 관리하세요</p>
       </div>
 
-      <DataTable
-        columns={columns}
-        data={data ?? []}
-        hasMore={hasNextPage}
-        isFetchingMore={isFetchingNextPage}
-        loaderRefAction={ref}
-      />
+      {showDashboard ? (
+        <AdoptionDashboard data={data} />
+      ) : (
+        <DataTable
+          columns={columns}
+          data={soldData}
+          hasMore={hasNextPage}
+          isFetchingMore={isFetchingNextPage}
+          loaderRefAction={ref}
+        />
+      )}
     </div>
   );
 };

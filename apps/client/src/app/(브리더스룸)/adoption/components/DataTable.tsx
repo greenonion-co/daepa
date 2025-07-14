@@ -26,7 +26,7 @@ import useTableStore from "../../pet/store/table";
 
 interface DataTableProps<TData> {
   columns: ColumnDef<TData>[];
-  data: TData[];
+  data?: TData[];
   hasMore?: boolean;
   isFetchingMore?: boolean;
   loaderRefAction: (node?: Element | null) => void;
@@ -34,7 +34,7 @@ interface DataTableProps<TData> {
 
 export const DataTable = ({
   columns,
-  data,
+  data = [],
   hasMore,
   isFetchingMore,
   loaderRefAction,
