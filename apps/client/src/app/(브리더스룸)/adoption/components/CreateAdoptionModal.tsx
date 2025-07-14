@@ -35,6 +35,7 @@ import { useInView } from "react-intersection-observer";
 import { useEffect } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 
 const adoptionSchema = z.object({
   price: z.string().optional(),
@@ -149,6 +150,7 @@ const CreateAdoptionModal = ({
       handleClose();
     } catch (error) {
       console.error("분양 등록 실패:", error);
+      toast.error("분양 등록에 실패했습니다. 다시 시도해주세요.");
     } finally {
       setIsSubmitting(false);
     }
@@ -164,7 +166,7 @@ const CreateAdoptionModal = ({
     onClose();
   };
 
-  const handlePetSelect = (pet: any) => {
+  const handlePetSelect = (pet: PetDto) => {
     setSelectedPet(pet);
     setStep(2);
   };

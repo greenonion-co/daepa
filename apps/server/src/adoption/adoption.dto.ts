@@ -6,7 +6,7 @@ import {
   IsEnum,
 } from 'class-validator';
 import { ApiProperty, OmitType, PartialType } from '@nestjs/swagger';
-import { Expose } from 'class-transformer';
+import { Expose, Type } from 'class-transformer';
 import { UserProfilePublicDto } from '../user/user.dto';
 import { PET_SALE_STATUS } from 'src/pet/pet.constants';
 import { PetDto } from '../pet/pet.dto';
@@ -126,6 +126,7 @@ export class CreateAdoptionDto {
     example: '2024-01-15',
     required: false,
   })
+  @Type(() => Date)
   @IsOptional()
   @IsDate()
   adoptionDate?: Date;

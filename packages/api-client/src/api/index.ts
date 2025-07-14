@@ -316,7 +316,7 @@ export const adoptionControllerUpdateAdoption = (
 ) => {
   return useCustomInstance<AdoptionDto>({
     url: `http://localhost:4000/api/v1/adoption/${adoptionId}`,
-    method: "PUT",
+    method: "PATCH",
     headers: { "Content-Type": "application/json" },
     data: updateAdoptionDto,
   });
@@ -2382,9 +2382,11 @@ export const getAdoptionControllerGetAdoptionByAdoptionIdMockHandler = (
 export const getAdoptionControllerUpdateAdoptionMockHandler = (
   overrideResponse?:
     | AdoptionDto
-    | ((info: Parameters<Parameters<typeof http.put>[1]>[0]) => Promise<AdoptionDto> | AdoptionDto),
+    | ((
+        info: Parameters<Parameters<typeof http.patch>[1]>[0],
+      ) => Promise<AdoptionDto> | AdoptionDto),
 ) => {
-  return http.put("*/api/v1/adoption/:adoptionId", async (info) => {
+  return http.patch("*/api/v1/adoption/:adoptionId", async (info) => {
     await delay(1000);
 
     return new HttpResponse(

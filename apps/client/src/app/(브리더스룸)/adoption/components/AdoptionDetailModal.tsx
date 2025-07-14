@@ -7,6 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { adoptionControllerGetAdoptionByAdoptionId, PetDtoSpecies } from "@repo/api-client";
 import { SPECIES_KOREAN_INFO } from "../../constants";
 import { getStatusBadge } from "@/lib/utils";
+import Loading from "@/components/common/Loading";
 
 interface AdoptionDetailModalProps {
   isOpen: boolean;
@@ -15,7 +16,11 @@ interface AdoptionDetailModalProps {
 }
 
 const AdoptionDetailModal = ({ isOpen, onClose, adoptionId }: AdoptionDetailModalProps) => {
-  const { data: adoptionData } = useQuery({
+  const {
+    data: adoptionData,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: [adoptionControllerGetAdoptionByAdoptionId.name, adoptionId],
     queryFn: () => adoptionControllerGetAdoptionByAdoptionId(adoptionId),
     select: (data) => data.data,
@@ -33,15 +38,20 @@ const AdoptionDetailModal = ({ isOpen, onClose, adoptionId }: AdoptionDetailModa
           </DialogTitle>
         </DialogHeader>
 
+        {isLoading && <Loading />}
+        {error && <div>Error: {error.message}</div>}
+
         <div className="space-y-4">
           {/* 펫 정보 */}
           <div className="bg-muted rounded-lg p-4">
             <div className="mb-2 flex items-center gap-2 font-semibold">
               {pet?.name}
 
-              <div className="text-muted-foreground text-sm font-normal">
-                | {SPECIES_KOREAN_INFO[pet?.species as PetDtoSpecies]}
-              </div>
+              {pet?.species && (
+                <div className="text-muted-foreground text-sm font-normal">
+                  | {SPECIES_KOREAN_INFO[pet.species as PetDtoSpecies]}
+                </div>
+              )}
             </div>
             <div className="flex flex-col gap-2 text-sm text-gray-600">
               {pet?.morphs && pet.morphs.length > 0 && (

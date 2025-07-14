@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Put, Body, Param, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Query,
+  Patch,
+} from '@nestjs/common';
 import {
   ApiExtraModels,
   ApiResponse,
@@ -16,7 +24,6 @@ import { JwtUser } from '../auth/auth.decorator';
 import { JwtUserPayload } from '../auth/strategies/jwt.strategy';
 import { PageMetaDto, PageOptionsDto } from 'src/common/page.dto';
 import { PageDto } from 'src/common/page.dto';
-import { CommonResponseDto } from 'src/common/response.dto';
 
 @ApiTags('분양')
 @Controller('/v1/adoption')
@@ -65,13 +72,17 @@ export class AdoptionController {
     description: '펫별 분양 정보 조회 성공',
     type: AdoptionDto,
   })
+  @ApiResponse({
+    status: 404,
+    description: '분양 정보를 찾을 수 없음',
+  })
   async getAdoptionByAdoptionId(
     @Param('adoptionId') adoptionId: string,
-  ): Promise<AdoptionDto | null> {
+  ): Promise<AdoptionDto> {
     return this.adoptionService.findByAdoptionId(adoptionId);
   }
 
-  @Put('/:adoptionId')
+  @Patch('/:adoptionId')
   @ApiResponse({
     status: 200,
     description: '분양 정보 수정 성공',

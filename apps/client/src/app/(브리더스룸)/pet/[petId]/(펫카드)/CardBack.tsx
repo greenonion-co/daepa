@@ -1,10 +1,10 @@
 import { FormField } from "@/app/(브리더스룸)/components/Form/FormField";
-import { FORM_STEPS, OPTION_STEPS, SALE_STATUS_KOREAN_INFO } from "@/app/(브리더스룸)/constants";
+import { FORM_STEPS, OPTION_STEPS } from "@/app/(브리더스룸)/constants";
 import { usePetStore } from "@/app/(브리더스룸)/register/store/pet";
 import { FieldName } from "@/app/(브리더스룸)/register/types";
 import { Button } from "@/components/ui/button";
 import { Edit3, InfoIcon } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import ParentLink from "../../components/ParentLink";
 import {
   petControllerUpdate,

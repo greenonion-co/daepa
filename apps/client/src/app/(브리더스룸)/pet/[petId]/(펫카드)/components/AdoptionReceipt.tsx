@@ -1,6 +1,6 @@
 import { SALE_STATUS_KOREAN_INFO } from "@/app/(브리더스룸)/constants";
 import { PetDto } from "@repo/api-client";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { ko } from "date-fns/locale";
 import { useState } from "react";
 
@@ -71,9 +71,13 @@ const AdoptionReceipt = ({ pet }: AdoptionReceiptProps) => {
           >
             <span className="text-sm text-gray-600 dark:text-gray-400">분양 상태</span>
             <span className="text-sm font-medium text-gray-800 dark:text-gray-200">
-              {SALE_STATUS_KOREAN_INFO[
-                pet.adoption?.status as keyof typeof SALE_STATUS_KOREAN_INFO
-              ] || "미정"}
+              {pet.adoption?.status &&
+              typeof pet.adoption.status === "string" &&
+              pet.adoption.status in SALE_STATUS_KOREAN_INFO
+                ? SALE_STATUS_KOREAN_INFO[
+                    pet.adoption.status as keyof typeof SALE_STATUS_KOREAN_INFO
+                  ]
+                : "미정"}
             </span>
           </div>
 
@@ -95,7 +99,7 @@ const AdoptionReceipt = ({ pet }: AdoptionReceiptProps) => {
               <span className="text-sm text-gray-600 dark:text-gray-400">분양 날짜</span>
               <span className="text-sm text-gray-800 dark:text-gray-200">
                 {pet.adoption?.adoptionDate
-                  ? format(pet.adoption.adoptionDate as Date, "yyyy년 MM월 dd일", {
+                  ? format(parseISO(pet.adoption.adoptionDate as string), "yyyy년 MM월 dd일", {
                       locale: ko,
                     })
                   : "미정"}
