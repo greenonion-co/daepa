@@ -9,7 +9,7 @@ import {
 } from 'typeorm';
 
 @Entity({ name: 'adoptions' })
-@Index('UNIQUE_PET_ADOPTION', ['pet_id', 'adoption_id'], { unique: true })
+@Index('UNIQUE_PET_ADOPTION', ['pet_id'], { unique: true })
 @Index('UNIQUE_ADOPTION_ID', ['adoption_id'], { unique: true })
 export class AdoptionEntity {
   @Exclude()
