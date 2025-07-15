@@ -8,6 +8,17 @@ import {
 import { ApiProperty, PickType } from '@nestjs/swagger';
 import { CHILD_TYPE, PARENT_ROLE, PARENT_STATUS } from './parent.constant';
 
+export class ParentBaseDto {
+  relationId: number;
+  petId: string;
+  parentId: string;
+  isMyPet: boolean;
+  role: PARENT_ROLE;
+  status: PARENT_STATUS;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export class ParentDto {
   @ApiProperty({ description: '부모 관계 테이블 row id' })
   @IsNumber()

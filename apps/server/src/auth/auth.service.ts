@@ -10,7 +10,6 @@ import { USER_STATUS } from 'src/user/user.constant';
 import * as bcrypt from 'bcrypt';
 import { JwtPayload } from './strategies/jwt.strategy';
 import { OauthService } from './oauth/oauth.service';
-import { OAUTH_PROVIDER } from './auth.constants';
 
 export type ValidatedUser = {
   userId: string;

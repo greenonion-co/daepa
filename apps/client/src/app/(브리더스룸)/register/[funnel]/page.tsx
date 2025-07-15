@@ -94,7 +94,7 @@ export default function RegisterPage({ params }: { params: Promise<{ funnel: str
       const transformedFormData = { ...formData };
       if (transformedFormData.sex && typeof transformedFormData.sex === "string") {
         const genderEntry = Object.entries(GENDER_KOREAN_INFO).find(
-          ([_, koreanValue]) => koreanValue === transformedFormData.sex,
+          ([, koreanValue]) => koreanValue === transformedFormData.sex,
         );
         if (genderEntry) {
           transformedFormData.sex = genderEntry[0];

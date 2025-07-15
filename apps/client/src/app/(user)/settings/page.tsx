@@ -211,7 +211,7 @@ const SettingsPage = () => {
                 {userProfile?.isBiz ? "사업자" : "일반 사용자"}
               </Badge>
             </div>
-            <div className="flex items-center justify-between rounded-lg bg-gray-50 p-3 dark:bg-gray-800">
+            {/* <div className="flex items-center justify-between rounded-lg bg-gray-50 p-3 dark:bg-gray-800">
               <div>
                 <Label className="text-sm font-medium">마지막 로그인</Label>
                 <p className="text-xs text-gray-500">
@@ -220,7 +220,7 @@ const SettingsPage = () => {
                     : "로그인 기록 없음"}
                 </p>
               </div>
-            </div>
+            </div> */}
             <div className="flex items-center justify-between rounded-lg bg-gray-50 p-3 dark:bg-gray-800">
               <div>
                 <Label className="text-sm font-medium">가입일</Label>

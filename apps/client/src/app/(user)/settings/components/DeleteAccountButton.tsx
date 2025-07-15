@@ -41,6 +41,7 @@ const DeleteAccountButton = () => {
       toast.success("탈퇴 처리되었습니다.");
       router.replace("/");
     } catch (error) {
+      console.error(error);
       toast.error("탈퇴 처리 중 오류가 발생했습니다.");
     }
   };

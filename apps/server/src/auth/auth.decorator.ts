@@ -6,17 +6,19 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
+import { ValidatedUser } from './auth.service';
+import { JwtUserPayload } from './strategies/jwt.strategy';
 
 export const PassportValidatedUser = createParamDecorator(
   (data: unknown, ctx: ExecutionContext) => {
-    const request = ctx.switchToHttp().getRequest();
+    const request = ctx.switchToHttp().getRequest<{ user: ValidatedUser }>();
     return request.user;
   },
 );
 
 export const JwtUser = createParamDecorator(
   (data: unknown, ctx: ExecutionContext) => {
-    const request = ctx.switchToHttp().getRequest();
+    const request = ctx.switchToHttp().getRequest<{ user: JwtUserPayload }>();
     return request.user;
   },
 );

@@ -9,10 +9,12 @@ const NotiTitle = ({
   senderPet,
   hasLink = false,
 }: {
-  receiverPet: NotificationDetailJson["receiverPet"];
-  senderPet: NotificationDetailJson["senderPet"];
+  receiverPet?: NotificationDetailJson["receiverPet"];
+  senderPet?: NotificationDetailJson["senderPet"];
   hasLink?: boolean;
 }) => {
+  if (!receiverPet || !senderPet) return null;
+
   const nameStyle = (sex?: PetDtoSex) =>
     cn(
       "relative font-bold after:absolute after:bottom-1 after:left-0.5 after:-z-10 after:h-[70%] after:w-full after:opacity-40 ",

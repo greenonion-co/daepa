@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 import {
   Injectable,
   NestInterceptor,
@@ -13,7 +14,7 @@ export class ExcludeNilInterceptor implements NestInterceptor {
     return next.handle().pipe(map((value) => this.excludeNil(value)));
   }
 
-  private excludeNil(value: any): any {
+  private excludeNil(value: any) {
     if (value === null || value === undefined) {
       return undefined;
     }
@@ -25,7 +26,7 @@ export class ExcludeNilInterceptor implements NestInterceptor {
     if (typeof value === 'object') {
       return Object.fromEntries(
         Object.entries(value)
-          .filter(([_, val]) => val !== undefined && val !== null)
+          .filter(([, val]) => val !== undefined && val !== null)
           .map(([key, val]) => [key, this.excludeNil(val)]),
       );
     }

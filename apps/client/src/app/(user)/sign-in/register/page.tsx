@@ -24,7 +24,7 @@ const registerSchema = z.object({
     .min(NICKNAME_MIN_LENGTH, `닉네임/업체명은 ${NICKNAME_MIN_LENGTH}자 이상 입력해주세요.`)
     .max(NICKNAME_MAX_LENGTH, `닉네임/업체명은 ${NICKNAME_MAX_LENGTH}자 이하로 입력해주세요.`)
     .regex(
-      /^[가-힣a-zA-Z0-9\s!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~`]+$/,
+      /^[가-힣a-zA-Z0-9\s!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?~`]+$/,
       "닉네임/업체명은 한글, 영문, 숫자, 특수문자 사용 가능합니다.",
     )
     .refine((value) => !/^\d+$/.test(value), {

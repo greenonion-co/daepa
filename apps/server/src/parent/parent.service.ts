@@ -159,8 +159,14 @@ export class ParentService {
         receiverId: opponentId,
         type: USER_NOTIFICATION_TYPE.PARENT_ACCEPT,
         detailJson: {
-          senderPet: requestedInfo.detail_json.receiverPet,
-          receiverPet: requestedInfo.detail_json.senderPet,
+          senderPet: requestedInfo.detail_json.receiverPet as Record<
+            string,
+            any
+          >,
+          receiverPet: requestedInfo.detail_json.senderPet as Record<
+            string,
+            any
+          >,
         },
       });
       return {
@@ -208,8 +214,14 @@ export class ParentService {
         type: USER_NOTIFICATION_TYPE.PARENT_REJECT,
         detailJson: {
           message: updateParentDto.rejectReason,
-          senderPet: requestedInfo.detail_json.receiverPet,
-          receiverPet: requestedInfo.detail_json.senderPet,
+          senderPet: requestedInfo.detail_json.receiverPet as Record<
+            string,
+            any
+          >,
+          receiverPet: requestedInfo.detail_json.senderPet as Record<
+            string,
+            any
+          >,
         },
       });
       return {

@@ -19,7 +19,11 @@ import {
 } from 'src/common/page.dto';
 import { PARENT_ROLE } from 'src/parent/parent.constant';
 import { CreatePetDto, PetParentDto } from 'src/pet/pet.dto';
-import { CreateParentDto, ParentDto } from 'src/parent/parent.dto';
+import {
+  CreateParentDto,
+  ParentBaseDto,
+  ParentDto,
+} from 'src/parent/parent.dto';
 import { PetService } from 'src/pet/pet.service';
 import { nanoid } from 'nanoid';
 import { isMySQLError } from 'src/common/error';
@@ -213,10 +217,10 @@ export class EggService {
     const eggList = entities.map((entity) => {
       const egg = instanceToPlain(entity);
       const { parents, ...eggData } = egg;
-      const father = parents?.find(
+      const father = (parents as ParentBaseDto[])?.find(
         (parent) => parent.role === PARENT_ROLE.FATHER,
       );
-      const mother = parents?.find(
+      const mother = (parents as ParentBaseDto[])?.find(
         (parent) => parent.role === PARENT_ROLE.MOTHER,
       );
       return plainToInstance(EggDto, {

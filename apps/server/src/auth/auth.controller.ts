@@ -7,7 +7,7 @@ import {
   UseGuards,
   Post,
 } from '@nestjs/common';
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService, ValidatedUser } from './auth.service';
 import { ApiResponse } from '@nestjs/swagger';
@@ -15,6 +15,7 @@ import { UserDto } from 'src/user/user.dto';
 import { JwtUser, PassportValidatedUser, Public } from './auth.decorator';
 import { TokenResponseDto } from './auth.dto';
 import { JwtUserPayload } from './strategies/jwt.strategy';
+import { RequestWithCookies } from 'src/types/request';
 
 @Controller('/auth')
 export class AuthController {
@@ -92,7 +93,7 @@ export class AuthController {
     type: TokenResponseDto,
   })
   async getToken(
-    @Req() req: Request,
+    @Req() req: RequestWithCookies,
     @Res({ passthrough: true }) res: Response,
   ) {
     const refreshToken = req.cookies.refreshToken;
@@ -124,7 +125,7 @@ export class AuthController {
     description: '로그아웃 성공',
   })
   async signOut(
-    @Req() req: Request,
+    @Req() req: RequestWithCookies,
     @Res({ passthrough: true }) res: Response,
   ) {
     const refreshToken = req.cookies.refreshToken;

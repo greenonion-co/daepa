@@ -8,7 +8,6 @@ import {
 } from 'typeorm';
 import { Expose, Exclude } from 'class-transformer';
 import { USER_ROLE, USER_STATUS } from './user.constant';
-import { OAUTH_PROVIDER } from 'src/auth/auth.constants';
 
 @Entity({ name: 'users' })
 @Index('UNIQUE_USER_ID', ['user_id'], { unique: true })
