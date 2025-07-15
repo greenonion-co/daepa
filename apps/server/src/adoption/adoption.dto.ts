@@ -6,7 +6,7 @@ import {
   IsEnum,
 } from 'class-validator';
 import { ApiProperty, OmitType, PartialType, PickType } from '@nestjs/swagger';
-import { Expose, Type } from 'class-transformer';
+import { Type } from 'class-transformer';
 import { UserProfilePublicDto } from '../user/user.dto';
 import { PET_SALE_STATUS } from 'src/pet/pet.constants';
 import { PetDto } from '../pet/pet.dto';
@@ -16,7 +16,6 @@ export class AdoptionBaseDto {
     description: '분양 ID',
     example: 'XXXXXXXX',
   })
-  @Expose({ name: 'adoptionId' })
   @IsString()
   adoptionId: string;
 
@@ -24,7 +23,6 @@ export class AdoptionBaseDto {
     description: '펫 ID',
     example: 'PET_XXXXXXXX',
   })
-  @Expose({ name: 'petId' })
   @IsString()
   petId: string;
 
@@ -33,7 +31,6 @@ export class AdoptionBaseDto {
     example: 50000,
     required: false,
   })
-  @Expose({ name: 'price' })
   @IsOptional()
   @IsNumber()
   price?: number;
@@ -43,7 +40,6 @@ export class AdoptionBaseDto {
     example: '2024-01-15',
     required: false,
   })
-  @Expose({ name: 'adoptionDate' })
   @IsOptional()
   @IsDate()
   adoptionDate?: Date;
@@ -53,7 +49,6 @@ export class AdoptionBaseDto {
     example: '건강한 개체입니다.',
     required: false,
   })
-  @Expose({ name: 'memo' })
   @IsOptional()
   @IsString()
   memo?: string;
@@ -63,7 +58,6 @@ export class AdoptionBaseDto {
     example: '서울시 강남구',
     required: false,
   })
-  @Expose({ name: 'location' })
   @IsOptional()
   @IsString()
   location?: string;
@@ -71,13 +65,11 @@ export class AdoptionBaseDto {
   @ApiProperty({
     description: '생성일',
   })
-  @Expose({ name: 'createdAt' })
   createdAt: Date;
 
   @ApiProperty({
     description: '수정일',
   })
-  @Expose({ name: 'updatedAt' })
   updatedAt: Date;
 
   @ApiProperty({
@@ -86,7 +78,6 @@ export class AdoptionBaseDto {
     enum: PET_SALE_STATUS,
     'x-enumNames': Object.keys(PET_SALE_STATUS),
   })
-  @Expose({ name: 'status' })
   status: PET_SALE_STATUS;
 }
 
@@ -181,14 +172,12 @@ export class AdoptionDto extends PickType(AdoptionBaseDto, [
   @ApiProperty({
     description: '분양자 정보',
   })
-  @Expose({ name: 'seller' })
   seller: UserProfilePublicDto;
 
   @ApiProperty({
     description: '입양자 정보',
     required: false,
   })
-  @Expose({ name: 'buyer' })
   @IsOptional()
   buyer?: UserProfilePublicDto;
 }
@@ -198,6 +187,5 @@ export class AdoptionWithPetDto extends OmitType(AdoptionBaseDto, [
   @ApiProperty({
     description: '펫 정보',
   })
-  @Expose({ name: 'pet' })
   pet: PetDto;
 }
