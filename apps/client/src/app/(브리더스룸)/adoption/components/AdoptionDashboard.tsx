@@ -127,19 +127,19 @@ const AdoptionCalendar = ({
           if (dailyData[dateKey]) {
             switch (adoption.pet.saleStatus) {
               case PetDtoSaleStatus.SOLD:
-                dailyData[dateKey]!.sold++;
+                dailyData[dateKey].sold++;
                 break;
               case PetDtoSaleStatus.ON_SALE:
-                dailyData[dateKey]!.onSale++;
+                dailyData[dateKey].onSale++;
                 break;
               case PetDtoSaleStatus.ON_RESERVATION:
-                dailyData[dateKey]!.onReservation++;
+                dailyData[dateKey].onReservation++;
                 break;
             }
-            dailyData[dateKey]!.total =
-              dailyData[dateKey]!.sold +
-              dailyData[dateKey]!.onSale +
-              dailyData[dateKey]!.onReservation;
+            dailyData[dateKey].total =
+              dailyData[dateKey].sold +
+              dailyData[dateKey].onSale +
+              dailyData[dateKey].onReservation;
           }
         }
       }

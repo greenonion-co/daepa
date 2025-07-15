@@ -7,7 +7,7 @@ import { Plus, BarChart3 } from "lucide-react";
 import { toast } from "sonner";
 import Loading from "@/components/common/Loading";
 import { useInView } from "react-intersection-observer";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { overlay } from "overlay-kit";
 
@@ -40,7 +40,10 @@ const AdoptionPage = () => {
     select: (data) => data.pages.flatMap((page) => page.data.data),
   });
 
-  const soldData = data?.filter((item) => item.pet.saleStatus === PetDtoSaleStatus.SOLD);
+  const soldData = useMemo(
+    () => data?.filter((item) => item.pet.saleStatus === PetDtoSaleStatus.SOLD),
+    [data],
+  );
 
   useEffect(() => {
     if (inView && hasNextPage && !isFetchingNextPage) {
