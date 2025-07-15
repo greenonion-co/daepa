@@ -216,7 +216,7 @@ export class AdoptionService {
 
     // where 조건 추가
     Object.keys(where).forEach((key) => {
-      const value = where[key];
+      const value = where[key as keyof typeof where];
       if (value !== undefined) {
         queryBuilder.andWhere(`adoptions.${key} = :${key}`, { [key]: value });
       }
