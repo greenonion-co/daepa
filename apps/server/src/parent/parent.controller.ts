@@ -70,10 +70,12 @@ export class ParentController {
     description: '부모 요청을 정상적으로 승인하였습니다.',
     type: CommonResponseDto,
   })
-  async updateParentRequest(@Body() updateParentDto: UpdateParentDto) {
-    const userId = 'ZUCOPIA';
+  async updateParentRequest(
+    @Body() updateParentDto: UpdateParentDto,
+    @JwtUser() token: JwtUserPayload,
+  ) {
     const { message } = await this.parentService.updateParentStatus({
-      myId: userId,
+      myId: token.userId,
       updateParentDto,
     });
     return {
