@@ -145,48 +145,36 @@ export class PetService {
       userId,
     );
 
-    if (data.length === 0) {
-      return new PageDto([], pageMeta);
-    }
+    const petListFullWithParent = await Promise.all(
+      data.map(async (pet) => {
+        const father = await this.getParent(pet.petId, PARENT_ROLE.FATHER);
+        if (father) {
+          pet.father = plainToInstance(PetParentDto, father);
+        }
+        const mother = await this.getParent(pet.petId, PARENT_ROLE.MOTHER);
+        if (mother) {
+          pet.mother = plainToInstance(PetParentDto, mother);
+        }
 
-    const petIds = data.map((pet) => pet.petId);
-
-    // 배치로 부모 정보 조회
-    const [fathers, mothers] = await Promise.all([
-      this.getParentsBatch(petIds, PARENT_ROLE.FATHER),
-      this.getParentsBatch(petIds, PARENT_ROLE.MOTHER),
-    ]);
-
-    // 배치로 분양 정보 조회
-    const adoptions = await this.getAdoptionsBatch(petIds);
-
-    const petListFullWithParent = data.map((pet) => {
-      // 부모 정보 매핑
-      const father = fathers.find((f) => f.petId === pet.petId);
-      if (father) {
-        pet.father = plainToInstance(PetParentDto, father);
-      }
-
-      const mother = mothers.find((m) => m.petId === pet.petId);
-      if (mother) {
-        pet.mother = plainToInstance(PetParentDto, mother);
-      }
-
-      // 분양 정보 매핑
-      const adoption = adoptions.find((a) => a.pet_id === pet.petId);
-      if (adoption) {
-        pet.adoption = {
-          adoptionId: adoption.adoption_id,
-          price: adoption.price
-            ? Math.floor(Number(adoption.price))
-            : undefined,
-          adoptionDate: adoption.adoption_date,
-          status: adoption.status,
-        };
-      }
-
-      return pet;
-    });
+        const adoptionEntity = await this.adoptionRepository.findOne({
+          where: {
+            pet_id: pet.petId,
+            is_deleted: false,
+          },
+        });
+        if (adoptionEntity) {
+          pet.adoption = {
+            adoptionId: adoptionEntity.adoption_id,
+            price: adoptionEntity.price
+              ? Math.floor(Number(adoptionEntity.price))
+              : undefined,
+            adoptionDate: adoptionEntity.adoption_date,
+            status: adoptionEntity.status,
+          };
+        }
+        return pet;
+      }),
+    );
 
     return new PageDto(petListFullWithParent, pageMeta);
   }
@@ -355,8 +343,8 @@ export class PetService {
 
     // 각 부모 펫의 자식들을 가져오기
     const parentsWithChildrenPromises = entities.map(async (entity) => {
-      const pet = instanceToPlain(entity) as PetEntity;
-      const children = await this.getChildren(pet.pet_id);
+      const pet = instanceToPlain(entity);
+      const children = await this.getChildren(pet.petId);
       const childrenCount = children.length;
 
       // 자식이 있는 경우에만 반환
@@ -446,60 +434,5 @@ export class PetService {
       .getOne();
 
     return result?.owner_id || null;
-  }
-
-  // 배치로 부모 정보 조회하는 새로운 메서드
-  private async getParentsBatch(
-    petIds: string[],
-    role: PARENT_ROLE,
-  ): Promise<Array<Partial<ParentDto> & { petId: string }>> {
-    if (petIds.length === 0) return [];
-
-    const parents = await this.parentService.findByPetIdsAndRole(petIds, role);
-
-    if (parents.length === 0) return [];
-
-    const parentPetIds = parents.map((p) => p.parent_id);
-    const parentPetSummaries = await this.getPetSummariesBatch(parentPetIds);
-
-    return parents.map((parent) => {
-      const parentPetSummary = parentPetSummaries.find(
-        (summary) => summary.petId === parent.parent_id,
-      );
-
-      return {
-        ...parentPetSummary,
-        relationId: parent.id,
-        status: parent.status,
-        petId: parent.pet_id,
-      };
-    });
-  }
-
-  // 배치로 분양 정보 조회하는 새로운 메서드
-  private async getAdoptionsBatch(petIds: string[]): Promise<AdoptionEntity[]> {
-    if (petIds.length === 0) return [];
-
-    return await this.adoptionRepository
-      .createQueryBuilder('adoption')
-      .where('adoption.pet_id IN (:...petIds)', { petIds })
-      .andWhere('adoption.is_deleted = :isDeleted', { isDeleted: false })
-      .getMany();
-  }
-
-  // 배치로 펫 요약 정보 조회하는 새로운 메서드
-  private async getPetSummariesBatch(
-    petIds: string[],
-  ): Promise<PetSummaryDto[]> {
-    if (petIds.length === 0) return [];
-
-    const queryBuilder = this.createPetWithOwnerQueryBuilder();
-    const { entities } = await queryBuilder
-      .andWhere('pets.pet_id IN (:...petIds)', { petIds })
-      .getRawAndEntities();
-
-    return entities.map((entity) =>
-      plainToInstance(PetSummaryDto, instanceToPlain(entity)),
-    );
   }
 }
