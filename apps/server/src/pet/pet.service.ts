@@ -456,7 +456,6 @@ export class PetService {
     if (petIds.length === 0) return [];
 
     const parents = await this.parentService.findByPetIdsAndRole(petIds, role);
-    console.log('🚀 ~ PetService ~ parents:', parents);
 
     if (parents.length === 0) return [];
 
