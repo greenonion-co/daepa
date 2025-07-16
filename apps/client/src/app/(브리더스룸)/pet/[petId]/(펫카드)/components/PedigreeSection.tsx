@@ -83,7 +83,8 @@ const PedigreeSection = memo(({ petId, ownerId }: PedigreeSectionProps) => {
   const handleUnlink = useCallback(
     (label: ParentDtoRole) => {
       try {
-        if (!formData[label]?.petId) return;
+        if (!formData[label]?.petId || !formData[label]?.relationId)
+          return toast.error("부모 연동 해제에 실패했습니다.");
         mutateDeleteParent({ relationId: formData[label]?.relationId });
 
         toast.success("부모 연동 해제가 완료되었습니다.");

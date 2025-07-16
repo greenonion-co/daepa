@@ -46,9 +46,11 @@ const BreedingInfoSection = memo(({ isEditing, isTooltipOpen }: BreedingInfoSect
     (type: FieldName) => {
       switch (type) {
         case "morphs":
-          return MORPH_LIST_BY_SPECIES[formData.species as keyof typeof MORPH_LIST_BY_SPECIES];
+          return (
+            MORPH_LIST_BY_SPECIES[formData.species as keyof typeof MORPH_LIST_BY_SPECIES] || []
+          );
         default:
-          return SELECTOR_CONFIGS[type as keyof typeof SELECTOR_CONFIGS].selectList;
+          return SELECTOR_CONFIGS[type as keyof typeof SELECTOR_CONFIGS].selectList || [];
       }
     },
     [formData.species],
