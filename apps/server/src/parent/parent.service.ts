@@ -245,6 +245,30 @@ export class ParentService {
     );
   }
 
+  // 배치로 부모 정보 조회하는 새로운 메서드
+  async findByPetIdsAndRole(petIds: string[], role: PARENT_ROLE) {
+    if (petIds.length === 0) return [];
+
+    return await this.parentRepository
+      .createQueryBuilder('parent')
+      .select([
+        'parent.id',
+        'parent.pet_id',
+        'parent.parent_id',
+        'parent.role',
+        'parent.status',
+      ])
+      .innerJoin('pets', 'pet', 'pet.pet_id = parent.parent_id')
+      .where('parent.pet_id IN (:...petIds)', { petIds })
+      .andWhere('parent.role = :role', { role })
+      .andWhere('parent.status IN (:...statuses)', {
+        statuses: ['pending', 'approved'],
+      })
+      .andWhere('pet.is_deleted = :isDeleted', { isDeleted: false })
+      .orderBy('parent.created_at', 'DESC')
+      .getMany();
+  }
+
   private async createParentRequestNotification({
     relationId,
     senderPetId,
