@@ -102,6 +102,7 @@ export * from "./updateUserNotificationDto";
 export * from "./updateUserNotificationDtoDetailJson";
 export * from "./updateUserNotificationDtoStatus";
 export * from "./updateUserNotificationDtoType";
+export * from "./userControllerVerifyNameParams";
 export * from "./userDto";
 export * from "./userDtoIsBiz";
 export * from "./userDtoProvider";
