@@ -1,46 +1,16 @@
-import { FormField } from "@/app/(브리더스룸)/components/Form/FormField";
-import { FORM_STEPS, OPTION_STEPS } from "@/app/(브리더스룸)/constants";
 import { usePetStore } from "@/app/(브리더스룸)/register/store/pet";
-import { FieldName } from "@/app/(브리더스룸)/register/types";
-import { Button } from "@/components/ui/button";
-import { Edit3, InfoIcon } from "lucide-react";
-import { useState, useEffect } from "react";
-import ParentLink from "../../components/ParentLink";
-import {
-  petControllerUpdate,
-  PetSummaryDto,
-  UpdatePetDto,
-  petControllerDelete,
-  parentControllerDeleteParent,
-  parentControllerCreateParent,
-  PetDto,
-  ParentDtoRole,
-  PetDtoSex,
-  ParentDtoStatus,
-  petControllerFindOne,
-  PetDtoSaleStatus,
-} from "@repo/api-client";
+import { useState, useEffect, memo, useMemo, useCallback } from "react";
+import { petControllerUpdate, UpdatePetDto, PetDto, petControllerFindOne } from "@repo/api-client";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
-import { overlay } from "overlay-kit";
-import Dialog from "@/app/(브리더스룸)/components/Form/Dialog";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import useParentLinkStore, { PetParentDtoWithMessage } from "../../store/parentLink";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import InfoItem from "@/app/(브리더스룸)/components/Form/InfoItem";
-import { cn } from "@/lib/utils";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+
 import { format } from "date-fns";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import CreateAdoptionModal from "@/app/(브리더스룸)/adoption/components/CreateAdoptionModal";
 import AdoptionReceipt from "./components/AdoptionReceipt";
+import PetVisibilityControl from "./components/PetVisibilityControl";
+import AdoptionStatusControl from "./components/AdoptionStatusControl";
+import PedigreeSection from "./components/PedigreeSection";
+import BreedingInfoSection from "./components/BreedingInfoSection";
+import CardBackActions from "./components/CardBackActions";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface CardBackProps {
   pet: PetDto;
@@ -48,64 +18,14 @@ interface CardBackProps {
   isWideScreen: boolean;
 }
 
-const CardBack = ({ pet, from, isWideScreen }: CardBackProps) => {
+const CardBack = memo(({ pet, from, isWideScreen }: CardBackProps) => {
   const queryClient = useQueryClient();
-  const { formData, errors, setFormData, setPage } = usePetStore();
-  const { selectedParent, setSelectedParent } = useParentLinkStore();
+  const { formData, setFormData, setPage } = usePetStore();
 
   const [isEditing, setIsEditing] = useState(from === "egg");
   const [isTooltipOpen, setIsTooltipOpen] = useState(false);
 
-  const router = useRouter();
-  const { mutate: mutateDeletePet } = useMutation({
-    mutationFn: (petId: string) => petControllerDelete(petId),
-    onSuccess: () => {
-      router.push("/pet");
-
-      toast.success("펫이 삭제되었습니다.");
-    },
-    onError: () => {
-      toast.error("펫 삭제에 실패했습니다.");
-    },
-  });
-
-  const { mutate: mutateDeleteParent } = useMutation({
-    mutationFn: ({ relationId }: { relationId: number }) =>
-      parentControllerDeleteParent(relationId),
-  });
-
-  const { mutate: mutateRequestParent } = useMutation({
-    mutationFn: ({
-      parentId,
-      role,
-      message,
-    }: {
-      parentId: string;
-      role: ParentDtoRole;
-      message: string;
-    }) =>
-      parentControllerCreateParent(pet.petId, {
-        parentId,
-        role,
-        message,
-      }),
-    onSuccess: () => {
-      toast.success("부모 연동 요청이 완료되었습니다.");
-      const role =
-        selectedParent?.sex?.toString() === PetDtoSex.MALE
-          ? ParentDtoRole.FATHER
-          : ParentDtoRole.MOTHER;
-      setFormData((prev) => ({
-        ...prev,
-        [role]: { ...selectedParent, status: ParentDtoStatus.PENDING },
-      }));
-      setSelectedParent(null);
-    },
-    onError: () => {
-      toast.error("부모 연동 요청에 실패했습니다.");
-      setSelectedParent(null);
-    },
-  });
+  const isNotSold = useMemo(() => pet?.adoption?.status !== "SOLD", [pet?.adoption?.status]);
 
   useEffect(() => {
     if (from !== "egg") return;
@@ -122,22 +42,7 @@ const CardBack = ({ pet, from, isWideScreen }: CardBackProps) => {
     setPage("detail");
   }, [pet, setFormData, setPage]);
 
-  const visibleFields = [
-    ...[...FORM_STEPS].reverse(),
-    ...OPTION_STEPS.filter((step) =>
-      ["traits", "foods", "birthdate", "weight", "name", "desc"].includes(step.field.name),
-    ),
-  ];
-
-  const handleChange = (value: {
-    type: FieldName;
-    value: string | string[] | PetSummaryDto | null;
-  }) => {
-    if (!isEditing) return;
-    setFormData((prev) => ({ ...prev, [value.type]: value.value }));
-  };
-
-  const handleSave = async () => {
+  const handleSave = useCallback(async () => {
     try {
       const { name, species, morphs, traits, growth, sex, foods, desc, birthdate, weight } =
         formData;
@@ -159,285 +64,56 @@ const CardBack = ({ pet, from, isWideScreen }: CardBackProps) => {
 
       await petControllerUpdate(pet.petId, updateData as UpdatePetDto);
       setIsEditing(false);
+      queryClient.invalidateQueries({
+        queryKey: [petControllerFindOne.name, pet.petId],
+      });
       toast.success("펫 정보 수정이 완료되었습니다.");
     } catch (error) {
       console.error("Failed to update pet:", error);
       toast.error("펫 정보 수정에 실패했습니다.");
     }
-  };
+  }, [formData, pet.petId, queryClient]);
 
-  const handleParentSelect = (role: ParentDtoRole, value: PetParentDtoWithMessage) => {
-    try {
-      setSelectedParent({
-        ...value,
-        status: ParentDtoStatus.PENDING,
-      });
+  const handleEditToggle = useCallback(() => {
+    setIsEditing(!isEditing);
+  }, [isEditing]);
 
-      // 부모 연동 요청
-      mutateRequestParent({
-        parentId: value.petId,
-        role,
-        message: value.message,
-      });
-    } catch (error) {
-      console.error("Failed to send notification:", error);
-    }
-  };
-
-  const deletePet = async () => {
-    try {
-      if (!pet.petId) return;
-
-      mutateDeletePet(pet.petId);
-    } catch (error) {
-      console.error("Failed to delete pet:", error);
-    }
-  };
-
-  const handleDelete = () => {
-    overlay.open(({ isOpen, close, unmount }) => (
-      <Dialog
-        isOpen={isOpen}
-        onCloseAction={close}
-        onConfirmAction={() => {
-          deletePet();
-          close();
-        }}
-        onExit={unmount}
-        title="개체 삭제 안내"
-        description={`정말로 삭제하시겠습니까? \n 삭제 후 복구할 수 없습니다.`}
-      />
-    ));
-  };
-
-  const handleUnlink = (label: ParentDtoRole) => {
-    try {
-      if (!formData[label]?.petId) return;
-      mutateDeleteParent({ relationId: formData[label]?.relationId });
-
-      toast.success("부모 연동 해제가 완료되었습니다.");
-      setFormData((prev) => ({ ...prev, [label]: null }));
-    } catch {
-      toast.error("부모 연동 해제에 실패했습니다.");
-    }
-  };
-
-  const updatePet = async (data: UpdatePetDto, close: () => void) => {
-    try {
-      await petControllerUpdate(pet.petId, data);
-      queryClient.invalidateQueries({
-        queryKey: [petControllerFindOne.name, pet.petId],
-      });
-      toast.success("펫 정보가 변경되었습니다.");
-    } catch (error) {
-      console.error("Failed to update pet:", error);
-      toast.error("펫 정보 수정에 실패했습니다.");
-    } finally {
-      close();
-    }
-  };
-
-  const onPublicChange = () => {
-    overlay.open(({ isOpen, close, unmount }) => (
-      <Dialog
-        isOpen={isOpen}
-        onCloseAction={close}
-        onConfirmAction={() => updatePet({ isPublic: !pet.isPublic } as UpdatePetDto, close)}
-        onExit={unmount}
-        title="펫 공개 여부 변경"
-        description="펫 공개 여부를 변경하시겠습니까?"
-      />
-    ));
-  };
-
-  const onSaleStatusChange = (newStatus: string) => {
-    if (["ON_SALE", "ON_RESERVATION", "SOLD"].includes(newStatus)) {
-      overlay.open(({ isOpen, close }) => (
-        <CreateAdoptionModal
-          isOpen={isOpen}
-          onClose={close}
-          pet={pet}
-          saleStatus={newStatus as PetDtoSaleStatus}
-          onSuccess={() => {
-            queryClient.invalidateQueries({
-              queryKey: [petControllerFindOne.name, pet.petId],
-            });
-            toast.success("판매 상태가 변경되었습니다.");
-          }}
-        />
-      ));
-    } else {
-      overlay.open(({ isOpen, close, unmount }) => (
-        <Dialog
-          isOpen={isOpen}
-          onCloseAction={close}
-          onConfirmAction={() => updatePet({ saleStatus: newStatus } as UpdatePetDto, close)}
-          onExit={unmount}
-          title="판매 상태 변경"
-          description="판매 상태를 변경하시겠습니까?"
-        />
-      ));
-    }
-  };
+  const handleCancel = useCallback(() => {
+    setIsEditing(false);
+  }, []);
 
   return (
     <div className="relative h-full w-full">
       <div className="h-full">
         <div className="px-6 pb-20">
           <div className="flex items-center justify-between">
-            <div className="flex gap-2">
-              <Switch
-                id="visibility"
-                className="data-[state=checked]:bg-blue-600"
-                checked={pet.isPublic ?? false}
-                onCheckedChange={onPublicChange}
-              />
-              <Label htmlFor="visibility" className="text-muted-foreground text-sm">
-                다른 브리더에게 공개
-              </Label>
-            </div>
+            <PetVisibilityControl petId={pet.petId} isPublic={pet.isPublic} />
 
-            {pet.saleStatus !== "SOLD" && (
-              <Select
-                value={pet.saleStatus || "UNDEFINED"}
-                onValueChange={(value) => onSaleStatusChange(value)}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="UNDEFINED" disabled>
-                    미정
-                  </SelectItem>
-                  <SelectItem value="NFS">판매 안함</SelectItem>
-                  <SelectItem value="ON_SALE">판매 중</SelectItem>
-                  <SelectItem value="ON_RESERVATION">예약 중</SelectItem>
-                  <SelectItem value="SOLD">판매 완료</SelectItem>
-                </SelectContent>
-              </Select>
-            )}
+            {isNotSold && <AdoptionStatusControl pet={pet} />}
           </div>
 
-          {!isWideScreen && <AdoptionReceipt pet={pet} />}
+          {!isWideScreen && pet.adoption && <AdoptionReceipt adoption={pet.adoption} />}
 
           {/* 혈통 정보 */}
-          <div className="pb-4 pt-4">
-            <h2 className="mb-3 text-xl font-bold">혈통 정보</h2>
-
-            <div className="grid grid-cols-2 gap-4">
-              <ParentLink
-                label="부"
-                data={formData.father}
-                currentPetOwnerId={pet.owner.userId}
-                onSelect={(item) => handleParentSelect(ParentDtoRole.FATHER, item)}
-                onUnlink={() => handleUnlink(ParentDtoRole.FATHER)}
-              />
-              <ParentLink
-                label="모"
-                data={formData.mother}
-                currentPetOwnerId={pet.owner.userId}
-                onSelect={(item) => handleParentSelect(ParentDtoRole.MOTHER, item)}
-                onUnlink={() => handleUnlink(ParentDtoRole.MOTHER)}
-              />
-            </div>
-          </div>
+          <PedigreeSection petId={pet.petId} ownerId={pet.owner.userId} />
 
           {/* 사육 정보 */}
-          <div>
-            <div className="mb-2 flex items-center gap-1">
-              <h2 className="text-xl font-bold">사육 정보</h2>
-              {isTooltipOpen && (
-                <Tooltip open>
-                  <TooltipTrigger>
-                    <InfoIcon className="mr-1 h-4 w-4 text-red-500" />
-                  </TooltipTrigger>
-                  <TooltipContent side="right">
-                    <p>
-                      <span className="font-bold">모프, 이름, 생년월일 </span>은 알에서 부화한
-                      개체의 필수 정보입니다.
-                      <br />
-                      수정 후 저장하여 해칭을 완료해주세요.
-                    </p>
-                  </TooltipContent>
-                </Tooltip>
-              )}
-            </div>
-
-            <div className="space-y-4">
-              <div>
-                {visibleFields.map((step) => {
-                  return (
-                    <InfoItem
-                      key={step.field.name}
-                      label={step.title}
-                      className={step.field.type === "textarea" ? "" : "flex gap-4"}
-                      value={
-                        <FormField
-                          field={step.field}
-                          formData={formData}
-                          errors={errors}
-                          handleChange={handleChange}
-                          disabled={!isEditing}
-                        />
-                      }
-                    />
-                  );
-                })}
-              </div>
-            </div>
-          </div>
+          <BreedingInfoSection isEditing={isEditing} isTooltipOpen={isTooltipOpen} />
         </div>
 
         {/* 하단 고정 버튼 영역 */}
-        <div
-          className={cn(
-            "sticky bottom-0 left-0 flex p-4",
-            isEditing ? "justify-end" : "justify-between",
-          )}
-        >
-          {isEditing ? (
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                className="h-8 rounded-xl"
-                onClick={() => {
-                  setFormData(pet);
-                  setIsEditing(false);
-                }}
-              >
-                취소
-              </Button>
-              <Button className="h-8 rounded-xl bg-[#1A56B3]" onClick={handleSave}>
-                저장하기
-              </Button>
-            </div>
-          ) : (
-            <div className="flex flex-1 justify-between">
-              <Button variant="destructive" size="sm" onClick={handleDelete} className="text-white">
-                삭제하기
-              </Button>
-
-              {/* 수정 버튼 */}
-              <div className="flex justify-end dark:bg-[#18181B]">
-                {!isEditing && (
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="h-8 w-8"
-                    onClick={() => {
-                      setIsEditing(true);
-                    }}
-                  >
-                    <Edit3 />
-                  </Button>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
+        <CardBackActions
+          petId={pet.petId}
+          isEditing={isEditing}
+          onEditToggle={handleEditToggle}
+          onSave={handleSave}
+          onCancel={handleCancel}
+        />
       </div>
     </div>
   );
-};
+});
+
+CardBack.displayName = "CardBack";
 
 export default CardBack;

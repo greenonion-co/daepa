@@ -18,6 +18,8 @@ import {
 import { ApiResponse, ApiParam } from '@nestjs/swagger';
 import { CHILD_TYPE } from './parent.constant';
 import { CommonResponseDto } from 'src/common/response.dto';
+import { JwtUser } from 'src/auth/auth.decorator';
+import { JwtUserPayload } from 'src/auth/strategies/jwt.strategy';
 
 @Controller('/v1/parent')
 export class ParentController {
@@ -46,11 +48,16 @@ export class ParentController {
   async createParent(
     @Param('petId') petId: string,
     @Body() createParentDto: CreateParentDto,
+    @JwtUser() token: JwtUserPayload,
   ) {
-    const tempUserId = 'ADMIN';
-    await this.parentService.createParent(tempUserId, petId, createParentDto, {
-      isEgg: createParentDto.childType === CHILD_TYPE.EGG,
-    });
+    await this.parentService.createParent(
+      token.userId,
+      petId,
+      createParentDto,
+      {
+        isEgg: createParentDto.childType === CHILD_TYPE.EGG,
+      },
+    );
     return {
       success: true,
       message: '부모 관계가 정상적으로 생성되었습니다.',
@@ -63,10 +70,12 @@ export class ParentController {
     description: '부모 요청을 정상적으로 승인하였습니다.',
     type: CommonResponseDto,
   })
-  async updateParentRequest(@Body() updateParentDto: UpdateParentDto) {
-    const userId = 'ZUCOPIA';
+  async updateParentRequest(
+    @Body() updateParentDto: UpdateParentDto,
+    @JwtUser() token: JwtUserPayload,
+  ) {
     const { message } = await this.parentService.updateParentStatus({
-      myId: userId,
+      myId: token.userId,
       updateParentDto,
     });
     return {

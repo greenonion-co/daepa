@@ -1,8 +1,16 @@
-import { Bell, Bubbles, DollarSign, Egg, Film, Home, Inbox, TreeDeciduous } from "lucide-react";
+import {
+  Bell,
+  Bubbles,
+  DollarSign,
+  Egg,
+  Film,
+  Heart,
+  Home,
+  Inbox,
+  TreeDeciduous,
+} from "lucide-react";
 import { FormStep, SelectorConfig } from "./register/types";
 import { PetDtoSex, PetDtoSpecies, UserDtoStatus, UserNotificationDtoType } from "@repo/api-client";
-
-export const USER_NAME = "낸시";
 
 export const REGISTER_PAGE = {
   FIRST: 1,
@@ -308,7 +316,7 @@ export const TABLE_HEADER = {
   canBreed: "발정 여부",
   breedingCount: "산란",
   pairing: "메이팅 상대",
-  saleStatus: "판매 상태",
+  status: "판매 상태",
   isPublic: "공개 여부",
 };
 
@@ -373,6 +381,11 @@ export const SIDEBAR_ITEMS = [
     title: "분양룸",
     url: "/adoption",
     icon: DollarSign,
+  },
+  {
+    title: "메이팅룸",
+    url: "/mating",
+    icon: Heart,
   },
   {
     title: "알림",

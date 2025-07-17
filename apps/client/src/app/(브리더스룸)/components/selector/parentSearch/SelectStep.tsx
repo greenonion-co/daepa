@@ -4,22 +4,22 @@ import { useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import Loading from "@/components/common/Loading";
 import { PetParentDtoWithMessage } from "@/app/(브리더스룸)/pet/store/parentLink";
+import { useUserStore } from "@/app/(브리더스룸)/store/user";
 
 const SelectStep = ({
   pets,
-  currentUserId,
   handlePetSelect,
   hasMore,
   isFetchingMore,
   loaderRefAction,
 }: {
   pets: PetParentDtoWithMessage[];
-  currentUserId: string;
   handlePetSelect: (pet: PetParentDtoWithMessage) => void;
   hasMore: boolean;
   isFetchingMore: boolean;
   loaderRefAction: (node?: Element | null) => void;
 }) => {
+  const { user } = useUserStore();
   const [tab, setTab] = useState<"my" | "others">("my");
 
   return (
@@ -51,8 +51,8 @@ const SelectStep = ({
             {pets
               ?.filter((pet) =>
                 tab === "my"
-                  ? pet.owner.userId === currentUserId
-                  : pet.owner.userId !== currentUserId,
+                  ? pet.owner?.userId === user?.userId
+                  : pet.owner?.userId !== user?.userId,
               )
               .map((pet) => (
                 <PetItem key={pet.petId} item={pet} handlePetSelect={handlePetSelect} />

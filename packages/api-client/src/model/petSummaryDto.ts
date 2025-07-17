@@ -22,6 +22,8 @@ export interface PetSummaryDto {
   morphs?: string[];
   /** 펫 형질 */
   traits?: string[];
+  /** 펫 출생일 */
+  birthdate?: number;
   /** 펫 성별(수컷, 암컷, 미구분) */
   sex?: PetSummaryDtoSex;
 }

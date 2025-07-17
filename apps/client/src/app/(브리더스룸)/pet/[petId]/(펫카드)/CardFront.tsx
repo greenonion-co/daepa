@@ -131,9 +131,11 @@ const CardFront = ({ pet, qrCodeDataUrl }: { pet: PetDto; qrCodeDataUrl?: string
         )}
 
         <div className="mb-4 flex flex-col gap-1">
-          <Badge className="whitespace-nowrap bg-slate-700 font-bold text-white backdrop-blur-sm">
-            {pet.owner.name}
-          </Badge>
+          {pet.owner && (
+            <Badge className="whitespace-nowrap bg-slate-700 font-bold text-white backdrop-blur-sm">
+              {pet.owner?.name || "-"}
+            </Badge>
+          )}
           <div className="flex items-center gap-2">
             <h1 className="text-2xl font-bold">{pet.name}</h1>
             <div

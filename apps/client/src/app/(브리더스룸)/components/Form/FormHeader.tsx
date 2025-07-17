@@ -1,8 +1,10 @@
 import { useRouter } from "next/navigation";
-import { REGISTER_PAGE, USER_NAME } from "../../constants";
+import { REGISTER_PAGE } from "../../constants";
+import { useUserStore } from "../../store/user";
 
 export const FormHeader = ({ funnel }: { funnel: number }) => {
   const router = useRouter();
+  const { user } = useUserStore();
 
   const handleNavigateBack = () => {
     if (document.referrer.includes("/register/1")) {
@@ -22,7 +24,7 @@ export const FormHeader = ({ funnel }: { funnel: number }) => {
 
       <div className="mb-8 text-2xl">
         <span className="relative font-bold after:absolute after:bottom-0 after:left-0 after:-z-10 after:h-[15px] after:w-full after:bg-[#247DFE] after:opacity-20">
-          {USER_NAME}
+          {user?.name}
         </span>
         님 개체의
         <br />

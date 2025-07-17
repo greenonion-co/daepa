@@ -196,8 +196,11 @@ export class EggService {
     };
   }
 
-  async getEggListByDate(dateRange: { startYmd?: number; endYmd?: number }) {
-    const queryBuilder = this.createEggWithOwnerAndParentQueryBuilder();
+  async getEggListByDate(
+    dateRange: { startYmd?: number; endYmd?: number },
+    userId?: string,
+  ) {
+    const queryBuilder = this.createEggWithOwnerAndParentQueryBuilder(userId);
 
     const layingDateFrom =
       dateRange?.startYmd ??
@@ -431,8 +434,8 @@ export class EggService {
       ]);
   }
 
-  private createEggWithOwnerAndParentQueryBuilder() {
-    return this.eggRepository
+  private createEggWithOwnerAndParentQueryBuilder(userId?: string) {
+    const queryBuilder = this.eggRepository
       .createQueryBuilder('eggs')
       .leftJoinAndMapOne(
         'eggs.owner',
@@ -456,5 +459,11 @@ export class EggService {
         'users.is_biz',
         'users.status',
       ]);
+
+    if (userId) {
+      queryBuilder.andWhere('users.user_id = :userId', { userId });
+    }
+
+    return queryBuilder;
   }
 }

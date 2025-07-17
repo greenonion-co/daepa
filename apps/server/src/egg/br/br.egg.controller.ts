@@ -5,6 +5,8 @@ import { ExcludeNilInterceptor } from 'src/interceptors/exclude-nil';
 import { DateRangeValidationPipe } from 'src/common/pipes/date-range.pipe';
 import { ApiExtraModels, ApiResponse, getSchemaPath } from '@nestjs/swagger';
 import { EggDto } from '../egg.dto';
+import { JwtUser } from 'src/auth/auth.decorator';
+import { JwtUserPayload } from 'src/auth/strategies/jwt.strategy';
 
 @Controller('/v1/br/egg')
 @UseInterceptors(ExcludeNilInterceptor)
@@ -29,7 +31,8 @@ export class BrEggController {
   async findAll(
     @Query(new DateRangeValidationPipe())
     dateRange: DateRangeDto,
+    @JwtUser() token: JwtUserPayload,
   ) {
-    return this.eggService.getEggListByDate(dateRange);
+    return this.eggService.getEggListByDate(dateRange, token.userId);
   }
 }

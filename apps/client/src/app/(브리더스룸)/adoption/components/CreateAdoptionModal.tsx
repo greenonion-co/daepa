@@ -25,10 +25,10 @@ import { cn } from "@/lib/utils";
 import { SALE_STATUS_KOREAN_INFO, SPECIES_KOREAN_INFO } from "../../constants";
 import {
   adoptionControllerCreateAdoption,
-  adoptionControllerUpdateAdoption,
+  adoptionControllerUpdate,
+  AdoptionDtoStatus,
   brPetControllerFindAll,
   PetDto,
-  PetDtoSaleStatus,
 } from "@repo/api-client";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useInView } from "react-intersection-observer";
@@ -49,7 +49,7 @@ type AdoptionFormData = z.infer<typeof adoptionSchema>;
 
 interface CreateAdoptionModalProps {
   isOpen: boolean;
-  saleStatus?: PetDtoSaleStatus;
+  status?: AdoptionDtoStatus;
   pet?: PetDto;
   onClose: () => void;
   onSuccess: () => void;
@@ -57,7 +57,7 @@ interface CreateAdoptionModalProps {
 
 const CreateAdoptionModal = ({
   isOpen,
-  saleStatus,
+  status,
   pet,
   onClose,
   onSuccess,
@@ -71,8 +71,7 @@ const CreateAdoptionModal = ({
   const { ref, inView } = useInView();
   const itemPerPage = 10;
 
-  const shouldShowAdvancedFields =
-    pet && (saleStatus === "ON_RESERVATION" || saleStatus === "SOLD");
+  const shouldShowAdvancedFields = pet && (status === "ON_RESERVATION" || status === "SOLD");
 
   const {
     data: pets,
@@ -135,13 +134,11 @@ const CreateAdoptionModal = ({
         ...(data.buyerId && {
           buyerId: data.buyerId,
         }),
-        ...(saleStatus && {
-          saleStatus: saleStatus,
-        }),
+        ...(status && Object.values(AdoptionDtoStatus).includes(status) && { status }),
       };
 
       if (selectedPet.adoption?.adoptionId) {
-        await adoptionControllerUpdateAdoption(selectedPet.adoption.adoptionId, newAdoptionDto);
+        await adoptionControllerUpdate(selectedPet.adoption.adoptionId, newAdoptionDto);
       } else {
         await adoptionControllerCreateAdoption(newAdoptionDto);
       }
@@ -244,7 +241,7 @@ const CreateAdoptionModal = ({
               <div className="text-sm font-medium">{selectedPet?.name}</div>
               <div className="text-muted-foreground text-sm">
                 {selectedPet?.species && SPECIES_KOREAN_INFO[selectedPet.species]} |{" "}
-                {selectedPet?.owner.name}
+                {selectedPet?.owner?.name}
               </div>
             </div>
 
@@ -314,7 +311,6 @@ const CreateAdoptionModal = ({
                   />
                 )}
 
-                {/* 입양자 선택 - pet이 있고 saleStatus가 ON_RESERVATION 또는 SOLD인 경우에만 표시 */}
                 {shouldShowAdvancedFields && (
                   <FormField
                     control={form.control}
@@ -359,7 +355,6 @@ const CreateAdoptionModal = ({
                   />
                 )}
 
-                {/* 거래 방식 - pet이 있고 saleStatus가 ON_RESERVATION 또는 SOLD인 경우에만 표시 */}
                 {shouldShowAdvancedFields && (
                   <FormField
                     control={form.control}
@@ -417,8 +412,8 @@ const CreateAdoptionModal = ({
                   <Button type="submit" className="flex-1" disabled={isSubmitting}>
                     {isSubmitting
                       ? "등록 중..."
-                      : selectedPet?.adoption?.adoptionId && saleStatus
-                        ? `${SALE_STATUS_KOREAN_INFO[saleStatus]}으로 수정`
+                      : selectedPet?.adoption?.adoptionId && status
+                        ? `${SALE_STATUS_KOREAN_INFO[status]}으로 수정`
                         : "등록하기"}
                   </Button>
                 </div>

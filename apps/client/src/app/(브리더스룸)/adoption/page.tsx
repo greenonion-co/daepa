@@ -1,7 +1,7 @@
 "use client";
 
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
-import { adoptionControllerGetAllAdoptions, PetDtoSaleStatus } from "@repo/api-client";
+import { adoptionControllerGetAllAdoptions, AdoptionDtoStatus } from "@repo/api-client";
 import { Button } from "@/components/ui/button";
 import { Plus, BarChart3 } from "lucide-react";
 import { toast } from "sonner";
@@ -41,7 +41,7 @@ const AdoptionPage = () => {
   });
 
   const soldData = useMemo(
-    () => data?.filter((item) => item.pet.saleStatus === PetDtoSaleStatus.SOLD),
+    () => data?.filter((item) => item.status === AdoptionDtoStatus.SOLD),
     [data],
   );
 

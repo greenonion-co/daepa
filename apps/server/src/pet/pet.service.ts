@@ -108,8 +108,9 @@ export class PetService {
   async getPetList<T extends PetDto | PetSummaryDto>(
     pageOptionsDto: PageOptionsDto,
     dtoClass: new () => T,
+    userId?: string,
   ): Promise<{ data: T[]; pageMeta: PageMetaDto }> {
-    const queryBuilder = this.createPetWithOwnerQueryBuilder();
+    const queryBuilder = this.createPetWithOwnerQueryBuilder(userId);
 
     queryBuilder
       .orderBy('pets.id', pageOptionsDto.order)
@@ -118,7 +119,13 @@ export class PetService {
 
     const totalCount = await queryBuilder.getCount();
     const { entities } = await queryBuilder.getRawAndEntities();
-    const petList = entities.map((entity) => instanceToPlain(entity));
+    const petList = entities.map((entity) => {
+      const plainEntity = instanceToPlain(entity);
+      plainEntity.weight = plainEntity.weight
+        ? Number(plainEntity.weight)
+        : undefined;
+      return plainEntity;
+    });
     const petDtos = petList.map((pet) => plainToInstance(dtoClass, pet));
     const pageMetaDto = new PageMetaDto({ totalCount, pageOptionsDto });
 
@@ -130,25 +137,56 @@ export class PetService {
 
   async getPetListFull(
     pageOptionsDto: PageOptionsDto,
+    userId: string,
   ): Promise<PageDto<PetDto>> {
     const { data, pageMeta } = await this.getPetList<PetDto>(
       pageOptionsDto,
       PetDto,
+      userId,
     );
 
-    const petListFullWithParent = await Promise.all(
-      data.map(async (pet) => {
-        const father = await this.getParent(pet.petId, PARENT_ROLE.FATHER);
-        if (father) {
-          pet.father = plainToInstance(PetParentDto, father);
-        }
-        const mother = await this.getParent(pet.petId, PARENT_ROLE.MOTHER);
-        if (mother) {
-          pet.mother = plainToInstance(PetParentDto, mother);
-        }
-        return pet;
-      }),
-    );
+    if (data.length === 0) {
+      return new PageDto([], pageMeta);
+    }
+
+    const petIds = data.map((pet) => pet.petId);
+
+    // 배치로 부모 정보 조회
+    const [fathers, mothers] = await Promise.all([
+      this.getParentsBatch(petIds, PARENT_ROLE.FATHER),
+      this.getParentsBatch(petIds, PARENT_ROLE.MOTHER),
+    ]);
+
+    // 배치로 분양 정보 조회
+    const adoptions = await this.getAdoptionsBatch(petIds);
+
+    const petListFullWithParent = data.map((pet) => {
+      // 부모 정보 매핑
+      const father = fathers.find((f) => f.petId === pet.petId);
+      if (father) {
+        pet.father = plainToInstance(PetParentDto, father);
+      }
+
+      const mother = mothers.find((m) => m.petId === pet.petId);
+      if (mother) {
+        pet.mother = plainToInstance(PetParentDto, mother);
+      }
+
+      // 분양 정보 매핑
+      const adoption = adoptions.find((a) => a.pet_id === pet.petId);
+      if (adoption) {
+        pet.adoption = {
+          adoptionId: adoption.adoption_id,
+          price: adoption.price
+            ? Math.floor(Number(adoption.price))
+            : undefined,
+          adoptionDate: adoption.adoption_date,
+          status: adoption.status,
+        };
+      }
+
+      return pet;
+    });
 
     return new PageDto(petListFullWithParent, pageMeta);
   }
@@ -197,8 +235,8 @@ export class PetService {
             : undefined,
           adoptionDate: adoptionEntity.adoption_date,
           memo: adoptionEntity.memo,
-          location: adoptionEntity.location,
           buyerId: adoptionEntity.buyer_id,
+          status: adoptionEntity.status,
         };
       }
     }
@@ -317,7 +355,7 @@ export class PetService {
 
     // 각 부모 펫의 자식들을 가져오기
     const parentsWithChildrenPromises = entities.map(async (entity) => {
-      const pet = instanceToPlain(entity);
+      const pet = instanceToPlain(entity) as PetDto;
       const children = await this.getChildren(pet.petId);
       const childrenCount = children.length;
 
@@ -374,8 +412,8 @@ export class PetService {
     );
   }
 
-  private createPetWithOwnerQueryBuilder() {
-    return this.petRepository
+  private createPetWithOwnerQueryBuilder(userId?: string) {
+    const queryBuilder = this.petRepository
       .createQueryBuilder('pets')
       .leftJoinAndMapOne(
         'pets.owner',
@@ -392,6 +430,12 @@ export class PetService {
         'users.is_biz',
         'users.status',
       ]);
+
+    if (userId) {
+      queryBuilder.andWhere('users.user_id = :userId', { userId });
+    }
+
+    return queryBuilder;
   }
 
   async getPetOwnerId(petId: string): Promise<string | null> {
@@ -402,5 +446,60 @@ export class PetService {
       .getOne();
 
     return result?.owner_id || null;
+  }
+
+  // 배치로 부모 정보 조회하는 새로운 메서드
+  private async getParentsBatch(
+    petIds: string[],
+    role: PARENT_ROLE,
+  ): Promise<Array<Partial<ParentDto> & { petId: string }>> {
+    if (petIds.length === 0) return [];
+
+    const parents = await this.parentService.findByPetIdsAndRole(petIds, role);
+
+    if (parents.length === 0) return [];
+
+    const parentPetIds = parents.map((p) => p.parent_id);
+    const parentPetSummaries = await this.getPetSummariesBatch(parentPetIds);
+
+    return parents.map((parent) => {
+      const parentPetSummary = parentPetSummaries.find(
+        (summary) => summary.petId === parent.parent_id,
+      );
+
+      return {
+        ...parentPetSummary,
+        relationId: parent.id,
+        status: parent.status,
+        petId: parent.pet_id,
+      };
+    });
+  }
+
+  // 배치로 분양 정보 조회하는 새로운 메서드
+  private async getAdoptionsBatch(petIds: string[]): Promise<AdoptionEntity[]> {
+    if (petIds.length === 0) return [];
+
+    return await this.adoptionRepository
+      .createQueryBuilder('adoption')
+      .where('adoption.pet_id IN (:...petIds)', { petIds })
+      .andWhere('adoption.is_deleted = :isDeleted', { isDeleted: false })
+      .getMany();
+  }
+
+  // 배치로 펫 요약 정보 조회하는 새로운 메서드
+  private async getPetSummariesBatch(
+    petIds: string[],
+  ): Promise<PetSummaryDto[]> {
+    if (petIds.length === 0) return [];
+
+    const queryBuilder = this.createPetWithOwnerQueryBuilder();
+    const { entities } = await queryBuilder
+      .andWhere('pets.pet_id IN (:...petIds)', { petIds })
+      .getRawAndEntities();
+
+    return entities.map((entity) =>
+      plainToInstance(PetSummaryDto, instanceToPlain(entity)),
+    );
   }
 }

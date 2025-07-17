@@ -5,6 +5,8 @@ import { ExcludeNilInterceptor } from 'src/interceptors/exclude-nil';
 import { ApiResponse, getSchemaPath } from '@nestjs/swagger';
 import { PetDto } from '../pet.dto';
 import { ApiExtraModels } from '@nestjs/swagger';
+import { JwtUser } from 'src/auth/auth.decorator';
+import { JwtUserPayload } from 'src/auth/strategies/jwt.strategy';
 
 // TODO: UseGuard를 사용하여 breeder 검증
 @Controller('/v1/br/pet')
@@ -31,7 +33,8 @@ export class BrPetController {
   })
   async findAll(
     @Query() pageOptionsDto: PageOptionsDto,
+    @JwtUser() token: JwtUserPayload,
   ): Promise<PageDto<PetDto>> {
-    return this.petService.getPetListFull(pageOptionsDto);
+    return this.petService.getPetListFull(pageOptionsDto, token.userId);
   }
 }

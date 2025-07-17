@@ -13,7 +13,7 @@ export enum PET_SPECIES {
   GARGO = 'GG', // 가고일게코
 }
 
-export enum PET_SALE_STATUS {
+export enum ADOPTION_SALE_STATUS {
   NFS = 'NFS', // 판매 안함
   ON_SALE = 'ON_SALE', // 판매 중
   ON_RESERVATION = 'ON_RESERVATION', // 예약 중

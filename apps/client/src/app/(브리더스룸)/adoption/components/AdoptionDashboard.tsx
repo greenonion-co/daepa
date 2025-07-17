@@ -17,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { AdoptionSummaryDto, PetDtoSaleStatus } from "@repo/api-client";
+import { AdoptionDto, PetDtoSaleStatus } from "@repo/api-client";
 import { chartConfig, STATS_CARDS, STATUS_CONFIG } from "../constants";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
@@ -25,7 +25,7 @@ import { Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface AdoptionDashboardProps {
-  data?: AdoptionSummaryDto[];
+  data?: AdoptionDto[];
 }
 
 // 통계 카드 컴포넌트
@@ -98,7 +98,7 @@ const AdoptionCalendar = ({
   selectedYear,
   selectedMonth,
 }: {
-  data: AdoptionSummaryDto[];
+  data: AdoptionDto[];
   selectedYear: number;
   selectedMonth: number | null;
 }) => {
@@ -125,7 +125,7 @@ const AdoptionCalendar = ({
         if (date.getFullYear() === selectedYear && date.getMonth() === selectedMonth - 1) {
           const dateKey = format(date, "yyyyMMdd");
           if (dailyData[dateKey]) {
-            switch (adoption.pet.saleStatus) {
+            switch (adoption.status) {
               case PetDtoSaleStatus.SOLD:
                 dailyData[dateKey].sold++;
                 break;
@@ -230,18 +230,20 @@ const AdoptionDashboard = ({ data = [] }: AdoptionDashboardProps) => {
   // 통계 카드용 데이터
   const stats = useMemo(() => {
     const totalAdoptions = statsData.length;
-    const totalRevenue = statsData.reduce((sum, adoption) => sum + (adoption.price || 0), 0);
+    const totalRevenue = statsData
+      .filter((adoption) => adoption.status === PetDtoSaleStatus.SOLD)
+      .reduce((sum, adoption) => sum + (adoption.price || 0), 0);
     const soldCount = statsData.filter(
-      (adoption) => adoption.pet.saleStatus === PetDtoSaleStatus.SOLD,
+      (adoption) => adoption.status === PetDtoSaleStatus.SOLD,
     ).length;
     const onSaleCount = statsData.filter(
-      (adoption) => adoption.pet.saleStatus === PetDtoSaleStatus.ON_SALE,
+      (adoption) => adoption.status === PetDtoSaleStatus.ON_SALE,
     ).length;
     const onReservationCount = statsData.filter(
-      (adoption) => adoption.pet.saleStatus === PetDtoSaleStatus.ON_RESERVATION,
+      (adoption) => adoption.status === PetDtoSaleStatus.ON_RESERVATION,
     ).length;
     const nfsCount = statsData.filter(
-      (adoption) => adoption.pet.saleStatus === PetDtoSaleStatus.NFS,
+      (adoption) => adoption.status === PetDtoSaleStatus.NFS,
     ).length;
 
     return {
@@ -269,7 +271,7 @@ const AdoptionDashboard = ({ data = [] }: AdoptionDashboardProps) => {
         const date = new Date(adoption.adoptionDate);
         if (date.getFullYear() === selectedYear) {
           const month = date.getMonth();
-          switch (adoption.pet.saleStatus) {
+          switch (adoption.status) {
             case PetDtoSaleStatus.SOLD:
               monthlyData[month]!.sold++;
               break;

@@ -18,7 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { AdoptionSummaryDto } from "@repo/api-client";
+import { AdoptionDto } from "@repo/api-client";
 import Loading from "@/components/common/Loading";
 import { overlay } from "overlay-kit";
 import AdoptionDetailModal from "./AdoptionDetailModal";
@@ -38,7 +38,7 @@ export const DataTable = ({
   hasMore,
   isFetchingMore,
   loaderRefAction,
-}: DataTableProps<AdoptionSummaryDto>) => {
+}: DataTableProps<AdoptionDto>) => {
   const {
     sorting,
     columnFilters,

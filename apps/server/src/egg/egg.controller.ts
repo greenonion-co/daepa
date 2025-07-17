@@ -18,6 +18,8 @@ import {
 import { ExcludeNilInterceptor } from 'src/interceptors/exclude-nil';
 import { ApiResponse } from '@nestjs/swagger';
 import { CommonResponseDto } from 'src/common/response.dto';
+import { JwtUserPayload } from 'src/auth/strategies/jwt.strategy';
+import { JwtUser } from 'src/auth/auth.decorator';
 
 @Controller('/v1/egg')
 @UseInterceptors(ExcludeNilInterceptor)
@@ -40,13 +42,13 @@ export class EggController {
     description: '알 등록 성공',
     type: CommonResponseDto,
   })
-  async create(@Body() createEggDto: CreateEggDto) {
-    // TODO: userId를 ownerId로 사용
-    const tempOwnerId = 'ADMIN';
-
+  async create(
+    @Body() createEggDto: CreateEggDto,
+    @JwtUser() token: JwtUserPayload,
+  ) {
     const createdEggs = await this.eggService.createEgg({
       ...createEggDto,
-      ownerId: tempOwnerId,
+      ownerId: token.userId,
     });
 
     return {
@@ -66,9 +68,9 @@ export class EggController {
   async update(
     @Param('eggId') eggId: string,
     @Body() updateEggDto: UpdateEggDto,
+    @JwtUser() token: JwtUserPayload,
   ) {
-    const tempOwnerId = 'ADMIN';
-    await this.eggService.updateEgg(tempOwnerId, eggId, updateEggDto);
+    await this.eggService.updateEgg(token.userId, eggId, updateEggDto);
     return {
       success: true,
       message: '알 수정이 완료되었습니다. eggId: ' + eggId,
@@ -95,9 +97,14 @@ export class EggController {
     description: '알 펫 전환 성공',
     type: HatchedResponseDto,
   })
-  async hatched(@Param('eggId') eggId: string) {
-    const tempOwnerId = 'ADMIN';
-    const { petId } = await this.eggService.convertEggToPet(eggId, tempOwnerId);
+  async hatched(
+    @Param('eggId') eggId: string,
+    @JwtUser() token: JwtUserPayload,
+  ) {
+    const { petId } = await this.eggService.convertEggToPet(
+      eggId,
+      token.userId,
+    );
     return {
       success: true,
       message: '알이 펫으로 전환되었습니다.',

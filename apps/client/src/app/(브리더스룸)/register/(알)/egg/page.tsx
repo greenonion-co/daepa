@@ -1,6 +1,6 @@
 "use client";
 
-import { EGG_REGISTER_STEPS, USER_NAME } from "../../../constants";
+import { EGG_REGISTER_STEPS } from "../../../constants";
 import { CreateEggDto, eggControllerCreate } from "@repo/api-client";
 import { FormField } from "../../../components/Form/FormField";
 
@@ -19,9 +19,11 @@ import { useSelect } from "../../hooks/useSelect";
 import { FormData } from "../../store/pet";
 import Loading from "@/components/common/Loading";
 import { format } from "date-fns";
+import { useUserStore } from "../../../store/user";
 
 const EggRegisterPage = () => {
   const router = useRouter();
+  const { user } = useUserStore();
   const { formData, setFormData, step, setStep, errors, setErrors, resetForm } = useEggStore();
   const { handleSelect } = useSelect();
   const visibleSteps = EGG_REGISTER_STEPS.slice(-step - 1);
@@ -153,7 +155,7 @@ const EggRegisterPage = () => {
     <div className="relative mx-auto min-h-screen max-w-[640px] p-4 pb-20">
       <div className={"mb-8 text-2xl"}>
         <span className="relative font-bold after:absolute after:bottom-0 after:left-0 after:-z-10 after:h-[15px] after:w-full after:bg-[#247DFE] after:opacity-20">
-          {USER_NAME}
+          {user?.name}
         </span>
         님 <span className="font-bold text-sky-700">알</span>의
         <br />

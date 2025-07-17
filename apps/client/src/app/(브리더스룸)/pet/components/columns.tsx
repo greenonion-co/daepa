@@ -95,10 +95,10 @@ export const columns: ColumnDef<PetDto>[] = [
     cell: ({ cell }) => <div className="capitalize">{cell.getValue() ? "✅" : ""}</div>,
   },
   {
-    accessorKey: "saleStatus",
-    header: TABLE_HEADER.saleStatus,
+    accessorKey: "adoption.status",
+    header: TABLE_HEADER.status,
     cell: ({ cell }) => {
-      const status = cell.getValue() as string;
+      const status = cell.getValue();
       return (
         <div className="capitalize">
           {SALE_STATUS_KOREAN_INFO[status as keyof typeof SALE_STATUS_KOREAN_INFO] || "미정"}

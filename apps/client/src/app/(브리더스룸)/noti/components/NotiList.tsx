@@ -129,6 +129,12 @@ const NotiList = ({ tab }: { tab: "all" | "unread" }) => {
           </div>
         </div>
 
+        {items.length === 0 && (
+          <div className="flex h-full items-center justify-center">
+            <p className="text-muted-foreground">알림이 없습니다.</p>
+          </div>
+        )}
+
         {items.map((item) => {
           return (
             <button

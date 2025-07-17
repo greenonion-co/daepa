@@ -1,4 +1,5 @@
 import { PetParentDtoWithMessage } from "@/app/(브리더스룸)/pet/store/parentLink";
+import { useUserStore } from "@/app/(브리더스룸)/store/user";
 import { Badge } from "@/components/ui/badge";
 import { PetDtoSex } from "@repo/api-client";
 import { Send } from "lucide-react";
@@ -7,13 +8,13 @@ import { useState } from "react";
 
 interface LinkStepProps {
   selectedPet: PetParentDtoWithMessage;
-  currentUserId: string;
   onSelect: (pet: PetParentDtoWithMessage) => void;
   onClose: () => void;
 }
 
-const LinkStep = ({ selectedPet, currentUserId, onSelect, onClose }: LinkStepProps) => {
+const LinkStep = ({ selectedPet, onSelect, onClose }: LinkStepProps) => {
   const [message, setMessage] = useState<string | null>(null);
+  const { user } = useUserStore();
 
   const defaultMessage = (pet: PetParentDtoWithMessage) => {
     return `안녕하세요, ${pet.name}님.\n${pet.name}를 ${
@@ -78,7 +79,9 @@ const LinkStep = ({ selectedPet, currentUserId, onSelect, onClose }: LinkStepPro
           </div>
 
           {/* 요청 메시지 영역 */}
-          {selectedPet.owner.userId !== currentUserId ? (
+          {selectedPet?.owner?.userId &&
+          user?.userId &&
+          selectedPet.owner.userId !== user.userId ? (
             <div className="space-y-2 rounded-xl">
               <div>
                 <div className="flex items-center gap-1">

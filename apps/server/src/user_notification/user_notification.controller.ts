@@ -18,6 +18,8 @@ import {
 } from './user_notification.dto';
 import { ApiExtraModels, ApiResponse, getSchemaPath } from '@nestjs/swagger';
 import { CommonResponseDto } from 'src/common/response.dto';
+import { JwtUser } from 'src/auth/auth.decorator';
+import { JwtUserPayload } from 'src/auth/strategies/jwt.strategy';
 
 @Controller('/v1/user-notification')
 export class UserNotificationController {
@@ -42,11 +44,13 @@ export class UserNotificationController {
       },
     },
   })
-  async findAll(@Query() pageOptionsDto: PageOptionsDto) {
-    const userId = 'ZUCOPIA';
+  async findAll(
+    @Query() pageOptionsDto: PageOptionsDto,
+    @JwtUser() token: JwtUserPayload,
+  ) {
     return this.userNotificationService.getAllReceiverNotifications(
       pageOptionsDto,
-      userId,
+      token.userId,
     );
   }
 
@@ -56,11 +60,12 @@ export class UserNotificationController {
     description: '알림이 생성되었습니다.',
     type: CommonResponseDto,
   })
-  async create(@Body() createUserNotificationDto: CreateUserNotificationDto) {
-    // TODO: 유저 토큰으로부터 senderId 획득
-    const senderId = 'ADMIN';
+  async create(
+    @Body() createUserNotificationDto: CreateUserNotificationDto,
+    @JwtUser() token: JwtUserPayload,
+  ) {
     await this.userNotificationService.createUserNotification(
-      senderId,
+      token.userId,
       createUserNotificationDto,
     );
     return {
@@ -75,11 +80,12 @@ export class UserNotificationController {
     description: '알림 상태가 변경되었습니다.',
     type: CommonResponseDto,
   })
-  async update(@Body() updateUserNotificationDto: UpdateUserNotificationDto) {
-    // TODO: 유저 토큰으로부터 senderId 획득
-    const senderId = 'ADMIN';
+  async update(
+    @Body() updateUserNotificationDto: UpdateUserNotificationDto,
+    @JwtUser() token: JwtUserPayload,
+  ) {
     await this.userNotificationService.updateUserNotification(
-      senderId,
+      token.userId,
       updateUserNotificationDto,
     );
     return {

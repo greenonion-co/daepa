@@ -1,4 +1,5 @@
 import { Exclude, Expose } from 'class-transformer';
+import { ADOPTION_SALE_STATUS } from 'src/pet/pet.constants';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -55,4 +56,7 @@ export class AdoptionEntity {
   @Expose({ name: 'isDeleted' })
   @Column({ default: false })
   is_deleted: boolean;
+
+  @Column({ type: 'enum', enum: ADOPTION_SALE_STATUS, nullable: true })
+  status?: ADOPTION_SALE_STATUS;
 }

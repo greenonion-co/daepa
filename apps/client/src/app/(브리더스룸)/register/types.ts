@@ -19,7 +19,7 @@ export type FieldName =
   | "clutch"
   | "parents"
   | "layingDate"
-  | "saleStatus"
+  | "status"
   | "isPublic";
 
 export type FormStep = {

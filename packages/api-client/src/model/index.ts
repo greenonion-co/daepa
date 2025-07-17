@@ -25,6 +25,7 @@ export * from "./brPetControllerFindAllParams";
 export * from "./commonResponseDto";
 export * from "./createAdoptionDto";
 export * from "./createAdoptionDtoSaleStatus";
+export * from "./createAdoptionDtoStatus";
 export * from "./createEggDto";
 export * from "./createEggDtoSpecies";
 export * from "./createEggHatchDto";

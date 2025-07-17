@@ -15,7 +15,6 @@ import {
   AdoptionDto,
   CreateAdoptionDto,
   UpdateAdoptionDto,
-  AdoptionWithPetDto,
 } from './adoption.dto';
 import { PetService } from 'src/pet/pet.service';
 import { UserService } from 'src/user/user.service';
@@ -23,7 +22,7 @@ import { nanoid } from 'nanoid';
 import { instanceToPlain, plainToInstance } from 'class-transformer';
 import { PageMetaDto, PageOptionsDto } from 'src/common/page.dto';
 import { PageDto } from 'src/common/page.dto';
-import { PET_SALE_STATUS } from 'src/pet/pet.constants';
+import { ADOPTION_SALE_STATUS } from 'src/pet/pet.constants';
 import { PetSummaryDto } from 'src/pet/pet.dto';
 
 @Injectable()
@@ -40,38 +39,42 @@ export class AdoptionService {
     return nanoid(8);
   }
 
-  private toAdoptionSummaryDto(entity: AdoptionEntity): AdoptionWithPetDto {
+  private toAdoptionDto(entity: AdoptionEntity): AdoptionDto {
     const plain = instanceToPlain(entity);
-    return plainToInstance(AdoptionWithPetDto, {
+    return plainToInstance(AdoptionDto, {
       ...plain,
       price: plain.price ? Math.floor(Number(plain.price)) : undefined,
       pet: plain.pet ? plainToInstance(PetSummaryDto, plain.pet) : undefined,
     });
   }
 
-  private async updatePetSaleStatus(
+  private async updatePetStatus(
     entityManager: EntityManager,
     petId: string,
     newAdoptionDto: UpdateAdoptionDto,
   ) {
-    const saleStatus =
-      newAdoptionDto.saleStatus ||
+    const status =
+      newAdoptionDto.status ||
       (newAdoptionDto.buyerId
-        ? PET_SALE_STATUS.ON_RESERVATION
-        : PET_SALE_STATUS.ON_SALE);
+        ? ADOPTION_SALE_STATUS.ON_RESERVATION
+        : ADOPTION_SALE_STATUS.ON_SALE);
 
-    await entityManager.update(
-      'pets',
-      { pet_id: petId },
-      { sale_status: saleStatus },
-    );
-
-    if (saleStatus === PET_SALE_STATUS.SOLD) {
-      await entityManager.update(
-        'pets',
-        { pet_id: petId },
-        { is_deleted: true },
-      );
+    if (status === ADOPTION_SALE_STATUS.SOLD) {
+      if (newAdoptionDto.buyerId) {
+        await entityManager.update(
+          'pets',
+          { pet_id: petId },
+          {
+            owner_id: newAdoptionDto.buyerId,
+          },
+        );
+      } else {
+        await entityManager.update(
+          'pets',
+          { pet_id: petId },
+          { owner_id: null },
+        );
+      }
     }
   }
 
@@ -90,7 +93,7 @@ export class AdoptionService {
   async createAdoption(
     sellerId: string,
     createAdoptionDto: CreateAdoptionDto,
-  ): Promise<AdoptionDto> {
+  ): Promise<{ adoptionId: string }> {
     return this.dataSource.transaction(async (entityManager: EntityManager) => {
       // 펫 존재 여부 확인
       const pet = await this.petService.getPet(createAdoptionDto.petId);
@@ -98,10 +101,9 @@ export class AdoptionService {
         throw new NotFoundException('펫을 찾을 수 없습니다.');
       }
 
-      // 펫 소유자 확인
-      // if (pet.owner.userId !== sellerId) {
-      //   throw new BadRequestException('펫의 소유자가 아닙니다.');
-      // }
+      if (pet.owner?.userId !== sellerId) {
+        throw new BadRequestException('펫의 소유자가 아닙니다.');
+      }
 
       // 이미 분양 정보가 있는지 확인
       const existingAdoption = await entityManager.findOne(AdoptionEntity, {
@@ -133,25 +135,22 @@ export class AdoptionService {
         buyerId: createAdoptionDto.buyerId,
       });
 
-      const saveAdoptionEntity = await entityManager.save(
-        AdoptionEntity,
-        adoptionEntity,
-      );
+      await entityManager.save(AdoptionEntity, adoptionEntity);
 
-      await this.updatePetSaleStatus(
+      await this.updatePetStatus(
         entityManager,
         createAdoptionDto.petId,
         createAdoptionDto,
       );
 
-      const adoption = instanceToPlain(saveAdoptionEntity);
-      return plainToInstance(AdoptionDto, adoption);
+      return { adoptionId };
     });
   }
 
   async findAll(
     pageOptionsDto: PageOptionsDto,
-  ): Promise<PageDto<AdoptionWithPetDto>> {
+    userId: string,
+  ): Promise<PageDto<AdoptionDto>> {
     const queryBuilder = this.adoptionRepository
       .createQueryBuilder('adoptions')
       .leftJoinAndMapOne(
@@ -173,6 +172,7 @@ export class AdoptionService {
         'buyer.user_id = adoptions.buyer_id',
       )
       .where('adoptions.is_deleted = :isDeleted', { isDeleted: false })
+      .andWhere('adoptions.seller_id = :userId', { userId })
       .orderBy('adoptions.created_at', pageOptionsDto.order)
       .skip(pageOptionsDto.skip)
       .take(pageOptionsDto.itemPerPage);
@@ -180,13 +180,13 @@ export class AdoptionService {
     const totalCount = await queryBuilder.getCount();
     const adoptionEntities = await queryBuilder.getMany();
 
-    const adoptionSummaryDtos = adoptionEntities.map((adoption) =>
-      this.toAdoptionSummaryDto(adoption),
+    const adoptionDtos = adoptionEntities.map((adoption) =>
+      this.toAdoptionDto(adoption),
     );
 
     const pageMetaDto = new PageMetaDto({ totalCount, pageOptionsDto });
 
-    return new PageDto(adoptionSummaryDtos, pageMetaDto);
+    return new PageDto(adoptionDtos, pageMetaDto);
   }
 
   async findOne(
@@ -250,7 +250,7 @@ export class AdoptionService {
   async updateAdoption(
     adoptionId: string,
     updateAdoptionDto: UpdateAdoptionDto,
-  ): Promise<AdoptionDto> {
+  ): Promise<{ adoptionId: string }> {
     return this.dataSource.transaction(async (entityManager: EntityManager) => {
       const adoptionEntity = await entityManager.findOne(AdoptionEntity, {
         where: { adoption_id: adoptionId, is_deleted: false },
@@ -277,23 +277,20 @@ export class AdoptionService {
         buyerId: (value: string) => ({ buyer_id: value }),
         memo: (value: string) => ({ memo: value }),
         location: (value: string) => ({ location: value }),
+        status: (value: ADOPTION_SALE_STATUS) => ({ status: value }),
       };
 
       this.updateEntityFields(adoptionEntity, updateAdoptionDto, fieldMappings);
 
-      const savedAdoptionEntity = await entityManager.save(
-        AdoptionEntity,
-        adoptionEntity,
-      );
+      await entityManager.save(AdoptionEntity, adoptionEntity);
 
-      await this.updatePetSaleStatus(
+      await this.updatePetStatus(
         entityManager,
         adoptionEntity.pet_id,
         updateAdoptionDto,
       );
 
-      const adoption = instanceToPlain(savedAdoptionEntity);
-      return plainToInstance(AdoptionDto, adoption);
+      return { adoptionId };
     });
   }
 }

@@ -6,7 +6,6 @@
  * OpenAPI spec version: 1.0
  */
 import type { CreatePetDtoSpecies } from "./createPetDtoSpecies";
-import type { CreatePetDtoSaleStatus } from "./createPetDtoSaleStatus";
 import type { CreatePetDtoSex } from "./createPetDtoSex";
 import type { CreateParentDto } from "./createParentDto";
 
@@ -23,8 +22,6 @@ export interface CreatePetDto {
   birthdate?: number;
   /** 펫 성장단계 */
   growth?: string;
-  /** 펫 판매 상태 */
-  saleStatus?: CreatePetDtoSaleStatus;
   /** 펫 공개 여부 */
   isPublic?: boolean;
   /** 펫 성별(수컷, 암컷, 미구분) */

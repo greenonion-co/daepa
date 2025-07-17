@@ -50,7 +50,7 @@ const NotiButton = () => {
     .slice(0, 4)
     .map((n) => ({
       title: NOTIFICATION_TYPE[n.type as keyof typeof NOTIFICATION_TYPE].label,
-      message: (n?.detailJson as { message: string })?.message.substring(0, 50) + "...",
+      message: (n?.detailJson as { message: string })?.message?.substring(0, 50) + "...",
       id: n.id,
     }));
 

@@ -5,10 +5,10 @@
  * Project Daepa API description
  * OpenAPI spec version: 1.0
  */
-import type { AdoptionWithPetDto } from "./adoptionWithPetDto";
+import type { AdoptionDto } from "./adoptionDto";
 import type { PageMetaDto } from "./pageMetaDto";
 
 export type AdoptionControllerGetAllAdoptions200 = {
-  data: AdoptionWithPetDto[];
+  data: AdoptionDto[];
   meta: PageMetaDto;
 };

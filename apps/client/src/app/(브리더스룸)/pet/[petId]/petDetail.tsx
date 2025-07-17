@@ -112,7 +112,7 @@ const PetDetail = ({ pet, qrCodeDataUrl }: PetDetailProps) => {
           <div className="h-[700px] w-full rounded-lg border-gray-300 bg-white shadow-xl dark:bg-[#18181B]">
             <CardFront pet={pet} qrCodeDataUrl={qrCodeDataUrl} />
 
-            {isWideScreen && <AdoptionReceipt pet={pet} />}
+            {isWideScreen && pet.adoption && <AdoptionReceipt adoption={pet.adoption} />}
           </div>
           {/* 오른쪽: CardBack */}
           <div className="w-full rounded-lg border-gray-300 bg-white shadow-xl dark:bg-[#18181B]">

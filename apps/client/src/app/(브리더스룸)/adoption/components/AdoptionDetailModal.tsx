@@ -34,7 +34,7 @@ const AdoptionDetailModal = ({ isOpen, onClose, adoptionId }: AdoptionDetailModa
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             분양 상세 정보
-            {getStatusBadge(pet?.saleStatus)}
+            {getStatusBadge(adoptionData?.status)}
           </DialogTitle>
         </DialogHeader>
 

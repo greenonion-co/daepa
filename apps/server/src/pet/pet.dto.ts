@@ -9,7 +9,7 @@ import {
 } from 'class-validator';
 import {
   PET_ADOPTION_LOCATION,
-  PET_SALE_STATUS,
+  ADOPTION_SALE_STATUS,
   PET_SEX,
   PET_SPECIES,
 } from './pet.constants';
@@ -93,17 +93,6 @@ export class PetBaseDto {
   growth?: string;
 
   @ApiProperty({
-    description: '펫 판매 상태',
-    example: 'ON_SALE',
-    enum: PET_SALE_STATUS,
-    'x-enumNames': Object.keys(PET_SALE_STATUS),
-    required: false,
-  })
-  @IsOptional()
-  @IsEnum(PET_SALE_STATUS)
-  saleStatus?: PET_SALE_STATUS;
-
-  @ApiProperty({
     description: '펫 공개 여부',
     example: false,
     required: false,
@@ -164,6 +153,7 @@ export class PetSummaryDto extends PickType(PetBaseDto, [
   'traits',
   'sex',
   'photos',
+  'birthdate',
 ]) {
   @Exclude()
   declare growth?: string;
@@ -253,12 +243,11 @@ export class PetAdoptionDto {
   @ApiProperty({
     description: '분양 상태',
     example: 'ON_SALE',
-    enum: PET_SALE_STATUS,
-    'x-enumNames': Object.keys(PET_SALE_STATUS),
-    required: true,
+    enum: ADOPTION_SALE_STATUS,
+    'x-enumNames': Object.keys(ADOPTION_SALE_STATUS),
   })
-  @IsEnum(PET_SALE_STATUS)
-  status: PET_SALE_STATUS;
+  @IsEnum(ADOPTION_SALE_STATUS)
+  status?: ADOPTION_SALE_STATUS;
 
   @ApiProperty({
     description: '분양 날짜',

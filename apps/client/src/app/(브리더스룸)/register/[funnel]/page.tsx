@@ -101,7 +101,7 @@ export default function RegisterPage({ params }: { params: Promise<{ funnel: str
         }
       }
 
-      const { growth, morphs, name, sex, species, ...rest } = transformedFormData;
+      const { growth, morphs, name, sex, species, desc, ...rest } = transformedFormData;
 
       const requestData: CreatePetDto = {
         growth,
@@ -109,6 +109,7 @@ export default function RegisterPage({ params }: { params: Promise<{ funnel: str
         name,
         sex,
         species,
+        ...(desc && { desc }),
         ...(rest?.birthdate && {
           birthdate: format(rest.birthdate, "yyyyMMdd"),
         }),

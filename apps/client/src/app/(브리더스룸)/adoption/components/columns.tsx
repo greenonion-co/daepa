@@ -4,12 +4,12 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Checkbox } from "@/components/ui/checkbox";
 
 import { Badge } from "@/components/ui/badge";
-import { AdoptionSummaryDto } from "@repo/api-client";
+import { AdoptionDto } from "@repo/api-client";
 import { getStatusBadge } from "@/lib/utils";
 import { formatDateToYYYYMMDDString } from "@/lib/utils";
 import { SPECIES_KOREAN_INFO } from "../../constants";
 
-export const columns: ColumnDef<AdoptionSummaryDto>[] = [
+export const columns: ColumnDef<AdoptionDto>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -70,18 +70,18 @@ export const columns: ColumnDef<AdoptionSummaryDto>[] = [
     },
   },
   {
-    accessorKey: "pet.saleStatus",
+    accessorKey: "status",
     header: "상태",
     cell: ({ row }) => {
-      const saleStatus = row.original.pet.saleStatus;
-      return <div className="flex justify-center">{getStatusBadge(saleStatus)}</div>;
+      const status = row.original.status;
+      return <div className="flex justify-center">{getStatusBadge(status)}</div>;
     },
   },
   {
     accessorKey: "buyer.name",
     header: "입양자",
     cell: ({ row }) => {
-      const buyer = row.original.buyer;
+      const buyer = row.original?.buyer;
       return <div className="text-sm">{buyer ? buyer.name : "입양자 정보 없음"}</div>;
     },
   },

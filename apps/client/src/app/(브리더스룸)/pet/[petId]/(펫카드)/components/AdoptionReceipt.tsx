@@ -1,23 +1,55 @@
 import { SALE_STATUS_KOREAN_INFO } from "@/app/(브리더스룸)/constants";
-import { PetDto } from "@repo/api-client";
+import { PetAdoptionDto } from "@repo/api-client";
 import { format, parseISO } from "date-fns";
 import { ko } from "date-fns/locale";
-import { useState } from "react";
+import { useState, memo, useCallback, useMemo } from "react";
 
 interface AdoptionReceiptProps {
-  pet: PetDto;
+  adoption: PetAdoptionDto; // 실제 타입에 맞게 수정 필요
 }
 
-const AdoptionReceipt = ({ pet }: AdoptionReceiptProps) => {
+const AdoptionReceipt = memo(({ adoption }: AdoptionReceiptProps) => {
   const [isReceiptVisible, setIsReceiptVisible] = useState(false);
 
-  const handleReceiptHover = () => {
+  const handleReceiptHover = useCallback(() => {
     if (!isReceiptVisible) {
       setIsReceiptVisible(true);
     }
-  };
+  }, [isReceiptVisible]);
 
-  if (!["ON_SALE", "ON_RESERVATION", "SOLD"].includes(pet.saleStatus || "")) return null;
+  const shouldShowReceipt = useMemo(() => {
+    return ["ON_SALE", "ON_RESERVATION", "SOLD"].includes(adoption?.status || "");
+  }, [adoption?.status]);
+
+  const statusText = useMemo(() => {
+    return adoption?.status &&
+      typeof adoption.status === "string" &&
+      adoption.status in SALE_STATUS_KOREAN_INFO
+      ? SALE_STATUS_KOREAN_INFO[adoption.status as keyof typeof SALE_STATUS_KOREAN_INFO]
+      : "미정";
+  }, [adoption?.status]);
+
+  const priceText = useMemo(() => {
+    return adoption?.price ? `${adoption.price.toLocaleString()}원` : "미정";
+  }, [adoption?.price]);
+
+  const adoptionDateText = useMemo(() => {
+    return adoption?.adoptionDate
+      ? format(parseISO(adoption.adoptionDate as string), "yyyy년 MM월 dd일", {
+          locale: ko,
+        })
+      : "미정";
+  }, [adoption?.adoptionDate]);
+
+  const shouldShowDate = useMemo(() => {
+    return ["SOLD", "ON_RESERVATION"].includes(adoption?.status || "");
+  }, [adoption?.status]);
+
+  const animationDelay = useMemo(() => {
+    return adoption?.memo ? "1.6s" : "1.4s";
+  }, [adoption?.memo]);
+
+  if (!shouldShowReceipt) return null;
 
   return (
     <div className="pb-4 pt-4">
@@ -40,16 +72,16 @@ const AdoptionReceipt = ({ pet }: AdoptionReceiptProps) => {
           style={{ animationDelay: "0.2s" }}
         >
           <div className="flex items-center gap-2 text-lg font-bold text-gray-800 dark:text-gray-200">
-            {pet.saleStatus === "SOLD" && (
+            {adoption?.status === "SOLD" && (
               <div className="opacity-0 transition-all duration-300 group-hover:opacity-100">
                 <span className="animate-bounce text-2xl">✨</span>
               </div>
             )}
             분양 영수증{" "}
-            {pet.saleStatus !== "SOLD" && (
+            {adoption?.status !== "SOLD" && (
               <span className="text-sm font-light text-gray-600 dark:text-gray-400">(예정)</span>
             )}
-            {pet.saleStatus === "SOLD" && (
+            {adoption?.status === "SOLD" && (
               <div className="opacity-0 transition-all duration-300 group-hover:opacity-100">
                 <span className="animate-bounce text-2xl">✨</span>
               </div>
@@ -71,13 +103,7 @@ const AdoptionReceipt = ({ pet }: AdoptionReceiptProps) => {
           >
             <span className="text-sm text-gray-600 dark:text-gray-400">분양 상태</span>
             <span className="text-sm font-medium text-gray-800 dark:text-gray-200">
-              {pet.adoption?.status &&
-              typeof pet.adoption.status === "string" &&
-              pet.adoption.status in SALE_STATUS_KOREAN_INFO
-                ? SALE_STATUS_KOREAN_INFO[
-                    pet.adoption.status as keyof typeof SALE_STATUS_KOREAN_INFO
-                  ]
-                : "미정"}
+              {statusText}
             </span>
           </div>
 
@@ -86,24 +112,16 @@ const AdoptionReceipt = ({ pet }: AdoptionReceiptProps) => {
             style={{ animationDelay: "0.8s" }}
           >
             <span className="text-sm text-gray-600 dark:text-gray-400">분양 가격</span>
-            <span className="text-sm font-bold text-gray-800 dark:text-gray-200">
-              {pet.adoption?.price ? `${pet.adoption.price.toLocaleString()}원` : "미정"}
-            </span>
+            <span className="text-sm font-bold text-gray-800 dark:text-gray-200">{priceText}</span>
           </div>
 
-          {["SOLD", "ON_RESERVATION"].includes(pet.saleStatus || "") && (
+          {shouldShowDate && (
             <div
               className={`flex justify-between ${isReceiptVisible ? "animate-fade-in-up" : ""}`}
               style={{ animationDelay: "1.0s" }}
             >
               <span className="text-sm text-gray-600 dark:text-gray-400">분양 날짜</span>
-              <span className="text-sm text-gray-800 dark:text-gray-200">
-                {pet.adoption?.adoptionDate
-                  ? format(parseISO(pet.adoption.adoptionDate as string), "yyyy년 MM월 dd일", {
-                      locale: ko,
-                    })
-                  : "미정"}
-              </span>
+              <span className="text-sm text-gray-800 dark:text-gray-200">{adoptionDateText}</span>
             </div>
           )}
         </div>
@@ -115,21 +133,21 @@ const AdoptionReceipt = ({ pet }: AdoptionReceiptProps) => {
           style={{ animationDelay: "1.2s" }}
         ></div>
 
-        {pet.adoption?.memo ? (
+        {adoption?.memo ? (
           <div
             className={`mt-4 ${isReceiptVisible ? "animate-fade-in-up" : ""}`}
             style={{ animationDelay: "1.4s" }}
           >
             <div className="mb-2 text-sm text-gray-600 dark:text-gray-400">메모</div>
             <div className="rounded bg-gray-100 p-3 text-sm text-gray-800 dark:bg-gray-700 dark:text-gray-200">
-              {pet.adoption.memo as string}
+              {adoption.memo as string}
             </div>
           </div>
         ) : null}
 
         <div
           className={`mt-4 text-center ${isReceiptVisible ? "animate-fade-in-up" : ""}`}
-          style={{ animationDelay: pet.adoption?.memo ? "1.6s" : "1.4s" }}
+          style={{ animationDelay }}
         >
           <div className="text-xs text-gray-500 dark:text-gray-400">
             ※ 문의 사항은 고객센터로 문의해주세요.
@@ -138,6 +156,8 @@ const AdoptionReceipt = ({ pet }: AdoptionReceiptProps) => {
       </div>
     </div>
   );
-};
+});
+
+AdoptionReceipt.displayName = "AdoptionReceipt";
 
 export default AdoptionReceipt;

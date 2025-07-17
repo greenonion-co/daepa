@@ -9,11 +9,11 @@
 /**
  * 판매 상태
  */
-export type UpdateAdoptionDtoStatus =
-  (typeof UpdateAdoptionDtoStatus)[keyof typeof UpdateAdoptionDtoStatus];
+export type CreateAdoptionDtoStatus =
+  (typeof CreateAdoptionDtoStatus)[keyof typeof CreateAdoptionDtoStatus];
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const UpdateAdoptionDtoStatus = {
+export const CreateAdoptionDtoStatus = {
   NFS: "NFS",
   ON_SALE: "ON_SALE",
   ON_RESERVATION: "ON_RESERVATION",

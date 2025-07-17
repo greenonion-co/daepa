@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { UserNotificationEntity } from './user_notification.entity';
 import {
   DeleteResult,
@@ -61,9 +65,19 @@ export class UserNotificationService {
     userId: string,
     dto: UpdateUserNotificationDto,
   ): Promise<UpdateResult> {
+    if (!dto.status) {
+      throw new BadRequestException('Status is required');
+    }
+    const userNotificationEntity =
+      await this.userNotificationRepository.findOne({
+        where: { id: dto.id },
+      });
+    if (!userNotificationEntity) {
+      throw new NotFoundException('User notification not found');
+    }
     return await this.userNotificationRepository.update(
-      { id: dto.id, sender_id: userId },
-      dto,
+      { id: dto.id },
+      { status: dto.status },
     );
   }
 

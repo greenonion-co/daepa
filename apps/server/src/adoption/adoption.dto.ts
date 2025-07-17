@@ -8,8 +8,9 @@ import {
 import { ApiProperty, OmitType, PartialType, PickType } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { UserProfilePublicDto } from '../user/user.dto';
-import { PET_SALE_STATUS } from 'src/pet/pet.constants';
-import { PetDto } from '../pet/pet.dto';
+
+import { PetDto, PetSummaryDto } from '../pet/pet.dto';
+import { ADOPTION_SALE_STATUS } from 'src/pet/pet.constants';
 
 export class AdoptionBaseDto {
   @ApiProperty({
@@ -75,10 +76,10 @@ export class AdoptionBaseDto {
   @ApiProperty({
     description: '펫 판매 상태',
     example: 'ON_SALE',
-    enum: PET_SALE_STATUS,
-    'x-enumNames': Object.keys(PET_SALE_STATUS),
+    enum: ADOPTION_SALE_STATUS,
+    'x-enumNames': Object.keys(ADOPTION_SALE_STATUS),
   })
-  status: PET_SALE_STATUS;
+  status: ADOPTION_SALE_STATUS;
 }
 
 export class CreateAdoptionDto {
@@ -138,13 +139,13 @@ export class CreateAdoptionDto {
   @ApiProperty({
     description: '판매 상태',
     example: 'ON_SALE',
-    enum: PET_SALE_STATUS,
-    'x-enumNames': Object.keys(PET_SALE_STATUS),
+    enum: ADOPTION_SALE_STATUS,
+    'x-enumNames': Object.keys(ADOPTION_SALE_STATUS),
     required: false,
   })
   @IsOptional()
-  @IsEnum(PET_SALE_STATUS)
-  saleStatus?: PET_SALE_STATUS;
+  @IsEnum(ADOPTION_SALE_STATUS)
+  status?: ADOPTION_SALE_STATUS;
 }
 
 export class UpdateAdoptionDto extends PartialType(CreateAdoptionDto) {
@@ -180,6 +181,11 @@ export class AdoptionDto extends PickType(AdoptionBaseDto, [
   })
   @IsOptional()
   buyer?: UserProfilePublicDto;
+
+  @ApiProperty({
+    description: '펫 정보',
+  })
+  pet: PetSummaryDto;
 }
 export class AdoptionWithPetDto extends OmitType(AdoptionBaseDto, [
   'location',

@@ -18,7 +18,6 @@ import {
   CreateAdoptionDto,
   UpdateAdoptionDto,
   AdoptionDto,
-  AdoptionWithPetDto,
 } from './adoption.dto';
 import { JwtUser } from '../auth/auth.decorator';
 import { JwtUserPayload } from '../auth/strategies/jwt.strategy';
@@ -37,14 +36,14 @@ export class AdoptionController {
     type: AdoptionDto,
   })
   async createAdoption(
-    @JwtUser() token: JwtUserPayload,
     @Body() createAdoptionDto: CreateAdoptionDto,
-  ): Promise<AdoptionDto> {
+    @JwtUser() token: JwtUserPayload,
+  ): Promise<{ adoptionId: string }> {
     return this.adoptionService.createAdoption(token.userId, createAdoptionDto);
   }
 
   @Get()
-  @ApiExtraModels(AdoptionWithPetDto, PageMetaDto)
+  @ApiExtraModels(AdoptionDto, PageMetaDto)
   @ApiResponse({
     status: 200,
     description: '분양 전체 리스트 조회 성공',
@@ -54,7 +53,7 @@ export class AdoptionController {
       properties: {
         data: {
           type: 'array',
-          items: { $ref: getSchemaPath(AdoptionWithPetDto) },
+          items: { $ref: getSchemaPath(AdoptionDto) },
         },
         meta: { $ref: getSchemaPath(PageMetaDto) },
       },
@@ -62,8 +61,9 @@ export class AdoptionController {
   })
   async getAllAdoptions(
     @Query() pageOptionsDto: PageOptionsDto,
-  ): Promise<PageDto<AdoptionWithPetDto>> {
-    return this.adoptionService.findAll(pageOptionsDto);
+    @JwtUser() token: JwtUserPayload,
+  ): Promise<PageDto<AdoptionDto>> {
+    return this.adoptionService.findAll(pageOptionsDto, token.userId);
   }
 
   @Get('/:adoptionId')
@@ -88,10 +88,10 @@ export class AdoptionController {
     description: '분양 정보 수정 성공',
     type: AdoptionDto,
   })
-  async updateAdoption(
+  async update(
     @Param('adoptionId') adoptionId: string,
     @Body() updateAdoptionDto: UpdateAdoptionDto,
-  ): Promise<AdoptionDto> {
+  ): Promise<{ adoptionId: string }> {
     return this.adoptionService.updateAdoption(adoptionId, updateAdoptionDto);
   }
 }

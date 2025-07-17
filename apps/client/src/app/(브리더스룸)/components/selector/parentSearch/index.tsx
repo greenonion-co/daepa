@@ -18,8 +18,6 @@ interface ParentSearchProps {
   sex?: "M" | "F";
 }
 
-const currentUserId = "ADMIN";
-
 export default function ParentSearchSelector({
   isOpen,
   onClose,
@@ -94,7 +92,6 @@ export default function ParentSearchSelector({
           {step === 1 ? (
             <SelectStep
               pets={data as PetParentDtoWithMessage[]}
-              currentUserId={currentUserId}
               handlePetSelect={handlePetSelect}
               hasMore={hasNextPage}
               isFetchingMore={isFetchingNextPage}
@@ -103,7 +100,6 @@ export default function ParentSearchSelector({
           ) : (
             <LinkStep
               selectedPet={selectedPet ?? ({} as PetParentDtoWithMessage)}
-              currentUserId={currentUserId}
               onSelect={onSelect}
               onClose={onClose}
             />

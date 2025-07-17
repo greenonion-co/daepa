@@ -16,6 +16,8 @@ import { ApiExtraModels, ApiResponse, getSchemaPath } from '@nestjs/swagger';
 import { ExcludeNilInterceptor } from 'src/interceptors/exclude-nil';
 import { CommonResponseDto } from 'src/common/response.dto';
 import { ParentWithChildrenDto } from './pet.dto';
+import { JwtUser } from 'src/auth/auth.decorator';
+import { JwtUserPayload } from 'src/auth/strategies/jwt.strategy';
 
 @Controller('/v1/pet')
 @UseInterceptors(ExcludeNilInterceptor)
@@ -82,13 +84,13 @@ export class PetController {
     description: '펫 등록이 완료되었습니다. petId: XXXXXX',
     type: CommonResponseDto,
   })
-  async create(@Body() createPetDto: CreatePetDto) {
-    // TODO: userId를 ownerId로 사용
-    const tempOwnerId = 'ADMIN';
-
+  async create(
+    @Body() createPetDto: CreatePetDto,
+    @JwtUser() token: JwtUserPayload,
+  ) {
     const { petId } = await this.petService.createPet({
       ...createPetDto,
-      ownerId: tempOwnerId,
+      ownerId: token.userId,
     });
 
     return {
@@ -106,9 +108,9 @@ export class PetController {
   async update(
     @Param('petId') petId: string,
     @Body() updatePetDto: UpdatePetDto,
+    @JwtUser() token: JwtUserPayload,
   ) {
-    const tempOwnerId = 'ADMIN';
-    await this.petService.updatePet(tempOwnerId, petId, updatePetDto);
+    await this.petService.updatePet(token.userId, petId, updatePetDto);
     return {
       success: true,
       message: '펫 수정이 완료되었습니다. petId: ' + petId,
