@@ -56,6 +56,12 @@ export class OauthService {
     });
   }
 
+  async deleteAllOauthInfoByEmail(email: string): Promise<void> {
+    await this.oauthRepository.delete({
+      email,
+    });
+  }
+
   async disconnectKakao(providerId: string): Promise<KakaoDisconnectResponse> {
     const response = await firstValueFrom(
       this.httpService
