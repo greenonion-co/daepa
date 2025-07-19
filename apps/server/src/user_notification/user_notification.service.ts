@@ -98,8 +98,8 @@ export class UserNotificationService {
     dto: DeleteUserNotificationDto,
   ): Promise<DeleteResult> {
     return await this.userNotificationRepository.update(
-      { id: dto.id, receiver_id: dto.receiverId, is_deleted: false },
-      { is_deleted: true },
+      { id: dto.id, receiverId: dto.receiverId, isDeleted: false },
+      { isDeleted: true },
     );
   }
 }

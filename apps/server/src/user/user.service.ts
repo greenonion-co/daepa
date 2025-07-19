@@ -7,8 +7,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindOptionsWhere, Repository } from 'typeorm';
 import { UserEntity } from './user.entity';
-import { CreateInitUserInfoDto, UserDto, UserProfileDto } from './user.dto';
-import { instanceToPlain, plainToInstance } from 'class-transformer';
+import { CreateInitUserInfoDto, UserDto } from './user.dto';
 import { ProviderInfo } from 'src/auth/auth.types';
 import { USER_ROLE, USER_STATUS } from './user.constant';
 import { nanoid } from 'nanoid';
@@ -22,13 +21,14 @@ export class UserService {
     private readonly userRepository: Repository<UserEntity>,
     private readonly oauthService: OauthService,
   ) {}
+
   async generateUserId() {
     const maxAttempts = 10;
 
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
       const userId = nanoid(6);
       const existingUser = await this.userRepository.findOneBy({
-        user_id: userId,
+        userId,
       });
       if (!existingUser) {
         return userId;
@@ -47,7 +47,8 @@ export class UserService {
     const userId = await this.generateUserId();
     const pendingName = `USER_${userId}`;
 
-    const userEntity = plainToInstance(UserEntity, {
+    const userEntity = new UserEntity();
+    Object.assign(userEntity, {
       userId,
       name: pendingName,
       email,
@@ -58,8 +59,22 @@ export class UserService {
     });
 
     const savedUserEntity = await this.userRepository.save(userEntity);
-    const savedUser = instanceToPlain(savedUserEntity);
-    return plainToInstance(UserDto, savedUser);
+    return this.toUserDto(savedUserEntity);
+  }
+
+  private toUserDto(entity: UserEntity): UserDto {
+    return {
+      userId: entity.userId,
+      name: entity.name,
+      email: entity.email,
+      role: entity.role,
+      isBiz: entity.isBiz,
+      refreshToken: entity.refreshToken,
+      refreshTokenExpiresAt: entity.refreshTokenExpiresAt,
+      status: entity.status,
+      createdAt: entity.createdAt,
+      updatedAt: entity.updatedAt,
+    };
   }
 
   async findOne(where: FindOptionsWhere<UserEntity>) {
@@ -69,13 +84,12 @@ export class UserService {
       return null;
     }
 
-    const user = instanceToPlain(userEntity);
-    return plainToInstance(UserDto, user);
+    return this.toUserDto(userEntity);
   }
 
   async findOneProfile(userId: string) {
     const userEntity = await this.userRepository.findOneBy({
-      user_id: userId,
+      userId,
     });
     if (!userEntity) {
       throw new NotFoundException('사용자를 찾을 수 없습니다.');
@@ -85,11 +99,10 @@ export class UserService {
       userEntity.email,
     );
 
-    const user = instanceToPlain(userEntity);
-    return plainToInstance(UserProfileDto, {
-      ...user,
+    return {
+      ...this.toUserDto(userEntity),
       provider: userProviders,
-    });
+    };
   }
 
   async createInitUserInfo(
@@ -109,10 +122,10 @@ export class UserService {
       }
 
       await this.userRepository.update(
-        { user_id: userId },
+        { userId },
         {
           name,
-          is_biz: isBiz,
+          isBiz,
           status: USER_STATUS.ACTIVE,
         },
       );
@@ -134,8 +147,8 @@ export class UserService {
   }
 
   async update(userId: string, userDto: Partial<UserDto>) {
-    const user = instanceToPlain(userDto);
-    const userUpdateEntity = plainToInstance(UserEntity, user);
-    await this.userRepository.update({ user_id: userId }, userUpdateEntity);
+    const userEntity = new UserEntity();
+    Object.assign(userEntity, userDto);
+    await this.userRepository.update({ userId }, userEntity);
   }
 }

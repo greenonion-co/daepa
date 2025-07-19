@@ -79,7 +79,7 @@ export class AdoptionBaseDto {
     enum: ADOPTION_SALE_STATUS,
     'x-enumNames': Object.keys(ADOPTION_SALE_STATUS),
   })
-  status: ADOPTION_SALE_STATUS;
+  status?: ADOPTION_SALE_STATUS;
 }
 
 export class CreateAdoptionDto {
@@ -194,4 +194,13 @@ export class AdoptionWithPetDto extends OmitType(AdoptionBaseDto, [
     description: '펫 정보',
   })
   pet: PetDto;
+}
+
+export class createAdoptionResponseDto {
+  @ApiProperty({
+    description: '분양 ID',
+    example: 'XXXXXXXX',
+  })
+  @IsString()
+  adoptionId: string;
 }

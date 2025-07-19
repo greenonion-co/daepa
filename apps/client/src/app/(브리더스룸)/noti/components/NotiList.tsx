@@ -15,13 +15,15 @@ import { ko } from "date-fns/locale";
 import { NOTIFICATION_TYPE } from "@/app/(브리더스룸)/constants";
 import Loading from "@/components/common/Loading";
 import NotiTitle from "./NotiTitle";
-import { useInfiniteQuery, useMutation } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useInView } from "react-intersection-observer";
 import { Badge } from "@/components/ui/badge";
 import { useRouter, useSearchParams } from "next/navigation";
+import { toast } from "sonner";
 
 const NotiList = ({ tab }: { tab: "all" | "unread" }) => {
+  const queryClient = useQueryClient();
   const [items, setItems] = useState<NotificationDetail[]>([]);
   const selectedRef = useRef<HTMLButtonElement>(null);
   const router = useRouter();
@@ -50,17 +52,11 @@ const NotiList = ({ tab }: { tab: "all" | "unread" }) => {
 
   const { mutate: updateNotification } = useMutation({
     mutationFn: (data: UpdateUserNotificationDto) => userNotificationControllerUpdate(data),
-    onMutate: async (newData) => {
-      // 낙관적 업데이트
-      setItems((prev) =>
-        prev.map((item) =>
-          item.id === newData.id ? { ...item, status: UserNotificationDtoStatus.READ } : item,
-        ),
-      );
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [userNotificationControllerFindAll.name] });
     },
     onError: () => {
-      // 에러 시 원래 상태로 복구
-      setItems(items);
+      toast.error("알림 읽음 처리에 실패했습니다.");
     },
   });
 

@@ -48,7 +48,7 @@ export class EggService {
     while (attempts < this.MAX_RETRIES) {
       const eggId = nanoid(8);
       const existingEgg = await this.eggRepository.findOne({
-        where: { egg_id: eggId },
+        where: { eggId },
       });
       if (!existingEgg) {
         return eggId;
@@ -295,7 +295,7 @@ export class EggService {
     const { father, mother, ...updateData } = updateEggDto;
 
     await this.eggRepository.update(
-      { egg_id: eggId },
+      { eggId },
       plainToInstance(EggEntity, updateData),
     );
 
@@ -312,7 +312,7 @@ export class EggService {
   }
 
   async deleteEgg(eggId: string): Promise<void> {
-    await this.eggRepository.update({ egg_id: eggId }, { is_deleted: true });
+    await this.eggRepository.update({ eggId }, { isDeleted: true });
   }
 
   async convertEggToPet(
@@ -357,9 +357,9 @@ export class EggService {
     });
 
     await this.eggRepository.update(
-      { egg_id: eggId },
+      { eggId },
       {
-        hatched_pet_id: petId,
+        hatchedPetId: petId,
       },
     );
 

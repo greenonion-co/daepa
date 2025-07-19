@@ -51,8 +51,8 @@ export class OauthService {
     await this.oauthRepository.insert({
       email,
       provider,
-      provider_id: providerId,
-      user_id: providerInfo.userId,
+      providerId,
+      userId: providerInfo.userId,
     });
   }
 

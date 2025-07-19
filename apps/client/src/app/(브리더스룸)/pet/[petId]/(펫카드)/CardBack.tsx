@@ -95,7 +95,7 @@ const CardBack = memo(({ pet, from, isWideScreen }: CardBackProps) => {
           {!isWideScreen && pet.adoption && <AdoptionReceipt adoption={pet.adoption} />}
 
           {/* 혈통 정보 */}
-          <PedigreeSection petId={pet.petId} ownerId={pet.owner.userId} />
+          <PedigreeSection petId={pet.petId} />
 
           {/* 사육 정보 */}
           <BreedingInfoSection isEditing={isEditing} isTooltipOpen={isTooltipOpen} />

@@ -18,6 +18,7 @@ import {
   CreateAdoptionDto,
   UpdateAdoptionDto,
   AdoptionDto,
+  createAdoptionResponseDto,
 } from './adoption.dto';
 import { JwtUser } from '../auth/auth.decorator';
 import { JwtUserPayload } from '../auth/strategies/jwt.strategy';
@@ -38,7 +39,7 @@ export class AdoptionController {
   async createAdoption(
     @Body() createAdoptionDto: CreateAdoptionDto,
     @JwtUser() token: JwtUserPayload,
-  ): Promise<{ adoptionId: string }> {
+  ): Promise<createAdoptionResponseDto> {
     return this.adoptionService.createAdoption(token.userId, createAdoptionDto);
   }
 

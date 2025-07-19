@@ -11,22 +11,23 @@ import ParentStatusBadge from "../../components/ParentStatusBadge";
 import { Badge } from "@/components/ui/badge";
 import { usePathname } from "next/navigation";
 import { PetParentDtoWithMessage } from "../store/parentLink";
+import { useUserStore } from "../../store/user";
 
 const ParentLink = ({
   label,
-  currentPetOwnerId = "",
   data,
   editable = true,
   onSelect,
   onUnlink,
 }: {
   label: "부" | "모";
-  currentPetOwnerId?: string;
+
   data?: PetParentDto;
   editable?: boolean;
   onSelect?: (item: PetParentDtoWithMessage) => void;
   onUnlink?: () => void;
 }) => {
+  const { user } = useUserStore();
   const pathname = usePathname();
   const isRegisterPage = pathname.includes("register");
   const deleteParent = () => {
@@ -59,16 +60,13 @@ const ParentLink = ({
         {label}
 
         {data?.status && (
-          <ParentStatusBadge
-            status={data.status}
-            isMyPet={data?.owner?.userId === currentPetOwnerId}
-          />
+          <ParentStatusBadge status={data.status} isMyPet={data?.owner?.userId === user?.userId} />
         )}
       </dt>
 
       {data?.petId ? (
         <div className="group relative block h-full w-full transition-opacity hover:opacity-95">
-          {!data?.status && data?.owner?.userId === currentPetOwnerId && (
+          {!data?.status && data?.owner?.userId === user?.userId && (
             <Badge
               variant="outline"
               className="absolute left-1 top-1 z-10 bg-blue-50 text-xs font-bold"

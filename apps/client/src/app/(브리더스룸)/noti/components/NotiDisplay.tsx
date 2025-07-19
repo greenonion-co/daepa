@@ -181,7 +181,8 @@ export function NotiDisplay() {
             <span className="font-bold">
               {item?.type !== UserNotificationDtoType.PARENT_REQUEST && "내가 보낸 요청 메시지"}
             </span>
-            <div>{String(item?.detailJson?.message)}</div>
+
+            <div>{String(item?.detailJson?.message ?? "")}</div>
           </div>
 
           <Link

@@ -10,9 +10,9 @@ import {
 import {
   adoptionControllerCreateAdoption,
   adoptionControllerUpdate,
+  AdoptionDtoStatus,
   petControllerFindOne,
   PetDto,
-  PetDtoSaleStatus,
   UpdateAdoptionDto,
 } from "@repo/api-client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -55,13 +55,13 @@ const AdoptionStatusControl = memo(({ pet }: AdoptionStatusControlProps) => {
   }, [queryClient, pet.petId]);
 
   const handleCreateAdoptionModal = useCallback(
-    (newStatus: string) => {
+    (newStatus: AdoptionDtoStatus) => {
       overlay.open(({ isOpen, close }) => (
         <CreateAdoptionModal
           isOpen={isOpen}
           onClose={close}
           pet={pet}
-          status={newStatus as PetDtoSaleStatus}
+          status={newStatus}
           onSuccess={handleSuccess}
         />
       ));
@@ -89,7 +89,7 @@ const AdoptionStatusControl = memo(({ pet }: AdoptionStatusControlProps) => {
   );
 
   const onSaleStatusChange = useCallback(
-    (newStatus: string) => {
+    (newStatus: AdoptionDtoStatus) => {
       if (["ON_SALE", "ON_RESERVATION", "SOLD"].includes(newStatus)) {
         handleCreateAdoptionModal(newStatus);
       } else {
@@ -102,7 +102,7 @@ const AdoptionStatusControl = memo(({ pet }: AdoptionStatusControlProps) => {
   return (
     <Select
       value={pet?.adoption?.status || "UNDEFINED"}
-      onValueChange={(value) => onSaleStatusChange(value)}
+      onValueChange={(value: AdoptionDtoStatus) => onSaleStatusChange(value)}
     >
       <SelectTrigger>
         <SelectValue />

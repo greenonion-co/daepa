@@ -2,14 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Bar, BarChart, CartesianGrid, LabelList, XAxis } from "recharts";
-import {
-  ChartContainer,
-  ChartLegend,
-  ChartLegendContent,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "@/components/ui/chart";
+
 import {
   Select,
   SelectContent,
@@ -17,194 +10,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { AdoptionDto, PetDtoSaleStatus } from "@repo/api-client";
-import { chartConfig, STATS_CARDS, STATUS_CONFIG } from "../constants";
-import { Calendar } from "@/components/ui/calendar";
-import { format } from "date-fns";
-import { Info } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { AdoptionDto, AdoptionDtoStatus } from "@repo/api-client";
+import { STATS_CARDS } from "../constants";
+import AdoptionCalendar from "./AdoptionCalendar";
+import MonthlyChart from "./MonthlyChart";
+import StatusItem from "./StatusItem";
+import StatCard from "./StatCard";
 
 interface AdoptionDashboardProps {
   data?: AdoptionDto[];
 }
-
-// 통계 카드 컴포넌트
-const StatCard = ({
-  title,
-  value,
-  icon: Icon,
-  bgColor,
-}: {
-  title: string;
-  value: string;
-  icon: React.ElementType;
-  bgColor?: string;
-}) => (
-  <Card className={cn(bgColor)}>
-    <CardHeader className="flex flex-row items-center justify-between">
-      <CardTitle className="text-sm font-medium text-gray-800">{title}</CardTitle>
-      <Icon className="h-4 w-4" />
-    </CardHeader>
-    <CardContent className="font-bold">{value}</CardContent>
-  </Card>
-);
-
-// 상태별 분포 항목 컴포넌트
-const StatusItem = ({ status, count }: { status: keyof typeof STATUS_CONFIG; count: number }) => {
-  const config = STATUS_CONFIG[status];
-  return (
-    <div className="flex items-center gap-2">
-      <span className="text-sm">{config.label}</span>
-      <div className="flex items-center gap-2">
-        <div className={`h-3 w-3 rounded-full ${config.color}`}></div>
-        <span className="font-medium">{count}</span>
-      </div>
-    </div>
-  );
-};
-
-// 차트 컴포넌트
-const MonthlyChart = ({
-  data,
-}: {
-  data: { month: string; sold: number; onSale: number; onReservation: number; total: number }[];
-}) => (
-  <ChartContainer config={chartConfig}>
-    <BarChart accessibilityLayer data={data} margin={{ top: 25 }}>
-      <CartesianGrid vertical={false} />
-      <XAxis
-        dataKey="month"
-        tickLine={false}
-        tickMargin={10}
-        axisLine={false}
-        tickFormatter={(value: string) => value.slice(0, 3)}
-      />
-      <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
-      <ChartLegend content={<ChartLegendContent />} />
-
-      <Bar dataKey="nfs" stackId="a" fill="var(--color-nfs)" radius={[0, 0, 8, 8]} />
-      <Bar dataKey="onReservation" stackId="a" fill="var(--color-onReservation)" />
-      <Bar dataKey="onSale" stackId="a" fill="var(--color-onSale)" />
-      <Bar dataKey="sold" stackId="a" fill="var(--color-sold)" radius={[8, 8, 0, 0]}>
-        <LabelList position="top" offset={12} className="fill-foreground" fontSize={12} />
-      </Bar>
-    </BarChart>
-  </ChartContainer>
-);
-
-// 일별 분양 현황을 달력으로 표시하는 컴포넌트
-const AdoptionCalendar = ({
-  data,
-  selectedYear,
-  selectedMonth,
-}: {
-  data: AdoptionDto[];
-  selectedYear: number;
-  selectedMonth: number | null;
-}) => {
-  // 선택된 월의 일별 분양 데이터 생성
-  const dailyAdoptionData = useMemo(() => {
-    if (selectedMonth === null) return {};
-
-    const daysInMonth = new Date(selectedYear, selectedMonth, 0).getDate();
-    const dailyData: Record<
-      string,
-      { sold: number; onSale: number; onReservation: number; total: number }
-    > = {};
-
-    // 해당 월의 모든 날짜에 대해 초기값 설정
-    for (let day = 1; day <= daysInMonth; day++) {
-      const dateKey = format(new Date(selectedYear, selectedMonth - 1, day), "yyyyMMdd");
-      dailyData[dateKey] = { sold: 0, onSale: 0, onReservation: 0, total: 0 };
-    }
-
-    // 실제 데이터로 채우기
-    data.forEach((adoption) => {
-      if (adoption.adoptionDate) {
-        const date = new Date(adoption.adoptionDate);
-        if (date.getFullYear() === selectedYear && date.getMonth() === selectedMonth - 1) {
-          const dateKey = format(date, "yyyyMMdd");
-          if (dailyData[dateKey]) {
-            switch (adoption.status) {
-              case PetDtoSaleStatus.SOLD:
-                dailyData[dateKey].sold++;
-                break;
-              case PetDtoSaleStatus.ON_SALE:
-                dailyData[dateKey].onSale++;
-                break;
-              case PetDtoSaleStatus.ON_RESERVATION:
-                dailyData[dateKey].onReservation++;
-                break;
-            }
-            dailyData[dateKey].total =
-              dailyData[dateKey].sold +
-              dailyData[dateKey].onSale +
-              dailyData[dateKey].onReservation;
-          }
-        }
-      }
-    });
-
-    return dailyData;
-  }, [data, selectedYear, selectedMonth]);
-
-  if (selectedMonth === null) {
-    return (
-      <Card className="text-muted-foreground flex h-64 items-center justify-center">
-        <CardContent className="flex flex-col items-center justify-center gap-2 text-center text-sm">
-          <Info className="h-6 w-6" />
-          <span>월을 선택하면 해당 월의 일별 분양 현황을 달력으로 확인할 수 있습니다.</span>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  return (
-    <Calendar
-      mode="single"
-      month={new Date(selectedYear, selectedMonth - 1)}
-      className="rounded-xl border shadow"
-      disableNavigation
-      classNames={{
-        day: "h-20 w-11 p-0 font-normal aria-selected:opacity-100 hover:bg-gray-50",
-      }}
-      components={{
-        DayContent: ({ date }: { date: Date }) => {
-          const dateKey = format(date, "yyyyMMdd");
-          const count = dailyAdoptionData[dateKey] ?? {
-            sold: 0,
-            onSale: 0,
-            onReservation: 0,
-            total: 0,
-          };
-
-          return (
-            <div className="flex w-full flex-col items-center justify-center gap-1">
-              <span className="text-sm font-medium">{date.getDate()}</span>
-              <div className="flex flex-col items-center gap-0.5">
-                {count.sold > 0 && (
-                  <span className="rounded-full bg-green-100 px-1.5 py-0.5 text-xs font-medium text-green-700">
-                    판매 {count.sold}
-                  </span>
-                )}
-                {count.onSale > 0 && (
-                  <span className="rounded-xl bg-blue-100 px-1.5 py-0.5 text-xs font-medium text-blue-700">
-                    판매중 {count.onSale}
-                  </span>
-                )}
-                {count.onReservation > 0 && (
-                  <span className="rounded-full bg-yellow-100 px-1.5 py-0.5 text-xs font-medium text-yellow-700">
-                    예약 {count.onReservation}
-                  </span>
-                )}
-              </div>
-            </div>
-          );
-        },
-      }}
-    />
-  );
-};
 
 const AdoptionDashboard = ({ data = [] }: AdoptionDashboardProps) => {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
@@ -213,7 +28,9 @@ const AdoptionDashboard = ({ data = [] }: AdoptionDashboardProps) => {
   // 통계 카드와 분포용 데이터 (선택된 월이 있으면 해당 월, 없으면 해당 연도 전체)
   const statsData = useMemo(() => {
     return data.filter((adoption) => {
-      if (!adoption.adoptionDate) return false;
+      if (adoption.status === AdoptionDtoStatus.NFS) return false;
+      if (!adoption.adoptionDate) return true;
+
       const date = new Date(adoption.adoptionDate);
       const yearMatch = date.getFullYear() === selectedYear;
 
@@ -231,19 +48,19 @@ const AdoptionDashboard = ({ data = [] }: AdoptionDashboardProps) => {
   const stats = useMemo(() => {
     const totalAdoptions = statsData.length;
     const totalRevenue = statsData
-      .filter((adoption) => adoption.status === PetDtoSaleStatus.SOLD)
+      .filter((adoption) => adoption.status === AdoptionDtoStatus.SOLD)
       .reduce((sum, adoption) => sum + (adoption.price || 0), 0);
     const soldCount = statsData.filter(
-      (adoption) => adoption.status === PetDtoSaleStatus.SOLD,
+      (adoption) => adoption.status === AdoptionDtoStatus.SOLD,
     ).length;
     const onSaleCount = statsData.filter(
-      (adoption) => adoption.status === PetDtoSaleStatus.ON_SALE,
+      (adoption) => adoption.status === AdoptionDtoStatus.ON_SALE,
     ).length;
     const onReservationCount = statsData.filter(
-      (adoption) => adoption.status === PetDtoSaleStatus.ON_RESERVATION,
+      (adoption) => adoption.status === AdoptionDtoStatus.ON_RESERVATION,
     ).length;
     const nfsCount = statsData.filter(
-      (adoption) => adoption.status === PetDtoSaleStatus.NFS,
+      (adoption) => adoption.status === AdoptionDtoStatus.NFS,
     ).length;
 
     return {
@@ -267,21 +84,22 @@ const AdoptionDashboard = ({ data = [] }: AdoptionDashboardProps) => {
       }));
 
     data.forEach((adoption) => {
-      if (adoption.adoptionDate) {
-        const date = new Date(adoption.adoptionDate);
-        if (date.getFullYear() === selectedYear) {
-          const month = date.getMonth();
-          switch (adoption.status) {
-            case PetDtoSaleStatus.SOLD:
-              monthlyData[month]!.sold++;
-              break;
-            case PetDtoSaleStatus.ON_SALE:
-              monthlyData[month]!.onSale++;
-              break;
-            case PetDtoSaleStatus.ON_RESERVATION:
-              monthlyData[month]!.onReservation++;
-              break;
-          }
+      // adoptionDate가 null이면 차트에서 제외
+      if (!adoption.adoptionDate) return;
+
+      const date = new Date(adoption.adoptionDate);
+      if (date.getFullYear() === selectedYear) {
+        const month = date.getMonth();
+        switch (adoption.status) {
+          case AdoptionDtoStatus.SOLD:
+            monthlyData[month]!.sold++;
+            break;
+          case AdoptionDtoStatus.ON_SALE:
+            monthlyData[month]!.onSale++;
+            break;
+          case AdoptionDtoStatus.ON_RESERVATION:
+            monthlyData[month]!.onReservation++;
+            break;
         }
       }
     });

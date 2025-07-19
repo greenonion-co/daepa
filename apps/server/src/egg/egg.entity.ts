@@ -1,4 +1,4 @@
-import { Exclude, Expose } from 'class-transformer';
+import { Exclude } from 'class-transformer';
 import { PET_SPECIES } from 'src/pet/pet.constants';
 import {
   Column,
@@ -10,8 +10,8 @@ import {
 } from 'typeorm';
 
 @Entity({ name: 'eggs' })
-@Index('UNIQUE_EGG_ID', ['egg_id'], { unique: true })
-@Index('UNIQUE_CLUTCH', ['name', 'laying_date', 'clutch', 'clutch_order'], {
+@Index('UNIQUE_EGG_ID', ['eggId'], { unique: true })
+@Index('UNIQUE_CLUTCH', ['name', 'layingDate', 'clutch', 'clutchOrder'], {
   unique: true,
 })
 export class EggEntity {
@@ -19,28 +19,23 @@ export class EggEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Expose({ name: 'eggId' })
   @Column()
-  egg_id: string;
+  eggId: string;
 
-  @Expose({ name: 'ownerId' })
   @Column()
-  owner_id: string;
+  ownerId: string;
 
   @Column({ type: 'enum', enum: PET_SPECIES })
   species: PET_SPECIES; // 종
 
-  @Expose({ name: 'layingDate' })
   @Column()
-  laying_date: number; // 산란일
+  layingDate: number; // 산란일
 
-  @Expose({ name: 'clutch' })
   @Column({ type: 'tinyint', nullable: true })
   clutch?: number; // 차수(클러치)
 
-  @Expose({ name: 'clutchOrder' })
   @Column({ type: 'tinyint' })
-  clutch_order: number; // 동배 번호(같은 차수 내 구분)
+  clutchOrder: number; // 동배 번호(같은 차수 내 구분)
 
   @Column()
   name: string;
@@ -48,19 +43,15 @@ export class EggEntity {
   @Column({ type: 'varchar', length: 500, nullable: true })
   desc?: string; // 알 정보
 
-  @Expose({ name: 'createdAt' })
   @CreateDateColumn()
-  created_at: Date;
+  createdAt: Date;
 
-  @Expose({ name: 'updatedAt' })
   @UpdateDateColumn()
-  updated_at: Date;
+  updatedAt: Date;
 
-  @Expose({ name: 'hatchedPetId' })
   @Column({ nullable: true })
-  hatched_pet_id?: string; // 해칭 여부 판단 시에도 사용
+  hatchedPetId?: string; // 해칭 여부 판단 시에도 사용
 
-  @Expose({ name: 'isDeleted' })
   @Column({ default: false })
-  is_deleted: boolean;
+  isDeleted: boolean;
 }

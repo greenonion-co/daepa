@@ -30,7 +30,7 @@ export class AuthService {
     const oauthFound = await this.oauthService.findOne({
       email,
       provider,
-      provider_id: providerId,
+      providerId,
     });
     // 기존 사용자 로그인
     if (oauthFound) {
@@ -122,7 +122,7 @@ export class AuthService {
       });
 
       const user = await this.userService.findOne({
-        user_id: tokenPayload.sub,
+        userId: tokenPayload.sub,
       });
 
       if (!user) {
@@ -176,7 +176,7 @@ export class AuthService {
     userId: string,
     refreshToken: string,
   ): Promise<void> {
-    const user = await this.userService.findOne({ user_id: userId });
+    const user = await this.userService.findOne({ userId });
     if (!user) {
       throw new Error('User not found');
     }
@@ -224,7 +224,7 @@ export class AuthService {
   }
 
   async deleteUser(userId: string): Promise<void> {
-    const user = await this.userService.findOne({ user_id: userId });
+    const user = await this.userService.findOne({ userId });
     if (!user) {
       throw new BadRequestException('사용자를 찾을 수 없습니다.');
     }

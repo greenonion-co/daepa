@@ -36,6 +36,7 @@ import { OauthEntity } from './auth/oauth/oauth.entity';
 import { AdoptionEntity } from './adoption/adoption.entity';
 import { AdoptionController } from './adoption/adoption.controller';
 import { AdoptionService } from './adoption/adoption.service';
+import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 
 const ENTITIES = [
   UserEntity,
@@ -63,6 +64,7 @@ const ENTITIES = [
       database: process.env.MYSQL_DATABASE,
       entities: ENTITIES,
       synchronize: true,
+      namingStrategy: new SnakeNamingStrategy(),
     }),
     TypeOrmModule.forFeature(ENTITIES),
     PassportModule,

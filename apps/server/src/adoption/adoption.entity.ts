@@ -1,5 +1,7 @@
-import { Exclude, Expose } from 'class-transformer';
+import { Exclude } from 'class-transformer';
 import { ADOPTION_SALE_STATUS } from 'src/pet/pet.constants';
+import { PetEntity } from 'src/pet/pet.entity';
+import { UserEntity } from 'src/user/user.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -7,37 +9,34 @@ import {
   Index,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToOne,
+  JoinColumn,
 } from 'typeorm';
 
 @Entity({ name: 'adoptions' })
-@Index('UNIQUE_ADOPTION_ID', ['adoption_id'], { unique: true })
+@Index('UNIQUE_ADOPTION_ID', ['adoptionId'], { unique: true })
 export class AdoptionEntity {
   @Exclude()
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Expose({ name: 'adoptionId' })
   @Column()
-  adoption_id: string;
+  adoptionId: string;
 
-  @Expose({ name: 'petId' })
   @Column()
-  pet_id: string;
+  petId: string;
 
   @Column({ nullable: true })
   price?: number; // 가격
 
-  @Expose({ name: 'adoptionDate' })
   @Column({ type: 'date', nullable: true })
-  adoption_date?: Date; // 분양 날짜
+  adoptionDate?: Date; // 분양 날짜
 
-  @Expose({ name: 'sellerId' })
   @Column()
-  seller_id: string; // 분양자 ID
+  sellerId: string; // 분양자 ID
 
-  @Expose({ name: 'buyerId' })
   @Column({ nullable: true })
-  buyer_id?: string; // 입양자 ID
+  buyerId?: string; // 입양자 ID
 
   @Column({ type: 'text', nullable: true })
   memo?: string; // 메모
@@ -45,18 +44,24 @@ export class AdoptionEntity {
   @Column({ type: 'varchar', length: 200, nullable: true })
   location?: string; // 거래 장소
 
-  @Expose({ name: 'createdAt' })
   @CreateDateColumn()
-  created_at: Date;
+  createdAt: Date;
 
-  @Expose({ name: 'updatedAt' })
   @UpdateDateColumn()
-  updated_at: Date;
+  updatedAt: Date;
 
-  @Expose({ name: 'isDeleted' })
   @Column({ default: false })
-  is_deleted: boolean;
+  isDeleted: boolean;
 
   @Column({ type: 'enum', enum: ADOPTION_SALE_STATUS, nullable: true })
   status?: ADOPTION_SALE_STATUS;
+
+  @JoinColumn({ name: 'petId' })
+  pet: PetEntity;
+
+  @OneToOne(() => UserEntity, (user) => user.sellerAdoption)
+  seller: UserEntity;
+
+  @OneToOne(() => UserEntity, (user) => user.buyerAdoption)
+  buyer: UserEntity;
 }

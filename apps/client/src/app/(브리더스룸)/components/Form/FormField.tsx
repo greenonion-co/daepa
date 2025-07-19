@@ -87,8 +87,6 @@ export const FormField = ({
               onUnlink={() => {
                 handleUnlink(ParentDtoRole.FATHER);
               }}
-              // TODO: 로그인/회원가입 후 현재 유저 아이디 전달
-              currentPetOwnerId={"ADMIN"}
             />
             <ParentLink
               label="모"
@@ -99,8 +97,6 @@ export const FormField = ({
               onUnlink={() => {
                 handleUnlink(ParentDtoRole.MOTHER);
               }}
-              // TODO: 로그인/회원가입 후 현재 유저 아이디 전달
-              currentPetOwnerId={"ADMIN"}
             />
           </div>
         );

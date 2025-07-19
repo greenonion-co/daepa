@@ -14,17 +14,14 @@ export class ParentEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Expose({ name: 'petId' })
   @Column()
-  pet_id: string;
+  petId: string;
 
-  @Expose({ name: 'parentId' })
   @Column()
-  parent_id: string;
+  parentId: string;
 
-  @Expose({ name: 'isMyPet' })
   @Column()
-  is_my_pet: boolean;
+  isMyPet: boolean;
 
   @Column({
     type: 'enum',
@@ -40,13 +37,11 @@ export class ParentEntity {
   })
   status: PARENT_STATUS;
 
-  @Expose({ name: 'createdAt' })
   @Column()
   @CreateDateColumn()
-  created_at: Date;
+  createdAt: Date;
 
-  @Expose({ name: 'updatedAt' })
   @Column()
   @UpdateDateColumn()
-  updated_at: Date;
+  updatedAt: Date;
 }

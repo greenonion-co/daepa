@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -19,11 +20,11 @@ import {
 import { PetService } from 'src/pet/pet.service';
 import { UserService } from 'src/user/user.service';
 import { nanoid } from 'nanoid';
-import { instanceToPlain, plainToInstance } from 'class-transformer';
 import { PageMetaDto, PageOptionsDto } from 'src/common/page.dto';
 import { PageDto } from 'src/common/page.dto';
 import { ADOPTION_SALE_STATUS } from 'src/pet/pet.constants';
 import { PetSummaryDto } from 'src/pet/pet.dto';
+import { PetEntity } from 'src/pet/pet.entity';
 
 @Injectable()
 export class AdoptionService {
@@ -40,12 +41,36 @@ export class AdoptionService {
   }
 
   private toAdoptionDto(entity: AdoptionEntity): AdoptionDto {
-    const plain = instanceToPlain(entity);
-    return plainToInstance(AdoptionDto, {
-      ...plain,
-      price: plain.price ? Math.floor(Number(plain.price)) : undefined,
-      pet: plain.pet ? plainToInstance(PetSummaryDto, plain.pet) : undefined,
-    });
+    if (!entity.pet) {
+      throw new Error('Pet information is required for adoption');
+    }
+    return {
+      adoptionId: entity.adoptionId,
+      petId: entity.petId,
+      price: entity.price ? Math.floor(Number(entity.price)) : undefined,
+      adoptionDate: entity.adoptionDate,
+      seller: entity.seller,
+      buyer: entity.buyer,
+      memo: entity.memo,
+      location: entity.location,
+      status: entity.status,
+      createdAt: entity.createdAt,
+      updatedAt: entity.updatedAt,
+      pet: this.toPetSummaryDto(entity.pet),
+    };
+  }
+
+  private toPetSummaryDto(pet: PetEntity): PetSummaryDto {
+    return {
+      petId: pet.petId,
+      name: pet.name,
+      species: pet.species,
+      morphs: pet.morphs,
+      traits: pet.traits,
+      birthdate: pet.birthdate,
+      sex: pet.sex,
+      owner: pet.owner,
+    };
   }
 
   private async updatePetStatus(
@@ -63,17 +88,13 @@ export class AdoptionService {
       if (newAdoptionDto.buyerId) {
         await entityManager.update(
           'pets',
-          { pet_id: petId },
+          { petId: petId },
           {
-            owner_id: newAdoptionDto.buyerId,
+            ownerId: newAdoptionDto.buyerId,
           },
         );
       } else {
-        await entityManager.update(
-          'pets',
-          { pet_id: petId },
-          { owner_id: null },
-        );
+        await entityManager.update('pets', { petId: petId }, { ownerId: null });
       }
     }
   }
@@ -90,6 +111,7 @@ export class AdoptionService {
       }
     });
   }
+
   async createAdoption(
     sellerId: string,
     createAdoptionDto: CreateAdoptionDto,
@@ -102,14 +124,14 @@ export class AdoptionService {
       }
 
       if (pet.owner?.userId !== sellerId) {
-        throw new BadRequestException('펫의 소유자가 아닙니다.');
+        throw new ForbiddenException('펫의 소유자가 아닙니다.');
       }
 
       // 이미 분양 정보가 있는지 확인
       const existingAdoption = await entityManager.findOne(AdoptionEntity, {
         where: {
-          pet_id: createAdoptionDto.petId,
-          is_deleted: false,
+          petId: createAdoptionDto.petId,
+          isDeleted: false,
         },
       });
 
@@ -119,7 +141,7 @@ export class AdoptionService {
 
       if (createAdoptionDto.buyerId) {
         const buyer = await this.userService.findOne({
-          user_id: createAdoptionDto.buyerId,
+          userId: createAdoptionDto.buyerId,
         });
         if (!buyer) {
           throw new NotFoundException('입양자를 찾을 수 없습니다.');
@@ -128,7 +150,8 @@ export class AdoptionService {
 
       const adoptionId = this.generateAdoptionId();
 
-      const adoptionEntity = plainToInstance(AdoptionEntity, {
+      const adoptionEntity = new AdoptionEntity();
+      Object.assign(adoptionEntity, {
         ...createAdoptionDto,
         adoptionId,
         sellerId,
@@ -228,17 +251,11 @@ export class AdoptionService {
       return null;
     }
 
-    const adoption = instanceToPlain(adoptionEntity);
-
-    if (adoption.price !== undefined && adoption.price !== null) {
-      adoption.price = Math.floor(Number(adoption.price));
-    }
-
-    return plainToInstance(AdoptionDto, adoption);
+    return this.toAdoptionDto(adoptionEntity);
   }
 
   async findByAdoptionId(adoptionId: string): Promise<AdoptionDto> {
-    const adoption = await this.findOne({ adoption_id: adoptionId });
+    const adoption = await this.findOne({ adoptionId: adoptionId });
 
     if (!adoption) {
       throw new NotFoundException('분양 정보를 찾을 수 없습니다.');
@@ -253,7 +270,7 @@ export class AdoptionService {
   ): Promise<{ adoptionId: string }> {
     return this.dataSource.transaction(async (entityManager: EntityManager) => {
       const adoptionEntity = await entityManager.findOne(AdoptionEntity, {
-        where: { adoption_id: adoptionId, is_deleted: false },
+        where: { adoptionId: adoptionId, isDeleted: false },
       });
 
       if (!adoptionEntity) {
@@ -262,7 +279,7 @@ export class AdoptionService {
 
       if (updateAdoptionDto.buyerId) {
         const buyer = await this.userService.findOne({
-          user_id: updateAdoptionDto.buyerId,
+          userId: updateAdoptionDto.buyerId,
         });
         if (!buyer) {
           throw new NotFoundException('입양자를 찾을 수 없습니다.');
@@ -272,9 +289,9 @@ export class AdoptionService {
       const fieldMappings: Partial<
         Record<keyof UpdateAdoptionDto, (value: any) => Partial<AdoptionEntity>>
       > = {
-        adoptionDate: (value: Date) => ({ adoption_date: new Date(value) }),
+        adoptionDate: (value: Date) => ({ adoptionDate: new Date(value) }),
         price: (value: number) => ({ price: value }),
-        buyerId: (value: string) => ({ buyer_id: value }),
+        buyerId: (value: string) => ({ buyerId: value }),
         memo: (value: string) => ({ memo: value }),
         location: (value: string) => ({ location: value }),
         status: (value: ADOPTION_SALE_STATUS) => ({ status: value }),
@@ -286,7 +303,7 @@ export class AdoptionService {
 
       await this.updatePetStatus(
         entityManager,
-        adoptionEntity.pet_id,
+        adoptionEntity.petId,
         updateAdoptionDto,
       );
 

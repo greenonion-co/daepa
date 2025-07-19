@@ -38,7 +38,7 @@ export class PetService {
     while (attempts < this.MAX_RETRIES) {
       const petId = nanoid(8);
       const existingPet = await this.petRepository.findOne({
-        where: { pet_id: petId },
+        where: { petId },
       });
       if (!existingPet) {
         return petId;
@@ -173,14 +173,14 @@ export class PetService {
       }
 
       // 분양 정보 매핑
-      const adoption = adoptions.find((a) => a.pet_id === pet.petId);
+      const adoption = adoptions.find((a) => a.petId === pet.petId);
       if (adoption) {
         pet.adoption = {
-          adoptionId: adoption.adoption_id,
+          adoptionId: adoption.adoptionId,
           price: adoption.price
             ? Math.floor(Number(adoption.price))
             : undefined,
-          adoptionDate: adoption.adoption_date,
+          adoptionDate: adoption.adoptionDate,
           status: adoption.status,
         };
       }
@@ -204,7 +204,7 @@ export class PetService {
   async getPet(petId: string): Promise<PetDto | null> {
     const queryBuilder = this.createPetWithOwnerQueryBuilder();
     const petEntity = await queryBuilder
-      .where('pets.pet_id = :petId', { petId })
+      .where('pets.petId = :petId', { petId })
       .getOne();
 
     if (!petEntity) {
@@ -223,19 +223,19 @@ export class PetService {
     if (typeof pet.petId === 'string') {
       const adoptionEntity = await this.adoptionRepository.findOne({
         where: {
-          pet_id: pet.petId,
-          is_deleted: false,
+          petId: pet.petId,
+          isDeleted: false,
         },
       });
       if (adoptionEntity) {
         pet.adoption = {
-          adoptionId: adoptionEntity.adoption_id,
+          adoptionId: adoptionEntity.adoptionId,
           price: adoptionEntity.price
             ? Math.floor(Number(adoptionEntity.price))
             : undefined,
-          adoptionDate: adoptionEntity.adoption_date,
+          adoptionDate: adoptionEntity.adoptionDate,
           memo: adoptionEntity.memo,
-          buyerId: adoptionEntity.buyer_id,
+          buyerId: adoptionEntity.buyerId,
           status: adoptionEntity.status,
         };
       }
@@ -250,7 +250,7 @@ export class PetService {
     const result = await this.petRepository
       .createQueryBuilder('pets')
       .select('pets.name')
-      .where('pets.pet_id = :petId', { petId })
+      .where('pets.petId = :petId', { petId })
       .getOne();
 
     return result?.name ?? null;
@@ -265,7 +265,7 @@ export class PetService {
 
     const updatePet = instanceToPlain(updateData);
     const updatePetEntity = plainToInstance(PetEntity, updatePet);
-    await this.petRepository.update({ pet_id: petId }, updatePetEntity);
+    await this.petRepository.update({ petId }, updatePetEntity);
 
     if (father) {
       await this.parentService.createParent(userId, petId, father, {});
@@ -276,16 +276,13 @@ export class PetService {
   }
 
   async deletePet(petId: string): Promise<DeleteResult> {
-    return await this.petRepository.update(
-      { pet_id: petId },
-      { is_deleted: true },
-    );
+    return await this.petRepository.update({ petId }, { isDeleted: true });
   }
 
   async getPetSummary(petId: string): Promise<PetSummaryDto | null> {
     const queryBuilder = this.createPetWithOwnerQueryBuilder();
     const petEntity = await queryBuilder
-      .where('pets.pet_id = :petId', { petId })
+      .where('pets.petId = :petId', { petId })
       .getOne();
 
     if (!petEntity) {
@@ -445,7 +442,7 @@ export class PetService {
       .where('pets.pet_id = :petId', { petId })
       .getOne();
 
-    return result?.owner_id || null;
+    return result?.ownerId || null;
   }
 
   // 배치로 부모 정보 조회하는 새로운 메서드
@@ -459,19 +456,19 @@ export class PetService {
 
     if (parents.length === 0) return [];
 
-    const parentPetIds = parents.map((p) => p.parent_id);
+    const parentPetIds = parents.map((p) => p.parentId);
     const parentPetSummaries = await this.getPetSummariesBatch(parentPetIds);
 
     return parents.map((parent) => {
       const parentPetSummary = parentPetSummaries.find(
-        (summary) => summary.petId === parent.parent_id,
+        (summary) => summary.petId === parent.parentId,
       );
 
       return {
         ...parentPetSummary,
         relationId: parent.id,
         status: parent.status,
-        petId: parent.pet_id,
+        petId: parent.petId,
       };
     });
   }
@@ -495,7 +492,7 @@ export class PetService {
 
     const queryBuilder = this.createPetWithOwnerQueryBuilder();
     const { entities } = await queryBuilder
-      .andWhere('pets.pet_id IN (:...petIds)', { petIds })
+      .andWhere('pets.petId IN (:...petIds)', { petIds })
       .getRawAndEntities();
 
     return entities.map((entity) =>

@@ -1,25 +1,23 @@
-import { ParentDtoStatus } from "@repo/api-client";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import ParentLink from "../../../components/ParentLink";
-import useParentLinkStore, { PetParentDtoWithMessage } from "../../../store/parentLink";
+import { PetParentDtoWithMessage } from "../../../store/parentLink";
 import {
   parentControllerCreateParent,
   parentControllerDeleteParent,
   ParentDtoRole,
+  petControllerFindOne,
 } from "@repo/api-client";
-import { PetDtoSex } from "@repo/api-client";
 import { toast } from "sonner";
 import { usePetStore } from "@/app/(브리더스룸)/register/store/pet";
 import { memo, useCallback } from "react";
 
 interface PedigreeSectionProps {
   petId: string;
-  ownerId: string;
 }
 
-const PedigreeSection = memo(({ petId, ownerId }: PedigreeSectionProps) => {
+const PedigreeSection = memo(({ petId }: PedigreeSectionProps) => {
+  const queryClient = useQueryClient();
   const { formData, setFormData } = usePetStore();
-  const { selectedParent, setSelectedParent } = useParentLinkStore();
 
   const { mutate: mutateDeleteParent } = useMutation({
     mutationFn: ({ relationId }: { relationId: number }) =>
@@ -43,30 +41,16 @@ const PedigreeSection = memo(({ petId, ownerId }: PedigreeSectionProps) => {
       }),
     onSuccess: () => {
       toast.success("부모 연동 요청이 완료되었습니다.");
-      const role =
-        selectedParent?.sex?.toString() === PetDtoSex.MALE
-          ? ParentDtoRole.FATHER
-          : ParentDtoRole.MOTHER;
-      setFormData((prev) => ({
-        ...prev,
-        [role]: { ...selectedParent, status: ParentDtoStatus.PENDING },
-      }));
-      setSelectedParent(null);
+      queryClient.invalidateQueries({ queryKey: [petControllerFindOne.name, petId] });
     },
     onError: () => {
       toast.error("부모 연동 요청에 실패했습니다.");
-      setSelectedParent(null);
     },
   });
 
   const handleParentSelect = useCallback(
     (role: ParentDtoRole, value: PetParentDtoWithMessage) => {
       try {
-        setSelectedParent({
-          ...value,
-          status: ParentDtoStatus.PENDING,
-        });
-
         // 부모 연동 요청
         mutateRequestParent({
           parentId: value.petId,
@@ -77,7 +61,7 @@ const PedigreeSection = memo(({ petId, ownerId }: PedigreeSectionProps) => {
         console.error("Failed to send notification:", error);
       }
     },
-    [mutateRequestParent, setSelectedParent],
+    [mutateRequestParent],
   );
 
   const handleUnlink = useCallback(
@@ -126,14 +110,12 @@ const PedigreeSection = memo(({ petId, ownerId }: PedigreeSectionProps) => {
         <ParentLink
           label="부"
           data={formData.father}
-          currentPetOwnerId={ownerId}
           onSelect={handleFatherSelect}
           onUnlink={handleFatherUnlink}
         />
         <ParentLink
           label="모"
           data={formData.mother}
-          currentPetOwnerId={ownerId}
           onSelect={handleMotherSelect}
           onUnlink={handleMotherUnlink}
         />

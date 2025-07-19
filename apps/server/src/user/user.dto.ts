@@ -94,7 +94,6 @@ export class UserDto extends PickType(UserBaseDto, [
   'email',
   'role',
   'isBiz',
-  'provider',
   'refreshToken',
   'refreshTokenExpiresAt',
   'status',

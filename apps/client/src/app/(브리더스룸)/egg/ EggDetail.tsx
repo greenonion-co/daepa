@@ -274,14 +274,12 @@ const EggDetail = ({ egg }: EggDetailProps) => {
                 data={formData.father}
                 onSelect={(item) => handleParentSelect(ParentDtoRole.FATHER, item)}
                 onUnlink={() => handleUnlink(ParentDtoRole.FATHER)}
-                currentPetOwnerId={egg.owner.userId}
               />
               <ParentLink
                 label="모"
                 data={formData.mother}
                 onSelect={(item) => handleParentSelect(ParentDtoRole.MOTHER, item)}
                 onUnlink={() => handleUnlink(ParentDtoRole.MOTHER)}
-                currentPetOwnerId={egg.owner.userId}
               />
             </div>
           </div>

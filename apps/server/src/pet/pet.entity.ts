@@ -1,4 +1,4 @@
-import { Exclude, Expose } from 'class-transformer';
+import { Exclude } from 'class-transformer';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -6,24 +6,25 @@ import {
   Index,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToOne,
 } from 'typeorm';
 import { PET_SEX, PET_SPECIES } from './pet.constants';
+import { AdoptionEntity } from 'src/adoption/adoption.entity';
+import { UserEntity } from 'src/user/user.entity';
 
 @Entity({ name: 'pets' })
-@Index('UNIQUE_PET_ID', ['pet_id'], { unique: true })
-@Index('UNIQUE_OWNER_PET_NAME', ['owner_id', 'name'], { unique: true })
+@Index('UNIQUE_PET_ID', ['petId'], { unique: true })
+@Index('UNIQUE_OWNER_PET_NAME', ['ownerId', 'name'], { unique: true })
 export class PetEntity {
   @Exclude()
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Expose({ name: 'petId' })
   @Column()
-  pet_id: string;
+  petId: string;
 
-  @Expose({ name: 'ownerId' })
   @Column({ nullable: true })
-  owner_id: string;
+  ownerId: string;
 
   @Column()
   name: string; // 이름
@@ -52,23 +53,24 @@ export class PetEntity {
   @Column('json', { nullable: true })
   foods?: string[]; // 먹이
 
-  @Expose({ name: 'desc' })
   @Column({ type: 'varchar', length: 500, nullable: true })
   desc?: string; // 소개말
 
-  @Expose({ name: 'createdAt' })
   @CreateDateColumn()
-  created_at: Date;
+  createdAt: Date;
 
-  @Expose({ name: 'updatedAt' })
   @UpdateDateColumn()
-  updated_at: Date;
+  updatedAt: Date;
 
-  @Expose({ name: 'isDeleted' })
   @Column({ default: false })
-  is_deleted: boolean;
+  isDeleted: boolean;
 
-  @Expose({ name: 'isPublic' })
   @Column({ default: true })
-  is_public?: boolean;
+  isPublic?: boolean;
+
+  @OneToOne(() => AdoptionEntity, (adoption) => adoption.pet)
+  adoption: AdoptionEntity;
+
+  @OneToOne(() => UserEntity, (user) => user)
+  owner: UserEntity;
 }

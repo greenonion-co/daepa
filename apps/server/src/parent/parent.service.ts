@@ -100,17 +100,17 @@ export class ParentService {
     const isMyPet = parentOwnerId === userId;
 
     const result = await this.parentRepository.insert({
-      pet_id: petId,
-      parent_id: createParentDto.parentId,
+      petId,
+      parentId: createParentDto.parentId,
       role: createParentDto.role,
-      is_my_pet: isMyPet,
+      isMyPet,
       status:
-        isMyPet || createOptions.isDirectApprove
+        parentOwnerId === null || isMyPet || createOptions.isDirectApprove
           ? PARENT_STATUS.APPROVED
           : PARENT_STATUS.PENDING,
     });
 
-    if (!isMyPet) {
+    if (!isMyPet && parentOwnerId !== null) {
       await this.createParentRequestNotification({
         relationId: result.identifiers[0].id as number,
         senderPetId: petId,
@@ -143,10 +143,10 @@ export class ParentService {
       // 본인 수신 notification 상태 수정
       const requestedInfo = await this.userNotificationService.updateWhere(
         {
-          sender_id: opponentId,
-          receiver_id: myId,
+          senderId: opponentId,
+          receiverId: myId,
           type: USER_NOTIFICATION_TYPE.PARENT_REQUEST,
-          target_id: relationId.toString(),
+          targetId: relationId.toString(),
         },
         { type: USER_NOTIFICATION_TYPE.PARENT_ACCEPT },
       );
@@ -159,11 +159,11 @@ export class ParentService {
         receiverId: opponentId,
         type: USER_NOTIFICATION_TYPE.PARENT_ACCEPT,
         detailJson: {
-          senderPet: requestedInfo.detail_json.receiverPet as Record<
+          senderPet: requestedInfo.detailJson.receiverPet as Record<
             string,
             any
           >,
-          receiverPet: requestedInfo.detail_json.senderPet as Record<
+          receiverPet: requestedInfo.detailJson.senderPet as Record<
             string,
             any
           >,
@@ -180,10 +180,10 @@ export class ParentService {
       // 상대방의 user_notification을 DELETED 상태로 변경하여 상대방 알림 삭제
       await this.userNotificationService.updateWhere(
         {
-          sender_id: myId,
-          receiver_id: opponentId,
+          senderId: myId,
+          receiverId: opponentId,
           type: USER_NOTIFICATION_TYPE.PARENT_REQUEST,
-          target_id: relationId.toString(),
+          targetId: relationId.toString(),
         },
         { status: USER_NOTIFICATION_STATUS.DELETED },
       );
@@ -197,10 +197,10 @@ export class ParentService {
       // 본인 수신 notification 상태 수정
       const requestedInfo = await this.userNotificationService.updateWhere(
         {
-          sender_id: opponentId,
-          receiver_id: myId,
+          senderId: opponentId,
+          receiverId: myId,
           type: USER_NOTIFICATION_TYPE.PARENT_REQUEST,
-          target_id: relationId.toString(),
+          targetId: relationId.toString(),
         },
         { type: USER_NOTIFICATION_TYPE.PARENT_REJECT },
       );
@@ -214,11 +214,11 @@ export class ParentService {
         type: USER_NOTIFICATION_TYPE.PARENT_REJECT,
         detailJson: {
           message: updateParentDto.rejectReason,
-          senderPet: requestedInfo.detail_json.receiverPet as Record<
+          senderPet: requestedInfo.detailJson.receiverPet as Record<
             string,
             any
           >,
-          receiverPet: requestedInfo.detail_json.senderPet as Record<
+          receiverPet: requestedInfo.detailJson.senderPet as Record<
             string,
             any
           >,

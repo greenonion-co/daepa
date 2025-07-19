@@ -6,7 +6,7 @@ import { ko } from "date-fns/locale";
 import { useQuery } from "@tanstack/react-query";
 import { adoptionControllerGetAdoptionByAdoptionId, PetDtoSpecies } from "@repo/api-client";
 import { SPECIES_KOREAN_INFO } from "../../constants";
-import { getStatusBadge } from "@/lib/utils";
+import { formatDateToYYYYMMDDString, getStatusBadge } from "@/lib/utils";
 import Loading from "@/components/common/Loading";
 
 interface AdoptionDetailModalProps {
@@ -61,7 +61,7 @@ const AdoptionDetailModal = ({ isOpen, onClose, adoptionId }: AdoptionDetailModa
               )}
               {pet?.birthdate && (
                 <p className="text-blue-600">
-                  {format(new Date(pet.birthdate), "yyyy. MM. dd", { locale: ko })}
+                  {pet.birthdate ? formatDateToYYYYMMDDString(pet.birthdate) : "-"}
                 </p>
               )}
             </div>
