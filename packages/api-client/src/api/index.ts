@@ -12,6 +12,7 @@ import type {
   CreateAdoptionDto,
   CreateEggDto,
   CreateInitUserInfoDto,
+  CreateMatingDto,
   CreateParentDto,
   CreatePetDto,
   CreateUserNotificationDto,
@@ -40,6 +41,7 @@ import type {
   CommonResponseDto,
   EggDto,
   HatchedResponseDto,
+  MatingBaseDto,
   ParentDto,
   PetControllerFindAll200,
   PetControllerGetPetsWithChildren200,
@@ -332,6 +334,22 @@ export const adoptionControllerUpdate = (
   });
 };
 
+export const matingControllerFindAll = () => {
+  return useCustomInstance<MatingBaseDto[]>({
+    url: `http://localhost:4000/api/v1/mating`,
+    method: "GET",
+  });
+};
+
+export const matingControllerCreateMating = (createMatingDto: CreateMatingDto) => {
+  return useCustomInstance<CommonResponseDto>({
+    url: `http://localhost:4000/api/v1/mating`,
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    data: createMatingDto,
+  });
+};
+
 export type PetControllerFindAllResult = NonNullable<
   Awaited<ReturnType<typeof petControllerFindAll>>
 >;
@@ -430,6 +448,12 @@ export type AdoptionControllerGetAdoptionByAdoptionIdResult = NonNullable<
 >;
 export type AdoptionControllerUpdateResult = NonNullable<
   Awaited<ReturnType<typeof adoptionControllerUpdate>>
+>;
+export type MatingControllerFindAllResult = NonNullable<
+  Awaited<ReturnType<typeof matingControllerFindAll>>
+>;
+export type MatingControllerCreateMatingResult = NonNullable<
+  Awaited<ReturnType<typeof matingControllerCreateMating>>
 >;
 
 export const getPetControllerFindAllResponseMock = (
@@ -1813,6 +1837,25 @@ export const getAdoptionControllerUpdateResponseMock = (
   ...overrideResponse,
 });
 
+export const getMatingControllerFindAllResponseMock = (): MatingBaseDto[] =>
+  Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+    matingId: faker.number.int({ min: undefined, max: undefined }),
+    userId: faker.string.alpha(20),
+    fatherId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+    motherId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+    matingDate: faker.number.int({ min: undefined, max: undefined }),
+    createdAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+    updatedAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+  }));
+
+export const getMatingControllerCreateMatingResponseMock = (
+  overrideResponse: Partial<CommonResponseDto> = {},
+): CommonResponseDto => ({
+  success: faker.datatype.boolean(),
+  message: faker.string.alpha(20),
+  ...overrideResponse,
+});
+
 export const getPetControllerFindAllMockHandler = (
   overrideResponse?:
     | PetControllerFindAll200
@@ -2518,6 +2561,52 @@ export const getAdoptionControllerUpdateMockHandler = (
     );
   });
 };
+
+export const getMatingControllerFindAllMockHandler = (
+  overrideResponse?:
+    | MatingBaseDto[]
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<MatingBaseDto[]> | MatingBaseDto[]),
+) => {
+  return http.get("*/api/v1/mating", async (info) => {
+    await delay(1000);
+
+    return new HttpResponse(
+      JSON.stringify(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getMatingControllerFindAllResponseMock(),
+      ),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+  });
+};
+
+export const getMatingControllerCreateMatingMockHandler = (
+  overrideResponse?:
+    | CommonResponseDto
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<CommonResponseDto> | CommonResponseDto),
+) => {
+  return http.post("*/api/v1/mating", async (info) => {
+    await delay(1000);
+
+    return new HttpResponse(
+      JSON.stringify(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getMatingControllerCreateMatingResponseMock(),
+      ),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+  });
+};
 export const getProjectDaepaAPIMock = () => [
   getPetControllerFindAllMockHandler(),
   getPetControllerCreateMockHandler(),
@@ -2552,4 +2641,6 @@ export const getProjectDaepaAPIMock = () => [
   getAdoptionControllerGetAllAdoptionsMockHandler(),
   getAdoptionControllerGetAdoptionByAdoptionIdMockHandler(),
   getAdoptionControllerUpdateMockHandler(),
+  getMatingControllerFindAllMockHandler(),
+  getMatingControllerCreateMatingMockHandler(),
 ];
