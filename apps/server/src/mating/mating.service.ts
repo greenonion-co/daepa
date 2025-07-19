@@ -4,6 +4,7 @@ import { MatingEntity } from './mating.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { plainToInstance } from 'class-transformer';
+import { LayingBaseDto } from '../laying/laying.dto';
 
 @Injectable()
 export class MatingService {
@@ -13,14 +14,26 @@ export class MatingService {
   ) {}
 
   async findAll(userId: string) {
-    const matingEntities = await this.matingRepository.find({
-      where: {
-        userId,
-      },
+    const matingEntities = await this.matingRepository
+      .createQueryBuilder('mating')
+      .leftJoinAndSelect('mating.layings', 'layings')
+      .where('mating.userId = :userId', { userId })
+      .orderBy('mating.createdAt', 'DESC')
+      .addOrderBy('layings.layingOrder', 'ASC')
+      .getMany();
+
+    return matingEntities.map((mating) => {
+      const matingDto = plainToInstance(MatingBaseDto, mating);
+      const layingsDto =
+        mating.layings?.map((laying) =>
+          plainToInstance(LayingBaseDto, laying),
+        ) || [];
+
+      return {
+        ...matingDto,
+        layings: layingsDto,
+      };
     });
-    return matingEntities.map((mating) =>
-      plainToInstance(MatingBaseDto, mating),
-    );
   }
 
   async saveMating(userId: string, createMatingDto: CreateMatingDto) {

@@ -3,10 +3,13 @@ import {
   CreateDateColumn,
   Entity,
   Index,
+  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
+  JoinColumn,
 } from 'typeorm';
 import { LAYING_EGG_TYPE } from './laying.constants';
+import { MatingEntity } from '../mating/mating.entity';
 
 @Entity({ name: 'layings' })
 @Index('UNIQUE_EGG_ID', ['eggId'], {
@@ -39,4 +42,8 @@ export class LayingEntity {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @ManyToOne(() => MatingEntity, (mating) => mating.layings)
+  @JoinColumn({ name: 'mating_id' })
+  mating: MatingEntity;
 }

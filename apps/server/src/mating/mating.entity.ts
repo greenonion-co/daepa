@@ -3,9 +3,11 @@ import {
   CreateDateColumn,
   Entity,
   Index,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { LayingEntity } from '../laying/laying.entity';
 
 @Entity({ name: 'matings' })
 @Index('UNIQUE_MATING', ['userId', 'fatherId', 'motherId', 'matingDate'], {
@@ -32,4 +34,7 @@ export class MatingEntity {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @OneToMany(() => LayingEntity, (laying) => laying.mating)
+  layings: LayingEntity[];
 }
