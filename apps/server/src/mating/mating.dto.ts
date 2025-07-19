@@ -1,11 +1,14 @@
 import { ApiProperty, PickType } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 import { IsDate, IsNumber, IsString } from 'class-validator';
+import { MatingEntity } from './mating.entity';
 
 export class MatingBaseDto {
   @ApiProperty({
     description: 'Mating ID',
     example: 1,
   })
+  @Transform(({ obj }: { obj: MatingEntity }) => obj.id)
   @IsNumber()
   matingId: number;
 

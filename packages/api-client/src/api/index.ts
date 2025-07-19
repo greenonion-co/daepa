@@ -12,6 +12,7 @@ import type {
   CreateAdoptionDto,
   CreateEggDto,
   CreateInitUserInfoDto,
+  CreateLayingDto,
   CreateMatingDto,
   CreateParentDto,
   CreatePetDto,
@@ -350,6 +351,15 @@ export const matingControllerCreateMating = (createMatingDto: CreateMatingDto) =
   });
 };
 
+export const layingControllerCreateLaying = (createLayingDto: CreateLayingDto) => {
+  return useCustomInstance<CommonResponseDto>({
+    url: `http://localhost:4000/api/v1/laying`,
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    data: createLayingDto,
+  });
+};
+
 export type PetControllerFindAllResult = NonNullable<
   Awaited<ReturnType<typeof petControllerFindAll>>
 >;
@@ -454,6 +464,9 @@ export type MatingControllerFindAllResult = NonNullable<
 >;
 export type MatingControllerCreateMatingResult = NonNullable<
   Awaited<ReturnType<typeof matingControllerCreateMating>>
+>;
+export type LayingControllerCreateLayingResult = NonNullable<
+  Awaited<ReturnType<typeof layingControllerCreateLaying>>
 >;
 
 export const getPetControllerFindAllResponseMock = (
@@ -1856,6 +1869,14 @@ export const getMatingControllerCreateMatingResponseMock = (
   ...overrideResponse,
 });
 
+export const getLayingControllerCreateLayingResponseMock = (
+  overrideResponse: Partial<CommonResponseDto> = {},
+): CommonResponseDto => ({
+  success: faker.datatype.boolean(),
+  message: faker.string.alpha(20),
+  ...overrideResponse,
+});
+
 export const getPetControllerFindAllMockHandler = (
   overrideResponse?:
     | PetControllerFindAll200
@@ -2607,6 +2628,29 @@ export const getMatingControllerCreateMatingMockHandler = (
     );
   });
 };
+
+export const getLayingControllerCreateLayingMockHandler = (
+  overrideResponse?:
+    | CommonResponseDto
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<CommonResponseDto> | CommonResponseDto),
+) => {
+  return http.post("*/api/v1/laying", async (info) => {
+    await delay(1000);
+
+    return new HttpResponse(
+      JSON.stringify(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getLayingControllerCreateLayingResponseMock(),
+      ),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+  });
+};
 export const getProjectDaepaAPIMock = () => [
   getPetControllerFindAllMockHandler(),
   getPetControllerCreateMockHandler(),
@@ -2643,4 +2687,5 @@ export const getProjectDaepaAPIMock = () => [
   getAdoptionControllerUpdateMockHandler(),
   getMatingControllerFindAllMockHandler(),
   getMatingControllerCreateMatingMockHandler(),
+  getLayingControllerCreateLayingMockHandler(),
 ];

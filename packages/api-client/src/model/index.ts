@@ -31,6 +31,8 @@ export * from "./createEggDtoSpecies";
 export * from "./createEggHatchDto";
 export * from "./createEggHatchDtoSpecies";
 export * from "./createInitUserInfoDto";
+export * from "./createLayingDto";
+export * from "./createLayingDtoEggType";
 export * from "./createMatingDto";
 export * from "./createParentDto";
 export * from "./createParentDtoChildType";
