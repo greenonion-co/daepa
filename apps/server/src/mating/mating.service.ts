@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { CreateMatingDto, MatingDto } from './mating.dto';
+import { CreateMatingDto, MatingBaseDto, MatingDto } from './mating.dto';
 import { MatingEntity } from './mating.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -141,5 +141,10 @@ export class MatingService {
         omit(laying, ['layingDate']),
       ) as LayingDto[],
     }));
+  }
+
+  async isMatingExist(matingDto: Partial<MatingBaseDto>) {
+    const isExist = await this.matingRepository.existsBy(matingDto);
+    return isExist;
   }
 }
