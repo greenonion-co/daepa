@@ -25,6 +25,7 @@ import type {
   UpdatePetDto,
   UpdateUserNotificationDto,
   UserNotificationControllerFindAllParams,
+  VerifyNameDto,
 } from "../model";
 
 import { faker } from "@faker-js/faker";
@@ -284,6 +285,15 @@ export const userControllerCreateInitUserInfo = (createInitUserInfoDto: CreateIn
   });
 };
 
+export const userControllerVerifyName = (verifyNameDto: VerifyNameDto) => {
+  return useCustomInstance<CommonResponseDto>({
+    url: `http://localhost:4000/api/v1/user/verify-name`,
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    data: verifyNameDto,
+  });
+};
+
 export const adoptionControllerCreateAdoption = (createAdoptionDto: CreateAdoptionDto) => {
   return useCustomInstance<AdoptionDto>({
     url: `http://localhost:4000/api/v1/adoption`,
@@ -405,6 +415,9 @@ export type UserControllerGetUserProfileResult = NonNullable<
 >;
 export type UserControllerCreateInitUserInfoResult = NonNullable<
   Awaited<ReturnType<typeof userControllerCreateInitUserInfo>>
+>;
+export type UserControllerVerifyNameResult = NonNullable<
+  Awaited<ReturnType<typeof userControllerVerifyName>>
 >;
 export type AdoptionControllerCreateAdoptionResult = NonNullable<
   Awaited<ReturnType<typeof adoptionControllerCreateAdoption>>
@@ -1391,6 +1404,14 @@ export const getUserControllerGetUserProfileResponseMock = (
 });
 
 export const getUserControllerCreateInitUserInfoResponseMock = (
+  overrideResponse: Partial<CommonResponseDto> = {},
+): CommonResponseDto => ({
+  success: faker.datatype.boolean(),
+  message: faker.string.alpha(20),
+  ...overrideResponse,
+});
+
+export const getUserControllerVerifyNameResponseMock = (
   overrideResponse: Partial<CommonResponseDto> = {},
 ): CommonResponseDto => ({
   success: faker.datatype.boolean(),
@@ -2385,6 +2406,29 @@ export const getUserControllerCreateInitUserInfoMockHandler = (
   });
 };
 
+export const getUserControllerVerifyNameMockHandler = (
+  overrideResponse?:
+    | CommonResponseDto
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<CommonResponseDto> | CommonResponseDto),
+) => {
+  return http.post("*/api/v1/user/verify-name", async (info) => {
+    await delay(1000);
+
+    return new HttpResponse(
+      JSON.stringify(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getUserControllerVerifyNameResponseMock(),
+      ),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+  });
+};
+
 export const getAdoptionControllerCreateAdoptionMockHandler = (
   overrideResponse?:
     | AdoptionDto
@@ -2503,6 +2547,7 @@ export const getProjectDaepaAPIMock = () => [
   getAuthControllerDeleteAccountMockHandler(),
   getUserControllerGetUserProfileMockHandler(),
   getUserControllerCreateInitUserInfoMockHandler(),
+  getUserControllerVerifyNameMockHandler(),
   getAdoptionControllerCreateAdoptionMockHandler(),
   getAdoptionControllerGetAllAdoptionsMockHandler(),
   getAdoptionControllerGetAdoptionByAdoptionIdMockHandler(),

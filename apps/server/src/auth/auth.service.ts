@@ -10,6 +10,7 @@ import { USER_STATUS } from 'src/user/user.constant';
 import * as bcrypt from 'bcrypt';
 import { JwtPayload } from './strategies/jwt.strategy';
 import { OauthService } from './oauth/oauth.service';
+import { Not } from 'typeorm';
 
 export type ValidatedUser = {
   userId: string;
@@ -36,6 +37,7 @@ export class AuthService {
     if (oauthFound) {
       const userFound = await this.userService.findOne({
         email,
+        status: Not(USER_STATUS.DELETED),
       });
 
       if (userFound) {
@@ -51,10 +53,13 @@ export class AuthService {
     }
 
     // 새로운 OAuth 가입
-    let newOAuthUser: { userId: string; status: USER_STATUS };
-
+    let newOAuthUser: {
+      userId: string;
+      status: USER_STATUS;
+    };
     const userFoundBySameEmail = await this.userService.findOne({
       email,
+      status: Not(USER_STATUS.DELETED),
     });
     if (userFoundBySameEmail) {
       // 기존 동일한 이메일을 사용하는 유저가 있는 경우, 해당 유저에 OAuth 추가 연결
@@ -241,13 +246,15 @@ export class AuthService {
     //   }
     // }
 
-    await this.softDeleteUser(userId);
+    await this.softDeleteUser(userId, user.email);
     // TODO: user.email에 해당되는 정보 oauth 테이블에서 처리하기
+    await this.oauthService.deleteAllOauthInfoByEmail(user.email);
   }
 
-  private async softDeleteUser(userId: string): Promise<void> {
+  private async softDeleteUser(userId: string, email: string): Promise<void> {
     await this.userService.update(userId, {
       userId: 'DELETED_' + userId,
+      email: `DELETED_${email}_${Date.now()}`,
       refreshToken: null,
       refreshTokenExpiresAt: null,
       status: USER_STATUS.DELETED,

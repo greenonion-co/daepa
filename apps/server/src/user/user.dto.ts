@@ -157,3 +157,11 @@ export class UserProfilePublicDto extends PickType(UserBaseDto, [
   @Exclude()
   declare createdAt?: Date;
 }
+
+export class VerifyNameDto {
+  @ApiProperty({
+    description: '닉네임',
+  })
+  @IsString()
+  name: string;
+}

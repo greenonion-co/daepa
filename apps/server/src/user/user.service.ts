@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindOptionsWhere, Repository } from 'typeorm';
+import { FindOptionsWhere, Not, Repository } from 'typeorm';
 import { UserEntity } from './user.entity';
 import { CreateInitUserInfoDto, UserDto } from './user.dto';
 import { ProviderInfo } from 'src/auth/auth.types';
@@ -150,5 +150,15 @@ export class UserService {
     const userEntity = new UserEntity();
     Object.assign(userEntity, userDto);
     await this.userRepository.update({ userId }, userEntity);
+  }
+
+  async isNameExist(nickname: string) {
+    const isExist = await this.userRepository.exists({
+      where: {
+        name: nickname,
+        status: Not(USER_STATUS.DELETED),
+      },
+    });
+    return !!isExist;
   }
 }
