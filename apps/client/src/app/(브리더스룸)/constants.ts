@@ -335,6 +335,8 @@ export const GENDER_KOREAN_INFO: Record<PetDtoSex, string> = {
   N: "미구분",
 };
 
+export const FOOD_LIST = ["판게아 인섹트", "귀뚜라미", "냉동귀뚜라미", "누에", "지렙 인섹트"];
+
 export const SELECTOR_CONFIGS: Record<
   "species" | "growth" | "sex" | "traits" | "foods",
   SelectorConfig
@@ -357,7 +359,7 @@ export const SELECTOR_CONFIGS: Record<
   },
   foods: {
     title: "먹이 선택",
-    selectList: ["판게아 인섹트", "귀뚜라미", "냉동귀뚜라미", "누에", "지렙 인섹트"],
+    selectList: FOOD_LIST,
   },
 };
 
@@ -408,8 +410,6 @@ export const SIDEBAR_ITEMS = [
     icon: TreeDeciduous,
   },
 ];
-
-export const FOOD_LIST = ["판게아 인섹트", "귀뚜라미", "누에", "지렙 인섹트"];
 
 export const FOOD_BADGE_COLORS: Record<string, string> = {
   "판게아 인섹트": "bg-indigo-300",

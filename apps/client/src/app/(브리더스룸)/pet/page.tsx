@@ -31,8 +31,13 @@ export default function PetPage() {
       }
       return undefined;
     },
-    select: (data) => data.pages.flatMap((page) => page.data.data),
+    select: (resp) => ({
+      items: resp.pages.flatMap((p) => p.data.data),
+      totalCount: resp.pages[0]?.data.meta.totalCount ?? 0,
+    }),
   });
+
+  const { items, totalCount } = data ?? { items: [], totalCount: 0 };
 
   // 무한 스크롤 처리
   useEffect(() => {
@@ -45,12 +50,12 @@ export default function PetPage() {
     <div className="container mx-auto space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">펫 목록</h1>
-        <div className="text-sm text-gray-600">검색 결과: {data?.length || 0}개</div>
+        <div className="text-sm text-gray-600">검색 결과: {totalCount}개</div>
       </div>
 
       <DataTable
         columns={columns}
-        data={data ?? []}
+        data={items ?? []}
         hasMore={hasNextPage}
         isFetchingMore={isFetchingNextPage}
         loaderRefAction={ref}

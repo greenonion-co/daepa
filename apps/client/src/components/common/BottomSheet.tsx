@@ -64,14 +64,14 @@ export default function BottomSheet({
             <div className="absolute bottom-4 left-4 right-4 flex h-[48px] gap-2">
               {secondButtonText && (
                 <button
-                  className="flex-1 rounded-xl bg-gray-200 py-3 font-semibold"
+                  className="flex-[1] rounded-xl bg-gray-200 py-3 font-semibold"
                   onClick={onSecondButtonClick}
                 >
                   {secondButtonText}
                 </button>
               )}
               <button
-                className="flex-2 rounded-xl bg-[#247DFE] py-3 font-bold text-white"
+                className="flex-[2] rounded-xl bg-[#247DFE] py-3 font-bold text-white"
                 onClick={onClick}
               >
                 {buttonText}
