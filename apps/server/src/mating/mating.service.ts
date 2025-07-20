@@ -143,8 +143,8 @@ export class MatingService {
     }));
   }
 
-  async isMatingExist(matingDto: Partial<MatingBaseDto>) {
-    const isExist = await this.matingRepository.existsBy(matingDto);
+  async isMatingExist(criteria: Partial<MatingBaseDto>) {
+    const isExist = await this.matingRepository.existsBy(criteria);
     return isExist;
   }
 }
