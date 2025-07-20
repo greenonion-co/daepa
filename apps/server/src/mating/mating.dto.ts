@@ -55,7 +55,8 @@ export class MatingBaseDto {
 
 export class MatingDto extends PickType(MatingBaseDto, [
   'id',
-  'userId',
+  'fatherId',
+  'motherId',
   'matingDate',
 ]) {}
 

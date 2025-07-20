@@ -8,6 +8,8 @@ import { LayingBaseDto } from '../laying/laying.dto';
 import { PetSummaryDto } from 'src/pet/pet.dto';
 import { PetEntity } from 'src/pet/pet.entity';
 import { LayingEntity } from 'src/laying/laying.entity';
+import { groupBy, omit } from 'es-toolkit';
+import { PET_SEX } from 'src/pet/pet.constants';
 
 interface MatingWithRelations extends MatingEntity {
   layings?: Partial<LayingEntity>[];
@@ -22,7 +24,7 @@ export class MatingService {
   ) {}
 
   async findAll(userId: string) {
-    const result = (await this.matingRepository
+    const entities = (await this.matingRepository
       .createQueryBuilder('matings')
       .leftJoinAndMapMany(
         'matings.layings',
@@ -61,7 +63,19 @@ export class MatingService {
       .addOrderBy('layings.layingOrder', 'ASC')
       .getMany()) as MatingWithRelations[];
 
-    return result.map((mating) => {
+    return this.formatResponseByDate(entities);
+  }
+
+  async saveMating(userId: string, createMatingDto: CreateMatingDto) {
+    const matingEntity = this.matingRepository.create({
+      ...createMatingDto,
+      userId,
+    });
+    return await this.matingRepository.save(matingEntity);
+  }
+
+  private formatResponseByDate(data: MatingWithRelations[]) {
+    const resultDto = data.map((mating) => {
       const matingDto = plainToInstance(MatingDto, mating);
       const layingsDto = mating.layings?.map((laying) =>
         plainToInstance(LayingBaseDto, laying),
@@ -75,13 +89,51 @@ export class MatingService {
         parents: parentsDto,
       };
     });
+
+    const groupedByParents = groupBy(resultDto, (mating) => {
+      const fatherId = mating.fatherId ?? 'null';
+      const motherId = mating.motherId ?? 'null';
+      const matingDate = mating.matingDate;
+
+      // 부모 중 null 값이 있는 경우 각각 다른 그룹으로 처리
+      if (mating.fatherId === null || mating.motherId === null) {
+        return `${fatherId}-${motherId}-${matingDate}-${mating.id}`;
+      }
+
+      return `${fatherId}-${motherId}-${matingDate}`;
+    });
+
+    return Object.values(groupedByParents).map((matingByParents) => {
+      const { parents } = matingByParents[0];
+      const father = parents?.find((parent) => parent.sex === PET_SEX.MALE);
+      const mother = parents?.find((parent) => parent.sex === PET_SEX.FEMALE);
+
+      const matingsByDate = matingByParents.map((mating) => {
+        const { id, matingDate, layings } = mating;
+        const layingsByDate = this.groupLayingsByDate(layings);
+        return {
+          id,
+          matingDate,
+          layingsByDate,
+        };
+      });
+
+      return {
+        father,
+        mother,
+        matingsByDate,
+      };
+    });
   }
 
-  async saveMating(userId: string, createMatingDto: CreateMatingDto) {
-    const matingEntity = this.matingRepository.create({
-      ...createMatingDto,
-      userId,
-    });
-    return await this.matingRepository.save(matingEntity);
+  private groupLayingsByDate(layings: LayingBaseDto[] | undefined) {
+    if (!layings?.length) return;
+
+    const grouped = groupBy(layings, (laying) => laying.layingDate);
+
+    return Object.entries(grouped).map(([layingDate, layingsForDate]) => ({
+      layingDate: parseInt(layingDate, 10),
+      layings: layingsForDate.map((laying) => omit(laying, ['layingDate'])),
+    }));
   }
 }
