@@ -92,7 +92,7 @@ class MatingByDateDto {
 
   @ApiProperty({
     description: '메이팅 날짜',
-    example: 'yyyyMMdd',
+    example: 20250101,
   })
   matingDate: number;
 

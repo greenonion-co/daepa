@@ -19,7 +19,7 @@ export class LayingBaseDto {
 
   @ApiProperty({
     description: 'Laying Date',
-    example: 'yyyyMMdd',
+    example: 20250101,
   })
   @IsNumber()
   layingDate: number;
