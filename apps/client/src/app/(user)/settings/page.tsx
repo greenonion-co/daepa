@@ -17,26 +17,56 @@ import {
   Trash2,
   Settings,
   ChevronRight,
+  Edit2,
+  Info,
+  CircleX,
+  CircleCheck,
 } from "lucide-react";
 import DeleteAccountButton from "./components/DeleteAccountButton";
 import { Switch } from "@/components/ui/switch";
 import { useRouter } from "next/navigation";
 import { useTheme } from "@/contexts/ThemeContext";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { authControllerSignOut, userControllerGetUserProfile } from "@repo/api-client";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  authControllerSignOut,
+  userControllerGetUserProfile,
+  userControllerCreateInitUserInfo,
+  userControllerVerifyName,
+  CommonResponseDto,
+} from "@repo/api-client";
 import { toast } from "sonner";
 import Image from "next/image";
 import { USER_STATUS_MAP } from "@/app/(브리더스룸)/constants";
 import { cn } from "@/lib/utils";
+import { AxiosError } from "axios";
+
+const NICKNAME_MAX_LENGTH = 15;
+const NICKNAME_MIN_LENGTH = 2;
+
+// 중복확인 상태 타입
+enum DUPLICATE_CHECK_STATUS {
+  NONE = "none",
+  CHECKING = "checking",
+  AVAILABLE = "available",
+  DUPLICATE = "duplicate",
+}
 
 const SettingsPage = () => {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { theme, setTheme } = useTheme();
   const [notifications, setNotifications] = useState({
     email: true,
     push: true,
     marketing: false,
   });
+
+  // 닉네임 수정 관련 상태
+  const [isEditingNickname, setIsEditingNickname] = useState(false);
+  const [newNickname, setNewNickname] = useState("");
+  const [duplicateCheckStatus, setDuplicateCheckStatus] = useState<DUPLICATE_CHECK_STATUS>(
+    DUPLICATE_CHECK_STATUS.NONE,
+  );
 
   const { data: userProfile } = useQuery({
     queryKey: [userControllerGetUserProfile.name],
@@ -53,6 +83,28 @@ const SettingsPage = () => {
     },
   });
 
+  const { mutateAsync: updateNickname, isPending: isUpdatingNickname } = useMutation({
+    mutationFn: userControllerCreateInitUserInfo,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [userControllerGetUserProfile.name] });
+      toast.success("닉네임이 성공적으로 변경되었습니다.");
+      setIsEditingNickname(false);
+      setNewNickname("");
+      setDuplicateCheckStatus(DUPLICATE_CHECK_STATUS.NONE);
+    },
+    onError: (error: AxiosError<CommonResponseDto>) => {
+      if (error?.response?.status === 409) {
+        toast.error("이미 사용중인 닉네임입니다.");
+      } else {
+        toast.error("닉네임 변경 중 오류가 발생했습니다.");
+      }
+    },
+  });
+
+  const { mutateAsync: verifyName, isPending: isVerifyingName } = useMutation({
+    mutationFn: userControllerVerifyName,
+  });
+
   const toggleNotification = (type: keyof typeof notifications) => {
     setNotifications((prev) => ({
       ...prev,
@@ -62,6 +114,81 @@ const SettingsPage = () => {
 
   const handleThemeChange = (isDark: boolean) => {
     setTheme(isDark ? "dark" : "light");
+  };
+
+  // 닉네임 수정 시작
+  const handleStartEditNickname = () => {
+    setNewNickname(userProfile?.name ?? "");
+    setIsEditingNickname(true);
+    setDuplicateCheckStatus(DUPLICATE_CHECK_STATUS.NONE);
+  };
+
+  // 닉네임 수정 취소
+  const handleCancelEditNickname = () => {
+    setIsEditingNickname(false);
+    setNewNickname("");
+    setDuplicateCheckStatus(DUPLICATE_CHECK_STATUS.NONE);
+  };
+
+  // 중복확인 함수
+  const handleDuplicateCheck = async () => {
+    if (
+      !newNickname ||
+      newNickname.length < NICKNAME_MIN_LENGTH ||
+      newNickname.length > NICKNAME_MAX_LENGTH
+    ) {
+      toast.error("올바른 닉네임을 입력해주세요.");
+      return;
+    }
+
+    if (newNickname === userProfile?.name) {
+      toast.error("현재 닉네임과 동일합니다.");
+      return;
+    }
+
+    setDuplicateCheckStatus(DUPLICATE_CHECK_STATUS.CHECKING);
+
+    try {
+      const response = await verifyName({ name: newNickname });
+
+      if (response.data.success) {
+        setDuplicateCheckStatus(DUPLICATE_CHECK_STATUS.AVAILABLE);
+        toast.success("사용 가능한 닉네임입니다.");
+      }
+    } catch (error) {
+      const axiosError = error as AxiosError<CommonResponseDto>;
+      if (axiosError?.response?.status === 409) {
+        setDuplicateCheckStatus(DUPLICATE_CHECK_STATUS.DUPLICATE);
+        toast.error("이미 사용중인 닉네임입니다.");
+      } else {
+        setDuplicateCheckStatus(DUPLICATE_CHECK_STATUS.NONE);
+        toast.error("중복확인 중 오류가 발생했습니다. 다시 시도해주세요.");
+      }
+    }
+  };
+
+  // 닉네임 저장
+  const handleSaveNickname = async () => {
+    if (
+      !newNickname ||
+      newNickname.length < NICKNAME_MIN_LENGTH ||
+      newNickname.length > NICKNAME_MAX_LENGTH
+    ) {
+      toast.error("닉네임은 2자 이상 15자 이하여야 합니다.");
+      return;
+    }
+
+    if (newNickname === userProfile?.name) {
+      toast.error("현재 닉네임과 동일합니다.");
+      return;
+    }
+
+    if (duplicateCheckStatus !== "available" && newNickname !== userProfile?.name) {
+      toast.error("중복확인을 먼저 진행해주세요.");
+      return;
+    }
+
+    await updateNickname({ name: newNickname });
   };
 
   return (
@@ -100,12 +227,84 @@ const SettingsPage = () => {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="nickname">닉네임</Label>
-              <Input
-                id="nickname"
-                placeholder="닉네임을 입력하세요"
-                value={userProfile?.name ?? ""}
-                disabled
-              />
+              {isEditingNickname ? (
+                <div className="space-y-2">
+                  <div className="flex gap-2">
+                    <Input
+                      id="nickname"
+                      placeholder="닉네임을 입력하세요"
+                      value={newNickname}
+                      onChange={(e) => {
+                        setNewNickname(e.target.value);
+                        setDuplicateCheckStatus(DUPLICATE_CHECK_STATUS.NONE);
+                      }}
+                      maxLength={NICKNAME_MAX_LENGTH}
+                      className="flex-1"
+                    />
+                    <Button
+                      variant="outline"
+                      onClick={handleDuplicateCheck}
+                      disabled={
+                        isVerifyingName || !newNickname || newNickname === userProfile?.name
+                      }
+                    >
+                      {isVerifyingName ? "확인중..." : "중복확인"}
+                    </Button>
+                  </div>
+                  <div className="flex h-5 text-sm">
+                    {duplicateCheckStatus === DUPLICATE_CHECK_STATUS.AVAILABLE && (
+                      <div className="flex items-center gap-1 text-green-600">
+                        <CircleCheck className="h-4 w-4" />
+                        사용 가능한 닉네임입니다
+                      </div>
+                    )}
+                    {duplicateCheckStatus === DUPLICATE_CHECK_STATUS.DUPLICATE && (
+                      <div className="flex items-center gap-1 text-red-600">
+                        <CircleX className="h-4 w-4" />
+                        이미 사용중인 닉네임입니다
+                      </div>
+                    )}
+                    {duplicateCheckStatus === DUPLICATE_CHECK_STATUS.NONE && (
+                      <div className="flex items-center gap-1 text-gray-500">
+                        <Info className="h-4 w-4" />
+                        닉네임은 {NICKNAME_MIN_LENGTH}자 이상 {NICKNAME_MAX_LENGTH}자 이하여야
+                        합니다
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      onClick={handleSaveNickname}
+                      disabled={isUpdatingNickname || duplicateCheckStatus !== "available"}
+                    >
+                      {isUpdatingNickname ? "저장중..." : "저장"}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={handleCancelEditNickname}
+                      disabled={isUpdatingNickname}
+                    >
+                      취소
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <Input
+                    id="nickname"
+                    placeholder="닉네임을 입력하세요"
+                    value={userProfile?.name ?? ""}
+                    disabled
+                    className="flex-1"
+                  />
+                  <Button size="icon" variant="outline" onClick={handleStartEditNickname}>
+                    <Edit2 />
+                  </Button>
+                </div>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="email">이메일</Label>
@@ -132,7 +331,6 @@ const SettingsPage = () => {
                 SNS 간편 로그인으로 가입한 계정은 이메일 변경이 제한됩니다
               </p>
             </div>
-            {/* <Button className="w-full">정보 수정</Button> */}
           </CardContent>
         </Card>
 
