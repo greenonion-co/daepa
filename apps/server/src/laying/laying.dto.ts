@@ -1,7 +1,5 @@
 import { ApiProperty, PickType } from '@nestjs/swagger';
 import { IsDate, IsEnum, IsNumber, IsString } from 'class-validator';
-import { LayingEntity } from './laying.entity';
-import { Transform } from 'class-transformer';
 import { LAYING_EGG_TYPE } from './laying.constants';
 
 export class LayingBaseDto {
@@ -9,9 +7,8 @@ export class LayingBaseDto {
     description: 'Laying ID',
     example: 1,
   })
-  @Transform(({ obj }: { obj: LayingEntity }) => obj.id)
   @IsNumber()
-  layingId: number;
+  id: number;
 
   @ApiProperty({
     description: 'Mating ID',

@@ -1,16 +1,13 @@
 import { ApiProperty, PickType } from '@nestjs/swagger';
-import { Transform } from 'class-transformer';
 import { IsDate, IsNumber, IsString } from 'class-validator';
-import { MatingEntity } from './mating.entity';
 
 export class MatingBaseDto {
   @ApiProperty({
     description: 'Mating ID',
     example: 1,
   })
-  @Transform(({ obj }: { obj: MatingEntity }) => obj.id)
   @IsNumber()
-  matingId: number;
+  id: number;
 
   @ApiProperty({
     description: 'User ID',
@@ -54,6 +51,12 @@ export class MatingBaseDto {
   @IsDate()
   updatedAt: Date;
 }
+
+export class MatingDto extends PickType(MatingBaseDto, [
+  'id',
+  'userId',
+  'matingDate',
+]) {}
 
 export class CreateMatingDto extends PickType(MatingBaseDto, [
   'fatherId',
