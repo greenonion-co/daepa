@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateMatingDto, MatingDto } from './mating.dto';
 import { MatingEntity } from './mating.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -67,6 +67,10 @@ export class MatingService {
   }
 
   async saveMating(userId: string, createMatingDto: CreateMatingDto) {
+    if (!createMatingDto.fatherId && !createMatingDto.motherId) {
+      throw new BadRequestException('최소 하나의 부모 펫을 입력해야 합니다.');
+    }
+
     const matingEntity = this.matingRepository.create({
       ...createMatingDto,
       userId,
