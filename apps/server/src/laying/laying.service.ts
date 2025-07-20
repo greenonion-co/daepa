@@ -17,7 +17,6 @@ export class LayingService {
   async createLaying(createLayingDto: CreateLayingDto) {
     const isMatingExist = await this.matingService.isMatingExist({
       id: createLayingDto.matingId,
-      matingDate: createLayingDto.layingDate,
     });
     if (!isMatingExist) {
       throw new BadRequestException('유효한 메이팅 정보가 존재하지 않습니다.');
