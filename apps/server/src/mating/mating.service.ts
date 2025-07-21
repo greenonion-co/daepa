@@ -111,15 +111,17 @@ export class MatingService {
       const father = parents?.find((parent) => parent.sex === PET_SEX.MALE);
       const mother = parents?.find((parent) => parent.sex === PET_SEX.FEMALE);
 
-      const matingsByDate = matingByParents.map((mating) => {
-        const { id, matingDate, layings } = mating;
-        const layingsByDate = this.groupLayingsByDate(layings);
-        return {
-          id,
-          matingDate,
-          layingsByDate,
-        };
-      });
+      const matingsByDate = matingByParents
+        .map((mating) => {
+          const { id, matingDate, layings } = mating;
+          const layingsByDate = this.groupLayingsByDate(layings);
+          return {
+            id,
+            matingDate,
+            layingsByDate,
+          };
+        })
+        .sort((a, b) => a.matingDate - b.matingDate);
 
       return {
         father,
