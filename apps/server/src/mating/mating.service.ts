@@ -97,14 +97,13 @@ export class MatingService {
     const groupedByParents = groupBy(resultDto, (mating) => {
       const fatherId = mating.fatherId ?? 'null';
       const motherId = mating.motherId ?? 'null';
-      const matingDate = mating.matingDate;
 
       // 부모 중 null 값이 있는 경우 각각 다른 그룹으로 처리
       if (mating.fatherId === null || mating.motherId === null) {
-        return `${fatherId}-${motherId}-${matingDate}-${mating.id}`;
+        return `${fatherId}-${motherId}-${mating.id}`;
       }
 
-      return `${fatherId}-${motherId}-${matingDate}`;
+      return `${fatherId}-${motherId}`;
     });
 
     return Object.values(groupedByParents).map((matingByParents) => {
