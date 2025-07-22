@@ -9,13 +9,13 @@
 export interface LayingDto {
   /** 알 아이디 */
   eggId: string;
+  /** 차수(클러치) */
+  clutch?: number;
   /** 동배 번호(차수 내 구분 - 순서 무관) */
   clutchOrder: number;
   /** 알 이름 */
   name: string;
-  /** 차수(클러치) */
-  clutch?: number;
-  /** 해칭 온도 */
+  /** 알 보관 온도 */
   temperature?: number;
   /** 해칭된 펫 아이디 */
   hatchedPetId?: string;

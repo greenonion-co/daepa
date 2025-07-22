@@ -28,6 +28,15 @@ export class EggBaseDto {
   owner: UserProfilePublicDto;
 
   @ApiProperty({
+    description: '메이팅 아이디',
+    example: 1,
+    required: false,
+  })
+  @IsOptional()
+  @IsNumber()
+  matingId?: number;
+
+  @ApiProperty({
     description: '알 종',
     example: '크레스티드게코',
     enum: PET_SPECIES,
@@ -66,6 +75,15 @@ export class EggBaseDto {
   })
   @IsString()
   name: string;
+
+  @ApiProperty({
+    description: '알 보관 온도',
+    example: 25,
+    required: false,
+  })
+  @IsOptional()
+  @IsNumber()
+  temperature?: number;
 
   @ApiProperty({
     description: '알 정보',
@@ -246,51 +264,11 @@ export class HatchedResponseDto extends CommonResponseDto {
   hatchedPetId: string;
 }
 
-export class LayingDto {
-  @ApiProperty({
-    description: '알 아이디',
-    example: 'XXXXXXXX',
-  })
-  @IsString()
-  eggId: string;
-
-  @ApiProperty({
-    description: '동배 번호(차수 내 구분 - 순서 무관)',
-    example: 1,
-  })
-  @IsNumber()
-  clutchOrder: number;
-
-  @ApiProperty({
-    description: '알 이름',
-    example: '대파아빠x대파엄마(1-1)',
-  })
-  @IsString()
-  name: string;
-
-  @ApiProperty({
-    description: '차수(클러치)',
-    example: 1,
-    required: false,
-  })
-  @IsOptional()
-  @IsNumber()
-  clutch?: number;
-
-  @ApiProperty({
-    description: '해칭 온도',
-    example: 35,
-    required: false,
-  })
-  @IsNumber()
-  temperature?: number;
-
-  @ApiProperty({
-    description: '해칭된 펫 아이디',
-    example: 'XXXXXXXX',
-    required: false,
-  })
-  @IsOptional()
-  @IsString()
-  hatchedPetId?: string;
-}
+export class LayingDto extends PickType(EggBaseDto, [
+  'eggId',
+  'clutchOrder',
+  'name',
+  'clutch',
+  'temperature',
+  'hatchedPetId',
+]) {}

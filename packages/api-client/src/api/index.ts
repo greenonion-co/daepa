@@ -1112,6 +1112,10 @@ export const getEggControllerFindOneResponseMock = (
       ] as const),
     },
   },
+  matingId: faker.helpers.arrayElement([
+    faker.number.int({ min: undefined, max: undefined }),
+    undefined,
+  ]),
   species: faker.helpers.arrayElement(["CR", "LE", "FT", "KN", "LC", "GG"] as const),
   layingDate: faker.number.int({ min: undefined, max: undefined }),
   clutch: faker.helpers.arrayElement([
@@ -1120,6 +1124,10 @@ export const getEggControllerFindOneResponseMock = (
   ]),
   clutchOrder: faker.number.int({ min: undefined, max: undefined }),
   name: faker.string.alpha(20),
+  temperature: faker.helpers.arrayElement([
+    faker.number.int({ min: undefined, max: undefined }),
+    undefined,
+  ]),
   desc: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
   hatchedPetId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
   father: faker.helpers.arrayElement([
@@ -1285,6 +1293,10 @@ export const getBrEggControllerFindAllResponseMock = (): BrEggControllerFindAll2
         ] as const),
       },
     },
+    matingId: faker.helpers.arrayElement([
+      faker.number.int({ min: undefined, max: undefined }),
+      undefined,
+    ]),
     species: faker.helpers.arrayElement(["CR", "LE", "FT", "KN", "LC", "GG"] as const),
     layingDate: faker.number.int({ min: undefined, max: undefined }),
     clutch: faker.helpers.arrayElement([
@@ -1293,6 +1305,10 @@ export const getBrEggControllerFindAllResponseMock = (): BrEggControllerFindAll2
     ]),
     clutchOrder: faker.number.int({ min: undefined, max: undefined }),
     name: faker.string.alpha(20),
+    temperature: faker.helpers.arrayElement([
+      faker.number.int({ min: undefined, max: undefined }),
+      undefined,
+    ]),
     desc: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
     hatchedPetId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
     father: faker.helpers.arrayElement([
@@ -1949,12 +1965,12 @@ export const getMatingControllerFindAllResponseMock = (): MatingByParentsDto[] =
             (_, i) => i + 1,
           ).map(() => ({
             eggId: faker.string.alpha(20),
-            clutchOrder: faker.number.int({ min: undefined, max: undefined }),
-            name: faker.string.alpha(20),
             clutch: faker.helpers.arrayElement([
               faker.number.int({ min: undefined, max: undefined }),
               undefined,
             ]),
+            clutchOrder: faker.number.int({ min: undefined, max: undefined }),
+            name: faker.string.alpha(20),
             temperature: faker.helpers.arrayElement([
               faker.number.int({ min: undefined, max: undefined }),
               undefined,
