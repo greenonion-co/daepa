@@ -1,12 +1,7 @@
 import { ApiProperty, PartialType, PickType } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
-import {
-  IsEnum,
-  IsNumber,
-  IsObject,
-  IsOptional,
-  IsString,
-} from 'class-validator';
+import { IsEnum, IsNumber, IsObject, IsString } from 'class-validator';
+import { IsOptionalExcludeNil } from 'src/common/decorators/exclude-nil.decorator';
 import { CommonResponseDto } from 'src/common/response.dto';
 import { CreateParentDto } from 'src/parent/parent.dto';
 import { PET_SPECIES } from 'src/pet/pet.constants';
@@ -32,7 +27,7 @@ export class EggBaseDto {
     example: 1,
     required: false,
   })
-  @IsOptional()
+  @IsOptionalExcludeNil()
   @IsNumber()
   matingId?: number;
 
@@ -58,7 +53,7 @@ export class EggBaseDto {
     example: 1,
     required: false,
   })
-  @IsOptional()
+  @IsOptionalExcludeNil()
   @IsNumber()
   clutch?: number;
 
@@ -81,7 +76,7 @@ export class EggBaseDto {
     example: 25,
     required: false,
   })
-  @IsOptional()
+  @IsOptionalExcludeNil()
   @IsNumber()
   temperature?: number;
 
@@ -89,7 +84,7 @@ export class EggBaseDto {
     description: '알 정보',
     required: false,
   })
-  @IsOptional()
+  @IsOptionalExcludeNil()
   @IsString()
   desc?: string;
 
@@ -98,7 +93,7 @@ export class EggBaseDto {
     example: 'XXXXXXXX',
     required: false,
   })
-  @IsOptional()
+  @IsOptionalExcludeNil()
   @IsString()
   hatchedPetId?: string;
 }
@@ -131,7 +126,7 @@ export class EggDto extends EggBaseDto {
     example: {},
     required: false,
   })
-  @IsOptional()
+  @IsOptionalExcludeNil()
   @IsObject()
   father?: PetParentDto;
 
@@ -140,7 +135,7 @@ export class EggDto extends EggBaseDto {
     example: {},
     required: false,
   })
-  @IsOptional()
+  @IsOptionalExcludeNil()
   @IsObject()
   mother?: PetParentDto;
 
@@ -177,7 +172,7 @@ export class CreateEggDto {
     example: 1,
     required: false,
   })
-  @IsOptional()
+  @IsOptionalExcludeNil()
   @IsNumber()
   clutch?: number;
 
@@ -185,7 +180,7 @@ export class CreateEggDto {
     description: '알 정보',
     required: false,
   })
-  @IsOptional()
+  @IsOptionalExcludeNil()
   @IsString()
   desc?: string;
 
@@ -199,7 +194,7 @@ export class CreateEggDto {
     description: '아빠 개체 정보',
     required: false,
   })
-  @IsOptional()
+  @IsOptionalExcludeNil()
   @IsObject()
   father?: CreateParentDto;
 
@@ -207,7 +202,7 @@ export class CreateEggDto {
     description: '엄마 개체 정보',
     required: false,
   })
-  @IsOptional()
+  @IsOptionalExcludeNil()
   @IsObject()
   mother?: CreateParentDto;
 
@@ -216,7 +211,7 @@ export class CreateEggDto {
     example: 1,
     required: false,
   })
-  @IsOptional()
+  @IsOptionalExcludeNil()
   @IsNumber()
   matingId?: number;
 
@@ -225,7 +220,7 @@ export class CreateEggDto {
     example: 25,
     required: false,
   })
-  @IsOptional()
+  @IsOptionalExcludeNil()
   @IsNumber()
   temperature?: number;
 }
@@ -242,7 +237,7 @@ export class UpdateEggDto extends PartialType(
     description: '아빠 개체 정보',
     required: false,
   })
-  @IsOptional()
+  @IsOptionalExcludeNil()
   @IsObject()
   father?: CreateParentDto;
 
@@ -250,7 +245,7 @@ export class UpdateEggDto extends PartialType(
     description: '엄마 개체 정보',
     required: false,
   })
-  @IsOptional()
+  @IsOptionalExcludeNil()
   @IsObject()
   mother?: CreateParentDto;
 }
