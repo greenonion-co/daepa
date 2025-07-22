@@ -18,6 +18,7 @@ import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { useState, useCallback } from "react";
 import { AxiosError } from "axios";
+import Link from "next/link";
 
 const MatingList = () => {
   const queryClient = useQueryClient();
@@ -117,14 +118,20 @@ const MatingList = () => {
               <div>
                 <div className="flex flex-1 gap-2">
                   {matingGroup.father && (
-                    <div className="flex flex-1 items-center justify-center rounded-md bg-blue-100 p-1 text-blue-800 hover:bg-blue-200">
+                    <Link
+                      href={`/pet/${matingGroup.father.petId}`}
+                      className="flex flex-1 items-center justify-center rounded-md bg-blue-100 p-1 text-blue-800 hover:bg-blue-200"
+                    >
                       {matingGroup.father.name}
-                    </div>
+                    </Link>
                   )}
                   {matingGroup.mother && (
-                    <div className="flex flex-1 items-center justify-center rounded-md bg-pink-100 p-1 text-pink-800 hover:bg-pink-200">
+                    <Link
+                      href={`/pet/${matingGroup.mother.petId}`}
+                      className="flex flex-1 items-center justify-center rounded-md bg-pink-100 p-1 text-pink-800 hover:bg-pink-200"
+                    >
                       {matingGroup.mother.name}
-                    </div>
+                    </Link>
                   )}
                 </div>
               </div>
@@ -212,6 +219,7 @@ const MatingList = () => {
                     mating={mating}
                     father={matingGroup.father}
                     mother={matingGroup.mother}
+                    matingDates={matingDates(matingGroup?.matingsByDate ?? [])}
                   />
                 ))}
               </div>

@@ -10,6 +10,7 @@ import { AxiosError } from "axios";
 import { CommonResponseDto, UpdateMatingDto } from "@repo/api-client";
 import { formatDateToYYYYMMDDString } from "@/lib/utils";
 import CalendarInput from "./CalendarInput";
+import { format } from "date-fns";
 
 interface EditMatingModalProps {
   isOpen: boolean;
@@ -20,9 +21,16 @@ interface EditMatingModalProps {
     motherId?: string;
     matingDate: number;
   };
+  matingDates?: Date[];
 }
 
-const EditMatingModal = ({ isOpen, onClose, matingId, currentData }: EditMatingModalProps) => {
+const EditMatingModal = ({
+  isOpen,
+  onClose,
+  matingId,
+  currentData,
+  matingDates,
+}: EditMatingModalProps) => {
   const queryClient = useQueryClient();
   const [formData, setFormData] = useState({
     fatherId: currentData.fatherId || "",
@@ -67,7 +75,26 @@ const EditMatingModal = ({ isOpen, onClose, matingId, currentData }: EditMatingM
               placeholder="메이팅 날짜를 선택하세요"
               value={formData.matingDate}
               onSelect={(date) => {
-                setFormData((prev) => ({ ...prev, matingDate: date }));
+                if (!date) return;
+
+                const dateString = format(date, "yyyyMMdd");
+                const matingDateStrings = matingDates?.map((d) => format(d, "yyyyMMdd")) ?? [];
+
+                if (matingDateStrings.includes(dateString)) {
+                  toast.error("이미 메이팅이 등록된 날짜입니다.");
+                  return;
+                }
+                setFormData((prev) => ({ ...prev, matingDate: format(date, "yyyy-MM-dd") }));
+              }}
+              modifiers={{
+                hasMating: matingDates ?? [],
+              }}
+              modifiersStyles={{
+                hasMating: {
+                  backgroundColor: "#fef3c7",
+                  color: "#92400e",
+                  fontWeight: "bold",
+                },
               }}
             />
           </div>

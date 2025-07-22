@@ -3,27 +3,25 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { CalendarIcon } from "lucide-react";
+import { DayModifiers, ModifiersStyles } from "react-day-picker";
 
 interface CalendarInputProps {
   placeholder: string;
   value: string;
-  onSelect: (date: string) => void;
+  modifiers?: DayModifiers;
+  modifiersStyles?: ModifiersStyles;
+  onSelect: (date?: Date) => void;
   disabled?: (date: Date) => boolean;
 }
 
-const CalendarInput = ({ placeholder, value, onSelect, disabled }: CalendarInputProps) => {
-  const handleDateSelect = (date: Date | undefined) => {
-    if (date) {
-      // Date 객체를 yyyyMMdd 형태의 숫자로 변환
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, "0");
-      const day = String(date.getDate()).padStart(2, "0");
-      const dateString = `${year}-${month}-${day}`;
-
-      onSelect(dateString);
-    }
-  };
-
+const CalendarInput = ({
+  placeholder,
+  value,
+  onSelect,
+  disabled,
+  modifiers,
+  modifiersStyles,
+}: CalendarInputProps) => {
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -39,8 +37,10 @@ const CalendarInput = ({ placeholder, value, onSelect, disabled }: CalendarInput
         <Calendar
           mode="single"
           selected={value ? new Date(value) : undefined}
-          onSelect={handleDateSelect}
+          onSelect={(date) => onSelect(date)}
           disabled={disabled}
+          modifiers={modifiers}
+          modifiersStyles={modifiersStyles}
           initialFocus
         />
       </PopoverContent>

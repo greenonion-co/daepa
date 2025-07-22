@@ -179,7 +179,11 @@ const CreateLayingModal = ({
                 placeholder="산란일을 선택하세요"
                 value={formData.layingDate}
                 onSelect={(date) => {
-                  setFormData((prev) => ({ ...prev, layingDate: date }));
+                  if (!date) return;
+                  setFormData((prev) => ({
+                    ...prev,
+                    layingDate: format(date, "yyyy-MM-dd"),
+                  }));
 
                   const trigger = document.querySelector(`button[data-field-name="layingDate"]`);
                   if (trigger) {

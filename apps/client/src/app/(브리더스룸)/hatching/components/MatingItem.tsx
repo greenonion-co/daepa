@@ -29,9 +29,10 @@ interface MatingItemProps {
   mating: MatingByDateDto;
   father?: PetSummaryDto;
   mother?: PetSummaryDto;
+  matingDates: Date[];
 }
 
-const MatingItem = ({ mating, father, mother }: MatingItemProps) => {
+const MatingItem = ({ mating, father, mother, matingDates }: MatingItemProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const handleAddLayingClick = () => {
@@ -47,7 +48,7 @@ const MatingItem = ({ mating, father, mother }: MatingItemProps) => {
     ));
   };
 
-  const handleEditClick = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleEditClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     overlay.open(({ isOpen, close }) => (
       <EditMatingModal
@@ -59,11 +60,12 @@ const MatingItem = ({ mating, father, mother }: MatingItemProps) => {
           motherId: mother?.petId,
           matingDate: mating.matingDate,
         }}
+        matingDates={matingDates}
       />
     ));
   };
 
-  const handleDeleteClick = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleDeleteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     overlay.open(({ isOpen, close }) => (
       <DeleteMatingModal
