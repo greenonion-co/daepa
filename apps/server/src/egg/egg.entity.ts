@@ -44,7 +44,7 @@ export class EggEntity {
   name: string;
 
   @Column({ nullable: true })
-  temperature?: number; // 알 온도
+  temperature?: number; // 알 보관 온도
 
   @Column({ type: 'varchar', length: 500, nullable: true })
   desc?: string; // 알 정보
