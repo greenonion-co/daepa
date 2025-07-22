@@ -6,10 +6,10 @@ import { Repository } from 'typeorm';
 import { plainToInstance } from 'class-transformer';
 import { PetSummaryDto } from 'src/pet/pet.dto';
 import { PetEntity } from 'src/pet/pet.entity';
-import { groupBy, omit } from 'es-toolkit';
+import { groupBy } from 'es-toolkit';
 import { PET_SEX } from 'src/pet/pet.constants';
 import { EggEntity } from 'src/egg/egg.entity';
-import { EggBaseDto, EggDto } from 'src/egg/egg.dto';
+import { EggBaseDto, LayingDto } from 'src/egg/egg.dto';
 
 interface MatingWithRelations extends MatingEntity {
   eggs?: Partial<EggEntity>[];
@@ -96,7 +96,7 @@ export class MatingService {
   private formatResponseByDate(data: MatingWithRelations[]) {
     const resultDto = data.map((mating) => {
       const matingDto = plainToInstance(MatingDto, mating);
-      const eggsDto = mating.eggs?.map((egg) =>
+      const eggDto = mating.eggs?.map((egg) =>
         plainToInstance(EggBaseDto, egg),
       );
       const parentsDto = mating.parents?.map((parent) =>
@@ -104,7 +104,7 @@ export class MatingService {
       );
       return {
         ...matingDto,
-        eggs: eggsDto,
+        eggs: eggDto,
         parents: parentsDto,
       };
     });
@@ -130,6 +130,7 @@ export class MatingService {
         .map((mating) => {
           const { id, matingDate, eggs } = mating;
           const eggsByDate = this.groupEggsByDate(eggs);
+          console.log(eggsByDate?.[0]?.layings);
           return {
             id,
             matingDate,
@@ -153,7 +154,7 @@ export class MatingService {
 
     return Object.entries(grouped).map(([layingDate, eggsForDate]) => ({
       layingDate: parseInt(layingDate, 10),
-      layings: eggsForDate.map((egg) => omit(egg, ['layingDate'])) as EggDto[],
+      layings: eggsForDate.map((egg) => plainToInstance(LayingDto, egg)),
     }));
   }
 
