@@ -22,6 +22,7 @@ import { AxiosError } from "axios";
 const MatingList = () => {
   const queryClient = useQueryClient();
   const [matingDate, setMatingDate] = useState<string | undefined>(undefined);
+  const [openPopoverIndex, setOpenPopoverIndex] = useState<number | null>(null);
   const { data: matings, isPending } = useQuery({
     queryKey: [matingControllerFindAll.name],
     queryFn: matingControllerFindAll,
@@ -46,6 +47,9 @@ const MatingList = () => {
     onSuccess: () => {
       toast.success("메이팅이 추가되었습니다.");
       queryClient.invalidateQueries({ queryKey: [matingControllerFindAll.name] });
+      // 메이팅 생성 후 캘린더 닫기
+      setOpenPopoverIndex(null);
+      setMatingDate(undefined);
     },
     onError: (error: AxiosError<CommonResponseDto>) => {
       toast.error(error.response?.data?.message ?? "메이팅 추가에 실패했습니다.");
@@ -127,7 +131,10 @@ const MatingList = () => {
 
               <div className="flex flex-col gap-2 px-1">
                 <div className="flex w-full items-center justify-center gap-2 rounded-lg bg-yellow-100 p-2 text-sm font-semibold text-yellow-800 transition-colors hover:bg-yellow-200">
-                  <Popover>
+                  <Popover
+                    open={openPopoverIndex === index}
+                    onOpenChange={(open) => setOpenPopoverIndex(open ? index : null)}
+                  >
                     <PopoverTrigger asChild>
                       <button
                         data-field-name="matingDate"
@@ -156,7 +163,11 @@ const MatingList = () => {
                               return;
                             }
 
-                            setMatingDate(date.toISOString());
+                            // 날짜만 처리하도록 수정 (시간대 문제 해결)
+                            const year = date.getFullYear();
+                            const month = String(date.getMonth() + 1).padStart(2, "0");
+                            const day = String(date.getDate()).padStart(2, "0");
+                            setMatingDate(`${year}-${month}-${day}`);
 
                             const trigger = document.querySelector(
                               `button[data-field-name="layingDate"]`,
@@ -171,8 +182,8 @@ const MatingList = () => {
                         }}
                         modifiersStyles={{
                           hasMating: {
-                            backgroundColor: "#fef3c7", // yellow-100
-                            color: "#92400e", // yellow-800
+                            backgroundColor: "#fef3c7",
+                            color: "#92400e",
                             fontWeight: "bold",
                           },
                         }}
