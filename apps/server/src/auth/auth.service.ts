@@ -10,7 +10,13 @@ import { USER_STATUS } from 'src/user/user.constant';
 import * as bcrypt from 'bcrypt';
 import { JwtPayload } from './strategies/jwt.strategy';
 import { OauthService } from './oauth/oauth.service';
-import { Not } from 'typeorm';
+import { Not, Repository } from 'typeorm';
+import { OauthEntity } from './oauth/oauth.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { UserEntity } from 'src/user/user.entity';
+import { plainToInstance } from 'class-transformer';
+import { OauthDto } from './oauth/oauth.dto';
+import { UserDto } from 'src/user/user.dto';
 
 export type ValidatedUser = {
   userId: string;
@@ -20,36 +26,27 @@ export type ValidatedUser = {
 @Injectable()
 export class AuthService {
   constructor(
+    @InjectRepository(OauthEntity)
+    private readonly oauthRepository: Repository<OauthEntity>,
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
     private readonly oauthService: OauthService,
   ) {}
 
   async validateUser(providerInfo: ProviderInfo): Promise<ValidatedUser> {
-    const { email, provider, providerId } = providerInfo;
-
-    const oauthFound = await this.oauthService.findOne({
-      email,
-      provider,
-      providerId,
-    });
-    // 기존 사용자 로그인
+    const oauthFound = await this.getOAuthWithUserByProviderInfo(providerInfo);
     if (oauthFound) {
-      const userFound = await this.userService.findOne({
-        email,
-        status: Not(USER_STATUS.DELETED),
-      });
-
-      if (userFound) {
-        return {
-          userId: userFound.userId,
-          userStatus: userFound.status,
-        };
-      } else {
+      const { user } = oauthFound;
+      if (!user) {
         throw new BadRequestException(
           'SNS 계정 정보와 사용자 정보가 일치하지 않습니다. 관리자에게 문의해주세요.',
         );
       }
+      // 기존 사용자 로그인
+      return {
+        userId: user.userId,
+        userStatus: user.status,
+      };
     }
 
     // 새로운 OAuth 가입
@@ -58,7 +55,7 @@ export class AuthService {
       status: USER_STATUS;
     };
     const userFoundBySameEmail = await this.userService.findOne({
-      email,
+      email: providerInfo.email,
       status: Not(USER_STATUS.DELETED),
     });
     if (userFoundBySameEmail) {
@@ -81,14 +78,11 @@ export class AuthService {
 
     // OAuth 정보 생성 (공통 로직)
     await this.oauthService.createOauthInfo({
-      email,
-      provider,
-      providerId,
+      ...providerInfo,
       userId: newOAuthUser.userId,
     });
 
     // TODO: 둘 중 하나라도 실패하는 경우 회원가입 안되도록 롤백 처리 필요
-
     return {
       userId: newOAuthUser.userId,
       userStatus: newOAuthUser.status,
@@ -260,5 +254,39 @@ export class AuthService {
       status: USER_STATUS.DELETED,
     });
     // TODO: 보관용 테이블에 삭제된 유저의 암호화된 provider_id, provider, deleted_at, expires_at (현재+3년?) 저장
+  }
+
+  async getOAuthWithUserByProviderInfo({
+    email,
+    provider,
+    providerId,
+  }: ProviderInfo) {
+    const entity = (await this.oauthRepository
+      .createQueryBuilder('oauth')
+      .innerJoinAndMapOne(
+        'oauth.user',
+        UserEntity,
+        'user',
+        'user.email = oauth.email',
+      )
+      .where(
+        'oauth.email = :email AND oauth.provider = :provider AND oauth.providerId = :providerId AND user.status != :status',
+        {
+          email,
+          provider,
+          providerId,
+          status: USER_STATUS.DELETED,
+        },
+      )
+      .getOne()) as OauthEntity & { user: UserEntity };
+
+    const { user, ...oauthEntity } = entity;
+    const oauthDto = plainToInstance(OauthDto, oauthEntity);
+    const userDto = plainToInstance(UserDto, user);
+
+    return {
+      ...oauthDto,
+      user: userDto,
+    };
   }
 }
