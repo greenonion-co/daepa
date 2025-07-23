@@ -38,9 +38,9 @@ export class ParentService {
   private createParentQueryBuilder(petId: string) {
     return this.parentRepository
       .createQueryBuilder('parent')
-      .select(['parent.id', 'parent.parent_id', 'parent.role', 'parent.status'])
-      .innerJoin('pets', 'pet', 'pet.pet_id = parent.parent_id')
-      .where('parent.pet_id = :petId', { petId })
+      .select(['parent.id', 'parent.parentId', 'parent.role', 'parent.status'])
+      .innerJoin('pets', 'pet', 'pet.petId = parent.parentId')
+      .where('parent.petId = :petId', { petId })
       .andWhere('pet.is_deleted = :isDeleted', { isDeleted: false });
   }
 
@@ -66,7 +66,7 @@ export class ParentService {
     const parentEntities = await this.createParentQueryBuilder(petId)
       .andWhere('parent.status = :status', { status: PARENT_STATUS.APPROVED })
       .getMany();
-
+    console.log(parentEntities);
     const fatherEntity = parentEntities.find(
       (parent) => parent.role === PARENT_ROLE.FATHER,
     );

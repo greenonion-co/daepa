@@ -337,6 +337,7 @@ export class EggService {
     };
 
     const { father, mother } = await this.parentService.findParents(eggId);
+
     if (father) {
       createPetDto.father = {
         parentId: father.parentId,
