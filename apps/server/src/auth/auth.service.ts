@@ -17,6 +17,7 @@ import { UserEntity } from 'src/user/user.entity';
 import { plainToInstance } from 'class-transformer';
 import { OauthDto } from './oauth/oauth.dto';
 import { UserDto } from 'src/user/user.dto';
+import { DataSource, EntityManager } from 'typeorm';
 
 export type ValidatedUser = {
   userId: string;
@@ -31,15 +32,17 @@ export class AuthService {
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
     private readonly oauthService: OauthService,
+    private readonly dataSource: DataSource,
   ) {}
 
   async validateUser(providerInfo: ProviderInfo): Promise<ValidatedUser> {
+    // 기존 OAuth 계정 확인
     const oauthFound = await this.getOAuthWithUserByProviderInfo(providerInfo);
     if (oauthFound) {
       const { user } = oauthFound;
       if (!user) {
         throw new BadRequestException(
-          'SNS 계정 정보와 사용자 정보가 일치하지 않습니다. 관리자에게 문의해주세요.',
+          'SNS 계정으로 사용자 정보를 불러오는데 실패했습니다. 관리자에게 문의해주세요.',
         );
       }
       // 기존 사용자 로그인
@@ -49,44 +52,52 @@ export class AuthService {
       };
     }
 
-    // 새로운 OAuth 가입
-    let newOAuthUser: {
-      userId: string;
-      status: USER_STATUS;
-    };
-    const userFoundBySameEmail = await this.userService.findOne({
-      email: providerInfo.email,
-      status: Not(USER_STATUS.DELETED),
-    });
-    if (userFoundBySameEmail) {
-      // 기존 동일한 이메일을 사용하는 유저가 있는 경우, 해당 유저에 OAuth 추가 연결
-      newOAuthUser = {
-        userId: userFoundBySameEmail.userId,
-        status: userFoundBySameEmail.status,
+    // 새로운 OAuth 가입 - 트랜잭션 내에서 처리
+    return this.dataSource.transaction(async (entityManager: EntityManager) => {
+      let newOAuthUser: {
+        userId: string;
+        status: USER_STATUS;
       };
-    } else {
-      // 최초 가입
-      const newUserCreated = await this.userService.createUser(
-        providerInfo,
-        USER_STATUS.PENDING,
-      );
-      newOAuthUser = {
-        userId: newUserCreated.userId,
-        status: newUserCreated.status,
+
+      // 동일한 이메일을 사용하는 기존 사용자 확인
+      const userFoundBySameEmail = await entityManager.findOne(UserEntity, {
+        where: {
+          email: providerInfo.email,
+          status: Not(USER_STATUS.DELETED),
+        },
+      });
+
+      if (userFoundBySameEmail) {
+        // 기존 동일한 이메일을 사용하는 유저가 있는 경우, 해당 유저에 OAuth 추가 연결
+        newOAuthUser = {
+          userId: userFoundBySameEmail.userId,
+          status: userFoundBySameEmail.status,
+        };
+      } else {
+        // 해당 이메일 최초 가입
+        const newUserCreated =
+          await this.userService.createUserWithEntityManager(
+            entityManager,
+            providerInfo,
+            USER_STATUS.PENDING,
+          );
+        newOAuthUser = {
+          userId: newUserCreated.userId,
+          status: newUserCreated.status,
+        };
+      }
+
+      // OAuth 정보 생성
+      await this.oauthService.createOauthInfoWithEntityManager(entityManager, {
+        ...providerInfo,
+        userId: newOAuthUser.userId,
+      });
+
+      return {
+        userId: newOAuthUser.userId,
+        userStatus: newOAuthUser.status,
       };
-    }
-
-    // OAuth 정보 생성 (공통 로직)
-    await this.oauthService.createOauthInfo({
-      ...providerInfo,
-      userId: newOAuthUser.userId,
     });
-
-    // TODO: 둘 중 하나라도 실패하는 경우 회원가입 안되도록 롤백 처리 필요
-    return {
-      userId: newOAuthUser.userId,
-      userStatus: newOAuthUser.status,
-    };
   }
 
   createJwtAccessToken(userId: string) {
@@ -279,6 +290,8 @@ export class AuthService {
         },
       )
       .getOne()) as OauthEntity & { user: UserEntity };
+
+    if (!entity) return null;
 
     const { user, ...oauthEntity } = entity;
     const oauthDto = plainToInstance(OauthDto, oauthEntity);

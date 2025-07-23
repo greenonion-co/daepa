@@ -13,6 +13,8 @@ import { USER_ROLE, USER_STATUS } from './user.constant';
 import { nanoid } from 'nanoid';
 import { isMySQLError } from 'src/common/error';
 import { OauthService } from 'src/auth/oauth/oauth.service';
+import { EntityManager } from 'typeorm';
+import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class UserService {
@@ -160,5 +162,30 @@ export class UserService {
       },
     });
     return !!isExist;
+  }
+
+  // Transaction 처리를 위해 EntityManager를 받는 메서드 추가
+  async createUserWithEntityManager(
+    entityManager: EntityManager,
+    providerInfo: ProviderInfo,
+    status: USER_STATUS,
+  ) {
+    const userId = await this.generateUserId();
+    const pendingName = `USER_${userId}`;
+    const createUserEntity = plainToInstance(UserEntity, {
+      userId,
+      name: pendingName,
+      email: providerInfo.email,
+      role: USER_ROLE.USER,
+      provider: providerInfo.provider,
+      providerId: providerInfo.providerId,
+      status,
+    });
+
+    const savedUserEntity = await entityManager.save(
+      UserEntity,
+      createUserEntity,
+    );
+    return this.toUserDto(savedUserEntity);
   }
 }

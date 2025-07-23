@@ -10,6 +10,7 @@ import { instanceToPlain } from 'class-transformer';
 import { plainToInstance } from 'class-transformer';
 import { OauthDto } from './oauth.dto';
 import { OAUTH_PROVIDER } from '../auth.constants';
+import { EntityManager } from 'typeorm';
 
 type KakaoDisconnectResponse = {
   id: number;
@@ -87,5 +88,18 @@ export class OauthService {
     );
 
     return response.data;
+  }
+
+  // Transaction 처리를 위해 EntityManager를 받는 메서드 추가
+  async createOauthInfoWithEntityManager(
+    entityManager: EntityManager,
+    providerInfo: { userId: string } & ProviderInfo,
+  ) {
+    await entityManager.insert(OauthEntity, {
+      email: providerInfo.email,
+      provider: providerInfo.provider,
+      providerId: providerInfo.providerId,
+      userId: providerInfo.userId,
+    });
   }
 }
