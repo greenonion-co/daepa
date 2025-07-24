@@ -33,6 +33,10 @@ export class OauthEntity {
   @Column()
   userId: string;
 
+  @Exclude()
+  @Column({ nullable: true })
+  refreshToken: string;
+
   @Column()
   @CreateDateColumn()
   createdAt: Date;

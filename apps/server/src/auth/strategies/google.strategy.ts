@@ -15,9 +15,16 @@ export class GoogleStrategy extends PassportStrategy(Strategy) {
     });
   }
 
+  authorizationParams() {
+    return {
+      access_type: 'offline',
+      prompt: 'consent',
+    };
+  }
+
   async validate(
     _accessToken: string,
-    _refreshToken: string,
+    refreshToken: string,
     profile: Profile,
     done: (error: any, validatedUser?: ValidatedUser) => void,
   ) {
@@ -33,6 +40,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy) {
         email: profile.emails[0].value,
         provider: OAUTH_PROVIDER.GOOGLE,
         providerId: profile.id.toString(),
+        refreshToken,
       };
 
       const validatedUser = await this.authService.validateUser(providerInfo);

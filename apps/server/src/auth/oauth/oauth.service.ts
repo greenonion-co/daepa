@@ -99,6 +99,7 @@ export class OauthService {
       email: providerInfo.email,
       provider: providerInfo.provider,
       providerId: providerInfo.providerId,
+      refreshToken: providerInfo.refreshToken,
       userId: providerInfo.userId,
     });
   }

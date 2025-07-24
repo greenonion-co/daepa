@@ -18,6 +18,7 @@ import { plainToInstance } from 'class-transformer';
 import { OauthDto } from './oauth/oauth.dto';
 import { UserDto } from 'src/user/user.dto';
 import { DataSource, EntityManager } from 'typeorm';
+import { OAUTH_PROVIDER } from './auth.constants';
 
 export type ValidatedUser = {
   userId: string;
@@ -45,6 +46,21 @@ export class AuthService {
           'SNS 계정으로 사용자 정보를 불러오는데 실패했습니다. 관리자에게 문의해주세요.',
         );
       }
+
+      // 구글 로그인 시 refreshToken 업데이트
+      if (providerInfo.provider === OAUTH_PROVIDER.GOOGLE) {
+        await this.oauthRepository.update(
+          {
+            email: providerInfo.email,
+            provider: providerInfo.provider,
+            providerId: providerInfo.providerId,
+          },
+          {
+            refreshToken: providerInfo.refreshToken,
+          },
+        );
+      }
+
       // 기존 사용자 로그인
       return {
         userId: user.userId,
@@ -251,15 +267,28 @@ export class AuthService {
     //   }
     // }
 
-    await this.softDeleteUser(userId, user.email);
-    // TODO: user.email에 해당되는 정보 oauth 테이블에서 처리하기
+    await this.softDeleteUser({
+      userId,
+      name: user.name,
+      email: user.email,
+    });
+    // TODO: user.email에 해당되는 정보가 여러개일 수도 있음. 모두 oauth 테이블에서 처리하기
     await this.oauthService.deleteAllOauthInfoByEmail(user.email);
   }
 
-  private async softDeleteUser(userId: string, email: string): Promise<void> {
+  private async softDeleteUser({
+    userId,
+    name,
+    email,
+  }: {
+    userId: string;
+    name: string;
+    email: string;
+  }): Promise<void> {
     await this.userService.update(userId, {
-      userId: 'DELETED_' + userId,
-      email: `DELETED_${email}_${Date.now()}`,
+      userId: `${Date.now()}_${userId}`,
+      name: `$_${name}`,
+      email: `$_${email}`,
       refreshToken: null,
       refreshTokenExpiresAt: null,
       status: USER_STATUS.DELETED,
