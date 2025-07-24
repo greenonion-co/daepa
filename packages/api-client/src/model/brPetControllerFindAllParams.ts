@@ -80,4 +80,8 @@ export type BrPetControllerFindAllParams = {
    * 펫 성장단계
    */
   growth?: BrPetControllerFindAllGrowth;
+  /**
+   * 타인 펫 포함 여부
+   */
+  includeOthers?: boolean;
 };

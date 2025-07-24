@@ -3,6 +3,7 @@ import {
   eggControllerDelete,
   eggControllerHatched,
   eggControllerUpdateLayingDate,
+  LayingDto,
   MatingByDateDto,
   matingControllerFindAll,
   PetSummaryDto,
@@ -31,6 +32,7 @@ import DropdownMenuIcon from "./DropdownMenuIcon";
 import Dialog from "../../components/Form/Dialog";
 import { toast } from "sonner";
 import { AxiosError } from "axios";
+import EditEggModal from "./EditEggModal";
 
 interface MatingItemProps {
   mating: MatingByDateDto;
@@ -67,6 +69,7 @@ const MatingItem = ({ mating, father, mother, matingDates }: MatingItemProps) =>
     onSuccess: (response) => {
       if (response?.data?.hatchedPetId) {
         toast.success("해칭 완료");
+        queryClient.invalidateQueries({ queryKey: [matingControllerFindAll.name] });
       }
     },
     onError: (error: AxiosError<{ message: string }>) => {
@@ -119,6 +122,11 @@ const MatingItem = ({ mating, father, mother, matingDates }: MatingItemProps) =>
         matingDate={formatDateToYYYYMMDDString(mating.matingDate, "yy/MM/dd")}
       />
     ));
+  };
+
+  const handleEditEggClick = (e: React.MouseEvent, egg: LayingDto) => {
+    e.stopPropagation();
+    overlay.open(({ isOpen, close }) => <EditEggModal isOpen={isOpen} onClose={close} egg={egg} />);
   };
 
   const getDisabledDates = (currentLayingDate: Date) => {
@@ -296,9 +304,7 @@ const MatingItem = ({ mating, father, mother, matingDates }: MatingItemProps) =>
                             {
                               icon: <Edit className="h-4 w-4 text-blue-600" />,
                               label: "수정",
-                              onClick: () => {
-                                console.log("editEgg");
-                              },
+                              onClick: (e) => handleEditEggClick(e, laying),
                             },
                             {
                               icon: <Trash2 className="h-4 w-4 text-red-600" />,

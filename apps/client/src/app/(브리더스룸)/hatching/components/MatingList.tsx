@@ -1,24 +1,21 @@
 import Loading from "@/components/common/Loading";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  CommonResponseDto,
-  MatingByDateDto,
-  matingControllerCreateMating,
-  matingControllerFindAll,
-} from "@repo/api-client";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Heart } from "lucide-react";
+import { MatingByDateDto, matingControllerFindAll } from "@repo/api-client";
+import { useQuery } from "@tanstack/react-query";
+import { Heart, Plus, ChevronUp, ChevronDown } from "lucide-react";
 import MatingItem from "./MatingItem";
 import { toast } from "sonner";
 import { getNumberToDate } from "@/lib/utils";
-import { useCallback } from "react";
-import { AxiosError } from "axios";
+import { useCallback, useState } from "react";
 import Link from "next/link";
 import CalendarSelect from "./CalendarSelect";
+import { Button } from "@/components/ui/button";
+import CreateMatingForm from "./CreateMatingForm";
 
 const MatingList = () => {
-  const queryClient = useQueryClient();
+  const [isCreateFormOpen, setIsCreateFormOpen] = useState(false);
+
   const { data: matings, isPending } = useQuery({
     queryKey: [matingControllerFindAll.name],
     queryFn: matingControllerFindAll,
@@ -32,38 +29,42 @@ const MatingList = () => {
     return matingDates.map((mating) => getNumberToDate(mating.matingDate));
   }, []);
 
-  const { mutate: createMating } = useMutation({
-    mutationFn: matingControllerCreateMating,
-    onSuccess: () => {
-      toast.success("메이팅이 추가되었습니다.");
-      queryClient.invalidateQueries({ queryKey: [matingControllerFindAll.name] });
-    },
-    onError: (error: AxiosError<CommonResponseDto>) => {
-      toast.error(error.response?.data?.message ?? "메이팅 추가에 실패했습니다.");
-    },
-  });
-
   if (isPending) {
     return <Loading />;
   }
 
   if (!matings || matings.length === 0) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Heart className="h-5 w-5 text-pink-500" />
-            메이팅 현황
-          </CardTitle>
-          <CardDescription>등록된 메이팅이 없습니다.</CardDescription>
-        </CardHeader>
-      </Card>
+      <div className="space-y-4">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Heart className="h-5 w-5 text-pink-500" />
+                메이팅 현황
+              </div>
+              <Button
+                onClick={() => setIsCreateFormOpen(!isCreateFormOpen)}
+                className="flex items-center gap-2"
+              >
+                {isCreateFormOpen ? (
+                  <ChevronUp className="h-4 w-4" />
+                ) : (
+                  <Plus className="h-4 w-4" />
+                )}
+                {isCreateFormOpen ? "폼 닫기" : "새 메이팅 추가"}
+              </Button>
+            </CardTitle>
+            <CardDescription>등록된 메이팅이 없습니다.</CardDescription>
+          </CardHeader>
+        </Card>
+
+        {isCreateFormOpen && <CreateMatingForm onClose={() => setIsCreateFormOpen(false)} />}
+      </div>
     );
   }
 
   const handleAddMatingClick = ({
-    fatherId,
-    motherId,
     matingDate,
   }: {
     fatherId?: string;
@@ -75,26 +76,23 @@ const MatingList = () => {
       return;
     }
 
-    const matingDateNumber = parseInt(matingDate.replace(/-/g, ""), 10);
-
-    createMating({
-      matingDate: matingDateNumber,
-      fatherId,
-      motherId,
-    });
+    // API 호출은 CreateMatingForm에서 처리하므로 여기서는 토스트만 표시
+    toast.error("이 기능은 새 메이팅 추가 폼을 사용해주세요.");
   };
 
   return (
     <div className="space-y-4">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Heart className="h-5 w-5 text-pink-500" />
-            메이팅 현황
-          </CardTitle>
-          <CardDescription>최근 메이팅 정보를 확인하세요</CardDescription>
-        </CardHeader>
-      </Card>
+      {/* 헤더 영역 */}
+      <Button
+        onClick={() => setIsCreateFormOpen(!isCreateFormOpen)}
+        className="flex items-center gap-2"
+      >
+        새 메이팅 추가
+        {isCreateFormOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+      </Button>
+
+      {/* 폴더블 폼 */}
+      {isCreateFormOpen && <CreateMatingForm onClose={() => setIsCreateFormOpen(false)} />}
 
       <ScrollArea className="h-[700px]">
         <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">

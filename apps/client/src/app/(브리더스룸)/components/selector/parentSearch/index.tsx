@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import BottomSheet from "@/components/common/BottomSheet";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { petControllerFindAll } from "@repo/api-client";
+import { brPetControllerFindAll } from "@repo/api-client";
 import SelectStep from "./SelectStep";
 import LinkStep from "./LinkStep";
 import Header from "./Header";
@@ -33,12 +33,13 @@ export default function ParentSearchSelector({
   const itemPerPage = 10;
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
-    queryKey: [petControllerFindAll.name],
+    queryKey: [brPetControllerFindAll.name, "includeOthers"],
     queryFn: ({ pageParam = 1 }) =>
-      petControllerFindAll({
+      brPetControllerFindAll({
         page: pageParam,
         itemPerPage,
         order: "DESC",
+        includeOthers: true,
       }),
     initialPageParam: 1,
     getNextPageParam: (lastPage) => {

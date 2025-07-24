@@ -223,6 +223,7 @@ export class UpdateEggDto extends PartialType(
     'clutch',
     'clutchOrder',
     'desc',
+    'temperature',
   ] as const),
 ) {
   @ApiProperty({

@@ -21,7 +21,6 @@ const ParentLink = ({
   onUnlink,
 }: {
   label: "부" | "모";
-
   data?: PetParentDto;
   editable?: boolean;
   onSelect?: (item: PetParentDtoWithMessage) => void;

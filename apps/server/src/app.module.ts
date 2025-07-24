@@ -76,6 +76,7 @@ const ENTITIES = [
       secret: process.env.JWT_SECRET ?? '',
       signOptions: { expiresIn: '1h' },
     }),
+    TypeOrmModule.forFeature(ENTITIES),
   ],
   controllers: [
     AppController,

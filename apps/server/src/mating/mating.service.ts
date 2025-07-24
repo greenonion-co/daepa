@@ -34,7 +34,7 @@ export class MatingService {
         'matings.eggs',
         EggEntity,
         'eggs',
-        'eggs.matingId = matings.id AND eggs.is_deleted = :isDeleted',
+        'eggs.matingId = matings.id AND eggs.isDeleted = :isDeleted AND eggs.hatchedPetId IS NULL',
         { isDeleted: false },
       )
       .leftJoinAndMapMany(
@@ -63,7 +63,7 @@ export class MatingService {
         'parents.growth',
         'parents.weight',
       ])
-      .where('matings.user_id = :userId', { userId })
+      .where('matings.userId = :userId', { userId })
       .orderBy('matings.createdAt', 'DESC')
       .addOrderBy('eggs.clutchOrder', 'ASC')
       .getMany()) as MatingWithRelations[];
