@@ -5,6 +5,7 @@ import {
   parentControllerCreateParent,
   parentControllerDeleteParent,
   ParentDtoRole,
+  ParentDtoStatus,
   petControllerFindOne,
 } from "@repo/api-client";
 import { toast } from "sonner";
@@ -13,9 +14,10 @@ import { memo, useCallback } from "react";
 
 interface PedigreeSectionProps {
   petId: string;
+  isMyPet: boolean;
 }
 
-const PedigreeSection = memo(({ petId }: PedigreeSectionProps) => {
+const PedigreeSection = memo(({ petId, isMyPet }: PedigreeSectionProps) => {
   const queryClient = useQueryClient();
   const { formData, setFormData } = usePetStore();
 
@@ -109,15 +111,25 @@ const PedigreeSection = memo(({ petId }: PedigreeSectionProps) => {
       <div className="grid grid-cols-2 gap-4">
         <ParentLink
           label="부"
-          data={formData.father}
+          data={
+            isMyPet || (!isMyPet && formData.father?.status === ParentDtoStatus.APPROVED)
+              ? formData.father
+              : null
+          }
           onSelect={handleFatherSelect}
           onUnlink={handleFatherUnlink}
+          editable={isMyPet}
         />
         <ParentLink
           label="모"
-          data={formData.mother}
+          data={
+            isMyPet || (!isMyPet && formData.mother?.status === ParentDtoStatus.APPROVED)
+              ? formData.mother
+              : null
+          }
           onSelect={handleMotherSelect}
           onUnlink={handleMotherUnlink}
+          editable={isMyPet}
         />
       </div>
     </div>

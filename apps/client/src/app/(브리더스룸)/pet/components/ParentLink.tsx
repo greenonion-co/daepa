@@ -28,6 +28,7 @@ const ParentLink = ({
 }) => {
   const { user } = useUserStore();
   const pathname = usePathname();
+  const isMyPet = data?.owner?.userId === user?.userId;
   const isRegisterPage = pathname.includes("register");
   const deleteParent = () => {
     if (!data?.petId) return;
@@ -58,14 +59,12 @@ const ParentLink = ({
       <dt className="mb-2 flex items-center gap-2 text-xs font-medium text-gray-500 dark:text-gray-400">
         {label}
 
-        {data?.status && (
-          <ParentStatusBadge status={data.status} isMyPet={data?.owner?.userId === user?.userId} />
-        )}
+        {data?.status && <ParentStatusBadge status={data.status} isMyPet={isMyPet} />}
       </dt>
 
       {data?.petId ? (
         <div className="group relative block h-full w-full transition-opacity hover:opacity-95">
-          {!data?.status && data?.owner?.userId === user?.userId && (
+          {!data?.status && isMyPet && (
             <Badge
               variant="outline"
               className="absolute left-1 top-1 z-10 bg-blue-50 text-xs font-bold"
