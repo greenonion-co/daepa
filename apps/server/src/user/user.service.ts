@@ -15,6 +15,7 @@ import { isMySQLError } from 'src/common/error';
 import { OauthService } from 'src/auth/oauth/oauth.service';
 import { EntityManager } from 'typeorm';
 import { plainToInstance } from 'class-transformer';
+import { OauthEntity } from 'src/auth/oauth/oauth.entity';
 
 @Injectable()
 export class UserService {
@@ -38,6 +39,26 @@ export class UserService {
     }
 
     throw new Error('Failed to generate unique userId after maximum attempts');
+  }
+
+  async getUserWithOauthsEntity(userId: string) {
+    const entity = (await this.userRepository
+      .createQueryBuilder('users')
+      .leftJoinAndMapMany(
+        'users.oauths',
+        OauthEntity,
+        'oauths',
+        'oauths.userId = users.userId',
+      )
+      .where('users.userId = :userId', { userId })
+      .getOne()) as UserEntity & { oauths: OauthEntity[] };
+
+    const { oauths, ...user } = entity;
+
+    return {
+      user,
+      oauths,
+    };
   }
 
   async createUser(

@@ -250,29 +250,42 @@ export class AuthService {
   }
 
   async deleteUser(userId: string): Promise<void> {
-    const user = await this.userService.findOne({ userId });
+    const { user, oauths } =
+      await this.userService.getUserWithOauthsEntity(userId);
+
     if (!user) {
       throw new BadRequestException('사용자를 찾을 수 없습니다.');
     }
     if (user.status === USER_STATUS.DELETED) {
       throw new BadRequestException('이미 탈퇴된 회원입니다.');
     }
+    if (oauths.length === 0) {
+      throw new BadRequestException('OAuth 정보를 찾을 수 없습니다.');
+    }
 
-    // if (user.provider === OAUTH_PROVIDER.KAKAO) {
-    //   const { id: disconnectedId } = await this.oauthService.disconnectKakao(
-    //     user.providerId ?? '',
-    //   );
-    //   if (user.providerId === disconnectedId.toString()) {
-    //     await this.softDeleteUser(userId);
-    //   }
-    // }
+    for (const oauth of oauths) {
+      // if (oauth.provider === OAUTH_PROVIDER.KAKAO) {
+      //   const { id: disconnectedId } = await this.oauthService.disconnectKakao(
+      //     oauth.providerId ?? '',
+      //   );
+      //   if (oauth.providerId === disconnectedId.toString()) {
+      //     await this.softDeleteUser({
+      //       userId,
+      //       name: user.name,
+      //       email: user.email,
+      //     });
+      //   }
+      // }
+      if (oauth.provider === OAUTH_PROVIDER.GOOGLE) {
+        await this.oauthService.disconnectGoogle(userId);
+      }
+    }
 
     await this.softDeleteUser({
       userId,
       name: user.name,
       email: user.email,
     });
-    // TODO: user.email에 해당되는 정보가 여러개일 수도 있음. 모두 oauth 테이블에서 처리하기
     await this.oauthService.deleteAllOauthInfoByEmail(user.email);
   }
 
@@ -286,9 +299,9 @@ export class AuthService {
     email: string;
   }): Promise<void> {
     await this.userService.update(userId, {
-      userId: `${Date.now()}_${userId}`,
-      name: `$_${name}`,
-      email: `$_${email}`,
+      userId: `DELETED_${userId}_${Date.now()}`,
+      name: `DELETED_${name}_${userId}`,
+      email: `DELETED_${email}_${userId}`,
       refreshToken: null,
       refreshTokenExpiresAt: null,
       status: USER_STATUS.DELETED,

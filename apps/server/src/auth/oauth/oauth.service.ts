@@ -1,5 +1,5 @@
 import { HttpService } from '@nestjs/axios';
-import { Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { AxiosError } from 'axios';
 import { catchError, firstValueFrom } from 'rxjs';
 import { ProviderInfo } from '../auth.types';
@@ -33,6 +33,15 @@ export class OauthService {
 
     const oauth = instanceToPlain(oauthEntity);
     return plainToInstance(OauthDto, oauth);
+  }
+
+  async findAllByUserId(userId: string) {
+    const oauthEntities = await this.oauthRepository.find({
+      where: {
+        userId,
+      },
+    });
+    return oauthEntities;
   }
 
   async findAllProvidersByEmail(email: string): Promise<OAUTH_PROVIDER[]> {
@@ -88,6 +97,41 @@ export class OauthService {
     );
 
     return response.data;
+  }
+
+  async disconnectGoogle(userId: string): Promise<boolean> {
+    const oauth = await this.oauthRepository.findOne({
+      where: {
+        userId,
+        provider: OAUTH_PROVIDER.GOOGLE,
+      },
+    });
+    if (!oauth?.refreshToken) {
+      throw new BadRequestException('Google OAuth RefreshToken Not Found');
+    }
+
+    const response = await firstValueFrom(
+      this.httpService
+        .post<unknown>(
+          'https://oauth2.googleapis.com/revoke',
+          {
+            token: oauth.refreshToken,
+          },
+          {
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8',
+            },
+          },
+        )
+        .pipe(
+          catchError((error: AxiosError) => {
+            this.logger.error(error.response?.data);
+            throw error;
+          }),
+        ),
+    );
+
+    return response.status === 200;
   }
 
   // Transaction 처리를 위해 EntityManager를 받는 메서드 추가
