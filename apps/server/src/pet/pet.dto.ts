@@ -514,4 +514,13 @@ export class PetFilterDto extends PageOptionsDto {
   @IsOptional()
   @IsEnum(PET_GROWTH)
   growth?: PET_GROWTH; // 크기 검색
+
+  @ApiProperty({
+    description: '타인 펫 포함 여부',
+    example: true,
+    required: false,
+  })
+  @IsOptional()
+  @IsBoolean()
+  includeOthers?: boolean;
 }

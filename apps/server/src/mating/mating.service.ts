@@ -1,18 +1,27 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { CreateMatingDto, MatingBaseDto, MatingDto } from './mating.dto';
+import {
+  CreateMatingDto,
+  MatingBaseDto,
+  MatingByParentsDto,
+  MatingDto,
+} from './mating.dto';
 import { MatingEntity } from './mating.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { IsNull, Repository } from 'typeorm';
 import { plainToInstance } from 'class-transformer';
-import { LayingBaseDto, LayingDto } from '../laying/laying.dto';
 import { PetSummaryDto } from 'src/pet/pet.dto';
 import { PetEntity } from 'src/pet/pet.entity';
-import { LayingEntity } from 'src/laying/laying.entity';
-import { groupBy, omit } from 'es-toolkit';
+import { groupBy } from 'es-toolkit';
 import { PET_SEX } from 'src/pet/pet.constants';
+import { EggEntity } from 'src/egg/egg.entity';
+import { EggBaseDto, LayingDto } from 'src/egg/egg.dto';
+import { UpdateMatingDto } from './mating.dto';
+import { Not } from 'typeorm';
+import { PageOptionsDto } from 'src/common/page.dto';
+import { PageDto, PageMetaDto } from 'src/common/page.dto';
 
 interface MatingWithRelations extends MatingEntity {
-  layings?: Partial<LayingEntity>[];
+  eggs?: Partial<EggEntity>[];
   parents?: Partial<PetEntity>[];
 }
 
@@ -21,16 +30,19 @@ export class MatingService {
   constructor(
     @InjectRepository(MatingEntity)
     private readonly matingRepository: Repository<MatingEntity>,
+    @InjectRepository(EggEntity)
+    private readonly eggRepository: Repository<EggEntity>,
   ) {}
 
   async findAll(userId: string) {
     const entities = (await this.matingRepository
       .createQueryBuilder('matings')
       .leftJoinAndMapMany(
-        'matings.layings',
-        LayingEntity,
-        'layings',
-        'layings.matingId = matings.id',
+        'matings.eggs',
+        EggEntity,
+        'eggs',
+        'eggs.matingId = matings.id AND eggs.isDeleted = :isDeleted AND eggs.hatchedPetId IS NULL',
+        { isDeleted: false },
       )
       .leftJoinAndMapMany(
         'matings.parents',
@@ -43,12 +55,12 @@ export class MatingService {
         'matings.matingDate',
         'matings.fatherId',
         'matings.motherId',
-        'layings.id',
-        'layings.eggId',
-        'layings.layingDate',
-        'layings.layingOrder',
-        'layings.eggType',
-        'layings.temperature',
+        'eggs.eggId',
+        'eggs.layingDate',
+        'eggs.clutch',
+        'eggs.clutchOrder',
+        'eggs.hatchedPetId',
+        'eggs.temperature',
         'parents.petId',
         'parents.name',
         'parents.morphs',
@@ -58,17 +70,90 @@ export class MatingService {
         'parents.growth',
         'parents.weight',
       ])
-      .where('matings.user_id = :userId', { userId })
+      .where('matings.userId = :userId', { userId })
       .orderBy('matings.createdAt', 'DESC')
-      .addOrderBy('layings.layingOrder', 'ASC')
+      .addOrderBy('eggs.clutchOrder', 'ASC')
       .getMany()) as MatingWithRelations[];
 
     return this.formatResponseByDate(entities);
   }
 
+  async getMatingListFull(
+    pageOptionsDto: PageOptionsDto,
+    userId: string,
+  ): Promise<PageDto<MatingByParentsDto>> {
+    // 모든 메이팅 데이터를 가져와서 가공
+    const allQueryBuilder = this.matingRepository
+      .createQueryBuilder('matings')
+      .leftJoinAndMapMany(
+        'matings.eggs',
+        EggEntity,
+        'eggs',
+        'eggs.matingId = matings.id AND eggs.isDeleted = :isDeleted AND eggs.hatchedPetId IS NULL',
+        { isDeleted: false },
+      )
+      .leftJoinAndMapMany(
+        'matings.parents',
+        PetEntity,
+        'parents',
+        'parents.petId IN (matings.fatherId, matings.motherId)',
+      )
+      .select([
+        'matings.id',
+        'matings.matingDate',
+        'matings.fatherId',
+        'matings.motherId',
+        'matings.createdAt',
+        'eggs.eggId',
+        'eggs.layingDate',
+        'eggs.clutch',
+        'eggs.clutchOrder',
+        'eggs.hatchedPetId',
+        'eggs.temperature',
+        'parents.petId',
+        'parents.name',
+        'parents.morphs',
+        'parents.species',
+        'parents.sex',
+        'parents.birthdate',
+        'parents.growth',
+        'parents.weight',
+      ])
+      .where('matings.userId = :userId', { userId })
+      .orderBy('matings.id', pageOptionsDto.order);
+
+    const { entities } = await allQueryBuilder.getRawAndEntities();
+
+    // 가공된 데이터 생성
+    const allMatingList = this.formatResponseByDate(
+      entities as MatingWithRelations[],
+    );
+
+    // 가공 후 데이터로 페이지네이션 적용
+    const totalCount = allMatingList.length;
+    const startIndex = pageOptionsDto.skip;
+    const endIndex = startIndex + pageOptionsDto.itemPerPage;
+    const paginatedMatingList = allMatingList.slice(startIndex, endIndex);
+
+    const pageMetaDto = new PageMetaDto({ totalCount, pageOptionsDto });
+    return new PageDto(paginatedMatingList, pageMetaDto);
+  }
   async saveMating(userId: string, createMatingDto: CreateMatingDto) {
     if (!createMatingDto.fatherId && !createMatingDto.motherId) {
       throw new BadRequestException('최소 하나의 부모 펫을 입력해야 합니다.');
+    }
+
+    const existingMating = await this.matingRepository.findOne({
+      where: {
+        userId,
+        fatherId: createMatingDto.fatherId ?? IsNull(),
+        motherId: createMatingDto.motherId ?? IsNull(),
+        matingDate: createMatingDto.matingDate,
+      },
+    });
+
+    if (existingMating) {
+      throw new BadRequestException('이미 존재하는 메이팅 정보입니다.');
     }
 
     const matingEntity = this.matingRepository.create({
@@ -78,18 +163,70 @@ export class MatingService {
     return await this.matingRepository.save(matingEntity);
   }
 
+  async updateMating(
+    userId: string,
+    matingId: number,
+    updateMatingDto: UpdateMatingDto,
+  ) {
+    const mating = await this.matingRepository.findOne({
+      where: { id: matingId, userId },
+    });
+
+    if (!mating) {
+      throw new BadRequestException('메이팅 정보를 찾을 수 없습니다.');
+    }
+
+    // 중복 체크 (자신을 제외하고)
+    const existingMating = await this.matingRepository.findOne({
+      where: {
+        userId,
+        fatherId: updateMatingDto.fatherId ?? IsNull(),
+        motherId: updateMatingDto.motherId ?? IsNull(),
+        matingDate: updateMatingDto.matingDate,
+        id: Not(matingId),
+      },
+    });
+
+    if (existingMating) {
+      throw new BadRequestException('이미 존재하는 메이팅 정보입니다.');
+    }
+
+    await this.matingRepository.update(matingId, updateMatingDto);
+  }
+
+  async deleteMating(userId: string, matingId: number) {
+    const mating = await this.matingRepository.findOne({
+      where: { id: matingId, userId },
+    });
+
+    if (!mating) {
+      throw new BadRequestException('메이팅 정보를 찾을 수 없습니다.');
+    }
+
+    // 연관된 알이 있는지 확인
+    const relatedEggs = await this.eggRepository.find({
+      where: { matingId, isDeleted: false },
+    });
+
+    if (relatedEggs.length > 0) {
+      throw new BadRequestException('연관된 알이 있어 삭제할 수 없습니다.');
+    }
+
+    await this.matingRepository.delete(matingId);
+  }
+
   private formatResponseByDate(data: MatingWithRelations[]) {
     const resultDto = data.map((mating) => {
       const matingDto = plainToInstance(MatingDto, mating);
-      const layingsDto = mating.layings?.map((laying) =>
-        plainToInstance(LayingBaseDto, laying),
+      const eggDto = mating.eggs?.map((egg) =>
+        plainToInstance(EggBaseDto, egg),
       );
       const parentsDto = mating.parents?.map((parent) =>
         plainToInstance(PetSummaryDto, parent),
       );
       return {
         ...matingDto,
-        layings: layingsDto,
+        eggs: eggDto,
         parents: parentsDto,
       };
     });
@@ -97,14 +234,13 @@ export class MatingService {
     const groupedByParents = groupBy(resultDto, (mating) => {
       const fatherId = mating.fatherId ?? 'null';
       const motherId = mating.motherId ?? 'null';
-      const matingDate = mating.matingDate;
 
       // 부모 중 null 값이 있는 경우 각각 다른 그룹으로 처리
       if (mating.fatherId === null || mating.motherId === null) {
-        return `${fatherId}-${motherId}-${matingDate}-${mating.id}`;
+        return `${fatherId}-${motherId}-${mating.id}`;
       }
 
-      return `${fatherId}-${motherId}-${matingDate}`;
+      return `${fatherId}-${motherId}`;
     });
 
     return Object.values(groupedByParents).map((matingByParents) => {
@@ -112,15 +248,17 @@ export class MatingService {
       const father = parents?.find((parent) => parent.sex === PET_SEX.MALE);
       const mother = parents?.find((parent) => parent.sex === PET_SEX.FEMALE);
 
-      const matingsByDate = matingByParents.map((mating) => {
-        const { id, matingDate, layings } = mating;
-        const layingsByDate = this.groupLayingsByDate(layings);
-        return {
-          id,
-          matingDate,
-          layingsByDate,
-        };
-      });
+      const matingsByDate = matingByParents
+        .map((mating) => {
+          const { id, matingDate, eggs } = mating;
+          const eggsByDate = this.groupEggsByDate(eggs);
+          return {
+            id,
+            matingDate,
+            layingsByDate: eggsByDate,
+          };
+        })
+        .sort((a, b) => b.matingDate - a.matingDate);
 
       return {
         father,
@@ -130,16 +268,14 @@ export class MatingService {
     });
   }
 
-  private groupLayingsByDate(layings: LayingBaseDto[] | undefined) {
-    if (!layings?.length) return;
+  private groupEggsByDate(eggs: EggBaseDto[] | undefined) {
+    if (!eggs?.length) return;
 
-    const grouped = groupBy(layings, (laying) => laying.layingDate);
+    const grouped = groupBy(eggs, (egg) => egg.layingDate);
 
-    return Object.entries(grouped).map(([layingDate, layingsForDate]) => ({
+    return Object.entries(grouped).map(([layingDate, eggsForDate]) => ({
       layingDate: parseInt(layingDate, 10),
-      layings: layingsForDate.map((laying) =>
-        omit(laying, ['layingDate']),
-      ) as LayingDto[],
+      layings: eggsForDate.map((egg) => plainToInstance(LayingDto, egg)),
     }));
   }
 

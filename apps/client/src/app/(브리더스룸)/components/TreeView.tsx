@@ -1,6 +1,7 @@
 import { EggDto, ParentDtoRole, ParentDtoStatus, PetParentDto } from "@repo/api-client";
 import Link from "next/link";
 import ParentStatusBadge from "./ParentStatusBadge";
+import { getEggName } from "@/lib/utils";
 
 export const TreeView = ({ node }: { node: EggDto }) => {
   return (
@@ -13,7 +14,7 @@ export const TreeView = ({ node }: { node: EggDto }) => {
           <div className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-100 text-blue-600">
             🥚
           </div>
-          <h3 className="text-sm">{node.name}</h3>
+          <h3 className="text-sm">{getEggName(node)}</h3>
         </div>
 
         <div className="flex items-center gap-2">

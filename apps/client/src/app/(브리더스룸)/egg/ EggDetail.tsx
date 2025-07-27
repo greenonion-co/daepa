@@ -27,7 +27,7 @@ import { EGG_EDIT_STEPS } from "../constants";
 import useParentLinkStore, { PetParentDtoWithMessage } from "../pet/store/parentLink";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { cn } from "@/lib/utils";
+import { cn, formatDateToYYYYMMDDString, getEggName } from "@/lib/utils";
 import FloatingButton from "../components/FloatingButton";
 import { AxiosError } from "axios";
 import Loading from "@/components/common/Loading";
@@ -37,13 +37,17 @@ import Link from "next/link";
 type EggDetailDto = Omit<EggDto, "layingDate"> & {
   layingDate: string;
 };
+
 interface EggDetailProps {
-  egg: EggDetailDto;
+  egg: EggDto;
 }
 
 const EggDetail = ({ egg }: EggDetailProps) => {
   const router = useRouter();
-  const [formData, setFormData] = useState<EggDetailDto>(egg);
+  const [formData, setFormData] = useState<EggDetailDto>({
+    ...egg,
+    layingDate: formatDateToYYYYMMDDString(egg.layingDate),
+  });
   const [isEditing, setIsEditing] = useState(false);
   const [isPublic, setIsPublic] = useState(false);
   const { selectedParent, setSelectedParent } = useParentLinkStore();
@@ -239,30 +243,34 @@ const EggDetail = ({ egg }: EggDetailProps) => {
 
           <div className="mb-2 flex justify-between">
             <span className="relative text-2xl font-bold after:absolute after:bottom-0 after:left-0 after:-z-10 after:h-[15px] after:w-full after:bg-[#247DFE] after:opacity-40">
-              {formData.name}
+              {getEggName(egg)}
             </span>
 
-            <Button
-              variant="destructive"
-              size="sm"
-              className="h-8 rounded-xl"
-              onClick={handleDelete}
-            >
-              삭제하기
-            </Button>
+            {!egg.hatchedPetId && (
+              <Button
+                variant="destructive"
+                size="sm"
+                className="h-8 rounded-xl"
+                onClick={handleDelete}
+              >
+                삭제하기
+              </Button>
+            )}
           </div>
 
-          <div className="flex items-center gap-2">
-            <Switch
-              id="visibility"
-              className="data-[state=checked]:bg-blue-600"
-              checked={isPublic}
-              onCheckedChange={onToggle}
-            />
-            <Label htmlFor="visibility" className="text-muted-foreground text-sm">
-              다른 브리더에게 공개
-            </Label>
-          </div>
+          {!egg.hatchedPetId && (
+            <div className="flex items-center gap-2">
+              <Switch
+                id="visibility"
+                className="data-[state=checked]:bg-blue-600"
+                checked={isPublic}
+                onCheckedChange={onToggle}
+              />
+              <Label htmlFor="visibility" className="text-muted-foreground text-sm">
+                다른 브리더에게 공개
+              </Label>
+            </div>
+          )}
 
           {/* 혈통 정보 */}
           <div className="pb-4 pt-4">
@@ -272,12 +280,14 @@ const EggDetail = ({ egg }: EggDetailProps) => {
               <ParentLink
                 label="부"
                 data={formData.father}
+                editable={!egg.hatchedPetId}
                 onSelect={(item) => handleParentSelect(ParentDtoRole.FATHER, item)}
                 onUnlink={() => handleUnlink(ParentDtoRole.FATHER)}
               />
               <ParentLink
                 label="모"
                 data={formData.mother}
+                editable={!egg.hatchedPetId}
                 onSelect={(item) => handleParentSelect(ParentDtoRole.MOTHER, item)}
                 onUnlink={() => handleUnlink(ParentDtoRole.MOTHER)}
               />
@@ -291,7 +301,7 @@ const EggDetail = ({ egg }: EggDetailProps) => {
 
               {/* 수정 버튼 */}
               <div className="sticky top-0 z-10 flex justify-end bg-white p-2 dark:bg-[#18181B]">
-                {!isEditing && (
+                {!isEditing && !egg.hatchedPetId && (
                   <Button
                     variant="outline"
                     size="icon"
@@ -332,32 +342,37 @@ const EggDetail = ({ egg }: EggDetailProps) => {
 
         {/* 하단 고정 버튼 영역 */}
 
-        <div
-          className={cn(
-            "sticky bottom-0 left-0 flex pt-4",
-            isEditing ? "justify-end" : "justify-between",
-          )}
-        >
-          {isEditing ? (
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                className="h-8 rounded-xl"
-                onClick={() => {
-                  setFormData(egg);
-                  setIsEditing(false);
-                }}
-              >
-                취소
-              </Button>
-              <Button className="h-8 rounded-xl bg-[#1A56B3]" onClick={handleSave}>
-                저장하기
-              </Button>
-            </div>
-          ) : (
-            <FloatingButton label="해칭 완료" onClick={handleHatching} />
-          )}
-        </div>
+        {!egg.hatchedPetId && (
+          <div
+            className={cn(
+              "sticky bottom-0 left-0 flex pt-4",
+              isEditing ? "justify-end" : "justify-between",
+            )}
+          >
+            {isEditing ? (
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  className="h-8 rounded-xl"
+                  onClick={() => {
+                    setFormData({
+                      ...egg,
+                      layingDate: formatDateToYYYYMMDDString(egg.layingDate),
+                    });
+                    setIsEditing(false);
+                  }}
+                >
+                  취소
+                </Button>
+                <Button className="h-8 rounded-xl bg-[#1A56B3]" onClick={handleSave}>
+                  저장하기
+                </Button>
+              </div>
+            ) : (
+              <FloatingButton label="해칭 완료" onClick={handleHatching} />
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

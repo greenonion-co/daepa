@@ -14,6 +14,7 @@ import {
   EggDto,
   HatchedResponseDto,
   UpdateEggDto,
+  UpdateLayingDateDto,
 } from './egg.dto';
 import { ExcludeNilInterceptor } from 'src/interceptors/exclude-nil';
 import { ApiResponse } from '@nestjs/swagger';
@@ -56,6 +57,28 @@ export class EggController {
       message:
         '알 등록이 완료되었습니다. eggIds: ' +
         createdEggs.map((egg) => egg.eggId).join(', '),
+    };
+  }
+
+  @Patch('laying-date')
+  @ApiResponse({
+    status: 200,
+    description: '산란일 일괄 수정 성공',
+    type: CommonResponseDto,
+  })
+  async updateLayingDate(
+    @Body() updateLayingDateDto: UpdateLayingDateDto,
+    @JwtUser() token: JwtUserPayload,
+  ) {
+    await this.eggService.updateLayingDate(
+      token.userId,
+      updateLayingDateDto.matingId,
+      updateLayingDateDto.currentLayingDate,
+      updateLayingDateDto.newLayingDate,
+    );
+    return {
+      success: true,
+      message: '산란일 수정이 완료되었습니다.',
     };
   }
 

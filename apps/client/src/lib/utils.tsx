@@ -2,7 +2,7 @@ import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import QRCode from "qrcode";
 import { format, parse } from "date-fns";
-import { PetDtoSaleStatus } from "@repo/api-client";
+import { EggDto, PetDtoSaleStatus } from "@repo/api-client";
 import { Badge } from "@/components/ui/badge";
 
 export const cn = (...inputs: ClassValue[]) => twMerge(clsx(inputs));
@@ -55,4 +55,16 @@ export const getStatusBadge = (status?: PetDtoSaleStatus) => {
     default:
       return <Badge variant="outline">미정</Badge>;
   }
+};
+
+export const getNumberToDate = (dateNumber: number) => {
+  const dateString = dateNumber.toString();
+  const year = parseInt(dateString.substring(0, 4), 10);
+  const month = parseInt(dateString.substring(4, 6), 10);
+  const day = parseInt(dateString.substring(6, 8), 10);
+  return new Date(year, month - 1, day);
+};
+
+export const getEggName = (egg: EggDto) => {
+  return `${egg.father?.name ?? "@"}x${egg.mother?.name ?? "@"}(${egg.clutch ?? "@"}-${egg.clutchOrder})`;
 };

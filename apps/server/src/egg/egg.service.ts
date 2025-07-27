@@ -19,11 +19,7 @@ import {
 } from 'src/common/page.dto';
 import { PARENT_ROLE } from 'src/parent/parent.constant';
 import { CreatePetDto, PetParentDto } from 'src/pet/pet.dto';
-import {
-  CreateParentDto,
-  ParentBaseDto,
-  ParentDto,
-} from 'src/parent/parent.dto';
+import { CreateParentDto, ParentDto } from 'src/parent/parent.dto';
 import { PetService } from 'src/pet/pet.service';
 import { nanoid } from 'nanoid';
 import { isMySQLError } from 'src/common/error';
@@ -174,10 +170,10 @@ export class EggService {
       dateRange?.endYmd ?? Number(format(endOfMonth(new Date()), 'yyyyMMdd'));
 
     queryBuilder
-      .andWhere('eggs.laying_date >= :startYmd', {
+      .andWhere('eggs.layingDate >= :startYmd', {
         startYmd: layingDateFrom,
       })
-      .andWhere('eggs.laying_date <= :endYmd', {
+      .andWhere('eggs.layingDate <= :endYmd', {
         endYmd: layingDateTo,
       })
       .orderBy('eggs.id', pageOptionsDto.order)
@@ -209,29 +205,31 @@ export class EggService {
       dateRange?.endYmd ?? Number(format(endOfMonth(new Date()), 'yyyyMMdd'));
 
     queryBuilder
-      .andWhere('eggs.laying_date >= :startYmd', {
+      .andWhere('eggs.layingDate >= :startYmd', {
         startYmd: layingDateFrom,
       })
-      .andWhere('eggs.laying_date <= :endYmd', {
+      .andWhere('eggs.layingDate <= :endYmd', {
         endYmd: layingDateTo,
       });
 
+    if (userId) {
+      queryBuilder.andWhere('users.userId = :userId', { userId });
+    }
+
     const { entities } = await queryBuilder.getRawAndEntities();
-    const eggList = entities.map((entity) => {
-      const egg = instanceToPlain(entity);
-      const { parents, ...eggData } = egg;
-      const father = (parents as ParentBaseDto[])?.find(
-        (parent) => parent.role === PARENT_ROLE.FATHER,
-      );
-      const mother = (parents as ParentBaseDto[])?.find(
-        (parent) => parent.role === PARENT_ROLE.MOTHER,
-      );
-      return plainToInstance(EggDto, {
-        ...eggData,
-        father, // TODO: dto 타입 수정을 통해 불필요한 필드 제거하기
-        mother,
-      });
-    });
+    const eggList = await Promise.all(
+      entities.map(async (egg) => {
+        const father = await this.getParent(egg.eggId, PARENT_ROLE.FATHER);
+        const mother = await this.getParent(egg.eggId, PARENT_ROLE.MOTHER);
+
+        return plainToInstance(EggDto, {
+          ...egg,
+          father,
+          mother,
+        });
+      }),
+    );
+
     const eggDtosByDate = eggList.reduce(
       (acc, eggDto) => {
         const layingDate = eggDto.layingDate;
@@ -250,7 +248,7 @@ export class EggService {
   async getEgg(eggId: string): Promise<EggDto | null> {
     const queryBuilder = this.createEggWithOwnerQueryBuilder();
     const eggEntity = await queryBuilder
-      .where('eggs.egg_id = :eggId', { eggId })
+      .where('eggs.eggId = :eggId', { eggId })
       .getOne();
 
     if (!eggEntity) {
@@ -274,7 +272,7 @@ export class EggService {
   async getEggSummary(eggId: string): Promise<EggSummaryDto | null> {
     const queryBuilder = this.createEggWithOwnerQueryBuilder();
     const eggEntity = await queryBuilder
-      .where('eggs.egg_id = :eggId', { eggId })
+      .where('eggs.eggId = :eggId', { eggId })
       .getOne();
 
     if (!eggEntity) {
@@ -330,13 +328,14 @@ export class EggService {
     }
 
     const createPetDto: CreatePetDto = {
-      name: egg.name,
+      name: `${egg.father?.name ?? '@'}x${egg.mother?.name ?? '@'}(${egg.clutch ?? '@'}-${egg.clutchOrder})-${egg.layingDate}`,
       species: egg.species,
       sex: PET_SEX.NON,
       growth: PET_GROWTH.BABY,
     };
 
     const { father, mother } = await this.parentService.findParents(eggId);
+
     if (father) {
       createPetDto.father = {
         parentId: father.parentId,
@@ -364,6 +363,22 @@ export class EggService {
     );
 
     return { petId };
+  }
+
+  async updateLayingDate(
+    userId: string,
+    matingId: number,
+    currentLayingDate: number,
+    newLayingDate: number,
+  ): Promise<void> {
+    await this.eggRepository.update(
+      {
+        ownerId: userId,
+        matingId: matingId,
+        layingDate: currentLayingDate,
+      },
+      { layingDate: newLayingDate },
+    );
   }
 
   private async getParent(
@@ -421,15 +436,15 @@ export class EggService {
         'eggs.owner',
         'users',
         'users',
-        'users.user_id = eggs.owner_id',
+        'users.userId = eggs.ownerId',
       )
-      .where('eggs.is_deleted = :isDeleted', { isDeleted: false })
+      .where('eggs.isDeleted = :isDeleted', { isDeleted: false })
       .select([
         'eggs',
-        'users.user_id',
+        'users.userId',
         'users.name',
         'users.role',
-        'users.is_biz',
+        'users.isBiz',
         'users.status',
       ]);
   }
@@ -441,27 +456,27 @@ export class EggService {
         'eggs.owner',
         'users',
         'users',
-        'users.user_id = eggs.owner_id',
+        'users.userId = eggs.ownerId',
       )
       .leftJoinAndMapMany(
         'eggs.parents',
         'parents',
         'parents',
-        'parents.pet_id = eggs.egg_id',
+        'parents.petId = eggs.eggId',
       )
-      .where('eggs.is_deleted = :isDeleted', { isDeleted: false })
+      .where('eggs.isDeleted = :isDeleted', { isDeleted: false })
       .select([
         'eggs',
         'parents',
-        'users.user_id',
+        'users.userId',
         'users.name',
         'users.role',
-        'users.is_biz',
+        'users.isBiz',
         'users.status',
       ]);
 
     if (userId) {
-      queryBuilder.andWhere('users.user_id = :userId', { userId });
+      queryBuilder.andWhere('users.userId = :userId', { userId });
     }
 
     return queryBuilder;

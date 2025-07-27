@@ -38,9 +38,9 @@ export class ParentService {
   private createParentQueryBuilder(petId: string) {
     return this.parentRepository
       .createQueryBuilder('parent')
-      .select(['parent.id', 'parent.parent_id', 'parent.role', 'parent.status'])
-      .innerJoin('pets', 'pet', 'pet.pet_id = parent.parent_id')
-      .where('parent.pet_id = :petId', { petId })
+      .select(['parent.id', 'parent.parentId', 'parent.role', 'parent.status'])
+      .innerJoin('pets', 'pet', 'pet.petId = parent.parentId')
+      .where('parent.petId = :petId', { petId })
       .andWhere('pet.is_deleted = :isDeleted', { isDeleted: false });
   }
 
@@ -66,7 +66,6 @@ export class ParentService {
     const parentEntities = await this.createParentQueryBuilder(petId)
       .andWhere('parent.status = :status', { status: PARENT_STATUS.APPROVED })
       .getMany();
-
     const fatherEntity = parentEntities.find(
       (parent) => parent.role === PARENT_ROLE.FATHER,
     );
@@ -253,19 +252,19 @@ export class ParentService {
       .createQueryBuilder('parent')
       .select([
         'parent.id',
-        'parent.pet_id',
-        'parent.parent_id',
+        'parent.petId',
+        'parent.parentId',
         'parent.role',
         'parent.status',
       ])
-      .innerJoin('pets', 'pet', 'pet.pet_id = parent.parent_id')
-      .where('parent.pet_id IN (:...petIds)', { petIds })
+      .innerJoin('pets', 'pet', 'pet.petId = parent.parentId')
+      .where('parent.petId IN (:...petIds)', { petIds })
       .andWhere('parent.role = :role', { role })
       .andWhere('parent.status IN (:...statuses)', {
         statuses: ['pending', 'approved'],
       })
-      .andWhere('pet.is_deleted = :isDeleted', { isDeleted: false })
-      .orderBy('parent.created_at', 'DESC')
+      .andWhere('pet.isDeleted = :isDeleted', { isDeleted: false })
+      .orderBy('parent.createdAt', 'DESC')
       .getMany();
   }
 

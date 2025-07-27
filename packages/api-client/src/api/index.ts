@@ -8,11 +8,11 @@
 import type {
   AdoptionControllerGetAllAdoptionsParams,
   BrEggControllerFindAllParams,
+  BrMatingControllerFindAllParams,
   BrPetControllerFindAllParams,
   CreateAdoptionDto,
   CreateEggDto,
   CreateInitUserInfoDto,
-  CreateLayingDto,
   CreateMatingDto,
   CreateParentDto,
   CreatePetDto,
@@ -23,6 +23,8 @@ import type {
   PetControllerGetPetsWithChildrenParams,
   UpdateAdoptionDto,
   UpdateEggDto,
+  UpdateLayingDateDto,
+  UpdateMatingDto,
   UpdateParentDto,
   UpdatePetDto,
   UpdateUserNotificationDto,
@@ -38,6 +40,7 @@ import type {
   AdoptionControllerGetAllAdoptions200,
   AdoptionDto,
   BrEggControllerFindAll200,
+  BrMatingControllerFindAll200,
   BrPetControllerFindAll200,
   CommonResponseDto,
   EggDto,
@@ -222,6 +225,15 @@ export const eggControllerCreate = (createEggDto: CreateEggDto) => {
   });
 };
 
+export const eggControllerUpdateLayingDate = (updateLayingDateDto: UpdateLayingDateDto) => {
+  return useCustomInstance<CommonResponseDto>({
+    url: `http://localhost:4000/api/v1/egg/laying-date`,
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    data: updateLayingDateDto,
+  });
+};
+
 export const eggControllerHatched = (eggId: string) => {
   return useCustomInstance<HatchedResponseDto>({
     url: `http://localhost:4000/api/v1/egg/${eggId}/hatched`,
@@ -351,12 +363,30 @@ export const matingControllerCreateMating = (createMatingDto: CreateMatingDto) =
   });
 };
 
-export const layingControllerCreateLaying = (createLayingDto: CreateLayingDto) => {
+export const matingControllerUpdateMating = (
+  matingId: number,
+  updateMatingDto: UpdateMatingDto,
+) => {
   return useCustomInstance<CommonResponseDto>({
-    url: `http://localhost:4000/api/v1/laying`,
-    method: "POST",
+    url: `http://localhost:4000/api/v1/mating/${matingId}`,
+    method: "PATCH",
     headers: { "Content-Type": "application/json" },
-    data: createLayingDto,
+    data: updateMatingDto,
+  });
+};
+
+export const matingControllerDeleteMating = (matingId: number) => {
+  return useCustomInstance<CommonResponseDto>({
+    url: `http://localhost:4000/api/v1/mating/${matingId}`,
+    method: "DELETE",
+  });
+};
+
+export const brMatingControllerFindAll = (params?: BrMatingControllerFindAllParams) => {
+  return useCustomInstance<BrMatingControllerFindAll200>({
+    url: `http://localhost:4000/api/v1/br/mating`,
+    method: "GET",
+    params,
   });
 };
 
@@ -417,6 +447,9 @@ export type EggControllerDeleteResult = NonNullable<
 export type EggControllerCreateResult = NonNullable<
   Awaited<ReturnType<typeof eggControllerCreate>>
 >;
+export type EggControllerUpdateLayingDateResult = NonNullable<
+  Awaited<ReturnType<typeof eggControllerUpdateLayingDate>>
+>;
 export type EggControllerHatchedResult = NonNullable<
   Awaited<ReturnType<typeof eggControllerHatched>>
 >;
@@ -465,8 +498,14 @@ export type MatingControllerFindAllResult = NonNullable<
 export type MatingControllerCreateMatingResult = NonNullable<
   Awaited<ReturnType<typeof matingControllerCreateMating>>
 >;
-export type LayingControllerCreateLayingResult = NonNullable<
-  Awaited<ReturnType<typeof layingControllerCreateLaying>>
+export type MatingControllerUpdateMatingResult = NonNullable<
+  Awaited<ReturnType<typeof matingControllerUpdateMating>>
+>;
+export type MatingControllerDeleteMatingResult = NonNullable<
+  Awaited<ReturnType<typeof matingControllerDeleteMating>>
+>;
+export type BrMatingControllerFindAllResult = NonNullable<
+  Awaited<ReturnType<typeof brMatingControllerFindAll>>
 >;
 
 export const getPetControllerFindAllResponseMock = (
@@ -1125,6 +1164,10 @@ export const getEggControllerFindOneResponseMock = (
       ] as const),
     },
   },
+  matingId: faker.helpers.arrayElement([
+    faker.number.int({ min: undefined, max: undefined }),
+    undefined,
+  ]),
   species: faker.helpers.arrayElement(["CR", "LE", "FT", "KN", "LC", "GG"] as const),
   layingDate: faker.number.int({ min: undefined, max: undefined }),
   clutch: faker.helpers.arrayElement([
@@ -1132,7 +1175,10 @@ export const getEggControllerFindOneResponseMock = (
     undefined,
   ]),
   clutchOrder: faker.number.int({ min: undefined, max: undefined }),
-  name: faker.string.alpha(20),
+  temperature: faker.helpers.arrayElement([
+    faker.number.int({ min: undefined, max: undefined }),
+    undefined,
+  ]),
   desc: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
   hatchedPetId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
   father: faker.helpers.arrayElement([
@@ -1268,6 +1314,14 @@ export const getEggControllerCreateResponseMock = (
   ...overrideResponse,
 });
 
+export const getEggControllerUpdateLayingDateResponseMock = (
+  overrideResponse: Partial<CommonResponseDto> = {},
+): CommonResponseDto => ({
+  success: faker.datatype.boolean(),
+  message: faker.string.alpha(20),
+  ...overrideResponse,
+});
+
 export const getEggControllerHatchedResponseMock = (
   overrideResponse: Partial<HatchedResponseDto> = {},
 ): HatchedResponseDto => ({
@@ -1298,6 +1352,10 @@ export const getBrEggControllerFindAllResponseMock = (): BrEggControllerFindAll2
         ] as const),
       },
     },
+    matingId: faker.helpers.arrayElement([
+      faker.number.int({ min: undefined, max: undefined }),
+      undefined,
+    ]),
     species: faker.helpers.arrayElement(["CR", "LE", "FT", "KN", "LC", "GG"] as const),
     layingDate: faker.number.int({ min: undefined, max: undefined }),
     clutch: faker.helpers.arrayElement([
@@ -1305,7 +1363,10 @@ export const getBrEggControllerFindAllResponseMock = (): BrEggControllerFindAll2
       undefined,
     ]),
     clutchOrder: faker.number.int({ min: undefined, max: undefined }),
-    name: faker.string.alpha(20),
+    temperature: faker.helpers.arrayElement([
+      faker.number.int({ min: undefined, max: undefined }),
+      undefined,
+    ]),
     desc: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
     hatchedPetId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
     father: faker.helpers.arrayElement([
@@ -1961,17 +2022,17 @@ export const getMatingControllerFindAllResponseMock = (): MatingByParentsDto[] =
             { length: faker.number.int({ min: 1, max: 10 }) },
             (_, i) => i + 1,
           ).map(() => ({
-            id: faker.number.int({ min: undefined, max: undefined }),
-            layingOrder: faker.number.int({ min: undefined, max: undefined }),
-            eggType: faker.helpers.arrayElement([
-              faker.helpers.arrayElement(["FR", "UN"] as const),
+            eggId: faker.string.alpha(20),
+            clutch: faker.helpers.arrayElement([
+              faker.number.int({ min: undefined, max: undefined }),
               undefined,
             ]),
-            eggId: faker.string.alpha(20),
+            clutchOrder: faker.number.int({ min: undefined, max: undefined }),
             temperature: faker.helpers.arrayElement([
               faker.number.int({ min: undefined, max: undefined }),
               undefined,
             ]),
+            hatchedPetId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
           })),
         })),
         undefined,
@@ -1987,11 +2048,154 @@ export const getMatingControllerCreateMatingResponseMock = (
   ...overrideResponse,
 });
 
-export const getLayingControllerCreateLayingResponseMock = (
+export const getMatingControllerUpdateMatingResponseMock = (
   overrideResponse: Partial<CommonResponseDto> = {},
 ): CommonResponseDto => ({
   success: faker.datatype.boolean(),
   message: faker.string.alpha(20),
+  ...overrideResponse,
+});
+
+export const getMatingControllerDeleteMatingResponseMock = (
+  overrideResponse: Partial<CommonResponseDto> = {},
+): CommonResponseDto => ({
+  success: faker.datatype.boolean(),
+  message: faker.string.alpha(20),
+  ...overrideResponse,
+});
+
+export const getBrMatingControllerFindAllResponseMock = (
+  overrideResponse: Partial<BrMatingControllerFindAll200> = {},
+): BrMatingControllerFindAll200 => ({
+  data: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+    father: faker.helpers.arrayElement([
+      {
+        ...{
+          petId: faker.string.alpha(20),
+          owner: {
+            ...{
+              userId: faker.string.alpha(20),
+              name: faker.string.alpha(20),
+              role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
+              isBiz: faker.datatype.boolean(),
+              status: faker.helpers.arrayElement([
+                "pending",
+                "active",
+                "inactive",
+                "suspended",
+                "deleted",
+              ] as const),
+            },
+          },
+          name: faker.string.alpha(20),
+          species: faker.helpers.arrayElement(["CR", "LE", "FT", "KN", "LC", "GG"] as const),
+          morphs: faker.helpers.arrayElement([
+            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
+            undefined,
+          ]),
+          traits: faker.helpers.arrayElement([
+            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
+            undefined,
+          ]),
+          birthdate: faker.helpers.arrayElement([
+            faker.number.int({ min: undefined, max: undefined }),
+            undefined,
+          ]),
+          sex: faker.helpers.arrayElement([
+            faker.helpers.arrayElement(["M", "F", "N"] as const),
+            undefined,
+          ]),
+        },
+      },
+      undefined,
+    ]),
+    mother: faker.helpers.arrayElement([
+      {
+        ...{
+          petId: faker.string.alpha(20),
+          owner: {
+            ...{
+              userId: faker.string.alpha(20),
+              name: faker.string.alpha(20),
+              role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
+              isBiz: faker.datatype.boolean(),
+              status: faker.helpers.arrayElement([
+                "pending",
+                "active",
+                "inactive",
+                "suspended",
+                "deleted",
+              ] as const),
+            },
+          },
+          name: faker.string.alpha(20),
+          species: faker.helpers.arrayElement(["CR", "LE", "FT", "KN", "LC", "GG"] as const),
+          morphs: faker.helpers.arrayElement([
+            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
+            undefined,
+          ]),
+          traits: faker.helpers.arrayElement([
+            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
+            undefined,
+          ]),
+          birthdate: faker.helpers.arrayElement([
+            faker.number.int({ min: undefined, max: undefined }),
+            undefined,
+          ]),
+          sex: faker.helpers.arrayElement([
+            faker.helpers.arrayElement(["M", "F", "N"] as const),
+            undefined,
+          ]),
+        },
+      },
+      undefined,
+    ]),
+    matingsByDate: Array.from(
+      { length: faker.number.int({ min: 1, max: 10 }) },
+      (_, i) => i + 1,
+    ).map(() => ({
+      id: faker.number.int({ min: undefined, max: undefined }),
+      matingDate: faker.number.int({ min: undefined, max: undefined }),
+      layingsByDate: faker.helpers.arrayElement([
+        Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+          layingDate: faker.number.int({ min: undefined, max: undefined }),
+          layings: Array.from(
+            { length: faker.number.int({ min: 1, max: 10 }) },
+            (_, i) => i + 1,
+          ).map(() => ({
+            eggId: faker.string.alpha(20),
+            clutch: faker.helpers.arrayElement([
+              faker.number.int({ min: undefined, max: undefined }),
+              undefined,
+            ]),
+            clutchOrder: faker.number.int({ min: undefined, max: undefined }),
+            temperature: faker.helpers.arrayElement([
+              faker.number.int({ min: undefined, max: undefined }),
+              undefined,
+            ]),
+            hatchedPetId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+          })),
+        })),
+        undefined,
+      ]),
+    })),
+  })),
+  meta: {
+    page: faker.number.int({ min: undefined, max: undefined }),
+    itemPerPage: faker.number.int({ min: undefined, max: undefined }),
+    totalCount: faker.number.int({ min: undefined, max: undefined }),
+    totalPage: faker.number.int({ min: undefined, max: undefined }),
+    hasPreviousPage: faker.datatype.boolean(),
+    hasNextPage: faker.datatype.boolean(),
+  },
   ...overrideResponse,
 });
 
@@ -2417,6 +2621,29 @@ export const getEggControllerCreateMockHandler = (
   });
 };
 
+export const getEggControllerUpdateLayingDateMockHandler = (
+  overrideResponse?:
+    | CommonResponseDto
+    | ((
+        info: Parameters<Parameters<typeof http.patch>[1]>[0],
+      ) => Promise<CommonResponseDto> | CommonResponseDto),
+) => {
+  return http.patch("*/api/v1/egg/laying-date", async (info) => {
+    await delay(1000);
+
+    return new HttpResponse(
+      JSON.stringify(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getEggControllerUpdateLayingDateResponseMock(),
+      ),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+  });
+};
+
 export const getEggControllerHatchedMockHandler = (
   overrideResponse?:
     | HatchedResponseDto
@@ -2747,14 +2974,14 @@ export const getMatingControllerCreateMatingMockHandler = (
   });
 };
 
-export const getLayingControllerCreateLayingMockHandler = (
+export const getMatingControllerUpdateMatingMockHandler = (
   overrideResponse?:
     | CommonResponseDto
     | ((
-        info: Parameters<Parameters<typeof http.post>[1]>[0],
+        info: Parameters<Parameters<typeof http.patch>[1]>[0],
       ) => Promise<CommonResponseDto> | CommonResponseDto),
 ) => {
-  return http.post("*/api/v1/laying", async (info) => {
+  return http.patch("*/api/v1/mating/:matingId", async (info) => {
     await delay(1000);
 
     return new HttpResponse(
@@ -2763,7 +2990,53 @@ export const getLayingControllerCreateLayingMockHandler = (
           ? typeof overrideResponse === "function"
             ? await overrideResponse(info)
             : overrideResponse
-          : getLayingControllerCreateLayingResponseMock(),
+          : getMatingControllerUpdateMatingResponseMock(),
+      ),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+  });
+};
+
+export const getMatingControllerDeleteMatingMockHandler = (
+  overrideResponse?:
+    | CommonResponseDto
+    | ((
+        info: Parameters<Parameters<typeof http.delete>[1]>[0],
+      ) => Promise<CommonResponseDto> | CommonResponseDto),
+) => {
+  return http.delete("*/api/v1/mating/:matingId", async (info) => {
+    await delay(1000);
+
+    return new HttpResponse(
+      JSON.stringify(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getMatingControllerDeleteMatingResponseMock(),
+      ),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+  });
+};
+
+export const getBrMatingControllerFindAllMockHandler = (
+  overrideResponse?:
+    | BrMatingControllerFindAll200
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<BrMatingControllerFindAll200> | BrMatingControllerFindAll200),
+) => {
+  return http.get("*/api/v1/br/mating", async (info) => {
+    await delay(1000);
+
+    return new HttpResponse(
+      JSON.stringify(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getBrMatingControllerFindAllResponseMock(),
       ),
       { status: 200, headers: { "Content-Type": "application/json" } },
     );
@@ -2789,6 +3062,7 @@ export const getProjectDaepaAPIMock = () => [
   getEggControllerUpdateMockHandler(),
   getEggControllerDeleteMockHandler(),
   getEggControllerCreateMockHandler(),
+  getEggControllerUpdateLayingDateMockHandler(),
   getEggControllerHatchedMockHandler(),
   getBrEggControllerFindAllMockHandler(),
   getAuthControllerKakaoLoginMockHandler(),
@@ -2805,5 +3079,7 @@ export const getProjectDaepaAPIMock = () => [
   getAdoptionControllerUpdateMockHandler(),
   getMatingControllerFindAllMockHandler(),
   getMatingControllerCreateMatingMockHandler(),
-  getLayingControllerCreateLayingMockHandler(),
+  getMatingControllerUpdateMatingMockHandler(),
+  getMatingControllerDeleteMatingMockHandler(),
+  getBrMatingControllerFindAllMockHandler(),
 ];

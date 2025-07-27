@@ -11,6 +11,7 @@ import PedigreeSection from "./components/PedigreeSection";
 import BreedingInfoSection from "./components/BreedingInfoSection";
 import CardBackActions from "./components/CardBackActions";
 import { useQueryClient } from "@tanstack/react-query";
+import { useUserStore } from "@/app/(브리더스룸)/store/user";
 
 interface CardBackProps {
   pet: PetDto;
@@ -21,6 +22,8 @@ interface CardBackProps {
 const CardBack = memo(({ pet, from, isWideScreen }: CardBackProps) => {
   const queryClient = useQueryClient();
   const { formData, setFormData, setPage } = usePetStore();
+  const { user } = useUserStore();
+  const isMyPet = user?.userId === pet.owner.userId;
 
   const [isEditing, setIsEditing] = useState(from === "egg");
   const [isTooltipOpen, setIsTooltipOpen] = useState(false);
@@ -86,29 +89,33 @@ const CardBack = memo(({ pet, from, isWideScreen }: CardBackProps) => {
     <div className="relative h-full w-full">
       <div className="h-full">
         <div className="px-6 pb-20">
-          <div className="flex items-center justify-between">
-            <PetVisibilityControl petId={pet.petId} isPublic={pet.isPublic} />
+          {isMyPet && (
+            <div className="flex items-center justify-between">
+              <PetVisibilityControl petId={pet.petId} isPublic={pet.isPublic} />
 
-            {isNotSold && <AdoptionStatusControl pet={pet} />}
-          </div>
+              {isNotSold && <AdoptionStatusControl pet={pet} />}
+            </div>
+          )}
 
-          {!isWideScreen && pet.adoption && <AdoptionReceipt adoption={pet.adoption} />}
+          {!isWideScreen && pet.adoption && isMyPet && <AdoptionReceipt adoption={pet.adoption} />}
 
           {/* 혈통 정보 */}
-          <PedigreeSection petId={pet.petId} />
+          <PedigreeSection petId={pet.petId} isMyPet={isMyPet} />
 
           {/* 사육 정보 */}
           <BreedingInfoSection isEditing={isEditing} isTooltipOpen={isTooltipOpen} />
         </div>
 
         {/* 하단 고정 버튼 영역 */}
-        <CardBackActions
-          petId={pet.petId}
-          isEditing={isEditing}
-          onEditToggle={handleEditToggle}
-          onSave={handleSave}
-          onCancel={handleCancel}
-        />
+        {isMyPet && (
+          <CardBackActions
+            petId={pet.petId}
+            isEditing={isEditing}
+            onEditToggle={handleEditToggle}
+            onSave={handleSave}
+            onCancel={handleCancel}
+          />
+        )}
       </div>
     </div>
   );

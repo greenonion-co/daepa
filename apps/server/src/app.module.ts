@@ -40,9 +40,7 @@ import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import { MatingController } from './mating/mating.controller';
 import { MatingService } from './mating/mating.service';
 import { MatingEntity } from './mating/mating.entity';
-import { LayingEntity } from './laying/laying.entity';
-import { LayingController } from './laying/laying.controller';
-import { LayingService } from './laying/laying.service';
+import { BrMatingController } from './mating/br/br.mating.controller';
 
 const ENTITIES = [
   UserEntity,
@@ -53,7 +51,6 @@ const ENTITIES = [
   EggEntity,
   AdoptionEntity,
   MatingEntity,
-  LayingEntity,
 ];
 
 @Module({
@@ -80,6 +77,7 @@ const ENTITIES = [
       secret: process.env.JWT_SECRET ?? '',
       signOptions: { expiresIn: '1h' },
     }),
+    TypeOrmModule.forFeature(ENTITIES),
   ],
   controllers: [
     AppController,
@@ -93,7 +91,7 @@ const ENTITIES = [
     UserController,
     AdoptionController,
     MatingController,
-    LayingController,
+    BrMatingController,
   ],
   providers: [
     AppService,
@@ -110,7 +108,6 @@ const ENTITIES = [
     JwtStrategy,
     AdoptionService,
     MatingService,
-    LayingService,
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,

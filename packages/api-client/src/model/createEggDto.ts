@@ -23,4 +23,8 @@ export interface CreateEggDto {
   father?: CreateParentDto;
   /** 엄마 개체 정보 */
   mother?: CreateParentDto;
+  /** 메이팅 아이디 */
+  matingId?: number;
+  /** 해칭 온도 */
+  temperature?: number;
 }

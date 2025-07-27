@@ -140,13 +140,16 @@ export class PetService {
     searchDto: PetFilterDto,
     userId: string,
   ): Promise<PageDto<PetDto>> {
-    const queryBuilder = this.createPetWithOwnerQueryBuilder(userId);
+    const queryBuilder = this.createPetWithOwnerQueryBuilder(
+      userId,
+      searchDto.includeOthers,
+    );
 
     // adoption 테이블을 LEFT JOIN으로 연결
     queryBuilder.leftJoin(
       'adoptions',
       'adoption',
-      'adoption.pet_id = pets.pet_id AND adoption.is_deleted = :isDeleted',
+      'adoption.petId = pets.petId AND adoption.isDeleted = :isDeleted',
       { isDeleted: false },
     );
 
@@ -442,19 +445,19 @@ export class PetService {
         'pets.owner',
         'users',
         'users',
-        'users.user_id = pets.owner_id',
+        'users.userId = pets.ownerId',
       )
-      .innerJoin('parents', 'parents', 'parents.parent_id = pets.pet_id')
-      .where('pets.is_deleted = :isDeleted', { isDeleted: false })
+      .innerJoin('parents', 'parents', 'parents.parentId = pets.petId')
+      .where('pets.isDeleted = :isDeleted', { isDeleted: false })
       .andWhere('parents.status = :status', { status: 'approved' })
       .groupBy('pets.id')
-      .addGroupBy('users.user_id')
+      .addGroupBy('users.userId')
       .select([
         'pets',
-        'users.user_id',
+        'users.userId',
         'users.name',
         'users.role',
-        'users.is_biz',
+        'users.isBiz',
         'users.status',
       ])
       .orderBy('pets.id', pageOptionsDto.order)
@@ -508,19 +511,19 @@ export class PetService {
         'pets.owner',
         'users',
         'users',
-        'users.user_id = pets.owner_id',
+        'users.userId = pets.ownerId',
       )
       // parents 테이블에서 현재 펫이 부모인 자식들을 찾음
-      .leftJoin('parents', 'parents', 'parents.pet_id = pets.pet_id')
-      .where('parents.parent_id = :parentId', { parentId })
+      .leftJoin('parents', 'parents', 'parents.petId = pets.petId')
+      .where('parents.parentId = :parentId', { parentId })
       .andWhere('parents.status = :status', { status: 'approved' })
-      .andWhere('pets.is_deleted = :isDeleted', { isDeleted: false })
+      .andWhere('pets.isDeleted = :isDeleted', { isDeleted: false })
       .select([
         'pets',
-        'users.user_id',
+        'users.userId',
         'users.name',
         'users.role',
-        'users.is_biz',
+        'users.isBiz',
         'users.status',
       ]);
 
@@ -530,27 +533,32 @@ export class PetService {
     );
   }
 
-  private createPetWithOwnerQueryBuilder(userId?: string) {
+  private createPetWithOwnerQueryBuilder(
+    userId?: string,
+    includeOthers?: boolean,
+  ) {
     const queryBuilder = this.petRepository
       .createQueryBuilder('pets')
       .leftJoinAndMapOne(
         'pets.owner',
         'users',
         'users',
-        'users.user_id = pets.owner_id',
+        'users.userId = pets.ownerId',
       )
-      .where('pets.is_deleted = :isDeleted', { isDeleted: false })
+      .where('pets.isDeleted = :isDeleted', { isDeleted: false })
       .select([
         'pets',
-        'users.user_id',
+        'users.userId',
         'users.name',
         'users.role',
-        'users.is_biz',
+        'users.isBiz',
         'users.status',
       ]);
 
     if (userId) {
-      queryBuilder.andWhere('users.user_id = :userId', { userId });
+      if (!includeOthers) {
+        queryBuilder.andWhere('pets.ownerId = :userId', { userId });
+      }
     }
 
     return queryBuilder;
@@ -559,8 +567,8 @@ export class PetService {
   async getPetOwnerId(petId: string): Promise<string | null> {
     const result = await this.petRepository
       .createQueryBuilder('pets')
-      .select('pets.owner_id')
-      .where('pets.pet_id = :petId', { petId })
+      .select('pets.ownerId')
+      .where('pets.petId = :petId', { petId })
       .getOne();
 
     return result?.ownerId || null;
@@ -600,8 +608,8 @@ export class PetService {
 
     return await this.adoptionRepository
       .createQueryBuilder('adoption')
-      .where('adoption.pet_id IN (:...petIds)', { petIds })
-      .andWhere('adoption.is_deleted = :isDeleted', { isDeleted: false })
+      .where('adoption.petId IN (:...petIds)', { petIds })
+      .andWhere('adoption.isDeleted = :isDeleted', { isDeleted: false })
       .getMany();
   }
 

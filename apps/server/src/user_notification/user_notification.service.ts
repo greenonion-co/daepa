@@ -42,14 +42,14 @@ export class UserNotificationService {
     userId: string,
   ): Promise<PageDto<UserNotificationEntity>> {
     const queryBuilder =
-      this.userNotificationRepository.createQueryBuilder('user_notification');
+      this.userNotificationRepository.createQueryBuilder('userNotification');
 
     queryBuilder
-      .where('user_notification.receiver_id = :userId', { userId })
-      .andWhere('user_notification.is_deleted = :isDeleted', {
+      .where('userNotification.receiverId = :userId', { userId })
+      .andWhere('userNotification.isDeleted = :isDeleted', {
         isDeleted: false,
       })
-      .orderBy('user_notification.created_at', dto.order)
+      .orderBy('userNotification.createdAt', dto.order)
       .skip(dto.skip)
       .take(dto.itemPerPage);
 

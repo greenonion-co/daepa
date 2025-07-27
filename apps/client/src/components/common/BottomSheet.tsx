@@ -42,10 +42,10 @@ export default function BottomSheet({
 
   return (
     <>
-      <div className="fixed inset-0 z-40 bg-black/10" onClick={onClose} />
+      <div className="fixed inset-0 z-[60] bg-black/10" onClick={onClose} />
       <div
         ref={sheetRef}
-        className={`fixed bottom-4 z-50 transition-all duration-300 ${
+        className={`fixed bottom-4 z-[70] transition-all duration-300 ${
           fullWidth
             ? state === "expanded" && !isMobile
               ? "left-[280px] right-4 w-[calc(100%-300px)]"

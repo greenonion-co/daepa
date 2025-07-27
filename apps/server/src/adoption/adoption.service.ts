@@ -180,23 +180,23 @@ export class AdoptionService {
         'adoptions.pet',
         'pets',
         'pets',
-        'pets.pet_id = adoptions.pet_id',
+        'pets.petId = adoptions.petId',
       )
       .leftJoinAndMapOne(
         'adoptions.seller',
         'users',
         'seller',
-        'seller.user_id = adoptions.seller_id',
+        'seller.userId = adoptions.sellerId',
       )
       .leftJoinAndMapOne(
         'adoptions.buyer',
         'users',
         'buyer',
-        'buyer.user_id = adoptions.buyer_id',
+        'buyer.userId = adoptions.buyerId',
       )
-      .where('adoptions.is_deleted = :isDeleted', { isDeleted: false })
-      .andWhere('adoptions.seller_id = :userId', { userId })
-      .orderBy('adoptions.created_at', pageOptionsDto.order)
+      .where('adoptions.isDeleted = :isDeleted', { isDeleted: false })
+      .andWhere('adoptions.sellerId = :userId', { userId })
+      .orderBy('adoptions.createdAt', pageOptionsDto.order)
       .skip(pageOptionsDto.skip)
       .take(pageOptionsDto.itemPerPage);
 
@@ -221,21 +221,21 @@ export class AdoptionService {
         'adoptions.pet',
         'pets',
         'pets',
-        'pets.pet_id = adoptions.pet_id',
+        'pets.petId = adoptions.petId',
       )
       .leftJoinAndMapOne(
         'adoptions.seller',
         'users',
         'seller',
-        'seller.user_id = adoptions.seller_id',
+        'seller.userId = adoptions.sellerId',
       )
       .leftJoinAndMapOne(
         'adoptions.buyer',
         'users',
         'buyer',
-        'buyer.user_id = adoptions.buyer_id',
+        'buyer.userId = adoptions.buyerId',
       )
-      .where('adoptions.is_deleted = :isDeleted', { isDeleted: false });
+      .where('adoptions.isDeleted = :isDeleted', { isDeleted: false });
 
     // where 조건 추가
     Object.keys(where).forEach((key) => {

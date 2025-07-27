@@ -1,12 +1,7 @@
-import { ApiProperty, OmitType, PartialType, PickType } from '@nestjs/swagger';
+import { ApiProperty, PartialType, PickType } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
-import {
-  IsEnum,
-  IsNumber,
-  IsObject,
-  IsOptional,
-  IsString,
-} from 'class-validator';
+import { IsEnum, IsNumber, IsObject, IsString } from 'class-validator';
+import { IsOptionalExcludeNil } from 'src/common/decorators/exclude-nil.decorator';
 import { CommonResponseDto } from 'src/common/response.dto';
 import { CreateParentDto } from 'src/parent/parent.dto';
 import { PET_SPECIES } from 'src/pet/pet.constants';
@@ -26,6 +21,15 @@ export class EggBaseDto {
   })
   @IsObject()
   owner: UserProfilePublicDto;
+
+  @ApiProperty({
+    description: '메이팅 아이디',
+    example: 1,
+    required: false,
+  })
+  @IsOptionalExcludeNil()
+  @IsNumber()
+  matingId?: number;
 
   @ApiProperty({
     description: '알 종',
@@ -49,7 +53,7 @@ export class EggBaseDto {
     example: 1,
     required: false,
   })
-  @IsOptional()
+  @IsOptionalExcludeNil()
   @IsNumber()
   clutch?: number;
 
@@ -61,17 +65,19 @@ export class EggBaseDto {
   clutchOrder: number;
 
   @ApiProperty({
-    description: '알 이름',
-    example: '대파아빠x대파엄마(1-1)',
+    description: '알 보관 온도',
+    example: 25,
+    required: false,
   })
-  @IsString()
-  name: string;
+  @IsOptionalExcludeNil()
+  @IsNumber()
+  temperature?: number;
 
   @ApiProperty({
     description: '알 정보',
     required: false,
   })
-  @IsOptional()
+  @IsOptionalExcludeNil()
   @IsString()
   desc?: string;
 
@@ -80,7 +86,7 @@ export class EggBaseDto {
     example: 'XXXXXXXX',
     required: false,
   })
-  @IsOptional()
+  @IsOptionalExcludeNil()
   @IsString()
   hatchedPetId?: string;
 }
@@ -88,7 +94,6 @@ export class EggBaseDto {
 export class EggSummaryDto extends PickType(EggBaseDto, [
   'eggId',
   'species',
-  'name',
   'owner',
   'layingDate',
   'clutch',
@@ -113,7 +118,7 @@ export class EggDto extends EggBaseDto {
     example: {},
     required: false,
   })
-  @IsOptional()
+  @IsOptionalExcludeNil()
   @IsObject()
   father?: PetParentDto;
 
@@ -122,7 +127,7 @@ export class EggDto extends EggBaseDto {
     example: {},
     required: false,
   })
-  @IsOptional()
+  @IsOptionalExcludeNil()
   @IsObject()
   mother?: PetParentDto;
 
@@ -136,21 +141,40 @@ export class EggDto extends EggBaseDto {
   declare isDeleted?: boolean;
 }
 
-export class CreateEggDto extends OmitType(EggBaseDto, [
-  'eggId',
-  'name',
-  'owner',
-  'clutchOrder',
-  'hatchedPetId',
-] as const) {
-  @Exclude()
-  declare eggId: string;
+export class CreateEggDto {
+  @ApiProperty({
+    description: '알 종',
+    example: '크레스티드게코',
+    enum: PET_SPECIES,
+    'x-enumNames': Object.keys(PET_SPECIES),
+  })
+  @IsString()
+  @IsEnum(PET_SPECIES)
+  species: PET_SPECIES;
 
-  @Exclude()
-  declare clutchOrder: number;
+  @ApiProperty({
+    description: '산란일(yyyyMMdd)',
+    example: 20250101,
+  })
+  @IsNumber()
+  layingDate: number;
 
-  @Exclude()
-  declare hatchedPetId?: string;
+  @ApiProperty({
+    description: '차수(클러치)',
+    example: 1,
+    required: false,
+  })
+  @IsOptionalExcludeNil()
+  @IsNumber()
+  clutch?: number;
+
+  @ApiProperty({
+    description: '알 정보',
+    required: false,
+  })
+  @IsOptionalExcludeNil()
+  @IsString()
+  desc?: string;
 
   @ApiProperty({
     description: '해당 클러치 알 개수',
@@ -162,7 +186,7 @@ export class CreateEggDto extends OmitType(EggBaseDto, [
     description: '아빠 개체 정보',
     required: false,
   })
-  @IsOptional()
+  @IsOptionalExcludeNil()
   @IsObject()
   father?: CreateParentDto;
 
@@ -170,9 +194,27 @@ export class CreateEggDto extends OmitType(EggBaseDto, [
     description: '엄마 개체 정보',
     required: false,
   })
-  @IsOptional()
+  @IsOptionalExcludeNil()
   @IsObject()
   mother?: CreateParentDto;
+
+  @ApiProperty({
+    description: '메이팅 아이디',
+    example: 1,
+    required: false,
+  })
+  @IsOptionalExcludeNil()
+  @IsNumber()
+  matingId?: number;
+
+  @ApiProperty({
+    description: '해칭 온도',
+    example: 25,
+    required: false,
+  })
+  @IsOptionalExcludeNil()
+  @IsNumber()
+  temperature?: number;
 }
 
 export class UpdateEggDto extends PartialType(
@@ -181,13 +223,14 @@ export class UpdateEggDto extends PartialType(
     'clutch',
     'clutchOrder',
     'desc',
+    'temperature',
   ] as const),
 ) {
   @ApiProperty({
     description: '아빠 개체 정보',
     required: false,
   })
-  @IsOptional()
+  @IsOptionalExcludeNil()
   @IsObject()
   father?: CreateParentDto;
 
@@ -195,7 +238,7 @@ export class UpdateEggDto extends PartialType(
     description: '엄마 개체 정보',
     required: false,
   })
-  @IsOptional()
+  @IsOptionalExcludeNil()
   @IsObject()
   mother?: CreateParentDto;
 }
@@ -207,4 +250,35 @@ export class HatchedResponseDto extends CommonResponseDto {
   })
   @IsString()
   hatchedPetId: string;
+}
+
+export class LayingDto extends PickType(EggBaseDto, [
+  'eggId',
+  'clutchOrder',
+  'clutch',
+  'temperature',
+  'hatchedPetId',
+]) {}
+
+export class UpdateLayingDateDto {
+  @ApiProperty({
+    description: '메이팅 ID',
+    example: 1,
+  })
+  @IsNumber()
+  matingId: number;
+
+  @ApiProperty({
+    description: '기존 산란일(yyyyMMdd)',
+    example: 20250101,
+  })
+  @IsNumber()
+  currentLayingDate: number;
+
+  @ApiProperty({
+    description: '새로운 산란일(yyyyMMdd)',
+    example: 20250102,
+  })
+  @IsNumber()
+  newLayingDate: number;
 }

@@ -36,6 +36,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { DateRange } from "react-day-picker";
+import MatingList from "./components/MatingList";
 
 const HatchingPage = () => {
   const [month, setMonth] = useState<Date>(new Date());
@@ -134,6 +135,7 @@ const HatchingPage = () => {
 
   return (
     <div className="flex flex-col gap-4">
+      <MatingList />
       <div className="flex gap-4">
         <Calendar
           mode="range"

@@ -37,11 +37,9 @@ export class ParentEntity {
   })
   status: PARENT_STATUS;
 
-  @Column()
   @CreateDateColumn()
   createdAt: Date;
 
-  @Column()
   @UpdateDateColumn()
   updatedAt: Date;
 }

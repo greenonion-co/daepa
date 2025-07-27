@@ -44,7 +44,7 @@ export function PetWithChildrenCard({ pet }: PetWithChildrenCardProps) {
             <div className="flex flex-col gap-2">
               <CardTitle className="flex items-center gap-2">
                 {pet.parent.name}
-                <div className="text-sm font-light text-gray-500">| {pet.parent.owner.name}</div>
+                <div className="text-sm font-light text-gray-500">| {pet.parent.owner?.name}</div>
               </CardTitle>
               <div className="flex items-center gap-2">
                 <Badge variant="outline">
