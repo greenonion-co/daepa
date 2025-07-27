@@ -10,7 +10,15 @@ import { USER_STATUS } from 'src/user/user.constant';
 import * as bcrypt from 'bcrypt';
 import { JwtPayload } from './strategies/jwt.strategy';
 import { OauthService } from './oauth/oauth.service';
-import { Not } from 'typeorm';
+import { Not, Repository } from 'typeorm';
+import { OauthEntity } from './oauth/oauth.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { UserEntity } from 'src/user/user.entity';
+import { plainToInstance } from 'class-transformer';
+import { OauthDto } from './oauth/oauth.dto';
+import { UserDto } from 'src/user/user.dto';
+import { DataSource, EntityManager } from 'typeorm';
+import { OAUTH_PROVIDER } from './auth.constants';
 
 export type ValidatedUser = {
   userId: string;
@@ -20,79 +28,92 @@ export type ValidatedUser = {
 @Injectable()
 export class AuthService {
   constructor(
+    @InjectRepository(OauthEntity)
+    private readonly oauthRepository: Repository<OauthEntity>,
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
     private readonly oauthService: OauthService,
+    private readonly dataSource: DataSource,
   ) {}
 
   async validateUser(providerInfo: ProviderInfo): Promise<ValidatedUser> {
-    const { email, provider, providerId } = providerInfo;
-
-    const oauthFound = await this.oauthService.findOne({
-      email,
-      provider,
-      providerId,
-    });
-    // 기존 사용자 로그인
+    // 기존 OAuth 계정 확인
+    const oauthFound = await this.getOAuthWithUserByProviderInfo(providerInfo);
     if (oauthFound) {
-      const userFound = await this.userService.findOne({
-        email,
-        status: Not(USER_STATUS.DELETED),
-      });
-
-      if (userFound) {
-        return {
-          userId: userFound.userId,
-          userStatus: userFound.status,
-        };
-      } else {
+      const { user } = oauthFound;
+      if (!user) {
         throw new BadRequestException(
-          'SNS 계정 정보와 사용자 정보가 일치하지 않습니다. 관리자에게 문의해주세요.',
+          'SNS 계정으로 사용자 정보를 불러오는데 실패했습니다. 관리자에게 문의해주세요.',
         );
       }
-    }
 
-    // 새로운 OAuth 가입
-    let newOAuthUser: {
-      userId: string;
-      status: USER_STATUS;
-    };
-    const userFoundBySameEmail = await this.userService.findOne({
-      email,
-      status: Not(USER_STATUS.DELETED),
-    });
-    if (userFoundBySameEmail) {
-      // 기존 동일한 이메일을 사용하는 유저가 있는 경우, 해당 유저에 OAuth 추가 연결
-      newOAuthUser = {
-        userId: userFoundBySameEmail.userId,
-        status: userFoundBySameEmail.status,
-      };
-    } else {
-      // 최초 가입
-      const newUserCreated = await this.userService.createUser(
-        providerInfo,
-        USER_STATUS.PENDING,
-      );
-      newOAuthUser = {
-        userId: newUserCreated.userId,
-        status: newUserCreated.status,
+      // 구글 로그인 시 refreshToken 업데이트
+      if (providerInfo.provider === OAUTH_PROVIDER.GOOGLE) {
+        await this.oauthRepository.update(
+          {
+            email: providerInfo.email,
+            provider: providerInfo.provider,
+            providerId: providerInfo.providerId,
+          },
+          {
+            refreshToken: providerInfo.refreshToken,
+          },
+        );
+      }
+
+      // 기존 사용자 로그인
+      return {
+        userId: user.userId,
+        userStatus: user.status,
       };
     }
 
-    // OAuth 정보 생성 (공통 로직)
-    await this.oauthService.createOauthInfo({
-      email,
-      provider,
-      providerId,
-      userId: newOAuthUser.userId,
+    // 새로운 OAuth 가입 - 트랜잭션 내에서 처리
+    return this.dataSource.transaction(async (entityManager: EntityManager) => {
+      let newOAuthUser: {
+        userId: string;
+        status: USER_STATUS;
+      };
+
+      // 동일한 이메일을 사용하는 기존 사용자 확인
+      const userFoundBySameEmail = await entityManager.findOne(UserEntity, {
+        where: {
+          email: providerInfo.email,
+          status: Not(USER_STATUS.DELETED),
+        },
+      });
+
+      if (userFoundBySameEmail) {
+        // 기존 동일한 이메일을 사용하는 유저가 있는 경우, 해당 유저에 OAuth 추가 연결
+        newOAuthUser = {
+          userId: userFoundBySameEmail.userId,
+          status: userFoundBySameEmail.status,
+        };
+      } else {
+        // 해당 이메일 최초 가입
+        const newUserCreated =
+          await this.userService.createUserWithEntityManager(
+            entityManager,
+            providerInfo,
+            USER_STATUS.PENDING,
+          );
+        newOAuthUser = {
+          userId: newUserCreated.userId,
+          status: newUserCreated.status,
+        };
+      }
+
+      // OAuth 정보 생성
+      await this.oauthService.createOauthInfoWithEntityManager(entityManager, {
+        ...providerInfo,
+        userId: newOAuthUser.userId,
+      });
+
+      return {
+        userId: newOAuthUser.userId,
+        userStatus: newOAuthUser.status,
+      };
     });
-
-    // TODO: 둘 중 하나라도 실패하는 경우 회원가입 안되도록 롤백 처리 필요
-
-    return {
-      userId: newOAuthUser.userId,
-      userStatus: newOAuthUser.status,
-    };
   }
 
   createJwtAccessToken(userId: string) {
@@ -229,36 +250,98 @@ export class AuthService {
   }
 
   async deleteUser(userId: string): Promise<void> {
-    const user = await this.userService.findOne({ userId });
+    const { user, oauths } =
+      await this.userService.getUserWithOauthsEntity(userId);
+
     if (!user) {
       throw new BadRequestException('사용자를 찾을 수 없습니다.');
     }
     if (user.status === USER_STATUS.DELETED) {
       throw new BadRequestException('이미 탈퇴된 회원입니다.');
     }
+    if (oauths.length === 0) {
+      throw new BadRequestException('OAuth 정보를 찾을 수 없습니다.');
+    }
 
-    // if (user.provider === OAUTH_PROVIDER.KAKAO) {
-    //   const { id: disconnectedId } = await this.oauthService.disconnectKakao(
-    //     user.providerId ?? '',
-    //   );
-    //   if (user.providerId === disconnectedId.toString()) {
-    //     await this.softDeleteUser(userId);
-    //   }
-    // }
+    for (const oauth of oauths) {
+      // if (oauth.provider === OAUTH_PROVIDER.KAKAO) {
+      //   const { id: disconnectedId } = await this.oauthService.disconnectKakao(
+      //     oauth.providerId ?? '',
+      //   );
+      //   if (oauth.providerId === disconnectedId.toString()) {
+      //     await this.softDeleteUser({
+      //       userId,
+      //       name: user.name,
+      //       email: user.email,
+      //     });
+      //   }
+      // }
+      if (oauth.provider === OAUTH_PROVIDER.GOOGLE) {
+        await this.oauthService.disconnectGoogle(userId);
+      }
+    }
 
-    await this.softDeleteUser(userId, user.email);
-    // TODO: user.email에 해당되는 정보 oauth 테이블에서 처리하기
+    await this.softDeleteUser({
+      userId,
+      name: user.name,
+      email: user.email,
+    });
     await this.oauthService.deleteAllOauthInfoByEmail(user.email);
   }
 
-  private async softDeleteUser(userId: string, email: string): Promise<void> {
+  private async softDeleteUser({
+    userId,
+    name,
+    email,
+  }: {
+    userId: string;
+    name: string;
+    email: string;
+  }): Promise<void> {
     await this.userService.update(userId, {
-      userId: 'DELETED_' + userId,
-      email: `DELETED_${email}_${Date.now()}`,
+      userId: `DELETED_${userId}_${Date.now()}`,
+      name: `DELETED_${name}_${userId}`,
+      email: `DELETED_${email}_${userId}`,
       refreshToken: null,
       refreshTokenExpiresAt: null,
       status: USER_STATUS.DELETED,
     });
     // TODO: 보관용 테이블에 삭제된 유저의 암호화된 provider_id, provider, deleted_at, expires_at (현재+3년?) 저장
+  }
+
+  async getOAuthWithUserByProviderInfo({
+    email,
+    provider,
+    providerId,
+  }: ProviderInfo) {
+    const entity = (await this.oauthRepository
+      .createQueryBuilder('oauth')
+      .innerJoinAndMapOne(
+        'oauth.user',
+        UserEntity,
+        'user',
+        'user.email = oauth.email',
+      )
+      .where(
+        'oauth.email = :email AND oauth.provider = :provider AND oauth.providerId = :providerId AND user.status != :status',
+        {
+          email,
+          provider,
+          providerId,
+          status: USER_STATUS.DELETED,
+        },
+      )
+      .getOne()) as OauthEntity & { user: UserEntity };
+
+    if (!entity) return null;
+
+    const { user, ...oauthEntity } = entity;
+    const oauthDto = plainToInstance(OauthDto, oauthEntity);
+    const userDto = plainToInstance(UserDto, user);
+
+    return {
+      ...oauthDto,
+      user: userDto,
+    };
   }
 }
