@@ -131,11 +131,20 @@ export const FormField = ({
       case "select":
         return (
           <div
-            className={cn(inputClassName, `${value && "text-black"}`)}
+            className={cn(inputClassName, `${value && "cursor-pointer text-black"}`)}
             onClick={() => {
-              if (!isRegister && name === "species") {
-                toast.error("종은 변경할 수 없습니다.");
-                return;
+              if (disabled) return;
+
+              if (!isRegister) {
+                if (name === "species") {
+                  toast.error("종은 변경할 수 없습니다.");
+                  return;
+                }
+
+                if (name === "sex") {
+                  toast.error("성별은 변경할 수 없습니다.");
+                  return;
+                }
               }
 
               handleSelect({

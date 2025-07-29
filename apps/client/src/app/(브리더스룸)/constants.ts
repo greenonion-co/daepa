@@ -348,7 +348,7 @@ export const SELECTOR_CONFIGS: Record<
   },
   growth: {
     title: "크기 선택",
-    selectList: Object.keys(GROWTH_KOREAN_INFO),
+    selectList: ["EGG", "BABY", "JUVENILE", "PRE_ADULT", "ADULT"],
   },
   sex: {
     title: "성별 선택",
