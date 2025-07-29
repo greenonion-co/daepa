@@ -591,20 +591,9 @@ export const getPetControllerCreateResponseMock = (
 export const getPetControllerGetFamilyTreeResponseMock = (
   overrideResponse: Partial<PetFamilyTreeResponseDto> = {},
 ): PetFamilyTreeResponseDto => ({
-  individualNodes: Array.from(
-    { length: faker.number.int({ min: 1, max: 10 }) },
-    (_, i) => i + 1,
-  ).map(() => ({})),
-  parentPairs: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-    () => ({}),
-  ),
-  childNodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-    () => ({}),
-  ),
-  totalPets: faker.number.int({ min: undefined, max: undefined }),
-  totalRelations: faker.number.int({ min: undefined, max: undefined }),
-  maleCount: faker.number.int({ min: undefined, max: undefined }),
-  femaleCount: faker.number.int({ min: undefined, max: undefined }),
+  pairData: {
+    [faker.string.alphanumeric(5)]: {},
+  },
   ...overrideResponse,
 });
 

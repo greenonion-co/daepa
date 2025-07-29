@@ -5,22 +5,9 @@
  * Project Daepa API description
  * OpenAPI spec version: 1.0
  */
-import type { PetFamilyNodeDto } from "./petFamilyNodeDto";
-import type { PetFamilyPairDto } from "./petFamilyPairDto";
+import type { PetFamilyTreeResponseDtoPairData } from "./petFamilyTreeResponseDtoPairData";
 
 export interface PetFamilyTreeResponseDto {
-  /** 개별 노드들 (1세대) */
-  individualNodes: PetFamilyNodeDto[];
-  /** 부모 쌍 노드들 */
-  parentPairs: PetFamilyPairDto[];
-  /** 자식 노드들 (3세대) */
-  childNodes: PetFamilyNodeDto[];
-  /** 총 펫 수 */
-  totalPets: number;
-  /** 총 관계 수 */
-  totalRelations: number;
-  /** 수컷 수 */
-  maleCount: number;
-  /** 암컷 수 */
-  femaleCount: number;
+  /** pairId별로 그룹화된 펫 데이터 */
+  pairData: PetFamilyTreeResponseDtoPairData;
 }
