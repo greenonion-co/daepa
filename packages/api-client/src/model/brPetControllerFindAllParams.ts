@@ -56,11 +56,11 @@ export type BrPetControllerFindAllParams = {
   /**
    * 펫 최소 생년월일
    */
-  minHatchingDate?: string;
+  startYmd?: string;
   /**
    * 펫 최대 생년월일
    */
-  maxHatchingDate?: string;
+  endYmd?: string;
   /**
    * 펫 모프
    */

@@ -553,7 +553,7 @@ export class PetFilterDto extends PageOptionsDto {
     required: false,
   })
   @IsOptional()
-  minHatchingDate?: Date; // 최소 생년월일
+  startYmd?: Date; // 최소 생년월일
 
   @ApiProperty({
     description: '펫 최대 생년월일',
@@ -561,7 +561,7 @@ export class PetFilterDto extends PageOptionsDto {
     required: false,
   })
   @IsOptional()
-  maxHatchingDate?: Date; // 최대 생년월일
+  endYmd?: Date; // 최대 생년월일
 
   @ApiProperty({
     description: '펫 모프',

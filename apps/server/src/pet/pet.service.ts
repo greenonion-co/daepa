@@ -562,15 +562,15 @@ export class PetService {
     }
 
     // 생년월일 범위 필터링
-    if (pageOptionsDto.minHatchingDate !== undefined) {
-      queryBuilder.andWhere('pets.hatchingDate >= :minHatchingDate', {
-        minHatchingDate: pageOptionsDto.minHatchingDate,
+    if (pageOptionsDto.startYmd !== undefined) {
+      queryBuilder.andWhere('pets.hatchingDate >= :startYmd', {
+        startYmd: pageOptionsDto.startYmd,
       });
     }
 
-    if (pageOptionsDto.maxHatchingDate !== undefined) {
-      queryBuilder.andWhere('pets.hatchingDate <= :maxHatchingDate', {
-        maxHatchingDate: pageOptionsDto.maxHatchingDate,
+    if (pageOptionsDto.endYmd !== undefined) {
+      queryBuilder.andWhere('pets.hatchingDate <= :endYmd', {
+        endYmd: pageOptionsDto.endYmd,
       });
     }
 
