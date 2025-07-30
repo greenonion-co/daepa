@@ -11,14 +11,14 @@ import { PetSummaryWithLayingDto } from 'src/pet/pet.dto';
 
 export class LayingBaseDto {
   @ApiProperty({
-    description: 'Laying ID',
+    description: '산란 ID',
     example: 1,
   })
   @IsNumber()
   id: number;
 
   @ApiProperty({
-    description: 'Mating ID',
+    description: '메이팅 ID',
     example: 1,
     required: false,
   })
@@ -27,7 +27,7 @@ export class LayingBaseDto {
   matingId?: number;
 
   @ApiProperty({
-    description: 'Laying Date',
+    description: '산란 날짜',
     example: '2025-01-01',
   })
   @IsDate()

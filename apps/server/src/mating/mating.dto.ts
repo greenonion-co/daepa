@@ -5,21 +5,21 @@ import { PetSummaryDto } from 'src/pet/pet.dto';
 
 export class MatingBaseDto {
   @ApiProperty({
-    description: 'Mating ID',
+    description: '메이팅 ID',
     example: 1,
   })
   @IsNumber()
   id: number;
 
   @ApiProperty({
-    description: 'Pair ID',
+    description: '펫 쌍 ID',
     example: 'PAIR_XXXXXXXX',
   })
   @IsString()
   pairId: string;
 
   @ApiProperty({
-    description: 'Father ID',
+    description: '아빠 펫 ID',
     example: 'PET_XXXXXXXX',
     required: false,
   })
@@ -27,7 +27,7 @@ export class MatingBaseDto {
   fatherId?: string;
 
   @ApiProperty({
-    description: 'Mother ID',
+    description: '엄마 펫 ID',
     example: 'PET_XXXXXXXX',
     required: false,
   })
@@ -35,7 +35,7 @@ export class MatingBaseDto {
   motherId?: string;
 
   @ApiProperty({
-    description: 'Mating Date',
+    description: '메이팅 날짜',
     example: '2025-01-01',
   })
   @IsDate()
