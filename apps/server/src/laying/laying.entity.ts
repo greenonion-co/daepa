@@ -11,6 +11,9 @@ import {
 @Index('UNIQUE_LAYING', ['matingId', 'layingDate'], {
   unique: true,
 })
+@Index('UNIQUE_CLUTCH', ['matingId', 'clutch'], {
+  unique: true,
+})
 export class LayingEntity {
   @PrimaryGeneratedColumn()
   id: number;
