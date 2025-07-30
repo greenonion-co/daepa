@@ -123,9 +123,25 @@ export class UserNotificationController {
   @ApiResponse({
     status: 200,
     description: '알림 상세 조회',
-    type: UserNotificationDto,
+    schema: {
+      type: 'object',
+      required: ['data'],
+      properties: {
+        data: { $ref: getSchemaPath(UserNotificationDto) },
+        success: { type: 'boolean' },
+        message: { type: 'string' },
+      },
+    },
   })
   async findOne(@Param('id') id: number, @JwtUser() token: JwtUserPayload) {
-    return await this.userNotificationService.findOne(id, token.userId);
+    const userNotification = await this.userNotificationService.findOne(
+      id,
+      token.userId,
+    );
+    return {
+      success: true,
+      message: '알림 상세 조회',
+      data: userNotification,
+    };
   }
 }

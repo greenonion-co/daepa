@@ -234,6 +234,11 @@ export class PetController {
     description: '펫 아이디',
     example: 'XXXXXXXX',
   })
+  @ApiResponse({
+    status: 200,
+    description: '해칭이 완료되었습니다.',
+    type: CommonResponseDto,
+  })
   async completeHatching(
     @Param('petId') petId: string,
     @JwtUser() token: JwtUserPayload,
@@ -244,5 +249,10 @@ export class PetController {
       token.userId,
       completeHatchingDto.hatchingDate,
     );
+
+    return {
+      success: true,
+      message: '해칭이 완료되었습니다.',
+    };
   }
 }
