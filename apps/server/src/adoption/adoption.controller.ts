@@ -18,12 +18,13 @@ import {
   CreateAdoptionDto,
   UpdateAdoptionDto,
   AdoptionDto,
-  createAdoptionResponseDto,
+  AdoptionDetailResponseDto,
 } from './adoption.dto';
 import { JwtUser } from '../auth/auth.decorator';
 import { JwtUserPayload } from '../auth/strategies/jwt.strategy';
 import { PageMetaDto, PageOptionsDto } from 'src/common/page.dto';
 import { PageDto } from 'src/common/page.dto';
+import { CommonResponseDto } from 'src/common/response.dto';
 
 @ApiTags('분양')
 @Controller('/v1/adoption')
@@ -34,13 +35,17 @@ export class AdoptionController {
   @ApiResponse({
     status: 201,
     description: '분양 정보 생성 성공',
-    type: AdoptionDto,
+    type: CommonResponseDto,
   })
   async createAdoption(
     @Body() createAdoptionDto: CreateAdoptionDto,
     @JwtUser() token: JwtUserPayload,
-  ): Promise<createAdoptionResponseDto> {
-    return this.adoptionService.createAdoption(token.userId, createAdoptionDto);
+  ): Promise<CommonResponseDto> {
+    await this.adoptionService.createAdoption(token.userId, createAdoptionDto);
+    return {
+      success: true,
+      message: '분양 정보 생성 성공',
+    };
   }
 
   @Get()
@@ -71,7 +76,7 @@ export class AdoptionController {
   @ApiResponse({
     status: 200,
     description: '펫별 분양 정보 조회 성공',
-    type: AdoptionDto,
+    type: AdoptionDetailResponseDto,
   })
   @ApiResponse({
     status: 404,
@@ -79,20 +84,29 @@ export class AdoptionController {
   })
   async getAdoptionByAdoptionId(
     @Param('adoptionId') adoptionId: string,
-  ): Promise<AdoptionDto> {
-    return this.adoptionService.findByAdoptionId(adoptionId);
+  ): Promise<AdoptionDetailResponseDto> {
+    const data = await this.adoptionService.findByAdoptionId(adoptionId);
+    return {
+      success: true,
+      message: '펫별 분양 정보 조회 성공',
+      data,
+    };
   }
 
   @Patch('/:adoptionId')
   @ApiResponse({
     status: 200,
     description: '분양 정보 수정 성공',
-    type: AdoptionDto,
+    type: CommonResponseDto,
   })
   async update(
     @Param('adoptionId') adoptionId: string,
     @Body() updateAdoptionDto: UpdateAdoptionDto,
-  ): Promise<{ adoptionId: string }> {
-    return this.adoptionService.updateAdoption(adoptionId, updateAdoptionDto);
+  ): Promise<CommonResponseDto> {
+    await this.adoptionService.updateAdoption(adoptionId, updateAdoptionDto);
+    return {
+      success: true,
+      message: '분양 정보 수정 성공',
+    };
   }
 }

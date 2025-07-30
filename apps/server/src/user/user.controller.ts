@@ -9,7 +9,7 @@ import {
 import { UserService } from './user.service';
 import {
   CreateInitUserInfoDto,
-  UserProfileDto,
+  UserProfileResponseDto,
   VerifyNameDto,
 } from './user.dto';
 import { CommonResponseDto } from 'src/common/response.dto';
@@ -25,11 +25,17 @@ export class UserController {
   @ApiResponse({
     status: 200,
     description: '사용자 프로필 조회 성공',
-    type: UserProfileDto,
+    type: UserProfileResponseDto,
   })
-  async getUserProfile(@JwtUser() token: JwtUserPayload) {
+  async getUserProfile(
+    @JwtUser() token: JwtUserPayload,
+  ): Promise<UserProfileResponseDto> {
     const userProfile = await this.userService.findOneProfile(token.userId);
-    return userProfile;
+    return {
+      success: true,
+      message: '사용자 프로필 조회 성공',
+      data: userProfile,
+    };
   }
 
   @Post('/init-info')
@@ -41,7 +47,7 @@ export class UserController {
   async createInitUserInfo(
     @JwtUser() token: JwtUserPayload,
     @Body() createInitUserInfoDto: CreateInitUserInfoDto,
-  ) {
+  ): Promise<CommonResponseDto> {
     await this.userService.createInitUserInfo(
       token.userId,
       createInitUserInfoDto,
@@ -59,7 +65,9 @@ export class UserController {
     description: '닉네임 중복 확인 성공',
     type: CommonResponseDto,
   })
-  async verifyName(@Body() verifyNameDto: VerifyNameDto) {
+  async verifyName(
+    @Body() verifyNameDto: VerifyNameDto,
+  ): Promise<CommonResponseDto> {
     const isExist = await this.userService.isNameExist(verifyNameDto.name);
     if (!isExist) {
       return {

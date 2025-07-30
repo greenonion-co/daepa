@@ -27,7 +27,7 @@ const CardBack = memo(({ pet, from, isWideScreen }: CardBackProps) => {
   const queryClient = useQueryClient();
   const { formData, setFormData, setPage } = usePetStore();
   const { user } = useUserStore();
-  const isMyPet = user?.userId === pet.owner.userId;
+  const isMyPet = user?.userId === pet.owner?.userId;
 
   const [isEditing, setIsEditing] = useState(from === "egg");
   const [isTooltipOpen, setIsTooltipOpen] = useState(false);

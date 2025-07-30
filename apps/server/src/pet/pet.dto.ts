@@ -33,6 +33,7 @@ import { UserProfilePublicDto } from 'src/user/user.dto';
 import { CreateParentDto } from 'src/parent_request/parent_request.dto';
 import { PageOptionsDto } from 'src/common/page.dto';
 import { PetEntity } from './pet.entity';
+import { CommonResponseDto } from 'src/common/response.dto';
 
 export class PetBaseDto {
   @ApiProperty({
@@ -153,7 +154,7 @@ export class PetBaseDto {
 
   @IsOptional()
   @IsArray()
-  photos?: any[];
+  photos?: string[];
 
   @ApiProperty({
     description: '펫 소개말',
@@ -718,7 +719,7 @@ export class PetFamilyParentDto {
   name: string;
 }
 
-export class PetFamilyTreeResponseDto {
+export class PetFamilyTreeResponseDto extends CommonResponseDto {
   @ApiProperty({
     description: 'pairId별로 그룹화된 펫 데이터',
     type: 'object',
@@ -726,5 +727,25 @@ export class PetFamilyTreeResponseDto {
       $ref: getSchemaPath(PetFamilyPairGroupDto),
     },
   })
-  pairData: Record<string, PetFamilyPairGroupDto>;
+  data: Record<string, PetFamilyPairGroupDto>;
+}
+
+export class FindPetByPetIdResponseDto extends CommonResponseDto {
+  @ApiProperty({
+    description: '펫 정보',
+    type: PetDto,
+  })
+  data: PetDto;
+}
+
+export class FilterPetListResponseDto extends CommonResponseDto {
+  @ApiProperty({
+    description: '날짜 범위별 해칭 펫 목록',
+    type: 'object',
+    additionalProperties: {
+      type: 'array',
+      items: { $ref: getSchemaPath(PetDto) },
+    },
+  })
+  data: Record<string, PetDto[]>;
 }

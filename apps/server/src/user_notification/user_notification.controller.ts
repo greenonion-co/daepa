@@ -16,6 +16,7 @@ import {
   DeleteUserNotificationDto,
   UpdateUserNotificationDto,
   UserNotificationDto,
+  UserNotificationResponseDto,
 } from './user_notification.dto';
 import { ApiExtraModels, ApiResponse, getSchemaPath } from '@nestjs/swagger';
 import { CommonResponseDto } from 'src/common/response.dto';
@@ -64,7 +65,7 @@ export class UserNotificationController {
   async create(
     @Body() createUserNotificationDto: CreateUserNotificationDto,
     @JwtUser() token: JwtUserPayload,
-  ) {
+  ): Promise<CommonResponseDto> {
     await this.userNotificationService.createUserNotification(
       token.userId,
       createUserNotificationDto,
@@ -84,7 +85,7 @@ export class UserNotificationController {
   async update(
     @Body() updateUserNotificationDto: UpdateUserNotificationDto,
     @JwtUser() token: JwtUserPayload,
-  ) {
+  ): Promise<CommonResponseDto> {
     await this.userNotificationService.updateUserNotification(
       token.userId,
       updateUserNotificationDto,
@@ -101,7 +102,9 @@ export class UserNotificationController {
     description: '알림이 삭제되었습니다.',
     type: CommonResponseDto,
   })
-  async delete(@Body() deleteUserNotificationDto: DeleteUserNotificationDto) {
+  async delete(
+    @Body() deleteUserNotificationDto: DeleteUserNotificationDto,
+  ): Promise<CommonResponseDto> {
     // TODO: 권한 체크
     // const isMyNotification =
     //   deleteUserNotificationDto.receiverId === 'JWT token id';
@@ -123,17 +126,12 @@ export class UserNotificationController {
   @ApiResponse({
     status: 200,
     description: '알림 상세 조회',
-    schema: {
-      type: 'object',
-      required: ['data'],
-      properties: {
-        data: { $ref: getSchemaPath(UserNotificationDto) },
-        success: { type: 'boolean' },
-        message: { type: 'string' },
-      },
-    },
+    type: UserNotificationResponseDto,
   })
-  async findOne(@Param('id') id: number, @JwtUser() token: JwtUserPayload) {
+  async findOne(
+    @Param('id') id: number,
+    @JwtUser() token: JwtUserPayload,
+  ): Promise<UserNotificationResponseDto> {
     const userNotification = await this.userNotificationService.findOne(
       id,
       token.userId,

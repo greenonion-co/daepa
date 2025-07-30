@@ -11,13 +11,15 @@ import {
 import { ParentRequestService } from './parent_request.service';
 import {
   CreateParentRequestDto,
+  RequestByIdResponseDto,
+  RequestsByReceiverIdResponseDto,
+  RequestsByRequesterIdResponseDto,
   UpdateParentRequestDto,
 } from './parent_request.dto';
 import { JwtAuthGuard, JwtUser } from '../auth/auth.decorator';
 import { JwtUserPayload } from 'src/auth/strategies/jwt.strategy';
-import { ApiResponse, getSchemaPath } from '@nestjs/swagger';
+import { ApiResponse } from '@nestjs/swagger';
 import { CommonResponseDto } from 'src/common/response.dto';
-import { ParentRequestEntity } from './parent_request.entity';
 
 @Controller('parent-requests')
 @UseGuards(JwtAuthGuard)
@@ -33,7 +35,7 @@ export class ParentRequestController {
   async createParentRequest(
     @Body() createParentRequestDto: CreateParentRequestDto,
     @JwtUser() token: JwtUserPayload,
-  ) {
+  ): Promise<CommonResponseDto> {
     // 요청자 ID를 현재 로그인한 사용자로 설정
     createParentRequestDto.requesterId = token.userId;
     await this.parentRequestService.createParentRequest(createParentRequestDto);
@@ -47,17 +49,11 @@ export class ParentRequestController {
   @ApiResponse({
     status: 200,
     description: '유저의 부모 요청 목록을 성공적으로 조회했습니다.',
-    schema: {
-      type: 'object',
-      required: ['data'],
-      properties: {
-        data: { $ref: getSchemaPath(ParentRequestEntity) },
-        success: { type: 'boolean' },
-        message: { type: 'string' },
-      },
-    },
+    type: RequestsByRequesterIdResponseDto,
   })
-  async getPendingRequests(@Param('userId') userId: string) {
+  async getPendingRequests(
+    @Param('userId') userId: string,
+  ): Promise<RequestsByRequesterIdResponseDto> {
     const parentRequests =
       await this.parentRequestService.findPendingRequestsByReceiverId(userId);
     return {
@@ -71,17 +67,11 @@ export class ParentRequestController {
   @ApiResponse({
     status: 200,
     description: '유저의 부모 요청 목록을 성공적으로 조회했습니다.',
-    schema: {
-      type: 'object',
-      required: ['data'],
-      properties: {
-        data: { $ref: getSchemaPath(ParentRequestEntity) },
-        success: { type: 'boolean' },
-        message: { type: 'string' },
-      },
-    },
+    type: RequestsByReceiverIdResponseDto,
   })
-  async getSentRequests(@Param('userId') userId: string) {
+  async getSentRequests(
+    @Param('userId') userId: string,
+  ): Promise<RequestsByReceiverIdResponseDto> {
     const parentRequests =
       await this.parentRequestService.findRequestsByRequesterId(userId);
     return {
@@ -101,7 +91,7 @@ export class ParentRequestController {
     @Param('notificationId') notificationId: number,
     @Body() updateParentRequestDto: UpdateParentRequestDto,
     @JwtUser() token: JwtUserPayload,
-  ) {
+  ): Promise<CommonResponseDto> {
     await this.parentRequestService.updateParentRequestByNotificationId(
       token.userId,
       notificationId,
@@ -123,7 +113,7 @@ export class ParentRequestController {
   async approveRequest(
     @Param('id') id: number,
     @JwtUser() token: JwtUserPayload,
-  ) {
+  ): Promise<CommonResponseDto> {
     await this.parentRequestService.approveParentRequest(id, token.userId);
     return {
       success: true,
@@ -141,7 +131,7 @@ export class ParentRequestController {
     @Param('id') id: number,
     @Body() body: { reason?: string },
     @JwtUser() token: JwtUserPayload,
-  ) {
+  ): Promise<CommonResponseDto> {
     await this.parentRequestService.rejectParentRequest(
       id,
       token.userId,
@@ -162,7 +152,7 @@ export class ParentRequestController {
   async cancelRequest(
     @Param('id') id: number,
     @JwtUser() token: JwtUserPayload,
-  ) {
+  ): Promise<CommonResponseDto> {
     await this.parentRequestService.cancelParentRequest(id, token.userId);
     return {
       success: true,
@@ -174,17 +164,11 @@ export class ParentRequestController {
   @ApiResponse({
     status: 200,
     description: '부모 관계 상태를 성공적으로 조회했습니다.',
-    schema: {
-      type: 'object',
-      required: ['data'],
-      properties: {
-        data: { $ref: getSchemaPath(ParentRequestEntity) },
-        success: { type: 'boolean' },
-        message: { type: 'string' },
-      },
-    },
+    type: RequestByIdResponseDto,
   })
-  async getRequestById(@Param('id') id: number) {
+  async getRequestById(
+    @Param('id') id: number,
+  ): Promise<RequestByIdResponseDto> {
     const parentRequest = await this.parentRequestService.findById(id);
     return {
       success: true,

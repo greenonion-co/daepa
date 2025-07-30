@@ -38,7 +38,7 @@ export const useUserStore = create<UserStore>()((set) => ({
       }
 
       set({
-        user: data,
+        user: data.data,
       });
     } catch (error) {
       console.error(error);

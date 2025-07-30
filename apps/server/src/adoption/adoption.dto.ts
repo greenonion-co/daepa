@@ -11,6 +11,7 @@ import { UserProfilePublicDto } from '../user/user.dto';
 
 import { PetDto, PetSummaryDto } from '../pet/pet.dto';
 import { ADOPTION_SALE_STATUS } from 'src/pet/pet.constants';
+import { CommonResponseDto } from 'src/common/response.dto';
 
 export class AdoptionBaseDto {
   @ApiProperty({
@@ -203,4 +204,11 @@ export class createAdoptionResponseDto {
   })
   @IsString()
   adoptionId: string;
+}
+
+export class AdoptionDetailResponseDto extends CommonResponseDto {
+  @ApiProperty({
+    description: '분양 정보',
+  })
+  data: AdoptionDto;
 }

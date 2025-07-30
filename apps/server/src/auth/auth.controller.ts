@@ -16,6 +16,7 @@ import { JwtUser, PassportValidatedUser, Public } from './auth.decorator';
 import { TokenResponseDto } from './auth.dto';
 import { JwtUserPayload } from './strategies/jwt.strategy';
 import { RequestWithCookies } from 'src/types/request';
+import { CommonResponseDto } from 'src/common/response.dto';
 
 @Controller('/auth')
 export class AuthController {
@@ -123,11 +124,12 @@ export class AuthController {
   @ApiResponse({
     status: 200,
     description: '로그아웃 성공',
+    type: CommonResponseDto,
   })
   async signOut(
     @Req() req: RequestWithCookies,
     @Res({ passthrough: true }) res: Response,
-  ) {
+  ): Promise<CommonResponseDto> {
     const refreshToken = req.cookies.refreshToken;
 
     if (refreshToken && typeof refreshToken === 'string') {
@@ -150,11 +152,12 @@ export class AuthController {
   @ApiResponse({
     status: 200,
     description: '탈퇴가 처리되었습니다.',
+    type: CommonResponseDto,
   })
   async deleteAccount(
     @JwtUser() user: JwtUserPayload,
     @Res({ passthrough: true }) res: Response,
-  ) {
+  ): Promise<CommonResponseDto> {
     await this.authService.deleteUser(user.userId);
 
     res.clearCookie('refreshToken', {

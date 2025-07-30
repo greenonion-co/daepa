@@ -19,7 +19,7 @@ function PetDetailPage({ params }: PetDetailPageProps) {
   const { data } = useQuery({
     queryKey: [petControllerFindPetByPetId.name, petId],
     queryFn: () => petControllerFindPetByPetId(petId),
-    select: (response) => response.data,
+    select: (response) => response.data.data,
   });
 
   useEffect(() => {

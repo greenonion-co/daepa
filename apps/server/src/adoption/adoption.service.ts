@@ -24,6 +24,7 @@ import { PageMetaDto, PageOptionsDto } from 'src/common/page.dto';
 import { PageDto } from 'src/common/page.dto';
 import { ADOPTION_SALE_STATUS } from 'src/pet/pet.constants';
 import { PetSummaryDto } from 'src/pet/pet.dto';
+import { UserProfilePublicDto } from 'src/user/user.dto';
 import { PetEntity } from 'src/pet/pet.entity';
 
 @Injectable()
@@ -40,7 +41,7 @@ export class AdoptionService {
     return nanoid(8);
   }
 
-  private async toAdoptionDto(entity: AdoptionEntity): Promise<AdoptionDto> {
+  private toAdoptionDtoOptimized(entity: AdoptionEntity): AdoptionDto {
     if (!entity.pet) {
       throw new Error('Pet information is required for adoption');
     }
@@ -56,12 +57,13 @@ export class AdoptionService {
       status: entity.status,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
-      pet: await this.toPetSummaryDto(entity.pet), // await 추가
+      pet: this.toPetSummaryDtoOptimized(entity.pet),
     };
   }
 
-  private async toPetSummaryDto(pet: PetEntity): Promise<PetSummaryDto> {
-    const owner = await this.userService.findOneProfile(pet.ownerId);
+  private toPetSummaryDtoOptimized(
+    pet: PetEntity & { owner?: UserProfilePublicDto },
+  ): PetSummaryDto {
     return {
       petId: pet.petId,
       name: pet.name,
@@ -70,7 +72,7 @@ export class AdoptionService {
       traits: pet.traits,
       hatchingDate: pet.hatchingDate,
       sex: pet.sex,
-      owner,
+      owner: pet.owner!,
     };
   }
 
@@ -129,11 +131,9 @@ export class AdoptionService {
       }
 
       // 이미 분양 정보가 있는지 확인
-      const existingAdoption = await entityManager.findOne(AdoptionEntity, {
-        where: {
-          petId: createAdoptionDto.petId,
-          isDeleted: false,
-        },
+      const existingAdoption = await entityManager.existsBy(AdoptionEntity, {
+        petId: createAdoptionDto.petId,
+        isDeleted: false,
       });
 
       if (existingAdoption) {
@@ -195,6 +195,12 @@ export class AdoptionService {
         'buyer',
         'buyer.userId = adoptions.buyerId',
       )
+      .leftJoinAndMapOne(
+        'adoptions.pet.owner',
+        'users',
+        'owner',
+        'owner.userId = pets.ownerId',
+      )
       .where('adoptions.isDeleted = :isDeleted', { isDeleted: false })
       .andWhere('adoptions.sellerId = :userId', { userId })
       .orderBy('adoptions.createdAt', pageOptionsDto.order)
@@ -204,8 +210,8 @@ export class AdoptionService {
     const totalCount = await queryBuilder.getCount();
     const adoptionEntities = await queryBuilder.getMany();
 
-    const adoptionDtos = await Promise.all(
-      adoptionEntities.map((adoption) => this.toAdoptionDto(adoption)),
+    const adoptionDtos = adoptionEntities.map((adoption) =>
+      this.toAdoptionDtoOptimized(adoption),
     );
 
     const pageMetaDto = new PageMetaDto({ totalCount, pageOptionsDto });
@@ -236,6 +242,12 @@ export class AdoptionService {
         'buyer',
         'buyer.userId = adoptions.buyerId',
       )
+      .leftJoinAndMapOne(
+        'adoptions.pet.owner',
+        'users',
+        'owner',
+        'owner.userId = pets.ownerId',
+      )
       .where('adoptions.isDeleted = :isDeleted', { isDeleted: false });
 
     // where 조건 추가
@@ -252,7 +264,7 @@ export class AdoptionService {
       return null;
     }
 
-    return this.toAdoptionDto(adoptionEntity);
+    return this.toAdoptionDtoOptimized(adoptionEntity);
   }
 
   async findByAdoptionId(adoptionId: string): Promise<AdoptionDto> {

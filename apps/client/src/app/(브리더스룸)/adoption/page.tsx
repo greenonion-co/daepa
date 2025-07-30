@@ -1,13 +1,13 @@
 "use client";
 
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
-import { adoptionControllerGetAllAdoptions, AdoptionDtoStatus } from "@repo/api-client";
+import { adoptionControllerGetAllAdoptions } from "@repo/api-client";
 import { Button } from "@/components/ui/button";
 import { Plus, BarChart3 } from "lucide-react";
 import { toast } from "sonner";
 import Loading from "@/components/common/Loading";
 import { useInView } from "react-intersection-observer";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { overlay } from "overlay-kit";
 
@@ -39,11 +39,6 @@ const AdoptionPage = () => {
     },
     select: (data) => data.pages.flatMap((page) => page.data.data),
   });
-
-  const soldData = useMemo(
-    () => data?.filter((item) => item.status === AdoptionDtoStatus.SOLD),
-    [data],
-  );
 
   useEffect(() => {
     if (inView && hasNextPage && !isFetchingNextPage) {
@@ -91,7 +86,7 @@ const AdoptionPage = () => {
       ) : (
         <DataTable
           columns={columns}
-          data={soldData}
+          data={data}
           hasMore={hasNextPage}
           isFetchingMore={isFetchingNextPage}
           loaderRefAction={ref}

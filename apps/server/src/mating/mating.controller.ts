@@ -10,7 +10,7 @@ import {
 import { MatingService } from './mating.service';
 import { JwtUser } from 'src/auth/auth.decorator';
 import { JwtUserPayload } from 'src/auth/strategies/jwt.strategy';
-import { CreateMatingDto, MatingByParentsDto } from './mating.dto';
+import { CreateMatingDto, MatingDetailResponseDto } from './mating.dto';
 import { CommonResponseDto } from 'src/common/response.dto';
 import { ApiResponse } from '@nestjs/swagger';
 import { UpdateMatingDto } from './mating.dto';
@@ -23,10 +23,17 @@ export class MatingController {
   @ApiResponse({
     status: 200,
     description: '메이팅 정보 조회가 완료되었습니다.',
-    type: [MatingByParentsDto],
+    type: MatingDetailResponseDto,
   })
-  async findAll(@JwtUser() token: JwtUserPayload) {
-    return await this.matingService.findAll(token.userId);
+  async findAll(
+    @JwtUser() token: JwtUserPayload,
+  ): Promise<MatingDetailResponseDto> {
+    const data = await this.matingService.findAll(token.userId);
+    return {
+      success: true,
+      message: '메이팅 정보 조회가 완료되었습니다.',
+      data,
+    };
   }
 
   @Post()
@@ -56,7 +63,7 @@ export class MatingController {
     @Param('matingId') matingId: number,
     @Body() updateMatingDto: UpdateMatingDto,
     @JwtUser() token: JwtUserPayload,
-  ) {
+  ): Promise<CommonResponseDto> {
     await this.matingService.updateMating(
       token.userId,
       matingId,
@@ -74,7 +81,9 @@ export class MatingController {
     description: '메이팅 정보 삭제가 완료되었습니다.',
     type: CommonResponseDto,
   })
-  async deleteMating(@Param('matingId') matingId: number) {
+  async deleteMating(
+    @Param('matingId') matingId: number,
+  ): Promise<CommonResponseDto> {
     await this.matingService.deleteMating(matingId);
     return {
       success: true,

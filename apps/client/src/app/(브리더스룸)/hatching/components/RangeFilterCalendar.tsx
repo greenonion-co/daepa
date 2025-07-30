@@ -24,7 +24,7 @@ const RangeFilterCalendar = memo(() => {
     to: new Date(),
   });
 
-  const [tab, setTab] = useState<"all" | "hatched" | "notHatched">("hatched");
+  const [tab, setTab] = useState<"all" | "hatched" | "notHatched">("all");
 
   // 월별 해칭된 펫 조회
   const { data: monthlyData } = useQuery({
@@ -34,7 +34,7 @@ const RangeFilterCalendar = memo(() => {
         year: month.getFullYear().toString(),
         month: month.getMonth().toString(),
       }),
-    select: (data) => data.data,
+    select: (data) => data.data.data,
   });
 
   // 날짜 범위별 해칭된 펫 조회
@@ -48,7 +48,7 @@ const RangeFilterCalendar = memo(() => {
         endDate: endDate ?? "",
       });
     },
-    select: (data) => data.data,
+    select: (data) => data.data.data,
   });
 
   // 월별 해칭된 펫 개수 계산

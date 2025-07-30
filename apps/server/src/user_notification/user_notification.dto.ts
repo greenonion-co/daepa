@@ -11,6 +11,7 @@ import {
   USER_NOTIFICATION_TYPE,
 } from './user_notification.constant';
 import { ApiProperty, PickType } from '@nestjs/swagger';
+import { CommonResponseDto } from 'src/common/response.dto';
 
 export class UserNotificationDto {
   @ApiProperty({
@@ -103,3 +104,11 @@ export class DeleteUserNotificationDto extends PickType(UserNotificationDto, [
   'id',
   'receiverId',
 ]) {}
+
+export class UserNotificationResponseDto extends CommonResponseDto {
+  @ApiProperty({
+    description: '알림 정보',
+    type: UserNotificationDto,
+  })
+  data: UserNotificationDto | null;
+}

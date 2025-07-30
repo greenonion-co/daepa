@@ -20,7 +20,7 @@ const PetItem = ({
         <div className="relative aspect-square w-full overflow-hidden rounded-lg">
           <Image
             src={"/default-pet-image.png"}
-            alt={item.name}
+            alt={item.name ?? ""}
             fill
             className="object-cover transition-opacity"
           />

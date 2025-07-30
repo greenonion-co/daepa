@@ -71,7 +71,7 @@ const SettingsPage = () => {
   const { data: userProfile } = useQuery({
     queryKey: [userControllerGetUserProfile.name],
     queryFn: userControllerGetUserProfile,
-    select: (response) => response.data,
+    select: (response) => response.data.data,
   });
 
   const { mutate: signOut } = useMutation({

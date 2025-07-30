@@ -35,7 +35,7 @@ const AdoptionReceipt = memo(({ adoption }: AdoptionReceiptProps) => {
 
   const adoptionDateText = useMemo(() => {
     return adoption?.adoptionDate
-      ? format(parseISO(adoption.adoptionDate as string), "yyyy년 MM월 dd일", {
+      ? format(parseISO(adoption.adoptionDate.toString()), "yyyy년 MM월 dd일", {
           locale: ko,
         })
       : "미정";

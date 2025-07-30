@@ -5,13 +5,13 @@
  * Project Daepa API description
  * OpenAPI spec version: 1.0
  */
-import type { PetFamilyTreeResponseDtoData } from "./petFamilyTreeResponseDtoData";
+import type { AdoptionDto } from "./adoptionDto";
 
-export interface PetFamilyTreeResponseDto {
+export interface AdoptionDetailResponseDto {
   /** 성공 여부 */
   success: boolean;
   /** 메시지 */
   message: string;
-  /** pairId별로 그룹화된 펫 데이터 */
-  data: PetFamilyTreeResponseDtoData;
+  /** 분양 정보 */
+  data: AdoptionDto;
 }

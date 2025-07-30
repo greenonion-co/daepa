@@ -1,6 +1,8 @@
 import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { PARENT_ROLE, PARENT_STATUS } from './parent_request.constants';
 import { ApiProperty } from '@nestjs/swagger';
+import { CommonResponseDto } from 'src/common/response.dto';
+import { ParentRequestEntity } from './parent_request.entity';
 
 export class CreateParentRequestDto {
   @IsNotEmpty()
@@ -68,4 +70,28 @@ export class CreateParentDto {
   @IsOptional()
   @IsString()
   message?: string;
+}
+
+export class RequestsByRequesterIdResponseDto extends CommonResponseDto {
+  @ApiProperty({
+    description: '부모 요청 정보',
+    type: [ParentRequestResponseDto],
+  })
+  data: ParentRequestResponseDto[];
+}
+
+export class RequestsByReceiverIdResponseDto extends CommonResponseDto {
+  @ApiProperty({
+    description: '부모 요청 정보',
+    type: [ParentRequestEntity],
+  })
+  data: ParentRequestEntity[];
+}
+
+export class RequestByIdResponseDto extends CommonResponseDto {
+  @ApiProperty({
+    description: '부모 요청 정보',
+    type: ParentRequestEntity,
+  })
+  data: ParentRequestEntity | null;
 }

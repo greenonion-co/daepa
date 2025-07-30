@@ -1,5 +1,6 @@
 import { ApiProperty, PickType } from '@nestjs/swagger';
 import { IsDate, IsNumber, IsString } from 'class-validator';
+import { CommonResponseDto } from 'src/common/response.dto';
 import { LayingByDateDto } from 'src/laying/laying.dto';
 import { PetSummaryDto } from 'src/pet/pet.dto';
 
@@ -117,4 +118,12 @@ export class MatingByParentsDto {
     isArray: true,
   })
   matingsByDate: MatingByDateDto[];
+}
+
+export class MatingDetailResponseDto extends CommonResponseDto {
+  @ApiProperty({
+    description: '메이팅 정보',
+    type: [MatingByParentsDto],
+  })
+  data: MatingByParentsDto[];
 }

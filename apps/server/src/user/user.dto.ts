@@ -10,6 +10,7 @@ import {
 } from 'class-validator';
 import { OAUTH_PROVIDER } from 'src/auth/auth.constants';
 import { Exclude } from 'class-transformer';
+import { CommonResponseDto } from 'src/common/response.dto';
 
 class UserBaseDto {
   @ApiProperty({
@@ -164,4 +165,12 @@ export class VerifyNameDto {
   })
   @IsString()
   name: string;
+}
+
+export class UserProfileResponseDto extends CommonResponseDto {
+  @ApiProperty({
+    description: '사용자 프로필',
+    type: UserProfileDto,
+  })
+  data: UserProfileDto;
 }

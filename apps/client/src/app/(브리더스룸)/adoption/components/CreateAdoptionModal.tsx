@@ -175,7 +175,7 @@ const CreateAdoptionModal = ({
 
   const filteredPets = pets?.filter(
     (pet) =>
-      pet.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      pet.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       pet.owner.name.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 

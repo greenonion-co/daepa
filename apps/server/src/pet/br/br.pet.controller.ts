@@ -7,7 +7,12 @@ import {
   ApiParam,
   ApiQuery,
 } from '@nestjs/swagger';
-import { PetDto, PetFilterDto, PetHatchingDateRangeDto } from '../pet.dto';
+import {
+  PetDto,
+  PetFilterDto,
+  PetHatchingDateRangeDto,
+  FilterPetListResponseDto,
+} from '../pet.dto';
 import { ApiExtraModels } from '@nestjs/swagger';
 import { JwtUser } from 'src/auth/auth.decorator';
 import { JwtUserPayload } from 'src/auth/strategies/jwt.strategy';
@@ -79,21 +84,23 @@ export class BrPetController {
   @ApiResponse({
     status: 200,
     description: '월별 해칭 펫 목록 조회 성공',
-    schema: {
-      type: 'object',
-      additionalProperties: {
-        type: 'array',
-        items: { $ref: getSchemaPath(PetDto) },
-      },
-    },
+    type: FilterPetListResponseDto,
   })
   async getPetsByMonth(
     @JwtUser() token: JwtUserPayload,
     @Query('year') year: string,
     @Query('month') month: string,
-  ): Promise<Record<string, PetDto[]>> {
+  ): Promise<FilterPetListResponseDto> {
     const monthDate = new Date(Number(year), Number(month), 1);
-    return this.petService.getPetListByMonth(monthDate, token.userId);
+    const data = await this.petService.getPetListByMonth(
+      monthDate,
+      token.userId,
+    );
+    return {
+      success: true,
+      message: '월별 해칭 펫 목록 조회 성공',
+      data,
+    };
   }
 
   @Get('hatching/date-range')
@@ -110,24 +117,23 @@ export class BrPetController {
   @ApiResponse({
     status: 200,
     description: '날짜 범위별 해칭 펫 목록 조회 성공',
-    schema: {
-      type: 'object',
-      additionalProperties: {
-        type: 'array',
-        items: { $ref: getSchemaPath(PetDto) },
-      },
-    },
+    type: FilterPetListResponseDto,
   })
   async getPetsByDateRange(
     @Query() query: PetHatchingDateRangeDto,
     @JwtUser() token: JwtUserPayload,
-  ): Promise<Record<string, PetDto[]>> {
+  ): Promise<FilterPetListResponseDto> {
     const start = query.startDate ? new Date(query.startDate) : undefined;
     const end = query.endDate ? new Date(query.endDate) : undefined;
 
-    return this.petService.getPetListByHatchingDate(
+    const data = await this.petService.getPetListByHatchingDate(
       { startDate: start, endDate: end },
       token.userId,
     );
+    return {
+      success: true,
+      message: '날짜 범위별 해칭 펫 목록 조회 성공',
+      data,
+    };
   }
 }

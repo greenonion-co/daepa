@@ -12,10 +12,9 @@ import {
   CompleteHatchingDto,
   CreatePetDto,
   LinkParentDto,
-  PetDto,
   UpdatePetDto,
   PetFamilyTreeResponseDto,
-  PetFamilyPairGroupDto,
+  FindPetByPetIdResponseDto,
 } from './pet.dto';
 import { PetService } from './pet.service';
 import { ApiResponse, ApiParam, ApiQuery } from '@nestjs/swagger';
@@ -37,7 +36,7 @@ export class PetController {
   async create(
     @Body() createPetDto: CreatePetDto,
     @JwtUser() token: JwtUserPayload,
-  ) {
+  ): Promise<CommonResponseDto> {
     await this.petService.createPet(createPetDto, token.userId);
 
     return {
@@ -52,8 +51,13 @@ export class PetController {
     description: '가족관계도 조회 성공',
     type: PetFamilyTreeResponseDto,
   })
-  async getFamilyTree(): Promise<Record<string, PetFamilyPairGroupDto>> {
-    return this.petService.getFamilyTree();
+  async getFamilyTree(): Promise<PetFamilyTreeResponseDto> {
+    const data = await this.petService.getFamilyTree();
+    return {
+      success: true,
+      message: '가족관계도 조회 성공',
+      data,
+    };
   }
 
   @Get(':petId')
@@ -65,14 +69,21 @@ export class PetController {
   @ApiResponse({
     status: 200,
     description: '펫 정보 조회 성공',
-    type: PetDto,
+    type: FindPetByPetIdResponseDto,
   })
   @ApiResponse({
     status: 404,
     description: '펫을 찾을 수 없습니다.',
   })
-  async findPetByPetId(@Param('petId') petId: string): Promise<PetDto> {
-    return this.petService.findPetByPetId(petId);
+  async findPetByPetId(
+    @Param('petId') petId: string,
+  ): Promise<FindPetByPetIdResponseDto> {
+    const data = await this.petService.findPetByPetId(petId);
+    return {
+      success: true,
+      message: '펫 정보 조회 성공',
+      data,
+    };
   }
 
   @Patch(':petId')
@@ -102,7 +113,7 @@ export class PetController {
     @Param('petId') petId: string,
     @Body() updatePetDto: UpdatePetDto,
     @JwtUser() token: JwtUserPayload,
-  ) {
+  ): Promise<CommonResponseDto> {
     await this.petService.updatePet(petId, updatePetDto, token.userId);
 
     return {
@@ -138,7 +149,7 @@ export class PetController {
     @Param('petId') petId: string,
     @Body() linkParentDto: LinkParentDto,
     @JwtUser() token: JwtUserPayload,
-  ) {
+  ): Promise<CommonResponseDto> {
     await this.petService.linkParent(petId, linkParentDto, token.userId);
 
     return {
@@ -180,7 +191,7 @@ export class PetController {
     @Param('petId') petId: string,
     @Query('role') role: PARENT_ROLE,
     @JwtUser() token: JwtUserPayload,
-  ) {
+  ): Promise<CommonResponseDto> {
     await this.petService.unlinkParent(petId, role, token.userId);
 
     return {
@@ -219,7 +230,7 @@ export class PetController {
   async deletePet(
     @Param('petId') petId: string,
     @JwtUser() token: JwtUserPayload,
-  ) {
+  ): Promise<CommonResponseDto> {
     await this.petService.deletePet(petId, token.userId);
 
     return {
@@ -243,7 +254,7 @@ export class PetController {
     @Param('petId') petId: string,
     @JwtUser() token: JwtUserPayload,
     @Body() completeHatchingDto: CompleteHatchingDto,
-  ) {
+  ): Promise<CommonResponseDto> {
     await this.petService.completeHatching(
       petId,
       token.userId,
