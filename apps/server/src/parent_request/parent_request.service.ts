@@ -1,4 +1,10 @@
-import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
+import {
+  Injectable,
+  HttpException,
+  NotFoundException,
+  InternalServerErrorException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Not } from 'typeorm';
 import { ParentRequestEntity } from './parent_request.entity';
@@ -32,10 +38,7 @@ export class ParentRequestService {
     });
 
     if (!parentPet) {
-      throw new HttpException(
-        '부모 펫을 찾을 수 없습니다.',
-        HttpStatus.NOT_FOUND,
-      );
+      throw new NotFoundException('부모 펫을 찾을 수 없습니다.');
     }
 
     const parentRequest = this.parentRequestRepository.create({
@@ -73,10 +76,7 @@ export class ParentRequestService {
     });
 
     if (!parentPet) {
-      throw new HttpException(
-        '부모 펫을 찾을 수 없습니다.',
-        HttpStatus.NOT_FOUND,
-      );
+      throw new NotFoundException('부모 펫을 찾을 수 없습니다.');
     }
 
     // parent_request 테이블에 요청 생성
@@ -149,20 +149,14 @@ export class ParentRequestService {
     const existingRequest = await this.findById(id);
 
     if (!existingRequest) {
-      throw new HttpException(
-        '부모 요청을 찾을 수 없습니다.',
-        HttpStatus.NOT_FOUND,
-      );
+      throw new NotFoundException('부모 요청을 찾을 수 없습니다.');
     }
 
     // 상태 업데이트
     await this.parentRequestRepository.update(id, updateParentRequestDto);
     const updated = await this.findById(id);
     if (!updated) {
-      throw new HttpException(
-        '부모 요청을 찾을 수 없습니다.',
-        HttpStatus.NOT_FOUND,
-      );
+      throw new NotFoundException('부모 요청을 찾을 수 없습니다.');
     }
 
     // 상태가 변경된 경우에만 알림 처리
@@ -188,10 +182,7 @@ export class ParentRequestService {
     });
 
     if (!childPet || !parentPet) {
-      throw new HttpException(
-        '펫 정보를 찾을 수 없습니다.',
-        HttpStatus.NOT_FOUND,
-      );
+      throw new NotFoundException('펫 정보를 찾을 수 없습니다.');
     }
 
     // 요청자에게 알림 보내기
@@ -248,9 +239,8 @@ export class ParentRequestService {
       if (error instanceof HttpException) {
         throw error;
       }
-      throw new HttpException(
+      throw new InternalServerErrorException(
         '알림 생성 중 오류가 발생했습니다.',
-        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -294,14 +284,11 @@ export class ParentRequestService {
   ): Promise<ParentRequestEntity> {
     const parentRequest = await this.findById(id);
     if (!parentRequest) {
-      throw new HttpException(
-        '부모 요청을 찾을 수 없습니다.',
-        HttpStatus.NOT_FOUND,
-      );
+      throw new NotFoundException('부모 요청을 찾을 수 없습니다.');
     }
 
     if (parentRequest.requesterId !== requesterId) {
-      throw new HttpException('승인 권한이 없습니다.', HttpStatus.FORBIDDEN);
+      throw new ForbiddenException('승인 권한이 없습니다.');
     }
 
     return await this.updateParentRequest(id, {
@@ -316,14 +303,11 @@ export class ParentRequestService {
   ): Promise<ParentRequestEntity> {
     const parentRequest = await this.findById(id);
     if (!parentRequest) {
-      throw new HttpException(
-        '부모 요청을 찾을 수 없습니다.',
-        HttpStatus.NOT_FOUND,
-      );
+      throw new NotFoundException('부모 요청을 찾을 수 없습니다.');
     }
 
     if (parentRequest.requesterId !== requesterId) {
-      throw new HttpException('취소 권한이 없습니다.', HttpStatus.FORBIDDEN);
+      throw new ForbiddenException('취소 권한이 없습니다.');
     }
 
     return await this.updateParentRequest(id, {
@@ -338,47 +322,15 @@ export class ParentRequestService {
   ): Promise<ParentRequestEntity> {
     const parentRequest = await this.findById(id);
     if (!parentRequest) {
-      throw new HttpException(
-        '부모 요청을 찾을 수 없습니다.',
-        HttpStatus.NOT_FOUND,
-      );
+      throw new NotFoundException('부모 요청을 찾을 수 없습니다.');
     }
 
     if (parentRequest.requesterId !== requesterId) {
-      throw new HttpException('취소 권한이 없습니다.', HttpStatus.FORBIDDEN);
+      throw new ForbiddenException('취소 권한이 없습니다.');
     }
 
     return await this.updateParentRequest(id, {
       status: PARENT_STATUS.CANCELLED,
-    });
-  }
-
-  async findPendingRequestsByReceiverId(
-    receiverId: string,
-  ): Promise<ParentRequestEntity[]> {
-    // 부모 펫의 소유자 ID로 필터링하기 위해 서브쿼리 사용
-    const subQuery = this.petRepository
-      .createQueryBuilder('pet')
-      .select('pet.petId')
-      .where('pet.ownerId = :receiverId', { receiverId });
-
-    return await this.parentRequestRepository
-      .createQueryBuilder('parentRequest')
-      .where('parentRequest.parentPetId IN (' + subQuery.getQuery() + ')')
-      .andWhere('parentRequest.status = :status', {
-        status: PARENT_STATUS.PENDING,
-      })
-      .setParameters({ receiverId })
-      .orderBy('parentRequest.createdAt', 'DESC')
-      .getMany();
-  }
-
-  async findRequestsByRequesterId(
-    requesterId: string,
-  ): Promise<ParentRequestEntity[]> {
-    return await this.parentRequestRepository.find({
-      where: { requesterId },
-      order: { createdAt: 'DESC' },
     });
   }
 
@@ -434,7 +386,7 @@ export class ParentRequestService {
     );
 
     if (!notification) {
-      throw new HttpException('알림을 찾을 수 없습니다.', HttpStatus.NOT_FOUND);
+      throw new NotFoundException('알림을 찾을 수 없습니다.');
     }
 
     const parentRequest = await this.parentRequestRepository.findOne({
@@ -446,10 +398,7 @@ export class ParentRequestService {
     });
 
     if (!parentRequest) {
-      throw new HttpException(
-        '부모 요청을 찾을 수 없습니다.',
-        HttpStatus.NOT_FOUND,
-      );
+      throw new NotFoundException('부모 요청을 찾을 수 없습니다.');
     }
 
     await this.updateParentRequest(parentRequest.id, updateParentRequestDto);
