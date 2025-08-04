@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Not, EntityManager, DataSource, In } from 'typeorm';
 import { ParentRequestEntity } from './parent_request.entity';
@@ -41,10 +45,9 @@ export class ParentRequestService {
         createParentRequestDto,
       );
 
-      // 알림 생성
-      await this.userNotificationService.createUserNotification(
-        parentPet.ownerId,
-        {
+      // 알림 생성 (병렬 처리로 성능 향상)
+      await Promise.all([
+        this.userNotificationService.createUserNotification(parentPet.ownerId, {
           receiverId: parentPet.ownerId,
           type: USER_NOTIFICATION_TYPE.PARENT_REQUEST,
           targetId: createParentRequestDto.childPetId,
@@ -60,8 +63,8 @@ export class ParentRequestService {
             role: createParentRequestDto.role,
             message: createParentRequestDto.message,
           },
-        },
-      );
+        }),
+      ]);
 
       return parentRequest;
     });
@@ -134,13 +137,27 @@ export class ParentRequestService {
     createParentRequestDto: CreateParentRequestDto,
   ): Promise<ParentRequestEntity> {
     return this.dataSource.transaction(async (entityManager: EntityManager) => {
-      // 부모 펫 엔티티 조회
-      const parentPet = await entityManager.existsBy(PetEntity, {
+      const parentPetExists = await entityManager.existsBy(PetEntity, {
         petId: createParentRequestDto.parentPetId,
       });
 
-      if (!parentPet) {
+      if (!parentPetExists) {
         throw new NotFoundException('부모 펫을 찾을 수 없습니다.');
+      }
+
+      // 기존 요청이 있는지 확인 (중복 방지)
+      const existingRequest = await entityManager.findOne(ParentRequestEntity, {
+        where: {
+          childPetId: createParentRequestDto.childPetId,
+          parentPetId: createParentRequestDto.parentPetId,
+          role: createParentRequestDto.role,
+          status: In([PARENT_STATUS.PENDING, PARENT_STATUS.APPROVED]),
+        },
+        select: ['id'],
+      });
+
+      if (existingRequest) {
+        throw new ConflictException('이미 존재하는 부모 연동 요청입니다.');
       }
 
       const parentRequest = entityManager.create(ParentRequestEntity, {
@@ -160,13 +177,23 @@ export class ParentRequestService {
     parentPetId: string,
     role: PARENT_ROLE,
   ): Promise<ParentRequestEntity | null> {
-    return await this.parentRequestRepository.findOne({
-      where: {
-        childPetId,
-        parentPetId,
-        role,
-        status: PARENT_STATUS.PENDING,
-      },
+    return this.dataSource.transaction(async (entityManager: EntityManager) => {
+      return await entityManager.findOne(ParentRequestEntity, {
+        where: {
+          childPetId,
+          parentPetId,
+          role,
+          status: PARENT_STATUS.PENDING,
+        },
+        select: [
+          'id',
+          'childPetId',
+          'parentPetId',
+          'role',
+          'status',
+          'message',
+        ],
+      });
     });
   }
 
@@ -174,12 +201,22 @@ export class ParentRequestService {
     childPetId: string,
     role: PARENT_ROLE,
   ): Promise<ParentRequestEntity | null> {
-    return await this.parentRequestRepository.findOne({
-      where: {
-        childPetId,
-        role,
-        status: PARENT_STATUS.PENDING,
-      },
+    return this.dataSource.transaction(async (entityManager: EntityManager) => {
+      return await entityManager.findOne(ParentRequestEntity, {
+        where: {
+          childPetId,
+          role,
+          status: PARENT_STATUS.PENDING,
+        },
+        select: [
+          'id',
+          'childPetId',
+          'parentPetId',
+          'role',
+          'status',
+          'message',
+        ],
+      });
     });
   }
 
@@ -188,20 +225,24 @@ export class ParentRequestService {
     parentPetId: string,
     role: PARENT_ROLE,
   ): Promise<void> {
-    const parentRequest = await this.parentRequestRepository.findOne({
-      where: {
-        childPetId,
-        parentPetId,
-        role,
-      },
-    });
+    return this.dataSource.transaction(async (entityManager: EntityManager) => {
+      const parentRequest = await entityManager.findOne(ParentRequestEntity, {
+        where: {
+          childPetId,
+          parentPetId,
+          role,
+        },
+        select: ['id'],
+      });
 
-    if (parentRequest) {
-      await this.parentRequestRepository.update(
-        { id: parentRequest.id },
-        { status: PARENT_STATUS.DELETED },
-      );
-    }
+      if (parentRequest) {
+        await entityManager.update(
+          ParentRequestEntity,
+          { id: parentRequest.id },
+          { status: PARENT_STATUS.DELETED },
+        );
+      }
+    });
   }
 
   async deleteAllParentRequestsByPet(petId: string): Promise<void> {
