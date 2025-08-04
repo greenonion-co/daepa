@@ -1,18 +1,20 @@
-import React from 'react';
-import {SafeAreaView, StyleSheet} from 'react-native';
-import WebView from 'react-native-webview';
+/**
+ * Sample React Native App
+ * https://github.com/facebook/react-native
+ *
+ * @format
+ */
 
-function App(): React.JSX.Element {
+import React from 'react';
+import { SafeAreaView, StyleSheet, Text, View } from 'react-native';
+
+function App() {
   return (
     <SafeAreaView style={styles.container}>
-      <WebView
-        source={{uri: 'http://localhost:3000/pet'}}
-        style={styles.webview}
-        allowsInlineMediaPlayback={true}
-        mediaPlaybackRequiresUserAction={false}
-        domStorageEnabled={true}
-        javaScriptEnabled={true}
-      />
+      <View style={styles.content}>
+        <Text style={styles.title}>Welcome to React Native!</Text>
+        <Text style={styles.subtitle}>Mobile App</Text>
+      </View>
     </SafeAreaView>
   );
 }
@@ -20,9 +22,23 @@ function App(): React.JSX.Element {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#F5F5F5',
   },
-  webview: {
+  content: {
     flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 10,
+  },
+  subtitle: {
+    fontSize: 16,
+    color: '#666',
   },
 });
 
