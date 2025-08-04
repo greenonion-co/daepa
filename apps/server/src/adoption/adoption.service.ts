@@ -212,11 +212,6 @@ export class AdoptionService {
         ),
       );
 
-      console.log(
-        '🚀 ~ AdoptionService ~ findAll ~ adoptionEntities:',
-        adoptionEntities,
-      );
-
       const pageMetaDto = new PageMetaDto({ totalCount, pageOptionsDto });
 
       return new PageDto(adoptionDtos, pageMetaDto);
