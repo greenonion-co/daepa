@@ -21,11 +21,9 @@ import {
 import { Filters } from "./Filters";
 import useTableStore from "../store/table";
 import { useRouter } from "next/navigation";
-import Add from "@mui/icons-material/Add";
 import { PetDto } from "@repo/api-client";
 import Loading from "@/components/common/Loading";
 import { cn } from "@/lib/utils";
-import Link from "next/link";
 
 interface DataTableProps<TData> {
   columns: ColumnDef<TData>[];
@@ -33,6 +31,8 @@ interface DataTableProps<TData> {
   hasMore?: boolean;
   isFetchingMore?: boolean;
   loaderRefAction: (node?: Element | null) => void;
+  hasFilter?: boolean;
+  isClickable?: boolean;
 }
 
 export const DataTable = ({
@@ -41,6 +41,8 @@ export const DataTable = ({
   hasMore,
   isFetchingMore,
   loaderRefAction,
+  hasFilter = true,
+  isClickable = true,
 }: DataTableProps<PetDto>) => {
   const {
     sorting,
@@ -76,6 +78,7 @@ export const DataTable = ({
   const handleRowClick = ({ e, id }: { e: React.MouseEvent<HTMLTableRowElement>; id: string }) => {
     // checkbox나 버튼 클릭 시에는 detail 페이지로 이동하지 않음
     if (
+      !isClickable ||
       (e.target as HTMLElement).closest("button") ||
       (e.target as HTMLElement).closest('[role="checkbox"]')
     ) {
@@ -87,7 +90,7 @@ export const DataTable = ({
   return (
     <div className="relative w-full">
       <div className="w-full">
-        <Filters table={table} />
+        {hasFilter && <Filters table={table} />}
 
         <div className="rounded-md border">
           <Table>
@@ -154,13 +157,6 @@ export const DataTable = ({
           </Table>
         </div>
       </div>
-
-      <Link
-        href="/register/1"
-        className="fixed bottom-6 right-6 flex h-14 w-14 items-center justify-center rounded-full bg-blue-500 shadow-lg hover:bg-blue-600"
-      >
-        <Add fontSize="large" className="text-white" />
-      </Link>
     </div>
   );
 };

@@ -8,6 +8,9 @@ import { useInView } from "react-intersection-observer";
 import { useEffect } from "react";
 
 import useSearchStore from "./store/search";
+import { CsvUploader } from "./components/CsvUploader";
+import Link from "next/link";
+import Add from "@mui/icons-material/Add";
 
 export default function PetPage() {
   const { ref, inView } = useInView();
@@ -54,6 +57,8 @@ export default function PetPage() {
         <div className="text-sm text-gray-600">검색 결과: {totalCount}개</div>
       </div>
 
+      <CsvUploader />
+
       <DataTable
         columns={columns}
         data={items ?? []}
@@ -61,6 +66,13 @@ export default function PetPage() {
         isFetchingMore={isFetchingNextPage}
         loaderRefAction={ref}
       />
+
+      <Link
+        href="/register/1"
+        className="fixed bottom-6 right-6 flex h-14 w-14 items-center justify-center rounded-full bg-blue-500 shadow-lg hover:bg-blue-600"
+      >
+        <Add fontSize="large" className="text-white" />
+      </Link>
     </div>
   );
 }

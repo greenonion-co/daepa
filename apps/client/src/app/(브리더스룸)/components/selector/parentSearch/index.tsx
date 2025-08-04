@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, memo } from "react";
 import BottomSheet from "@/components/common/BottomSheet";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import {
@@ -23,14 +23,14 @@ interface ParentSearchProps {
   petListType?: BrPetControllerFindAllFilterType;
 }
 
-export default function ParentSearchSelector({
+const ParentSearchSelector = ({
   isOpen,
   onClose,
   onSelect,
   onExit,
   sex = "F",
   petListType = BrPetControllerFindAllFilterType.ALL,
-}: ParentSearchProps) {
+}: ParentSearchProps) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [step, setStep] = useState(1);
   const [selectedPet, setSelectedPet] = useState<PetParentDtoWithMessage | null>(null);
@@ -39,13 +39,14 @@ export default function ParentSearchSelector({
   const itemPerPage = 10;
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
-    queryKey: [brPetControllerFindAll.name, petListType],
+    queryKey: [brPetControllerFindAll.name, petListType, searchQuery],
     queryFn: ({ pageParam = 1 }) =>
       brPetControllerFindAll({
         page: pageParam,
         itemPerPage,
         order: "DESC",
         filterType: petListType,
+        keyword: searchQuery ?? "",
       }),
     initialPageParam: 1,
     getNextPageParam: (lastPage) => {
@@ -116,4 +117,6 @@ export default function ParentSearchSelector({
       </div>
     </BottomSheet>
   );
-}
+};
+
+export default ParentSearchSelector;

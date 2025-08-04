@@ -165,7 +165,7 @@ export const FormField = ({
         );
       case "multipleSelect":
         return (
-          <div className="flex flex-col gap-2">
+          <div className="flex cursor-pointer flex-col gap-2">
             {!disabled && (
               <div className={inputClassName} onClick={() => handleMultipleSelect?.(name)}>
                 {placeholder}

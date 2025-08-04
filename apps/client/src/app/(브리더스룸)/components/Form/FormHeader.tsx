@@ -1,8 +1,10 @@
 import { useRouter } from "next/navigation";
 import { REGISTER_PAGE } from "../../constants";
 import { useUserStore } from "../../store/user";
+import { ArrowLeftCircle } from "lucide-react";
+import { memo } from "react";
 
-export const FormHeader = ({ funnel }: { funnel: number }) => {
+export const FormHeader = memo(({ funnel }: { funnel: number }) => {
   const router = useRouter();
   const { user } = useUserStore();
 
@@ -17,8 +19,13 @@ export const FormHeader = ({ funnel }: { funnel: number }) => {
   return (
     <>
       {funnel === REGISTER_PAGE.SECOND && (
-        <button type="button" onClick={handleNavigateBack}>
-          필수 정보 수정하기
+        <button
+          className="mb-2 flex cursor-pointer items-center gap-2 text-gray-500 hover:font-bold hover:text-blue-700"
+          type="button"
+          onClick={handleNavigateBack}
+        >
+          <ArrowLeftCircle className="size-5" />
+          이전 단계로 돌아가기
         </button>
       )}
 
@@ -42,4 +49,6 @@ export const FormHeader = ({ funnel }: { funnel: number }) => {
       </div>
     </>
   );
-};
+});
+
+FormHeader.displayName = "FormHeader";

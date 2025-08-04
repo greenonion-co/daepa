@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { memo, useMemo, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 import {
@@ -21,7 +21,7 @@ interface AdoptionDashboardProps {
   data?: AdoptionDto[];
 }
 
-const AdoptionDashboard = ({ data = [] }: AdoptionDashboardProps) => {
+const AdoptionDashboard = memo(({ data = [] }: AdoptionDashboardProps) => {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [selectedMonth, setSelectedMonth] = useState<number | null>(new Date().getMonth() + 1);
 
@@ -130,7 +130,7 @@ const AdoptionDashboard = ({ data = [] }: AdoptionDashboardProps) => {
                   setSelectedMonth(null); // 연도 변경 시 월 선택 초기화
                 }}
               >
-                <SelectTrigger>
+                <SelectTrigger className="bg-gray-50">
                   <SelectValue placeholder="연도 선택" />
                 </SelectTrigger>
                 <SelectContent>
@@ -147,7 +147,7 @@ const AdoptionDashboard = ({ data = [] }: AdoptionDashboardProps) => {
                 value={selectedMonth?.toString() || "all"}
                 onValueChange={(value) => setSelectedMonth(value === "all" ? null : Number(value))}
               >
-                <SelectTrigger>
+                <SelectTrigger className="bg-gray-50">
                   <SelectValue placeholder="전체 월" />
                 </SelectTrigger>
                 <SelectContent>
@@ -218,6 +218,8 @@ const AdoptionDashboard = ({ data = [] }: AdoptionDashboardProps) => {
       </Card>
     </div>
   );
-};
+});
+
+AdoptionDashboard.displayName = "AdoptionDashboard";
 
 export default AdoptionDashboard;

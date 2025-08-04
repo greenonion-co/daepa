@@ -19,15 +19,12 @@ import PetCard from "./PetCard";
 
 const RangeFilterCalendar = memo(() => {
   const [month, setMonth] = useState<Date>(new Date());
-  const [dateRange, setDateRange] = useState<DateRange | undefined>({
-    from: new Date(),
-    to: new Date(),
-  });
+  const [dateRange, setDateRange] = useState<DateRange | undefined>();
 
   const [tab, setTab] = useState<"all" | "hatched" | "notHatched">("all");
 
   // 월별 해칭된 펫 조회
-  const { data: monthlyData } = useQuery({
+  const { data: monthlyData, isPending: monthlyIsPending } = useQuery({
     queryKey: [brPetControllerGetPetsByMonth.name, month.getFullYear(), month.getMonth()],
     queryFn: () =>
       brPetControllerGetPetsByMonth({
@@ -49,6 +46,7 @@ const RangeFilterCalendar = memo(() => {
       });
     },
     select: (data) => data.data.data,
+    enabled: !!dateRange?.from && !!dateRange?.to,
   });
 
   // 월별 해칭된 펫 개수 계산
@@ -71,6 +69,8 @@ const RangeFilterCalendar = memo(() => {
     );
   }, [monthlyData]);
 
+  const visibleData = selectedData ?? monthlyData ?? {};
+
   return (
     <div>
       <div className="flex gap-4">
@@ -92,7 +92,7 @@ const RangeFilterCalendar = memo(() => {
                   : `${format(dateRange.from, "yyyy.MM.dd")} - ${format(dateRange.to, "yyyy.MM.dd")}`
                 : dateRange?.from
                   ? format(dateRange.from, "yyyy.MM.dd") + " ~ "
-                  : "날짜를 선택해주세요"}
+                  : `${month.getMonth() + 1}월`}
             </div>
           </div>
           <Tabs
@@ -102,28 +102,28 @@ const RangeFilterCalendar = memo(() => {
           >
             <TabsList>
               <TabsTrigger value="all">
-                전체 ({Object.values(selectedData || {}).flat().length || 0})
+                전체 ({Object.values(visibleData).flat().length || 0})
               </TabsTrigger>
               <TabsTrigger value="hatched">
                 해칭된 펫 (
-                {Object.values(selectedData || {})
+                {Object.values(visibleData || {})
                   .flat()
                   .filter((pet) => pet.growth !== PetDtoGrowth.EGG).length || 0}
                 )
               </TabsTrigger>
               <TabsTrigger value="notHatched">
                 해칭되지 않은 펫 (
-                {Object.values(selectedData || {})
+                {Object.values(visibleData || {})
                   .flat()
                   .filter((pet) => pet.growth === PetDtoGrowth.EGG).length || 0}
                 )
               </TabsTrigger>
             </TabsList>
           </Tabs>
-          {todayIsPending ? (
+          {monthlyIsPending && todayIsPending ? (
             <Loading />
           ) : (
-            Object.entries(selectedData || {})
+            Object.entries(visibleData || {})
               .filter(([, pets]) => {
                 if (tab === "all") return pets.length > 0;
                 if (tab === "hatched")

@@ -1,5 +1,7 @@
+import { Button } from "@/components/ui/button";
 import { PetSummaryDto } from "@repo/api-client";
 import { ChevronRight } from "lucide-react";
+import { useState } from "react";
 
 interface HeaderProps {
   step: number;
@@ -9,7 +11,9 @@ interface HeaderProps {
   setSearchQuery: (searchQuery: string) => void;
 }
 
-const Header = ({ step, setStep, selectedPet, searchQuery, setSearchQuery }: HeaderProps) => {
+const Header = ({ step, setStep, selectedPet, setSearchQuery }: HeaderProps) => {
+  const [keyword, setKeyword] = useState("");
+
   return (
     <div className="sticky -top-[12px] z-20 bg-white pb-4 pt-4 dark:bg-[#18181B]">
       <div className="flex items-center gap-2 pb-2 pl-4">
@@ -28,14 +32,22 @@ const Header = ({ step, setStep, selectedPet, searchQuery, setSearchQuery }: Hea
       </div>
 
       {step === 1 && (
-        <div className="px-2">
+        <div className="flex items-center gap-2 px-2">
           <input
             type="text"
             placeholder="부모 개체를 검색하세요"
             className="w-full rounded-xl border border-gray-200 p-3 focus:border-gray-500 focus:outline-none"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            value={keyword}
+            onChange={(e) => setKeyword(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                setSearchQuery(keyword);
+              }
+            }}
           />
+          <Button className="h-12 rounded-xl text-[16px]" onClick={() => setSearchQuery(keyword)}>
+            검색
+          </Button>
         </div>
       )}
     </div>
