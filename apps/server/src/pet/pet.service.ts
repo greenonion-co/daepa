@@ -23,12 +23,18 @@ import {
   PetDto,
   PetFamilyParentDto,
   PetFamilyPairGroupDto,
+  CsvPreviewResponseDto,
 } from './pet.dto';
 import {
   PET_GROWTH,
   PET_SEX,
   ADOPTION_SALE_STATUS,
   PET_LIST_FILTER_TYPE,
+  CSV_FIELD_MAPPING,
+  SPECIES_MAPPING,
+  SEX_MAPPING,
+  GROWTH_MAPPING,
+  PET_SPECIES,
 } from './pet.constants';
 import { ParentRequestService } from '../parent_request/parent_request.service';
 import {
@@ -48,10 +54,14 @@ import { LayingEntity } from 'src/laying/laying.entity';
 import { isMySQLError } from 'src/common/error';
 import { UserProfilePublicDto } from 'src/user/user.dto';
 import { ParentRequestEntity } from 'src/parent_request/parent_request.entity';
+import { parse } from 'csv-parse';
+import { Readable } from 'stream';
 
 @Injectable()
 export class PetService {
   private readonly MAX_RETRIES = 3;
+  private readonly REQUIRED_FIELDS = ['name', 'species'];
+  private readonly BATCH_SIZE = 100;
 
   constructor(
     @InjectRepository(PetEntity)
@@ -902,5 +912,292 @@ export class PetService {
     throw new InternalServerErrorException(
       '펫 아이디 생성 중 오류가 발생했습니다. 나중에 다시 시도해주세요.',
     );
+  }
+
+  async uploadCsvFile(
+    file: Express.Multer.File,
+    userId: string,
+  ): Promise<CsvPreviewResponseDto> {
+    return this.dataSource.transaction(async (entityManager: EntityManager) => {
+      const results: CsvPreviewResponseDto = {
+        uploadedCount: 0,
+        failedCount: 0,
+        errors: [],
+        previewData: [],
+      };
+
+      // CSV 파싱
+      const records = await this.parseCsvFile(file.buffer);
+
+      for (let i = 0; i < records.length; i += this.BATCH_SIZE) {
+        const batch = records.slice(i, i + this.BATCH_SIZE);
+        await Promise.all(
+          batch.map(async (record, index) => {
+            try {
+              const validationError = this.validateCsvRecord(record);
+              if (validationError) {
+                results.failedCount++;
+                results.errors.push(`행 ${i + index + 2}: ${validationError}`);
+                return;
+              }
+              await this.createPetFromCsv(record, userId, entityManager);
+              results.uploadedCount++;
+            } catch (error) {
+              results.failedCount++;
+              const errorMessage =
+                error instanceof Error ? error.message : '알 수 없는 오류';
+              results.errors.push(`행 ${i + index + 2}: ${errorMessage}`);
+            }
+          }),
+        );
+      }
+
+      return results;
+    });
+  }
+
+  async previewCsvFile(
+    file: Express.Multer.File,
+  ): Promise<CsvPreviewResponseDto> {
+    const records = await this.parseCsvFile(file.buffer);
+    const results = {
+      uploadedCount: 0,
+      failedCount: 0,
+      errors: [] as string[],
+      previewData: [] as any[],
+    };
+    const validRecords: any[] = [];
+
+    for (let i = 0; i < records.length; i++) {
+      try {
+        const validationError = this.validateCsvRecord(records[i]);
+
+        if (validationError) {
+          results.failedCount++;
+          results.errors.push(`행 ${i + 2}: ${validationError}`);
+        } else {
+          results.uploadedCount++;
+          validRecords.push(records[i]);
+        }
+      } catch (error) {
+        results.failedCount++;
+        const errorMessage =
+          error instanceof Error ? error.message : '알 수 없는 오류';
+        results.errors.push(`행 ${i + 2}: ${errorMessage}`);
+      }
+    }
+
+    // 미리보기용 데이터를 results에 포함
+    results.previewData = validRecords;
+    return results;
+  }
+
+  private async parseCsvFile(buffer: Buffer): Promise<any[]> {
+    return new Promise((resolve, reject) => {
+      const records: any[] = [];
+      const stream = Readable.from(buffer);
+
+      stream
+        .pipe(
+          parse({
+            columns: true,
+            skip_empty_lines: true,
+            trim: true,
+          }),
+        )
+        .on('data', (record) => {
+          records.push(record);
+        })
+        .on('end', () => {
+          resolve(records);
+        })
+        .on('error', () => {
+          reject(new Error('CSV 파일 파싱에 실패했습니다.'));
+        });
+    });
+  }
+
+  private validateCsvRecord(record: Record<string, unknown>): string | null {
+    // 1. 필드명 정규화
+    const normalizedRecord = this.normalizeFieldNames(record);
+
+    // 2. 필수 필드 검증
+    const missingField = this.validateRequiredFields(normalizedRecord);
+    if (missingField) return missingField;
+
+    // 3. 종 검증
+    const speciesError = this.validateSpecies(normalizedRecord);
+    if (speciesError) return speciesError;
+
+    // 4. 성별 검증
+    const sexError = this.validateSex(normalizedRecord);
+    if (sexError) return sexError;
+
+    // 5. 성장단계 검증 (선택적)
+    const growthError = this.validateGrowth(normalizedRecord);
+    if (growthError) return growthError;
+
+    // 6. 해칭일 검증 (선택적)
+    const hatchingDateError = this.validateHatchingDate(normalizedRecord);
+    if (hatchingDateError) return hatchingDateError;
+
+    // 7. 몸무게 검증 (선택적)
+    const weightError = this.validateWeight(normalizedRecord);
+    if (weightError) return weightError;
+
+    // 8. 모프 검증 (선택적)
+    const morphsError = this.validateMorphs(normalizedRecord);
+    if (morphsError) return morphsError;
+
+    // 9. 정규화된 데이터를 원본에 저장
+    Object.keys(record).forEach((key) => delete record[key]);
+    Object.assign(record, normalizedRecord);
+    return null;
+  }
+
+  private normalizeFieldNames(
+    record: Record<string, unknown>,
+  ): Record<string, unknown> {
+    const normalizedRecord: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(record)) {
+      const normalizedKey = CSV_FIELD_MAPPING[key];
+      if (normalizedKey) {
+        // 한글 키를 영어 키로 변환
+        normalizedRecord[normalizedKey] = value;
+      } else if (!CSV_FIELD_MAPPING[key]) {
+        // 매핑되지 않은 키는 그대로 유지
+        normalizedRecord[key] = value;
+      }
+    }
+    return normalizedRecord;
+  }
+
+  private validateRequiredFields(
+    record: Record<string, unknown>,
+  ): string | null {
+    for (const field of this.REQUIRED_FIELDS) {
+      if (!record[field]) {
+        const koreanFieldName = Object.keys(CSV_FIELD_MAPPING).find(
+          (key) => CSV_FIELD_MAPPING[key] === field,
+        );
+        return `${koreanFieldName || field} 필드는 필수입니다.`;
+      }
+    }
+    return null;
+  }
+
+  private validateMorphs(record: Record<string, unknown>): string | null {
+    if (!record.morphs) {
+      record.morphs = [];
+      return null;
+    }
+
+    const morphsString = typeof record.morphs === 'string' ? record.morphs : '';
+    record.morphs = morphsString
+      .split(',')
+      .map((morph: string) => morph.trim())
+      .filter((morph: string) => morph.length > 0); // 빈 문자열 제거
+    return null;
+  }
+
+  private validateSpecies(record: Record<string, unknown>): string | null {
+    const speciesValue =
+      typeof record.species === 'string' ? record.species : '';
+    const normalizedSpecies = speciesValue.replace(/\s+/g, '');
+    const mappedSpecies =
+      SPECIES_MAPPING[speciesValue] || SPECIES_MAPPING[normalizedSpecies];
+
+    if (!mappedSpecies) {
+      return `유효하지 않은 종입니다: ${speciesValue}`;
+    }
+    record.species = mappedSpecies;
+    return null;
+  }
+
+  private validateSex(record: Record<string, unknown>): string | null {
+    const sexValue = typeof record.sex === 'string' ? record.sex : '';
+    const mappedSex = SEX_MAPPING[sexValue];
+    if (!mappedSex) {
+      return `유효하지 않은 성별입니다: ${sexValue}`;
+    }
+    record.sex = mappedSex;
+    return null;
+  }
+
+  private validateGrowth(record: Record<string, unknown>): string | null {
+    if (!record.growth) return null;
+
+    const growthValue = typeof record.growth === 'string' ? record.growth : '';
+    const mappedGrowth = GROWTH_MAPPING[growthValue];
+    if (!mappedGrowth) {
+      return `유효하지 않은 성장단계입니다: ${growthValue}`;
+    }
+    record.growth = mappedGrowth;
+    return null;
+  }
+
+  private validateHatchingDate(record: Record<string, unknown>): string | null {
+    if (!record.hatchingDate) return null;
+
+    const hatchingDate =
+      typeof record.hatchingDate === 'string' ? record.hatchingDate : '';
+    if (
+      !/^\d{8}$/.test(hatchingDate) &&
+      !/^\d{4}-\d{2}-\d{2}$/.test(hatchingDate)
+    ) {
+      return '해칭일은 YYYYMMDD 또는 YYYY-MM-DD 형식이어야 합니다.';
+    }
+
+    if (hatchingDate.includes('-')) {
+      record.hatchingDate = hatchingDate.replace(/-/g, '');
+    }
+    return null;
+  }
+
+  private validateWeight(record: Record<string, unknown>): string | null {
+    // 단위 제거 후 저장
+    if (!record.weight) return null;
+    const weightValue = typeof record.weight === 'string' ? record.weight : '';
+    record.weight = Number(weightValue.replace(/[^0-9]/g, ''));
+    return null;
+  }
+
+  private async createPetFromCsv(
+    record: Record<string, unknown>,
+    userId: string,
+    entityManager: EntityManager,
+  ): Promise<void> {
+    const petId = await this.generateUniquePetId(entityManager);
+
+    const petData = {
+      petId,
+      name: typeof record.name === 'string' ? record.name : '',
+      species:
+        typeof record.species === 'string'
+          ? (record.species as PET_SPECIES)
+          : PET_SPECIES.CRESTED,
+      sex:
+        typeof record.sex === 'string' ? (record.sex as PET_SEX) : PET_SEX.NON,
+      hatchingDate: Number(record.hatchingDate),
+      desc: typeof record.desc === 'string' ? record.desc : undefined,
+      ownerId: userId,
+      isPublic: true,
+      growth:
+        typeof record.growth === 'string'
+          ? (record.growth as PET_GROWTH)
+          : PET_GROWTH.BABY,
+      weight: typeof record.weight === 'string' ? Number(record.weight) : 0,
+      clutchOrder:
+        typeof record.clutchOrder === 'string'
+          ? Number(record.clutchOrder)
+          : undefined,
+      temperature:
+        typeof record.temperature === 'string'
+          ? Number(record.temperature)
+          : undefined,
+      morphs: Array.isArray(record.morphs) ? record.morphs : [],
+    };
+
+    await entityManager.insert(PetEntity, petData);
   }
 }

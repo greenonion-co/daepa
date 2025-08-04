@@ -6,6 +6,10 @@ import {
   Param,
   Patch,
   Delete,
+  UseInterceptors,
+  UploadedFile,
+  ParseFilePipe,
+  MaxFileSizeValidator,
 } from '@nestjs/common';
 import {
   CompleteHatchingDto,
@@ -14,13 +18,22 @@ import {
   PetFamilyTreeResponseDto,
   FindPetByPetIdResponseDto,
   UnlinkParentDto,
+  CsvUploadResponseDto,
+  PetDto,
 } from './pet.dto';
 import { PetService } from './pet.service';
-import { ApiResponse, ApiParam } from '@nestjs/swagger';
+import {
+  ApiResponse,
+  ApiParam,
+  ApiConsumes,
+  ApiBody,
+  getSchemaPath,
+} from '@nestjs/swagger';
 import { CommonResponseDto } from 'src/common/response.dto';
 import { JwtUser } from 'src/auth/auth.decorator';
 import { JwtUserPayload } from 'src/auth/strategies/jwt.strategy';
 import { CreateParentDto } from 'src/parent_request/parent_request.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('/v1/pet')
 export class PetController {
@@ -55,6 +68,117 @@ export class PetController {
     return {
       success: true,
       message: '가족관계도 조회 성공',
+      data,
+    };
+  }
+
+  @Post('upload-csv')
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'CSV 파일 업로드 성공',
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean' },
+        message: { type: 'string' },
+        data: {
+          type: 'object',
+          properties: {
+            uploadedCount: { type: 'number' },
+            failedCount: { type: 'number' },
+            errors: { type: 'array', items: { type: 'string' } },
+            previewData: {
+              type: 'array',
+              items: { $ref: getSchemaPath(PetDto) },
+            },
+          },
+        },
+      },
+    },
+  })
+  async uploadCsv(
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({ maxSize: 10 * 1024 * 1024 }), // 10MB
+        ],
+      }),
+    )
+    file: Express.Multer.File,
+    @JwtUser() token: JwtUserPayload,
+  ): Promise<CsvUploadResponseDto> {
+    const data = await this.petService.uploadCsvFile(file, token.userId);
+    return {
+      success: true,
+      message: 'CSV 파일 업로드 성공',
+      data,
+    };
+  }
+
+  @Post('preview-csv')
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'CSV 파일 업로드 성공',
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean' },
+        message: { type: 'string' },
+        data: {
+          type: 'object',
+          properties: {
+            uploadedCount: { type: 'number' },
+            failedCount: { type: 'number' },
+            errors: { type: 'array', items: { type: 'string' } },
+            previewData: {
+              type: 'array',
+              items: { $ref: getSchemaPath(PetDto) },
+            },
+          },
+        },
+      },
+    },
+  })
+  async previewCsv(
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({ maxSize: 10 * 1024 * 1024 }), // 10MB
+        ],
+      }),
+    )
+    file: Express.Multer.File,
+  ): Promise<CsvUploadResponseDto> {
+    const data = await this.petService.previewCsvFile(file);
+    return {
+      success: true,
+      message: 'CSV 파일 미리보기 성공',
       data,
     };
   }

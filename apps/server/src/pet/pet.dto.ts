@@ -786,3 +786,45 @@ export class UnlinkParentDto {
   @IsNotEmpty()
   role: PARENT_ROLE;
 }
+
+export class CsvPreviewResponseDto {
+  @ApiProperty({ description: '업로드된 펫 수', required: true })
+  uploadedCount: number;
+
+  @ApiProperty({ description: '실패한 행 수', required: true })
+  failedCount: number;
+
+  @ApiProperty({ description: '에러 메시지 목록', required: true })
+  errors: string[];
+
+  @ApiProperty({ description: '미리보기 데이터', required: true })
+  previewData: PetDto[];
+}
+
+export class CsvUploadResponseDto extends CommonResponseDto {
+  @ApiProperty({ description: '업로드 데이터' })
+  data: CsvPreviewResponseDto;
+}
+
+export class CsvUploadTemplateDto {
+  @ApiProperty({ description: '펫 이름', example: '잠원동대파' })
+  @IsString()
+  name: string;
+
+  @ApiProperty({ description: '종', example: 'CR' })
+  @IsString()
+  species: string;
+
+  @ApiProperty({ description: '성별', example: 'MALE' })
+  @IsString()
+  sex: string;
+
+  @ApiProperty({ description: '해칭일', example: '20250101' })
+  @IsString()
+  hatchingDate: string;
+
+  @ApiProperty({ description: '메모', example: '메모입니다' })
+  @IsOptional()
+  @IsString()
+  desc?: string;
+}
