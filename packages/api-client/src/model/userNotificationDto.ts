@@ -19,7 +19,7 @@ export interface UserNotificationDto {
   /** 알림 타입 */
   type: UserNotificationDtoType;
   /** 알림 대상 이벤트 아이디 ex) 부모 개체 아이디, 댓글 아이디 등 */
-  targetId?: string;
+  targetId?: number;
   /** 알림 상태
       - unread: 읽지 않음
       - read: 읽음

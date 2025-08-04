@@ -10,6 +10,7 @@ import { useEffect } from "react";
 import useSearchStore from "./store/search";
 import Link from "next/link";
 import Add from "@mui/icons-material/Add";
+import { CsvUploader } from "./components/CsvUploader";
 
 export default function PetPage() {
   const { ref, inView } = useInView();
@@ -55,6 +56,8 @@ export default function PetPage() {
         <h1 className="text-2xl font-bold">펫 목록</h1>
         <div className="text-sm text-gray-600">검색 결과: {totalCount}개</div>
       </div>
+
+      <CsvUploader />
 
       <DataTable
         columns={columns}
