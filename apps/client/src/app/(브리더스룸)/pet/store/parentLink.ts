@@ -1,9 +1,9 @@
-import { ParentStatus, PetDto } from "@repo/api-client";
+import { UpdateParentRequestDtoStatus, PetDto } from "@repo/api-client";
 import { create } from "zustand";
 
 export type PetParentDtoWithMessage = PetDto & {
   message: string;
-  status?: ParentStatus;
+  status?: UpdateParentRequestDtoStatus;
   isMyPet?: boolean;
 };
 interface ParentState {

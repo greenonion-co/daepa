@@ -32,7 +32,6 @@ import {
 import { UserProfilePublicDto } from 'src/user/user.dto';
 import { CreateParentDto } from 'src/parent_request/parent_request.dto';
 import { PageOptionsDto } from 'src/common/page.dto';
-import { PetEntity } from './pet.entity';
 import { CommonResponseDto } from 'src/common/response.dto';
 
 export class PetBaseDto {
@@ -698,54 +697,6 @@ export class PetHatchingDateRangeDto {
   @IsOptional()
   @IsString()
   endDate?: string;
-}
-
-export class PetFamilyPairGroupDto {
-  @ApiProperty({
-    description: '해당 pair에 속한 펫 리스트',
-    type: 'array',
-    items: { $ref: getSchemaPath(PetEntity) },
-  })
-  @IsArray()
-  petList: PetEntity[];
-
-  @ApiProperty({
-    description: '아버지 펫 정보',
-    type: () => PetFamilyParentDto,
-    nullable: true,
-  })
-  @IsOptional()
-  father: PetFamilyParentDto | null;
-
-  @ApiProperty({
-    description: '어머니 펫 정보',
-    type: () => PetFamilyParentDto,
-    nullable: true,
-  })
-  @IsOptional()
-  mother: PetFamilyParentDto | null;
-}
-
-export class PetFamilyParentDto {
-  @ApiProperty({ description: '펫 ID', example: 'abc123' })
-  @IsString()
-  petId: string;
-
-  @ApiProperty({ description: '펫 이름', example: '잠원동대파' })
-  @IsOptional()
-  @IsString()
-  name?: string;
-}
-
-export class PetFamilyTreeResponseDto extends CommonResponseDto {
-  @ApiProperty({
-    description: 'pairId별로 그룹화된 펫 데이터',
-    type: 'object',
-    additionalProperties: {
-      $ref: getSchemaPath(PetFamilyPairGroupDto),
-    },
-  })
-  data: Record<string, PetFamilyPairGroupDto>;
 }
 
 export class FindPetByPetIdResponseDto extends CommonResponseDto {

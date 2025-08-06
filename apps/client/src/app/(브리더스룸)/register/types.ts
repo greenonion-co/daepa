@@ -1,4 +1,4 @@
-import { ParentDtoRole } from "@repo/api-client";
+import { UnlinkParentDtoRole } from "@repo/api-client";
 
 export type FieldName =
   | "species"
@@ -54,5 +54,5 @@ export interface ParentRequestDetailJsonDto {
     name: string;
   };
   message: string;
-  role: ParentDtoRole;
+  role: UnlinkParentDtoRole;
 }

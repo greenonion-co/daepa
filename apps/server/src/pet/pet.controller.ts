@@ -11,7 +11,6 @@ import {
   CompleteHatchingDto,
   CreatePetDto,
   UpdatePetDto,
-  PetFamilyTreeResponseDto,
   FindPetByPetIdResponseDto,
   UnlinkParentDto,
 } from './pet.dto';
@@ -41,21 +40,6 @@ export class PetController {
     return {
       success: true,
       message: '펫 등록이 완료되었습니다.',
-    };
-  }
-
-  @Get('family-tree')
-  @ApiResponse({
-    status: 200,
-    description: '가족관계도 조회 성공',
-    type: PetFamilyTreeResponseDto,
-  })
-  async getFamilyTree(): Promise<PetFamilyTreeResponseDto> {
-    const data = await this.petService.getFamilyTree();
-    return {
-      success: true,
-      message: '가족관계도 조회 성공',
-      data,
     };
   }
 

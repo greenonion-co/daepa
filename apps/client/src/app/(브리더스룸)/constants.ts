@@ -405,11 +405,6 @@ export const SIDEBAR_ITEMS = [
     url: "/shorts",
     icon: Film,
   },
-  {
-    title: "가족관계도",
-    url: "/familyTree",
-    icon: TreeDeciduous,
-  },
 ];
 
 export const FOOD_BADGE_COLORS: Record<string, string> = {

@@ -8,22 +8,10 @@ import {
 } from '@nestjs/common';
 import { PetEntity } from './pet.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import {
-  Repository,
-  In,
-  Not,
-  IsNull,
-  EntityManager,
-  DataSource,
-} from 'typeorm';
+import { Repository, In, EntityManager, DataSource } from 'typeorm';
 import { nanoid } from 'nanoid';
 import { plainToInstance } from 'class-transformer';
-import {
-  CreatePetDto,
-  PetDto,
-  PetFamilyParentDto,
-  PetFamilyPairGroupDto,
-} from './pet.dto';
+import { CreatePetDto, PetDto } from './pet.dto';
 import {
   PET_GROWTH,
   PET_SEX,
@@ -833,57 +821,6 @@ export class PetService {
         },
       );
     });
-  }
-
-  async getFamilyTree(): Promise<Record<string, PetFamilyPairGroupDto>> {
-    const petList = await this.petRepository.find({
-      where: {
-        isDeleted: false,
-        pairId: Not(IsNull()),
-        growth: Not(PET_GROWTH.EGG),
-      },
-    });
-
-    // pairId를 key로. 펫리스트와 해당 pairId의 부,모 id를 value로 가진다.
-    const petListByPairId: Record<
-      string,
-      {
-        petList: PetEntity[];
-        father: PetFamilyParentDto | null;
-        mother: PetFamilyParentDto | null;
-      }
-    > = {};
-
-    for (const pet of petList) {
-      if (pet.pairId && !petListByPairId[pet.pairId]) {
-        // 부모 펫 정보 조회
-        const { father, mother } =
-          await this.parentRequestService.getParentsWithRequestStatus(
-            pet.petId,
-          );
-
-        petListByPairId[pet.pairId] = {
-          petList: [],
-          father: father?.petId
-            ? {
-                petId: father.petId,
-                name: father.name,
-              }
-            : null,
-          mother: mother?.petId
-            ? {
-                petId: mother.petId,
-                name: mother.name,
-              }
-            : null,
-        };
-      }
-      if (pet.pairId && petListByPairId[pet.pairId]) {
-        petListByPairId[pet.pairId].petList.push(pet);
-      }
-    }
-
-    return petListByPairId;
   }
 
   // 펫 아이디 생성

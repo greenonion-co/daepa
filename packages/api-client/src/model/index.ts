@@ -60,8 +60,6 @@ export * from "./petDtoGrowth";
 export * from "./petDtoSex";
 export * from "./petDtoSpecies";
 export * from "./petDtoStatus";
-export * from "./petFamilyTreeResponseDto";
-export * from "./petFamilyTreeResponseDtoData";
 export * from "./petParentDto";
 export * from "./petParentDtoSex";
 export * from "./petParentDtoSpecies";
