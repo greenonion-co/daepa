@@ -23,4 +23,6 @@ export interface PetAdoptionDto {
   location: PetAdoptionDtoLocation;
   /** 분양 구매자 아이디 */
   buyerId: string;
+  /** 분양 펫 아이디 */
+  petId: string;
 }

@@ -355,6 +355,13 @@ export class PetAdoptionDto {
   })
   @IsString()
   buyerId?: string;
+
+  @ApiProperty({
+    description: '분양 펫 아이디',
+    example: 'XXXXXXXX',
+  })
+  @IsString()
+  petId?: string;
 }
 
 export class PetDto extends PetBaseDto {
