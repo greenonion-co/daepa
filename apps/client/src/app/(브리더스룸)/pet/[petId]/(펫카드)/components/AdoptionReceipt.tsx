@@ -1,14 +1,19 @@
 import { SALE_STATUS_KOREAN_INFO } from "@/app/(브리더스룸)/constants";
-import { PetAdoptionDto } from "@repo/api-client";
+import { PetAdoptionDto, petControllerFindPetByPetId } from "@repo/api-client";
 import { format, parseISO } from "date-fns";
 import { ko } from "date-fns/locale";
 import { useState, memo, useCallback, useMemo } from "react";
+import { PencilIcon } from "lucide-react";
+import AdoptionDetailModal from "@/app/(브리더스룸)/adoption/components/AdoptionDetailModal";
+import { overlay } from "overlay-kit";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface AdoptionReceiptProps {
   adoption: PetAdoptionDto; // 실제 타입에 맞게 수정 필요
 }
 
 const AdoptionReceipt = memo(({ adoption }: AdoptionReceiptProps) => {
+  const queryClient = useQueryClient();
   const [isReceiptVisible, setIsReceiptVisible] = useState(false);
 
   const handleReceiptHover = useCallback(() => {
@@ -49,6 +54,21 @@ const AdoptionReceipt = memo(({ adoption }: AdoptionReceiptProps) => {
     return adoption?.memo ? "1.6s" : "1.4s";
   }, [adoption?.memo]);
 
+  const handleEditAdoption = useCallback(() => {
+    overlay.open(({ isOpen, close }) => (
+      <AdoptionDetailModal
+        isOpen={isOpen}
+        onClose={close}
+        adoptionId={adoption.adoptionId}
+        onUpdate={() => {
+          queryClient.invalidateQueries({
+            queryKey: [petControllerFindPetByPetId.name, adoption.petId],
+          });
+        }}
+      />
+    ));
+  }, [adoption.adoptionId, adoption.petId, queryClient]);
+
   if (!shouldShowReceipt) return null;
 
   return (
@@ -79,7 +99,12 @@ const AdoptionReceipt = memo(({ adoption }: AdoptionReceiptProps) => {
             )}
             분양 영수증{" "}
             {adoption?.status !== "SOLD" && (
-              <span className="text-sm font-light text-gray-600 dark:text-gray-400">(예정)</span>
+              <>
+                <button className="cursor-pointer" onClick={handleEditAdoption}>
+                  <PencilIcon className="h-5 w-5 hover:text-blue-500" />
+                </button>
+                <span className="text-sm font-light text-gray-600 dark:text-gray-400">(예정)</span>
+              </>
             )}
             {adoption?.status === "SOLD" && (
               <div className="opacity-0 transition-all duration-300 group-hover:opacity-100">
