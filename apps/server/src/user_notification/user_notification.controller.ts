@@ -84,10 +84,8 @@ export class UserNotificationController {
   })
   async update(
     @Body() updateUserNotificationDto: UpdateUserNotificationDto,
-    @JwtUser() token: JwtUserPayload,
   ): Promise<CommonResponseDto> {
     await this.userNotificationService.updateUserNotification(
-      token.userId,
       updateUserNotificationDto,
     );
     return {

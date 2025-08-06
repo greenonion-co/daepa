@@ -4,12 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { UserNotificationEntity } from './user_notification.entity';
-import {
-  DeleteResult,
-  FindOptionsWhere,
-  Repository,
-  UpdateResult,
-} from 'typeorm';
+import { DeleteResult, Repository, UpdateResult } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PageDto, PageMetaDto, PageOptionsDto } from 'src/common/page.dto';
 import {
@@ -62,7 +57,6 @@ export class UserNotificationService {
   }
 
   async updateUserNotification(
-    userId: string,
     dto: UpdateUserNotificationDto,
   ): Promise<UpdateResult> {
     if (!dto.status) {
@@ -77,19 +71,6 @@ export class UserNotificationService {
       { id: dto.id },
       { status: dto.status },
     );
-  }
-
-  async updateWhere(
-    where: FindOptionsWhere<UserNotificationEntity>,
-    payload: Partial<UserNotificationEntity>,
-  ) {
-    await this.userNotificationRepository.update(where, payload);
-    return await this.userNotificationRepository.findOne({
-      where: {
-        ...where,
-        ...payload,
-      },
-    });
   }
 
   async deleteUserNotification(
@@ -112,5 +93,12 @@ export class UserNotificationService {
     } catch {
       throw new NotFoundException('알림을 찾을 수 없습니다.');
     }
+  }
+
+  async updateUserNotificationDetailJson(
+    id: number,
+    detailJson: UserNotificationEntity['detailJson'],
+  ) {
+    return await this.userNotificationRepository.update({ id }, { detailJson });
   }
 }

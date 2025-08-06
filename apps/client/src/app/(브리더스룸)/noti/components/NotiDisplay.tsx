@@ -11,8 +11,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   parentRequestControllerUpdateStatus,
-  UpdateParentRequestDtoStatus,
   UpdateParentRequestDto,
+  UpdateParentRequestDtoStatus,
   userNotificationControllerDelete,
   userNotificationControllerFindAll,
   userNotificationControllerFindOne,
@@ -30,7 +30,9 @@ import { isNumber } from "@/lib/typeGuards";
 import { memo } from "react";
 import { ParentRequestDetailJsonDto } from "../../register/types";
 import { overlay } from "overlay-kit";
-import Dialog from "../../components/Form/Dialog";
+import RejectModal from "./RejectModal";
+import { AxiosError } from "axios";
+import StatusBadge from "./StatusBadge";
 
 const NotiDisplay = memo(() => {
   const router = useRouter();
@@ -47,6 +49,10 @@ const NotiDisplay = memo(() => {
   });
 
   const detailData = data?.detailJson as unknown as ParentRequestDetailJsonDto;
+  const alreadyProcessed =
+    data?.type === UserNotificationDtoType.PARENT_REQUEST &&
+    !!data?.detailJson?.status &&
+    data?.detailJson?.status !== UpdateParentRequestDtoStatus.PENDING;
 
   const { mutate: updateParentStatus } = useMutation({
     mutationFn: ({ id, status, rejectReason }: UpdateParentRequestDto & { id: number }) =>
@@ -58,9 +64,10 @@ const NotiDisplay = memo(() => {
       );
 
       queryClient.invalidateQueries({ queryKey: [userNotificationControllerFindOne.name, id] });
+      queryClient.invalidateQueries({ queryKey: [userNotificationControllerFindAll.name] });
     },
-    onError: () => {
-      toast.error("부모 연동 상태 변경에 실패했습니다.");
+    onError: (error: AxiosError<{ message: string }>) => {
+      toast.error(error?.response?.data?.message ?? "부모 연동 상태 변경에 실패했습니다.");
     },
   });
 
@@ -81,6 +88,11 @@ const NotiDisplay = memo(() => {
   });
 
   const handleUpdate = (status: UpdateParentRequestDtoStatus, rejectReason?: string) => {
+    if (alreadyProcessed) {
+      toast.error("이미 처리된 요청입니다.");
+      return;
+    }
+
     if (!data?.senderId || !data?.targetId) return;
 
     updateParentStatus({
@@ -183,20 +195,16 @@ const NotiDisplay = memo(() => {
                 <Button
                   onClick={(e) => {
                     e.preventDefault();
+                    if (alreadyProcessed) {
+                      toast.error("이미 처리된 요청입니다.");
+                      return;
+                    }
+
                     overlay.open(({ isOpen, close }) => (
-                      <Dialog
-                        title="요청 거절"
-                        description="요청을 거절하시겠습니까?"
-                        isOpen={isOpen}
-                        onCloseAction={close}
-                        onConfirmAction={() => {
-                          handleUpdate(UpdateParentRequestDtoStatus.REJECTED, "거절합니다.");
-                          close();
-                        }}
-                        onExit={close}
-                      />
+                      <RejectModal isOpen={isOpen} close={close} handleUpdate={handleUpdate} />
                     ));
                   }}
+                  disabled={alreadyProcessed}
                   variant="outline"
                   size="sm"
                   className="ml-auto"
@@ -208,6 +216,7 @@ const NotiDisplay = memo(() => {
                     e.preventDefault();
                     handleUpdate(UpdateParentRequestDtoStatus.APPROVED);
                   }}
+                  disabled={alreadyProcessed}
                   size="sm"
                   className="ml-auto"
                 >
@@ -228,14 +237,17 @@ const NotiDisplay = memo(() => {
                 <AvatarFallback>A</AvatarFallback>
               </Avatar>
               <div className="flex flex-col">
-                <Badge
-                  className={cn(
-                    "my-1 px-2 text-sm font-semibold",
-                    NOTIFICATION_TYPE[data.type as keyof typeof NOTIFICATION_TYPE].color,
-                  )}
-                >
-                  {NOTIFICATION_TYPE[data.type as keyof typeof NOTIFICATION_TYPE].label}
-                </Badge>
+                <div className="flex items-center gap-2">
+                  <Badge
+                    className={cn(
+                      "my-1 px-2 text-sm font-semibold",
+                      NOTIFICATION_TYPE[data.type as keyof typeof NOTIFICATION_TYPE].color,
+                    )}
+                  >
+                    {NOTIFICATION_TYPE[data.type as keyof typeof NOTIFICATION_TYPE].label}
+                  </Badge>
+                  <StatusBadge item={data} />
+                </div>
                 <NotiTitle hasLink detailData={detailData} />
               </div>
             </div>
@@ -257,11 +269,24 @@ const NotiDisplay = memo(() => {
           <Separator />
 
           <div className="whitespace-pre-wrap p-4 text-sm">
-            <span className="font-bold">
-              {data?.type !== UserNotificationDtoType.PARENT_REQUEST && "내가 보낸 요청 메시지"}
-            </span>
+            <div
+              className={cn(
+                "flex flex-col",
+                data?.type === UserNotificationDtoType.PARENT_REJECT && "text-muted-foreground",
+              )}
+            >
+              <span className="font-bold">
+                {data?.type !== UserNotificationDtoType.PARENT_REQUEST && "내가 보낸 요청 메시지"}
+              </span>
+              <div>{String(safeData?.message ?? "")}</div>
+            </div>
 
-            <div>{String(safeData?.message ?? "")}</div>
+            {data?.type === UserNotificationDtoType.PARENT_REJECT && (
+              <div className="mt-4 flex flex-col">
+                <span className="font-bold">거절 사유</span>
+                <span>{safeData?.rejectReason ?? "거절 사유가 없습니다."}</span>
+              </div>
+            )}
           </div>
 
           <Link

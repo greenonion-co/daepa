@@ -48,9 +48,9 @@ export class UserNotificationDto {
     example: 'XXXXXXXX',
     required: false,
   })
-  @IsString()
+  @IsNumber()
   @IsOptional()
-  targetId?: string;
+  targetId?: number;
 
   @ApiProperty({
     description: `알림 상태

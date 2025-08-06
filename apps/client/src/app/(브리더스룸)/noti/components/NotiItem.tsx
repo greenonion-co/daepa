@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { useRouter, useSearchParams } from "next/navigation";
 import { NOTIFICATION_TYPE } from "../../constants";
 import { ParentRequestDetailJsonDto } from "../../register/types";
+import StatusBadge from "./StatusBadge";
 
 interface NotiItemProps {
   item: UserNotificationDto;
@@ -77,6 +78,8 @@ const NotiItem = ({ item }: NotiItemProps) => {
             >
               {NOTIFICATION_TYPE[item.type].label}
             </Badge>
+            <StatusBadge item={item} />
+
             {item.status === UserNotificationDtoStatus.UNREAD && (
               <span className="flex h-2 w-2 rounded-full bg-red-500" />
             )}

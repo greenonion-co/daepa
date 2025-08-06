@@ -55,4 +55,5 @@ export interface ParentRequestDetailJsonDto {
   };
   message: string;
   role: ParentDtoRole;
+  rejectReason?: string;
 }
