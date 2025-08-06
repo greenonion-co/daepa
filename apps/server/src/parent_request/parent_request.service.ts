@@ -4,7 +4,7 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Not, EntityManager, DataSource, In } from 'typeorm';
+import { EntityManager, DataSource, In } from 'typeorm';
 import { ParentRequestEntity } from './parent_request.entity';
 import {
   CreateParentRequestDto,
@@ -46,8 +46,10 @@ export class ParentRequestService {
     );
 
     // 알림 생성 (병렬 처리로 성능 향상)
-    await Promise.all([
-      this.userNotificationService.createUserNotification(parentPet.ownerId, {
+
+    await this.userNotificationService.createUserNotification(
+      parentPet.ownerId,
+      {
         receiverId: parentPet.ownerId,
         type: USER_NOTIFICATION_TYPE.PARENT_REQUEST,
         targetId: createParentRequestDto.childPetId,
@@ -63,8 +65,8 @@ export class ParentRequestService {
           role: createParentRequestDto.role,
           message: createParentRequestDto.message,
         },
-      }),
-    ]);
+      },
+    );
 
     return parentRequest;
   }
@@ -227,24 +229,15 @@ export class ParentRequestService {
   async deleteAllParentRequestsByPet(petId: string): Promise<void> {
     return this.dataSource.transaction(async (entityManager: EntityManager) => {
       // 해당 펫과 관련된 모든 parent_request를 병렬로 DELETED 상태로 변경
-      await Promise.all([
-        entityManager.update(
-          ParentRequestEntity,
-          {
-            childPetId: petId,
-            status: Not(PARENT_STATUS.DELETED), // 이미 삭제된 것 제외
-          },
-          { status: PARENT_STATUS.DELETED },
-        ),
-        entityManager.update(
-          ParentRequestEntity,
-          {
-            parentPetId: petId,
-            status: Not(PARENT_STATUS.DELETED),
-          },
-          { status: PARENT_STATUS.DELETED },
-        ),
-      ]);
+      await entityManager
+        .createQueryBuilder()
+        .update(ParentRequestEntity)
+        .set({ status: PARENT_STATUS.DELETED })
+        .where('status != :deletedStatus', {
+          deletedStatus: PARENT_STATUS.DELETED,
+        })
+        .andWhere('(childPetId = :petId OR parentPetId = :petId)', { petId })
+        .execute();
     });
   }
 
@@ -325,7 +318,7 @@ export class ParentRequestService {
       case PARENT_STATUS.REJECTED:
         return USER_NOTIFICATION_TYPE.PARENT_REJECT;
       case PARENT_STATUS.CANCELLED:
-        return USER_NOTIFICATION_TYPE.PARENT_REJECT; // CANCEL 타입이 없으므로 REJECT 사용
+        return USER_NOTIFICATION_TYPE.PARENT_CANCEL;
       default:
         return USER_NOTIFICATION_TYPE.PARENT_REQUEST;
     }
