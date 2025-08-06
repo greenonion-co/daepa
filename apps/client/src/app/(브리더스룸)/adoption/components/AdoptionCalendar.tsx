@@ -1,6 +1,6 @@
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent } from "@/components/ui/card";
-import { AdoptionDto, PetDtoSaleStatus } from "@repo/api-client";
+import { AdoptionDto, AdoptionDtoStatus } from "@repo/api-client";
 import { format } from "date-fns";
 import { Info } from "lucide-react";
 import { useMemo } from "react";
@@ -36,13 +36,13 @@ const AdoptionCalendar = ({ data, selectedYear, selectedMonth }: AdoptionCalenda
           const dateKey = format(date, "yyyyMMdd");
           if (dailyData[dateKey]) {
             switch (adoption.status) {
-              case PetDtoSaleStatus.SOLD:
+              case AdoptionDtoStatus.SOLD:
                 dailyData[dateKey].sold++;
                 break;
-              case PetDtoSaleStatus.ON_SALE:
+              case AdoptionDtoStatus.ON_SALE:
                 dailyData[dateKey].onSale++;
                 break;
-              case PetDtoSaleStatus.ON_RESERVATION:
+              case AdoptionDtoStatus.ON_RESERVATION:
                 dailyData[dateKey].onReservation++;
                 break;
             }

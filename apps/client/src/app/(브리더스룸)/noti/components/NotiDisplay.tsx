@@ -11,7 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   parentRequestControllerUpdateStatus,
-  UpdateParentDtoStatus,
+  UpdateParentRequestDtoStatus,
   UpdateParentRequestDto,
   userNotificationControllerDelete,
   userNotificationControllerFindAll,
@@ -54,7 +54,7 @@ const NotiDisplay = memo(() => {
     onSuccess: (res, variables) => {
       toast.success(
         res?.data?.message ??
-          `부모 연동이 ${variables.status === UpdateParentDtoStatus.APPROVED ? "수락" : variables.status === UpdateParentDtoStatus.CANCELLED ? "취소" : "거절"} 되었습니다.`,
+          `부모 연동이 ${variables.status === UpdateParentRequestDtoStatus.APPROVED ? "수락" : variables.status === UpdateParentRequestDtoStatus.CANCELLED ? "취소" : "거절"} 되었습니다.`,
       );
 
       queryClient.invalidateQueries({ queryKey: [userNotificationControllerFindOne.name, id] });
@@ -80,7 +80,7 @@ const NotiDisplay = memo(() => {
     },
   });
 
-  const handleUpdate = (status: UpdateParentDtoStatus, rejectReason?: string) => {
+  const handleUpdate = (status: UpdateParentRequestDtoStatus, rejectReason?: string) => {
     if (!data?.senderId || !data?.targetId) return;
 
     updateParentStatus({
@@ -190,7 +190,7 @@ const NotiDisplay = memo(() => {
                         isOpen={isOpen}
                         onCloseAction={close}
                         onConfirmAction={() => {
-                          handleUpdate(UpdateParentDtoStatus.REJECTED, "거절합니다.");
+                          handleUpdate(UpdateParentRequestDtoStatus.REJECTED, "거절합니다.");
                           close();
                         }}
                         onExit={close}
@@ -206,7 +206,7 @@ const NotiDisplay = memo(() => {
                 <Button
                   onClick={(e) => {
                     e.preventDefault();
-                    handleUpdate(UpdateParentDtoStatus.APPROVED);
+                    handleUpdate(UpdateParentRequestDtoStatus.APPROVED);
                   }}
                   size="sm"
                   className="ml-auto"
