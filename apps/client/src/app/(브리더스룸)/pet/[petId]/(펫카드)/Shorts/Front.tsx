@@ -66,7 +66,7 @@ const CardFront = ({ pet, qrCodeDataUrl }: { pet: PetDto; qrCodeDataUrl?: string
               >
                 <Image
                   src={allImages[currentImageIndex] || "/default-pet-image.png"}
-                  alt={pet.name}
+                  alt={pet.name || "Pet Image"}
                   fill
                   className="object-cover"
                 />
