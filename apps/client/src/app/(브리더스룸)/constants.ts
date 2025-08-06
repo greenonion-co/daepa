@@ -452,6 +452,10 @@ export const NOTIFICATION_TYPE: Record<UserNotificationDtoType, { label: string;
       label: "주인 거절",
       color: "bg-red-600",
     },
+    parent_cancel: {
+      label: "부모 연동 취소",
+      color: "bg-gray-600",
+    },
   };
 
 export const STATUS_MAP = {
