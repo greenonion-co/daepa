@@ -2,6 +2,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  Index,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -11,6 +12,7 @@ import {
 } from './user_notification.constant';
 
 @Entity({ name: 'user_notifications' })
+@Index(['senderId', 'receiverId', 'type', 'targetId'], { unique: true })
 export class UserNotificationEntity {
   @PrimaryGeneratedColumn()
   id: number;

@@ -5,7 +5,11 @@ import { overlay } from "overlay-kit";
 import ParentSearchSelector from "../../components/selector/parentSearch";
 import { Button } from "@/components/ui/button";
 import Dialog from "../../components/Form/Dialog";
-import { BrPetControllerFindAllFilterType, PetParentDto } from "@repo/api-client";
+import {
+  BrPetControllerFindAllFilterType,
+  PetParentDto,
+  PetParentDtoStatus,
+} from "@repo/api-client";
 import { cn } from "@/lib/utils";
 import ParentStatusBadge from "../../components/ParentStatusBadge";
 import { Badge } from "@/components/ui/badge";
@@ -49,8 +53,14 @@ const ParentLink = ({
           deleteParent();
           close();
         }}
-        title="부모 연동 해제"
-        description={`${label} 개체와의 연동을 해제하시겠습니까?`}
+        title={
+          data?.status === PetParentDtoStatus.APPROVED ? "부모 연동 해제" : "부모 연동 요청 취소"
+        }
+        description={
+          data?.status === PetParentDtoStatus.APPROVED
+            ? `부모 연동을 해제하시겠습니까? \n 해제 후 다시 연동 요청을 해야 합니다.`
+            : "부모 연동 요청을 취소하시겠습니까? \n 부모 개체 주인에게 취소 알림이 발송됩니다."
+        }
         onExit={unmount}
       />
     ));

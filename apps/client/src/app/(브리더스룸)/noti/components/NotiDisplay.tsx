@@ -276,7 +276,10 @@ const NotiDisplay = memo(() => {
               )}
             >
               <span className="font-bold">
-                {data?.type !== UserNotificationDtoType.PARENT_REQUEST && "내가 보낸 요청 메시지"}
+                {(data?.type === UserNotificationDtoType.PARENT_ACCEPT ||
+                  data?.type === UserNotificationDtoType.PARENT_REJECT ||
+                  data?.type === UserNotificationDtoType.PARENT_REQUEST) &&
+                  "내가 보낸 요청 메시지"}
               </span>
               <div>{String(safeData?.message ?? "")}</div>
             </div>

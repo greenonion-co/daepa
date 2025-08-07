@@ -50,7 +50,7 @@ export class ParentRequestService {
     // 알림 생성 (병렬 처리로 성능 향상)
 
     await this.userNotificationService.createUserNotification(
-      parentPet.ownerId,
+      childPet.ownerId,
       {
         receiverId: parentPet.ownerId,
         type: USER_NOTIFICATION_TYPE.PARENT_REQUEST,
@@ -147,7 +147,6 @@ export class ParentRequestService {
         await this.userNotificationService.updateUserNotificationDetailJson(
           notification.id,
           {
-            ...notification.detailJson,
             status: updateParentRequestDto.status,
             ...(updateParentRequestDto.status === PARENT_STATUS.REJECTED && {
               rejectReason: updateParentRequestDto.rejectReason,
@@ -266,7 +265,7 @@ export class ParentRequestService {
     });
   }
 
-  private async getPetInfo(
+  async getPetInfo(
     entityManager: EntityManager,
     childPetId: string,
     parentPetId: string,

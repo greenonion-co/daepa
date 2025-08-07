@@ -36,6 +36,9 @@ import { LayingEntity } from 'src/laying/laying.entity';
 import { isMySQLError } from 'src/common/error';
 import { UserProfilePublicDto } from 'src/user/user.dto';
 import { ParentRequestEntity } from 'src/parent_request/parent_request.entity';
+import { UserNotificationService } from 'src/user_notification/user_notification.service';
+import { USER_NOTIFICATION_TYPE } from 'src/user_notification/user_notification.constant';
+import { UserNotificationEntity } from 'src/user_notification/user_notification.entity';
 
 @Injectable()
 export class PetService {
@@ -45,10 +48,13 @@ export class PetService {
     @InjectRepository(PetEntity)
     private readonly petRepository: Repository<PetEntity>,
     private readonly parentRequestService: ParentRequestService,
+    @InjectRepository(UserNotificationEntity)
+    private readonly userNotificationRepository: Repository<UserNotificationEntity>,
     @InjectRepository(LayingEntity)
     private readonly layingRepository: Repository<LayingEntity>,
     private readonly userService: UserService,
     private readonly pairService: PairService,
+    private readonly userNotificationService: UserNotificationService,
     private readonly dataSource: DataSource,
   ) {}
 
@@ -810,14 +816,63 @@ export class PetService {
         throw new NotFoundException('해당 부모 관계를 찾을 수 없습니다.');
       }
 
+      if (parentRequest.status === PARENT_STATUS.PENDING) {
+        const { childPet, parentPet } =
+          await this.parentRequestService.getPetInfo(
+            entityManager,
+            parentRequest.childPetId,
+            parentRequest.parentPetId,
+          );
+
+        if (!childPet?.ownerId || !parentPet?.ownerId) {
+          throw new NotFoundException('주인 정보를 찾을 수 없습니다.');
+        }
+
+        const notification = await this.userNotificationRepository.findOne({
+          where: {
+            senderId: childPet.ownerId,
+            receiverId: parentPet.ownerId,
+            type: USER_NOTIFICATION_TYPE.PARENT_REQUEST,
+            targetId: parentRequest.id,
+          },
+        });
+
+        if (notification) {
+          await this.userNotificationService.updateUserNotificationDetailJson(
+            notification.id,
+            {
+              status: PARENT_STATUS.CANCELLED,
+            },
+          );
+        }
+
+        await this.userNotificationService.createUserNotification(
+          childPet.ownerId,
+          {
+            receiverId: parentPet.ownerId,
+            type: USER_NOTIFICATION_TYPE.PARENT_CANCEL,
+            targetId: parentRequest.id,
+            detailJson: {
+              childPet: {
+                id: parentRequest.childPetId,
+                name: childPet?.name,
+              },
+              parentPet: {
+                id: parentRequest.parentPetId,
+                name: parentPet?.name,
+              },
+              role: parentRequest.role,
+              message: '부모 요청이 취소되었습니다.',
+            },
+          },
+        );
+      }
+
       await entityManager.update(
         ParentRequestEntity,
         { id: parentRequest.id },
         {
-          status:
-            parentRequest.status === PARENT_STATUS.PENDING
-              ? PARENT_STATUS.CANCELLED
-              : PARENT_STATUS.DELETED,
+          status: PARENT_STATUS.CANCELLED,
         },
       );
     });

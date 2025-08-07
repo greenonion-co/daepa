@@ -9,8 +9,8 @@ import {
 import { PARENT_ROLE, PARENT_STATUS } from './parent_request.constants';
 
 @Entity({ name: 'parent_requests' })
-@Index('UNIQUE_CHILD_PARENT', ['childPetId', 'parentPetId', 'status'], {
-  unique: true,
+@Index('UNIQUE_CHILD_PARENT_ACTIVE', ['childPetId', 'parentPetId', 'status'], {
+  unique: false,
 })
 export class ParentRequestEntity {
   @PrimaryGeneratedColumn()

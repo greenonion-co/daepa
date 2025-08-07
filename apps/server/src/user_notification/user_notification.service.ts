@@ -97,8 +97,25 @@ export class UserNotificationService {
 
   async updateUserNotificationDetailJson(
     id: number,
-    detailJson: UserNotificationEntity['detailJson'],
+    detailJson: Partial<UserNotificationEntity['detailJson']>,
   ) {
-    return await this.userNotificationRepository.update({ id }, { detailJson });
+    const existingNotification = await this.userNotificationRepository.findOne({
+      where: { id },
+      select: ['detailJson'],
+    });
+
+    if (!existingNotification) {
+      throw new NotFoundException('알림을 찾을 수 없습니다.');
+    }
+
+    const updatedDetailJson = {
+      ...existingNotification.detailJson,
+      ...detailJson,
+    };
+
+    return await this.userNotificationRepository.update(
+      { id },
+      { detailJson: updatedDetailJson },
+    );
   }
 }
