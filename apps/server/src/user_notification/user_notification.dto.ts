@@ -89,6 +89,7 @@ export class UserNotificationDto {
 }
 
 export class CreateUserNotificationDto extends PickType(UserNotificationDto, [
+  'senderId',
   'receiverId',
   'type',
   'targetId',

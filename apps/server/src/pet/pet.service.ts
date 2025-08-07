@@ -828,7 +828,7 @@ export class PetService {
           throw new NotFoundException('주인 정보를 찾을 수 없습니다.');
         }
 
-        const notification = await this.userNotificationRepository.findOne({
+        const notifications = await entityManager.find(UserNotificationEntity, {
           where: {
             senderId: childPet.ownerId,
             receiverId: parentPet.ownerId,
@@ -837,8 +837,9 @@ export class PetService {
           },
         });
 
-        if (notification) {
+        for (const notification of notifications) {
           await this.userNotificationService.updateUserNotificationDetailJson(
+            entityManager,
             notification.id,
             {
               status: PARENT_STATUS.CANCELLED,
@@ -847,8 +848,9 @@ export class PetService {
         }
 
         await this.userNotificationService.createUserNotification(
-          childPet.ownerId,
+          entityManager,
           {
+            senderId: childPet.ownerId,
             receiverId: parentPet.ownerId,
             type: USER_NOTIFICATION_TYPE.PARENT_CANCEL,
             targetId: parentRequest.id,
