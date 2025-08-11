@@ -48,8 +48,6 @@ export class PetService {
     @InjectRepository(PetEntity)
     private readonly petRepository: Repository<PetEntity>,
     private readonly parentRequestService: ParentRequestService,
-    @InjectRepository(UserNotificationEntity)
-    private readonly userNotificationRepository: Repository<UserNotificationEntity>,
     @InjectRepository(LayingEntity)
     private readonly layingRepository: Repository<LayingEntity>,
     private readonly userService: UserService,
@@ -126,6 +124,7 @@ export class PetService {
             throw new ConflictException('이미 존재하는 펫 이름입니다.');
           }
         }
+
         throw new InternalServerErrorException(
           '펫 생성 중 오류가 발생했습니다.',
         );
@@ -828,24 +827,20 @@ export class PetService {
           throw new NotFoundException('주인 정보를 찾을 수 없습니다.');
         }
 
-        const notifications = await entityManager.find(UserNotificationEntity, {
-          where: {
+        await entityManager
+          .createQueryBuilder()
+          .update(UserNotificationEntity)
+          .set({
+            detailJson: () =>
+              `JSON_SET(detailJson, '$.status', '"${PARENT_STATUS.CANCELLED}"')`,
+          })
+          .where({
             senderId: childPet.ownerId,
             receiverId: parentPet.ownerId,
             type: USER_NOTIFICATION_TYPE.PARENT_REQUEST,
             targetId: parentRequest.id,
-          },
-        });
-
-        for (const notification of notifications) {
-          await this.userNotificationService.updateUserNotificationDetailJson(
-            entityManager,
-            notification.id,
-            {
-              status: PARENT_STATUS.CANCELLED,
-            },
-          );
-        }
+          })
+          .execute();
 
         await this.userNotificationService.createUserNotification(
           entityManager,

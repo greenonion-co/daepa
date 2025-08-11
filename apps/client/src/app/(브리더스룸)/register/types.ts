@@ -1,5 +1,3 @@
-import { UnlinkParentDtoRole } from "@repo/api-client";
-
 export type FieldName =
   | "species"
   | "morphs"
@@ -42,18 +40,4 @@ export interface FormErrors {
 export interface SelectorConfig {
   title: string;
   selectList: string[];
-}
-
-export interface ParentRequestDetailJsonDto {
-  childPet: {
-    id: string;
-    name: string;
-  };
-  parentPet: {
-    id: string;
-    name: string;
-  };
-  message: string;
-  role: UnlinkParentDtoRole;
-  rejectReason?: string;
 }

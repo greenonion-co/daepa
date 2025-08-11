@@ -7,7 +7,7 @@
  */
 import type { UserNotificationDtoType } from "./userNotificationDtoType";
 import type { UserNotificationDtoStatus } from "./userNotificationDtoStatus";
-import type { UserNotificationDtoDetailJson } from "./userNotificationDtoDetailJson";
+import type { UserNotificationDetailJson } from "./userNotificationDetailJson";
 
 export interface UserNotificationDto {
   /** 알림 아이디 */
@@ -26,7 +26,7 @@ export interface UserNotificationDto {
       - deleted: 삭제 */
   status: UserNotificationDtoStatus;
   /** 알림 상세 정보 JSON */
-  detailJson?: UserNotificationDtoDetailJson;
+  detailJson?: UserNotificationDetailJson;
   /** 알림 생성 시간 */
   createdAt: string;
   /** 알림 수정 시간 */

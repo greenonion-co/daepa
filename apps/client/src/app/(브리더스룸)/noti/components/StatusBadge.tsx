@@ -5,11 +5,15 @@ import { cn } from "@/lib/utils";
 import { UserNotificationDtoType } from "@repo/api-client";
 
 const StatusBadge = ({ item }: { item: UserNotificationDto }) => {
+  const status = item.detailJson?.status;
+
   if (
     !(
       item.type === UserNotificationDtoType.PARENT_REQUEST &&
-      !!item.detailJson?.status &&
-      item.detailJson?.status !== UpdateParentRequestDtoStatus.PENDING
+      !!status &&
+      (status === UpdateParentRequestDtoStatus.APPROVED ||
+        status === UpdateParentRequestDtoStatus.REJECTED ||
+        status === UpdateParentRequestDtoStatus.CANCELLED)
     )
   )
     return;
@@ -18,16 +22,16 @@ const StatusBadge = ({ item }: { item: UserNotificationDto }) => {
     <Badge
       className={cn(
         "my-1 px-2 text-sm font-semibold",
-        item.detailJson?.status === UpdateParentRequestDtoStatus.APPROVED
+        status === UpdateParentRequestDtoStatus.APPROVED
           ? "bg-green-500 text-white"
-          : item.detailJson?.status === UpdateParentRequestDtoStatus.REJECTED
+          : status === UpdateParentRequestDtoStatus.REJECTED
             ? "bg-red-500 text-white"
             : "bg-gray-500 text-white",
       )}
     >
-      {item.detailJson?.status === UpdateParentRequestDtoStatus.APPROVED && "수락"}
-      {item.detailJson?.status === UpdateParentRequestDtoStatus.REJECTED && "거절"}
-      {item.detailJson?.status === UpdateParentRequestDtoStatus.CANCELLED && "취소"}
+      {status === UpdateParentRequestDtoStatus.APPROVED && "수락"}
+      {status === UpdateParentRequestDtoStatus.REJECTED && "거절"}
+      {status === UpdateParentRequestDtoStatus.CANCELLED && "취소"}
     </Badge>
   );
 };

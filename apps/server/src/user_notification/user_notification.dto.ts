@@ -12,6 +12,83 @@ import {
 } from './user_notification.constant';
 import { ApiProperty, PickType } from '@nestjs/swagger';
 import { CommonResponseDto } from 'src/common/response.dto';
+import {
+  PARENT_ROLE,
+  PARENT_STATUS,
+} from 'src/parent_request/parent_request.constants';
+
+export class NotificationPetDto {
+  @ApiProperty({
+    description: '개체 아이디',
+    example: 'XXXXXXXX',
+  })
+  @IsString()
+  id: string;
+
+  @ApiProperty({
+    description: '개체 이름',
+    example: '뽀삐',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  name?: string;
+}
+
+export class UserNotificationDetailJson {
+  @ApiProperty({
+    description: '부모 연동 상태',
+    example: PARENT_STATUS.PENDING,
+    enum: PARENT_STATUS,
+    required: false,
+    'x-enumNames': Object.keys(PARENT_STATUS),
+  })
+  @IsEnum(PARENT_STATUS)
+  status?: PARENT_STATUS;
+
+  @ApiProperty({
+    description: '자식 개체 정보',
+    type: NotificationPetDto,
+    required: false,
+  })
+  @IsOptional()
+  childPet: NotificationPetDto;
+
+  @ApiProperty({
+    description: '부모 개체 정보',
+    type: NotificationPetDto,
+    required: false,
+  })
+  @IsOptional()
+  parentPet: NotificationPetDto;
+
+  @ApiProperty({
+    description: '부모 역할',
+    example: PARENT_ROLE.FATHER,
+    required: false,
+  })
+  @IsEnum(PARENT_ROLE)
+  @IsOptional()
+  role: PARENT_ROLE;
+
+  @ApiProperty({
+    description: '메시지',
+    example: '뽀삐 부모 연동 요청',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  message?: string;
+
+  @ApiProperty({
+    description: '거절 이유',
+    example: '뽀삐 부모 연동 거절',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  rejectReason?: string;
+}
 
 export class UserNotificationDto {
   @ApiProperty({
@@ -71,7 +148,7 @@ export class UserNotificationDto {
   })
   @IsOptional()
   @IsJSON()
-  detailJson?: Record<string, any>;
+  detailJson?: UserNotificationDetailJson;
 
   @ApiProperty({
     description: '알림 생성 시간',

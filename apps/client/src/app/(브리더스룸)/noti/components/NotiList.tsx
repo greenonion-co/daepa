@@ -57,22 +57,6 @@ const NotiList = ({ tab }: { tab: "all" | "unread" }) => {
   return (
     <ScrollArea className="h-[calc(100vh-200px)]">
       <div className="flex flex-col gap-2 p-4 pt-0">
-        {/* 역할별 색상 안내 추가 */}
-        <div className="text-muted-foreground mb-2 flex items-center gap-4 text-xs">
-          <div className="flex items-center gap-1">
-            <span className="h-2 w-2 rounded-full bg-red-400/70" />
-            <span>모</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <span className="h-2 w-2 rounded-full bg-[#247DFE]/70" />
-            <span>부</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <span className="bg-muted-foreground/50 h-2 w-2 rounded-full" />
-            <span>미구분</span>
-          </div>
-        </div>
-
         {items.length === 0 && (
           <div className="flex h-full items-center justify-center">
             <p className="text-muted-foreground">알림이 없습니다.</p>

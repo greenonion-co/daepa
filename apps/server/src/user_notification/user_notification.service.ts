@@ -11,6 +11,8 @@ import {
   CreateUserNotificationDto,
   DeleteUserNotificationDto,
   UpdateUserNotificationDto,
+  UserNotificationDetailJson,
+  UserNotificationDto,
 } from './user_notification.dto';
 import { plainToInstance } from 'class-transformer';
 
@@ -85,11 +87,18 @@ export class UserNotificationService {
   async findOne(
     id: number,
     userId: string,
-  ): Promise<UserNotificationEntity | null> {
+  ): Promise<UserNotificationDto | null> {
     try {
-      return await this.userNotificationRepository.findOne({
-        where: { id, isDeleted: false, receiverId: userId },
-      });
+      const userNotificationEntity =
+        await this.userNotificationRepository.findOne({
+          where: { id, isDeleted: false, receiverId: userId },
+        });
+
+      if (!userNotificationEntity) {
+        return null;
+      }
+
+      return plainToInstance(UserNotificationDto, userNotificationEntity);
     } catch {
       throw new NotFoundException('알림을 찾을 수 없습니다.');
     }
@@ -98,7 +107,7 @@ export class UserNotificationService {
   async updateUserNotificationDetailJson(
     entityManager: EntityManager,
     id: number,
-    detailJson: Partial<UserNotificationEntity['detailJson']>,
+    detailJson: Partial<UserNotificationDetailJson>,
   ) {
     const existingNotification = await entityManager.findOne(
       UserNotificationEntity,
@@ -113,7 +122,7 @@ export class UserNotificationService {
       throw new NotFoundException('알림을 찾을 수 없습니다.');
     }
 
-    const updatedDetailJson = {
+    const updatedDetailJson: UserNotificationDetailJson = {
       ...existingNotification.detailJson,
       ...detailJson,
     };

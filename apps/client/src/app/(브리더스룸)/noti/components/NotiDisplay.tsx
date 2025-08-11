@@ -28,7 +28,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { isPlainObject, isString } from "es-toolkit";
 import { isNumber } from "@/lib/typeGuards";
 import { memo } from "react";
-import { ParentRequestDetailJsonDto } from "../../register/types";
 import { overlay } from "overlay-kit";
 import RejectModal from "./RejectModal";
 import { AxiosError } from "axios";
@@ -48,7 +47,7 @@ const NotiDisplay = memo(() => {
     select: (res) => res?.data?.data,
   });
 
-  const detailData = data?.detailJson as unknown as ParentRequestDetailJsonDto;
+  const detailData = data?.detailJson;
   const alreadyProcessed =
     data?.type === UserNotificationDtoType.PARENT_REQUEST &&
     !!data?.detailJson?.status &&
@@ -241,10 +240,10 @@ const NotiDisplay = memo(() => {
                   <Badge
                     className={cn(
                       "my-1 px-2 text-sm font-semibold",
-                      NOTIFICATION_TYPE[data.type as keyof typeof NOTIFICATION_TYPE].color,
+                      NOTIFICATION_TYPE[data.type].color,
                     )}
                   >
-                    {NOTIFICATION_TYPE[data.type as keyof typeof NOTIFICATION_TYPE].label}
+                    {NOTIFICATION_TYPE[data.type].label}
                   </Badge>
                   <StatusBadge item={data} />
                 </div>
@@ -279,7 +278,7 @@ const NotiDisplay = memo(() => {
                 {(data?.type === UserNotificationDtoType.PARENT_ACCEPT ||
                   data?.type === UserNotificationDtoType.PARENT_REJECT ||
                   data?.type === UserNotificationDtoType.PARENT_REQUEST) &&
-                  "내가 보낸 요청 메시지"}
+                  "요청 메시지"}
               </span>
               <div>{String(safeData?.message ?? "")}</div>
             </div>

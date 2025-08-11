@@ -6,7 +6,9 @@
  * OpenAPI spec version: 1.0
  */
 
-/**
- * 알림 상세 정보 JSON
- */
-export type CreateUserNotificationDtoDetailJson = { [key: string]: unknown };
+export interface NotificationPetDto {
+  /** 개체 아이디 */
+  id: string;
+  /** 개체 이름 */
+  name?: string;
+}
