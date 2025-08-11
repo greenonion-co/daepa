@@ -49,8 +49,8 @@ const NotiButton = () => {
     ?.filter((n) => n.status === UserNotificationDtoStatus.UNREAD)
     .slice(0, 4)
     .map((n) => ({
-      title: NOTIFICATION_TYPE[n.type as keyof typeof NOTIFICATION_TYPE].label,
-      message: (n?.detailJson as { message: string })?.message?.substring(0, 50) + "...",
+      title: NOTIFICATION_TYPE[n.type].label,
+      message: n?.detailJson?.message?.substring(0, 50) + "...",
       id: n.id,
     }));
 

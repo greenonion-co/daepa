@@ -22,7 +22,7 @@ const PedigreeSection = memo(({ petId, isMyPet }: PedigreeSectionProps) => {
   const queryClient = useQueryClient();
   const { formData } = usePetStore();
 
-  const { mutate: mutateDeleteParent } = useMutation({
+  const { mutate: mutateUnlinkParent } = useMutation({
     mutationFn: ({ role }: { role: UnlinkParentDtoRole }) =>
       petControllerUnlinkParent(petId, { role }),
     onSuccess: () => {
@@ -81,32 +81,10 @@ const PedigreeSection = memo(({ petId, isMyPet }: PedigreeSectionProps) => {
   const handleUnlink = useCallback(
     (label: UnlinkParentDtoRole) => {
       if (!formData[label]?.petId) return toast.error("부모 연동 해제에 실패했습니다.");
-      mutateDeleteParent({ role: label });
+      mutateUnlinkParent({ role: label });
     },
-    [formData, mutateDeleteParent],
+    [formData, mutateUnlinkParent],
   );
-
-  const handleFatherSelect = useCallback(
-    (item: PetParentDtoWithMessage) => {
-      handleParentSelect(UnlinkParentDtoRole.FATHER, item);
-    },
-    [handleParentSelect],
-  );
-
-  const handleMotherSelect = useCallback(
-    (item: PetParentDtoWithMessage) => {
-      handleParentSelect(UnlinkParentDtoRole.MOTHER, item);
-    },
-    [handleParentSelect],
-  );
-
-  const handleFatherUnlink = useCallback(() => {
-    handleUnlink(UnlinkParentDtoRole.FATHER);
-  }, [handleUnlink]);
-
-  const handleMotherUnlink = useCallback(() => {
-    handleUnlink(UnlinkParentDtoRole.MOTHER);
-  }, [handleUnlink]);
 
   return (
     <div className="pb-4 pt-4">
@@ -121,8 +99,8 @@ const PedigreeSection = memo(({ petId, isMyPet }: PedigreeSectionProps) => {
               ? formData.father
               : null
           }
-          onSelect={handleFatherSelect}
-          onUnlink={handleFatherUnlink}
+          onSelect={(item) => handleParentSelect(UnlinkParentDtoRole.FATHER, item)}
+          onUnlink={() => handleUnlink(UnlinkParentDtoRole.FATHER)}
           editable={isMyPet}
         />
         <ParentLink
@@ -133,8 +111,8 @@ const PedigreeSection = memo(({ petId, isMyPet }: PedigreeSectionProps) => {
               ? formData.mother
               : null
           }
-          onSelect={handleMotherSelect}
-          onUnlink={handleMotherUnlink}
+          onSelect={(item) => handleParentSelect(UnlinkParentDtoRole.MOTHER, item)}
+          onUnlink={() => handleUnlink(UnlinkParentDtoRole.MOTHER)}
           editable={isMyPet}
         />
       </div>

@@ -1,4 +1,4 @@
-import { Bell, Bubbles, DollarSign, Film, Heart, Home, Inbox } from "lucide-react";
+import { Bell, Bubbles, DollarSign, Film, Home, Inbox } from "lucide-react";
 import { FormStep, SelectorConfig } from "./register/types";
 import {
   PetDtoGrowth,
@@ -199,16 +199,6 @@ export const EGG_REGISTER_STEPS: FormStep[] = [
 ];
 
 export const EGG_EDIT_STEPS: FormStep[] = [
-  // {
-  //   title: "이름/관리번호",
-  //   field: {
-  //     name: "name",
-  //     type: "text",
-  //     required: true,
-  //     placeholder: "개체 이름/관리번호를 입력해주세요",
-  //     validation: (value) => value.length > 0,
-  //   },
-  // },
   {
     title: "종",
     field: {
@@ -386,11 +376,6 @@ export const SIDEBAR_ITEMS = [
     icon: DollarSign,
   },
   {
-    title: "메이팅룸",
-    url: "/mating",
-    icon: Heart,
-  },
-  {
     title: "알림",
     url: "/noti",
     icon: Bell,
@@ -433,18 +418,6 @@ export const NOTIFICATION_TYPE: Record<UserNotificationDtoType, { label: string;
     },
     parent_reject: {
       label: "부모 연동 거절",
-      color: "bg-red-600",
-    },
-    owner_transfer: {
-      label: "주인 이전",
-      color: "bg-blue-600",
-    },
-    owner_accept: {
-      label: "주인 수락",
-      color: "bg-green-600",
-    },
-    owner_reject: {
-      label: "주인 거절",
       color: "bg-red-600",
     },
     parent_cancel: {

@@ -49,26 +49,24 @@ export class ParentRequestService {
 
     // 알림 생성 (병렬 처리로 성능 향상)
 
-    await this.userNotificationService.createUserNotification(
-      parentPet.ownerId,
-      {
-        receiverId: parentPet.ownerId,
-        type: USER_NOTIFICATION_TYPE.PARENT_REQUEST,
-        targetId: parentRequest.id,
-        detailJson: {
-          childPet: {
-            id: childPet?.petId,
-            name: childPet?.name,
-          },
-          parentPet: {
-            id: parentPet?.petId,
-            name: parentPet.name,
-          },
-          role: createParentRequestDto.role,
-          message: createParentRequestDto.message,
+    await this.userNotificationService.createUserNotification(entityManager, {
+      senderId: childPet.ownerId,
+      receiverId: parentPet.ownerId,
+      type: USER_NOTIFICATION_TYPE.PARENT_REQUEST,
+      targetId: parentRequest.id,
+      detailJson: {
+        childPet: {
+          id: childPet?.petId,
+          name: childPet?.name,
         },
+        parentPet: {
+          id: parentPet?.petId,
+          name: parentPet.name,
+        },
+        role: createParentRequestDto.role,
+        message: createParentRequestDto.message,
       },
-    );
+    });
 
     return parentRequest;
   }
@@ -113,6 +111,10 @@ export class ParentRequestService {
         parentRequest.parentPetId,
       );
 
+      if (!parentPet?.ownerId || !childPet?.ownerId) {
+        throw new NotFoundException('주인 정보를 찾을 수 없습니다.');
+      }
+
       // 상태 업데이트
       await entityManager.update(
         ParentRequestEntity,
@@ -123,31 +125,37 @@ export class ParentRequestService {
       // 상태가 변경된 경우에만 알림 처리
       if (parentRequest.status !== updateParentRequestDto.status) {
         // 새로운 알림 보내기
-        await this.userNotificationService.createUserNotification(userId, {
-          receiverId: notification.senderId,
-          type: this.getNotificationTypeByStatus(updateParentRequestDto.status),
-          targetId: parentRequest.id,
-          detailJson: {
-            childPet: {
-              id: parentRequest.childPetId,
-              name: childPet?.name,
+        await this.userNotificationService.createUserNotification(
+          entityManager,
+          {
+            senderId: parentPet.ownerId,
+            receiverId: notification.senderId,
+            type: this.getNotificationTypeByStatus(
+              updateParentRequestDto.status,
+            ),
+            targetId: parentRequest.id,
+            detailJson: {
+              childPet: {
+                id: parentRequest.childPetId,
+                name: childPet?.name,
+              },
+              parentPet: {
+                id: parentRequest.parentPetId,
+                name: parentPet?.name,
+              },
+              role: parentRequest.role,
+              message: parentRequest.message,
+              ...(updateParentRequestDto.status === PARENT_STATUS.REJECTED && {
+                rejectReason: updateParentRequestDto.rejectReason,
+              }),
             },
-            parentPet: {
-              id: parentRequest.parentPetId,
-              name: parentPet?.name,
-            },
-            role: parentRequest.role,
-            message: parentRequest.message,
-            ...(updateParentRequestDto.status === PARENT_STATUS.REJECTED && {
-              rejectReason: updateParentRequestDto.rejectReason,
-            }),
           },
-        });
+        );
 
         await this.userNotificationService.updateUserNotificationDetailJson(
+          entityManager,
           notification.id,
           {
-            ...notification.detailJson,
             status: updateParentRequestDto.status,
             ...(updateParentRequestDto.status === PARENT_STATUS.REJECTED && {
               rejectReason: updateParentRequestDto.rejectReason,
@@ -266,7 +274,7 @@ export class ParentRequestService {
     });
   }
 
-  private async getPetInfo(
+  async getPetInfo(
     entityManager: EntityManager,
     childPetId: string,
     parentPetId: string,

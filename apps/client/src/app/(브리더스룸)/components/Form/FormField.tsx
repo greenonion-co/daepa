@@ -14,14 +14,23 @@ import { usePathname } from "next/navigation";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
-import { PetDtoGrowth, PetDtoSex, PetDtoSpecies, UnlinkParentDtoRole } from "@repo/api-client";
+import {
+  PetDtoGrowth,
+  PetDtoSex,
+  PetDtoSpecies,
+  PetSummaryDto,
+  UnlinkParentDtoRole,
+} from "@repo/api-client";
 interface FormFieldProps {
   label?: string;
   field: FormStep["field"];
   formData: FormData;
   errors?: FormErrors;
   disabled?: boolean;
-  handleChange: (value: { type: FieldName; value: any }) => void;
+  handleChange: (value: {
+    type: FieldName;
+    value: string | string[] | PetSummaryDto | null;
+  }) => void;
   handleMultipleSelect?: (type: FieldName) => void;
 }
 

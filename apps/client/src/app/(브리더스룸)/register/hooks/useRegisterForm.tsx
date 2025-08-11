@@ -43,7 +43,7 @@ export const useRegisterForm = ({
 
   // 다음 단계로 이동
   const goNext = useCallback(
-    async (newFormData = formData) => {
+    async (newFormData = formData): Promise<void> => {
       const { errors, isValid } = validateStep({
         formStep,
         data: newFormData,
@@ -91,7 +91,7 @@ export const useRegisterForm = ({
 
   // 입력 필드 변경
   const handleNext = useCallback(
-    ({ type, value }: { type: FieldName; value: string | string[] | PetSummaryDto }) => {
+    ({ type, value }: { type: FieldName; value: string | string[] | PetSummaryDto | null }) => {
       if (
         type === "species" &&
         formData.species !== value &&

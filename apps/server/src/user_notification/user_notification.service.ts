@@ -4,13 +4,15 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { UserNotificationEntity } from './user_notification.entity';
-import { DeleteResult, Repository, UpdateResult } from 'typeorm';
+import { DeleteResult, EntityManager, Repository, UpdateResult } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PageDto, PageMetaDto, PageOptionsDto } from 'src/common/page.dto';
 import {
   CreateUserNotificationDto,
   DeleteUserNotificationDto,
   UpdateUserNotificationDto,
+  UserNotificationDetailJson,
+  UserNotificationDto,
 } from './user_notification.dto';
 import { plainToInstance } from 'class-transformer';
 
@@ -22,14 +24,14 @@ export class UserNotificationService {
   ) {}
 
   async createUserNotification(
-    userId: string,
+    entityManager: EntityManager,
     dto: CreateUserNotificationDto,
   ): Promise<UserNotificationEntity> {
-    const userNotificationEntity = plainToInstance(UserNotificationEntity, {
-      ...dto,
-      senderId: userId,
-    });
-    return await this.userNotificationRepository.save(userNotificationEntity);
+    const userNotificationEntity = plainToInstance(UserNotificationEntity, dto);
+    return await entityManager.save(
+      UserNotificationEntity,
+      userNotificationEntity,
+    );
   }
 
   async getAllReceiverNotifications(
@@ -85,20 +87,50 @@ export class UserNotificationService {
   async findOne(
     id: number,
     userId: string,
-  ): Promise<UserNotificationEntity | null> {
+  ): Promise<UserNotificationDto | null> {
     try {
-      return await this.userNotificationRepository.findOne({
-        where: { id, isDeleted: false, receiverId: userId },
-      });
+      const userNotificationEntity =
+        await this.userNotificationRepository.findOne({
+          where: { id, isDeleted: false, receiverId: userId },
+        });
+
+      if (!userNotificationEntity) {
+        return null;
+      }
+
+      return plainToInstance(UserNotificationDto, userNotificationEntity);
     } catch {
       throw new NotFoundException('알림을 찾을 수 없습니다.');
     }
   }
 
   async updateUserNotificationDetailJson(
+    entityManager: EntityManager,
     id: number,
-    detailJson: UserNotificationEntity['detailJson'],
+    detailJson: Partial<UserNotificationDetailJson>,
   ) {
-    return await this.userNotificationRepository.update({ id }, { detailJson });
+    const existingNotification = await entityManager.findOne(
+      UserNotificationEntity,
+      {
+        where: { id },
+        select: ['detailJson'],
+        lock: { mode: 'pessimistic_write' },
+      },
+    );
+
+    if (!existingNotification) {
+      throw new NotFoundException('알림을 찾을 수 없습니다.');
+    }
+
+    const updatedDetailJson: UserNotificationDetailJson = {
+      ...existingNotification.detailJson,
+      ...detailJson,
+    };
+
+    return await entityManager.update(
+      UserNotificationEntity,
+      { id },
+      { detailJson: updatedDetailJson },
+    );
   }
 }

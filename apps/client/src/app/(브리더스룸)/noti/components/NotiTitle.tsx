@@ -1,12 +1,12 @@
 import { ArrowLeftRight } from "lucide-react";
 import LinkButton from "../../components/LinkButton";
-import { ParentRequestDetailJsonDto } from "../../register/types";
+import { UserNotificationDetailJson } from "@repo/api-client";
 
 const NotiTitle = ({
   detailData,
   hasLink = false,
 }: {
-  detailData?: ParentRequestDetailJsonDto;
+  detailData?: UserNotificationDetailJson;
   hasLink?: boolean;
 }) => {
   if (!detailData) return null;

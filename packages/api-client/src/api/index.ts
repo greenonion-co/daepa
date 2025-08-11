@@ -19,7 +19,6 @@ import type {
   CreatePairDto,
   CreateParentDto,
   CreatePetDto,
-  CreateUserNotificationDto,
   DeleteUserNotificationDto,
   UnlinkParentDto,
   UpdateAdoptionDto,
@@ -122,17 +121,6 @@ export const userNotificationControllerFindAll = (
     url: `http://localhost:4000/api/v1/user-notification`,
     method: "GET",
     params,
-  });
-};
-
-export const userNotificationControllerCreate = (
-  createUserNotificationDto: CreateUserNotificationDto,
-) => {
-  return useCustomInstance<CommonResponseDto>({
-    url: `http://localhost:4000/api/v1/user-notification`,
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    data: createUserNotificationDto,
   });
 };
 
@@ -401,9 +389,6 @@ export type PetControllerCompleteHatchingResult = NonNullable<
 >;
 export type UserNotificationControllerFindAllResult = NonNullable<
   Awaited<ReturnType<typeof userNotificationControllerFindAll>>
->;
-export type UserNotificationControllerCreateResult = NonNullable<
-  Awaited<ReturnType<typeof userNotificationControllerCreate>>
 >;
 export type UserNotificationControllerUpdateResult = NonNullable<
   Awaited<ReturnType<typeof userNotificationControllerUpdate>>
@@ -756,13 +741,50 @@ export const getUserNotificationControllerFindAllResponseMock = (
       "parent_accept",
       "parent_reject",
       "parent_cancel",
-      "owner_transfer",
-      "owner_accept",
-      "owner_reject",
     ] as const),
-    targetId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+    targetId: faker.helpers.arrayElement([
+      faker.number.int({ min: undefined, max: undefined }),
+      undefined,
+    ]),
     status: faker.helpers.arrayElement(["read", "unread", "deleted"] as const),
-    detailJson: faker.helpers.arrayElement([{}, undefined]),
+    detailJson: faker.helpers.arrayElement([
+      {
+        ...{
+          status: faker.helpers.arrayElement([
+            faker.helpers.arrayElement([
+              "pending",
+              "approved",
+              "rejected",
+              "deleted",
+              "cancelled",
+            ] as const),
+            undefined,
+          ]),
+          childPet: faker.helpers.arrayElement([
+            {
+              ...{
+                id: faker.string.alpha(20),
+                name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+              },
+            },
+            undefined,
+          ]),
+          parentPet: faker.helpers.arrayElement([
+            {
+              ...{
+                id: faker.string.alpha(20),
+                name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+              },
+            },
+            undefined,
+          ]),
+          role: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+          message: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+          rejectReason: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+        },
+      },
+      undefined,
+    ]),
     createdAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
     updatedAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
   })),
@@ -774,14 +796,6 @@ export const getUserNotificationControllerFindAllResponseMock = (
     hasPreviousPage: faker.datatype.boolean(),
     hasNextPage: faker.datatype.boolean(),
   },
-  ...overrideResponse,
-});
-
-export const getUserNotificationControllerCreateResponseMock = (
-  overrideResponse: Partial<CommonResponseDto> = {},
-): CommonResponseDto => ({
-  success: faker.datatype.boolean(),
-  message: faker.string.alpha(20),
   ...overrideResponse,
 });
 
@@ -816,13 +830,50 @@ export const getUserNotificationControllerFindOneResponseMock = (
         "parent_accept",
         "parent_reject",
         "parent_cancel",
-        "owner_transfer",
-        "owner_accept",
-        "owner_reject",
       ] as const),
-      targetId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+      targetId: faker.helpers.arrayElement([
+        faker.number.int({ min: undefined, max: undefined }),
+        undefined,
+      ]),
       status: faker.helpers.arrayElement(["read", "unread", "deleted"] as const),
-      detailJson: faker.helpers.arrayElement([{}, undefined]),
+      detailJson: faker.helpers.arrayElement([
+        {
+          ...{
+            status: faker.helpers.arrayElement([
+              faker.helpers.arrayElement([
+                "pending",
+                "approved",
+                "rejected",
+                "deleted",
+                "cancelled",
+              ] as const),
+              undefined,
+            ]),
+            childPet: faker.helpers.arrayElement([
+              {
+                ...{
+                  id: faker.string.alpha(20),
+                  name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+                },
+              },
+              undefined,
+            ]),
+            parentPet: faker.helpers.arrayElement([
+              {
+                ...{
+                  id: faker.string.alpha(20),
+                  name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+                },
+              },
+              undefined,
+            ]),
+            role: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+            message: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+            rejectReason: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+          },
+        },
+        undefined,
+      ]),
       createdAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
       updatedAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
     },
@@ -2503,29 +2554,6 @@ export const getUserNotificationControllerFindAllMockHandler = (
   });
 };
 
-export const getUserNotificationControllerCreateMockHandler = (
-  overrideResponse?:
-    | CommonResponseDto
-    | ((
-        info: Parameters<Parameters<typeof http.post>[1]>[0],
-      ) => Promise<CommonResponseDto> | CommonResponseDto),
-) => {
-  return http.post("*/api/v1/user-notification", async (info) => {
-    await delay(1000);
-
-    return new HttpResponse(
-      JSON.stringify(
-        overrideResponse !== undefined
-          ? typeof overrideResponse === "function"
-            ? await overrideResponse(info)
-            : overrideResponse
-          : getUserNotificationControllerCreateResponseMock(),
-      ),
-      { status: 200, headers: { "Content-Type": "application/json" } },
-    );
-  });
-};
-
 export const getUserNotificationControllerUpdateMockHandler = (
   overrideResponse?:
     | CommonResponseDto
@@ -3160,7 +3188,6 @@ export const getProjectDaepaAPIMock = () => [
   getPetControllerUnlinkParentMockHandler(),
   getPetControllerCompleteHatchingMockHandler(),
   getUserNotificationControllerFindAllMockHandler(),
-  getUserNotificationControllerCreateMockHandler(),
   getUserNotificationControllerUpdateMockHandler(),
   getUserNotificationControllerDeleteMockHandler(),
   getUserNotificationControllerFindOneMockHandler(),

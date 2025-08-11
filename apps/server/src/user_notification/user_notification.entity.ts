@@ -2,6 +2,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  Index,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -9,8 +10,10 @@ import {
   USER_NOTIFICATION_STATUS,
   USER_NOTIFICATION_TYPE,
 } from './user_notification.constant';
+import { UserNotificationDetailJson } from './user_notification.dto';
 
 @Entity({ name: 'user_notifications' })
+@Index(['senderId', 'receiverId', 'type', 'targetId'], { unique: true })
 export class UserNotificationEntity {
   @PrimaryGeneratedColumn()
   id: number;
@@ -24,7 +27,7 @@ export class UserNotificationEntity {
   @Column({ type: 'enum', enum: USER_NOTIFICATION_TYPE })
   type: USER_NOTIFICATION_TYPE; // 알림 종류
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'int' })
   targetId?: number; // 알림 대상 객체 Id
 
   @Column({
@@ -34,11 +37,11 @@ export class UserNotificationEntity {
   })
   status: USER_NOTIFICATION_STATUS; // 알림 상태
 
-  @Column({ type: 'json', nullable: true })
-  detailJson: Record<string, any>;
+  @Column({ nullable: true, type: 'json' })
+  detailJson: UserNotificationDetailJson;
 
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt: Date; // 알림 생성 시간
 
   @UpdateDateColumn()
   updatedAt: Date;
