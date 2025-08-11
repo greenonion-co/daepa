@@ -386,11 +386,6 @@ export const SIDEBAR_ITEMS = [
     icon: DollarSign,
   },
   {
-    title: "메이팅룸",
-    url: "/mating",
-    icon: Heart,
-  },
-  {
     title: "알림",
     url: "/noti",
     icon: Bell,
