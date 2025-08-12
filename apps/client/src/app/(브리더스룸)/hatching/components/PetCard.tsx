@@ -24,15 +24,21 @@ const PetCard = ({ date, pets, tab }: PetCardProps) => {
           })
           .map((pet) => (
             <Link href={`/pet/${pet.petId}`} key={pet.petId} className="w-full">
-              <Card className={cn("cursor-pointer", pet.growth !== PetDtoGrowth.EGG && "bg-muted")}>
+              <Card
+                className={cn(
+                  "cursor-pointer",
+                  pet.growth !== PetDtoGrowth.EGG &&
+                    "bg-muted dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-800",
+                )}
+              >
                 <CardContent>
                   <div className="font-medium">{pet.name}</div>
 
-                  <div className="text-sm text-gray-600">
+                  <div className="text-sm text-gray-600 dark:text-gray-400">
                     {SPECIES_KOREAN_INFO[pet.species]} • {GENDER_KOREAN_INFO[pet.sex ?? "N"]}
                   </div>
                   {pet.hatchingDate && (
-                    <div className="text-sm text-gray-500">
+                    <div className="text-sm text-gray-500 dark:text-gray-400">
                       해칭일: {format(new Date(pet.hatchingDate), "yyyy-MM-dd")}
                     </div>
                   )}

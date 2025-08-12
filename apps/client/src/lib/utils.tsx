@@ -46,6 +46,8 @@ export const formatDateToYYYYMMDDString = (
 
 export const getStatusBadge = (status?: AdoptionDtoStatus) => {
   switch (status) {
+    case AdoptionDtoStatus.NFS:
+      return <Badge className="bg-gray-500">판매안함</Badge>;
     case AdoptionDtoStatus.ON_SALE:
       return <Badge className="bg-blue-500">판매중</Badge>;
     case AdoptionDtoStatus.ON_RESERVATION:

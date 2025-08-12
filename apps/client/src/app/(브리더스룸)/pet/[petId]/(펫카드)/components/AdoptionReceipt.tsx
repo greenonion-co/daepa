@@ -10,9 +10,10 @@ import { useQueryClient } from "@tanstack/react-query";
 
 interface AdoptionReceiptProps {
   adoption: AdoptionDto | PetAdoptionDto;
+  isEditable?: boolean;
 }
 
-const AdoptionReceipt = memo(({ adoption }: AdoptionReceiptProps) => {
+const AdoptionReceipt = memo(({ adoption, isEditable = true }: AdoptionReceiptProps) => {
   const [isReceiptVisible, setIsReceiptVisible] = useState(false);
   const queryClient = useQueryClient();
 
@@ -96,9 +97,11 @@ const AdoptionReceipt = memo(({ adoption }: AdoptionReceiptProps) => {
             분양 영수증{" "}
             {adoption?.status !== "SOLD" && (
               <>
-                <button className="cursor-pointer" onClick={handleEditAdoption}>
-                  <PencilIcon className="h-5 w-5 hover:text-blue-500" />
-                </button>
+                {isEditable && (
+                  <button className="cursor-pointer" onClick={handleEditAdoption}>
+                    <PencilIcon className="h-5 w-5 hover:text-blue-500" />
+                  </button>
+                )}
                 <span className="text-sm font-light text-gray-600 dark:text-gray-400">(예정)</span>
               </>
             )}

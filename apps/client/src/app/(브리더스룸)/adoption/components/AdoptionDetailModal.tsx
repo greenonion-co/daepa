@@ -96,8 +96,7 @@ const AdoptionDetailModal = ({
                 handleCancel={handleCancel}
               />
             ) : (
-              // 읽기 전용 뷰
-              <AdoptionReceipt adoption={adoptionData} />
+              <AdoptionReceipt adoption={adoptionData} isEditable={false} />
             )}
           </div>
           <div className="flex justify-end">

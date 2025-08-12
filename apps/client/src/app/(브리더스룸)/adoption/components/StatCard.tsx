@@ -9,9 +9,11 @@ interface StatCardProps {
 }
 
 const StatCard = ({ title, value, icon: Icon, bgColor }: StatCardProps) => (
-  <Card className={cn(bgColor)}>
+  <Card className={cn(bgColor, "dark:bg-gray-800 dark:text-gray-200")}>
     <CardHeader className="flex flex-row items-center justify-between">
-      <CardTitle className="text-sm font-medium text-gray-800">{title}</CardTitle>
+      <CardTitle className="text-sm font-medium text-gray-800 dark:text-gray-200">
+        {title}
+      </CardTitle>
       <Icon className="h-4 w-4" />
     </CardHeader>
     <CardContent className="font-bold">{value}</CardContent>

@@ -33,7 +33,10 @@ const CalendarInput = ({
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
         <button
-          className={cn("flex w-full cursor-pointer items-center gap-1", value && "text-black")}
+          className={cn(
+            "flex w-full cursor-pointer items-center gap-1",
+            value && "text-black dark:text-gray-200",
+          )}
         >
           {value && isValid(new Date(value)) ? format(new Date(value), formatString) : placeholder}
           <CalendarIcon className="h-4 w-4 opacity-50" />

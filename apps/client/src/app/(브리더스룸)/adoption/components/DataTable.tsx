@@ -126,7 +126,7 @@ export const DataTable = ({
                     <TableRow
                       key={row.id}
                       data-state={row.getIsSelected() && "selected"}
-                      className="cursor-pointer hover:bg-gray-50"
+                      className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
                       onClick={(e) => handleRowClick({ e, adoptionId: row.original.adoptionId })}
                     >
                       {row.getVisibleCells().map((cell) => (

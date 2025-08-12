@@ -4,14 +4,8 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import {
-  FindOptionsWhere,
-  Repository,
-  EntityManager,
-  DataSource,
-} from 'typeorm';
+import { FindOptionsWhere, EntityManager, DataSource } from 'typeorm';
 import { AdoptionEntity } from './adoption.entity';
-import { InjectRepository } from '@nestjs/typeorm';
 import {
   AdoptionDto,
   CreateAdoptionDto,
@@ -31,8 +25,6 @@ import { PetEntity } from 'src/pet/pet.entity';
 @Injectable()
 export class AdoptionService {
   constructor(
-    @InjectRepository(AdoptionEntity)
-    private readonly adoptionRepository: Repository<AdoptionEntity>,
     private readonly petService: PetService,
     private readonly userService: UserService,
     private readonly dataSource: DataSource,

@@ -91,10 +91,10 @@ const CreateMatingForm = ({ onClose }: CreateMatingFormProps) => {
   };
 
   return (
-    <Card className="mt-2 max-w-lg border-2 border-blue-200 bg-blue-50/50">
+    <Card className="mt-2 max-w-lg border-2 border-blue-200 bg-blue-50/50 dark:bg-gray-800 dark:text-gray-200">
       <CardHeader>
         <CardTitle className="text-lg">새 메이팅 추가</CardTitle>
-        <CardDescription className="text-sm text-blue-700">
+        <CardDescription className="text-sm text-blue-700 dark:text-blue-400">
           나의 개체만 선택할 수 있습니다.
         </CardDescription>
       </CardHeader>
