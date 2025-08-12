@@ -38,7 +38,7 @@ export class UserNotificationEntity {
   status: USER_NOTIFICATION_STATUS; // 알림 상태
 
   @Column({ nullable: true, type: 'json' })
-  detailJson: UserNotificationDetailJson;
+  detailJson?: UserNotificationDetailJson | null;
 
   @CreateDateColumn()
   createdAt: Date; // 알림 생성 시간

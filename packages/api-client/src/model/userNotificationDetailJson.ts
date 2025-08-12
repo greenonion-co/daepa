@@ -7,6 +7,7 @@
  */
 import type { UserNotificationDetailJsonStatus } from "./userNotificationDetailJsonStatus";
 import type { NotificationPetDto } from "./notificationPetDto";
+import type { UserNotificationDetailJsonRole } from "./userNotificationDetailJsonRole";
 
 export interface UserNotificationDetailJson {
   /** 부모 연동 상태 */
@@ -16,7 +17,7 @@ export interface UserNotificationDetailJson {
   /** 부모 개체 정보 */
   parentPet?: NotificationPetDto;
   /** 부모 역할 */
-  role?: string;
+  role?: UserNotificationDetailJsonRole;
   /** 메시지 */
   message?: string;
   /** 거절 이유 */

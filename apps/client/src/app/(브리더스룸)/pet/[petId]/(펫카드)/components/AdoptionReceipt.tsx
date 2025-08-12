@@ -1,15 +1,20 @@
 import { SALE_STATUS_KOREAN_INFO } from "@/app/(브리더스룸)/constants";
-import { PetAdoptionDto } from "@repo/api-client";
+import { AdoptionDto, PetAdoptionDto, petControllerFindPetByPetId } from "@repo/api-client";
 import { format, parseISO } from "date-fns";
 import { ko } from "date-fns/locale";
 import { useState, memo, useCallback, useMemo } from "react";
+import { PencilIcon } from "lucide-react";
+import AdoptionDetailModal from "@/app/(브리더스룸)/adoption/components/AdoptionDetailModal";
+import { overlay } from "overlay-kit";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface AdoptionReceiptProps {
-  adoption: PetAdoptionDto; // 실제 타입에 맞게 수정 필요
+  adoption: AdoptionDto | PetAdoptionDto;
 }
 
 const AdoptionReceipt = memo(({ adoption }: AdoptionReceiptProps) => {
   const [isReceiptVisible, setIsReceiptVisible] = useState(false);
+  const queryClient = useQueryClient();
 
   const handleReceiptHover = useCallback(() => {
     if (!isReceiptVisible) {
@@ -41,13 +46,24 @@ const AdoptionReceipt = memo(({ adoption }: AdoptionReceiptProps) => {
       : "미정";
   }, [adoption?.adoptionDate]);
 
-  const shouldShowDate = useMemo(() => {
-    return ["SOLD", "ON_RESERVATION"].includes(adoption?.status || "");
-  }, [adoption?.status]);
-
   const animationDelay = useMemo(() => {
     return adoption?.memo ? "1.6s" : "1.4s";
   }, [adoption?.memo]);
+
+  const handleEditAdoption = useCallback(() => {
+    overlay.open(({ isOpen, close }) => (
+      <AdoptionDetailModal
+        isOpen={isOpen}
+        onClose={close}
+        adoptionId={adoption.adoptionId}
+        onUpdate={() => {
+          queryClient.invalidateQueries({
+            queryKey: [petControllerFindPetByPetId.name, adoption.petId],
+          });
+        }}
+      />
+    ));
+  }, [adoption, queryClient]);
 
   if (!shouldShowReceipt) return null;
 
@@ -79,7 +95,12 @@ const AdoptionReceipt = memo(({ adoption }: AdoptionReceiptProps) => {
             )}
             분양 영수증{" "}
             {adoption?.status !== "SOLD" && (
-              <span className="text-sm font-light text-gray-600 dark:text-gray-400">(예정)</span>
+              <>
+                <button className="cursor-pointer" onClick={handleEditAdoption}>
+                  <PencilIcon className="h-5 w-5 hover:text-blue-500" />
+                </button>
+                <span className="text-sm font-light text-gray-600 dark:text-gray-400">(예정)</span>
+              </>
             )}
             {adoption?.status === "SOLD" && (
               <div className="opacity-0 transition-all duration-300 group-hover:opacity-100">
@@ -115,28 +136,40 @@ const AdoptionReceipt = memo(({ adoption }: AdoptionReceiptProps) => {
             <span className="text-sm font-bold text-gray-800 dark:text-gray-200">{priceText}</span>
           </div>
 
-          {shouldShowDate && (
-            <div
-              className={`flex justify-between ${isReceiptVisible ? "animate-fade-in-up" : ""}`}
-              style={{ animationDelay: "1.0s" }}
-            >
-              <span className="text-sm text-gray-600 dark:text-gray-400">분양 날짜</span>
-              <span className="text-sm text-gray-800 dark:text-gray-200">{adoptionDateText}</span>
-            </div>
-          )}
+          <div
+            className={`flex justify-between ${isReceiptVisible ? "animate-fade-in-up" : ""}`}
+            style={{ animationDelay: "1.0s" }}
+          >
+            <span className="text-sm text-gray-600 dark:text-gray-400">분양 날짜</span>
+            <span className="text-sm text-gray-800 dark:text-gray-200">{adoptionDateText}</span>
+          </div>
+
+          <div
+            className={`flex justify-between ${isReceiptVisible ? "animate-fade-in-up" : ""}`}
+            style={{ animationDelay: "1.2s" }}
+          >
+            <span className="text-sm text-gray-600 dark:text-gray-400">거래 방식</span>
+            <span className="text-sm text-gray-800 dark:text-gray-200">
+              {adoption?.location
+                ? adoption.location === "ONLINE"
+                  ? "온라인"
+                  : "오프라인"
+                : "미정"}
+            </span>
+          </div>
         </div>
 
         <div
           className={`mt-4 border-b border-dashed border-gray-400 pb-2 ${
             isReceiptVisible ? "animate-fade-in-up" : ""
           }`}
-          style={{ animationDelay: "1.2s" }}
+          style={{ animationDelay: "1.4s" }}
         ></div>
 
         {adoption?.memo ? (
           <div
             className={`mt-4 ${isReceiptVisible ? "animate-fade-in-up" : ""}`}
-            style={{ animationDelay: "1.4s" }}
+            style={{ animationDelay: "1.6s" }}
           >
             <div className="mb-2 text-sm text-gray-600 dark:text-gray-400">메모</div>
             <div className="rounded bg-gray-100 p-3 text-sm text-gray-800 dark:bg-gray-700 dark:text-gray-200">

@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { PetSummaryDto } from "@repo/api-client";
 import { ChevronRight } from "lucide-react";
 import { useState } from "react";
@@ -6,16 +7,16 @@ import { useState } from "react";
 interface HeaderProps {
   step: number;
   setStep: (step: number) => void;
-  selectedPet: PetSummaryDto;
-  searchQuery: string;
+  selectedPet?: PetSummaryDto;
+  className?: string;
   setSearchQuery: (searchQuery: string) => void;
 }
 
-const Header = ({ step, setStep, selectedPet, setSearchQuery }: HeaderProps) => {
+const Header = ({ step, setStep, selectedPet, setSearchQuery, className }: HeaderProps) => {
   const [keyword, setKeyword] = useState("");
 
   return (
-    <div className="sticky -top-[12px] z-20 bg-white pb-4 pt-4 dark:bg-[#18181B]">
+    <div className={cn("sticky -top-[12px] z-20 mt-3 bg-white py-4 dark:bg-[#18181B]", className)}>
       <div className="flex items-center gap-2 pb-2 pl-4">
         <button
           onClick={() => step === 2 && setStep(1)}
@@ -36,7 +37,7 @@ const Header = ({ step, setStep, selectedPet, setSearchQuery }: HeaderProps) => 
           <input
             type="text"
             placeholder="부모 개체를 검색하세요"
-            className="w-full rounded-xl border border-gray-200 p-3 focus:border-gray-500 focus:outline-none"
+            className="w-full rounded-xl border border-gray-200 p-3 text-sm font-normal focus:border-gray-500 focus:outline-none"
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
             onKeyDown={(e) => {

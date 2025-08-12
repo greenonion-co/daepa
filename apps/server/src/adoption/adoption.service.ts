@@ -22,7 +22,10 @@ import { UserService } from 'src/user/user.service';
 import { nanoid } from 'nanoid';
 import { PageMetaDto, PageOptionsDto } from 'src/common/page.dto';
 import { PageDto } from 'src/common/page.dto';
-import { ADOPTION_SALE_STATUS } from 'src/pet/pet.constants';
+import {
+  ADOPTION_SALE_STATUS,
+  PET_ADOPTION_LOCATION,
+} from 'src/pet/pet.constants';
 import { PetEntity } from 'src/pet/pet.entity';
 
 @Injectable()
@@ -299,7 +302,7 @@ export class AdoptionService {
         price: (value: number) => ({ price: value }),
         buyerId: (value: string) => ({ buyerId: value }),
         memo: (value: string) => ({ memo: value }),
-        location: (value: string) => ({ location: value }),
+        location: (value: PET_ADOPTION_LOCATION) => ({ location: value }),
         status: (value: ADOPTION_SALE_STATUS) => ({ status: value }),
       };
 

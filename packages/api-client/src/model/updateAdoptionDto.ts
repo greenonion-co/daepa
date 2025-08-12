@@ -5,6 +5,7 @@
  * Project Daepa API description
  * OpenAPI spec version: 1.0
  */
+import type { UpdateAdoptionDtoLocation } from "./updateAdoptionDtoLocation";
 import type { UpdateAdoptionDtoStatus } from "./updateAdoptionDtoStatus";
 
 export interface UpdateAdoptionDto {
@@ -18,8 +19,8 @@ export interface UpdateAdoptionDto {
   buyerId?: string;
   /** 메모 */
   memo?: string;
-  /** 거래 장소 */
-  location?: string;
+  /** 분양 위치 */
+  location?: UpdateAdoptionDtoLocation;
   /** 판매 상태 */
   status?: UpdateAdoptionDtoStatus;
 }

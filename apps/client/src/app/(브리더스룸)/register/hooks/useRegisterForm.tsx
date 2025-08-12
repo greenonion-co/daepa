@@ -9,7 +9,7 @@ import {
 } from "../../constants";
 import { overlay } from "overlay-kit";
 import MultipleSelector from "../../components/selector/multiple";
-import { UnlinkParentDtoRole, PetSummaryDto } from "@repo/api-client";
+import { UnlinkParentDtoRole } from "@repo/api-client";
 import Dialog from "../../components/Form/Dialog";
 
 import { validateStep } from "@/lib/form";
@@ -91,7 +91,7 @@ export const useRegisterForm = ({
 
   // 입력 필드 변경
   const handleNext = useCallback(
-    ({ type, value }: { type: FieldName; value: string | string[] | PetSummaryDto | null }) => {
+    <K extends FieldName>({ type, value }: { type: K; value: FormData[K] }) => {
       if (
         type === "species" &&
         formData.species !== value &&

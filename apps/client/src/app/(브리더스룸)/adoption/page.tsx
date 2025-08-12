@@ -11,7 +11,7 @@ import { useEffect, useState } from "react";
 
 import { overlay } from "overlay-kit";
 
-import CreateAdoptionModal from "./components/CreateAdoptionModal";
+import EditAdoptionModal from "./components/EditAdoptionModal";
 import AdoptionDashboard from "./components/AdoptionDashboard";
 import { columns } from "./components/columns";
 import DataTable from "./components/DataTable";
@@ -48,10 +48,11 @@ const AdoptionPage = () => {
 
   const handleCreateAdoption = () => {
     overlay.open(({ isOpen, close }) => (
-      <CreateAdoptionModal
+      <EditAdoptionModal
         isOpen={isOpen}
         onClose={close}
         onSuccess={() => {
+          close();
           queryClient.invalidateQueries({ queryKey: [adoptionControllerGetAllAdoptions.name] });
           toast.success("분양이 성공적으로 생성되었습니다.");
         }}

@@ -52,7 +52,7 @@ export class UserNotificationDetailJson {
     required: false,
   })
   @IsOptional()
-  childPet: NotificationPetDto;
+  childPet?: NotificationPetDto;
 
   @ApiProperty({
     description: '부모 개체 정보',
@@ -60,16 +60,18 @@ export class UserNotificationDetailJson {
     required: false,
   })
   @IsOptional()
-  parentPet: NotificationPetDto;
+  parentPet?: NotificationPetDto;
 
   @ApiProperty({
     description: '부모 역할',
     example: PARENT_ROLE.FATHER,
+    enum: PARENT_ROLE,
+    'x-enumNames': Object.keys(PARENT_ROLE),
     required: false,
   })
   @IsEnum(PARENT_ROLE)
   @IsOptional()
-  role: PARENT_ROLE;
+  role?: PARENT_ROLE;
 
   @ApiProperty({
     description: '메시지',
@@ -166,7 +168,6 @@ export class UserNotificationDto {
 }
 
 export class CreateUserNotificationDto extends PickType(UserNotificationDto, [
-  'senderId',
   'receiverId',
   'type',
   'targetId',

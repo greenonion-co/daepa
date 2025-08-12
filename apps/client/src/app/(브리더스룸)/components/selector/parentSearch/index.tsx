@@ -93,7 +93,6 @@ const ParentSearchSelector = ({
           step={step}
           setStep={setStep}
           selectedPet={selectedPet ?? ({} as PetParentDtoWithMessage)}
-          searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
         />
         <div ref={contentRef} className="relative flex-1">

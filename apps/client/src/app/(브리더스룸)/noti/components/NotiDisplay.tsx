@@ -53,7 +53,7 @@ const NotiDisplay = memo(() => {
     !!data?.detailJson?.status &&
     data?.detailJson?.status !== UpdateParentRequestDtoStatus.PENDING;
 
-  const { mutate: updateParentStatus } = useMutation({
+  const { mutateAsync: updateParentStatus } = useMutation({
     mutationFn: ({ id, status, rejectReason }: UpdateParentRequestDto & { id: number }) =>
       parentRequestControllerUpdateStatus(id, { status, rejectReason }),
     onSuccess: (res, variables) => {
@@ -86,15 +86,16 @@ const NotiDisplay = memo(() => {
     },
   });
 
-  const handleUpdate = (status: UpdateParentRequestDtoStatus, rejectReason?: string) => {
-    if (alreadyProcessed) {
-      toast.error("이미 처리된 요청입니다.");
-      return;
-    }
+  const handleProcessedRequest = () => {
+    toast.error("이미 처리된 요청입니다.");
+  };
 
-    if (!data?.senderId || !data?.targetId) return;
+  const handleUpdate = async (status: UpdateParentRequestDtoStatus, rejectReason?: string) => {
+    if (alreadyProcessed) return handleProcessedRequest();
 
-    updateParentStatus({
+    if (!data?.senderId || data?.targetId === undefined || data?.targetId === null) return;
+
+    await updateParentStatus({
       id: data.id,
       status,
       rejectReason,
@@ -194,10 +195,7 @@ const NotiDisplay = memo(() => {
                 <Button
                   onClick={(e) => {
                     e.preventDefault();
-                    if (alreadyProcessed) {
-                      toast.error("이미 처리된 요청입니다.");
-                      return;
-                    }
+                    if (alreadyProcessed) return handleProcessedRequest();
 
                     overlay.open(({ isOpen, close }) => (
                       <RejectModal isOpen={isOpen} close={close} handleUpdate={handleUpdate} />

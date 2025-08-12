@@ -48,11 +48,17 @@ const NotiButton = () => {
   const recentNotifications = notifications
     ?.filter((n) => n.status === UserNotificationDtoStatus.UNREAD)
     .slice(0, 4)
-    .map((n) => ({
-      title: NOTIFICATION_TYPE[n.type].label,
-      message: n?.detailJson?.message?.substring(0, 50) + "...",
-      id: n.id,
-    }));
+    .map((n) => {
+      const info = NOTIFICATION_TYPE[n.type as keyof typeof NOTIFICATION_TYPE];
+      const rawMessage = n?.detailJson?.message ?? "";
+      const message = rawMessage.length > 50 ? `${rawMessage.slice(0, 50)}...` : rawMessage;
+
+      return {
+        title: info?.label ?? "알림",
+        message,
+        id: n.id,
+      };
+    });
 
   if (isNotiPage) return;
 

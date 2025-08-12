@@ -18,7 +18,7 @@ export default function PetPage() {
 
   // 일반 목록 조회
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
-    queryKey: [brPetControllerFindAll.name, searchFilters, false],
+    queryKey: [brPetControllerFindAll.name, searchFilters, BrPetControllerFindAllFilterType.MY],
     queryFn: ({ pageParam = 1 }) =>
       brPetControllerFindAll({
         page: pageParam,

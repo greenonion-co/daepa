@@ -1,7 +1,6 @@
 "use client";
 
 import { Column, ColumnDef } from "@tanstack/react-table";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -47,12 +46,12 @@ function TableHeaderSelect({
   column,
   title,
   items,
-  renderItem = (item: string) => item,
+  renderItem = (item: string | number) => item.toString(),
 }: {
   column: Column<PetDto, unknown>;
   title: string;
-  items: string[];
-  renderItem?: (item: string) => string;
+  items: string[] | number[];
+  renderItem?: (item: string | number) => string;
 }) {
   const { searchFilters, setSearchFilters } = useSearchStore();
   const columnId = column.id === "adoption_status" ? "status" : column.id;
@@ -84,7 +83,7 @@ function TableHeaderSelect({
         <SelectContent>
           <SelectItem value="all">전체</SelectItem>
           {items.map((item) => (
-            <SelectItem key={item} value={item}>
+            <SelectItem key={item} value={item.toString()}>
               {renderItem(item)}
             </SelectItem>
           ))}
@@ -96,40 +95,28 @@ function TableHeaderSelect({
 
 export const columns: ColumnDef<PetDto>[] = [
   {
-    id: "select",
-    header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
     accessorKey: "isPublic",
     header: ({ column }) => {
       return (
         <TableHeaderSelect
           column={column}
           title={TABLE_HEADER.isPublic || ""}
-          items={["true", "false"]}
-          renderItem={(item) => (item === "true" ? "공개" : "비공개")}
+          items={[1, 0]}
+          renderItem={(item) => (item === 1 ? "공개" : "비공개")}
         />
       );
     },
-    cell: ({ cell }) => <div className="capitalize">{cell.getValue() ? "✅" : ""}</div>,
+    cell: ({ cell }) => {
+      const isPublic = cell.getValue();
+      return (
+        <div className="text-center">
+          <Badge variant={isPublic ? "default" : "outline"}>{isPublic ? "공개" : "비공개"}</Badge>
+          <span className="sr-only">{isPublic ? "공개" : "비공개"}</span>
+        </div>
+      );
+    },
   },
+
   {
     accessorKey: "adoption.status",
     header: ({ column }) => {
@@ -158,7 +145,11 @@ export const columns: ColumnDef<PetDto>[] = [
     header: TABLE_HEADER.name,
     cell: ({ row }) => {
       const name = row.original.name;
-      return <div className="font-semibold">{name}</div>;
+      return (
+        <div className="max-w-[150px] truncate font-semibold" title={name}>
+          {name}
+        </div>
+      );
     },
   },
   {

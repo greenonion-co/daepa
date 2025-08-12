@@ -1,5 +1,8 @@
 import { Exclude } from 'class-transformer';
-import { ADOPTION_SALE_STATUS } from 'src/pet/pet.constants';
+import {
+  ADOPTION_SALE_STATUS,
+  PET_ADOPTION_LOCATION,
+} from 'src/pet/pet.constants';
 import { PetEntity } from 'src/pet/pet.entity';
 import { UserEntity } from 'src/user/user.entity';
 import {
@@ -42,8 +45,8 @@ export class AdoptionEntity {
   @Column({ type: 'text', nullable: true })
   memo?: string; // 메모
 
-  @Column({ type: 'varchar', length: 200, nullable: true })
-  location?: string; // 거래 장소
+  @Column({ type: 'enum', enum: PET_ADOPTION_LOCATION, nullable: true })
+  location?: PET_ADOPTION_LOCATION; // 거래 장소
 
   @CreateDateColumn()
   createdAt: Date;

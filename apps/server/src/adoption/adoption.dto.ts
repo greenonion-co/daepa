@@ -10,7 +10,10 @@ import { Transform, Type } from 'class-transformer';
 import { UserProfilePublicDto } from '../user/user.dto';
 
 import { PetSummaryWithoutOwnerDto } from '../pet/pet.dto';
-import { ADOPTION_SALE_STATUS } from 'src/pet/pet.constants';
+import {
+  ADOPTION_SALE_STATUS,
+  PET_ADOPTION_LOCATION,
+} from 'src/pet/pet.constants';
 import { CommonResponseDto } from 'src/common/response.dto';
 
 export class AdoptionBaseDto {
@@ -61,13 +64,15 @@ export class AdoptionBaseDto {
   memo?: string;
 
   @ApiProperty({
-    description: '거래 장소',
-    example: '서울시 강남구',
+    description: '분양 위치',
+    example: 'ONLINE',
+    enum: PET_ADOPTION_LOCATION,
+    'x-enumNames': Object.keys(PET_ADOPTION_LOCATION),
     required: false,
   })
   @IsOptional()
-  @IsString()
-  location?: string;
+  @IsEnum(PET_ADOPTION_LOCATION)
+  location?: PET_ADOPTION_LOCATION;
 
   @ApiProperty({
     description: '생성일',
@@ -139,13 +144,15 @@ export class CreateAdoptionDto {
   memo?: string;
 
   @ApiProperty({
-    description: '거래 장소',
-    example: '서울시 강남구',
+    description: '분양 위치',
+    example: 'ONLINE',
+    enum: PET_ADOPTION_LOCATION,
+    'x-enumNames': Object.keys(PET_ADOPTION_LOCATION),
     required: false,
   })
   @IsOptional()
-  @IsString()
-  location?: string;
+  @IsEnum(PET_ADOPTION_LOCATION)
+  location?: PET_ADOPTION_LOCATION;
 
   @ApiProperty({
     description: '판매 상태',
@@ -177,8 +184,6 @@ export class AdoptionDto extends PickType(AdoptionBaseDto, [
   'adoptionDate',
   'memo',
   'location',
-  'createdAt',
-  'updatedAt',
   'status',
 ] as const) {
   @ApiProperty({

@@ -25,9 +25,13 @@ export class UserNotificationService {
 
   async createUserNotification(
     entityManager: EntityManager,
+    senderId: string,
     dto: CreateUserNotificationDto,
   ): Promise<UserNotificationEntity> {
-    const userNotificationEntity = plainToInstance(UserNotificationEntity, dto);
+    const userNotificationEntity = plainToInstance(UserNotificationEntity, {
+      ...dto,
+      senderId,
+    });
     return await entityManager.save(
       UserNotificationEntity,
       userNotificationEntity,
@@ -88,31 +92,27 @@ export class UserNotificationService {
     id: number,
     userId: string,
   ): Promise<UserNotificationDto | null> {
-    try {
-      const userNotificationEntity =
-        await this.userNotificationRepository.findOne({
-          where: { id, isDeleted: false, receiverId: userId },
-        });
+    const userNotificationEntity =
+      await this.userNotificationRepository.findOne({
+        where: { id, isDeleted: false, receiverId: userId },
+      });
 
-      if (!userNotificationEntity) {
-        return null;
-      }
-
-      return plainToInstance(UserNotificationDto, userNotificationEntity);
-    } catch {
-      throw new NotFoundException('알림을 찾을 수 없습니다.');
+    if (!userNotificationEntity) {
+      return null;
     }
+
+    return plainToInstance(UserNotificationDto, userNotificationEntity);
   }
 
   async updateUserNotificationDetailJson(
     entityManager: EntityManager,
     id: number,
     detailJson: Partial<UserNotificationDetailJson>,
-  ) {
+  ): Promise<UpdateResult> {
     const existingNotification = await entityManager.findOne(
       UserNotificationEntity,
       {
-        where: { id },
+        where: { id, isDeleted: false },
         select: ['detailJson'],
         lock: { mode: 'pessimistic_write' },
       },
@@ -123,8 +123,8 @@ export class UserNotificationService {
     }
 
     const updatedDetailJson: UserNotificationDetailJson = {
-      ...existingNotification.detailJson,
-      ...detailJson,
+      ...(existingNotification.detailJson ?? {}),
+      ...(detailJson ?? {}),
     };
 
     return await entityManager.update(

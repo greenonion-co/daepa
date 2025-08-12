@@ -344,7 +344,9 @@ export class PetAdoptionDto {
     example: 'ONLINE',
     enum: PET_ADOPTION_LOCATION,
     'x-enumNames': Object.keys(PET_ADOPTION_LOCATION),
+    required: false,
   })
+  @IsOptional()
   @IsEnum(PET_ADOPTION_LOCATION)
   location?: PET_ADOPTION_LOCATION;
 
@@ -354,6 +356,14 @@ export class PetAdoptionDto {
   })
   @IsString()
   buyerId?: string;
+
+  @ApiProperty({
+    description: '분양 펫 아이디',
+    example: 'XXXXXXXX',
+    required: true,
+  })
+  @IsString()
+  petId: string;
 }
 
 export class PetDto extends PetBaseDto {
@@ -537,12 +547,12 @@ export class PetFilterDto extends PageOptionsDto {
 
   @ApiProperty({
     description: '펫 공개 여부',
-    example: true,
+    example: 1,
     required: false,
   })
   @IsOptional()
-  @IsBoolean()
-  isPublic?: boolean; // 공개 여부 필터
+  @IsNumber()
+  isPublic?: number; // 공개 여부 필터
 
   @ApiProperty({
     description: '펫 최소 몸무게',

@@ -12,7 +12,7 @@ import { useState } from "react";
 interface RejectModalProps {
   isOpen: boolean;
   close: () => void;
-  handleUpdate: (status: UpdateParentRequestDtoStatus, rejectReason?: string) => void;
+  handleUpdate: (status: UpdateParentRequestDtoStatus, rejectReason?: string) => Promise<void>;
 }
 
 const RejectModal = ({ isOpen, close, handleUpdate }: RejectModalProps) => {
@@ -51,8 +51,8 @@ const RejectModal = ({ isOpen, close, handleUpdate }: RejectModalProps) => {
 
         <DialogFooter>
           <Button
-            onClick={() => {
-              handleUpdate(UpdateParentRequestDtoStatus.REJECTED, rejectReason);
+            onClick={async () => {
+              await handleUpdate(UpdateParentRequestDtoStatus.REJECTED, rejectReason);
               close();
             }}
           >

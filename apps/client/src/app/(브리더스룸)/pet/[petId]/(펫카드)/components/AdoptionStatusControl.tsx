@@ -1,4 +1,4 @@
-import CreateAdoptionModal from "@/app/(브리더스룸)/adoption/components/CreateAdoptionModal";
+import EditAdoptionModal from "@/app/(브리더스룸)/adoption/components/EditAdoptionModal";
 import Dialog from "@/app/(브리더스룸)/components/Form/Dialog";
 import {
   Select,
@@ -25,6 +25,14 @@ interface AdoptionStatusControlProps {
 }
 const AdoptionStatusControl = memo(({ pet }: AdoptionStatusControlProps) => {
   const queryClient = useQueryClient();
+
+  const refreshAndToast = useCallback(async () => {
+    await queryClient.invalidateQueries({
+      queryKey: [petControllerFindPetByPetId.name, pet.petId],
+    });
+    toast.success("판매 상태가 변경되었습니다.", { id: "adoption-status" });
+  }, [pet.petId, queryClient]);
+
   const { mutate: updateAdoption } = useMutation({
     mutationFn: async (data: UpdateAdoptionDto) => {
       if (!pet?.adoption?.adoptionId) {
@@ -36,37 +44,28 @@ const AdoptionStatusControl = memo(({ pet }: AdoptionStatusControlProps) => {
         return adoptionControllerUpdate(pet?.adoption?.adoptionId, data);
       }
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: [petControllerFindPetByPetId.name, pet.petId],
-      });
-      toast.success("판매 상태가 변경되었습니다.");
-    },
+    onSuccess: refreshAndToast,
     onError: () => {
       toast.error("판매 상태 변경에 실패했습니다.");
     },
   });
 
-  const handleSuccess = useCallback(() => {
-    queryClient.invalidateQueries({
-      queryKey: [petControllerFindPetByPetId.name, pet.petId],
-    });
-    toast.success("판매 상태가 변경되었습니다.");
-  }, [queryClient, pet.petId]);
-
   const handleCreateAdoptionModal = useCallback(
     (newStatus: AdoptionDtoStatus) => {
       overlay.open(({ isOpen, close }) => (
-        <CreateAdoptionModal
+        <EditAdoptionModal
           isOpen={isOpen}
           onClose={close}
           pet={pet}
           status={newStatus}
-          onSuccess={handleSuccess}
+          onSuccess={async () => {
+            await refreshAndToast();
+            close();
+          }}
         />
       ));
     },
-    [pet, handleSuccess],
+    [pet, refreshAndToast],
   );
 
   const handleStatusChangeDialog = useCallback(

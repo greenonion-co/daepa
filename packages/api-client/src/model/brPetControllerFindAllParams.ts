@@ -44,7 +44,7 @@ export type BrPetControllerFindAllParams = {
   /**
    * 펫 공개 여부
    */
-  isPublic?: boolean;
+  isPublic?: number;
   /**
    * 펫 최소 몸무게
    */
