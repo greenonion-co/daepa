@@ -781,7 +781,10 @@ export const getUserNotificationControllerFindAllResponseMock = (
             },
             undefined,
           ]),
-          role: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+          role: faker.helpers.arrayElement([
+            faker.helpers.arrayElement(["father", "mother"] as const),
+            undefined,
+          ]),
           message: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
           rejectReason: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
         },
@@ -870,7 +873,10 @@ export const getUserNotificationControllerFindOneResponseMock = (
               },
               undefined,
             ]),
-            role: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+            role: faker.helpers.arrayElement([
+              faker.helpers.arrayElement(["father", "mother"] as const),
+              undefined,
+            ]),
             message: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
             rejectReason: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
           },

@@ -113,3 +113,4 @@ export * from "./userProfilePublicDtoRole";
 export * from "./userProfilePublicDtoStatus";
 export * from "./userProfileResponseDto";
 export * from "./verifyNameDto";
+export * from "./userNotificationDetailJsonRole";

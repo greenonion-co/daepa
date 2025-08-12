@@ -65,6 +65,8 @@ export class UserNotificationDetailJson {
   @ApiProperty({
     description: '부모 역할',
     example: PARENT_ROLE.FATHER,
+    enum: PARENT_ROLE,
+    'x-enumNames': Object.keys(PARENT_ROLE),
     required: false,
   })
   @IsEnum(PARENT_ROLE)
