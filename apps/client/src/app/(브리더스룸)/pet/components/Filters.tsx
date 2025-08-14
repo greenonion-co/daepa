@@ -12,8 +12,7 @@ import { ChevronDown, Search } from "lucide-react";
 import { TABLE_HEADER } from "../../constants";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
-import { BrPetControllerFindAllParams } from "@repo/api-client";
-import useSearchStore from "../store/search";
+import useSearchStore, { SearchFilters } from "../store/search";
 
 interface FiltersProps<TData> {
   table: Table<TData>;
@@ -21,14 +20,14 @@ interface FiltersProps<TData> {
 
 export function Filters<TData>({ table }: FiltersProps<TData>) {
   const { searchFilters, setSearchFilters } = useSearchStore();
-  const [filters, setFilters] = useState<Partial<BrPetControllerFindAllParams>>({});
+  const [filters, setFilters] = useState<Partial<SearchFilters>>({});
 
   const handleSearch = () => {
     setSearchFilters(filters);
   };
 
   const hasActiveFilters = Object.entries(searchFilters).some(
-    ([key, value]) => value !== undefined && value !== "" && value !== null && key !== "keyword",
+    ([, value]) => value !== undefined && value !== "" && value !== null,
   );
 
   const handleResetFilters = () => {

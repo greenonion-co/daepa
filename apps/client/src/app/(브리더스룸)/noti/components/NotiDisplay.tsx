@@ -279,20 +279,22 @@ const NotiDisplay = memo(() => {
           <Separator />
 
           <div className="whitespace-pre-wrap p-4 text-sm">
-            <div
-              className={cn(
-                "flex flex-col",
-                data?.type === UserNotificationDtoType.PARENT_REJECT && "text-muted-foreground",
-              )}
-            >
-              <span className="font-bold">
-                {(data?.type === UserNotificationDtoType.PARENT_ACCEPT ||
-                  data?.type === UserNotificationDtoType.PARENT_REJECT ||
-                  data?.type === UserNotificationDtoType.PARENT_REQUEST) &&
-                  "요청 메시지"}
-              </span>
-              <div>{String(safeData?.message ?? "")}</div>
-            </div>
+            {safeData?.message && (
+              <div
+                className={cn(
+                  "flex flex-col",
+                  data?.type === UserNotificationDtoType.PARENT_REJECT && "text-muted-foreground",
+                )}
+              >
+                <span className="font-bold">
+                  {(data?.type === UserNotificationDtoType.PARENT_ACCEPT ||
+                    data?.type === UserNotificationDtoType.PARENT_REJECT ||
+                    data?.type === UserNotificationDtoType.PARENT_REQUEST) &&
+                    "요청 메시지"}
+                </span>
+                <div>{String(safeData.message)}</div>
+              </div>
+            )}
 
             {data?.type === UserNotificationDtoType.PARENT_REJECT && (
               <div className="mt-4 flex flex-col">

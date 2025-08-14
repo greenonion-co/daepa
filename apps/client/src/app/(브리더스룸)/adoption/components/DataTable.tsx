@@ -24,6 +24,7 @@ import { overlay } from "overlay-kit";
 import AdoptionDetailModal from "./AdoptionDetailModal";
 import useTableStore from "../../pet/store/table";
 import { useQueryClient } from "@tanstack/react-query";
+import { Filters } from "../../pet/components/Filters";
 
 interface DataTableProps<TData> {
   columns: ColumnDef<TData>[];
@@ -102,65 +103,67 @@ export const DataTable = ({
   return (
     <div className="relative w-full">
       <div className="w-full">
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => {
-                    return (
-                      <TableHead key={header.id}>
-                        {header.isPlaceholder
-                          ? null
-                          : flexRender(header.column.columnDef.header, header.getContext())}
-                      </TableHead>
-                    );
-                  })}
-                </TableRow>
-              ))}
-            </TableHeader>
-            <TableBody>
-              {table.getRowModel().rows?.length ? (
-                <>
-                  {table.getRowModel().rows.map((row) => (
-                    <TableRow
-                      key={row.id}
-                      data-state={row.getIsSelected() && "selected"}
-                      className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
-                      onClick={(e) => handleRowClick({ e, adoptionId: row.original.adoptionId })}
-                    >
-                      {row.getVisibleCells().map((cell) => (
-                        <TableCell key={cell.id}>
-                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                        </TableCell>
-                      ))}
-                    </TableRow>
-                  ))}
-                  {/* 무한 스크롤 로더 */}
-                  {hasMore && (
-                    <TableRow ref={loaderRefAction}>
-                      <TableCell colSpan={columns.length} className="h-20 text-center">
-                        {isFetchingMore ? (
-                          <div className="flex items-center justify-center">
-                            <div className="h-6 w-6 animate-spin rounded-full border-b-2 border-blue-500" />
-                          </div>
-                        ) : (
-                          <Loading />
-                        )}
+        <Filters table={table} />
+      </div>
+      <div className="mb-1 text-sm text-gray-500">검색 결과 {data.length} 건</div>
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => {
+                  return (
+                    <TableHead key={header.id}>
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(header.column.columnDef.header, header.getContext())}
+                    </TableHead>
+                  );
+                })}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows?.length ? (
+              <>
+                {table.getRowModel().rows.map((row) => (
+                  <TableRow
+                    key={row.id}
+                    data-state={row.getIsSelected() && "selected"}
+                    className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
+                    onClick={(e) => handleRowClick({ e, adoptionId: row.original.adoptionId })}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       </TableCell>
-                    </TableRow>
-                  )}
-                </>
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={columns.length} className="h-24 text-center">
-                    분양 정보가 없습니다.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </div>
+                    ))}
+                  </TableRow>
+                ))}
+                {/* 무한 스크롤 로더 */}
+                {hasMore && (
+                  <TableRow ref={loaderRefAction}>
+                    <TableCell colSpan={columns.length} className="h-20 text-center">
+                      {isFetchingMore ? (
+                        <div className="flex items-center justify-center">
+                          <div className="h-6 w-6 animate-spin rounded-full border-b-2 border-blue-500" />
+                        </div>
+                      ) : (
+                        <Loading />
+                      )}
+                    </TableCell>
+                  </TableRow>
+                )}
+              </>
+            ) : (
+              <TableRow>
+                <TableCell colSpan={columns.length} className="h-24 text-center">
+                  분양 정보가 없습니다.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
       </div>
     </div>
   );

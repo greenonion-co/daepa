@@ -3,14 +3,15 @@
 import { ColumnDef } from "@tanstack/react-table";
 
 import { Badge } from "@/components/ui/badge";
-import { AdoptionDto } from "@repo/api-client";
+import { AdoptionDto, AdoptionDtoStatus } from "@repo/api-client";
 import { getStatusBadge } from "@/lib/utils";
-import { SPECIES_KOREAN_INFO } from "../../constants";
+import { SALE_STATUS_KOREAN_INFO, SPECIES_KOREAN_INFO, TABLE_HEADER } from "../../constants";
+import TableHeaderSelect from "../../components/TableHeaderSelect";
 
 export const columns: ColumnDef<AdoptionDto>[] = [
   {
     accessorKey: "pet.name",
-    header: "펫 이름",
+    header: TABLE_HEADER.pet_name,
     cell: ({ row }) => {
       const petName = row.original.pet.name;
       return <div className="font-semibold">{petName}</div>;
@@ -18,7 +19,18 @@ export const columns: ColumnDef<AdoptionDto>[] = [
   },
   {
     accessorKey: "pet.species",
-    header: "종",
+    header: ({ column }) => {
+      const uniqueSpecies = Object.keys(SPECIES_KOREAN_INFO);
+
+      return (
+        <TableHeaderSelect
+          column={column}
+          title={TABLE_HEADER.pet_species}
+          items={uniqueSpecies}
+          renderItem={(item) => SPECIES_KOREAN_INFO[item as keyof typeof SPECIES_KOREAN_INFO]}
+        />
+      );
+    },
     cell: ({ row }) => {
       const species = row.original.pet.species;
       return <div className="capitalize">{SPECIES_KOREAN_INFO[species]}</div>;
@@ -46,7 +58,16 @@ export const columns: ColumnDef<AdoptionDto>[] = [
   },
   {
     accessorKey: "status",
-    header: "상태",
+    header: ({ column }) => (
+      <TableHeaderSelect
+        column={column}
+        title={TABLE_HEADER.status}
+        items={Object.values(AdoptionDtoStatus)}
+        renderItem={(item) =>
+          SALE_STATUS_KOREAN_INFO[item as keyof typeof SALE_STATUS_KOREAN_INFO] || "미정"
+        }
+      />
+    ),
     cell: ({ row }) => {
       const status = row.original.status;
       return <div className="flex justify-center">{getStatusBadge(status)}</div>;

@@ -1,9 +1,10 @@
 import { create } from "zustand";
-import { BrPetControllerFindAllParams } from "@repo/api-client";
+
+export type SearchFilters = Record<string, string[] | string | number | undefined>;
 
 interface SearchState {
-  searchFilters: Partial<BrPetControllerFindAllParams>;
-  setSearchFilters: (filters: Partial<BrPetControllerFindAllParams>) => void;
+  searchFilters: Partial<SearchFilters>;
+  setSearchFilters: (filters: Partial<SearchFilters>) => void;
 }
 
 const createSearchStore = () =>

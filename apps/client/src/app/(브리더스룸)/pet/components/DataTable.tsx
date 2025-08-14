@@ -31,7 +31,6 @@ interface DataTableProps<TData> {
   hasMore?: boolean;
   isFetchingMore?: boolean;
   loaderRefAction: (node?: Element | null) => void;
-  hasFilter?: boolean;
   isClickable?: boolean;
 }
 
@@ -41,7 +40,6 @@ export const DataTable = ({
   hasMore,
   isFetchingMore,
   loaderRefAction,
-  hasFilter = true,
   isClickable = true,
 }: DataTableProps<PetDto>) => {
   const {
@@ -90,7 +88,7 @@ export const DataTable = ({
   return (
     <div className="relative w-full">
       <div className="w-full">
-        {hasFilter && <Filters table={table} />}
+        <Filters table={table} />
 
         <div className="rounded-md border">
           <Table>

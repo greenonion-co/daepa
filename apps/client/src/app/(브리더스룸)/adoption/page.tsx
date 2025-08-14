@@ -5,7 +5,6 @@ import { adoptionControllerGetAllAdoptions } from "@repo/api-client";
 import { Button } from "@/components/ui/button";
 import { Plus, BarChart3 } from "lucide-react";
 import { toast } from "sonner";
-import Loading from "@/components/common/Loading";
 import { useInView } from "react-intersection-observer";
 import { useEffect, useState } from "react";
 
@@ -15,20 +14,23 @@ import EditAdoptionModal from "./components/EditAdoptionModal";
 import AdoptionDashboard from "./components/AdoptionDashboard";
 import { columns } from "./components/columns";
 import DataTable from "./components/DataTable";
+import useSearchStore from "../pet/store/search";
 
 const AdoptionPage = () => {
   const queryClient = useQueryClient();
   const { ref, inView } = useInView();
   const itemPerPage = 10;
   const [showDashboard, setShowDashboard] = useState(false);
+  const { searchFilters } = useSearchStore();
 
-  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
-    queryKey: [adoptionControllerGetAllAdoptions.name],
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
+    queryKey: [adoptionControllerGetAllAdoptions.name, searchFilters],
     queryFn: ({ pageParam = 1 }) =>
       adoptionControllerGetAllAdoptions({
         page: pageParam,
         itemPerPage,
         order: "DESC",
+        ...searchFilters,
       }),
     initialPageParam: 1,
     getNextPageParam: (lastPage) => {
@@ -37,8 +39,13 @@ const AdoptionPage = () => {
       }
       return undefined;
     },
-    select: (data) => data.pages.flatMap((page) => page.data.data),
+    select: (resp) => ({
+      items: resp.pages.flatMap((p) => p.data.data),
+      totalCount: resp.pages[0]?.data.meta.totalCount ?? 0,
+    }),
   });
+
+  const { items } = data ?? { items: [], totalCount: 0 };
 
   useEffect(() => {
     if (inView && hasNextPage && !isFetchingNextPage) {
@@ -59,8 +66,6 @@ const AdoptionPage = () => {
       />
     ));
   };
-
-  if (isLoading) return <Loading />;
 
   return (
     <div className="container mx-auto p-6">
@@ -83,11 +88,11 @@ const AdoptionPage = () => {
       </div>
 
       {showDashboard ? (
-        <AdoptionDashboard data={data} />
+        <AdoptionDashboard data={items} />
       ) : (
         <DataTable
           columns={columns}
-          data={data}
+          data={items}
           hasMore={hasNextPage}
           isFetchingMore={isFetchingNextPage}
           loaderRefAction={ref}

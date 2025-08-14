@@ -300,6 +300,15 @@ export const TABLE_HEADER = {
   foods: "먹이",
   isPublic: "공개 여부",
   adoption_status: "분양 상태",
+  pet_name: "펫 이름",
+  pet_species: "종",
+  pet_morphs: "모프",
+  pet_hatchingDate: "출생일",
+  status: "상태",
+  buyer_name: "입양자",
+  adoptionDate: "분양 날짜",
+  price: "분양 가격",
+  memo: "메모",
 };
 
 export const SPECIES_KOREAN_INFO: Record<PetDtoSpecies, string> = {
