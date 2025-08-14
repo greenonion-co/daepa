@@ -8,13 +8,14 @@ import { FindOptionsWhere, EntityManager, DataSource } from 'typeorm';
 import { AdoptionEntity } from './adoption.entity';
 import {
   AdoptionDto,
+  AdoptionFilterDto,
   CreateAdoptionDto,
   UpdateAdoptionDto,
 } from './adoption.dto';
 import { PetService } from 'src/pet/pet.service';
 import { UserService } from 'src/user/user.service';
 import { nanoid } from 'nanoid';
-import { PageMetaDto, PageOptionsDto } from 'src/common/page.dto';
+import { PageMetaDto } from 'src/common/page.dto';
 import { PageDto } from 'src/common/page.dto';
 import {
   ADOPTION_SALE_STATUS,
@@ -139,12 +140,12 @@ export class AdoptionService {
   }
 
   async findAll(
-    pageOptionsDto: PageOptionsDto,
+    pageOptionsDto: AdoptionFilterDto,
     userId: string,
   ): Promise<PageDto<AdoptionDto>> {
     const [adoptionEntities, totalCount] = await this.dataSource.transaction(
       async (entityManager: EntityManager) => {
-        return entityManager
+        const queryBuilder = entityManager
           .createQueryBuilder(AdoptionEntity, 'adoptions')
           .leftJoinAndMapOne(
             'adoptions.pet',
@@ -165,7 +166,93 @@ export class AdoptionService {
             'buyer.userId = adoptions.buyerId',
           )
           .where('adoptions.isDeleted = :isDeleted', { isDeleted: false })
-          .andWhere('adoptions.sellerId = :userId', { userId })
+          .andWhere('adoptions.sellerId = :userId', { userId });
+
+        // 키워드 검색 (펫 이름/설명 + 분양 메모)
+        if (pageOptionsDto.keyword) {
+          queryBuilder.andWhere(
+            '(pets.name LIKE :keyword OR pets.desc LIKE :keyword OR adoptions.memo LIKE :keyword)',
+            { keyword: `%${pageOptionsDto.keyword}%` },
+          );
+        }
+
+        // 종 필터링
+        if (pageOptionsDto.species) {
+          queryBuilder.andWhere('pets.species = :species', {
+            species: pageOptionsDto.species,
+          });
+        }
+
+        // 성별 필터링
+        if (pageOptionsDto.sex) {
+          queryBuilder.andWhere('pets.sex = :sex', { sex: pageOptionsDto.sex });
+        }
+
+        // 공개 여부 필터링 (펫 공개 여부)
+        if (pageOptionsDto.isPublic !== undefined) {
+          queryBuilder.andWhere('pets.isPublic = :isPublic', {
+            isPublic: pageOptionsDto.isPublic,
+          });
+        }
+
+        // 생년월일 범위 필터링
+        if (pageOptionsDto.startYmd !== undefined) {
+          queryBuilder.andWhere('pets.hatchingDate >= :startYmd', {
+            startYmd: pageOptionsDto.startYmd,
+          });
+        }
+        if (pageOptionsDto.endYmd !== undefined) {
+          queryBuilder.andWhere('pets.hatchingDate <= :endYmd', {
+            endYmd: pageOptionsDto.endYmd,
+          });
+        }
+
+        // 모프 필터링
+        if (pageOptionsDto.morphs && pageOptionsDto.morphs.length > 0) {
+          pageOptionsDto.morphs.forEach((morph, index) => {
+            queryBuilder.andWhere(
+              `JSON_CONTAINS(pets.morphs, :morph${index})`,
+              {
+                [`morph${index}`]: JSON.stringify(morph),
+              },
+            );
+          });
+        }
+
+        // 형질 필터링
+        if (pageOptionsDto.traits && pageOptionsDto.traits.length > 0) {
+          pageOptionsDto.traits.forEach((trait, index) => {
+            queryBuilder.andWhere(
+              `JSON_CONTAINS(pets.traits, :trait${index})`,
+              {
+                [`trait${index}`]: JSON.stringify(trait),
+              },
+            );
+          });
+        }
+
+        // 먹이 필터링
+        if (pageOptionsDto.foods) {
+          queryBuilder.andWhere('JSON_CONTAINS(pets.foods, :food)', {
+            food: JSON.stringify(pageOptionsDto.foods),
+          });
+        }
+
+        // 판매 상태 필터링
+        if (pageOptionsDto.status) {
+          queryBuilder.andWhere('adoptions.status = :status', {
+            status: pageOptionsDto.status,
+          });
+        }
+
+        // 성장단계 필터링
+        if (pageOptionsDto.growth) {
+          queryBuilder.andWhere('pets.growth = :growth', {
+            growth: pageOptionsDto.growth,
+          });
+        }
+
+        return queryBuilder
           .orderBy('adoptions.createdAt', pageOptionsDto.order)
           .skip(pageOptionsDto.skip)
           .take(pageOptionsDto.itemPerPage)

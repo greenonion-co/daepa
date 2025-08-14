@@ -6,6 +6,10 @@
  * OpenAPI spec version: 1.0
  */
 import type { AdoptionControllerGetAllAdoptionsOrder } from "./adoptionControllerGetAllAdoptionsOrder";
+import type { AdoptionControllerGetAllAdoptionsSpecies } from "./adoptionControllerGetAllAdoptionsSpecies";
+import type { AdoptionControllerGetAllAdoptionsSex } from "./adoptionControllerGetAllAdoptionsSex";
+import type { AdoptionControllerGetAllAdoptionsStatus } from "./adoptionControllerGetAllAdoptionsStatus";
+import type { AdoptionControllerGetAllAdoptionsGrowth } from "./adoptionControllerGetAllAdoptionsGrowth";
 
 export type AdoptionControllerGetAllAdoptionsParams = {
   /**
@@ -20,4 +24,48 @@ export type AdoptionControllerGetAllAdoptionsParams = {
    * 페이지당 항목 수
    */
   itemPerPage?: number;
+  /**
+   * 검색 키워드 (이름, 설명 등)
+   */
+  keyword?: string;
+  /**
+   * 펫 종
+   */
+  species?: AdoptionControllerGetAllAdoptionsSpecies;
+  /**
+   * 펫 성별
+   */
+  sex?: AdoptionControllerGetAllAdoptionsSex;
+  /**
+   * 펫 공개 여부
+   */
+  isPublic?: number;
+  /**
+   * 펫 최소 생년월일
+   */
+  startYmd?: string;
+  /**
+   * 펫 최대 생년월일
+   */
+  endYmd?: string;
+  /**
+   * 펫 모프
+   */
+  morphs?: string[];
+  /**
+   * 펫 형질
+   */
+  traits?: string[];
+  /**
+   * 펫 먹이
+   */
+  foods?: string;
+  /**
+   * 판매 상태
+   */
+  status?: AdoptionControllerGetAllAdoptionsStatus;
+  /**
+   * 펫 성장단계
+   */
+  growth?: AdoptionControllerGetAllAdoptionsGrowth;
 };
