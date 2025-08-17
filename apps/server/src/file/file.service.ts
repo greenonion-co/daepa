@@ -19,11 +19,8 @@ export class FileService {
       })),
     );
 
-    const savedPetImages = await this.petImageService.saveImages(
-      petId,
-      uploadedFiles,
-    );
+    await this.petImageService.saveImages(petId, uploadedFiles);
 
-    return savedPetImages;
+    return uploadedFiles;
   }
 }

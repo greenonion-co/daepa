@@ -2,8 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PetImageEntity } from './pet.image.entity';
 import { Repository } from 'typeorm';
-import { PetImageDto, UploadedPetImageDto } from './pet.image.dto';
-import { plainToInstance } from 'class-transformer';
+import { UploadedPetImageDto } from './pet.image.dto';
 
 @Injectable()
 export class PetImageService {
@@ -21,9 +20,11 @@ export class PetImageService {
       mimeType: image.mimeType,
     }));
 
-    const savedPetImagesEntities =
-      await this.petImageRepository.save(petImages);
+    await this.petImageRepository.upsert(petImages, {
+      conflictPaths: ['petId', 'fileName'],
+      skipUpdateIfNoValuesChanged: true,
+    });
 
-    return plainToInstance(PetImageDto, savedPetImagesEntities);
+    return true;
   }
 }
