@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { UploadedPetImageDto } from 'src/pet/image/pet.image.dto';
 
 @Injectable()
 export class R2Service {
@@ -33,7 +34,7 @@ export class R2Service {
 
   async upload(
     files: { buffer: Buffer; fileName: string; mimeType: string }[],
-  ) {
+  ): Promise<UploadedPetImageDto[]> {
     const bucketName = this.configService.get<string>(
       'CLOUDFLARE_R2_IMAGE_BUCKET_NAME',
     );
@@ -61,7 +62,6 @@ export class R2Service {
       size: buffer.byteLength,
       mimeType,
     }));
-    // TODO: 업로드 성공 시 파일 정보 저장
 
     return uploadSuccessFiles;
   }

@@ -45,7 +45,9 @@ import { PairController } from './pair/pair.controller';
 import { PairService } from './pair/pair.service';
 import { FileController } from './file/file.controller';
 import { FileService } from './file/file.service';
-import { R2Service } from './common/storage/r2/r2.service';
+import { R2Service } from './common/cloudflare/r2.service';
+import { PetImageEntity } from './pet/image/pet.image.entity';
+import { PetImageService } from './pet/image/pet.image.service';
 
 const ENTITIES = [
   UserEntity,
@@ -57,6 +59,7 @@ const ENTITIES = [
   ParentRequestEntity,
   LayingEntity,
   PairEntity,
+  PetImageEntity,
 ];
 
 @Module({
@@ -119,6 +122,7 @@ const ENTITIES = [
     PairService,
     R2Service,
     FileService,
+    PetImageService,
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,

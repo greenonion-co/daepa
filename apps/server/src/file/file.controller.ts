@@ -45,7 +45,7 @@ export class FileController {
   })
   @ApiResponse({
     status: 413,
-    description: '파일 크기가 너무 큽니다 (최대 5MB)',
+    description: '파일 크기가 너무 큽니다 (최대 10MB)',
   })
   async uploadImages(
     @Body() uploadImagesDto: Pick<UploadImagesRequestDto, 'petId'>,
