@@ -20,6 +20,7 @@ import type {
   CreateParentDto,
   CreatePetDto,
   DeleteUserNotificationDto,
+  KakaoNativeLoginRequestDto,
   UnlinkParentDto,
   UpdateAdoptionDto,
   UpdateLayingDto,
@@ -183,6 +184,17 @@ export const brPetControllerGetPetsByDateRange = (
     url: `http://localhost:4000/api/v1/br/pet/hatching/date-range`,
     method: "GET",
     params,
+  });
+};
+
+export const authControllerKakaoNative = (
+  kakaoNativeLoginRequestDto: KakaoNativeLoginRequestDto,
+) => {
+  return useCustomInstance<UserDto>({
+    url: `http://localhost:4000/api/auth/sign-in/kakao/native`,
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    data: kakaoNativeLoginRequestDto,
   });
 };
 
@@ -410,6 +422,9 @@ export type BrPetControllerGetPetsByMonthResult = NonNullable<
 >;
 export type BrPetControllerGetPetsByDateRangeResult = NonNullable<
   Awaited<ReturnType<typeof brPetControllerGetPetsByDateRange>>
+>;
+export type AuthControllerKakaoNativeResult = NonNullable<
+  Awaited<ReturnType<typeof authControllerKakaoNative>>
 >;
 export type AuthControllerKakaoLoginResult = NonNullable<
   Awaited<ReturnType<typeof authControllerKakaoLogin>>
@@ -1722,6 +1737,22 @@ export const getBrPetControllerGetPetsByDateRangeResponseMock = (
   ...overrideResponse,
 });
 
+export const getAuthControllerKakaoNativeResponseMock = (
+  overrideResponse: Partial<UserDto> = {},
+): UserDto => ({
+  userId: faker.string.alpha(8),
+  name: faker.person.fullName(),
+  email: faker.internet.email(),
+  role: faker.helpers.arrayElement(["user", "admin"] as const),
+  isBiz: faker.datatype.boolean(),
+  refreshToken: faker.string.alphanumeric(16),
+  refreshTokenExpiresAt: new Date().toISOString(),
+  status: faker.helpers.arrayElement(["PENDING", "ACTIVE", "DELETED"] as const),
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+  ...overrideResponse,
+});
+
 export const getAuthControllerGetTokenResponseMock = (
   overrideResponse: Partial<TokenResponseDto> = {},
 ): TokenResponseDto => ({
@@ -2738,6 +2769,27 @@ export const getBrPetControllerGetPetsByDateRangeMockHandler = (
   });
 };
 
+export const getAuthControllerKakaoNativeMockHandler = (
+  overrideResponse?:
+    | UserDto
+    | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<UserDto> | UserDto),
+) => {
+  return http.post("*/api/auth/sign-in/kakao/native", async (info) => {
+    await delay(1000);
+
+    return new HttpResponse(
+      JSON.stringify(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getAuthControllerKakaoNativeResponseMock(),
+      ),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+  });
+};
+
 export const getAuthControllerKakaoLoginMockHandler = (
   overrideResponse?:
     | unknown
@@ -3218,6 +3270,7 @@ export const getProjectDaepaAPIMock = () => [
   getBrPetControllerGetPetsByYearMockHandler(),
   getBrPetControllerGetPetsByMonthMockHandler(),
   getBrPetControllerGetPetsByDateRangeMockHandler(),
+  getAuthControllerKakaoNativeMockHandler(),
   getAuthControllerKakaoLoginMockHandler(),
   getAuthControllerGoogleLoginMockHandler(),
   getAuthControllerGetTokenMockHandler(),

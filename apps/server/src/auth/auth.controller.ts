@@ -6,21 +6,65 @@ import {
   UnauthorizedException,
   UseGuards,
   Post,
+  Body,
 } from '@nestjs/common';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService, ValidatedUser } from './auth.service';
+import { UserService } from 'src/user/user.service';
 import { ApiResponse } from '@nestjs/swagger';
 import { UserDto } from 'src/user/user.dto';
 import { JwtUser, PassportValidatedUser, Public } from './auth.decorator';
-import { TokenResponseDto } from './auth.dto';
+import { KakaoNativeLoginRequestDto, TokenResponseDto } from './auth.dto';
 import { JwtUserPayload } from './strategies/jwt.strategy';
 import { RequestWithCookies } from 'src/types/request';
 import { CommonResponseDto } from 'src/common/response.dto';
+import { OAUTH_PROVIDER } from './auth.constants';
 
 @Controller('/auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly userService: UserService,
+  ) {}
+
+  @Post('sign-in/kakao/native')
+  @Public()
+  @ApiResponse({
+    status: 200,
+    description: '카카오 네이티브 로그인 성공',
+    type: UserDto,
+  })
+  async kakaoNative(
+    @Req() _req: Request,
+    @Res({ passthrough: true }) res: Response,
+    @Body() body: KakaoNativeLoginRequestDto,
+  ) {
+    const { email, id, refreshToken } = body;
+
+    const validatedUser = await this.authService.validateUser({
+      email,
+      provider: OAUTH_PROVIDER.KAKAO,
+      providerId: id,
+      refreshToken,
+    });
+
+    const jwtRefreshToken = await this.authService.createJwtRefreshToken(
+      validatedUser.userId,
+    );
+
+    res.cookie('refreshToken', jwtRefreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 180 * 24 * 60 * 60 * 1000,
+    });
+
+    const user = await this.userService.findOne({
+      userId: validatedUser.userId,
+    });
+    return user as UserDto;
+  }
 
   @Get('sign-in/kakao')
   @Public()
