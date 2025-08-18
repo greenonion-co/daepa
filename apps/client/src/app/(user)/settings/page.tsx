@@ -39,6 +39,7 @@ import Image from "next/image";
 import { USER_STATUS_MAP } from "@/app/(브리더스룸)/constants";
 import { cn } from "@/lib/utils";
 import { AxiosError } from "axios";
+import { tokenStorage } from "@/lib/tokenStorage";
 
 const NICKNAME_MAX_LENGTH = 15;
 const NICKNAME_MIN_LENGTH = 2;
@@ -77,7 +78,7 @@ const SettingsPage = () => {
   const { mutate: signOut } = useMutation({
     mutationFn: authControllerSignOut,
     onSuccess: () => {
-      localStorage.removeItem("accessToken");
+      tokenStorage.removeToken();
       toast.success("로그아웃 되었습니다.");
       router.replace("/pet");
     },

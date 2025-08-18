@@ -1,13 +1,13 @@
 const TOKEN_KEY = "accessToken";
 
 export const tokenStorage = {
-  async setToken(token: string): Promise<void> {
+  setToken(token: string): void {
     localStorage.setItem(TOKEN_KEY, token);
   },
-  async getToken(): Promise<string | null> {
+  getToken(): string | null {
     return localStorage.getItem(TOKEN_KEY);
   },
-  async removeToken(): Promise<void> {
+  removeToken(): void {
     localStorage.removeItem(TOKEN_KEY);
   },
 };
