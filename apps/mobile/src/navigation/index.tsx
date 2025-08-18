@@ -6,7 +6,7 @@ import RegisterScreen from '../screens/Register';
 const Stack = createStackNavigator<RootStackParamList>();
 
 export type RootStackParamList = {
-  Tabs: undefined;
+  Tabs: { screen: string };
   PetDetail: { petId: string };
   Register: undefined;
 };

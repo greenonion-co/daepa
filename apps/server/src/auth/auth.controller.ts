@@ -13,13 +13,12 @@ import { AuthGuard } from '@nestjs/passport';
 import { AuthService, ValidatedUser } from './auth.service';
 import { UserService } from 'src/user/user.service';
 import { ApiResponse } from '@nestjs/swagger';
-import { UserDto } from 'src/user/user.dto';
+import { PublicUserDto, UserDto } from 'src/user/user.dto';
 import { JwtUser, PassportValidatedUser, Public } from './auth.decorator';
 import { KakaoNativeLoginRequestDto, TokenResponseDto } from './auth.dto';
 import { JwtUserPayload } from './strategies/jwt.strategy';
 import { RequestWithCookies } from 'src/types/request';
 import { CommonResponseDto } from 'src/common/response.dto';
-import { OAUTH_PROVIDER } from './auth.constants';
 
 @Controller('/auth')
 export class AuthController {
@@ -33,7 +32,7 @@ export class AuthController {
   @ApiResponse({
     status: 200,
     description: '카카오 네이티브 로그인 성공',
-    type: UserDto,
+    type: PublicUserDto,
   })
   async kakaoNative(
     @Req() _req: Request,
@@ -42,9 +41,8 @@ export class AuthController {
   ) {
     const { email, id, refreshToken } = body;
 
-    const validatedUser = await this.authService.validateUser({
+    const validatedUser = await this.authService.validateKakaoNativeAndGetUser({
       email,
-      provider: OAUTH_PROVIDER.KAKAO,
       providerId: id,
       refreshToken,
     });

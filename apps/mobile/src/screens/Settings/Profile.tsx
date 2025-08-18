@@ -4,6 +4,7 @@ import {
   userControllerGetUserProfile,
 } from '@repo/api-client';
 import { useMutation, useQuery } from '@tanstack/react-query';
+import { tokenStorage } from '../../utils/tokenStorage';
 
 const Profile = () => {
   const { data: userProfile } = useQuery({
@@ -27,7 +28,7 @@ const Profile = () => {
       <Text>{userProfile?.name}</Text>
       <Text>{userProfile?.email}</Text>
 
-      <TouchableOpacity style={styles.button} onPress={signOut}>
+      <TouchableOpacity style={styles.button} onPress={() => signOut()}>
         <Text style={styles.buttonText}>로그아웃</Text>
       </TouchableOpacity>
     </View>

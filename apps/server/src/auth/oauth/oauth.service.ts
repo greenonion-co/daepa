@@ -134,6 +134,68 @@ export class OauthService {
     return response.status === 200;
   }
 
+  async getKakaoAccessTokenByRefreshToken(
+    refreshToken: string,
+  ): Promise<string> {
+    const params = new URLSearchParams();
+    params.append('grant_type', 'refresh_token');
+    params.append('client_id', process.env.KAKAO_CLIENT_ID ?? '');
+    params.append('refresh_token', refreshToken);
+    if (process.env.KAKAO_CLIENT_SECRET) {
+      params.append('client_secret', process.env.KAKAO_CLIENT_SECRET);
+    }
+
+    const response = await firstValueFrom(
+      this.httpService
+        .post<{ access_token: string }>(
+          'https://kauth.kakao.com/oauth/token',
+          params,
+          {
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8',
+            },
+          },
+        )
+        .pipe(
+          catchError((error: AxiosError) => {
+            this.logger.error(error.response?.data);
+            throw error;
+          }),
+        ),
+    );
+
+    if (!response.data?.access_token) {
+      throw new BadRequestException('카카오 액세스 토큰 갱신에 실패했습니다.');
+    }
+
+    return response.data.access_token;
+  }
+
+  async getKakaoUserMeByAccessToken(accessToken: string): Promise<{
+    id: number;
+    kakao_account?: { email?: string };
+  }> {
+    const response = await firstValueFrom(
+      this.httpService
+        .get<{
+          id: number;
+          kakao_account?: { email?: string };
+        }>('https://kapi.kakao.com/v2/user/me', {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        })
+        .pipe(
+          catchError((error: AxiosError) => {
+            this.logger.error(error.response?.data);
+            throw error;
+          }),
+        ),
+    );
+
+    return response.data;
+  }
+
   // Transaction 처리를 위해 EntityManager를 받는 메서드 추가
   async createOauthInfoWithEntityManager(
     entityManager: EntityManager,

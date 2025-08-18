@@ -1,36 +1,45 @@
 import { Button } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { login, getProfile } from '@react-native-seoul/kakao-login';
-import {
-  authControllerGetToken,
-  authControllerKakaoNative,
-} from '../../../../../packages/api-client/src/api';
+
 import { setupApiClient } from '../../utils/apiSetup';
 import { useMutation } from '@tanstack/react-query';
-import { UserDtoStatus } from '@repo/api-client';
-import { useNavigation } from '@react-navigation/native';
+import {
+  UserDtoStatus,
+  authControllerGetToken,
+  authControllerKakaoNative,
+} from '@repo/api-client';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { tokenStorage } from '../../utils/tokenStorage';
 import Profile from './Profile';
+import { useState } from 'react';
+import { RootStackParamList } from '../../navigation';
+import { StackNavigationProp } from '@react-navigation/stack';
 
 const SettingsScreen = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
 
   const { mutate: mutateGetToken } = useMutation({
     mutationFn: async (_status: UserDtoStatus) => {
       return authControllerGetToken();
     },
-    onSuccess: (data, status) => {
+    onSuccess: async (data, status) => {
       switch (status) {
         case UserDtoStatus.PENDING:
-          tokenStorage.setToken(data.data.token);
+          await tokenStorage.setToken(data.data.token);
           navigation.navigate('Register');
           break;
         case UserDtoStatus.ACTIVE:
-          tokenStorage.setToken(data.data.token);
-          navigation.navigate('Home');
+          await tokenStorage.setToken(data.data.token);
+          navigation.navigate('Tabs', {
+            screen: 'Home',
+          });
           break;
         default:
-          navigation.navigate('Settings');
+          navigation.navigate('Tabs', {
+            screen: 'Settings',
+          });
           break;
       }
     },
@@ -59,10 +68,25 @@ const SettingsScreen = () => {
     } catch (e: any) {}
   };
 
+  useFocusEffect(() => {
+    tokenStorage.getToken().then(token => {
+      setIsLoggedIn(!!token);
+    });
+  });
+
+  // useEffect(() => {
+  //   tokenStorage.getToken().then(token => {
+  //     setIsLoggedIn(!!token);
+  //   });
+  // }, []);
+
   return (
     <SafeAreaView>
-      <Profile />
-      <Button title="카카오톡 로그인" onPress={handleKakaoLogin} />
+      {isLoggedIn ? (
+        <Profile />
+      ) : (
+        <Button title="카카오톡 로그인" onPress={handleKakaoLogin} />
+      )}
     </SafeAreaView>
   );
 };

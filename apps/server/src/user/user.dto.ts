@@ -102,6 +102,17 @@ export class UserDto extends PickType(UserBaseDto, [
   'updatedAt',
 ]) {}
 
+export class PublicUserDto extends PickType(UserDto, [
+  'userId',
+  'name',
+  'email',
+  'role',
+  'isBiz',
+  'status',
+  'createdAt',
+  'updatedAt',
+] as const) {}
+
 export class CreateInitUserInfoDto extends PickType(UserBaseDto, ['name']) {
   @ApiProperty({
     description: '사업자 여부',

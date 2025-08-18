@@ -1,4 +1,4 @@
-import { setTokenProvider } from '../../../../packages/api-client/src/api/mutator/use-custom-instance';
+import { setTokenProvider } from '@repo/api-client';
 import { tokenStorage } from './tokenStorage';
 
 export const setupApiClient = () => {

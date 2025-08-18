@@ -36,6 +36,28 @@ export class AuthService {
     private readonly dataSource: DataSource,
   ) {}
 
+  private isKakaoUserResponse(
+    value: unknown,
+  ): value is { id: number; kakao_account?: { email?: string } } {
+    if (typeof value !== 'object' || value === null) return false;
+    const obj = value as Record<string, unknown>;
+    if (typeof obj.id !== 'number') return false;
+    if (
+      obj.kakao_account !== undefined &&
+      (typeof obj.kakao_account !== 'object' || obj.kakao_account === null)
+    ) {
+      return false;
+    }
+    if (
+      obj.kakao_account &&
+      'email' in (obj.kakao_account as Record<string, unknown>) &&
+      typeof (obj.kakao_account as Record<string, unknown>).email !== 'string'
+    ) {
+      return false;
+    }
+    return true;
+  }
+
   async validateUser(providerInfo: ProviderInfo): Promise<ValidatedUser> {
     // 기존 OAuth 계정 확인
     const oauthFound = await this.getOAuthWithUserByProviderInfo(providerInfo);
@@ -113,6 +135,66 @@ export class AuthService {
         userId: newOAuthUser.userId,
         userStatus: newOAuthUser.status,
       };
+    });
+  }
+
+  async validateKakaoNativeAndGetUser({
+    email,
+    providerId,
+    refreshToken,
+  }: {
+    email: string;
+    providerId: string;
+    refreshToken?: string;
+  }): Promise<ValidatedUser> {
+    // 1) 토큰 확보: refreshToken이 있으면 갱신하여 access token 확보, 없으면 에러
+    if (!refreshToken) {
+      throw new UnauthorizedException('카카오 refresh token이 필요합니다.');
+    }
+
+    const accessTokenUnknown =
+      await this.oauthService.getKakaoAccessTokenByRefreshToken(refreshToken);
+    if (
+      typeof accessTokenUnknown !== 'string' ||
+      accessTokenUnknown.length === 0
+    ) {
+      throw new UnauthorizedException(
+        '카카오 액세스 토큰 발급에 실패했습니다.',
+      );
+    }
+    const accessToken = accessTokenUnknown;
+
+    // 2) /v2/user/me로 유저 정보 조회
+    const kakaoUserUnknown =
+      await this.oauthService.getKakaoUserMeByAccessToken(accessToken);
+    if (!this.isKakaoUserResponse(kakaoUserUnknown)) {
+      throw new UnauthorizedException(
+        '카카오 사용자 정보가 유효하지 않습니다.',
+      );
+    }
+    const kakaoUser = kakaoUserUnknown;
+
+    // 3) id와 email 일치 검증
+    const kakaoUserId = kakaoUser.id?.toString();
+    const kakaoEmail = kakaoUser.kakao_account?.email;
+    if (!kakaoUserId || !kakaoEmail) {
+      throw new UnauthorizedException(
+        '카카오 사용자 정보가 유효하지 않습니다.',
+      );
+    }
+
+    if (kakaoUserId !== providerId || kakaoEmail !== email) {
+      throw new UnauthorizedException(
+        '카카오 사용자 정보가 일치하지 않습니다.',
+      );
+    }
+
+    // 4) 검증 성공 시 기존 로직으로 유효 사용자 반환/가입 처리
+    return this.validateUser({
+      email,
+      provider: OAUTH_PROVIDER.KAKAO,
+      providerId,
+      refreshToken,
     });
   }
 
