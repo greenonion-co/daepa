@@ -7,7 +7,6 @@ export class PetImageDto {
     example: 1,
     required: true,
   })
-- @IsString()
  @IsNumber()
  id: number;
   @ApiProperty({
