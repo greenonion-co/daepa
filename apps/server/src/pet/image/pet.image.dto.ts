@@ -7,9 +7,9 @@ export class PetImageDto {
     example: 1,
     required: true,
   })
-  @IsString()
-  id: string;
-
+- @IsString()
+ @IsNumber()
+ id: number;
   @ApiProperty({
     description: '펫 아이디',
     example: 'XXXXXXXX',
