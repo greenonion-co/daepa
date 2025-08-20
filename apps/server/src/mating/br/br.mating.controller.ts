@@ -6,8 +6,10 @@ import { JwtUser } from 'src/auth/auth.decorator';
 import { JwtUserPayload } from 'src/auth/strategies/jwt.strategy';
 import { MatingService } from '../mating.service';
 import { MatingByParentsDto } from '../mating.dto';
+import { BrAccessOnly } from 'src/common/decorators/roles.decorator';
 
 @Controller('/v1/br/mating')
+@BrAccessOnly()
 export class BrMatingController {
   constructor(private readonly matingService: MatingService) {}
 

@@ -1,13 +1,13 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from 'src/auth/auth.decorator';
 import { CreatePairDto } from './pair.dto';
 import { PairService } from './pair.service';
 import { CommonResponseDto } from 'src/common/response.dto';
+import { BrAccessOnly } from 'src/common/decorators/roles.decorator';
 
 @ApiTags('펫 쌍')
 @Controller('v1/pairs')
-@UseGuards(JwtAuthGuard)
+@BrAccessOnly()
 export class PairController {
   constructor(private readonly pairService: PairService) {}
 

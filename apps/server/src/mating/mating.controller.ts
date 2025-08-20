@@ -14,8 +14,10 @@ import { CreateMatingDto, MatingDetailResponseDto } from './mating.dto';
 import { CommonResponseDto } from 'src/common/response.dto';
 import { ApiResponse } from '@nestjs/swagger';
 import { UpdateMatingDto } from './mating.dto';
+import { BrAccessOnly } from 'src/common/decorators/roles.decorator';
 
 @Controller('/v1/mating')
+@BrAccessOnly()
 export class MatingController {
   constructor(private readonly matingService: MatingService) {}
 
