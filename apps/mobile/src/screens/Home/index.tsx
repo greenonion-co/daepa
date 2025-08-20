@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -15,7 +15,6 @@ import {
   PetDto,
 } from '@repo/api-client';
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { tokenStorage } from '../../utils/tokenStorage';
 import PetCard from '../../components/ui/Home/PetCard';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -29,32 +28,39 @@ const HomeScreen = () => {
 
   const cardHeight = height - insets.top - tabBarHeight;
 
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
-    useInfiniteQuery({
-      queryKey: [
-        brPetControllerFindAll.name,
-        BrPetControllerFindAllFilterType.ALL,
-      ],
-      queryFn: ({ pageParam = 1 }) =>
-        brPetControllerFindAll({
-          page: pageParam,
-          itemPerPage: ITEM_PER_PAGE,
-          order: 'DESC',
-          filterType: BrPetControllerFindAllFilterType.ALL,
-          // ...searchFilters,
-        }),
-      initialPageParam: 1,
-      getNextPageParam: lastPage => {
-        if (lastPage.data.meta.hasNextPage) {
-          return lastPage.data.meta.page + 1;
-        }
-        return undefined;
-      },
-      select: resp => ({
-        items: resp.pages.flatMap(p => p.data.data),
-        totalCount: resp.pages[0]?.data.meta.totalCount ?? 0,
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+    refetch,
+    isRefetching,
+  } = useInfiniteQuery({
+    queryKey: [
+      brPetControllerFindAll.name,
+      BrPetControllerFindAllFilterType.ALL,
+    ],
+    queryFn: ({ pageParam = 1 }) =>
+      brPetControllerFindAll({
+        page: pageParam,
+        itemPerPage: ITEM_PER_PAGE,
+        order: 'DESC',
+        filterType: BrPetControllerFindAllFilterType.ALL,
+        // ...searchFilters,
       }),
-    });
+    initialPageParam: 1,
+    getNextPageParam: lastPage => {
+      if (lastPage.data.meta.hasNextPage) {
+        return lastPage.data.meta.page + 1;
+      }
+      return undefined;
+    },
+    select: resp => ({
+      items: resp.pages.flatMap(p => p.data.data),
+      totalCount: resp.pages[0]?.data.meta.totalCount ?? 0,
+    }),
+  });
 
   const { items } = data ?? { items: [], totalCount: 0 };
 
@@ -62,13 +68,7 @@ const HomeScreen = () => {
     return <PetCard pet={item} cardHeight={cardHeight} />;
   };
 
-  useEffect(() => {
-    tokenStorage.setToken(
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJwWk5CSEkiLCJzdGF0dXMiOiJhdXRoZW50aWNhdGVkIiwiaWF0IjoxNzU1MDkxNTk4LCJleHAiOjE3NTUwOTUxOTh9.WrM_rLTag6gEAtEEWmvKwknGTxKfSaUsGm8dhE_1kK4',
-    );
-  }, []);
-
-  if (isFetchingNextPage) {
+  if (isLoading) {
     return (
       <SafeAreaView style={styles.loadingWrap}>
         <ActivityIndicator size="large" />
@@ -92,13 +92,10 @@ const HomeScreen = () => {
         snapToAlignment="start"
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl
-            refreshing={isFetchingNextPage}
-            onRefresh={fetchNextPage}
-          />
+          <RefreshControl refreshing={isRefetching} onRefresh={refetch} />
         }
         ListFooterComponent={
-          isFetchingNextPage ? (
+          isFetchingNextPage || isRefetching ? (
             <View style={styles.footer}>
               <ActivityIndicator />
             </View>
