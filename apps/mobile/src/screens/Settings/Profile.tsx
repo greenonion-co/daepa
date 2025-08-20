@@ -9,6 +9,7 @@ import { useAuthStore } from '../../store/auth';
 import Loading from '../../components/common/Loading';
 import Toast from '@/components/common/Toast';
 import TouchableButton from '@/components/common/TouchableButton';
+import Popup from '@/components/common/Popup';
 
 const Profile = () => {
   const { data: userProfile } = useQuery({
@@ -44,8 +45,18 @@ const Profile = () => {
   });
 
   const handleDeleteAccount = () => {
-    Loading.show();
-    deleteAccount();
+    Popup.show({
+      title: '회원 탈퇴',
+      description:
+        '회원 탈퇴 하시겠습니까?\n회원 탈퇴 시 모든 정보가 삭제됩니다.',
+      rightButton: {
+        title: '회원 탈퇴',
+        onPress: () => {
+          Loading.show();
+          deleteAccount();
+        },
+      },
+    });
   };
 
   if (!userProfile) return null;
