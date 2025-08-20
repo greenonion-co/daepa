@@ -1,5 +1,5 @@
 import Axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
-import { authControllerGetToken } from "../../..";
+import { authControllerGetToken } from "..";
 
 export const AXIOS_INSTANCE = Axios.create({
   baseURL: "http://localhost:4000",
@@ -25,23 +25,44 @@ const processQueue = (error: any, token: string | null = null) => {
   failedQueue = [];
 };
 
+export interface TokenProvider {
+  setToken(token: string): Promise<void> | void;
+  getToken(): Promise<string | null> | string | null;
+  removeToken(): Promise<void> | void;
+}
+
+let tokenProvider: TokenProvider | null = null;
+
+export const setTokenProvider = (provider: TokenProvider) => {
+  tokenProvider = provider;
+};
+
 // 요청 인터셉터 추가
-AXIOS_INSTANCE.interceptors.request.use((config) => {
-  if (typeof window !== "undefined") {
-    const token = localStorage.getItem("accessToken");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+AXIOS_INSTANCE.interceptors.request.use(
+  async (config) => {
+    if (tokenProvider) {
+      const token = await tokenProvider.getToken();
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
     }
-  }
-  return config;
-});
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  },
+);
 
 AXIOS_INSTANCE.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if (
+      typeof window !== "undefined" &&
+      error.response?.status === 401 &&
+      !originalRequest._retry
+    ) {
       const errorMessage = error.response.data.message;
 
       if (errorMessage === "ACCESS_TOKEN_INVALID") {
@@ -66,9 +87,9 @@ AXIOS_INSTANCE.interceptors.response.use(
           const response = await authControllerGetToken();
           const newAccessToken = response.data.token;
 
-          // 새 토큰을 localStorage에 저장
-          if (typeof window !== "undefined") {
-            localStorage.setItem("accessToken", newAccessToken);
+          // 새 토큰을 저장
+          if (tokenProvider) {
+            await tokenProvider.setToken(newAccessToken);
           }
 
           // 큐에 있는 요청들 처리
@@ -82,11 +103,13 @@ AXIOS_INSTANCE.interceptors.response.use(
           processQueue(refreshError, null);
 
           // 로그아웃 처리
-          if (typeof window !== "undefined") {
-            localStorage.removeItem("accessToken");
-            const currentPath = window.location.pathname + window.location.search;
-            localStorage.setItem("redirectUrl", currentPath);
-            window.location.href = "/sign-in";
+          if (tokenProvider) {
+            await tokenProvider.removeToken();
+            if (typeof window !== "undefined") {
+              const currentPath = window.location.pathname + window.location.search;
+              localStorage.setItem("redirectUrl", currentPath);
+              window.location.href = "/sign-in";
+            }
           }
 
           return Promise.reject(refreshError);
@@ -96,11 +119,13 @@ AXIOS_INSTANCE.interceptors.response.use(
       }
 
       // ACCESS_TOKEN_INVALID가 아닌 다른 401 에러
-      if (typeof window !== "undefined") {
-        localStorage.removeItem("accessToken");
-        const currentPath = window.location.pathname + window.location.search;
-        localStorage.setItem("redirectUrl", currentPath);
-        window.location.href = "/sign-in";
+      if (tokenProvider) {
+        tokenProvider.removeToken();
+        if (typeof window !== "undefined") {
+          const currentPath = window.location.pathname + window.location.search;
+          localStorage.setItem("redirectUrl", currentPath);
+          window.location.href = "/sign-in";
+        }
       }
     }
 

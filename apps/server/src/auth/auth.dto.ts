@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 import { CommonResponseDto } from 'src/common/response.dto';
 
 export class TokenResponseDto extends CommonResponseDto {
@@ -9,4 +9,19 @@ export class TokenResponseDto extends CommonResponseDto {
   })
   @IsString()
   token: string;
+}
+
+export class KakaoNativeLoginRequestDto {
+  @ApiProperty({ description: '카카오 계정 이메일' })
+  @IsString()
+  email: string;
+
+  @ApiProperty({ description: '카카오 사용자 ID' })
+  @IsString()
+  id: string;
+
+  @ApiProperty({ description: '카카오 Refresh Token', required: false })
+  @IsOptional()
+  @IsString()
+  refreshToken?: string;
 }
