@@ -12,10 +12,15 @@ import {
 import useLogin from '../../hooks/useLogin';
 import Loading from '@/components/common/Loading';
 import Toast from '@/components/common/Toast';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamList } from '@/navigation';
+import { isAxiosError } from 'axios';
 
 const AppleLoginButton = () => {
   const { navigateByStatus } = useLogin();
   const isAndroid = Platform.OS === 'android';
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
 
   const { mutate: mutateGetToken } = useMutation({
     mutationFn: async (_status: UserDtoStatus) => {
@@ -25,7 +30,6 @@ const AppleLoginButton = () => {
       navigateByStatus({ status, token: data.data.token });
 
       Loading.close();
-      Toast.show('로그인에 성공했습니다.');
     },
     onError: error => {
       console.log('getToken error', error);
@@ -39,9 +43,22 @@ const AppleLoginButton = () => {
     onSuccess: data => {
       mutateGetToken(data.data.status);
     },
-    onError: error => {
-      console.log('appleLogin error', error);
+    onError: (error: unknown, variables) => {
       Loading.close();
+
+      if (
+        isAxiosError(error) &&
+        error.response?.status === 422 &&
+        error.response.data?.code === 600
+      ) {
+        navigation.navigate('EmailRegister', {
+          identityToken: variables.identityToken,
+          authorizationCode: variables.authorizationCode ?? '',
+          nonce: variables.nonce ?? '',
+        });
+        return;
+      }
+
       Toast.show('로그인에 실패했습니다. 다시 시도해주세요.');
     },
   });
@@ -85,17 +102,24 @@ const AppleLoginButton = () => {
       const { email, identityToken, authorizationCode, nonce } =
         appleAuthRequestResponse;
 
-      if (identityToken) {
-        appleLogin({
-          identityToken,
-          email: email ?? undefined,
-          authorizationCode: authorizationCode ?? undefined,
-          nonce: nonce ?? undefined,
-        });
-      } else {
+      if (!identityToken) {
         Loading.close();
         Toast.show('로그인에 실패했습니다. 다시 시도해주세요.');
+        return;
       }
+
+      if (!authorizationCode || !nonce) {
+        Loading.close();
+        Toast.show('로그인에 실패했습니다. 다시 시도해주세요.');
+        return;
+      }
+
+      appleLogin({
+        identityToken,
+        email: email ?? undefined,
+        authorizationCode: authorizationCode ?? undefined,
+        nonce: nonce ?? undefined,
+      });
     } catch (e: any) {
       console.log(e);
       Loading.close();

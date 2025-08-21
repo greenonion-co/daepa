@@ -106,7 +106,7 @@ AXIOS_INSTANCE.interceptors.response.use(
           // 로그아웃 처리
           if (tokenProvider) {
             await tokenProvider.removeToken();
-            if (typeof window !== "undefined") {
+            if (typeof window !== "undefined" && window?.location?.pathname) {
               const currentPath = window.location.pathname + window.location.search;
               localStorage.setItem("redirectUrl", currentPath);
               window.location.href = "/sign-in";
@@ -122,7 +122,7 @@ AXIOS_INSTANCE.interceptors.response.use(
       // ACCESS_TOKEN_INVALID가 아닌 다른 401 에러
       if (tokenProvider) {
         tokenProvider.removeToken();
-        if (typeof window !== "undefined") {
+        if (typeof window !== "undefined" && window?.location?.pathname) {
           const currentPath = window.location.pathname + window.location.search;
           localStorage.setItem("redirectUrl", currentPath);
           window.location.href = "/sign-in";
