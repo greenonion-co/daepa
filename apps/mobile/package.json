@@ -21,6 +21,7 @@
     "@react-navigation/stack": "^7.4.7",
     "@repo/api-client": "workspace:^",
     "@tanstack/react-query": "^5.75.5",
+    "axios": "^1.11.0",
     "jose": "^5.9.6",
     "lottie-react-native": "^7.3.2",
     "lucide-react-native": "^0.539.0",
