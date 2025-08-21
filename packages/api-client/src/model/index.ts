@@ -116,4 +116,5 @@ export * from "./userProfilePublicDto";
 export * from "./userProfilePublicDtoRole";
 export * from "./userProfilePublicDtoStatus";
 export * from "./userProfileResponseDto";
+export * from "./verifyEmailDto";
 export * from "./verifyNameDto";
