@@ -44,7 +44,6 @@ export class BrPetController {
     @Query() pageOptionsDto: PetFilterDto,
     @JwtUser() token: JwtUserPayload,
   ): Promise<PageDto<PetDto>> {
-    console.log('here: ', token);
     return this.petService.getPetListFull(pageOptionsDto, token.userId);
   }
 
