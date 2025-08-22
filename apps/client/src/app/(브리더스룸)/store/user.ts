@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { userControllerGetUserProfile, UserProfileDto } from "@repo/api-client";
+import { tokenStorage } from "@/lib/tokenStorage";
 
 interface UserState {
   user: UserProfileDto | null;
@@ -23,7 +24,7 @@ export const useUserStore = create<UserStore>()((set) => ({
   // 초기화 함수
   initialize: async () => {
     try {
-      const token = localStorage.getItem("accessToken");
+      const token = tokenStorage.getToken();
       if (!token) {
         set({
           user: null,

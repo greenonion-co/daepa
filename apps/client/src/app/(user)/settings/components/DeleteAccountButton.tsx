@@ -19,6 +19,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { tokenStorage } from "@/lib/tokenStorage";
 
 const DeleteAccountButton = () => {
   const router = useRouter();
@@ -37,7 +38,7 @@ const DeleteAccountButton = () => {
 
     try {
       await mutateDeleteAccount();
-      localStorage.removeItem("accessToken");
+      tokenStorage.removeToken();
       toast.success("탈퇴 처리되었습니다.");
       router.replace("/");
     } catch (error) {

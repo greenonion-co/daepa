@@ -132,7 +132,7 @@ const MatingList = memo(() => {
       {/* 헤더 영역 */}
       <Button
         onClick={() => setIsCreateFormOpen(!isCreateFormOpen)}
-        className="flex items-center gap-2"
+        className="flex items-center gap-2 dark:bg-gray-800 dark:text-gray-200"
       >
         새 메이팅 추가
         {isCreateFormOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
@@ -141,21 +141,21 @@ const MatingList = memo(() => {
       {/* 폴더블 폼 */}
       {isCreateFormOpen && <CreateMatingForm onClose={() => setIsCreateFormOpen(false)} />}
 
-      <div className="mt-2 text-sm text-gray-600">검색 결과: {totalCount}개</div>
+      <div className="m-2 text-sm text-gray-600 dark:text-gray-400">검색 결과: {totalCount}개</div>
 
       <ScrollArea className="h-[700px]">
         <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
           {items.map((matingGroup, index) => (
             <div
               key={index}
-              className="flex flex-col gap-4 rounded-lg border-2 border-pink-100 px-2 py-4 shadow-md"
+              className="flex flex-col gap-4 rounded-lg border-2 border-pink-100 px-2 py-4 shadow-md dark:border-gray-700"
             >
               <div>
                 <div className="flex flex-1 gap-2">
                   {matingGroup.father && (
                     <Link
                       href={`/pet/${matingGroup.father.petId}`}
-                      className="flex flex-1 items-center justify-center rounded-md bg-blue-100 p-1 text-blue-800 hover:bg-blue-200"
+                      className="flex flex-1 items-center justify-center rounded-md bg-blue-100 p-1 text-blue-800 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-200 dark:hover:bg-blue-800"
                     >
                       {matingGroup.father.name}
                     </Link>
@@ -163,7 +163,7 @@ const MatingList = memo(() => {
                   {matingGroup.mother && (
                     <Link
                       href={`/pet/${matingGroup.mother.petId}`}
-                      className="flex flex-1 items-center justify-center rounded-md bg-pink-100 p-1 text-pink-800 hover:bg-pink-200"
+                      className="flex flex-1 items-center justify-center rounded-md bg-pink-100 p-1 text-pink-800 hover:bg-pink-200 dark:bg-pink-900 dark:text-pink-200 dark:hover:bg-pink-800"
                     >
                       {matingGroup.mother.name}
                     </Link>
@@ -172,7 +172,7 @@ const MatingList = memo(() => {
               </div>
 
               <div className="flex flex-col gap-2 px-1">
-                <div className="flex w-full items-center justify-center gap-2 rounded-lg bg-yellow-100 p-2 text-sm font-semibold text-yellow-800 transition-colors hover:bg-yellow-200">
+                <div className="flex w-full items-center justify-center gap-2 rounded-lg bg-yellow-100 p-2 text-sm font-semibold text-yellow-800 transition-colors hover:bg-yellow-200 dark:bg-yellow-900 dark:text-yellow-500 dark:hover:bg-yellow-800">
                   <CalendarSelect
                     triggerText="메이팅을 추가하려면 날짜를 선택하세요"
                     confirmButtonText="메이팅 추가"

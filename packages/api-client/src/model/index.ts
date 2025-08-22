@@ -47,6 +47,7 @@ export * from "./fileControllerUploadImageBody";
 export * from "./filterPetListResponseDto";
 export * from "./filterPetListResponseDtoData";
 export * from "./findPetByPetIdResponseDto";
+export * from "./kakaoNativeLoginRequestDto";
 export * from "./layingByDateDto";
 export * from "./matingByDateDto";
 export * from "./matingByParentsDto";

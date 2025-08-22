@@ -32,6 +32,7 @@ import { overlay } from "overlay-kit";
 import RejectModal from "./RejectModal";
 import { AxiosError } from "axios";
 import StatusBadge from "./StatusBadge";
+import Dialog from "../../components/Form/Dialog";
 
 const NotiDisplay = memo(() => {
   const router = useRouter();
@@ -178,7 +179,19 @@ const NotiDisplay = memo(() => {
               disabled={!data}
               onClick={() => {
                 if (data?.id && data?.receiverId) {
-                  deleteNotification({ id: data?.id, receiverId: data?.receiverId });
+                  overlay.open(({ isOpen, close, unmount }) => (
+                    <Dialog
+                      title="알림 삭제"
+                      description="알림을 삭제하시겠습니까?"
+                      onExit={unmount}
+                      isOpen={isOpen}
+                      onCloseAction={close}
+                      onConfirmAction={() => {
+                        deleteNotification({ id: data?.id, receiverId: data?.receiverId });
+                        close();
+                      }}
+                    />
+                  ));
                 }
               }}
             >
@@ -313,7 +326,7 @@ const NotiDisplay = memo(() => {
                   />
                 </div>
               ) : (
-                <div className="bg-foreground/70 flex h-48 w-full items-center justify-center rounded-lg">
+                <div className="bg-foreground/70 dark:bg-foreground/30 flex h-48 w-full items-center justify-center rounded-lg">
                   <span className="text-4xl">🔗</span>
                 </div>
               )}

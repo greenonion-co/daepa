@@ -20,7 +20,7 @@ const AdoptionPage = () => {
   const queryClient = useQueryClient();
   const { ref, inView } = useInView();
   const itemPerPage = 10;
-  const [showDashboard, setShowDashboard] = useState(true);
+  const [showDashboard, setShowDashboard] = useState(false);
 
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
     queryKey: [adoptionControllerGetAllAdoptions.name],

@@ -126,7 +126,7 @@ const MatingItem = ({ mating, father, mother, matingDates }: MatingItemProps) =>
   return (
     <div
       key={mating.id}
-      className="flex flex-col rounded-lg border-2 border-gray-200 px-2 py-3 shadow-md"
+      className="flex flex-col rounded-lg border-2 border-gray-200 px-2 py-3 shadow-md dark:border-gray-700"
     >
       <div className="flex items-center justify-between">
         <div
@@ -134,12 +134,13 @@ const MatingItem = ({ mating, father, mother, matingDates }: MatingItemProps) =>
           onClick={() => setIsExpanded(!isExpanded)}
         >
           <span className="font-bold">
-            {mating.matingDate} <span className="text-sm font-normal text-gray-500">메이팅</span>
+            {mating.matingDate}{" "}
+            <span className="text-sm font-normal text-gray-500 dark:text-gray-400">메이팅</span>
           </span>
 
           <div className="flex items-center">
             {mating.layingsByDate && mating.layingsByDate.length > 0 && (
-              <span className="text-sm font-semibold text-gray-500">
+              <span className="text-sm font-semibold text-gray-500 dark:text-gray-400">
                 {mating.layingsByDate?.length}차
               </span>
             )}
@@ -200,7 +201,7 @@ const MatingItem = ({ mating, father, mother, matingDates }: MatingItemProps) =>
 
           <button
             onClick={handleAddLayingClick}
-            className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg bg-blue-100 p-2 text-sm font-bold text-blue-800 transition-colors"
+            className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg bg-blue-100 p-2 text-sm font-bold text-blue-800 transition-colors dark:bg-blue-900 dark:text-blue-200 dark:hover:bg-blue-800"
           >
             <Plus className="h-4 w-4" />
             산란 추가

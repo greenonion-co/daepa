@@ -114,7 +114,7 @@ const AdoptionDashboard = ({ data = [] }: AdoptionDashboardProps) => {
   return (
     <div className="space-y-6">
       {/* 연도/월 선택 */}
-      <Card className="bg-gray-100 text-gray-800">
+      <Card className="bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200">
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>
             기간 선택
@@ -130,7 +130,7 @@ const AdoptionDashboard = ({ data = [] }: AdoptionDashboardProps) => {
                   setSelectedMonth(null); // 연도 변경 시 월 선택 초기화
                 }}
               >
-                <SelectTrigger className="bg-gray-50">
+                <SelectTrigger className="bg-gray-50 dark:bg-gray-700">
                   <SelectValue placeholder="연도 선택" />
                 </SelectTrigger>
                 <SelectContent>
@@ -147,7 +147,7 @@ const AdoptionDashboard = ({ data = [] }: AdoptionDashboardProps) => {
                 value={selectedMonth?.toString() || "all"}
                 onValueChange={(value) => setSelectedMonth(value === "all" ? null : Number(value))}
               >
-                <SelectTrigger className="bg-gray-50">
+                <SelectTrigger className="bg-gray-50 dark:bg-gray-700">
                   <SelectValue placeholder="전체 월" />
                 </SelectTrigger>
                 <SelectContent>

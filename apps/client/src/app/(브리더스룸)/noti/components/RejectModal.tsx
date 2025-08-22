@@ -26,7 +26,9 @@ const RejectModal = ({ isOpen, close, handleUpdate }: RejectModalProps) => {
         </DialogHeader>
 
         <div className="relative flex flex-col gap-2">
-          <p className="text-sm font-semibold text-gray-800">요청을 거절하시겠습니까?</p>
+          <p className="text-sm font-semibold text-gray-800 dark:text-gray-400">
+            요청을 거절하시겠습니까?
+          </p>
           <textarea
             className={`min-h-[160px] w-full rounded-xl bg-gray-100 p-4 text-left text-[18px] focus:outline-none focus:ring-0 dark:bg-gray-600/50 dark:text-white`}
             value={rejectReason ?? ""}

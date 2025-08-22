@@ -1,6 +1,7 @@
 "use client";
 
 import LoadingScreen from "@/app/loading";
+import { tokenStorage } from "@/lib/tokenStorage";
 import { authControllerGetToken, UserDtoStatus } from "@repo/api-client";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -21,7 +22,7 @@ const AuthPage = () => {
   useEffect(() => {
     if (!data?.token || !userStatus) return;
 
-    localStorage.setItem("accessToken", data.token);
+    tokenStorage.setToken(data.token);
 
     const redirectUrl = localStorage.getItem("redirectUrl");
 

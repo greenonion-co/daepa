@@ -78,7 +78,7 @@ const RangeFilterCalendar = memo(() => {
           mode="range"
           selected={dateRange}
           onSelect={setDateRange}
-          className="rounded-xl border shadow"
+          className="rounded-xl border shadow dark:border-gray-700"
           eggCounts={petCounts}
           onMonthChange={setMonth}
         />
