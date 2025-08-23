@@ -67,7 +67,10 @@ export class AuthController {
     const user = await this.userService.findOne({
       userId: validatedUser.userId,
     });
-    return user as UserDto;
+    if (!user) {
+      throw new UnauthorizedException('사용자를 찾을 수 없습니다.');
+    }
+    return user;
   }
 
   @Post('sign-in/apple/native')
