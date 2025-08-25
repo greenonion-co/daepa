@@ -14,7 +14,7 @@ import Toast from '@/components/common/Toast';
 const KakaoLoginButton = () => {
   const { navigateByStatus } = useLogin();
 
-  const { mutate: mutateGetToken } = useMutation({
+  const { mutateAsync: mutateGetToken } = useMutation({
     mutationFn: async (_status: UserDtoStatus) => {
       return authControllerGetToken();
     },
@@ -29,7 +29,7 @@ const KakaoLoginButton = () => {
     },
   });
 
-  const { mutate: kakaoNativeLogin } = useMutation({
+  const { mutateAsync: kakaoNativeLogin } = useMutation({
     mutationFn: authControllerKakaoNative,
     onSuccess: data => {
       mutateGetToken(data.data.status);
@@ -47,8 +47,13 @@ const KakaoLoginButton = () => {
       const kakaoLogin = await login();
       const userInfo = await getProfile();
 
+      if (!userInfo.email) {
+        Toast.show('카카오 로그인 중 오류가 발생했습니다. 다시 시도해주세요.');
+        return;
+      }
+
       kakaoNativeLogin({
-        email: userInfo.email ?? '',
+        email: userInfo.email,
         id: String(userInfo.id),
         refreshToken: kakaoLogin.refreshToken,
       });
