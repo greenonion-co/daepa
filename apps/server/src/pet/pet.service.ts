@@ -39,6 +39,8 @@ import { ParentRequestEntity } from 'src/parent_request/parent_request.entity';
 import { UserNotificationService } from 'src/user_notification/user_notification.service';
 import { USER_NOTIFICATION_TYPE } from 'src/user_notification/user_notification.constant';
 import { UserNotificationEntity } from 'src/user_notification/user_notification.entity';
+import { PetImageEntity } from 'src/pet/image/pet.image.entity';
+import { FileService } from 'src/file/file.service';
 
 const NOTIFICATION_MESSAGES = {
   PARENT_REQUEST_CANCEL: '부모 요청이 취소되었습니다.',
@@ -58,6 +60,7 @@ export class PetService {
     private readonly pairService: PairService,
     private readonly userNotificationService: UserNotificationService,
     private readonly dataSource: DataSource,
+    private readonly fileService: FileService,
   ) {}
 
   async createPet(
@@ -151,6 +154,14 @@ export class PetService {
         where: { petId, isDeleted: false },
       });
 
+      // pet_images에서 이미지 URL 조회
+      const petImages = await entityManager.find(PetImageEntity, {
+        where: { petId },
+        select: ['url'],
+        order: { id: 'ASC' },
+      });
+      const photos = petImages.map((img) => img.url).slice(0, 3);
+
       if (!pet.ownerId) {
         throw new NotFoundException('펫의 소유자를 찾을 수 없습니다.');
       }
@@ -167,6 +178,7 @@ export class PetService {
         father,
         mother,
         adoption,
+        photos,
       });
     });
   }

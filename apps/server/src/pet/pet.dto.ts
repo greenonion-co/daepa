@@ -151,6 +151,14 @@ export class PetBaseDto {
   @IsArray()
   foods?: string[];
 
+  @ApiProperty({
+    description: '펫 이미지 목록',
+    example: [
+      'https://example.com/image1.jpg',
+      'https://example.com/image2.jpg',
+    ],
+    required: false,
+  })
   @IsOptional()
   @IsArray()
   photos?: string[];
