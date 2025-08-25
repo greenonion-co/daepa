@@ -11,7 +11,7 @@ import { plainToInstance } from 'class-transformer';
 import { OauthDto } from './oauth.dto';
 import { OAUTH_PROVIDER } from '../auth.constants';
 import { EntityManager } from 'typeorm';
-import type { JWTPayload } from 'jose';
+import type { JWTPayload as JoseJWTPayload } from 'jose';
 
 type KakaoDisconnectResponse = {
   id: number;
@@ -156,7 +156,9 @@ export class OauthService {
     }
   }
 
-  async verifyAppleIdentityToken(identityToken: string): Promise<JWTPayload> {
+  async verifyAppleIdentityToken(
+    identityToken: string,
+  ): Promise<JoseJWTPayload> {
     try {
       const { jwtVerify, createRemoteJWKSet } = await import('jose');
 
