@@ -38,6 +38,8 @@ export interface PetDto {
   weight?: number;
   /** 펫 먹이 */
   foods?: string[];
+  /** 펫 이미지 목록 */
+  photos?: string[];
   /** 펫 소개말 */
   desc?: string;
   /** 아빠 개체 정보 */

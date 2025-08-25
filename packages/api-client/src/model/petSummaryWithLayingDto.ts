@@ -26,6 +26,8 @@ export interface PetSummaryWithLayingDto {
   hatchingDate?: string;
   /** 펫 성별(수컷, 암컷, 미구분) */
   sex?: PetSummaryWithLayingDtoSex;
+  /** 펫 이미지 목록 */
+  photos?: string[];
   /** 산란 아이디 */
   layingId?: number;
   /** 산란 클러치 */

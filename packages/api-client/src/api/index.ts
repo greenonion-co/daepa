@@ -43,6 +43,7 @@ import type {
   BrMatingControllerFindAll200,
   BrPetControllerFindAll200,
   BrPetControllerGetPetsByYear200,
+  CommonIdResponseDto,
   CommonResponseDto,
   FilterPetListResponseDto,
   FindPetByPetIdResponseDto,
@@ -56,7 +57,7 @@ import type {
 
 import { useCustomInstance } from "./mutator/use-custom-instance";
 export const petControllerCreate = (createPetDto: CreatePetDto) => {
-  return useCustomInstance<CommonResponseDto>({
+  return useCustomInstance<CommonIdResponseDto>({
     url: `http://localhost:4000/api/v1/pet`,
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -509,10 +510,11 @@ export type FileControllerUploadImagesResult = NonNullable<
 >;
 
 export const getPetControllerCreateResponseMock = (
-  overrideResponse: Partial<CommonResponseDto> = {},
-): CommonResponseDto => ({
+  overrideResponse: Partial<CommonIdResponseDto> = {},
+): CommonIdResponseDto => ({
   success: faker.datatype.boolean(),
   message: faker.string.alpha(20),
+  id: faker.string.alpha(20),
   ...overrideResponse,
 });
 
@@ -583,6 +585,12 @@ export const getPetControllerFindPetByPetIdResponseMock = (
         ),
         undefined,
       ]),
+      photos: faker.helpers.arrayElement([
+        Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+          faker.string.alpha(20),
+        ),
+        undefined,
+      ]),
       desc: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
       father: faker.helpers.arrayElement([
         {
@@ -623,6 +631,12 @@ export const getPetControllerFindPetByPetIdResponseMock = (
             ]),
             sex: faker.helpers.arrayElement([
               faker.helpers.arrayElement(["M", "F", "N"] as const),
+              undefined,
+            ]),
+            photos: faker.helpers.arrayElement([
+              Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => faker.string.alpha(20),
+              ),
               undefined,
             ]),
             relationId: faker.number.int({ min: undefined, max: undefined }),
@@ -676,6 +690,12 @@ export const getPetControllerFindPetByPetIdResponseMock = (
             ]),
             sex: faker.helpers.arrayElement([
               faker.helpers.arrayElement(["M", "F", "N"] as const),
+              undefined,
+            ]),
+            photos: faker.helpers.arrayElement([
+              Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => faker.string.alpha(20),
+              ),
               undefined,
             ]),
             relationId: faker.number.int({ min: undefined, max: undefined }),
@@ -987,6 +1007,12 @@ export const getBrPetControllerFindAllResponseMock = (
       ),
       undefined,
     ]),
+    photos: faker.helpers.arrayElement([
+      Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+        faker.string.alpha(20),
+      ),
+      undefined,
+    ]),
     desc: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
     father: faker.helpers.arrayElement([
       {
@@ -1027,6 +1053,12 @@ export const getBrPetControllerFindAllResponseMock = (
           ]),
           sex: faker.helpers.arrayElement([
             faker.helpers.arrayElement(["M", "F", "N"] as const),
+            undefined,
+          ]),
+          photos: faker.helpers.arrayElement([
+            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
             undefined,
           ]),
           relationId: faker.number.int({ min: undefined, max: undefined }),
@@ -1080,6 +1112,12 @@ export const getBrPetControllerFindAllResponseMock = (
           ]),
           sex: faker.helpers.arrayElement([
             faker.helpers.arrayElement(["M", "F", "N"] as const),
+            undefined,
+          ]),
+          photos: faker.helpers.arrayElement([
+            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
             undefined,
           ]),
           relationId: faker.number.int({ min: undefined, max: undefined }),
@@ -1196,6 +1234,12 @@ export const getBrPetControllerGetPetsByYearResponseMock = (): BrPetControllerGe
       ),
       undefined,
     ]),
+    photos: faker.helpers.arrayElement([
+      Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+        faker.string.alpha(20),
+      ),
+      undefined,
+    ]),
     desc: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
     father: faker.helpers.arrayElement([
       {
@@ -1236,6 +1280,12 @@ export const getBrPetControllerGetPetsByYearResponseMock = (): BrPetControllerGe
           ]),
           sex: faker.helpers.arrayElement([
             faker.helpers.arrayElement(["M", "F", "N"] as const),
+            undefined,
+          ]),
+          photos: faker.helpers.arrayElement([
+            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
             undefined,
           ]),
           relationId: faker.number.int({ min: undefined, max: undefined }),
@@ -1289,6 +1339,12 @@ export const getBrPetControllerGetPetsByYearResponseMock = (): BrPetControllerGe
           ]),
           sex: faker.helpers.arrayElement([
             faker.helpers.arrayElement(["M", "F", "N"] as const),
+            undefined,
+          ]),
+          photos: faker.helpers.arrayElement([
+            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
             undefined,
           ]),
           relationId: faker.number.int({ min: undefined, max: undefined }),
@@ -1401,6 +1457,12 @@ export const getBrPetControllerGetPetsByMonthResponseMock = (
         ),
         undefined,
       ]),
+      photos: faker.helpers.arrayElement([
+        Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+          faker.string.alpha(20),
+        ),
+        undefined,
+      ]),
       desc: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
       father: faker.helpers.arrayElement([
         {
@@ -1441,6 +1503,12 @@ export const getBrPetControllerGetPetsByMonthResponseMock = (
             ]),
             sex: faker.helpers.arrayElement([
               faker.helpers.arrayElement(["M", "F", "N"] as const),
+              undefined,
+            ]),
+            photos: faker.helpers.arrayElement([
+              Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => faker.string.alpha(20),
+              ),
               undefined,
             ]),
             relationId: faker.number.int({ min: undefined, max: undefined }),
@@ -1494,6 +1562,12 @@ export const getBrPetControllerGetPetsByMonthResponseMock = (
             ]),
             sex: faker.helpers.arrayElement([
               faker.helpers.arrayElement(["M", "F", "N"] as const),
+              undefined,
+            ]),
+            photos: faker.helpers.arrayElement([
+              Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => faker.string.alpha(20),
+              ),
               undefined,
             ]),
             relationId: faker.number.int({ min: undefined, max: undefined }),
@@ -1613,6 +1687,12 @@ export const getBrPetControllerGetPetsByDateRangeResponseMock = (
         ),
         undefined,
       ]),
+      photos: faker.helpers.arrayElement([
+        Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+          faker.string.alpha(20),
+        ),
+        undefined,
+      ]),
       desc: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
       father: faker.helpers.arrayElement([
         {
@@ -1653,6 +1733,12 @@ export const getBrPetControllerGetPetsByDateRangeResponseMock = (
             ]),
             sex: faker.helpers.arrayElement([
               faker.helpers.arrayElement(["M", "F", "N"] as const),
+              undefined,
+            ]),
+            photos: faker.helpers.arrayElement([
+              Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => faker.string.alpha(20),
+              ),
               undefined,
             ]),
             relationId: faker.number.int({ min: undefined, max: undefined }),
@@ -1706,6 +1792,12 @@ export const getBrPetControllerGetPetsByDateRangeResponseMock = (
             ]),
             sex: faker.helpers.arrayElement([
               faker.helpers.arrayElement(["M", "F", "N"] as const),
+              undefined,
+            ]),
+            photos: faker.helpers.arrayElement([
+              Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => faker.string.alpha(20),
+              ),
               undefined,
             ]),
             relationId: faker.number.int({ min: undefined, max: undefined }),
@@ -1930,6 +2022,12 @@ export const getAdoptionControllerGetAllAdoptionsResponseMock = (
           faker.helpers.arrayElement(["M", "F", "N"] as const),
           undefined,
         ]),
+        photos: faker.helpers.arrayElement([
+          Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+            faker.string.alpha(20),
+          ),
+          undefined,
+        ]),
       },
     },
   })),
@@ -2025,6 +2123,12 @@ export const getAdoptionControllerGetAdoptionByAdoptionIdResponseMock = (
             faker.helpers.arrayElement(["M", "F", "N"] as const),
             undefined,
           ]),
+          photos: faker.helpers.arrayElement([
+            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
+            undefined,
+          ]),
         },
       },
     },
@@ -2087,6 +2191,12 @@ export const getMatingControllerFindAllResponseMock = (
             faker.helpers.arrayElement(["M", "F", "N"] as const),
             undefined,
           ]),
+          photos: faker.helpers.arrayElement([
+            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
+            undefined,
+          ]),
         },
       },
       undefined,
@@ -2130,6 +2240,12 @@ export const getMatingControllerFindAllResponseMock = (
           ]),
           sex: faker.helpers.arrayElement([
             faker.helpers.arrayElement(["M", "F", "N"] as const),
+            undefined,
+          ]),
+          photos: faker.helpers.arrayElement([
+            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
             undefined,
           ]),
         },
@@ -2186,6 +2302,12 @@ export const getMatingControllerFindAllResponseMock = (
             ]),
             sex: faker.helpers.arrayElement([
               faker.helpers.arrayElement(["M", "F", "N"] as const),
+              undefined,
+            ]),
+            photos: faker.helpers.arrayElement([
+              Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => faker.string.alpha(20),
+              ),
               undefined,
             ]),
             layingId: faker.helpers.arrayElement([
@@ -2282,6 +2404,12 @@ export const getBrMatingControllerFindAllResponseMock = (
             faker.helpers.arrayElement(["M", "F", "N"] as const),
             undefined,
           ]),
+          photos: faker.helpers.arrayElement([
+            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
+            undefined,
+          ]),
         },
       },
       undefined,
@@ -2325,6 +2453,12 @@ export const getBrMatingControllerFindAllResponseMock = (
           ]),
           sex: faker.helpers.arrayElement([
             faker.helpers.arrayElement(["M", "F", "N"] as const),
+            undefined,
+          ]),
+          photos: faker.helpers.arrayElement([
+            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
             undefined,
           ]),
         },
@@ -2381,6 +2515,12 @@ export const getBrMatingControllerFindAllResponseMock = (
             ]),
             sex: faker.helpers.arrayElement([
               faker.helpers.arrayElement(["M", "F", "N"] as const),
+              undefined,
+            ]),
+            photos: faker.helpers.arrayElement([
+              Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => faker.string.alpha(20),
+              ),
               undefined,
             ]),
             layingId: faker.helpers.arrayElement([
@@ -2458,10 +2598,10 @@ export const getFileControllerUploadImagesResponseMock = (
 
 export const getPetControllerCreateMockHandler = (
   overrideResponse?:
-    | CommonResponseDto
+    | CommonIdResponseDto
     | ((
         info: Parameters<Parameters<typeof http.post>[1]>[0],
-      ) => Promise<CommonResponseDto> | CommonResponseDto),
+      ) => Promise<CommonIdResponseDto> | CommonIdResponseDto),
 ) => {
   return http.post("*/api/v1/pet", async (info) => {
     await delay(1000);
