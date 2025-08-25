@@ -1,5 +1,6 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type Provider = 'kakao' | 'google' | 'apple' | string;
 
@@ -34,6 +35,7 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: 'auth-store',
+      storage: createJSONStorage(() => AsyncStorage),
       partialize: state => ({
         accessToken: state.accessToken,
         user: state.user,

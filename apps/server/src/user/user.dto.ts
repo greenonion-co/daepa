@@ -7,6 +7,7 @@ import {
   IsEnum,
   IsOptional,
   IsString,
+  IsEmail,
 } from 'class-validator';
 import { OAUTH_PROVIDER } from 'src/auth/auth.constants';
 import { Exclude } from 'class-transformer';
@@ -174,4 +175,10 @@ export class UserProfileResponseDto extends CommonResponseDto {
     type: UserProfileDto,
   })
   data: UserProfileDto;
+}
+
+export class VerifyEmailDto {
+  @ApiProperty({ description: '이메일' })
+  @IsEmail()
+  email: string;
 }

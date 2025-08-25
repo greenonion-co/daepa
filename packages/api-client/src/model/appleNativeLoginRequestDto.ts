@@ -15,4 +15,8 @@ export interface AppleNativeLoginRequestDto {
   email?: string;
   /** nonce(raw 또는 hashed) */
   nonce?: string;
+  /** 닉네임 */
+  name?: string;
+  /** 사용자 유형 */
+  isBiz?: boolean;
 }

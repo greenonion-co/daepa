@@ -165,10 +165,10 @@ export class OauthService {
       const jwks = createRemoteJWKSet(
         new URL('https://appleid.apple.com/auth/keys'),
       );
-      const audiencesEnv = process.env.APPLE_CLIENT_ID?.trim();
+      const audiencesEnv = process.env.NEXT_PUBLIC_APPLE_CLIENT_ID?.trim();
       if (!audiencesEnv) {
         throw new BadRequestException(
-          'Server misconfiguration: APPLE_CLIENT_ID is required for Apple ID token verification',
+          'Server misconfiguration: NEXT_PUBLIC_APPLE_CLIENT_ID is required for Apple ID token verification',
         );
       }
 
@@ -184,11 +184,59 @@ export class OauthService {
     }
   }
 
+  async exchangeAppleAuthorizationCode(
+    authorizationCode: string,
+  ): Promise<string | undefined> {
+    const clientSecret = await this.generateAppleClientSecret();
+    const clientId = process.env.NEXT_PUBLIC_APPLE_CLIENT_ID ?? '';
+
+    const form = new URLSearchParams();
+    form.append('client_id', clientId);
+    form.append('client_secret', clientSecret);
+    form.append('code', authorizationCode);
+    form.append('grant_type', 'authorization_code');
+
+    try {
+      const response = await firstValueFrom(
+        this.httpService.post<{
+          access_token?: string;
+          expires_in?: number;
+          id_token?: string;
+          refresh_token?: string;
+          token_type?: string;
+        }>('https://appleid.apple.com/auth/token', form.toString(), {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+        }),
+      );
+
+      return response.data.refresh_token;
+    } catch (error) {
+      this.logger.warn('Apple token exchange failed', error);
+      return undefined;
+    }
+  }
+
   private async generateAppleClientSecret(): Promise<string> {
     const teamId = process.env.APPLE_TEAM_ID ?? '';
-    const clientId = process.env.APPLE_CLIENT_ID ?? '';
+    const clientId = process.env.NEXT_PUBLIC_APPLE_CLIENT_ID ?? '';
     const keyId = process.env.APPLE_KEY_ID ?? '';
     let privateKey = process.env.APPLE_PRIVATE_KEY ?? '';
+
+    if (!privateKey) {
+      const keyLines = [
+        process.env.APPLE_PRIVATE_KEY_LINE1,
+        process.env.APPLE_PRIVATE_KEY_LINE2,
+        process.env.APPLE_PRIVATE_KEY_LINE3,
+        process.env.APPLE_PRIVATE_KEY_LINE4,
+        process.env.APPLE_PRIVATE_KEY_LINE5,
+        process.env.APPLE_PRIVATE_KEY_LINE6,
+      ].filter(Boolean) as string[];
+      if (keyLines.length > 0) {
+        privateKey = keyLines.join('\\n');
+      }
+    }
 
     if (!teamId || !clientId || !keyId || !privateKey) {
       throw new BadRequestException(
@@ -196,7 +244,6 @@ export class OauthService {
       );
     }
 
-    // Support env with escaped newlines
     privateKey = privateKey.replace(/\\n/g, '\n');
 
     const { SignJWT, importPKCS8 } = await import('jose');
@@ -238,7 +285,7 @@ export class OauthService {
       const clientSecret = await this.generateAppleClientSecret();
 
       const form = new URLSearchParams();
-      form.append('client_id', process.env.APPLE_CLIENT_ID ?? '');
+      form.append('client_id', process.env.NEXT_PUBLIC_APPLE_CLIENT_ID ?? '');
       form.append('client_secret', clientSecret);
       form.append('token', oauth.refreshToken);
       form.append('token_type_hint', 'refresh_token');

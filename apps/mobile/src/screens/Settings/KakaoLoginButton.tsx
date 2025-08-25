@@ -3,7 +3,7 @@ import { login, getProfile } from '@react-native-seoul/kakao-login';
 import {
   authControllerGetToken,
   authControllerKakaoNative,
-} from '../../../../../packages/api-client/src/api';
+} from '@repo/api-client';
 import { setupApiClient } from '../../utils/apiSetup';
 import { useMutation } from '@tanstack/react-query';
 import { UserDtoStatus } from '@repo/api-client';
@@ -22,7 +22,6 @@ const KakaoLoginButton = () => {
       navigateByStatus({ status, token: data.data.token });
 
       Loading.close();
-      Toast.show('로그인에 성공했습니다.');
     },
     onError: () => {
       Loading.close();

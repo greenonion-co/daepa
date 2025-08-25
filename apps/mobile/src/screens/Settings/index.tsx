@@ -1,5 +1,5 @@
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useAuthStore } from '../../store/auth';
+import { useAuthStore } from '@/store/auth';
 import Profile from './Profile';
 import KakaoLoginButton from './KakaoLoginButton';
 import AppleLoginButton from './AppleLoginButton';

@@ -3,6 +3,8 @@ import {
   Injectable,
   UnauthorizedException,
   Logger,
+  HttpStatus,
+  HttpException,
 } from '@nestjs/common';
 import { UserService } from 'src/user/user.service';
 import { ProviderInfo } from './auth.types';
@@ -42,9 +44,11 @@ export class AuthService {
   async validateAppleNativeAndGetUser({
     identityToken,
     email,
+    authorizationCode,
   }: {
     identityToken: string;
     email?: string;
+    authorizationCode?: string;
   }): Promise<ValidatedUser> {
     const payload =
       await this.oauthService.verifyAppleIdentityToken(identityToken);
@@ -76,14 +80,28 @@ export class AuthService {
           userStatus: existing.user.status,
         };
       }
-      // 신규 가입이 필요한 경우 이메일 요구
-      throw new UnauthorizedException('Apple 이메일이 필요합니다.');
+
+      throw new HttpException(
+        { code: 600, message: 'Apple 이메일이 필요합니다.' },
+        HttpStatus.UNPROCESSABLE_ENTITY,
+      );
+    }
+
+    // Authorization Code가 있으면 Apple 토큰 교환으로 refresh_token 확보
+    let refreshToken: string | undefined;
+
+    if (authorizationCode) {
+      refreshToken =
+        await this.oauthService.exchangeAppleAuthorizationCode(
+          authorizationCode,
+        );
     }
 
     return this.validateUser({
       email: resolvedEmail,
       provider: OAUTH_PROVIDER.APPLE,
       providerId,
+      refreshToken,
     });
   }
 
@@ -98,8 +116,8 @@ export class AuthService {
         );
       }
 
-      // 구글 로그인 시 refreshToken 업데이트
-      if (providerInfo.provider === OAUTH_PROVIDER.GOOGLE) {
+      // refreshToken이 전달된 경우 provider와 무관하게 업데이트
+      if (providerInfo.refreshToken) {
         await this.oauthRepository.update(
           {
             email: providerInfo.email,

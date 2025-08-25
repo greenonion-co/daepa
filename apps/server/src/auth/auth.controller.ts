@@ -77,16 +77,27 @@ export class AuthController {
     description: '애플 네이티브 로그인 성공',
     type: UserDto,
   })
+  @ApiResponse({
+    status: 401,
+    description: '애플 네이티브 로그인 실패',
+    type: CommonResponseDto,
+  })
+  @ApiResponse({
+    status: 422,
+    description: '애플 네이티브 로그인 실패',
+    type: CommonResponseDto,
+  })
   async appleNative(
     @Req() _req: Request,
     @Res({ passthrough: true }) res: Response,
     @Body() body: AppleNativeLoginRequestDto,
   ) {
-    const { identityToken, email } = body;
+    const { identityToken, email, authorizationCode, name, isBiz } = body;
 
     const validatedUser = await this.authService.validateAppleNativeAndGetUser({
       identityToken,
       email,
+      authorizationCode,
     });
 
     const jwtRefreshToken = await this.authService.createJwtRefreshToken(
@@ -105,6 +116,24 @@ export class AuthController {
     });
     if (!user) {
       throw new UnauthorizedException('사용자를 찾을 수 없습니다.');
+    }
+    if (typeof name === 'string' && name.trim().length > 0) {
+      await this.userService.createInitUserInfo(validatedUser.userId, {
+        name: name.trim(),
+        isBiz,
+      });
+      const updated = await this.userService.findOne({
+        userId: validatedUser.userId,
+      });
+      return updated;
+    } else if (typeof isBiz !== 'undefined') {
+      await this.userService.update(validatedUser.userId, {
+        isBiz,
+      });
+      const updated = await this.userService.findOne({
+        userId: validatedUser.userId,
+      });
+      return updated;
     }
     return user;
   }

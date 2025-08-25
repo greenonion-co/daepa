@@ -185,6 +185,16 @@ export class UserService {
     return !!isExist;
   }
 
+  async isEmailExist(email: string) {
+    const isExist = await this.userRepository.exists({
+      where: {
+        email,
+        status: Not(USER_STATUS.DELETED),
+      },
+    });
+    return !!isExist;
+  }
+
   // Transaction 처리를 위해 EntityManager를 받는 메서드 추가
   async createUserWithEntityManager(
     entityManager: EntityManager,

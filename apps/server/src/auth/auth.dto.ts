@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsOptional, IsString } from 'class-validator';
 import { CommonResponseDto } from 'src/common/response.dto';
 
 export class TokenResponseDto extends CommonResponseDto {
@@ -45,4 +45,14 @@ export class AppleNativeLoginRequestDto {
   @IsOptional()
   @IsString()
   nonce?: string;
+
+  @ApiProperty({ description: '닉네임', required: false })
+  @IsOptional()
+  @IsString()
+  name?: string;
+
+  @ApiProperty({ description: '사용자 유형', required: false })
+  @IsOptional()
+  @IsBoolean()
+  isBiz?: boolean;
 }
