@@ -23,9 +23,8 @@ export class FileController {
         fileSize: 10 * 1024 * 1024, // 10MB
       },
       fileFilter: (req, file, callback) => {
-        if (
-          !file.originalname.match(/\.(jpg|jpeg|png|gif|webp|heic|heif|avif)$/)
-        ) {
+        const name = (file.originalname || '').toLowerCase();
+        if (!name.match(/\.(jpg|jpeg|png|gif|webp|avif)$/)) {
           return callback(new Error('허용되지 않는 이미지 형식입니다.'), false);
         }
         callback(null, true);
