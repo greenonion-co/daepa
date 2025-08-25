@@ -13,3 +13,8 @@ export class CommonResponseDto {
   })
   message: string;
 }
+
+export class CommonIdResponseDto extends CommonResponseDto {
+  @ApiProperty({ description: '자원 식별자', example: 'XXXXXXXX' })
+  id: string;
+}

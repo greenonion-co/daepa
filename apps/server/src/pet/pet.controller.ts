@@ -16,7 +16,10 @@ import {
 } from './pet.dto';
 import { PetService } from './pet.service';
 import { ApiResponse, ApiParam } from '@nestjs/swagger';
-import { CommonResponseDto } from 'src/common/response.dto';
+import {
+  CommonResponseDto,
+  CommonIdResponseDto,
+} from 'src/common/response.dto';
 import { JwtUser } from 'src/auth/auth.decorator';
 import { JwtUserPayload } from 'src/auth/strategies/jwt.strategy';
 import { CreateParentDto } from 'src/parent_request/parent_request.dto';
@@ -29,17 +32,21 @@ export class PetController {
   @ApiResponse({
     status: 200,
     description: '펫 등록이 완료되었습니다. petId: XXXXXX',
-    type: CommonResponseDto,
+    type: CommonIdResponseDto,
   })
   async create(
     @Body() createPetDto: CreatePetDto,
     @JwtUser() token: JwtUserPayload,
-  ): Promise<CommonResponseDto> {
-    await this.petService.createPet(createPetDto, token.userId);
+  ): Promise<CommonIdResponseDto> {
+    const { petId } = await this.petService.createPet(
+      createPetDto,
+      token.userId,
+    );
 
     return {
       success: true,
       message: '펫 등록이 완료되었습니다.',
+      id: petId,
     };
   }
 
