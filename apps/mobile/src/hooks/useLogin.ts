@@ -1,12 +1,11 @@
 import { UserDtoStatus } from '@repo/api-client';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { RootStackParamList } from '../navigation';
 import { useNavigation } from '@react-navigation/native';
 import { useAuthStore } from '../store/auth';
 import Toast from '@/components/common/Toast';
+import { RootStackNavigationProp } from '@/types/navigation';
 
 const useLogin = () => {
-  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+  const navigation = useNavigation<RootStackNavigationProp>();
 
   const navigateByStatus = ({
     status,

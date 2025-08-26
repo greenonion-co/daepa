@@ -3,19 +3,9 @@ import PetDetailScreen from '../screens/Pet';
 import Tabs from './Tabs';
 import RegisterScreen from '../screens/Register';
 import EmailRegisterScreen from '../screens/Register/email';
+import { RootStackParamList } from '@/types/navigation';
 
 const Stack = createStackNavigator<RootStackParamList>();
-
-export type RootStackParamList = {
-  Tabs: { screen: string };
-  PetDetail: { petId: string };
-  Register: { token: string };
-  EmailRegister: {
-    identityToken: string;
-    authorizationCode: string;
-    nonce: string;
-  };
-};
 
 export default function Navigation() {
   return (

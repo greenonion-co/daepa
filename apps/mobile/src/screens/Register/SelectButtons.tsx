@@ -11,6 +11,10 @@ const SelectButtons = ({
   value: string;
   setValue: (value: string) => void;
 }) => {
+  if (!selectList || selectList.length !== 2) {
+    console.warn('SelectButtons: selectList must contain exactly 2 items.');
+    return null;
+  }
   return (
     <View>
       <Text style={styles.label}>{label}</Text>

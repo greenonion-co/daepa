@@ -4,9 +4,7 @@ import {
   authControllerGetToken,
   authControllerKakaoNative,
 } from '@repo/api-client';
-import { setupApiClient } from '../../utils/apiSetup';
 import { useMutation } from '@tanstack/react-query';
-import { UserDtoStatus } from '@repo/api-client';
 import useLogin from '../../hooks/useLogin';
 import Loading from '@/components/common/Loading';
 import Toast from '@/components/common/Toast';
@@ -15,35 +13,16 @@ const KakaoLoginButton = () => {
   const { navigateByStatus } = useLogin();
 
   const { mutateAsync: mutateGetToken } = useMutation({
-    mutationFn: async (_status: UserDtoStatus) => {
-      return authControllerGetToken();
-    },
-    onSuccess: async (data, status) => {
-      navigateByStatus({ status, token: data.data.token });
-
-      Loading.close();
-    },
-    onError: () => {
-      Loading.close();
-      Toast.show('로그인에 실패했습니다. 다시 시도해주세요.');
-    },
+    mutationFn: authControllerGetToken,
   });
 
   const { mutateAsync: kakaoNativeLogin } = useMutation({
     mutationFn: authControllerKakaoNative,
-    onSuccess: data => {
-      mutateGetToken(data.data.status);
-    },
-    onError: error => {
-      console.log(error);
-      Loading.close();
-    },
   });
 
   const handleKakaoLogin = async () => {
     Loading.show();
     try {
-      setupApiClient();
       const kakaoLogin = await login();
       const userInfo = await getProfile();
 
@@ -52,13 +31,27 @@ const KakaoLoginButton = () => {
         return;
       }
 
-      kakaoNativeLogin({
+      const kakaoRes = await kakaoNativeLogin({
         email: userInfo.email,
         id: String(userInfo.id),
         refreshToken: kakaoLogin.refreshToken,
       });
-    } catch (e: any) {
-      console.log(e);
+
+      const tokenRes = await mutateGetToken();
+
+      navigateByStatus({
+        status: kakaoRes.data.status,
+        token: tokenRes.data.token,
+      });
+    } catch (e) {
+      if (
+        e instanceof Error &&
+        !e.message.includes('KakaoSDKCommon.SdkError')
+      ) {
+        Toast.show('로그인에 실패했습니다. 다시 시도해주세요.');
+        console.log(e);
+      }
+    } finally {
       Loading.close();
     }
   };

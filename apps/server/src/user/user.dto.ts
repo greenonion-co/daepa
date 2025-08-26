@@ -91,6 +91,17 @@ class UserBaseDto {
   updatedAt: Date;
 }
 
+export class SafeUserDto extends PickType(UserBaseDto, [
+  'userId',
+  'name',
+  'email',
+  'role',
+  'isBiz',
+  'status',
+  'createdAt',
+  'updatedAt',
+]) {}
+
 export class UserDto extends PickType(UserBaseDto, [
   'userId',
   'name',

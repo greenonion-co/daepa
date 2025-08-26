@@ -73,7 +73,9 @@ const NicknameInput = ({
         buttonLabel={isVerifyPending ? '확인중...' : '중복확인'}
         handlePress={handleDuplicateCheck}
         buttonDisabled={
-          isVerifyPending || nickname.length < NICKNAME_MIN_LENGTH
+          isVerifyPending ||
+          nickname.length < NICKNAME_MIN_LENGTH ||
+          nickname.length > NICKNAME_MAX_LENGTH
         }
       />
       <Text style={styles.helper}>

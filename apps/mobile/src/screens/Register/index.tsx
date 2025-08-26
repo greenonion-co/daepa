@@ -8,9 +8,6 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { useState } from 'react';
-import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { RootStackParamList } from '../../navigation';
 import SelectButtons from './SelectButtons';
 import VoidSpace from '@/components/common/VoidSpace';
 import NicknameInput from './NicknameInput';
@@ -18,16 +15,18 @@ import { DuplicateStatus } from '@/services/constant/input';
 import axios from 'axios';
 import { useAuthStore } from '@/store/auth';
 import Toast from '@/components/common/Toast';
+import { RegisterScreenProps } from '@/types/navigation';
 
-const RegisterScreen = () => {
-  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+const RegisterScreen: React.FC<RegisterScreenProps> = ({
+  navigation,
+  route,
+}) => {
   const [isRegisterPending, setIsRegisterPending] = useState(false);
   const [nickname, setNickname] = useState('');
   const [userType, setUserType] = useState('user');
   const [duplicateStatus, setDuplicateStatus] =
     useState<DuplicateStatus>('none');
-  const { token } =
-    useRoute<RouteProp<RootStackParamList, 'Register'>>().params;
+  const { token } = route.params;
 
   const handleSubmit = async () => {
     if (duplicateStatus !== 'available') return;
@@ -35,7 +34,7 @@ const RegisterScreen = () => {
       setIsRegisterPending(true);
 
       const response = await axios.post(
-        `http://localhost:4000/api/v1/user/init-info`,
+        `${process.env.NEXT_PUBLIC_SERVER_BASE_URL}/api/v1/user/init-info`,
         { name: nickname, isBiz: userType === 'biz' },
         {
           headers: {

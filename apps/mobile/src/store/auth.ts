@@ -1,26 +1,13 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-type Provider = 'kakao' | 'google' | 'apple' | string;
-
-export type AuthUser = {
-  userId: string;
-  name: string;
-  email: string;
-  role: string;
-  isBiz: boolean;
-  status: string;
-  createdAt?: string | Date;
-  updatedAt?: string | Date;
-  provider?: Provider[] | Provider;
-};
+import { UserDto } from '@repo/api-client';
 
 type AuthState = {
   accessToken: string | null;
-  user: AuthUser | null;
+  user: UserDto | null;
   setAccessToken: (token: string | null) => void;
-  setUser: (user: AuthUser | null) => void;
+  setUser: (user: UserDto | null) => void;
   clear: () => void;
 };
 

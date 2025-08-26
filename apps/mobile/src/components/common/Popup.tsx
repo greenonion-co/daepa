@@ -50,8 +50,9 @@ const initialState = {
 
 class Popup extends Component<PopupProps, PopupState> {
   state = initialState;
-
   screenWidth: number = 0;
+
+  private backHandlerSub?: { remove: () => void };
 
   static _ref: Popup | null = null;
 
@@ -68,12 +69,17 @@ class Popup extends Component<PopupProps, PopupState> {
   componentDidMount() {
     const { width } = Dimensions.get('screen');
     this.screenWidth = width;
-    BackHandler.addEventListener('hardwareBackPress', () => {
-      const { visible } = this.state;
-      if (visible) {
-        return true;
-      }
-    });
+    this.backHandlerSub = BackHandler.addEventListener(
+      'hardwareBackPress',
+      () => {
+        const { visible } = this.state;
+        return !!visible;
+      },
+    );
+  }
+
+  componentWillUnmount(): void {
+    this.backHandlerSub?.remove();
   }
 
   static update = (props: PopupContent) => Popup._ref?.update(props);

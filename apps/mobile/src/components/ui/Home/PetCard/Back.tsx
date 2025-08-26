@@ -22,8 +22,9 @@ import {
 import { formatYyMmDd } from '@/utils/format';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { RootStackParamList } from '@/navigation';
+
 import DefaultPetImage from '@/assets/images/default-pet-image.png';
+import { RootStackParamList } from '@/types/navigation';
 
 type FormField =
   | {
@@ -127,8 +128,7 @@ const CardBack: React.FC<Props> = ({ pet, onCloseBack }) => {
                 >
                   <Pressable
                     style={styles.parentCard}
-                    onPress={e => {
-                      e?.stopPropagation?.();
+                    onPress={() => {
                       if (!pet.father) return;
 
                       navigation.navigate('PetDetail', {
