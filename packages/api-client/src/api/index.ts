@@ -29,6 +29,7 @@ import type {
   UpdateParentRequestDto,
   UpdatePetDto,
   UpdateUserNotificationDto,
+  UploadImagesRequestDto,
   UserNotificationControllerFindAllParams,
   VerifyEmailDto,
   VerifyNameDto,
@@ -409,6 +410,19 @@ export const pairControllerCreate = (createPairDto: CreatePairDto) => {
   });
 };
 
+export const fileControllerUploadImages = (uploadImagesRequestDto: UploadImagesRequestDto) => {
+  const formData = new FormData();
+  formData.append(`petId`, uploadImagesRequestDto.petId);
+  uploadImagesRequestDto.files.forEach((value) => formData.append(`files`, value));
+
+  return useCustomInstance<CommonResponseDto>({
+    url: `http://localhost:4000/api/v1/file/upload/pet`,
+    method: "POST",
+    headers: { "Content-Type": "multipart/form-data" },
+    data: formData,
+  });
+};
+
 export type PetControllerCreateResult = NonNullable<
   Awaited<ReturnType<typeof petControllerCreate>>
 >;
@@ -528,6 +542,9 @@ export type LayingControllerUpdateResult = NonNullable<
 >;
 export type PairControllerCreateResult = NonNullable<
   Awaited<ReturnType<typeof pairControllerCreate>>
+>;
+export type FileControllerUploadImagesResult = NonNullable<
+  Awaited<ReturnType<typeof fileControllerUploadImages>>
 >;
 
 export const getPetControllerCreateResponseMock = (
@@ -2505,6 +2522,14 @@ export const getPairControllerCreateResponseMock = (
   ...overrideResponse,
 });
 
+export const getFileControllerUploadImagesResponseMock = (
+  overrideResponse: Partial<CommonResponseDto> = {},
+): CommonResponseDto => ({
+  success: faker.datatype.boolean(),
+  message: faker.string.alpha(20),
+  ...overrideResponse,
+});
+
 export const getPetControllerCreateMockHandler = (
   overrideResponse?:
     | CommonResponseDto
@@ -3406,6 +3431,29 @@ export const getPairControllerCreateMockHandler = (
     );
   });
 };
+
+export const getFileControllerUploadImagesMockHandler = (
+  overrideResponse?:
+    | CommonResponseDto
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<CommonResponseDto> | CommonResponseDto),
+) => {
+  return http.post("*/api/v1/file/upload/pet", async (info) => {
+    await delay(1000);
+
+    return new HttpResponse(
+      JSON.stringify(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getFileControllerUploadImagesResponseMock(),
+      ),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+  });
+};
 export const getProjectDaepaAPIMock = () => [
   getPetControllerCreateMockHandler(),
   getPetControllerFindPetByPetIdMockHandler(),
@@ -3447,4 +3495,5 @@ export const getProjectDaepaAPIMock = () => [
   getLayingControllerCreateMockHandler(),
   getLayingControllerUpdateMockHandler(),
   getPairControllerCreateMockHandler(),
+  getFileControllerUploadImagesMockHandler(),
 ];
