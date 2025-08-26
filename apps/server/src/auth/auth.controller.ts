@@ -7,13 +7,14 @@ import {
   UseGuards,
   Post,
   Body,
+  BadRequestException,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService, ValidatedUser } from './auth.service';
 import { UserService } from 'src/user/user.service';
 import { ApiResponse } from '@nestjs/swagger';
-import { UserDto } from 'src/user/user.dto';
+import { SafeUserDto } from 'src/user/user.dto';
 import { JwtUser, PassportValidatedUser, Public } from './auth.decorator';
 import {
   AppleNativeLoginRequestDto,
@@ -24,20 +25,45 @@ import { JwtUserPayload } from './strategies/jwt.strategy';
 import { RequestWithCookies } from 'src/types/request';
 import { CommonResponseDto } from 'src/common/response.dto';
 import { OAUTH_PROVIDER } from './auth.constants';
+import { NonceService } from './nonce.service';
 
 @Controller('/auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly userService: UserService,
+    private readonly nonceService: NonceService,
   ) {}
+
+  @Get('apple/nonce')
+  @Public()
+  @ApiResponse({
+    status: 200,
+    description: 'Apple nonce issued',
+    schema: {
+      type: 'object',
+      properties: {
+        nonceId: { type: 'string' },
+        rawNonce: { type: 'string' },
+        hashedNonce: { type: 'string' },
+      },
+    },
+  })
+  issueAppleNonce() {
+    try {
+      return this.nonceService.issue();
+    } catch (error) {
+      console.error('Failed to issue nonce', error);
+      throw new BadRequestException('Failed to issue nonce');
+    }
+  }
 
   @Post('sign-in/kakao/native')
   @Public()
   @ApiResponse({
     status: 200,
     description: '카카오 네이티브 로그인 성공',
-    type: UserDto,
+    type: SafeUserDto,
   })
   async kakaoNative(
     @Req() _req: Request,
@@ -70,7 +96,15 @@ export class AuthController {
     if (!user) {
       throw new UnauthorizedException('사용자를 찾을 수 없습니다.');
     }
-    return user;
+
+    const {
+      refreshToken: _refreshToken,
+      refreshTokenExpiresAt: _refreshTokenExpiresAt,
+      ...safeUser
+    } = user;
+    void _refreshToken;
+    void _refreshTokenExpiresAt;
+    return safeUser;
   }
 
   @Post('sign-in/apple/native')
@@ -78,7 +112,12 @@ export class AuthController {
   @ApiResponse({
     status: 200,
     description: '애플 네이티브 로그인 성공',
-    type: UserDto,
+    type: SafeUserDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Nonce 검증 실패',
+    type: CommonResponseDto,
   })
   @ApiResponse({
     status: 401,
@@ -95,12 +134,25 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
     @Body() body: AppleNativeLoginRequestDto,
   ) {
-    const { identityToken, email, authorizationCode, name, isBiz } = body;
+    const {
+      identityToken,
+      email,
+      authorizationCode,
+      name,
+      isBiz,
+      nonce,
+      nonceId,
+    } = body;
+
+    // nonce 검증 로직 개선: 첫 요청에서는 유효성만 확인(소비 X)
+    this.nonceService.validateNonceIfProvided(nonce, nonceId);
 
     const validatedUser = await this.authService.validateAppleNativeAndGetUser({
       identityToken,
       email,
       authorizationCode,
+      nonce,
+      nonceId,
     });
 
     const jwtRefreshToken = await this.authService.createJwtRefreshToken(
@@ -120,25 +172,24 @@ export class AuthController {
     if (!user) {
       throw new UnauthorizedException('사용자를 찾을 수 없습니다.');
     }
-    if (typeof name === 'string' && name.trim().length > 0) {
-      await this.userService.createInitUserInfo(validatedUser.userId, {
-        name: name.trim(),
-        isBiz,
-      });
-      const updated = await this.userService.findOne({
-        userId: validatedUser.userId,
-      });
-      return updated;
-    } else if (typeof isBiz !== 'undefined') {
-      await this.userService.update(validatedUser.userId, {
-        isBiz,
-      });
-      const updated = await this.userService.findOne({
-        userId: validatedUser.userId,
-      });
-      return updated;
+    const updatedUser = await this.authService.updateUserInfoIfNeeded(
+      user,
+      validatedUser.userId,
+      name,
+      isBiz,
+    );
+
+    if (nonce && nonceId) {
+      this.nonceService.markUsed(nonceId);
     }
-    return user;
+    const {
+      refreshToken: _refreshToken,
+      refreshTokenExpiresAt: _refreshTokenExpiresAt,
+      ...safeUser
+    } = updatedUser;
+    void _refreshToken;
+    void _refreshTokenExpiresAt;
+    return safeUser;
   }
 
   @Get('sign-in/kakao')
@@ -147,7 +198,7 @@ export class AuthController {
   @ApiResponse({
     status: 302,
     description: '카카오 로그인 성공',
-    type: UserDto,
+    type: SafeUserDto,
   })
   async kakaoLogin(
     @PassportValidatedUser() validatedUser: ValidatedUser,
@@ -179,7 +230,7 @@ export class AuthController {
   @ApiResponse({
     status: 302,
     description: '구글 로그인 성공',
-    type: UserDto,
+    type: SafeUserDto,
   })
   async googleLogin(
     @PassportValidatedUser() validatedUser: ValidatedUser,

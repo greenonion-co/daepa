@@ -1,5 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsOptional, IsString } from 'class-validator';
+import {
+  IsBoolean,
+  IsEmail,
+  IsJWT,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { CommonResponseDto } from 'src/common/response.dto';
 
 export class TokenResponseDto extends CommonResponseDto {
@@ -28,7 +34,7 @@ export class KakaoNativeLoginRequestDto {
 
 export class AppleNativeLoginRequestDto {
   @ApiProperty({ description: 'Apple identity token (JWT)' })
-  @IsString()
+  @IsJWT()
   identityToken: string;
 
   @ApiProperty({ description: 'Authorization code', required: false })
@@ -38,7 +44,7 @@ export class AppleNativeLoginRequestDto {
 
   @ApiProperty({ description: '사용자 이메일(없을 수 있음)', required: false })
   @IsOptional()
-  @IsString()
+  @IsEmail()
   email?: string;
 
   @ApiProperty({ description: 'nonce(raw 또는 hashed)', required: false })
@@ -55,4 +61,9 @@ export class AppleNativeLoginRequestDto {
   @IsOptional()
   @IsBoolean()
   isBiz?: boolean;
+
+  @ApiProperty({ description: 'nonceId', required: false })
+  @IsOptional()
+  @IsString()
+  nonceId?: string;
 }

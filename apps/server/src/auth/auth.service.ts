@@ -45,19 +45,23 @@ export class AuthService {
     identityToken,
     email,
     authorizationCode,
+    nonce,
+    nonceId,
   }: {
     identityToken: string;
     email?: string;
     authorizationCode?: string;
+    nonce?: string;
+    nonceId?: string;
   }): Promise<ValidatedUser> {
-    const payload =
-      await this.oauthService.verifyAppleIdentityToken(identityToken);
+    const payload = await this.oauthService.verifyAppleIdentityToken(
+      identityToken,
+      nonce,
+      nonceId,
+    );
 
     const providerId = String((payload.sub ?? '').toString());
-    const emailFromToken = (payload as Record<string, unknown>).email as
-      | string
-      | undefined;
-
+    const emailFromToken = payload.email as string | undefined;
     if (emailFromToken && email && emailFromToken !== email) {
       throw new UnauthorizedException(
         '토큰의 이메일과 요청 이메일이 일치하지 않습니다.',
@@ -346,10 +350,22 @@ export class AuthService {
           }
           break;
         case OAUTH_PROVIDER.GOOGLE:
-          await this.oauthService.disconnectGoogle(userId);
+          try {
+            await this.oauthService.disconnectGoogle(userId);
+          } catch (error) {
+            this.logger.warn(
+              `Google unlink failed but continuing account deletion: ${(error as Error).message}`,
+            );
+          }
           break;
         case OAUTH_PROVIDER.APPLE:
-          await this.oauthService.disconnectApple(userId);
+          try {
+            await this.oauthService.disconnectApple(userId);
+          } catch (error) {
+            this.logger.warn(
+              `Apple unlink failed but continuing account deletion: ${(error as Error).message}`,
+            );
+          }
           break;
       }
     }
@@ -453,5 +469,30 @@ export class AuthService {
       ...oauthDto,
       user: userDto,
     };
+  }
+
+  async updateUserInfoIfNeeded(
+    user: UserDto,
+    userId: string,
+    name?: string,
+    isBiz?: boolean,
+  ): Promise<UserDto> {
+    // name이 유효한 문자열인 경우 초기 사용자 정보 생성
+    if (typeof name === 'string' && name.trim().length > 0) {
+      await this.userService.createInitUserInfo(userId, {
+        name: name.trim(),
+        isBiz,
+      });
+      const updatedUser = await this.userService.findOne({ userId });
+      return plainToInstance(UserDto, updatedUser);
+    }
+    // isBiz만 제공된 경우 업데이트
+    else if (typeof isBiz !== 'undefined') {
+      await this.userService.update(userId, { isBiz });
+      const updatedUser = await this.userService.findOne({ userId });
+      return plainToInstance(UserDto, updatedUser);
+    }
+    // 업데이트할 내용이 없으면 기존 사용자 반환
+    return user;
   }
 }
