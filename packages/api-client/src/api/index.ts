@@ -7,6 +7,7 @@
  */
 import type {
   AdoptionControllerGetAllAdoptionsParams,
+  AppleNativeLoginRequestDto,
   BrMatingControllerFindAllParams,
   BrPetControllerFindAllParams,
   BrPetControllerGetPetsByDateRangeParams,
@@ -28,8 +29,8 @@ import type {
   UpdateParentRequestDto,
   UpdatePetDto,
   UpdateUserNotificationDto,
-  UploadImagesRequestDto,
   UserNotificationControllerFindAllParams,
+  VerifyEmailDto,
   VerifyNameDto,
 } from "../model";
 
@@ -201,6 +202,17 @@ export const authControllerKakaoNative = (
   });
 };
 
+export const authControllerAppleNative = (
+  appleNativeLoginRequestDto: AppleNativeLoginRequestDto,
+) => {
+  return useCustomInstance<UserDto>({
+    url: `http://localhost:4000/api/auth/sign-in/apple/native`,
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    data: appleNativeLoginRequestDto,
+  });
+};
+
 export const authControllerKakaoLogin = () => {
   return useCustomInstance<unknown>({
     url: `http://localhost:4000/api/auth/sign-in/kakao`,
@@ -258,6 +270,15 @@ export const userControllerVerifyName = (verifyNameDto: VerifyNameDto) => {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     data: verifyNameDto,
+  });
+};
+
+export const userControllerVerifyEmail = (verifyEmailDto: VerifyEmailDto) => {
+  return useCustomInstance<CommonResponseDto>({
+    url: `http://localhost:4000/api/v1/user/verify-email`,
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    data: verifyEmailDto,
   });
 };
 
@@ -381,19 +402,6 @@ export const pairControllerCreate = (createPairDto: CreatePairDto) => {
   });
 };
 
-export const fileControllerUploadImages = (uploadImagesRequestDto: UploadImagesRequestDto) => {
-  const formData = new FormData();
-  formData.append(`petId`, uploadImagesRequestDto.petId);
-  uploadImagesRequestDto.files.forEach((value) => formData.append(`files`, value));
-
-  return useCustomInstance<CommonResponseDto>({
-    url: `http://localhost:4000/api/v1/file/upload/pet`,
-    method: "POST",
-    headers: { "Content-Type": "multipart/form-data" },
-    data: formData,
-  });
-};
-
 export type PetControllerCreateResult = NonNullable<
   Awaited<ReturnType<typeof petControllerCreate>>
 >;
@@ -442,6 +450,9 @@ export type BrPetControllerGetPetsByDateRangeResult = NonNullable<
 export type AuthControllerKakaoNativeResult = NonNullable<
   Awaited<ReturnType<typeof authControllerKakaoNative>>
 >;
+export type AuthControllerAppleNativeResult = NonNullable<
+  Awaited<ReturnType<typeof authControllerAppleNative>>
+>;
 export type AuthControllerKakaoLoginResult = NonNullable<
   Awaited<ReturnType<typeof authControllerKakaoLogin>>
 >;
@@ -465,6 +476,9 @@ export type UserControllerCreateInitUserInfoResult = NonNullable<
 >;
 export type UserControllerVerifyNameResult = NonNullable<
   Awaited<ReturnType<typeof userControllerVerifyName>>
+>;
+export type UserControllerVerifyEmailResult = NonNullable<
+  Awaited<ReturnType<typeof userControllerVerifyEmail>>
 >;
 export type AdoptionControllerCreateAdoptionResult = NonNullable<
   Awaited<ReturnType<typeof adoptionControllerCreateAdoption>>
@@ -504,9 +518,6 @@ export type LayingControllerUpdateResult = NonNullable<
 >;
 export type PairControllerCreateResult = NonNullable<
   Awaited<ReturnType<typeof pairControllerCreate>>
->;
-export type FileControllerUploadImagesResult = NonNullable<
-  Awaited<ReturnType<typeof fileControllerUploadImages>>
 >;
 
 export const getPetControllerCreateResponseMock = (
@@ -1869,6 +1880,28 @@ export const getAuthControllerKakaoNativeResponseMock = (
   ...overrideResponse,
 });
 
+export const getAuthControllerAppleNativeResponseMock = (
+  overrideResponse: Partial<UserDto> = {},
+): UserDto => ({
+  userId: faker.string.alpha(20),
+  name: faker.string.alpha(20),
+  email: faker.string.alpha(20),
+  role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
+  isBiz: faker.datatype.boolean(),
+  refreshToken: {},
+  refreshTokenExpiresAt: {},
+  status: faker.helpers.arrayElement([
+    "pending",
+    "active",
+    "inactive",
+    "suspended",
+    "deleted",
+  ] as const),
+  createdAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+  updatedAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+  ...overrideResponse,
+});
+
 export const getAuthControllerGetTokenResponseMock = (
   overrideResponse: Partial<TokenResponseDto> = {},
 ): TokenResponseDto => ({
@@ -1906,7 +1939,7 @@ export const getUserControllerGetUserProfileResponseMock = (
       email: faker.string.alpha(20),
       role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
       isBiz: faker.datatype.boolean(),
-      provider: faker.helpers.arrayElement(["kakao", "google", "naver", "apple"] as const),
+      provider: faker.helpers.arrayElements(["kakao", "google", "naver", "apple"] as const),
       status: faker.helpers.arrayElement([
         "pending",
         "active",
@@ -1929,6 +1962,14 @@ export const getUserControllerCreateInitUserInfoResponseMock = (
 });
 
 export const getUserControllerVerifyNameResponseMock = (
+  overrideResponse: Partial<CommonResponseDto> = {},
+): CommonResponseDto => ({
+  success: faker.datatype.boolean(),
+  message: faker.string.alpha(20),
+  ...overrideResponse,
+});
+
+export const getUserControllerVerifyEmailResponseMock = (
   overrideResponse: Partial<CommonResponseDto> = {},
 ): CommonResponseDto => ({
   success: faker.datatype.boolean(),
@@ -2588,14 +2629,6 @@ export const getPairControllerCreateResponseMock = (
   ...overrideResponse,
 });
 
-export const getFileControllerUploadImagesResponseMock = (
-  overrideResponse: Partial<CommonResponseDto> = {},
-): CommonResponseDto => ({
-  success: faker.datatype.boolean(),
-  message: faker.string.alpha(20),
-  ...overrideResponse,
-});
-
 export const getPetControllerCreateMockHandler = (
   overrideResponse?:
     | CommonIdResponseDto
@@ -2962,6 +2995,27 @@ export const getAuthControllerKakaoNativeMockHandler = (
   });
 };
 
+export const getAuthControllerAppleNativeMockHandler = (
+  overrideResponse?:
+    | UserDto
+    | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<UserDto> | UserDto),
+) => {
+  return http.post("*/api/auth/sign-in/apple/native", async (info) => {
+    await delay(1000);
+
+    return new HttpResponse(
+      JSON.stringify(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getAuthControllerAppleNativeResponseMock(),
+      ),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+  });
+};
+
 export const getAuthControllerKakaoLoginMockHandler = (
   overrideResponse?:
     | unknown
@@ -3122,6 +3176,29 @@ export const getUserControllerVerifyNameMockHandler = (
             ? await overrideResponse(info)
             : overrideResponse
           : getUserControllerVerifyNameResponseMock(),
+      ),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+  });
+};
+
+export const getUserControllerVerifyEmailMockHandler = (
+  overrideResponse?:
+    | CommonResponseDto
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<CommonResponseDto> | CommonResponseDto),
+) => {
+  return http.post("*/api/v1/user/verify-email", async (info) => {
+    await delay(1000);
+
+    return new HttpResponse(
+      JSON.stringify(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getUserControllerVerifyEmailResponseMock(),
       ),
       { status: 200, headers: { "Content-Type": "application/json" } },
     );
@@ -3426,29 +3503,6 @@ export const getPairControllerCreateMockHandler = (
     );
   });
 };
-
-export const getFileControllerUploadImagesMockHandler = (
-  overrideResponse?:
-    | CommonResponseDto
-    | ((
-        info: Parameters<Parameters<typeof http.post>[1]>[0],
-      ) => Promise<CommonResponseDto> | CommonResponseDto),
-) => {
-  return http.post("*/api/v1/file/upload/pet", async (info) => {
-    await delay(1000);
-
-    return new HttpResponse(
-      JSON.stringify(
-        overrideResponse !== undefined
-          ? typeof overrideResponse === "function"
-            ? await overrideResponse(info)
-            : overrideResponse
-          : getFileControllerUploadImagesResponseMock(),
-      ),
-      { status: 200, headers: { "Content-Type": "application/json" } },
-    );
-  });
-};
 export const getProjectDaepaAPIMock = () => [
   getPetControllerCreateMockHandler(),
   getPetControllerFindPetByPetIdMockHandler(),
@@ -3466,6 +3520,7 @@ export const getProjectDaepaAPIMock = () => [
   getBrPetControllerGetPetsByMonthMockHandler(),
   getBrPetControllerGetPetsByDateRangeMockHandler(),
   getAuthControllerKakaoNativeMockHandler(),
+  getAuthControllerAppleNativeMockHandler(),
   getAuthControllerKakaoLoginMockHandler(),
   getAuthControllerGoogleLoginMockHandler(),
   getAuthControllerGetTokenMockHandler(),
@@ -3474,6 +3529,7 @@ export const getProjectDaepaAPIMock = () => [
   getUserControllerGetUserProfileMockHandler(),
   getUserControllerCreateInitUserInfoMockHandler(),
   getUserControllerVerifyNameMockHandler(),
+  getUserControllerVerifyEmailMockHandler(),
   getAdoptionControllerCreateAdoptionMockHandler(),
   getAdoptionControllerGetAllAdoptionsMockHandler(),
   getAdoptionControllerGetAdoptionByAdoptionIdMockHandler(),
@@ -3487,5 +3543,4 @@ export const getProjectDaepaAPIMock = () => [
   getLayingControllerCreateMockHandler(),
   getLayingControllerUpdateMockHandler(),
   getPairControllerCreateMockHandler(),
-  getFileControllerUploadImagesMockHandler(),
 ];

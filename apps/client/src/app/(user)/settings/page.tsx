@@ -40,6 +40,7 @@ import { USER_STATUS_MAP } from "@/app/(브리더스룸)/constants";
 import { cn } from "@/lib/utils";
 import { AxiosError } from "axios";
 import { tokenStorage } from "@/lib/tokenStorage";
+import { providerIconMap } from "../constants";
 
 const NICKNAME_MAX_LENGTH = 15;
 const NICKNAME_MIN_LENGTH = 2;
@@ -116,6 +117,12 @@ const SettingsPage = () => {
   const handleThemeChange = (isDark: boolean) => {
     setTheme(isDark ? "dark" : "light");
   };
+
+  const normalizedProviders = Array.isArray(userProfile?.provider)
+    ? userProfile?.provider
+    : userProfile?.provider
+      ? [userProfile.provider]
+      : [];
 
   // 닉네임 수정 시작
   const handleStartEditNickname = () => {
@@ -318,15 +325,19 @@ const SettingsPage = () => {
                   placeholder="이메일을 입력하세요"
                   disabled
                 />
-                {/* TODO: provider가 여러 개인 경우 대응하기 */}
-                <Image
-                  src={`/${userProfile?.provider?.[0]}_icon.svg`}
-                  alt={userProfile?.provider?.[0] ?? ""}
-                  width={24}
-                  height={24}
-                  className="absolute right-4 top-1/2 -translate-y-1/2"
-                />
+                <div className="absolute right-4 top-1/2 flex -translate-y-1/2 gap-2">
+                  {normalizedProviders.map((provider) => (
+                    <Image
+                      key={provider}
+                      src={providerIconMap[provider]}
+                      alt={provider}
+                      width={24}
+                      height={24}
+                    />
+                  ))}
+                </div>
               </div>
+
               <p className="text-xs text-gray-500">
                 SNS 간편 로그인으로 가입한 계정은 이메일 변경이 제한됩니다
               </p>

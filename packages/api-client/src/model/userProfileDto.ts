@@ -6,7 +6,7 @@
  * OpenAPI spec version: 1.0
  */
 import type { UserProfileDtoRole } from "./userProfileDtoRole";
-import type { UserProfileDtoProvider } from "./userProfileDtoProvider";
+import type { UserProfileDtoProviderItem } from "./userProfileDtoProviderItem";
 import type { UserProfileDtoStatus } from "./userProfileDtoStatus";
 
 export interface UserProfileDto {
@@ -21,7 +21,7 @@ export interface UserProfileDto {
   /** 사업자 여부 */
   isBiz: boolean;
   /** Oauth 제공자 */
-  provider: UserProfileDtoProvider;
+  provider: UserProfileDtoProviderItem[];
   /** 유저 상태 */
   status: UserProfileDtoStatus;
   /** 생성 시간 */

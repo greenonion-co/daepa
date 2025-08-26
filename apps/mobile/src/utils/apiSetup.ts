@@ -1,10 +1,10 @@
-import { setTokenProvider } from '../../../../packages/api-client/src/api/mutator/use-custom-instance';
-import { tokenStorage } from './tokenStorage';
+import { setTokenProvider } from '@repo/api-client';
+import { useAuthStore } from '../store/auth';
 
 export const setupApiClient = () => {
-  setTokenProvider({
-    setToken: async (token: string) => await tokenStorage.setToken(token),
-    getToken: async () => await tokenStorage.getToken(),
-    removeToken: async () => await tokenStorage.removeToken(),
-  });
+  const getToken = async () => useAuthStore.getState().accessToken ?? null;
+  const setToken = async (token: string) =>
+    useAuthStore.getState().setAccessToken(token);
+  const removeToken = async () => useAuthStore.getState().setAccessToken(null);
+  setTokenProvider({ setToken, getToken, removeToken });
 };

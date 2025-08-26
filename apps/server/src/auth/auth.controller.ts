@@ -15,7 +15,11 @@ import { UserService } from 'src/user/user.service';
 import { ApiResponse } from '@nestjs/swagger';
 import { UserDto } from 'src/user/user.dto';
 import { JwtUser, PassportValidatedUser, Public } from './auth.decorator';
-import { KakaoNativeLoginRequestDto, TokenResponseDto } from './auth.dto';
+import {
+  AppleNativeLoginRequestDto,
+  KakaoNativeLoginRequestDto,
+  TokenResponseDto,
+} from './auth.dto';
 import { JwtUserPayload } from './strategies/jwt.strategy';
 import { RequestWithCookies } from 'src/types/request';
 import { CommonResponseDto } from 'src/common/response.dto';
@@ -63,7 +67,78 @@ export class AuthController {
     const user = await this.userService.findOne({
       userId: validatedUser.userId,
     });
-    return user as UserDto;
+    if (!user) {
+      throw new UnauthorizedException('사용자를 찾을 수 없습니다.');
+    }
+    return user;
+  }
+
+  @Post('sign-in/apple/native')
+  @Public()
+  @ApiResponse({
+    status: 200,
+    description: '애플 네이티브 로그인 성공',
+    type: UserDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: '애플 네이티브 로그인 실패',
+    type: CommonResponseDto,
+  })
+  @ApiResponse({
+    status: 422,
+    description: '애플 네이티브 로그인 실패',
+    type: CommonResponseDto,
+  })
+  async appleNative(
+    @Req() _req: Request,
+    @Res({ passthrough: true }) res: Response,
+    @Body() body: AppleNativeLoginRequestDto,
+  ) {
+    const { identityToken, email, authorizationCode, name, isBiz } = body;
+
+    const validatedUser = await this.authService.validateAppleNativeAndGetUser({
+      identityToken,
+      email,
+      authorizationCode,
+    });
+
+    const jwtRefreshToken = await this.authService.createJwtRefreshToken(
+      validatedUser.userId,
+    );
+
+    res.cookie('refreshToken', jwtRefreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 180 * 24 * 60 * 60 * 1000,
+    });
+
+    const user = await this.userService.findOne({
+      userId: validatedUser.userId,
+    });
+    if (!user) {
+      throw new UnauthorizedException('사용자를 찾을 수 없습니다.');
+    }
+    if (typeof name === 'string' && name.trim().length > 0) {
+      await this.userService.createInitUserInfo(validatedUser.userId, {
+        name: name.trim(),
+        isBiz,
+      });
+      const updated = await this.userService.findOne({
+        userId: validatedUser.userId,
+      });
+      return updated;
+    } else if (typeof isBiz !== 'undefined') {
+      await this.userService.update(validatedUser.userId, {
+        isBiz,
+      });
+      const updated = await this.userService.findOne({
+        userId: validatedUser.userId,
+      });
+      return updated;
+    }
+    return user;
   }
 
   @Get('sign-in/kakao')

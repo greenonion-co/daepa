@@ -16,6 +16,7 @@ import { CommonResponseDto } from 'src/common/response.dto';
 import { ApiResponse } from '@nestjs/swagger';
 import { JwtUser, Public } from 'src/auth/auth.decorator';
 import { JwtUserPayload } from 'src/auth/strategies/jwt.strategy';
+import { VerifyEmailDto } from './user.dto';
 
 @Controller('/v1/user')
 export class UserController {
@@ -83,5 +84,29 @@ export class UserController {
         HttpStatus.CONFLICT,
       );
     }
+  }
+
+  @Post('/verify-email')
+  @Public()
+  @ApiResponse({
+    status: 200,
+    description: '이메일 중복 확인 성공',
+    type: CommonResponseDto,
+  })
+  async verifyEmail(@Body() dto: VerifyEmailDto): Promise<CommonResponseDto> {
+    const isExist = await this.userService.isEmailExist(dto.email);
+    if (!isExist) {
+      return {
+        success: true,
+        message: '사용 가능한 이메일입니다.',
+      };
+    }
+    throw new HttpException(
+      {
+        statusCode: HttpStatus.CONFLICT,
+        message: '이미 사용중인 이메일입니다.',
+      },
+      HttpStatus.CONFLICT,
+    );
   }
 }

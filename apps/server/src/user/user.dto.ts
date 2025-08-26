@@ -7,6 +7,7 @@ import {
   IsEnum,
   IsOptional,
   IsString,
+  IsEmail,
 } from 'class-validator';
 import { OAUTH_PROVIDER } from 'src/auth/auth.constants';
 import { Exclude } from 'class-transformer';
@@ -49,6 +50,7 @@ class UserBaseDto {
   @ApiProperty({
     description: 'Oauth 제공자',
     enum: OAUTH_PROVIDER,
+    isArray: true,
     'x-enumNames': Object.keys(OAUTH_PROVIDER),
   })
   @IsArray()
@@ -88,6 +90,17 @@ class UserBaseDto {
   @IsDate()
   updatedAt: Date;
 }
+
+export class SafeUserDto extends PickType(UserBaseDto, [
+  'userId',
+  'name',
+  'email',
+  'role',
+  'isBiz',
+  'status',
+  'createdAt',
+  'updatedAt',
+]) {}
 
 export class UserDto extends PickType(UserBaseDto, [
   'userId',
@@ -173,4 +186,10 @@ export class UserProfileResponseDto extends CommonResponseDto {
     type: UserProfileDto,
   })
   data: UserProfileDto;
+}
+
+export class VerifyEmailDto {
+  @ApiProperty({ description: '이메일' })
+  @IsEmail()
+  email: string;
 }

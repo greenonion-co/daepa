@@ -2,6 +2,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Image from "next/image";
+import AppleLoginButton from "./AppleLoginButton";
 
 const SignInPage = () => {
   return (
@@ -19,6 +20,7 @@ const SignInPage = () => {
           </CardHeader>
 
           <CardContent>
+            <AppleLoginButton />
             <a
               className="mb-2 flex h-[46px] w-full items-center justify-center gap-3 rounded-[12px] bg-[#F2F2F2]"
               href={"http://localhost:4000/api/auth/sign-in/google"}
@@ -27,22 +29,13 @@ const SignInPage = () => {
               <span className="font-semibold">구글로 시작하기</span>
             </a>
 
-            {/* <a
+            <a
               className="flex h-[46px] w-full items-center justify-center gap-3 rounded-[12px] bg-[#FEE500]"
               href={"http://localhost:4000/api/auth/sign-in/kakao"}
             >
               <Image src="/kakao_icon.svg" alt="Kakao" width={18} height={18} />
               <span className="font-semibold">카카오로 시작하기</span>
-            </a> */}
-            <button
-              className="flex h-[46px] w-full items-center justify-center gap-3 rounded-[12px] bg-[#FEE500]"
-              onClick={() => {
-                alert("카카오 로그인 기능 준비 중입니다.");
-              }}
-            >
-              <Image src="/kakao_icon.svg" alt="Kakao" width={18} height={18} />
-              <span className="font-semibold">카카오로 시작하기</span>
-            </button>
+            </a>
           </CardContent>
         </Card>
 

@@ -2,6 +2,9 @@ import {
   BadRequestException,
   Injectable,
   UnauthorizedException,
+  Logger,
+  HttpStatus,
+  HttpException,
 } from '@nestjs/common';
 import { UserService } from 'src/user/user.service';
 import { ProviderInfo } from './auth.types';
@@ -36,6 +39,72 @@ export class AuthService {
     private readonly dataSource: DataSource,
   ) {}
 
+  private readonly logger = new Logger(AuthService.name);
+
+  async validateAppleNativeAndGetUser({
+    identityToken,
+    email,
+    authorizationCode,
+  }: {
+    identityToken: string;
+    email?: string;
+    authorizationCode?: string;
+  }): Promise<ValidatedUser> {
+    const payload =
+      await this.oauthService.verifyAppleIdentityToken(identityToken);
+
+    const providerId = String((payload.sub ?? '').toString());
+    const emailFromToken = (payload as Record<string, unknown>).email as
+      | string
+      | undefined;
+
+    if (emailFromToken && email && emailFromToken !== email) {
+      throw new UnauthorizedException(
+        '토큰의 이메일과 요청 이메일이 일치하지 않습니다.',
+      );
+    }
+    const resolvedEmail = emailFromToken ?? email;
+
+    if (!providerId) {
+      throw new UnauthorizedException('유효하지 않은 Apple 토큰입니다.');
+    }
+    if (!resolvedEmail) {
+      // 이메일이 없으면 기존 APPLE OAuth를 providerId로 조회하여 로그인 허용
+      const existing = await this.getOAuthWithUserByProviderId({
+        provider: OAUTH_PROVIDER.APPLE,
+        providerId,
+      });
+      if (existing?.user) {
+        return {
+          userId: existing.user.userId,
+          userStatus: existing.user.status,
+        };
+      }
+
+      throw new HttpException(
+        { code: 600, message: 'Apple 이메일이 필요합니다.' },
+        HttpStatus.UNPROCESSABLE_ENTITY,
+      );
+    }
+
+    // Authorization Code가 있으면 Apple 토큰 교환으로 refresh_token 확보
+    let refreshToken: string | undefined;
+
+    if (authorizationCode) {
+      refreshToken =
+        await this.oauthService.exchangeAppleAuthorizationCode(
+          authorizationCode,
+        );
+    }
+
+    return this.validateUser({
+      email: resolvedEmail,
+      provider: OAUTH_PROVIDER.APPLE,
+      providerId,
+      refreshToken,
+    });
+  }
+
   async validateUser(providerInfo: ProviderInfo): Promise<ValidatedUser> {
     // 기존 OAuth 계정 확인
     const oauthFound = await this.getOAuthWithUserByProviderInfo(providerInfo);
@@ -47,8 +116,8 @@ export class AuthService {
         );
       }
 
-      // 구글 로그인 시 refreshToken 업데이트
-      if (providerInfo.provider === OAUTH_PROVIDER.GOOGLE) {
+      // refreshToken이 전달된 경우 provider와 무관하게 업데이트
+      if (providerInfo.refreshToken) {
         await this.oauthRepository.update(
           {
             email: providerInfo.email,
@@ -264,20 +333,24 @@ export class AuthService {
     }
 
     for (const oauth of oauths) {
-      // if (oauth.provider === OAUTH_PROVIDER.KAKAO) {
-      //   const { id: disconnectedId } = await this.oauthService.disconnectKakao(
-      //     oauth.providerId ?? '',
-      //   );
-      //   if (oauth.providerId === disconnectedId.toString()) {
-      //     await this.softDeleteUser({
-      //       userId,
-      //       name: user.name,
-      //       email: user.email,
-      //     });
-      //   }
-      // }
-      if (oauth.provider === OAUTH_PROVIDER.GOOGLE) {
-        await this.oauthService.disconnectGoogle(userId);
+      switch (oauth.provider) {
+        case OAUTH_PROVIDER.KAKAO:
+          try {
+            await this.oauthService.disconnectKakao(oauth.providerId ?? '');
+          } catch (error) {
+            this.logger.warn(
+              `Kakao unlink failed but continuing account deletion: ${
+                (error as Error).message
+              }`,
+            );
+          }
+          break;
+        case OAUTH_PROVIDER.GOOGLE:
+          await this.oauthService.disconnectGoogle(userId);
+          break;
+        case OAUTH_PROVIDER.APPLE:
+          await this.oauthService.disconnectApple(userId);
+          break;
       }
     }
 
@@ -326,6 +399,43 @@ export class AuthService {
         'oauth.email = :email AND oauth.provider = :provider AND oauth.providerId = :providerId AND user.status != :status',
         {
           email,
+          provider,
+          providerId,
+          status: USER_STATUS.DELETED,
+        },
+      )
+      .getOne()) as OauthEntity & { user: UserEntity };
+
+    if (!entity) return null;
+
+    const { user, ...oauthEntity } = entity;
+    const oauthDto = plainToInstance(OauthDto, oauthEntity);
+    const userDto = plainToInstance(UserDto, user);
+
+    return {
+      ...oauthDto,
+      user: userDto,
+    };
+  }
+
+  async getOAuthWithUserByProviderId({
+    provider,
+    providerId,
+  }: {
+    provider: OAUTH_PROVIDER;
+    providerId: string;
+  }) {
+    const entity = (await this.oauthRepository
+      .createQueryBuilder('oauth')
+      .innerJoinAndMapOne(
+        'oauth.user',
+        UserEntity,
+        'user',
+        'user.email = oauth.email',
+      )
+      .where(
+        'oauth.provider = :provider AND oauth.providerId = :providerId AND user.status != :status',
+        {
           provider,
           providerId,
           status: USER_STATUS.DELETED,
