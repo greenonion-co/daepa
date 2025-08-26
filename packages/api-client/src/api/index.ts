@@ -41,6 +41,7 @@ import { HttpResponse, delay, http } from "msw";
 import type {
   AdoptionControllerGetAllAdoptions200,
   AdoptionDetailResponseDto,
+  AuthControllerIssueAppleNonce200,
   BrMatingControllerFindAll200,
   BrPetControllerFindAll200,
   BrPetControllerGetPetsByYear200,
@@ -48,8 +49,8 @@ import type {
   FilterPetListResponseDto,
   FindPetByPetIdResponseDto,
   MatingDetailResponseDto,
+  SafeUserDto,
   TokenResponseDto,
-  UserDto,
   UserNotificationControllerFindAll200,
   UserNotificationResponseDto,
   UserProfileResponseDto,
@@ -190,10 +191,17 @@ export const brPetControllerGetPetsByDateRange = (
   });
 };
 
+export const authControllerIssueAppleNonce = () => {
+  return useCustomInstance<AuthControllerIssueAppleNonce200>({
+    url: `http://localhost:4000/api/auth/apple/nonce`,
+    method: "GET",
+  });
+};
+
 export const authControllerKakaoNative = (
   kakaoNativeLoginRequestDto: KakaoNativeLoginRequestDto,
 ) => {
-  return useCustomInstance<UserDto>({
+  return useCustomInstance<SafeUserDto>({
     url: `http://localhost:4000/api/auth/sign-in/kakao/native`,
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -204,7 +212,7 @@ export const authControllerKakaoNative = (
 export const authControllerAppleNative = (
   appleNativeLoginRequestDto: AppleNativeLoginRequestDto,
 ) => {
-  return useCustomInstance<UserDto>({
+  return useCustomInstance<SafeUserDto>({
     url: `http://localhost:4000/api/auth/sign-in/apple/native`,
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -445,6 +453,9 @@ export type BrPetControllerGetPetsByMonthResult = NonNullable<
 >;
 export type BrPetControllerGetPetsByDateRangeResult = NonNullable<
   Awaited<ReturnType<typeof brPetControllerGetPetsByDateRange>>
+>;
+export type AuthControllerIssueAppleNonceResult = NonNullable<
+  Awaited<ReturnType<typeof authControllerIssueAppleNonce>>
 >;
 export type AuthControllerKakaoNativeResult = NonNullable<
   Awaited<ReturnType<typeof authControllerKakaoNative>>
@@ -1766,16 +1777,23 @@ export const getBrPetControllerGetPetsByDateRangeResponseMock = (
   ...overrideResponse,
 });
 
+export const getAuthControllerIssueAppleNonceResponseMock = (
+  overrideResponse: Partial<AuthControllerIssueAppleNonce200> = {},
+): AuthControllerIssueAppleNonce200 => ({
+  nonceId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+  rawNonce: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+  hashedNonce: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+  ...overrideResponse,
+});
+
 export const getAuthControllerKakaoNativeResponseMock = (
-  overrideResponse: Partial<UserDto> = {},
-): UserDto => ({
+  overrideResponse: Partial<SafeUserDto> = {},
+): SafeUserDto => ({
   userId: faker.string.alpha(20),
   name: faker.string.alpha(20),
   email: faker.string.alpha(20),
   role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
   isBiz: faker.datatype.boolean(),
-  refreshToken: {},
-  refreshTokenExpiresAt: {},
   status: faker.helpers.arrayElement([
     "pending",
     "active",
@@ -1789,15 +1807,13 @@ export const getAuthControllerKakaoNativeResponseMock = (
 });
 
 export const getAuthControllerAppleNativeResponseMock = (
-  overrideResponse: Partial<UserDto> = {},
-): UserDto => ({
+  overrideResponse: Partial<SafeUserDto> = {},
+): SafeUserDto => ({
   userId: faker.string.alpha(20),
   name: faker.string.alpha(20),
   email: faker.string.alpha(20),
   role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
   isBiz: faker.datatype.boolean(),
-  refreshToken: {},
-  refreshTokenExpiresAt: {},
   status: faker.helpers.arrayElement([
     "pending",
     "active",
@@ -2834,10 +2850,35 @@ export const getBrPetControllerGetPetsByDateRangeMockHandler = (
   });
 };
 
+export const getAuthControllerIssueAppleNonceMockHandler = (
+  overrideResponse?:
+    | AuthControllerIssueAppleNonce200
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<AuthControllerIssueAppleNonce200> | AuthControllerIssueAppleNonce200),
+) => {
+  return http.get("*/api/auth/apple/nonce", async (info) => {
+    await delay(1000);
+
+    return new HttpResponse(
+      JSON.stringify(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getAuthControllerIssueAppleNonceResponseMock(),
+      ),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+  });
+};
+
 export const getAuthControllerKakaoNativeMockHandler = (
   overrideResponse?:
-    | UserDto
-    | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<UserDto> | UserDto),
+    | SafeUserDto
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<SafeUserDto> | SafeUserDto),
 ) => {
   return http.post("*/api/auth/sign-in/kakao/native", async (info) => {
     await delay(1000);
@@ -2857,8 +2898,10 @@ export const getAuthControllerKakaoNativeMockHandler = (
 
 export const getAuthControllerAppleNativeMockHandler = (
   overrideResponse?:
-    | UserDto
-    | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<UserDto> | UserDto),
+    | SafeUserDto
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<SafeUserDto> | SafeUserDto),
 ) => {
   return http.post("*/api/auth/sign-in/apple/native", async (info) => {
     await delay(1000);
@@ -3379,6 +3422,7 @@ export const getProjectDaepaAPIMock = () => [
   getBrPetControllerGetPetsByYearMockHandler(),
   getBrPetControllerGetPetsByMonthMockHandler(),
   getBrPetControllerGetPetsByDateRangeMockHandler(),
+  getAuthControllerIssueAppleNonceMockHandler(),
   getAuthControllerKakaoNativeMockHandler(),
   getAuthControllerAppleNativeMockHandler(),
   getAuthControllerKakaoLoginMockHandler(),
