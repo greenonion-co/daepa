@@ -1,4 +1,5 @@
 import { BackHandler, Dimensions, StyleSheet, View } from 'react-native';
+import type { NativeEventSubscription } from 'react-native';
 import React, { Component } from 'react';
 import LottieLoading from './LottieLoading';
 
@@ -20,9 +21,21 @@ class Loading extends Component<LoadingProps, LoadingState> {
   state = initialState;
 
   static _ref: Loading | null = null;
+  private backHandlerSub?: NativeEventSubscription;
 
   componentDidMount() {
-    BackHandler.addEventListener('hardwareBackPress', this.backAction);
+    this.backHandlerSub = BackHandler.addEventListener(
+      'hardwareBackPress',
+      this.backAction,
+    );
+  }
+
+  componentWillUnmount() {
+    this.backHandlerSub?.remove();
+
+    if (Loading._ref === this) {
+      Loading._ref = null;
+    }
   }
 
   static setRef(ref: Loading | null) {
@@ -39,12 +52,6 @@ class Loading extends Component<LoadingProps, LoadingState> {
 
   static update(props: LoadingProps) {
     Loading._ref?.update(props);
-  }
-
-  timer() {
-    return setTimeout(() => {
-      this.close();
-    }, 700);
   }
 
   show() {

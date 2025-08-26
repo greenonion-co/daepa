@@ -61,30 +61,6 @@ export class UserService {
     };
   }
 
-  async createUser(
-    providerInfo: ProviderInfo,
-    status: (typeof USER_STATUS)[keyof typeof USER_STATUS],
-  ) {
-    const { email, provider, providerId } = providerInfo;
-
-    const userId = await this.generateUserId();
-    const pendingName = `USER_${userId}`;
-
-    const userEntity = new UserEntity();
-    Object.assign(userEntity, {
-      userId,
-      name: pendingName,
-      email,
-      role: USER_ROLE.USER,
-      provider,
-      providerId,
-      status,
-    });
-
-    const savedUserEntity = await this.userRepository.save(userEntity);
-    return this.toUserDto(savedUserEntity);
-  }
-
   private toUserDto(entity: UserEntity): UserDto {
     return {
       userId: entity.userId,
@@ -179,6 +155,16 @@ export class UserService {
     const isExist = await this.userRepository.exists({
       where: {
         name: nickname,
+        status: Not(USER_STATUS.DELETED),
+      },
+    });
+    return !!isExist;
+  }
+
+  async isEmailExist(email: string) {
+    const isExist = await this.userRepository.exists({
+      where: {
+        email,
         status: Not(USER_STATUS.DELETED),
       },
     });

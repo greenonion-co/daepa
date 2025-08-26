@@ -1,4 +1,3 @@
-// apps/mobile/src/components/CardFront.tsx
 import React, { useMemo, useRef, useState } from 'react';
 import {
   Dimensions,
@@ -10,11 +9,12 @@ import {
   View,
 } from 'react-native';
 import type { PetDto } from '@repo/api-client';
-import { formatYyMmDd } from '../../../../utils/format';
+import { formatYyMmDd } from '@/utils/format';
 import {
   GENDER_KOREAN_INFO,
   SPECIES_KOREAN_INFO,
-} from '../../../../services/constant/form';
+} from '@/services/constant/form';
+import DefaultPetImage from '@/assets/images/default-pet-image_2.png';
 
 const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -31,10 +31,7 @@ const CardFront: React.FC<Props> = ({
 }) => {
   const allImages = useMemo(() => {
     const photos =
-      'photos' in pet && Array.isArray((pet as any).photos)
-        ? ((pet as any).photos as string[])
-        : [];
-    // RN에서 로컬 public 이미지는 바로 못 쓰므로, 비어있으면 임시 빈 배열로 두고 배경 처리
+      'photos' in pet && Array.isArray(pet.photos) ? pet.photos : [];
     return photos;
   }, [pet]);
 
@@ -69,10 +66,7 @@ const CardFront: React.FC<Props> = ({
               )}
             />
           ) : (
-            <Image
-              source={require('../../../../assets/images/default-pet-image_2.png')}
-              style={styles.image}
-            />
+            <Image source={DefaultPetImage} style={styles.image} />
           )}
 
           {/* 이미지 인디케이터 */}

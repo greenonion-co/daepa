@@ -9,6 +9,7 @@ import {
   Easing,
   Keyboard,
   KeyboardAvoidingView,
+  Platform,
   StyleSheet,
   Text,
   View,
@@ -44,7 +45,7 @@ const initialState: ToastState = {
   message: null,
   inset: 0,
   keyboardShown: false,
-  animationFlag: new Animated.Value(1),
+  animationFlag: new Animated.Value(0),
   screenWidth: 0,
 };
 
@@ -59,8 +60,13 @@ class Toast extends Component<ToastProps, ToastState> {
   private timerID: ReturnType<typeof setTimeout> | null = null;
 
   componentDidMount() {
-    const keyboardShowType = 'keyboardWillShow';
-    const keyboardHideType = 'keyboardWillHide';
+    const { width } = Dimensions.get('screen');
+    this.setState({ screenWidth: width });
+
+    const keyboardShowType =
+      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const keyboardHideType =
+      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
     this.keyboardShow = Keyboard.addListener(keyboardShowType, () => {
       this.setState({ keyboardShown: true });
     });
@@ -72,11 +78,17 @@ class Toast extends Component<ToastProps, ToastState> {
   componentWillUnmount() {
     this.keyboardShow?.remove();
     this.keyboardHide?.remove();
+
+    if (this.timerID) {
+      clearTimeout(this.timerID);
+    }
   }
 
   componentDidUpdate() {
     const { width } = Dimensions.get('screen');
-    this.screenWidth = width;
+    if (this.state.screenWidth !== width) {
+      this.setState({ screenWidth: width });
+    }
   }
 
   timer = (): ReturnType<typeof setTimeout> =>
@@ -96,12 +108,14 @@ class Toast extends Component<ToastProps, ToastState> {
     if (this.timerID) {
       clearTimeout(this.timerID);
     }
+
     const newState: ToastState = {
       ...this.state,
       isVisible: true,
       message,
       icon,
       inset,
+      animationFlag: new Animated.Value(0),
     };
 
     this.setState(newState);
@@ -111,6 +125,11 @@ class Toast extends Component<ToastProps, ToastState> {
   }
 
   close() {
+    if (this.timerID) {
+      clearTimeout(this.timerID);
+      this.timerID = null;
+    }
+
     this.dismissAnimation();
   }
 
@@ -133,6 +152,10 @@ class Toast extends Component<ToastProps, ToastState> {
       easing: Easing.cubic,
     }).start(({ finished }) => {
       if (finished) {
+        if (this.timerID) {
+          clearTimeout(this.timerID);
+          this.timerID = null;
+        }
         this.setState(initialState);
       }
     });
@@ -165,11 +188,12 @@ class Toast extends Component<ToastProps, ToastState> {
       inset: insetState,
     } = this.state;
 
-    const inset = !insetState
-      ? keyboardShown
-        ? 16
-        : TOAST_BOTTOM_INSET
-      : insetState;
+    const inset =
+      insetState === undefined
+        ? keyboardShown
+          ? 16
+          : TOAST_BOTTOM_INSET
+        : insetState;
 
     const width = this.screenWidth - TOAST_MARGIN * 2;
 

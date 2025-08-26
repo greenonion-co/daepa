@@ -1,7 +1,14 @@
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import {
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  TextInputProps,
+  View,
+} from 'react-native';
 import { InfoIcon } from 'lucide-react-native';
 
-interface InputBoxProps {
+interface InputBoxProps extends TextInputProps {
   label: string;
   placeholder: string;
   errorMessage?: string;
