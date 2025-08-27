@@ -136,12 +136,6 @@ export default function RegisterPage({ params }: { params: Promise<{ funnel: str
       const petId = petResponse.data.id;
       const files = (formData.photoFiles as File[]) || [];
 
-      // 펫 생성 실패
-      if (!petId) {
-        toast.error("개체 등록에 실패했습니다.");
-        return;
-      }
-
       // 이미지를 선택하지 않은 경우: 펫만 성공
       if (files.length === 0) {
         handleSuccess();
