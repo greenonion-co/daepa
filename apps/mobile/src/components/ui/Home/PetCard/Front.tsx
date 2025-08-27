@@ -14,7 +14,6 @@ import {
   GENDER_KOREAN_INFO,
   SPECIES_KOREAN_INFO,
 } from '@/services/constant/form';
-import DefaultPetImage from '@/assets/images/default-pet-image_2.png';
 
 const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -40,7 +39,7 @@ const CardFront: React.FC<Props> = ({
       <View style={styles.card}>
         {/* 이미지 캐러셀 */}
         <View style={styles.imageWrap}>
-          {allImages.length > 0 ? (
+          {allImages.length > 0 && (
             <FlatList
               data={allImages}
               keyExtractor={(uri, idx) => `${uri}-${idx}`}
@@ -60,8 +59,6 @@ const CardFront: React.FC<Props> = ({
                 />
               )}
             />
-          ) : (
-            <Image source={DefaultPetImage} style={styles.image} />
           )}
 
           {/* 이미지 인디케이터 */}
