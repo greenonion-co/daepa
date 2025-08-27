@@ -16,7 +16,6 @@ import { plainToInstance } from 'class-transformer';
 import { OauthDto } from './oauth.dto';
 import { OAUTH_PROVIDER } from '../auth.constants';
 import { EntityManager } from 'typeorm';
-import { NonceService } from '../nonce.service';
 import { createHash } from 'crypto';
 
 type KakaoDisconnectResponse = {
@@ -30,7 +29,6 @@ export class OauthService {
     @InjectRepository(OauthEntity)
     private readonly oauthRepository: Repository<OauthEntity>,
     private readonly httpService: HttpService,
-    private readonly nonceService: NonceService,
   ) {}
 
   async findOne(where: FindOptionsWhere<OauthEntity>) {
