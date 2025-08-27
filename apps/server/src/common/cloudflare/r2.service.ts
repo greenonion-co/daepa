@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
-import { UploadedPetImageDto } from 'src/pet/image/pet.image.dto';
+import { UploadedPetImageDto } from 'src/pet/pet.dto';
 
 @Injectable()
 export class R2Service {

@@ -16,7 +16,6 @@ import { PetEntity } from '../pet/pet.entity';
 import { PET_SEX } from '../pet/pet.constants';
 import { UserNotificationService } from '../user_notification/user_notification.service';
 import { USER_NOTIFICATION_TYPE } from '../user_notification/user_notification.constant';
-import { PetImageEntity } from '../pet/image/pet.image.entity';
 
 @Injectable()
 export class ParentRequestService {
@@ -58,12 +57,12 @@ export class ParentRequestService {
             childPet: {
               id: childPet?.petId,
               name: childPet?.name,
-              photo: childPet?.photo,
+              photos: childPet?.photos,
             },
             parentPet: {
               id: parentPet?.petId,
               name: parentPet.name,
-              photo: parentPet?.photo,
+              photos: parentPet?.photos,
             },
             role: createParentRequestDto.role,
             message: createParentRequestDto.message,
@@ -149,12 +148,12 @@ export class ParentRequestService {
               childPet: {
                 id: parentRequest.childPetId,
                 name: childPet?.name,
-                photo: childPet?.photo,
+                photos: childPet?.photos,
               },
               parentPet: {
                 id: parentRequest.parentPetId,
                 name: parentPet?.name,
-                photo: parentPet?.photo,
+                photos: parentPet?.photos,
               },
               role: parentRequest.role,
               message: parentRequest.message,
@@ -295,39 +294,15 @@ export class ParentRequestService {
     const [childPet, parentPet] = await Promise.all([
       entityManager.findOne(PetEntity, {
         where: { petId: childPetId },
-        select: ['name', 'petId', 'ownerId'],
+        select: ['name', 'petId', 'ownerId', 'photos'],
       }),
       entityManager.findOne(PetEntity, {
         where: { petId: parentPetId },
-        select: ['name', 'petId', 'ownerId'],
+        select: ['name', 'petId', 'ownerId', 'photos'],
       }),
     ]);
-    // 각 펫의 대표 사진(첫 번째)을 조회하여 photo 필드로 포함
-    const [childPhoto, parentPhoto] = await Promise.all([
-      childPet
-        ? entityManager.findOne(PetImageEntity, {
-            where: { petId: childPetId },
-            select: ['url'],
-            order: { id: 'ASC' },
-          })
-        : Promise.resolve(null),
-      parentPet
-        ? entityManager.findOne(PetImageEntity, {
-            where: { petId: parentPetId },
-            select: ['url'],
-            order: { id: 'ASC' },
-          })
-        : Promise.resolve(null),
-    ]);
 
-    const childWithPhoto = childPet
-      ? { ...childPet, photo: childPhoto?.url }
-      : childPet;
-    const parentWithPhoto = parentPet
-      ? { ...parentPet, photo: parentPhoto?.url }
-      : parentPet;
-
-    return { childPet: childWithPhoto, parentPet: parentWithPhoto };
+    return { childPet, parentPet };
   }
 
   async getParentsWithRequestStatus(petId: string): Promise<{
@@ -354,20 +329,6 @@ export class ParentRequestService {
         select: ['petId', 'name', 'species', 'morphs', 'sex', 'hatchingDate'],
       });
 
-      // 부모 펫 이미지 URL을 한 번에 가져옴 (정렬: id ASC)
-      const parentPetImages = await entityManager.find(PetImageEntity, {
-        where: { petId: In(parentPetIds) },
-        select: ['petId', 'url', 'id'],
-        order: { id: 'ASC' },
-      });
-
-      const petIdToPhotos = new Map<string, string[]>();
-      for (const img of parentPetImages) {
-        const list = petIdToPhotos.get(img.petId) ?? [];
-        list.push(img.url);
-        petIdToPhotos.set(img.petId, list);
-      }
-
       const requestMap = new Map(
         parentRequests.map((req) => [req.parentPetId, req.status]),
       );
@@ -380,7 +341,7 @@ export class ParentRequestService {
         ? {
             ...fatherPet,
             status: requestMap.get(fatherPet.petId) || PARENT_STATUS.PENDING,
-            photos: petIdToPhotos.get(fatherPet.petId) ?? [],
+            photos: fatherPet.photos ?? [],
           }
         : null;
 
@@ -388,7 +349,7 @@ export class ParentRequestService {
         ? {
             ...motherPet,
             status: requestMap.get(motherPet.petId) || PARENT_STATUS.PENDING,
-            photos: petIdToPhotos.get(motherPet.petId) ?? [],
+            photos: motherPet.photos ?? [],
           }
         : null;
 

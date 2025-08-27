@@ -73,6 +73,9 @@ export class PetEntity {
   @Column({ default: false })
   isDeleted: boolean;
 
+  @Column('json', { nullable: true })
+  photos?: string[];
+
   @CreateDateColumn()
   createdAt: Date;
 

@@ -1,4 +1,5 @@
 import {
+  IsArray,
   IsDate,
   IsEnum,
   IsJSON,
@@ -36,12 +37,12 @@ export class NotificationPetDto {
 
   @ApiProperty({
     description: '개체 이미지',
-    example: 'https://example.com/image.jpg',
+    example: ['example.com/image1.jpg', 'example.com/image2.jpg'],
     required: false,
   })
-  @IsString()
   @IsOptional()
-  photo?: string;
+  @IsArray()
+  photos?: string[];
 }
 
 export class UserNotificationDetailJson {
