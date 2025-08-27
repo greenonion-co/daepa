@@ -80,6 +80,12 @@ export default function RegisterPage({ params }: { params: Promise<{ funnel: str
     }
   }, [step, funnel]);
 
+  const handleSuccess = () => {
+    toast.success("개체 등록이 완료되었습니다.");
+    router.push(`/pet`);
+    resetForm();
+  };
+
   const createPet = async (formData: FormData) => {
     try {
       const data = { ...formData };
@@ -129,10 +135,28 @@ export default function RegisterPage({ params }: { params: Promise<{ funnel: str
 
       const petId = petResponse.data.id;
       const files = (formData.photoFiles as File[]) || [];
-      if (petId && files.length > 0) {
+
+      // 펫 생성 실패
+      if (!petId) {
+        toast.error("개체 등록에 실패했습니다.");
+        return;
+      }
+
+      // 이미지를 선택하지 않은 경우: 펫만 성공
+      if (files.length === 0) {
+        handleSuccess();
+        return;
+      }
+
+      // 이미지를 선택한 경우 업로드 시도
+      try {
         await mutateUploadImages({ petId, files });
-        toast.success("개체 등록이 완료되었습니다.");
-        router.push(`/pet`);
+        handleSuccess();
+      } catch (error) {
+        // 펫 성공, 이미지 실패: 상세 페이지로 이동하여 재업로드를 유도
+        console.error("Image upload failed:", error);
+        toast.error("이미지 업로드에 실패했습니다. 상세 페이지에서 다시 업로드해 주세요.");
+        router.push(`/pet/${petId}`);
         resetForm();
       }
     } catch (error) {

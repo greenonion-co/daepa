@@ -25,8 +25,7 @@ export class UploadImagesRequestDto {
       type: 'string',
       format: 'binary',
     },
-    description:
-      '업로드할 이미지 파일 (jpg, jpeg, png, gif, webp, heic, heif, avif)',
+    description: '업로드할 이미지 파일 (jpg, jpeg, png, gif, webp, avif)',
     required: true,
   })
   files: Express.Multer.File[];
