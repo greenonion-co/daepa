@@ -10,7 +10,7 @@ import { FormField } from "../../components/Form/FormField";
 import FloatingButton from "../../components/FloatingButton";
 import { useSelect } from "../hooks/useSelect";
 import { useMutation } from "@tanstack/react-query";
-import { fileControllerUploadImages, petControllerCreate } from "@repo/api-client";
+import { petControllerCreate } from "@repo/api-client";
 import { toast } from "sonner";
 import { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
@@ -25,10 +25,6 @@ export default function RegisterPage({ params }: { params: Promise<{ funnel: str
   const resolvedParams = use(params);
   const funnel = Number(resolvedParams.funnel);
   const visibleSteps = FORM_STEPS.slice(-step - 1);
-
-  const { mutateAsync: mutateUploadImages, isPending: isUploading } = useMutation({
-    mutationFn: fileControllerUploadImages,
-  });
 
   const { mutateAsync: mutateCreatePet, isPending: isCreating } = useMutation({
     mutationFn: petControllerCreate,
@@ -123,36 +119,18 @@ export default function RegisterPage({ params }: { params: Promise<{ funnel: str
             : undefined,
           foods: data?.foods,
           traits: data?.traits,
+          photos: data?.photos,
         },
         (value) => !isNil(value),
       );
 
-      const petResponse = await mutateCreatePet({
+      await mutateCreatePet({
         ...baseFields,
         ...requestData,
         species: data.species,
       });
 
-      const petId = petResponse.data.id;
-      const files = (formData.photoFiles as File[]) || [];
-
-      // 이미지를 선택하지 않은 경우: 펫만 성공
-      if (files.length === 0) {
-        handleSuccess();
-        return;
-      }
-
-      // 이미지를 선택한 경우 업로드 시도
-      try {
-        await mutateUploadImages({ petId, files });
-        handleSuccess();
-      } catch (error) {
-        // 펫 성공, 이미지 실패: 상세 페이지로 이동하여 재업로드를 유도
-        console.error("Image upload failed:", error);
-        toast.error("이미지 업로드에 실패했습니다. 상세 페이지에서 다시 업로드해 주세요.");
-        router.push(`/pet/${petId}`);
-        resetForm();
-      }
+      handleSuccess();
     } catch (error) {
       console.error("Failed to create pet:", error);
       if (error instanceof AxiosError) {
@@ -177,7 +155,7 @@ export default function RegisterPage({ params }: { params: Promise<{ funnel: str
     handleSubmit: createPet,
   });
 
-  if (isCreating || isUploading) {
+  if (isCreating) {
     return <Loading />;
   }
 

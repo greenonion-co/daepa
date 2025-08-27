@@ -23,7 +23,6 @@ const CardFront = ({ pet, qrCodeDataUrl }: { pet: PetDto; qrCodeDataUrl?: string
   return (
     <div className="absolute h-full w-full [-webkit-backface-visibility:hidden] [backface-visibility:hidden] [transform:rotateY(0deg)]">
       <div className="relative h-full overflow-hidden rounded-xl border-gray-300 bg-white shadow-xl dark:bg-[#18181B]">
-        {" "}
         {/* 이미지 컨테이너 */}
         <motion.div
           animate={{

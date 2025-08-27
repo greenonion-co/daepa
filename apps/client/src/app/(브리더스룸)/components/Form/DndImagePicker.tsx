@@ -12,13 +12,15 @@ import { SortableContext, useSortable, arrayMove, rectSortingStrategy } from "@d
 import { CSS } from "@dnd-kit/utilities";
 import { useDropzone } from "react-dropzone";
 import Image from "next/image";
-import { buildTransformedUrl, cn, resizeImageFile } from "@/lib/utils";
+import { buildTransformedUrl, cn } from "@/lib/utils";
 import { X, Plus, Loader2, Info } from "lucide-react";
 import { toast } from "sonner";
 import { usePetStore } from "../../register/store/pet";
 import { useCallback, useState } from "react";
 import { isNil, range } from "es-toolkit";
 import { ACCEPT_IMAGE_FORMATS } from "../../constants";
+import { fileControllerUploadImages } from "@repo/api-client";
+import { useMutation } from "@tanstack/react-query";
 
 interface DndImagePickerProps {
   max?: number;
@@ -30,6 +32,10 @@ export default function DndImagePicker({ max = 3, disabled }: DndImagePickerProp
   const [isLoading, setIsLoading] = useState(false);
   const photos: string[] = formData.photos ?? [];
   const ids = photos.map((p, idx) => `${idx}:${p}`);
+
+  const { mutateAsync: mutateUploadImages } = useMutation({
+    mutationFn: fileControllerUploadImages,
+  });
 
   // 터치와 마우스 센서 설정
   const mouseSensor = useSensor(MouseSensor, {
@@ -69,15 +75,14 @@ export default function DndImagePicker({ max = 3, disabled }: DndImagePickerProp
 
     setIsLoading(true);
     try {
-      const promises = targetFiles.map((file) => resizeImageFile(file, 1280, 0.82));
-      const results = await Promise.all(promises);
-      setFormData((prev: { photos?: string[]; photoFiles?: File[] }) => ({
+      const { data: uploadedImages } = await mutateUploadImages({ files: targetFiles });
+      setFormData((prev) => ({
         ...prev,
-        photos: [...(prev?.photos ?? []), ...results].slice(0, max),
-        photoFiles: [...(prev?.photoFiles ?? []), ...targetFiles],
+        photos: [...(prev?.photos ?? []), ...uploadedImages],
       }));
-    } catch {
-      toast.error("이미지 처리 중 오류가 발생했습니다.");
+    } catch (error) {
+      console.error("Image upload failed:", error);
+      toast.error("이미지 업로드에 실패했습니다.");
     } finally {
       setIsLoading(false);
     }
@@ -103,11 +108,9 @@ export default function DndImagePicker({ max = 3, disabled }: DndImagePickerProp
 
       setFormData((prev) => {
         const photos = [...(prev.photos ?? [])];
-        const files = [...(prev.photoFiles ?? [])];
         const nextPhotos = order.map((i) => photos[i]);
-        const nextFiles = order.filter((i) => i < files.length).map((i) => files[i]);
 
-        return { ...prev, photos: nextPhotos, photoFiles: nextFiles };
+        return { ...prev, photos: nextPhotos };
       });
     },
     [disabled, isLoading, setFormData],
@@ -139,10 +142,8 @@ export default function DndImagePicker({ max = 3, disabled }: DndImagePickerProp
     (index: number) => {
       setFormData((prev) => {
         const photos = [...(prev.photos ?? [])];
-        const files = [...(prev.photoFiles ?? [])];
         if (index < photos.length) photos.splice(index, 1);
-        if (index < files.length) files.splice(index, 1);
-        return { ...prev, photos, photoFiles: files };
+        return { ...prev, photos };
       });
     },
     [setFormData],

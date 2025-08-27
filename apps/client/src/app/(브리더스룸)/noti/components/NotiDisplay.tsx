@@ -307,10 +307,10 @@ const NotiDisplay = memo(() => {
             className="group mx-4 mt-4 flex flex-col rounded-lg border p-3 shadow-sm transition-all duration-200 hover:scale-[1.02] hover:shadow-md"
           >
             <div className="flex flex-col gap-3">
-              {detailData?.childPet?.photo ? (
+              {detailData?.childPet?.photos ? (
                 <div className="relative w-full overflow-hidden rounded-lg">
                   <PetThumbnail
-                    imageUrl={detailData?.childPet?.photo}
+                    imageUrl={detailData?.childPet?.photos[0]}
                     alt={detailData?.childPet?.name}
                   />
                 </div>

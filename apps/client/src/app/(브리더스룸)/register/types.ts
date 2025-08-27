@@ -10,7 +10,6 @@ export type FieldName =
   | "weight"
   | "desc"
   | "photos"
-  | "photoFiles"
   | "father"
   | "mother"
   | "clutchCount"

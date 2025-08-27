@@ -60,10 +60,7 @@ export class PetService {
     private readonly dataSource: DataSource,
   ) {}
 
-  async createPet(
-    createPetDto: CreatePetDto,
-    ownerId: string,
-  ): Promise<{ petId: string }> {
+  async createPet(createPetDto: CreatePetDto, ownerId: string) {
     return this.dataSource.transaction(async (entityManager: EntityManager) => {
       const petId = await this.generateUniquePetId(entityManager);
       const { father, mother, ...petData } = createPetDto;
@@ -120,8 +117,6 @@ export class PetService {
             );
           }
         }
-
-        return { petId };
       } catch (error: unknown) {
         if (isMySQLError(error) && error.code === 'ER_DUP_ENTRY') {
           if (error.message.includes('UNIQUE_OWNER_PET_NAME')) {
