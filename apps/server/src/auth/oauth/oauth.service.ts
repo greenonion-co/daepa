@@ -1,7 +1,12 @@
 import { HttpService } from '@nestjs/axios';
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { AxiosError } from 'axios';
-import { catchError, firstValueFrom } from 'rxjs';
+import { catchError, firstValueFrom, of } from 'rxjs';
 import { ProviderInfo } from '../auth.types';
 import { OauthEntity } from './oauth.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -11,7 +16,7 @@ import { plainToInstance } from 'class-transformer';
 import { OauthDto } from './oauth.dto';
 import { OAUTH_PROVIDER } from '../auth.constants';
 import { EntityManager } from 'typeorm';
-import type { JWTPayload as JoseJWTPayload } from 'jose';
+import { createHash } from 'crypto';
 
 type KakaoDisconnectResponse = {
   id: number;
@@ -108,6 +113,7 @@ export class OauthService {
         this.logger.warn(
           `Kakao unlink: user not registered (providerId=${providerId}). Treating as success`,
         );
+        return true;
       }
 
       this.logger.error(data ?? error.message);
@@ -127,13 +133,13 @@ export class OauthService {
     }
 
     try {
+      const form = new URLSearchParams();
+      form.append('token', oauth.refreshToken);
       const response = await firstValueFrom(
         this.httpService
           .post<unknown>(
             'https://oauth2.googleapis.com/revoke',
-            {
-              token: oauth.refreshToken,
-            },
+            form.toString(),
             {
               headers: {
                 'Content-Type':
@@ -143,6 +149,13 @@ export class OauthService {
           )
           .pipe(
             catchError((error: AxiosError) => {
+              const status = error.response?.status;
+              if (status === 400) {
+                this.logger.warn(
+                  'Google revoke returned 400, treating as success',
+                );
+                return of({ status: 200 });
+              }
               this.logger.error(error.response?.data);
               throw error;
             }),
@@ -158,7 +171,9 @@ export class OauthService {
 
   async verifyAppleIdentityToken(
     identityToken: string,
-  ): Promise<JoseJWTPayload> {
+    nonce?: string,
+    nonceId?: string,
+  ): Promise<import('jose').JWTPayload> {
     try {
       const { jwtVerify, createRemoteJWKSet } = await import('jose');
 
@@ -177,11 +192,40 @@ export class OauthService {
         audience: audiencesEnv,
       });
 
+      if (nonce && nonceId) {
+        const tokenNonce = payload.nonce;
+        if (!tokenNonce) {
+          throw new UnauthorizedException(
+            'Apple 토큰에 nonce가 포함되지 않았습니다.',
+          );
+        }
+
+        const hex = this.hashNonce(nonce);
+        const base64 = createHash('sha256')
+          .update(nonce, 'utf8')
+          .digest('base64');
+        const base64url = base64
+          .replace(/\+/g, '-')
+          .replace(/\//g, '_')
+          .replace(/=+$/g, '');
+
+        if (tokenNonce !== hex && tokenNonce !== base64url) {
+          throw new UnauthorizedException('Nonce 검증에 실패했습니다.');
+        }
+      }
+
       return payload;
     } catch (error) {
       this.logger.error(error);
-      throw error;
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+      throw new UnauthorizedException('Apple 토큰 검증에 실패했습니다.');
     }
+  }
+
+  private hashNonce(nonce: string): string {
+    return createHash('sha256').update(nonce, 'utf8').digest('hex');
   }
 
   async exchangeAppleAuthorizationCode(

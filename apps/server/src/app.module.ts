@@ -43,6 +43,7 @@ import { LayingService } from './laying/laying.service';
 import { PairEntity } from './pair/pair.entity';
 import { PairController } from './pair/pair.controller';
 import { PairService } from './pair/pair.service';
+import { NonceService } from './auth/nonce.service';
 import { FileController } from './file/file.controller';
 import { FileService } from './file/file.service';
 import { R2Service } from './common/cloudflare/r2.service';
@@ -117,6 +118,7 @@ const ENTITIES = [
     ParentRequestService,
     LayingService,
     PairService,
+    NonceService,
     R2Service,
     FileService,
     PetImageService,

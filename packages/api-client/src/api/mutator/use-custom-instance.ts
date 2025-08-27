@@ -2,7 +2,7 @@ import Axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 import { authControllerGetToken } from "..";
 
 export const AXIOS_INSTANCE = Axios.create({
-  baseURL: "http://localhost:4000",
+  baseURL: process.env.NEXT_PUBLIC_SERVER_BASE_URL ?? "",
   withCredentials: true,
 });
 
@@ -73,6 +73,7 @@ AXIOS_INSTANCE.interceptors.response.use(
             failedQueue.push({ resolve, reject });
           })
             .then((token) => {
+              originalRequest.headers = originalRequest.headers ?? {};
               originalRequest.headers.Authorization = `Bearer ${token}`;
               return AXIOS_INSTANCE(originalRequest);
             })
@@ -97,6 +98,7 @@ AXIOS_INSTANCE.interceptors.response.use(
           processQueue(null, newAccessToken);
 
           // 원래 요청 재시도
+          originalRequest.headers = originalRequest.headers ?? {};
           originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
           return AXIOS_INSTANCE(originalRequest);
         } catch (refreshError) {

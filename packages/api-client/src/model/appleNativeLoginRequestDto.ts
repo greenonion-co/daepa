@@ -19,4 +19,6 @@ export interface AppleNativeLoginRequestDto {
   name?: string;
   /** 사용자 유형 */
   isBiz?: boolean;
+  /** nonceId */
+  nonceId?: string;
 }

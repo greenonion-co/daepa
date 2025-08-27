@@ -10,28 +10,20 @@ import {
   View,
 } from 'react-native';
 import { useMutation } from '@tanstack/react-query';
-import { userControllerVerifyEmail, UserDtoStatus } from '@repo/api-client';
+import { userControllerVerifyEmail } from '@repo/api-client';
 import { useState } from 'react';
-import { useRoute } from '@react-navigation/native';
-import Toast from '@/components/common/Toast';
-import {
-  authControllerAppleNative,
-  authControllerGetToken,
-} from '@repo/api-client';
-import Loading from '@/components/common/Loading';
-import useLogin from '@/hooks/useLogin';
+
 import VoidSpace from '@/components/common/VoidSpace';
 import SelectButtons from './SelectButtons';
 import NicknameInput from './NicknameInput';
 import { DuplicateStatus } from '@/services/constant/input';
+import { useAppleNativeLogin } from '@/hooks/useAppleNativeLogin';
 
-const RegisterScreen = () => {
-  const { navigateByStatus } = useLogin();
-  const { identityToken, authorizationCode, nonce } = useRoute().params as {
-    identityToken: string;
-    authorizationCode: string;
-    nonce: string;
-  };
+import { EmailRegisterScreenProps } from '@/types/navigation';
+
+const EmailRegisterScreen: React.FC<EmailRegisterScreenProps> = ({ route }) => {
+  const { handleAppleLoginOnIOS } = useAppleNativeLogin();
+  const { identityToken, authorizationCode, nonce, nonceId } = route.params;
 
   const [email, setEmail] = useState('');
   const [userType, setUserType] = useState('user');
@@ -45,33 +37,6 @@ const RegisterScreen = () => {
     useMutation({
       mutationFn: userControllerVerifyEmail,
     });
-
-  const { mutate: mutateGetToken } = useMutation({
-    mutationFn: async (_status: UserDtoStatus) => {
-      return authControllerGetToken();
-    },
-    onSuccess: async (data, status) => {
-      navigateByStatus({ status, token: data.data.token });
-      Loading.close();
-    },
-    onError: error => {
-      console.log('getToken error', error);
-      Loading.close();
-      Toast.show('로그인에 실패했습니다. 다시 시도해주세요.');
-    },
-  });
-
-  const { mutate: appleLogin } = useMutation({
-    mutationFn: authControllerAppleNative,
-    onSuccess: data => {
-      mutateGetToken(data.data.status);
-    },
-    onError: error => {
-      console.log('appleLogin error', error);
-      Loading.close();
-      Toast.show('로그인에 실패했습니다. 다시 시도해주세요.');
-    },
-  });
 
   const handleDuplicateCheck = async () => {
     if (!email) return;
@@ -98,14 +63,14 @@ const RegisterScreen = () => {
     )
       return;
 
-    Loading.show();
-    appleLogin({
+    await handleAppleLoginOnIOS({
       identityToken,
       email,
       authorizationCode,
       nonce,
       name: nickname,
       isBiz: userType === 'biz',
+      nonceId,
     });
   };
 
@@ -194,7 +159,7 @@ const RegisterScreen = () => {
   );
 };
 
-export default RegisterScreen;
+export default EmailRegisterScreen;
 
 const styles = StyleSheet.create({
   header: {
