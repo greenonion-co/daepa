@@ -16,9 +16,10 @@ import {
 import { ApiExtraModels } from '@nestjs/swagger';
 import { JwtUser } from 'src/auth/auth.decorator';
 import { JwtUserPayload } from 'src/auth/strategies/jwt.strategy';
+import { BrAccessOnly } from 'src/common/decorators/roles.decorator';
 
-// TODO: UseGuard를 사용하여 breeder 검증
 @Controller('/v1/br/pet')
+@BrAccessOnly()
 export class BrPetController {
   constructor(private readonly petService: PetService) {}
 

@@ -1,21 +1,15 @@
-import {
-  Controller,
-  Post,
-  Body,
-  UseGuards,
-  Param,
-  Patch,
-} from '@nestjs/common';
+import { Controller, Post, Body, Param, Patch } from '@nestjs/common';
 import { LayingService } from './laying.service';
 import { CreateLayingDto, UpdateLayingDto } from './laying.dto';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard, JwtUser } from 'src/auth/auth.decorator';
+import { JwtUser } from 'src/auth/auth.decorator';
 import { JwtUserPayload } from 'src/auth/strategies/jwt.strategy';
 import { CommonResponseDto } from 'src/common/response.dto';
+import { BrAccessOnly } from 'src/common/decorators/roles.decorator';
 
 @ApiTags('산란')
 @Controller('v1/layings')
-@UseGuards(JwtAuthGuard)
+@BrAccessOnly()
 export class LayingController {
   constructor(private readonly layingService: LayingService) {}
 

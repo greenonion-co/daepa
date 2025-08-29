@@ -9,7 +9,7 @@ import {
 import { UserService } from 'src/user/user.service';
 import { ProviderInfo } from './auth.types';
 import { JwtService } from '@nestjs/jwt';
-import { USER_STATUS } from 'src/user/user.constant';
+import { USER_ROLE, USER_STATUS } from 'src/user/user.constant';
 import * as bcrypt from 'bcrypt';
 import { JwtPayload } from './strategies/jwt.strategy';
 import { OauthService } from './oauth/oauth.service';
@@ -185,10 +185,11 @@ export class AuthService {
     });
   }
 
-  createJwtAccessToken(userId: string) {
+  createJwtAccessToken({ userId, role }: { userId: string; role: USER_ROLE }) {
     const accessToken = this.jwtService.sign({
       sub: userId,
       status: 'authenticated',
+      role,
     });
     return accessToken;
   }
@@ -240,7 +241,10 @@ export class AuthService {
         throw new UnauthorizedException('refresh token이 만료되었습니다.');
       }
 
-      const newAccessToken = this.createJwtAccessToken(user.userId);
+      const newAccessToken = this.createJwtAccessToken({
+        userId: user.userId,
+        role: user.role,
+      });
 
       const oneWeekFromNow = new Date();
       oneWeekFromNow.setDate(oneWeekFromNow.getDate() + 7);
