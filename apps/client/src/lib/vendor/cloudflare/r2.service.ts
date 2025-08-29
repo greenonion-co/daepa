@@ -9,8 +9,15 @@ class R2Service {
 
   private constructor(s3Client: S3Client) {
     this.s3Client = s3Client;
-    this.r2ImageBaseUrl = process.env.CLOUDFLARE_R2_IMAGE_BASE_URL ?? "";
-    this.r2ImageBucketName = process.env.CLOUDFLARE_R2_IMAGE_BUCKET_NAME ?? "";
+    const baseUrl = process.env.CLOUDFLARE_R2_IMAGE_BASE_URL;
+    const bucket = process.env.CLOUDFLARE_R2_IMAGE_BUCKET_NAME;
+    if (!baseUrl || !bucket) {
+      throw new Error(
+        "R2 이미지 업로드 설정이 누락되었습니다. CLOUDFLARE_R2_IMAGE_BASE_URL, CLOUDFLARE_R2_IMAGE_BUCKET_NAME를 확인하세요.",
+      );
+    }
+    this.r2ImageBaseUrl = baseUrl.replace(/\/+$/, "");
+    this.r2ImageBucketName = bucket;
   }
 
   static create() {
@@ -28,8 +35,9 @@ class R2Service {
     mimeType: string;
     size: number;
   }) {
+    const ext = (mimeType.split("/")[1] || "bin").toLowerCase();
     const file = {
-      name: `${petId}/${nanoid()}`,
+      name: `${petId}/${nanoid()}.${ext}`,
       buffer: buffer,
       mimeType: mimeType,
       size: size,
@@ -47,7 +55,8 @@ class R2Service {
       }),
     );
 
-    if (uploadResults.$metadata.httpStatusCode !== 200) {
+    const code = uploadResults.$metadata.httpStatusCode ?? 0;
+    if (code < 200 || code >= 300) {
       throw new Error("파일 업로드 중 오류가 발생했습니다.");
     }
 
