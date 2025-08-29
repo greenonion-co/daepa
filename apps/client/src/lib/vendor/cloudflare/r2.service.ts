@@ -35,10 +35,8 @@ class R2Service {
     mimeType: string;
     size: number;
   }) {
-    const imageId = nanoid(10);
-    const uploadPath = `/${petId}/${imageId}`;
     const file = {
-      path: uploadPath,
+      name: `${petId}/${nanoid(10)}`,
       buffer: buffer,
       mimeType: mimeType,
       size: size,
@@ -47,7 +45,7 @@ class R2Service {
     const uploadResults = await this.s3Client.send(
       new PutObjectCommand({
         Bucket: this.r2ImageBucketName,
-        Key: file.path,
+        Key: file.name,
         Body: file.buffer,
         ContentType: file.mimeType,
         Metadata: {
@@ -62,8 +60,8 @@ class R2Service {
     }
 
     return {
-      imageId,
-      url: this.r2ImageBaseUrl + file.path,
+      name: file.name,
+      url: `${this.r2ImageBaseUrl}/${file.name}`,
     };
   }
 }
