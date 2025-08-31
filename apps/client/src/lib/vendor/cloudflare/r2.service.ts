@@ -48,9 +48,6 @@ class R2Service {
         Key: file.name,
         Body: file.buffer,
         ContentType: file.mimeType,
-        Metadata: {
-          "image-status": "pending", // 사용자가 첨부한 이미지를 등록 완료하기 전까지는 pending 상태 할당
-        },
       }),
     );
 
