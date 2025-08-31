@@ -1,7 +1,7 @@
-import { ApiProperty, OmitType } from '@nestjs/swagger';
-import { IsDate, IsNumber, IsString } from 'class-validator';
+import { ApiExtraModels, ApiProperty, OmitType } from '@nestjs/swagger';
+import { IsDate, IsNumber, IsOptional, IsString } from 'class-validator';
 
-export class PetImageDto {
+export class PetImageBaseDto {
   @ApiProperty({
     description: '펫 이미지 아이디',
     example: 1,
@@ -46,8 +46,17 @@ export class PetImageDto {
   updatedAt: Date;
 }
 
-export class CreatePetImageDto extends OmitType(PetImageDto, [
+@ApiExtraModels()
+export class UpsertPetImageDto extends OmitType(PetImageBaseDto, [
   'id',
   'createdAt',
   'updatedAt',
-]) {}
+]) {
+  @ApiProperty({
+    description: '펫 아이디',
+    example: 'XXXXXXXX',
+  })
+  @IsString()
+  @IsOptional()
+  petId?: string;
+}

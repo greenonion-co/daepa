@@ -33,6 +33,7 @@ import { UserProfilePublicDto } from 'src/user/user.dto';
 import { CreateParentDto } from 'src/parent_request/parent_request.dto';
 import { PageOptionsDto } from 'src/common/page.dto';
 import { CommonResponseDto } from 'src/common/response.dto';
+import { UpsertPetImageDto } from 'src/pet_image/pet_image.dto';
 
 export class PetBaseDto {
   @ApiProperty({
@@ -499,12 +500,13 @@ export class CreatePetDto extends OmitType(PetBaseDto, [
 
   @ApiProperty({
     description: '펫 이미지 목록',
-    example: ['example.com/image1.jpg', 'example.com/image2.jpg'],
     required: false,
+    type: 'array',
+    items: { $ref: getSchemaPath(UpsertPetImageDto) },
   })
   @IsOptional()
   @IsArray()
-  photos?: string[];
+  photos?: UpsertPetImageDto[];
 }
 
 export class UpdatePetDto extends PartialType(CreatePetDto) {}

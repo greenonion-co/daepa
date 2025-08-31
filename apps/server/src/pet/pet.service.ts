@@ -39,6 +39,7 @@ import { ParentRequestEntity } from 'src/parent_request/parent_request.entity';
 import { UserNotificationService } from 'src/user_notification/user_notification.service';
 import { USER_NOTIFICATION_TYPE } from 'src/user_notification/user_notification.constant';
 import { UserNotificationEntity } from 'src/user_notification/user_notification.entity';
+import { PetImageService } from 'src/pet_image/pet_image.service';
 
 const NOTIFICATION_MESSAGES = {
   PARENT_REQUEST_CANCEL: '부모 요청이 취소되었습니다.',
@@ -56,6 +57,7 @@ export class PetService {
     private readonly layingRepository: Repository<LayingEntity>,
     private readonly userService: UserService,
     private readonly pairService: PairService,
+    private readonly petImageService: PetImageService,
     private readonly userNotificationService: UserNotificationService,
     private readonly dataSource: DataSource,
   ) {}
@@ -63,7 +65,7 @@ export class PetService {
   async createPet(createPetDto: CreatePetDto, ownerId: string) {
     return this.dataSource.transaction(async (entityManager: EntityManager) => {
       const petId = await this.generateUniquePetId(entityManager);
-      const { father, mother, ...petData } = createPetDto;
+      const { father, mother, photos, ...petData } = createPetDto;
 
       // 펫 데이터 준비
       const petEntityData = plainToInstance(PetEntity, {
@@ -71,6 +73,14 @@ export class PetService {
         petId,
         ownerId,
       });
+
+      if (photos) {
+        await this.petImageService.saveAndUploadConfirmedImages(
+          entityManager,
+          petId,
+          photos,
+        );
+      }
 
       try {
         // 펫 생성

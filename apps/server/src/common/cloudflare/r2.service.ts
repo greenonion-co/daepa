@@ -1,6 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import {
+  S3Client,
+  PutObjectCommand,
+  CopyObjectCommand,
+} from '@aws-sdk/client-s3';
 import { UploadedPetImageDto } from 'src/pet/pet.dto';
 
 @Injectable()
@@ -64,5 +68,26 @@ export class R2Service {
     }));
 
     return uploadSuccessFiles;
+  }
+
+  async updateFileKey(fileName: string, newFileName: string) {
+    const bucketName = this.configService.get<string>(
+      'CLOUDFLARE_R2_IMAGE_BUCKET_NAME',
+    );
+    const baseUrl =
+      this.configService.get<string>('CLOUDFLARE_R2_IMAGE_BASE_URL') ?? '';
+
+    const command = new CopyObjectCommand({
+      Bucket: bucketName,
+      Key: newFileName,
+      CopySource: `${bucketName}/${fileName}`,
+    });
+
+    await this.s3Client.send(command);
+
+    return {
+      fileName: newFileName,
+      url: `${baseUrl}/${newFileName}`,
+    };
   }
 }

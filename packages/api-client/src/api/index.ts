@@ -610,7 +610,7 @@ export const getPetControllerFindPetByPetIdResponseMock = (
         ),
         undefined,
       ]),
-      photos: faker.helpers.arrayElement([
+      photoOrder: faker.helpers.arrayElement([
         Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
           faker.string.alpha(20),
         ),
@@ -658,7 +658,7 @@ export const getPetControllerFindPetByPetIdResponseMock = (
               faker.helpers.arrayElement(["M", "F", "N"] as const),
               undefined,
             ]),
-            photos: faker.helpers.arrayElement([
+            photoOrder: faker.helpers.arrayElement([
               Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
                 () => faker.string.alpha(20),
               ),
@@ -672,6 +672,12 @@ export const getPetControllerFindPetByPetIdResponseMock = (
               "deleted",
               "cancelled",
             ] as const),
+            photos: faker.helpers.arrayElement([
+              Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => faker.string.alpha(20),
+              ),
+              undefined,
+            ]),
           },
         },
         undefined,
@@ -717,7 +723,7 @@ export const getPetControllerFindPetByPetIdResponseMock = (
               faker.helpers.arrayElement(["M", "F", "N"] as const),
               undefined,
             ]),
-            photos: faker.helpers.arrayElement([
+            photoOrder: faker.helpers.arrayElement([
               Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
                 () => faker.string.alpha(20),
               ),
@@ -731,6 +737,12 @@ export const getPetControllerFindPetByPetIdResponseMock = (
               "deleted",
               "cancelled",
             ] as const),
+            photos: faker.helpers.arrayElement([
+              Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => faker.string.alpha(20),
+              ),
+              undefined,
+            ]),
           },
         },
         undefined,
@@ -1060,7 +1072,7 @@ export const getBrPetControllerFindAllResponseMock = (
       ),
       undefined,
     ]),
-    photos: faker.helpers.arrayElement([
+    photoOrder: faker.helpers.arrayElement([
       Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
         faker.string.alpha(20),
       ),
@@ -1108,7 +1120,7 @@ export const getBrPetControllerFindAllResponseMock = (
             faker.helpers.arrayElement(["M", "F", "N"] as const),
             undefined,
           ]),
-          photos: faker.helpers.arrayElement([
+          photoOrder: faker.helpers.arrayElement([
             Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
               faker.string.alpha(20),
             ),
@@ -1122,6 +1134,12 @@ export const getBrPetControllerFindAllResponseMock = (
             "deleted",
             "cancelled",
           ] as const),
+          photos: faker.helpers.arrayElement([
+            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
+            undefined,
+          ]),
         },
       },
       undefined,
@@ -1167,7 +1185,7 @@ export const getBrPetControllerFindAllResponseMock = (
             faker.helpers.arrayElement(["M", "F", "N"] as const),
             undefined,
           ]),
-          photos: faker.helpers.arrayElement([
+          photoOrder: faker.helpers.arrayElement([
             Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
               faker.string.alpha(20),
             ),
@@ -1181,6 +1199,12 @@ export const getBrPetControllerFindAllResponseMock = (
             "deleted",
             "cancelled",
           ] as const),
+          photos: faker.helpers.arrayElement([
+            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
+            undefined,
+          ]),
         },
       },
       undefined,
@@ -1287,7 +1311,7 @@ export const getBrPetControllerGetPetsByYearResponseMock = (): BrPetControllerGe
       ),
       undefined,
     ]),
-    photos: faker.helpers.arrayElement([
+    photoOrder: faker.helpers.arrayElement([
       Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
         faker.string.alpha(20),
       ),
@@ -1335,7 +1359,7 @@ export const getBrPetControllerGetPetsByYearResponseMock = (): BrPetControllerGe
             faker.helpers.arrayElement(["M", "F", "N"] as const),
             undefined,
           ]),
-          photos: faker.helpers.arrayElement([
+          photoOrder: faker.helpers.arrayElement([
             Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
               faker.string.alpha(20),
             ),
@@ -1349,6 +1373,12 @@ export const getBrPetControllerGetPetsByYearResponseMock = (): BrPetControllerGe
             "deleted",
             "cancelled",
           ] as const),
+          photos: faker.helpers.arrayElement([
+            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
+            undefined,
+          ]),
         },
       },
       undefined,
@@ -1394,7 +1424,7 @@ export const getBrPetControllerGetPetsByYearResponseMock = (): BrPetControllerGe
             faker.helpers.arrayElement(["M", "F", "N"] as const),
             undefined,
           ]),
-          photos: faker.helpers.arrayElement([
+          photoOrder: faker.helpers.arrayElement([
             Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
               faker.string.alpha(20),
             ),
@@ -1408,6 +1438,12 @@ export const getBrPetControllerGetPetsByYearResponseMock = (): BrPetControllerGe
             "deleted",
             "cancelled",
           ] as const),
+          photos: faker.helpers.arrayElement([
+            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
+            undefined,
+          ]),
         },
       },
       undefined,
@@ -1510,7 +1546,7 @@ export const getBrPetControllerGetPetsByMonthResponseMock = (
         ),
         undefined,
       ]),
-      photos: faker.helpers.arrayElement([
+      photoOrder: faker.helpers.arrayElement([
         Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
           faker.string.alpha(20),
         ),
@@ -1558,7 +1594,7 @@ export const getBrPetControllerGetPetsByMonthResponseMock = (
               faker.helpers.arrayElement(["M", "F", "N"] as const),
               undefined,
             ]),
-            photos: faker.helpers.arrayElement([
+            photoOrder: faker.helpers.arrayElement([
               Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
                 () => faker.string.alpha(20),
               ),
@@ -1572,6 +1608,12 @@ export const getBrPetControllerGetPetsByMonthResponseMock = (
               "deleted",
               "cancelled",
             ] as const),
+            photos: faker.helpers.arrayElement([
+              Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => faker.string.alpha(20),
+              ),
+              undefined,
+            ]),
           },
         },
         undefined,
@@ -1617,7 +1659,7 @@ export const getBrPetControllerGetPetsByMonthResponseMock = (
               faker.helpers.arrayElement(["M", "F", "N"] as const),
               undefined,
             ]),
-            photos: faker.helpers.arrayElement([
+            photoOrder: faker.helpers.arrayElement([
               Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
                 () => faker.string.alpha(20),
               ),
@@ -1631,6 +1673,12 @@ export const getBrPetControllerGetPetsByMonthResponseMock = (
               "deleted",
               "cancelled",
             ] as const),
+            photos: faker.helpers.arrayElement([
+              Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => faker.string.alpha(20),
+              ),
+              undefined,
+            ]),
           },
         },
         undefined,
@@ -1740,7 +1788,7 @@ export const getBrPetControllerGetPetsByDateRangeResponseMock = (
         ),
         undefined,
       ]),
-      photos: faker.helpers.arrayElement([
+      photoOrder: faker.helpers.arrayElement([
         Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
           faker.string.alpha(20),
         ),
@@ -1788,7 +1836,7 @@ export const getBrPetControllerGetPetsByDateRangeResponseMock = (
               faker.helpers.arrayElement(["M", "F", "N"] as const),
               undefined,
             ]),
-            photos: faker.helpers.arrayElement([
+            photoOrder: faker.helpers.arrayElement([
               Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
                 () => faker.string.alpha(20),
               ),
@@ -1802,6 +1850,12 @@ export const getBrPetControllerGetPetsByDateRangeResponseMock = (
               "deleted",
               "cancelled",
             ] as const),
+            photos: faker.helpers.arrayElement([
+              Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => faker.string.alpha(20),
+              ),
+              undefined,
+            ]),
           },
         },
         undefined,
@@ -1847,7 +1901,7 @@ export const getBrPetControllerGetPetsByDateRangeResponseMock = (
               faker.helpers.arrayElement(["M", "F", "N"] as const),
               undefined,
             ]),
-            photos: faker.helpers.arrayElement([
+            photoOrder: faker.helpers.arrayElement([
               Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
                 () => faker.string.alpha(20),
               ),
@@ -1861,6 +1915,12 @@ export const getBrPetControllerGetPetsByDateRangeResponseMock = (
               "deleted",
               "cancelled",
             ] as const),
+            photos: faker.helpers.arrayElement([
+              Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => faker.string.alpha(20),
+              ),
+              undefined,
+            ]),
           },
         },
         undefined,
@@ -2105,7 +2165,7 @@ export const getAdoptionControllerGetAllAdoptionsResponseMock = (
           faker.helpers.arrayElement(["M", "F", "N"] as const),
           undefined,
         ]),
-        photos: faker.helpers.arrayElement([
+        photoOrder: faker.helpers.arrayElement([
           Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
             faker.string.alpha(20),
           ),
@@ -2206,7 +2266,7 @@ export const getAdoptionControllerGetAdoptionByAdoptionIdResponseMock = (
             faker.helpers.arrayElement(["M", "F", "N"] as const),
             undefined,
           ]),
-          photos: faker.helpers.arrayElement([
+          photoOrder: faker.helpers.arrayElement([
             Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
               faker.string.alpha(20),
             ),
@@ -2274,7 +2334,7 @@ export const getMatingControllerFindAllResponseMock = (
             faker.helpers.arrayElement(["M", "F", "N"] as const),
             undefined,
           ]),
-          photos: faker.helpers.arrayElement([
+          photoOrder: faker.helpers.arrayElement([
             Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
               faker.string.alpha(20),
             ),
@@ -2325,7 +2385,7 @@ export const getMatingControllerFindAllResponseMock = (
             faker.helpers.arrayElement(["M", "F", "N"] as const),
             undefined,
           ]),
-          photos: faker.helpers.arrayElement([
+          photoOrder: faker.helpers.arrayElement([
             Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
               faker.string.alpha(20),
             ),
@@ -2387,7 +2447,7 @@ export const getMatingControllerFindAllResponseMock = (
               faker.helpers.arrayElement(["M", "F", "N"] as const),
               undefined,
             ]),
-            photos: faker.helpers.arrayElement([
+            photoOrder: faker.helpers.arrayElement([
               Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
                 () => faker.string.alpha(20),
               ),
@@ -2487,7 +2547,7 @@ export const getBrMatingControllerFindAllResponseMock = (
             faker.helpers.arrayElement(["M", "F", "N"] as const),
             undefined,
           ]),
-          photos: faker.helpers.arrayElement([
+          photoOrder: faker.helpers.arrayElement([
             Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
               faker.string.alpha(20),
             ),
@@ -2538,7 +2598,7 @@ export const getBrMatingControllerFindAllResponseMock = (
             faker.helpers.arrayElement(["M", "F", "N"] as const),
             undefined,
           ]),
-          photos: faker.helpers.arrayElement([
+          photoOrder: faker.helpers.arrayElement([
             Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
               faker.string.alpha(20),
             ),
@@ -2600,7 +2660,7 @@ export const getBrMatingControllerFindAllResponseMock = (
               faker.helpers.arrayElement(["M", "F", "N"] as const),
               undefined,
             ]),
-            photos: faker.helpers.arrayElement([
+            photoOrder: faker.helpers.arrayElement([
               Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
                 () => faker.string.alpha(20),
               ),

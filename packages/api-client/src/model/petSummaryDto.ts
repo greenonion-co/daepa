@@ -27,5 +27,5 @@ export interface PetSummaryDto {
   /** 펫 성별(수컷, 암컷, 미구분) */
   sex?: PetSummaryDtoSex;
   /** 펫 이미지 목록 */
-  photos?: string[];
+  photoOrder?: string[];
 }

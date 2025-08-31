@@ -9,6 +9,7 @@ import type { CreatePetDtoSpecies } from "./createPetDtoSpecies";
 import type { CreatePetDtoGrowth } from "./createPetDtoGrowth";
 import type { CreatePetDtoSex } from "./createPetDtoSex";
 import type { CreateParentDto } from "./createParentDto";
+import type { UpsertPetImageDto } from "./upsertPetImageDto";
 
 export interface CreatePetDto {
   /** 펫 이름 */
@@ -32,7 +33,7 @@ export interface CreatePetDto {
   /** 펫 먹이 */
   foods?: string[];
   /** 펫 이미지 목록 */
-  photos?: string[];
+  photoOrder?: string[];
   /** 펫 소개말 */
   desc?: string;
   /** 아빠 개체 정보 */
@@ -51,4 +52,6 @@ export interface CreatePetDto {
   layingId?: number;
   /** 클러치 순서 */
   clutchOrder?: number;
+  /** 펫 이미지 목록 */
+  photos?: UpsertPetImageDto[];
 }
