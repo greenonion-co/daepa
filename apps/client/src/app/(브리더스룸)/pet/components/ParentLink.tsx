@@ -11,7 +11,7 @@ import {
   PetParentDto,
   PetParentDtoStatus,
 } from "@repo/api-client";
-import { cn } from "@/lib/utils";
+import { buildR2TransformedUrl, cn } from "@/lib/utils";
 import ParentStatusBadge from "../../components/ParentStatusBadge";
 import { Badge } from "@/components/ui/badge";
 import { usePathname } from "next/navigation";
@@ -128,7 +128,7 @@ const ParentLink = ({
             }}
             className="flex flex-col items-center gap-2"
           >
-            <PetThumbnail imageUrl={data.photos?.[0]} />
+            <PetThumbnail imageUrl={buildR2TransformedUrl(data.photos?.[0]?.url)} />
 
             <span
               className={cn(

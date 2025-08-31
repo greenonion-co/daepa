@@ -8,7 +8,7 @@ import { GENDER_KOREAN_INFO, SPECIES_KOREAN_INFO } from "@/app/(브리더스룸)
 import { Expand, Shrink } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { buildTransformedUrl, cn, getNumberToDate } from "@/lib/utils";
+import { buildR2TransformedUrl, cn, getNumberToDate } from "@/lib/utils";
 import { format } from "date-fns";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, EffectFade } from "swiper/modules";
@@ -72,10 +72,10 @@ const CardFront = ({ pet, qrCodeDataUrl }: { pet: PetDto; qrCodeDataUrl?: string
           className="h-full w-full"
         >
           {allImages.map((image, index) => (
-            <SwiperSlide key={index} className="relative">
+            <SwiperSlide key={image.fileName} className="relative">
               <div className="relative h-full w-full">
                 <Image
-                  src={buildTransformedUrl(image)}
+                  src={buildR2TransformedUrl(image.url)}
                   alt={`${pet.name} 사진 ${index + 1}`}
                   fill
                   className="object-cover"

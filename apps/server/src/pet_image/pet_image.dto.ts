@@ -1,4 +1,9 @@
-import { ApiExtraModels, ApiProperty, OmitType } from '@nestjs/swagger';
+import {
+  ApiExtraModels,
+  ApiProperty,
+  OmitType,
+  PickType,
+} from '@nestjs/swagger';
 import { IsDate, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class PetImageBaseDto {
@@ -60,3 +65,8 @@ export class UpsertPetImageDto extends OmitType(PetImageBaseDto, [
   @IsOptional()
   petId?: string;
 }
+
+export class PetImageDto extends PickType(PetImageBaseDto, [
+  'fileName',
+  'url',
+]) {}

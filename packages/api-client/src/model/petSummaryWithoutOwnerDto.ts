@@ -7,6 +7,7 @@
  */
 import type { PetSummaryWithoutOwnerDtoSpecies } from "./petSummaryWithoutOwnerDtoSpecies";
 import type { PetSummaryWithoutOwnerDtoSex } from "./petSummaryWithoutOwnerDtoSex";
+import type { PetImageDto } from "./petImageDto";
 
 export interface PetSummaryWithoutOwnerDto {
   /** 펫 아이디 */
@@ -25,4 +26,6 @@ export interface PetSummaryWithoutOwnerDto {
   sex?: PetSummaryWithoutOwnerDtoSex;
   /** 펫 이미지 목록 */
   photoOrder?: string[];
+  /** 펫 이미지 목록 */
+  photos?: PetImageDto[];
 }

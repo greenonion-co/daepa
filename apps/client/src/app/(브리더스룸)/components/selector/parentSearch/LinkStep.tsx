@@ -5,6 +5,7 @@ import { PetDtoSex } from "@repo/api-client";
 import { Send } from "lucide-react";
 import { useState } from "react";
 import PetThumbnail from "../../PetThumbnail";
+import { buildR2TransformedUrl } from "@/lib/utils";
 
 interface LinkStepProps {
   selectedPet: PetParentDtoWithMessage;
@@ -29,7 +30,10 @@ const LinkStep = ({ selectedPet, onSelect, onClose }: LinkStepProps) => {
           {/* 상단 정보 영역 */}
           <div className="flex gap-6">
             <div className="relative aspect-square w-72 overflow-hidden rounded-xl">
-              <PetThumbnail imageUrl={selectedPet.photos?.[0]} alt={selectedPet.name} />
+              <PetThumbnail
+                imageUrl={buildR2TransformedUrl(selectedPet.photos?.[0]?.url)}
+                alt={selectedPet.name}
+              />
             </div>
 
             <div className="flex-1">

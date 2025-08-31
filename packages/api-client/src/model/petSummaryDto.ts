@@ -8,6 +8,7 @@
 import type { UserProfilePublicDto } from "./userProfilePublicDto";
 import type { PetSummaryDtoSpecies } from "./petSummaryDtoSpecies";
 import type { PetSummaryDtoSex } from "./petSummaryDtoSex";
+import type { PetImageDto } from "./petImageDto";
 
 export interface PetSummaryDto {
   /** 펫 아이디 */
@@ -28,4 +29,6 @@ export interface PetSummaryDto {
   sex?: PetSummaryDtoSex;
   /** 펫 이미지 목록 */
   photoOrder?: string[];
+  /** 펫 이미지 목록 */
+  photos?: PetImageDto[];
 }

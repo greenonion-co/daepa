@@ -33,7 +33,7 @@ import { UserProfilePublicDto } from 'src/user/user.dto';
 import { CreateParentDto } from 'src/parent_request/parent_request.dto';
 import { PageOptionsDto } from 'src/common/page.dto';
 import { CommonResponseDto } from 'src/common/response.dto';
-import { UpsertPetImageDto } from 'src/pet_image/pet_image.dto';
+import { UpsertPetImageDto, PetImageDto } from 'src/pet_image/pet_image.dto';
 
 export class PetBaseDto {
   @ApiProperty({
@@ -185,6 +185,16 @@ export class PetSummaryDto extends PickType(PetBaseDto, [
   'photoOrder',
   'hatchingDate',
 ]) {
+  @ApiProperty({
+    description: '펫 이미지 목록',
+    required: false,
+    type: 'array',
+    items: { $ref: getSchemaPath(PetImageDto) },
+  })
+  @IsOptional()
+  @IsArray()
+  photos?: PetImageDto[];
+
   @Exclude()
   declare growth?: PET_GROWTH;
 
@@ -304,15 +314,13 @@ export class PetParentDto extends PartialType(PetSummaryDto) {
 
   @ApiProperty({
     description: '펫 이미지 목록',
-    example: [
-      'https://example.com/image1.jpg',
-      'https://example.com/image2.jpg',
-    ],
     required: false,
+    type: 'array',
+    items: { $ref: getSchemaPath(PetImageDto) },
   })
   @IsOptional()
   @IsArray()
-  photos?: string[];
+  photos?: PetImageDto[];
 }
 
 export class PetAdoptionDto {
@@ -422,6 +430,16 @@ export class PetDto extends PetBaseDto {
   @IsOptional()
   @IsEnum(PARENT_STATUS)
   status?: PARENT_STATUS;
+
+  @ApiProperty({
+    description: '펫 이미지 목록',
+    required: false,
+    type: 'array',
+    items: { $ref: getSchemaPath(PetImageDto) },
+  })
+  @IsOptional()
+  @IsArray()
+  photos?: PetImageDto[];
 
   @Exclude()
   declare createdAt?: Date;
@@ -771,59 +789,3 @@ export class UnlinkParentDto {
   @IsNotEmpty()
   role: PARENT_ROLE;
 }
-
-export class PetImageDto {
-  @ApiProperty({
-    description: '펫 이미지 아이디',
-    example: 1,
-    required: true,
-  })
-  @IsNumber()
-  id: number;
-  @ApiProperty({
-    description: '펫 아이디',
-    example: 'XXXXXXXX',
-    required: true,
-  })
-  @IsString()
-  petId: string;
-
-  @ApiProperty({
-    description: '펫 이미지 파일',
-    example: 'XXXXXXXX',
-    required: true,
-  })
-  @IsString()
-  fileName: string;
-
-  @ApiProperty({
-    description: '펫 이미지 원본 url',
-    example: 'https://daepa.com/images/pet/1234567890.jpg',
-    required: true,
-  })
-  @IsString()
-  url: string;
-
-  @ApiProperty({
-    description: '펫 이미지 크기',
-    example: 1000,
-    required: true,
-  })
-  @IsNumber()
-  size: number;
-
-  @ApiProperty({
-    description: '펫 이미지 mime type',
-    example: 'image/jpeg',
-    required: true,
-  })
-  @IsString()
-  mimeType: string;
-}
-
-export class UploadedPetImageDto extends PickType(PetImageDto, [
-  'fileName',
-  'url',
-  'size',
-  'mimeType',
-]) {}

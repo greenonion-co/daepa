@@ -12,6 +12,7 @@ import type { PetDtoSex } from "./petDtoSex";
 import type { PetParentDto } from "./petParentDto";
 import type { PetAdoptionDto } from "./petAdoptionDto";
 import type { PetDtoStatus } from "./petDtoStatus";
+import type { PetImageDto } from "./petImageDto";
 
 export interface PetDto {
   /** 펫 아이디 */
@@ -50,4 +51,6 @@ export interface PetDto {
   adoption?: PetAdoptionDto;
   /** 부모 관계 상태 */
   status: PetDtoStatus;
+  /** 펫 이미지 목록 */
+  photos?: PetImageDto[];
 }

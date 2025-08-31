@@ -67,27 +67,22 @@ export const getNumberToDate = (dateNumber: number) => {
   return new Date(year, month - 1, day);
 };
 
-export const buildTransformedUrl = (
+const CLOUDFLARE_R2_URL_BASE = process.env.CLOUDFLARE_R2_IMAGE_BASE_URL;
+export const buildR2TransformedUrl = (
   raw: string | undefined,
   transform: string = "width=460,height=700,format=webp",
 ) => {
   if (!raw) return "";
-  const cdnBase = process.env.NEXT_PUBLIC_CDN_URL;
 
-  // 절대 URL이면 hostname 확인 후 path만 추출
   try {
     const url = new URL(raw);
-    const hostname = url.hostname;
-    const path = url.pathname.replace(/^\/+/, "");
-    if (cdnBase && hostname.endsWith("daepa.store")) {
-      return `${cdnBase}/${transform}/${path}`;
-    }
+    const { origin, pathname } = url;
     // 다른 호스트면 변환 없이 원본 사용 (next.config.ts에 허용된 경우만 렌더)
-    return raw;
+    if (origin !== CLOUDFLARE_R2_URL_BASE) return raw;
+
+    return `${CLOUDFLARE_R2_URL_BASE}/cdn-cgi/image/${transform}${pathname}`;
   } catch {
-    // 상대경로("/petId/profile_1" 등)인 경우
-    const path = raw.replace(/^\/+/, "");
-    return cdnBase ? `${cdnBase}/${transform}/${path}` : raw;
+    return raw;
   }
 };
 

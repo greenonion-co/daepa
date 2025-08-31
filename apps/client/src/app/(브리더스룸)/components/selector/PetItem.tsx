@@ -1,6 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { PetParentDtoWithMessage } from "@/app/(브리더스룸)/pet/store/parentLink";
 import PetThumbnail from "../PetThumbnail";
+import { buildR2TransformedUrl } from "@/lib/utils";
 
 const PetItem = ({
   item,
@@ -18,7 +19,7 @@ const PetItem = ({
     >
       <div className="flex w-full flex-col items-center gap-1">
         <div className="relative aspect-square w-full overflow-hidden rounded-lg">
-          <PetThumbnail imageUrl={item.photos?.[0]} alt={item.name} />
+          <PetThumbnail imageUrl={buildR2TransformedUrl(item.photos?.[0]?.url)} alt={item.name} />
         </div>
         <div className="flex w-full flex-col items-center gap-1">
           <div className="relative">
@@ -28,7 +29,7 @@ const PetItem = ({
           </div>
           <div className="flex flex-wrap justify-center gap-1">
             {item.morphs?.map((morph) => (
-              <Badge key={morph} className="bg-blue-800 text-black text-white">
+              <Badge key={morph} className="bg-blue-800 text-white">
                 {morph}
               </Badge>
             ))}

@@ -664,6 +664,12 @@ export const getPetControllerFindPetByPetIdResponseMock = (
               ),
               undefined,
             ]),
+            photos: faker.helpers.arrayElement([
+              Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => ({}),
+              ),
+              undefined,
+            ]),
             relationId: faker.number.int({ min: undefined, max: undefined }),
             status: faker.helpers.arrayElement([
               "pending",
@@ -672,12 +678,6 @@ export const getPetControllerFindPetByPetIdResponseMock = (
               "deleted",
               "cancelled",
             ] as const),
-            photos: faker.helpers.arrayElement([
-              Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-                () => faker.string.alpha(20),
-              ),
-              undefined,
-            ]),
           },
         },
         undefined,
@@ -729,6 +729,12 @@ export const getPetControllerFindPetByPetIdResponseMock = (
               ),
               undefined,
             ]),
+            photos: faker.helpers.arrayElement([
+              Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => ({}),
+              ),
+              undefined,
+            ]),
             relationId: faker.number.int({ min: undefined, max: undefined }),
             status: faker.helpers.arrayElement([
               "pending",
@@ -737,12 +743,6 @@ export const getPetControllerFindPetByPetIdResponseMock = (
               "deleted",
               "cancelled",
             ] as const),
-            photos: faker.helpers.arrayElement([
-              Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-                () => faker.string.alpha(20),
-              ),
-              undefined,
-            ]),
           },
         },
         undefined,
@@ -777,6 +777,12 @@ export const getPetControllerFindPetByPetIdResponseMock = (
         "deleted",
         "cancelled",
       ] as const),
+      photos: faker.helpers.arrayElement([
+        Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+          () => ({}),
+        ),
+        undefined,
+      ]),
     },
   },
   ...overrideResponse,
@@ -1126,6 +1132,12 @@ export const getBrPetControllerFindAllResponseMock = (
             ),
             undefined,
           ]),
+          photos: faker.helpers.arrayElement([
+            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+              () => ({}),
+            ),
+            undefined,
+          ]),
           relationId: faker.number.int({ min: undefined, max: undefined }),
           status: faker.helpers.arrayElement([
             "pending",
@@ -1134,12 +1146,6 @@ export const getBrPetControllerFindAllResponseMock = (
             "deleted",
             "cancelled",
           ] as const),
-          photos: faker.helpers.arrayElement([
-            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-            undefined,
-          ]),
         },
       },
       undefined,
@@ -1191,6 +1197,12 @@ export const getBrPetControllerFindAllResponseMock = (
             ),
             undefined,
           ]),
+          photos: faker.helpers.arrayElement([
+            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+              () => ({}),
+            ),
+            undefined,
+          ]),
           relationId: faker.number.int({ min: undefined, max: undefined }),
           status: faker.helpers.arrayElement([
             "pending",
@@ -1199,12 +1211,6 @@ export const getBrPetControllerFindAllResponseMock = (
             "deleted",
             "cancelled",
           ] as const),
-          photos: faker.helpers.arrayElement([
-            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-            undefined,
-          ]),
         },
       },
       undefined,
@@ -1234,6 +1240,12 @@ export const getBrPetControllerFindAllResponseMock = (
       "deleted",
       "cancelled",
     ] as const),
+    photos: faker.helpers.arrayElement([
+      Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+        () => ({}),
+      ),
+      undefined,
+    ]),
   })),
   meta: {
     page: faker.number.int({ min: undefined, max: undefined }),
@@ -1365,6 +1377,12 @@ export const getBrPetControllerGetPetsByYearResponseMock = (): BrPetControllerGe
             ),
             undefined,
           ]),
+          photos: faker.helpers.arrayElement([
+            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+              () => ({}),
+            ),
+            undefined,
+          ]),
           relationId: faker.number.int({ min: undefined, max: undefined }),
           status: faker.helpers.arrayElement([
             "pending",
@@ -1373,12 +1391,6 @@ export const getBrPetControllerGetPetsByYearResponseMock = (): BrPetControllerGe
             "deleted",
             "cancelled",
           ] as const),
-          photos: faker.helpers.arrayElement([
-            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-            undefined,
-          ]),
         },
       },
       undefined,
@@ -1430,6 +1442,12 @@ export const getBrPetControllerGetPetsByYearResponseMock = (): BrPetControllerGe
             ),
             undefined,
           ]),
+          photos: faker.helpers.arrayElement([
+            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+              () => ({}),
+            ),
+            undefined,
+          ]),
           relationId: faker.number.int({ min: undefined, max: undefined }),
           status: faker.helpers.arrayElement([
             "pending",
@@ -1438,12 +1456,6 @@ export const getBrPetControllerGetPetsByYearResponseMock = (): BrPetControllerGe
             "deleted",
             "cancelled",
           ] as const),
-          photos: faker.helpers.arrayElement([
-            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-            undefined,
-          ]),
         },
       },
       undefined,
@@ -1473,6 +1485,12 @@ export const getBrPetControllerGetPetsByYearResponseMock = (): BrPetControllerGe
       "deleted",
       "cancelled",
     ] as const),
+    photos: faker.helpers.arrayElement([
+      Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+        () => ({}),
+      ),
+      undefined,
+    ]),
   })),
 });
 
@@ -1600,6 +1618,12 @@ export const getBrPetControllerGetPetsByMonthResponseMock = (
               ),
               undefined,
             ]),
+            photos: faker.helpers.arrayElement([
+              Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => ({}),
+              ),
+              undefined,
+            ]),
             relationId: faker.number.int({ min: undefined, max: undefined }),
             status: faker.helpers.arrayElement([
               "pending",
@@ -1608,12 +1632,6 @@ export const getBrPetControllerGetPetsByMonthResponseMock = (
               "deleted",
               "cancelled",
             ] as const),
-            photos: faker.helpers.arrayElement([
-              Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-                () => faker.string.alpha(20),
-              ),
-              undefined,
-            ]),
           },
         },
         undefined,
@@ -1665,6 +1683,12 @@ export const getBrPetControllerGetPetsByMonthResponseMock = (
               ),
               undefined,
             ]),
+            photos: faker.helpers.arrayElement([
+              Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => ({}),
+              ),
+              undefined,
+            ]),
             relationId: faker.number.int({ min: undefined, max: undefined }),
             status: faker.helpers.arrayElement([
               "pending",
@@ -1673,12 +1697,6 @@ export const getBrPetControllerGetPetsByMonthResponseMock = (
               "deleted",
               "cancelled",
             ] as const),
-            photos: faker.helpers.arrayElement([
-              Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-                () => faker.string.alpha(20),
-              ),
-              undefined,
-            ]),
           },
         },
         undefined,
@@ -1713,6 +1731,12 @@ export const getBrPetControllerGetPetsByMonthResponseMock = (
         "deleted",
         "cancelled",
       ] as const),
+      photos: faker.helpers.arrayElement([
+        Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+          () => ({}),
+        ),
+        undefined,
+      ]),
     })),
   },
   ...overrideResponse,
@@ -1842,6 +1866,12 @@ export const getBrPetControllerGetPetsByDateRangeResponseMock = (
               ),
               undefined,
             ]),
+            photos: faker.helpers.arrayElement([
+              Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => ({}),
+              ),
+              undefined,
+            ]),
             relationId: faker.number.int({ min: undefined, max: undefined }),
             status: faker.helpers.arrayElement([
               "pending",
@@ -1850,12 +1880,6 @@ export const getBrPetControllerGetPetsByDateRangeResponseMock = (
               "deleted",
               "cancelled",
             ] as const),
-            photos: faker.helpers.arrayElement([
-              Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-                () => faker.string.alpha(20),
-              ),
-              undefined,
-            ]),
           },
         },
         undefined,
@@ -1907,6 +1931,12 @@ export const getBrPetControllerGetPetsByDateRangeResponseMock = (
               ),
               undefined,
             ]),
+            photos: faker.helpers.arrayElement([
+              Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => ({}),
+              ),
+              undefined,
+            ]),
             relationId: faker.number.int({ min: undefined, max: undefined }),
             status: faker.helpers.arrayElement([
               "pending",
@@ -1915,12 +1945,6 @@ export const getBrPetControllerGetPetsByDateRangeResponseMock = (
               "deleted",
               "cancelled",
             ] as const),
-            photos: faker.helpers.arrayElement([
-              Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-                () => faker.string.alpha(20),
-              ),
-              undefined,
-            ]),
           },
         },
         undefined,
@@ -1955,6 +1979,12 @@ export const getBrPetControllerGetPetsByDateRangeResponseMock = (
         "deleted",
         "cancelled",
       ] as const),
+      photos: faker.helpers.arrayElement([
+        Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+          () => ({}),
+        ),
+        undefined,
+      ]),
     })),
   },
   ...overrideResponse,
@@ -2171,6 +2201,12 @@ export const getAdoptionControllerGetAllAdoptionsResponseMock = (
           ),
           undefined,
         ]),
+        photos: faker.helpers.arrayElement([
+          Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+            () => ({}),
+          ),
+          undefined,
+        ]),
       },
     },
   })),
@@ -2272,6 +2308,12 @@ export const getAdoptionControllerGetAdoptionByAdoptionIdResponseMock = (
             ),
             undefined,
           ]),
+          photos: faker.helpers.arrayElement([
+            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+              () => ({}),
+            ),
+            undefined,
+          ]),
         },
       },
     },
@@ -2340,6 +2382,12 @@ export const getMatingControllerFindAllResponseMock = (
             ),
             undefined,
           ]),
+          photos: faker.helpers.arrayElement([
+            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+              () => ({}),
+            ),
+            undefined,
+          ]),
         },
       },
       undefined,
@@ -2388,6 +2436,12 @@ export const getMatingControllerFindAllResponseMock = (
           photoOrder: faker.helpers.arrayElement([
             Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
               faker.string.alpha(20),
+            ),
+            undefined,
+          ]),
+          photos: faker.helpers.arrayElement([
+            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+              () => ({}),
             ),
             undefined,
           ]),
@@ -2450,6 +2504,12 @@ export const getMatingControllerFindAllResponseMock = (
             photoOrder: faker.helpers.arrayElement([
               Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
                 () => faker.string.alpha(20),
+              ),
+              undefined,
+            ]),
+            photos: faker.helpers.arrayElement([
+              Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => ({}),
               ),
               undefined,
             ]),
@@ -2553,6 +2613,12 @@ export const getBrMatingControllerFindAllResponseMock = (
             ),
             undefined,
           ]),
+          photos: faker.helpers.arrayElement([
+            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+              () => ({}),
+            ),
+            undefined,
+          ]),
         },
       },
       undefined,
@@ -2601,6 +2667,12 @@ export const getBrMatingControllerFindAllResponseMock = (
           photoOrder: faker.helpers.arrayElement([
             Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
               faker.string.alpha(20),
+            ),
+            undefined,
+          ]),
+          photos: faker.helpers.arrayElement([
+            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+              () => ({}),
             ),
             undefined,
           ]),
@@ -2663,6 +2735,12 @@ export const getBrMatingControllerFindAllResponseMock = (
             photoOrder: faker.helpers.arrayElement([
               Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
                 () => faker.string.alpha(20),
+              ),
+              undefined,
+            ]),
+            photos: faker.helpers.arrayElement([
+              Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => ({}),
               ),
               undefined,
             ]),

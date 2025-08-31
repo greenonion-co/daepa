@@ -40,6 +40,7 @@ import { UserNotificationService } from 'src/user_notification/user_notification
 import { USER_NOTIFICATION_TYPE } from 'src/user_notification/user_notification.constant';
 import { UserNotificationEntity } from 'src/user_notification/user_notification.entity';
 import { PetImageService } from 'src/pet_image/pet_image.service';
+import { PetImageEntity } from 'src/pet_image/pet_image.entity';
 
 const NOTIFICATION_MESSAGES = {
   PARENT_REQUEST_CANCEL: '부모 요청이 취소되었습니다.',
@@ -160,6 +161,10 @@ export class PetService {
         throw new NotFoundException('펫의 소유자를 찾을 수 없습니다.');
       }
 
+      const photos = await entityManager.find(PetImageEntity, {
+        where: { petId },
+      });
+
       // 소유자 정보 조회
       const owner = await this.userService.findOneProfile(pet.ownerId);
 
@@ -172,6 +177,7 @@ export class PetService {
         father,
         mother,
         adoption,
+        photos,
       });
     });
   }
@@ -318,6 +324,12 @@ export class PetService {
         'adoptions',
         'adoptions',
         'adoptions.petId = pets.petId AND adoptions.isDeleted = false AND adoptions.status != :soldStatus',
+      )
+      .leftJoinAndMapMany(
+        'pets.photos',
+        'pet_images',
+        'pet_images',
+        'pet_images.petId = pets.petId',
       )
       .where(' pets.isDeleted = :isDeleted AND pets.growth != :eggGrowth', {
         isDeleted: false,

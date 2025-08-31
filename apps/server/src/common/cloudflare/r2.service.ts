@@ -5,7 +5,7 @@ import {
   PutObjectCommand,
   CopyObjectCommand,
 } from '@aws-sdk/client-s3';
-import { UploadedPetImageDto } from 'src/pet/pet.dto';
+import { UpsertPetImageDto } from 'src/pet_image/pet_image.dto';
 
 @Injectable()
 export class R2Service {
@@ -38,7 +38,7 @@ export class R2Service {
 
   async upload(
     files: { buffer: Buffer; fileName: string; mimeType: string }[],
-  ): Promise<UploadedPetImageDto[]> {
+  ): Promise<UpsertPetImageDto[]> {
     const bucketName = this.configService.get<string>(
       'CLOUDFLARE_R2_IMAGE_BUCKET_NAME',
     );
