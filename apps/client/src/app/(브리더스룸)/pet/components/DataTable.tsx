@@ -24,6 +24,7 @@ import { useRouter } from "next/navigation";
 import { PetDto } from "@repo/api-client";
 import Loading from "@/components/common/Loading";
 import { cn } from "@/lib/utils";
+import { useFilterStore } from "../../store/filter";
 
 interface DataTableProps<TData> {
   columns: ColumnDef<TData>[];
@@ -44,16 +45,9 @@ export const DataTable = ({
   hasFilter = true,
   isClickable = true,
 }: DataTableProps<PetDto>) => {
-  const {
-    sorting,
-    columnFilters,
-    columnVisibility,
-    rowSelection,
-    setSorting,
-    setColumnFilters,
-    setColumnVisibility,
-    setRowSelection,
-  } = useTableStore();
+  const { columnFilters } = useFilterStore();
+  const { sorting, rowSelection, setSorting, setColumnVisibility, setRowSelection } =
+    useTableStore();
 
   const router = useRouter();
 
@@ -61,7 +55,6 @@ export const DataTable = ({
     data,
     columns,
     onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
@@ -69,9 +62,8 @@ export const DataTable = ({
     onRowSelectionChange: setRowSelection,
     state: {
       sorting,
-      columnFilters,
-      columnVisibility,
       rowSelection,
+      columnVisibility: columnFilters,
     },
   });
 
