@@ -1,20 +1,34 @@
 "use client";
 
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import MatingList from "./components/MatingList";
 import Dashboard from "./components/Dashboard";
 import RangeFilterCalendar from "./components/RangeFilterCalendar";
 
 const HatchingPage = () => {
   return (
-    <div className="flex flex-col gap-4">
-      {/* 메이팅 리스트 */}
-      <MatingList />
+    <div>
+      <div className="flex items-center px-4 py-1">
+        <h1 className="text-xl font-bold">산란 관리</h1>
+      </div>
 
-      {/* 해칭 날짜 범위 선택 */}
-      <RangeFilterCalendar />
+      <Tabs defaultValue="mating" className="flex flex-col gap-4">
+        <TabsList>
+          <TabsTrigger value="mating">메이팅 리스트</TabsTrigger>
+          <TabsTrigger value="range">해칭 캘린더</TabsTrigger>
+          <TabsTrigger value="dashboard">대시보드</TabsTrigger>
+        </TabsList>
 
-      {/* 대시보드 */}
-      <Dashboard />
+        <TabsContent value="mating">
+          <MatingList />
+        </TabsContent>
+        <TabsContent value="range">
+          <RangeFilterCalendar />
+        </TabsContent>
+        <TabsContent value="dashboard">
+          <Dashboard />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

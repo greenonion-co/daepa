@@ -1,5 +1,5 @@
 import Loading from "@/components/common/Loading";
-import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   brMatingControllerFindAll,
@@ -8,7 +8,7 @@ import {
   matingControllerCreateMating,
 } from "@repo/api-client";
 import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Heart, Plus, ChevronUp, ChevronDown } from "lucide-react";
+import { ChevronUp, ChevronDown, Cake, ChevronsDown } from "lucide-react";
 import MatingItem from "./MatingItem";
 import { toast } from "sonner";
 import { memo, useCallback, useEffect, useState } from "react";
@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import CreateMatingForm from "./CreateMatingForm";
 import { AxiosError } from "axios";
 import { useInView } from "react-intersection-observer";
+import Filters from "./Filters";
 
 const MatingList = memo(() => {
   const { ref, inView } = useInView();
@@ -26,7 +27,7 @@ const MatingList = memo(() => {
   const itemPerPage = 10;
 
   // 메이팅 조회 (무한 스크롤)
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useInfiniteQuery({
     queryKey: [brMatingControllerFindAll.name],
     queryFn: ({ pageParam = 1 }) =>
       brMatingControllerFindAll({
@@ -75,30 +76,25 @@ const MatingList = memo(() => {
     }
   }, [inView, fetchNextPage, hasNextPage, isFetchingNextPage]);
 
+  if (isLoading) return <Loading />;
+
   if (!items || items.length === 0) {
     return (
-      <div className="space-y-4">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Heart className="h-5 w-5 text-pink-500" />
-                메이팅 현황
-              </div>
-              <Button
-                onClick={() => setIsCreateFormOpen(!isCreateFormOpen)}
-                className="flex items-center gap-2"
-              >
-                {isCreateFormOpen ? (
-                  <ChevronUp className="h-4 w-4" />
-                ) : (
-                  <Plus className="h-4 w-4" />
-                )}
-                {isCreateFormOpen ? "폼 닫기" : "새 메이팅 추가"}
-              </Button>
-            </CardTitle>
-            <CardDescription>등록된 메이팅이 없습니다.</CardDescription>
-          </CardHeader>
+      <div className="flex flex-col items-center space-y-4">
+        <span className="inline-flex animate-bounce items-center gap-2 rounded-full bg-blue-900/90 px-4 py-2 text-sm text-white">
+          <ChevronsDown className="h-4 w-4" />
+          클릭해서 메이팅을 추가해보세요!
+        </span>
+        <Card
+          className="flex w-full cursor-pointer flex-col items-center justify-center bg-blue-50 p-10 hover:bg-blue-100 dark:bg-gray-900 dark:text-gray-200"
+          onClick={() => setIsCreateFormOpen((prev) => !prev)}
+        >
+          <Cake className="h-10 w-10 text-blue-500" />
+          <div className="text-center text-gray-600 dark:text-gray-400">
+            메이팅을
+            <span className="text-blue-500">추가</span>하여
+            <div className="font-semibold text-blue-500">편리하게 관리해보세요!</div>
+          </div>
         </Card>
 
         {isCreateFormOpen && <CreateMatingForm onClose={() => setIsCreateFormOpen(false)} />}
@@ -128,23 +124,32 @@ const MatingList = memo(() => {
   };
 
   return (
-    <div>
+    <div className="flex flex-col">
       {/* 헤더 영역 */}
-      <Button
-        onClick={() => setIsCreateFormOpen(!isCreateFormOpen)}
-        className="flex items-center gap-2 dark:bg-gray-800 dark:text-gray-200"
-      >
-        새 메이팅 추가
-        {isCreateFormOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-      </Button>
+      <div className="flex items-center justify-between px-2">
+        <h2 className="text-lg font-bold">메이팅 리스트</h2>
+
+        <Button
+          onClick={() => setIsCreateFormOpen(!isCreateFormOpen)}
+          className="cursor-pointer gap-2 dark:bg-gray-800 dark:text-gray-200"
+        >
+          새 메이팅 추가
+          {isCreateFormOpen ? (
+            <ChevronUp className="h-4 w-4" />
+          ) : (
+            <ChevronDown className="h-4 w-4" />
+          )}
+        </Button>
+      </div>
 
       {/* 폴더블 폼 */}
       {isCreateFormOpen && <CreateMatingForm onClose={() => setIsCreateFormOpen(false)} />}
 
+      <Filters />
       <div className="m-2 text-sm text-gray-600 dark:text-gray-400">검색 결과: {totalCount}개</div>
 
-      <ScrollArea className="h-[700px]">
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+      <ScrollArea>
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
           {items.map((matingGroup, index) => (
             <div
               key={index}

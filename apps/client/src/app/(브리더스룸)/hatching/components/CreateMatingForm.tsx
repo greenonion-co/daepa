@@ -18,6 +18,12 @@ import CalendarInput from "./CalendarInput";
 import ParentLink from "../../pet/components/ParentLink";
 import { PetParentDtoWithMessage } from "../../pet/store/parentLink";
 
+const MatingInitialFormData = {
+  father: undefined,
+  mother: undefined,
+  matingDate: format(new Date(), "yyyy-MM-dd"),
+};
+
 interface CreateMatingFormProps {
   onClose: () => void;
 }
@@ -28,11 +34,7 @@ const CreateMatingForm = ({ onClose }: CreateMatingFormProps) => {
     father?: PetParentDto;
     mother?: PetParentDto;
     matingDate: string;
-  }>({
-    father: undefined,
-    mother: undefined,
-    matingDate: format(new Date(), "yyyy-MM-dd"),
-  });
+  }>(MatingInitialFormData);
 
   const { mutate: createMating } = useMutation({
     mutationFn: matingControllerCreateMating,
@@ -40,11 +42,7 @@ const CreateMatingForm = ({ onClose }: CreateMatingFormProps) => {
       toast.success("메이팅이 추가되었습니다.");
       queryClient.invalidateQueries({ queryKey: [brMatingControllerFindAll.name] });
       // 폼 초기화
-      setFormData({
-        father: undefined,
-        mother: undefined,
-        matingDate: format(new Date(), "yyyy-MM-dd"),
-      });
+      setFormData(MatingInitialFormData);
       onClose();
     },
     onError: (error: AxiosError<CommonResponseDto>) => {
@@ -91,7 +89,7 @@ const CreateMatingForm = ({ onClose }: CreateMatingFormProps) => {
   };
 
   return (
-    <Card className="mt-2 max-w-lg border-2 border-blue-200 bg-blue-50/50 dark:bg-gray-800 dark:text-gray-200">
+    <Card className="mt-2 w-full border-2 border-blue-200 bg-blue-50/50 dark:bg-gray-800 dark:text-gray-200">
       <CardHeader>
         <CardTitle className="text-lg">새 메이팅 추가</CardTitle>
         <CardDescription className="text-sm text-blue-700 dark:text-blue-400">
@@ -103,7 +101,7 @@ const CreateMatingForm = ({ onClose }: CreateMatingFormProps) => {
           {/* 부모 선택 */}
           <div className="space-y-4">
             <Label className="text-base font-semibold">부모 개체 선택</Label>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid max-w-lg grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label className="text-sm text-gray-600">부 개체</Label>
                 <ParentLink
