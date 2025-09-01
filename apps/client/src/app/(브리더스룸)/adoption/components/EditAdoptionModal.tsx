@@ -9,6 +9,7 @@ import { SPECIES_KOREAN_INFO } from "../../constants";
 import {
   AdoptionDtoStatus,
   brPetControllerFindAll,
+  BrPetControllerFindAllFilterType,
   BrPetControllerFindAllOrder,
   PetDto,
 } from "@repo/api-client";
@@ -16,14 +17,15 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { useInView } from "react-intersection-observer";
 import { useEffect } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import EditAdoptionForm from "./EditAdoptionForm";
 import { AdoptionEditFormDto } from "../types";
 import { Button } from "@/components/ui/button";
 import Header from "../../components/selector/parentSearch/Header";
-import { cn, getStatusBadge } from "@/lib/utils";
 import { toast } from "sonner";
+import PetItem from "../../components/selector/PetItem";
+import { TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs } from "@/components/ui/tabs";
 
 const CREATE_ADOPTION_MODAL_STEP = {
   PET_SELECT: 1,
@@ -33,12 +35,20 @@ const CREATE_ADOPTION_MODAL_STEP = {
 interface EditAdoptionModalProps {
   isOpen: boolean;
   status?: AdoptionDtoStatus;
+  adoptionData?: AdoptionEditFormDto[];
   pet?: PetDto;
   onClose: () => void;
   onSuccess: () => void;
 }
 
-const EditAdoptionModal = ({ isOpen, status, pet, onClose, onSuccess }: EditAdoptionModalProps) => {
+const EditAdoptionModal = ({
+  isOpen,
+  status,
+  adoptionData,
+  pet,
+  onClose,
+  onSuccess,
+}: EditAdoptionModalProps) => {
   const [step, setStep] = useState(
     pet ? CREATE_ADOPTION_MODAL_STEP.ADOPTION_INFO : CREATE_ADOPTION_MODAL_STEP.PET_SELECT,
   );
@@ -46,7 +56,7 @@ const EditAdoptionModal = ({ isOpen, status, pet, onClose, onSuccess }: EditAdop
   const [keyword, setKeyword] = useState("");
   const { ref, inView } = useInView();
   const itemPerPage = 10;
-
+  const [tab, setTab] = useState<"male" | "female">("male");
   const {
     data: pets,
     fetchNextPage,
@@ -61,6 +71,7 @@ const EditAdoptionModal = ({ isOpen, status, pet, onClose, onSuccess }: EditAdop
         itemPerPage,
         order: BrPetControllerFindAllOrder.DESC,
         keyword,
+        filterType: BrPetControllerFindAllFilterType.MY,
       }),
     initialPageParam: 1,
     getNextPageParam: (lastPage) => {
@@ -113,7 +124,7 @@ const EditAdoptionModal = ({ isOpen, status, pet, onClose, onSuccess }: EditAdop
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[700px]">
         <DialogTitle>
           {pet ? (
             <div className="pl-2">{pet?.name}의 분양 정보</div>
@@ -131,49 +142,65 @@ const EditAdoptionModal = ({ isOpen, status, pet, onClose, onSuccess }: EditAdop
         {step === CREATE_ADOPTION_MODAL_STEP.PET_SELECT ? (
           // 1단계: 펫 선택
           <div className="space-y-4">
-            <ScrollArea className="h-[400px]">
-              <div className="space-y-2">
-                {pets?.map((pet) => (
-                  <Card
-                    key={pet.petId}
-                    className={cn(
-                      "cursor-pointer",
-                      pet.adoption?.adoptionId
-                        ? "text-muted-foreground bg-muted"
-                        : "hover:bg-blue-50",
-                    )}
-                    onClick={() => handlePetSelect(pet)}
-                  >
-                    <CardContent className="flex-1">
-                      <div className="flex items-center gap-2 font-medium">
-                        {pet.adoption?.adoptionId && getStatusBadge(pet.adoption?.status)}
-                        {pet.name}
-                        <div className="text-muted-foreground text-sm">
-                          | {SPECIES_KOREAN_INFO[pet.species]}
-                        </div>
-                      </div>
+            <Tabs
+              defaultValue="male"
+              className="w-full"
+              onValueChange={(value) => {
+                setTab(value as "male" | "female");
+              }}
+            >
+              <TabsList className="grid h-12 w-full grid-cols-2 rounded-full p-1">
+                <TabsTrigger
+                  value="male"
+                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full text-sm text-zinc-600 data-[state=active]:font-bold dark:text-zinc-200"
+                >
+                  수컷
+                </TabsTrigger>
+                <TabsTrigger
+                  value="female"
+                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full text-sm text-zinc-600 data-[state=active]:font-bold dark:text-zinc-200"
+                >
+                  암컷
+                </TabsTrigger>
+              </TabsList>
 
-                      {pet.sex && (
-                        <Badge variant="secondary" className="mt-1">
-                          {pet.sex === "M" ? "수컷" : pet.sex === "F" ? "암컷" : "미구분"}
-                        </Badge>
+              <ScrollArea className="h-[400px]">
+                <div className="mb-10 grid grid-cols-2 gap-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
+                  {pets
+                    ?.filter((pet) => (tab === "male" ? pet.sex === "M" : pet.sex === "F"))
+                    .map((pet) => {
+                      const disabled = adoptionData?.some(
+                        (adoption) => adoption.petId === pet.petId,
+                      );
+                      return (
+                        <PetItem
+                          key={pet.petId}
+                          disabled={disabled}
+                          item={pet}
+                          handlePetSelect={(pet) => {
+                            if (disabled) {
+                              toast.error("이미 분양 정보가 있습니다.");
+                              return;
+                            }
+                            handlePetSelect(pet);
+                          }}
+                        />
+                      );
+                    })}
+                  {hasNextPage && (
+                    <div ref={ref} className="h-20 text-center">
+                      {isFetchingNextPage ? (
+                        <div className="flex items-center justify-center">
+                          <div className="h-6 w-6 animate-spin rounded-full border-b-2 border-blue-500" />
+                        </div>
+                      ) : (
+                        <div className="text-muted-foreground">더 불러오는 중...</div>
                       )}
-                    </CardContent>
-                  </Card>
-                ))}
-                {hasNextPage && (
-                  <div ref={ref} className="h-20 text-center">
-                    {isFetchingNextPage ? (
-                      <div className="flex items-center justify-center">
-                        <div className="h-6 w-6 animate-spin rounded-full border-b-2 border-blue-500" />
-                      </div>
-                    ) : (
-                      <div className="text-muted-foreground">더 불러오는 중...</div>
-                    )}
-                  </div>
-                )}
-              </div>
-            </ScrollArea>
+                    </div>
+                  )}
+                </div>
+              </ScrollArea>
+            </Tabs>
           </div>
         ) : selectedPet ? (
           // 2단계: 분양 정보 입력

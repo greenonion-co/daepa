@@ -3,7 +3,7 @@ import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/comp
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon, Search, User } from "lucide-react";
+import { CalendarIcon, ChevronDown, ChevronUp, UserCircle } from "lucide-react";
 import {
   adoptionControllerCreateAdoption,
   adoptionControllerUpdate,
@@ -21,7 +21,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
@@ -34,13 +33,14 @@ import {
 import { SALE_STATUS_KOREAN_INFO } from "../../constants";
 import { isUndefined, omitBy } from "es-toolkit";
 import { AdoptionEditFormDto } from "../types";
+import UserList from "../../components/UserList";
 
 const adoptionSchema = z.object({
   price: z.string().optional(),
   adoptionDate: z.date().optional(),
   memo: z.string().optional(),
   location: z.enum(["ONLINE", "OFFLINE"]).default("OFFLINE"),
-  buyerId: z.string().optional(),
+  buyer: z.object({ userId: z.string().optional(), name: z.string().optional() }).optional(),
   status: z
     .enum([
       AdoptionDtoStatus.NFS,
@@ -62,7 +62,6 @@ interface EditAdoptionFormProps {
 
 const EditAdoptionForm = ({ adoptionData, handleClose, handleCancel }: EditAdoptionFormProps) => {
   const [showUserSelector, setShowUserSelector] = useState(false);
-  const [userSearchQuery, setUserSearchQuery] = useState("");
 
   const form = useForm({
     resolver: zodResolver(adoptionSchema),
@@ -70,7 +69,7 @@ const EditAdoptionForm = ({ adoptionData, handleClose, handleCancel }: EditAdopt
       price: adoptionData?.price ? adoptionData.price.toString() : "",
       memo: adoptionData?.memo ?? "",
       location: adoptionData?.location ?? PetAdoptionDtoLocation.OFFLINE,
-      buyerId: adoptionData?.buyerId ?? adoptionData?.buyer?.userId ?? "",
+      buyer: adoptionData?.buyer ?? {},
       adoptionDate: adoptionData?.adoptionDate ? new Date(adoptionData.adoptionDate) : undefined,
       status: adoptionData?.status ?? "UNDEFINED",
     },
@@ -117,7 +116,7 @@ const EditAdoptionForm = ({ adoptionData, handleClose, handleCancel }: EditAdopt
         adoptionDate: data.adoptionDate?.toISOString(),
         memo: data.memo,
         location: data.location,
-        buyerId: data.buyerId,
+        buyerId: data.buyer?.userId,
         status: data.status === "UNDEFINED" ? undefined : data.status,
       },
       isUndefined,
@@ -140,7 +139,7 @@ const EditAdoptionForm = ({ adoptionData, handleClose, handleCancel }: EditAdopt
             name="status"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>분양 상태</FormLabel>
+                <FormLabel>분양 상태 (필수)</FormLabel>
                 <FormControl>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <SelectTrigger>
@@ -189,7 +188,7 @@ const EditAdoptionForm = ({ adoptionData, handleClose, handleCancel }: EditAdopt
                       <Button
                         variant={"outline"}
                         className={cn(
-                          "w-full pl-3 text-left font-normal",
+                          "h-10 w-full pl-3 text-left font-normal",
                           !field.value && "text-muted-foreground",
                         )}
                       >
@@ -225,37 +224,32 @@ const EditAdoptionForm = ({ adoptionData, handleClose, handleCancel }: EditAdopt
 
           <FormField
             control={form.control}
-            name="buyerId"
+            name="buyer"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>입양자 선택 (선택사항)</FormLabel>
+                <FormLabel>입양자 선택</FormLabel>
                 <FormControl>
                   <div className="space-y-2">
                     <Button
                       type="button"
                       variant="outline"
                       onClick={() => setShowUserSelector(!showUserSelector)}
-                      className="w-full justify-start"
+                      className="flex h-10 w-full items-center justify-between bg-gray-800 text-white"
                     >
-                      <User className="mr-2 h-4 w-4" />
-                      {field.value ? "선택된 사용자" : "사용자 선택하기"}
+                      <div className="flex items-center">
+                        <UserCircle className="mr-1 h-4 w-4" />
+                        {field.value?.name ?? "사용자 선택하기"}
+                      </div>
+                      {showUserSelector ? (
+                        <ChevronUp className="ml-1 h-4 w-4" />
+                      ) : (
+                        <ChevronDown className="ml-1 h-4 w-4" />
+                      )}
                     </Button>
 
                     {showUserSelector && (
-                      <div className="space-y-2 rounded-lg border p-3">
-                        <div className="relative">
-                          <Search className="text-muted-foreground absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" />
-                          <Input
-                            placeholder="사용자 이름이나 이메일로 검색..."
-                            value={userSearchQuery}
-                            onChange={(e) => setUserSearchQuery(e.target.value)}
-                            className="pl-10"
-                          />
-                        </div>
-
-                        <ScrollArea className="h-[200px]">
-                          <div className="space-y-2"></div>
-                        </ScrollArea>
+                      <div className="rounded-lg border p-2">
+                        <UserList selectedUserId={field.value?.userId} onSelect={field.onChange} />
                       </div>
                     )}
                   </div>
@@ -279,7 +273,7 @@ const EditAdoptionForm = ({ adoptionData, handleClose, handleCancel }: EditAdopt
                         field.value === PetAdoptionDtoLocation.OFFLINE ? "default" : "outline"
                       }
                       onClick={() => field.onChange(PetAdoptionDtoLocation.OFFLINE)}
-                      className="flex-1"
+                      className="h-10 flex-1"
                     >
                       오프라인
                     </Button>
@@ -289,7 +283,7 @@ const EditAdoptionForm = ({ adoptionData, handleClose, handleCancel }: EditAdopt
                         field.value === PetAdoptionDtoLocation.ONLINE ? "default" : "outline"
                       }
                       onClick={() => field.onChange(PetAdoptionDtoLocation.ONLINE)}
-                      className="flex-1"
+                      className="h-10 flex-1"
                     >
                       온라인
                     </Button>
@@ -307,7 +301,12 @@ const EditAdoptionForm = ({ adoptionData, handleClose, handleCancel }: EditAdopt
               <FormItem>
                 <FormLabel>메모</FormLabel>
                 <FormControl>
-                  <Textarea {...field} placeholder="분양 관련 메모를 입력하세요" rows={3} />
+                  <Textarea
+                    {...field}
+                    placeholder="분양 관련 메모를 입력하세요"
+                    rows={3}
+                    className="h-20"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
