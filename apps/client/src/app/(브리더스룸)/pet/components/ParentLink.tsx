@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import Dialog from "../../components/Form/Dialog";
 import {
   BrPetControllerFindAllFilterType,
+  PetDtoSpecies,
   PetParentDto,
   PetParentDtoStatus,
 } from "@repo/api-client";
@@ -18,6 +19,7 @@ import { PetParentDtoWithMessage } from "../store/parentLink";
 import { useUserStore } from "../../store/user";
 
 const ParentLink = ({
+  species,
   label,
   data,
   editable = true,
@@ -25,6 +27,7 @@ const ParentLink = ({
   onSelect,
   onUnlink,
 }: {
+  species?: PetDtoSpecies;
   label: "부" | "모";
   data?: PetParentDto;
   editable?: boolean;
@@ -79,6 +82,7 @@ const ParentLink = ({
       <ParentSearchSelector
         isOpen={isOpen}
         onClose={close}
+        species={species}
         onSelect={(item) => {
           close();
           onSelect?.(item);

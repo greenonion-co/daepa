@@ -1,14 +1,14 @@
 import Loading from "@/components/common/Loading";
-import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   brMatingControllerFindAll,
   CommonResponseDto,
   MatingByDateDto,
   matingControllerCreateMating,
+  PetDtoSpecies,
 } from "@repo/api-client";
 import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { ChevronUp, ChevronDown, Cake, ChevronsDown } from "lucide-react";
+import { ChevronUp, ChevronDown } from "lucide-react";
 import MatingItem from "./MatingItem";
 import { toast } from "sonner";
 import { memo, useCallback, useEffect, useState } from "react";
@@ -18,22 +18,49 @@ import { Button } from "@/components/ui/button";
 import CreateMatingForm from "./CreateMatingForm";
 import { AxiosError } from "axios";
 import { useInView } from "react-intersection-observer";
+import Filters from "./Filters";
+import { useMatingFilterStore } from "../../store/matingFilter";
+import { format } from "date-fns";
+import { isNil, omitBy } from "es-toolkit";
 
 const MatingList = memo(() => {
   const { ref, inView } = useInView();
   const queryClient = useQueryClient();
+  const { species, father, mother, startDate, endDate } = useMatingFilterStore();
   const [isCreateFormOpen, setIsCreateFormOpen] = useState(false);
   const itemPerPage = 10;
 
   // 메이팅 조회 (무한 스크롤)
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useInfiniteQuery({
-    queryKey: [brMatingControllerFindAll.name],
-    queryFn: ({ pageParam = 1 }) =>
-      brMatingControllerFindAll({
+    queryKey: [
+      brMatingControllerFindAll.name,
+      species,
+      father?.petId,
+      mother?.petId,
+      startDate,
+      endDate,
+    ],
+    queryFn: ({ pageParam = 1 }) => {
+      const startYmd = startDate ? format(startDate, "yyyy-MM-dd") : undefined;
+      const endYmd = endDate ? format(endDate, "yyyy-MM-dd") : undefined;
+      const filter = omitBy(
+        {
+          species: species ?? undefined,
+          fatherId: father?.petId,
+          motherId: mother?.petId,
+          startYmd,
+          endYmd,
+        },
+        isNil,
+      );
+
+      return brMatingControllerFindAll({
         page: pageParam,
         itemPerPage,
         order: "DESC",
-      }),
+        ...filter,
+      });
+    },
     initialPageParam: 1,
     getNextPageParam: (lastPage) => {
       if (lastPage.data.meta.hasNextPage) {
@@ -77,45 +104,29 @@ const MatingList = memo(() => {
 
   if (isLoading) return <Loading />;
 
-  if (!items || items.length === 0) {
-    return (
-      <div className="flex flex-col items-center space-y-4">
-        <span className="inline-flex animate-bounce items-center gap-2 rounded-full bg-blue-900/90 px-4 py-2 text-sm text-white">
-          <ChevronsDown className="h-4 w-4" />
-          클릭해서 메이팅을 추가해보세요!
-        </span>
-        <Card
-          className="flex w-full cursor-pointer flex-col items-center justify-center bg-blue-50 p-10 hover:bg-blue-100 dark:bg-gray-900 dark:text-gray-200"
-          onClick={() => setIsCreateFormOpen((prev) => !prev)}
-        >
-          <Cake className="h-10 w-10 text-blue-500" />
-          <div className="text-center text-gray-600 dark:text-gray-400">
-            메이팅을
-            <span className="text-blue-500">추가</span>하여
-            <div className="font-semibold text-blue-500">편리하게 관리해보세요!</div>
-          </div>
-        </Card>
-
-        {isCreateFormOpen && <CreateMatingForm onClose={() => setIsCreateFormOpen(false)} />}
-      </div>
-    );
-  }
-
   const handleAddMatingClick = ({
+    species,
     fatherId,
     motherId,
     matingDate,
   }: {
+    species?: PetDtoSpecies;
     fatherId?: string;
     motherId?: string;
     matingDate: string;
   }) => {
+    if (!species) {
+      toast.error("종을 선택해주세요.");
+      return;
+    }
+
     if (!matingDate) {
       toast.error("메이팅 날짜를 선택해주세요.");
       return;
     }
 
     createMating({
+      species,
       matingDate,
       fatherId,
       motherId,
@@ -144,6 +155,8 @@ const MatingList = memo(() => {
       {/* 폴더블 폼 */}
       {isCreateFormOpen && <CreateMatingForm onClose={() => setIsCreateFormOpen(false)} />}
 
+      {/* 필터 */}
+      <Filters />
       <div className="m-2 text-sm text-gray-600 dark:text-gray-400">검색 결과: {totalCount}개</div>
 
       <ScrollArea>
@@ -182,6 +195,7 @@ const MatingList = memo(() => {
                     disabledDates={matingDates(matingGroup?.matingsByDate ?? [])}
                     onConfirm={(matingDate) =>
                       handleAddMatingClick({
+                        species: matingGroup.species,
                         fatherId: matingGroup.father?.petId,
                         motherId: matingGroup.mother?.petId,
                         matingDate,

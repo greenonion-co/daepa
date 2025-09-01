@@ -80,6 +80,7 @@ export const FormField = ({
         return (
           <div className="flex gap-2">
             <ParentLink
+              species={formData.species}
               label="부"
               data={formData.father}
               onSelect={(item) => {
@@ -90,6 +91,7 @@ export const FormField = ({
               }}
             />
             <ParentLink
+              species={formData.species}
               label="모"
               data={formData.mother}
               onSelect={(item) => {

@@ -9,6 +9,7 @@ import {
   matingControllerCreateMating,
   UnlinkParentDtoRole,
   PetParentDto,
+  PetDtoSpecies,
 } from "@repo/api-client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -17,6 +18,11 @@ import { format } from "date-fns";
 import CalendarInput from "./CalendarInput";
 import ParentLink from "../../pet/components/ParentLink";
 import { PetParentDtoWithMessage } from "../../pet/store/parentLink";
+import { cn } from "@/lib/utils";
+import { SPECIES_KOREAN_INFO } from "../../constants";
+import { useSelect } from "../../register/hooks/useSelect";
+import { overlay } from "overlay-kit";
+import Dialog from "../../components/Form/Dialog";
 
 const MatingInitialFormData = {
   father: undefined,
@@ -30,7 +36,9 @@ interface CreateMatingFormProps {
 
 const CreateMatingForm = ({ onClose }: CreateMatingFormProps) => {
   const queryClient = useQueryClient();
+  const { handleSelect } = useSelect();
   const [formData, setFormData] = useState<{
+    species?: PetDtoSpecies;
     father?: PetParentDto;
     mother?: PetParentDto;
     matingDate: string;
@@ -51,6 +59,11 @@ const CreateMatingForm = ({ onClose }: CreateMatingFormProps) => {
   });
 
   const handleSubmit = () => {
+    if (!formData.species) {
+      toast.error("종을 선택해주세요.");
+      return;
+    }
+
     if (!formData.father) {
       toast.error("부 개체를 선택해주세요.");
       return;
@@ -67,6 +80,7 @@ const CreateMatingForm = ({ onClose }: CreateMatingFormProps) => {
     }
 
     createMating({
+      species: formData.species,
       matingDate: formData.matingDate,
       fatherId: formData.father.petId,
       motherId: formData.mother.petId,
@@ -98,6 +112,56 @@ const CreateMatingForm = ({ onClose }: CreateMatingFormProps) => {
       </CardHeader>
       <div className="px-6">
         <div className="grid gap-6">
+          <div className="space-y-1">
+            <Label className="text-base font-semibold">종</Label>
+
+            <div
+              className={cn(
+                "flex h-9 w-full cursor-pointer items-center border-b-[1.2px] border-b-gray-200 pr-1 text-left text-[16px] text-gray-400 transition-all duration-300 ease-in-out placeholder:text-gray-400 focus:border-b-[1.8px] focus:border-[#1A56B3] focus:outline-none focus:ring-0 dark:text-gray-400",
+                `${formData.species && "cursor-pointer text-black"}`,
+              )}
+              onClick={() => {
+                handleSelect({
+                  type: "species",
+                  value: formData.species ?? "",
+                  handleNext: (value) => {
+                    if (formData.species !== value.value) {
+                      if (formData.father || formData.mother) {
+                        overlay.open(({ isOpen, close, unmount }) => (
+                          <Dialog
+                            title="종 변경 안내"
+                            description={`종을 변경하시겠습니까? \n 선택된 부모 개체가 있다면 다시 선택해야 합니다.`}
+                            isOpen={isOpen}
+                            onCloseAction={close}
+                            onConfirmAction={() => {
+                              close();
+                              setFormData((prev) => ({
+                                ...prev,
+                                father: undefined,
+                                mother: undefined,
+                                species: value.value as PetDtoSpecies,
+                              }));
+                            }}
+                            onExit={unmount}
+                          />
+                        ));
+                      } else {
+                        setFormData((prev) => ({
+                          ...prev,
+                          species: value.value as PetDtoSpecies,
+                        }));
+                      }
+                    }
+                  },
+                });
+              }}
+            >
+              {formData.species
+                ? (SPECIES_KOREAN_INFO[formData.species] ?? "종을 선택하세요")
+                : "종을 선택하세요"}
+            </div>
+          </div>
+
           {/* 부모 선택 */}
           <div className="space-y-4">
             <Label className="text-base font-semibold">부모 개체 선택</Label>
@@ -106,6 +170,7 @@ const CreateMatingForm = ({ onClose }: CreateMatingFormProps) => {
                 <Label className="text-sm text-gray-600">부 개체</Label>
                 <ParentLink
                   label="부"
+                  species={formData.species}
                   data={formData.father}
                   onSelect={(item) => handleParentSelect(UnlinkParentDtoRole.FATHER, item)}
                   onUnlink={handleFatherUnlink}
@@ -116,6 +181,7 @@ const CreateMatingForm = ({ onClose }: CreateMatingFormProps) => {
                 <Label className="text-sm text-gray-600">모 개체</Label>
                 <ParentLink
                   label="모"
+                  species={formData.species}
                   data={formData.mother}
                   onSelect={(item) => handleParentSelect(UnlinkParentDtoRole.MOTHER, item)}
                   onUnlink={handleMotherUnlink}
