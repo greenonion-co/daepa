@@ -16,6 +16,7 @@ import { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
 import Loading from "@/components/common/Loading";
 import { isNil, pick, pickBy } from "es-toolkit";
+import { PhotoItem } from "../types";
 
 export default function RegisterPage({ params }: { params: Promise<{ funnel: string }> }) {
   const router = useRouter();
@@ -120,6 +121,9 @@ export default function RegisterPage({ params }: { params: Promise<{ funnel: str
           foods: data?.foods,
           traits: data?.traits,
           photos: data?.photos,
+          photoOrder: data?.photos?.map((photo: PhotoItem) =>
+            photo.fileName.replace("PENDING/", ""),
+          ),
         },
         (value) => !isNil(value),
       );

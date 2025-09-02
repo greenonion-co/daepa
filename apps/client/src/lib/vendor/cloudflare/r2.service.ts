@@ -9,7 +9,7 @@ class R2Service {
 
   private constructor(s3Client: S3Client) {
     this.s3Client = s3Client;
-    const baseUrl = process.env.CLOUDFLARE_R2_IMAGE_BASE_URL;
+    const baseUrl = process.env.NEXT_PUBLIC_CLOUDFLARE_R2_IMAGE_BASE_URL;
     const bucket = process.env.CLOUDFLARE_R2_IMAGE_BUCKET_NAME;
     if (!baseUrl || !bucket) {
       throw new Error(

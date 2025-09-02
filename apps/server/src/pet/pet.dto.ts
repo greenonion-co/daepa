@@ -18,6 +18,7 @@ import {
   PET_LIST_FILTER_TYPE,
 } from './pet.constants';
 import {
+  ApiExtraModels,
   ApiProperty,
   OmitType,
   PartialType,
@@ -448,6 +449,7 @@ export class PetDto extends PetBaseDto {
   declare updatedAt?: Date;
 }
 
+@ApiExtraModels(UpsertPetImageDto)
 export class CreatePetDto extends OmitType(PetBaseDto, [
   'petId',
   'owner',

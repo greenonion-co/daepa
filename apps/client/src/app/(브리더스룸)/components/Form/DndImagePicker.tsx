@@ -20,13 +20,7 @@ import { useCallback, useState } from "react";
 import { isNil, range, remove } from "es-toolkit";
 import { ACCEPT_IMAGE_FORMATS } from "../../constants";
 import { tokenStorage } from "@/lib/tokenStorage";
-
-interface Photo {
-  fileName: string;
-  size: number;
-  mimeType: string;
-  url: string;
-}
+import { PhotoItem } from "../../register/types";
 
 interface DndImagePickerProps {
   max?: number;
@@ -36,7 +30,7 @@ interface DndImagePickerProps {
 export default function DndImagePicker({ max = 3, disabled }: DndImagePickerProps) {
   const { formData, setFormData } = usePetStore();
   const [isLoading, setIsLoading] = useState(false);
-  const photos: Photo[] = formData.photos ?? [];
+  const photos: PhotoItem[] = formData.photos ?? [];
   const imageNamesInOrder = photos.map(({ fileName }) => fileName) ?? [];
 
   // 터치와 마우스 센서 설정

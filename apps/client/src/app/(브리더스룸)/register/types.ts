@@ -20,6 +20,13 @@ export type FieldName =
   | "status"
   | "isPublic";
 
+export type PhotoItem = {
+  fileName: string;
+  size: number;
+  mimeType: string;
+  url: string;
+};
+
 export type FormStep = {
   title: string;
   field: {
