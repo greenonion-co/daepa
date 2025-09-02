@@ -12,15 +12,21 @@ import { SortableContext, useSortable, arrayMove, rectSortingStrategy } from "@d
 import { CSS } from "@dnd-kit/utilities";
 import { useDropzone } from "react-dropzone";
 import Image from "next/image";
-import { buildTransformedUrl, cn } from "@/lib/utils";
+import { buildR2TransformedUrl, cn } from "@/lib/utils";
 import { X, Plus, Loader2, Info } from "lucide-react";
 import { toast } from "sonner";
 import { usePetStore } from "../../register/store/pet";
 import { useCallback, useState } from "react";
-import { isNil, range } from "es-toolkit";
+import { isNil, range, remove } from "es-toolkit";
 import { ACCEPT_IMAGE_FORMATS } from "../../constants";
-import { fileControllerUploadImages } from "@repo/api-client";
-import { useMutation } from "@tanstack/react-query";
+import { tokenStorage } from "@/lib/tokenStorage";
+
+interface Photo {
+  fileName: string;
+  size: number;
+  mimeType: string;
+  url: string;
+}
 
 interface DndImagePickerProps {
   max?: number;
@@ -30,12 +36,8 @@ interface DndImagePickerProps {
 export default function DndImagePicker({ max = 3, disabled }: DndImagePickerProps) {
   const { formData, setFormData } = usePetStore();
   const [isLoading, setIsLoading] = useState(false);
-  const photos: string[] = formData.photos ?? [];
-  const ids = photos.map((p, idx) => `${idx}:${p}`);
-
-  const { mutateAsync: mutateUploadImages } = useMutation({
-    mutationFn: fileControllerUploadImages,
-  });
+  const photos: Photo[] = formData.photos ?? [];
+  const imageNamesInOrder = photos.map(({ fileName }) => fileName) ?? [];
 
   // 터치와 마우스 센서 설정
   const mouseSensor = useSensor(MouseSensor, {
@@ -75,10 +77,38 @@ export default function DndImagePicker({ max = 3, disabled }: DndImagePickerProp
 
     setIsLoading(true);
     try {
-      const { data: uploadedImages } = await mutateUploadImages({ files: targetFiles });
+      const uploadedPendingFiles = await Promise.all(
+        targetFiles.map(async (file) => {
+          const formData = new FormData();
+          formData.append("file", file);
+          formData.append("petId", "PENDING");
+
+          const response = await fetch("/api/upload/image", {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${tokenStorage.getToken()}`,
+            },
+            body: formData,
+          });
+
+          if (!response.ok) {
+            throw new Error(`Upload failed for file ${file.name}`);
+          }
+
+          const result = await response.json();
+          return result;
+        }),
+      );
+      const addedPhotos = uploadedPendingFiles.map(({ url, fileName, size, mimeType }) => ({
+        url,
+        fileName,
+        size,
+        mimeType,
+      }));
+
       setFormData((prev) => ({
         ...prev,
-        photos: [...(prev?.photos ?? []), ...uploadedImages],
+        photos: [...(prev?.photos ?? []), ...addedPhotos],
       }));
     } catch (error) {
       console.error("Image upload failed:", error);
@@ -94,12 +124,15 @@ export default function DndImagePicker({ max = 3, disabled }: DndImagePickerProp
     const { active, over } = event;
     if (isNil(over) || active.id === over.id) return;
 
-    const [oldIndex, newIndex] = [ids.indexOf(String(active.id)), ids.indexOf(String(over.id))];
+    const [oldIndex, newIndex] = [
+      imageNamesInOrder.indexOf(String(active.id)),
+      imageNamesInOrder.indexOf(String(over.id)),
+    ];
     if (oldIndex === -1 || newIndex === -1) return;
 
-    // indices 매핑 반환
-    const orderIndices = arrayMove(range(photos.length), oldIndex, newIndex);
-    onReorder(orderIndices);
+    const imageIndices = range(imageNamesInOrder.length);
+    const indexOrdered = arrayMove(imageIndices, oldIndex, newIndex);
+    onReorder(indexOrdered);
   };
 
   const onReorder = useCallback(
@@ -107,8 +140,8 @@ export default function DndImagePicker({ max = 3, disabled }: DndImagePickerProp
       if (disabled || isLoading) return;
 
       setFormData((prev) => {
-        const photos = [...(prev.photos ?? [])];
-        const nextPhotos = order.map((i) => photos[i]);
+        const prevPhotos = [...(prev.photos ?? [])];
+        const nextPhotos = order.map((i) => prevPhotos[i]);
 
         return { ...prev, photos: nextPhotos };
       });
@@ -141,9 +174,11 @@ export default function DndImagePicker({ max = 3, disabled }: DndImagePickerProp
   const handleDelete = useCallback(
     (index: number) => {
       setFormData((prev) => {
-        const photos = [...(prev.photos ?? [])];
-        if (index < photos.length) photos.splice(index, 1);
-        return { ...prev, photos };
+        const nextPhotos = [...(prev.photos ?? [])];
+        if (index < nextPhotos.length) {
+          remove(nextPhotos, (_, i) => i === index);
+        }
+        return { ...prev, photos: nextPhotos };
       });
     },
     [setFormData],
@@ -170,21 +205,18 @@ export default function DndImagePicker({ max = 3, disabled }: DndImagePickerProp
           // 모바일에서 스크롤과 드래그가 충돌하지 않도록 설정
           autoScroll={false}
         >
-          <SortableContext items={ids} strategy={rectSortingStrategy}>
+          <SortableContext items={imageNamesInOrder} strategy={rectSortingStrategy}>
             <div className={cn("grid grid-cols-3 gap-2", isDragActive && "ring-2 ring-blue-400")}>
-              {photos.map((u, index) => {
-                const url: string = typeof u === "string" ? u : "";
-                return (
-                  <SortableThumb
-                    key={String(ids[index])}
-                    id={String(ids[index])}
-                    src={url}
-                    disabled={disabled}
-                    isLoading={isLoading}
-                    onDelete={() => handleDelete(index)}
-                  />
-                );
-              })}
+              {photos.map((photo, index) => (
+                <SortableThumb
+                  key={String(imageNamesInOrder[index])}
+                  id={String(imageNamesInOrder[index])}
+                  src={photo.url}
+                  disabled={disabled}
+                  isLoading={isLoading}
+                  onDelete={() => handleDelete(index)}
+                />
+              ))}
               {!disabled &&
                 photos.length < max &&
                 (!isLoading ? (
@@ -261,8 +293,8 @@ function SortableThumb({
           </div>
         ) : (
           <Image
-            src={buildTransformedUrl(src)}
-            alt={`사진 ${id + 1}`}
+            src={buildR2TransformedUrl(src)}
+            alt={`image_${id}`}
             fill
             className="object-cover"
             // 이미지 드래그 방지
