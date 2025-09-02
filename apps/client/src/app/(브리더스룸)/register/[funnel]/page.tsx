@@ -10,7 +10,7 @@ import { FormField } from "../../components/Form/FormField";
 import FloatingButton from "../../components/FloatingButton";
 import { useSelect } from "../hooks/useSelect";
 import { useMutation } from "@tanstack/react-query";
-import { petControllerCreate } from "@repo/api-client";
+import { CreateParentDtoRole, petControllerCreate } from "@repo/api-client";
 import { toast } from "sonner";
 import { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
@@ -104,7 +104,7 @@ export default function RegisterPage({ params }: { params: Promise<{ funnel: str
           father: data?.father?.petId
             ? {
                 parentId: data.father.petId,
-                role: "father",
+                role: CreateParentDtoRole.FATHER,
                 isMyPet: false,
                 message: data.father?.message,
               }
@@ -112,7 +112,7 @@ export default function RegisterPage({ params }: { params: Promise<{ funnel: str
           mother: data?.mother?.petId
             ? {
                 parentId: data.mother.petId,
-                role: "mother",
+                role: CreateParentDtoRole.MOTHER,
                 isMyPet: false,
                 message: data.mother?.message,
               }
