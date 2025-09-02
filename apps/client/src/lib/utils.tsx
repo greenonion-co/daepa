@@ -67,7 +67,7 @@ export const getNumberToDate = (dateNumber: number) => {
   return new Date(year, month - 1, day);
 };
 
-const CLOUDFLARE_R2_URL_BASE = process.env.CLOUDFLARE_R2_IMAGE_BASE_URL;
+const CLOUDFLARE_R2_URL_BASE = process.env.NEXT_PUBLIC_CLOUDFLARE_R2_IMAGE_BASE_URL;
 export const buildR2TransformedUrl = (
   raw: string | undefined,
   transform: string = "width=460,height=700,format=webp",
