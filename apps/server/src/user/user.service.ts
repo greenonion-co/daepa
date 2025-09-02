@@ -87,7 +87,6 @@ export class UserService {
   }
 
   async findOneProfile(userId: string) {
-    console.log('userId: ', userId);
     const userEntity = await this.userRepository.findOneBy({
       userId,
     });
