@@ -13,8 +13,10 @@ import { PetSummaryWithoutOwnerDto } from '../pet/pet.dto';
 import {
   ADOPTION_SALE_STATUS,
   PET_ADOPTION_LOCATION,
+  PET_SPECIES,
 } from 'src/pet/pet.constants';
 import { CommonResponseDto } from 'src/common/response.dto';
+import { PageOptionsDto } from 'src/common/page.dto';
 
 export class AdoptionBaseDto {
   @ApiProperty({
@@ -209,4 +211,37 @@ export class AdoptionDetailResponseDto extends CommonResponseDto {
     description: '분양 정보',
   })
   data: AdoptionDto;
+}
+
+export class AdoptionFilterDto extends PageOptionsDto {
+  @ApiProperty({
+    description: '검색 키워드',
+    example: '대파',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  keyword?: string;
+
+  @ApiProperty({
+    description: '펫 종',
+    example: '크레스티드게코',
+    enum: PET_SPECIES,
+    'x-enumNames': Object.keys(PET_SPECIES),
+    required: false,
+  })
+  @IsOptional()
+  @IsEnum(PET_SPECIES)
+  species?: PET_SPECIES;
+
+  @ApiProperty({
+    description: '펫 판매 상태',
+    example: 'ON_SALE',
+    enum: ADOPTION_SALE_STATUS,
+    'x-enumNames': Object.keys(ADOPTION_SALE_STATUS),
+    required: false,
+  })
+  @IsOptional()
+  @IsEnum(ADOPTION_SALE_STATUS)
+  status?: ADOPTION_SALE_STATUS;
 }

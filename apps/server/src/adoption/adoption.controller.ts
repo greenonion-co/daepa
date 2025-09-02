@@ -19,10 +19,11 @@ import {
   UpdateAdoptionDto,
   AdoptionDto,
   AdoptionDetailResponseDto,
+  AdoptionFilterDto,
 } from './adoption.dto';
 import { JwtUser } from '../auth/auth.decorator';
 import { JwtUserPayload } from '../auth/strategies/jwt.strategy';
-import { PageMetaDto, PageOptionsDto } from 'src/common/page.dto';
+import { PageMetaDto } from 'src/common/page.dto';
 import { PageDto } from 'src/common/page.dto';
 import { CommonResponseDto } from 'src/common/response.dto';
 
@@ -66,7 +67,7 @@ export class AdoptionController {
     },
   })
   async getAllAdoptions(
-    @Query() pageOptionsDto: PageOptionsDto,
+    @Query() pageOptionsDto: AdoptionFilterDto,
     @JwtUser() token: JwtUserPayload,
   ): Promise<PageDto<AdoptionDto>> {
     return this.adoptionService.findAll(pageOptionsDto, token.userId);

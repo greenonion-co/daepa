@@ -12,6 +12,7 @@ import { Card } from "@/components/ui/card";
 import { useState } from "react";
 import EditAdoptionForm from "./EditAdoptionForm";
 import AdoptionReceipt from "../../pet/[petId]/(펫카드)/components/AdoptionReceipt";
+import Link from "next/link";
 
 interface AdoptionDetailModalProps {
   isOpen: boolean;
@@ -64,23 +65,25 @@ const AdoptionDetailModal = ({
         <div className="space-y-4">
           {/* 펫 정보 */}
           {adoptionData?.status !== PetAdoptionDtoStatus.SOLD && (
-            <Card className="bg-muted p-4">
-              <div className="mb-2 flex items-center gap-2 font-semibold">
-                {pet.name}
+            <Link href={`/pet/${pet.petId}`} onClick={() => onClose()}>
+              <Card className="bg-muted mb-4 flex gap-0 border-2 p-4 hover:shadow-md">
+                <div className="mb-2 flex items-center gap-2 font-semibold">
+                  {pet.name}
 
-                <div className="text-muted-foreground text-sm font-normal">
-                  | {SPECIES_KOREAN_INFO[pet.species] || "미분류"}
-                </div>
-              </div>
-              <div className="flex flex-col gap-2 text-sm text-gray-600">
-                {pet.morphs && pet.morphs.length > 0 && (
-                  <div className="flex flex-wrap gap-2">
-                    {pet.morphs.map((morph: string) => `#${morph}`).join(" ")}
+                  <div className="text-muted-foreground text-sm font-normal">
+                    | {SPECIES_KOREAN_INFO[pet.species] || "미분류"}
                   </div>
-                )}
-                {pet.hatchingDate && <p className="text-blue-600">{pet.hatchingDate}</p>}
-              </div>
-            </Card>
+                </div>
+                <div className="flex flex-col gap-2 text-sm text-gray-600">
+                  {pet.morphs && pet.morphs.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {pet.morphs.map((morph: string) => `#${morph}`).join(" ")}
+                    </div>
+                  )}
+                  {pet.hatchingDate && <p className="text-blue-600">{pet.hatchingDate}</p>}
+                </div>
+              </Card>
+            </Link>
           )}
           {/* 분양 정보 */}
 

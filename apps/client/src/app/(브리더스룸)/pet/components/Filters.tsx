@@ -13,15 +13,22 @@ import { TABLE_HEADER } from "../../constants";
 import { Input } from "@/components/ui/input";
 import { useEffect, useState } from "react";
 import { BrPetControllerFindAllParams, PetDto } from "@repo/api-client";
-import { useFilterStore } from "../../store/filter";
+import { FilterStore } from "../../store/filter";
 
-interface FiltersProps<TData> {
+interface FiltersProps<TData> extends FilterStore {
   table: Table<TData>;
 }
 
-export function Filters<TData>({ table }: FiltersProps<TData>) {
-  const [filters, setFilters] = useState<Partial<BrPetControllerFindAllParams>>({});
-  const { columnFilters, setColumnFilters, searchFilters, setSearchFilters } = useFilterStore();
+export function Filters<TData>({
+  table,
+  searchFilters,
+  setSearchFilters,
+  columnFilters,
+  setColumnFilters,
+}: FiltersProps<TData>) {
+  const [filters, setFilters] = useState<Partial<BrPetControllerFindAllParams>>(
+    searchFilters ?? {},
+  );
   const handleSearch = () => {
     setSearchFilters(filters);
   };

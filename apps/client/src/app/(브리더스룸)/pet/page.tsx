@@ -10,8 +10,7 @@ import { useEffect } from "react";
 import Link from "next/link";
 import Add from "@mui/icons-material/Add";
 import { useFilterStore } from "../store/filter";
-import { ScanFace } from "lucide-react";
-import { Card } from "@/components/ui/card";
+
 import Loading from "@/components/common/Loading";
 
 export default function PetPage() {
@@ -61,26 +60,13 @@ export default function PetPage() {
         <div className="text-sm text-gray-600">검색 결과: {totalCount}개</div>
       </div>
 
-      {items && items.length === 0 ? (
-        <Link href="/register/1">
-          <Card className="flex cursor-pointer flex-col items-center justify-center bg-blue-50 p-10 hover:bg-blue-100">
-            <ScanFace className="h-10 w-10 text-blue-500" />
-            <div className="text-center text-gray-600">
-              나의 펫을
-              <span className="text-blue-500">등록</span>하여
-              <div className="font-semibold text-blue-500">브리더스룸을 시작해보세요!</div>
-            </div>
-          </Card>
-        </Link>
-      ) : (
-        <DataTable
-          columns={columns}
-          data={items ?? []}
-          hasMore={hasNextPage}
-          isFetchingMore={isFetchingNextPage}
-          loaderRefAction={ref}
-        />
-      )}
+      <DataTable
+        columns={columns}
+        data={items ?? []}
+        hasMore={hasNextPage}
+        isFetchingMore={isFetchingNextPage}
+        loaderRefAction={ref}
+      />
 
       <Link
         href="/register/1"

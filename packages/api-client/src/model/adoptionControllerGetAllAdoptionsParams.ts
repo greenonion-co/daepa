@@ -6,6 +6,8 @@
  * OpenAPI spec version: 1.0
  */
 import type { AdoptionControllerGetAllAdoptionsOrder } from "./adoptionControllerGetAllAdoptionsOrder";
+import type { AdoptionControllerGetAllAdoptionsSpecies } from "./adoptionControllerGetAllAdoptionsSpecies";
+import type { AdoptionControllerGetAllAdoptionsStatus } from "./adoptionControllerGetAllAdoptionsStatus";
 
 export type AdoptionControllerGetAllAdoptionsParams = {
   /**
@@ -20,4 +22,16 @@ export type AdoptionControllerGetAllAdoptionsParams = {
    * 페이지당 항목 수
    */
   itemPerPage?: number;
+  /**
+   * 검색 키워드
+   */
+  keyword?: string;
+  /**
+   * 펫 종
+   */
+  species?: AdoptionControllerGetAllAdoptionsSpecies;
+  /**
+   * 펫 판매 상태
+   */
+  status?: AdoptionControllerGetAllAdoptionsStatus;
 };

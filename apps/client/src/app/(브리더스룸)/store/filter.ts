@@ -2,13 +2,13 @@ import { create } from "zustand";
 import { BrPetControllerFindAllParams, PetDto } from "@repo/api-client";
 import { VisibilityState } from "@tanstack/react-table";
 
-interface FilterStore {
+export interface FilterStore {
   searchFilters: Partial<BrPetControllerFindAllParams>;
   columnFilters?: VisibilityState;
   setSearchFilters: (filters: Partial<BrPetControllerFindAllParams>) => void;
   setColumnFilters: (columnFilters: Partial<Record<keyof PetDto, boolean>>) => void;
-  clearSearchFilters: () => void;
-  clearColumnFilters: () => void;
+  clearSearchFilters?: () => void;
+  clearColumnFilters?: () => void;
 }
 
 export const useFilterStore = create<FilterStore>()((set) => ({
