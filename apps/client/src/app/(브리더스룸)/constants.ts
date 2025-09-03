@@ -15,12 +15,12 @@ export const REGISTER_PAGE = {
 
 export const FORM_STEPS: FormStep[] = [
   {
-    title: "개체 이름 /관리번호",
+    title: "개체 이름",
     field: {
       name: "name",
-      type: "text",
+      type: "nickname",
       required: true,
-      placeholder: "개체 이름 /관리번호를 입력해주세요",
+      placeholder: "개체 이름을 입력해주세요",
       validation: (value) => value.length > 0,
     },
   },
@@ -360,11 +360,6 @@ export const SIDEBAR_ITEMS = [
     url: "/pet",
     icon: Home,
   },
-  // {
-  //   title: "알 등록",
-  //   url: "/register/egg",
-  //   icon: Egg,
-  // },
   {
     title: "개체 등록",
     url: "/register/1",

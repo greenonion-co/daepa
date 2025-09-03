@@ -7,7 +7,12 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindOptionsWhere, Not, Repository } from 'typeorm';
 import { UserEntity } from './user.entity';
-import { CreateInitUserInfoDto, UserDto, UserFilterDto } from './user.dto';
+import {
+  CreateInitUserInfoDto,
+  UserDto,
+  UserFilterDto,
+  SafeUserDto,
+} from './user.dto';
 import { ProviderInfo } from 'src/auth/auth.types';
 import { USER_ROLE, USER_STATUS } from './user.constant';
 import { nanoid } from 'nanoid';
@@ -74,6 +79,15 @@ export class UserService {
       status: entity.status,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
+    };
+  }
+
+  private toSafeUserDto(entity: UserEntity): SafeUserDto {
+    return {
+      userId: entity.userId,
+      name: entity.name,
+      email: entity.email,
+      isBiz: entity.isBiz,
     };
   }
 
@@ -200,14 +214,13 @@ export class UserService {
   async getUsers(
     query: UserFilterDto,
     userId: string,
-  ): Promise<PageDto<UserDto>> {
-    const queryBuilder = this.userRepository.createQueryBuilder('users');
-
-    queryBuilder.where('users.status = :status', {
-      status: USER_STATUS.ACTIVE,
-    });
-
-    queryBuilder.andWhere('users.userId != :userId', { userId });
+  ): Promise<PageDto<SafeUserDto>> {
+    const queryBuilder = this.userRepository
+      .createQueryBuilder('users')
+      .where('users.status = :status', {
+        status: USER_STATUS.ACTIVE,
+      })
+      .andWhere('users.userId != :userId', { userId });
 
     if (query.keyword) {
       queryBuilder.andWhere('users.name LIKE :keyword', {
@@ -215,7 +228,13 @@ export class UserService {
       });
     }
 
-    const [users, total] = await queryBuilder.getManyAndCount();
+    queryBuilder
+      .orderBy('users.createdAt', query.order)
+      .skip(query.skip)
+      .take(query.itemPerPage);
+
+    const [entities, total] = await queryBuilder.getManyAndCount();
+    const users = entities.map((e) => this.toSafeUserDto(e));
 
     const pageMetaDto = new PageMetaDto({
       totalCount: total,

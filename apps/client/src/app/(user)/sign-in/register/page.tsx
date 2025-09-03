@@ -15,12 +15,10 @@ import { cn } from "@/lib/utils";
 import { useMutation } from "@tanstack/react-query";
 import { userControllerCreateInitUserInfo, userControllerVerifyName } from "@repo/api-client";
 import { AxiosError } from "axios";
+import { DUPLICATE_CHECK_STATUS } from "@/app/(브리더스룸)/register/types";
 
 const NICKNAME_MAX_LENGTH = 15;
 const NICKNAME_MIN_LENGTH = 2;
-
-// 중복확인 상태 타입
-type DuplicateCheckStatus = "none" | "checking" | "available" | "duplicate";
 
 // 닉네임 및 사업자 여부 검증 스키마
 const registerSchema = z.object({
@@ -44,7 +42,9 @@ type RegisterFormData = z.infer<typeof registerSchema>;
 
 const RegisterPage = () => {
   const router = useRouter();
-  const [duplicateCheckStatus, setDuplicateCheckStatus] = useState<DuplicateCheckStatus>("none");
+  const [duplicateCheckStatus, setDuplicateCheckStatus] = useState<DUPLICATE_CHECK_STATUS>(
+    DUPLICATE_CHECK_STATUS.NONE,
+  );
 
   const { mutateAsync: mutateRegister, isPending: isRegisterPending } = useMutation({
     mutationFn: userControllerCreateInitUserInfo,
@@ -73,7 +73,7 @@ const RegisterPage = () => {
 
   // 닉네임이 변경되면 중복확인 상태 초기화
   useEffect(() => {
-    setDuplicateCheckStatus("none");
+    setDuplicateCheckStatus(DUPLICATE_CHECK_STATUS.NONE);
   }, [nickname]);
 
   // 중복확인 함수
@@ -83,21 +83,21 @@ const RegisterPage = () => {
       return;
     }
 
-    setDuplicateCheckStatus("checking");
+    setDuplicateCheckStatus(DUPLICATE_CHECK_STATUS.CHECKING);
 
     try {
       const response = await mutateVerifyName({ name: nickname });
 
       if (response.data.success) {
-        setDuplicateCheckStatus("available");
+        setDuplicateCheckStatus(DUPLICATE_CHECK_STATUS.AVAILABLE);
         toast.success("사용 가능한 닉네임입니다.");
       }
     } catch (error: unknown) {
       if (error instanceof AxiosError && error.response?.status === 409) {
-        setDuplicateCheckStatus("duplicate");
+        setDuplicateCheckStatus(DUPLICATE_CHECK_STATUS.DUPLICATE);
         toast.error("이미 사용중인 닉네임입니다.");
       } else {
-        setDuplicateCheckStatus("none");
+        setDuplicateCheckStatus(DUPLICATE_CHECK_STATUS.NONE);
         toast.error("중복확인 중 오류가 발생했습니다. 다시 시도해주세요.");
       }
     }
@@ -105,7 +105,7 @@ const RegisterPage = () => {
 
   const onSubmit = async (data: RegisterFormData) => {
     // 중복확인이 완료되지 않았거나 중복인 경우 제출 방지
-    if (duplicateCheckStatus !== "available") {
+    if (duplicateCheckStatus !== DUPLICATE_CHECK_STATUS.AVAILABLE) {
       toast.error("닉네임 중복확인을 완료해주세요.");
       return;
     }
@@ -171,8 +171,14 @@ const RegisterPage = () => {
                       type="text"
                       placeholder="닉네임/업체명을 입력해주세요"
                       className={cn("h-12 pr-16")}
-                      maxLength={NICKNAME_MAX_LENGTH - 1}
+                      maxLength={NICKNAME_MAX_LENGTH}
                       {...register("nickname")}
+                      onChange={(e) => {
+                        if (e.target.value.length > NICKNAME_MAX_LENGTH) {
+                          e.target.value = e.target.value.slice(0, NICKNAME_MAX_LENGTH);
+                        }
+                        register("nickname").onChange(e);
+                      }}
                     />
                     {nickname && (
                       <div className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">
@@ -198,32 +204,32 @@ const RegisterPage = () => {
                 </div>
 
                 {errors.nickname && (
-                  <p className="flex items-center gap-1 text-sm text-red-500">
+                  <div className="flex items-center gap-1 text-sm text-red-500">
                     <Info className="h-4 w-4" />
                     {errors.nickname.message}
-                  </p>
+                  </div>
                 )}
 
                 {/* 중복확인 결과 표시 */}
-                {duplicateCheckStatus === "available" && (
-                  <p className="flex items-center gap-1 text-sm text-green-600">
+                {duplicateCheckStatus === DUPLICATE_CHECK_STATUS.AVAILABLE && (
+                  <div className="flex items-center gap-1 text-sm text-green-600">
                     <Check className="h-4 w-4" />
                     사용 가능한 닉네임/업체명입니다
-                  </p>
+                  </div>
                 )}
 
-                {duplicateCheckStatus === "duplicate" && (
-                  <p className="flex items-center gap-1 text-sm text-red-500">
+                {duplicateCheckStatus === DUPLICATE_CHECK_STATUS.DUPLICATE && (
+                  <div className="flex items-center gap-1 text-sm text-red-500">
                     <Info className="h-4 w-4" />
                     이미 사용중인 닉네임/업체명입니다
-                  </p>
+                  </div>
                 )}
 
-                {duplicateCheckStatus === "checking" && (
-                  <p className="flex items-center gap-1 text-sm text-blue-500">
+                {duplicateCheckStatus === DUPLICATE_CHECK_STATUS.CHECKING && (
+                  <div className="flex items-center gap-1 text-sm text-blue-500">
                     <div className="h-4 w-4 animate-spin rounded-full border-2 border-blue-500 border-t-transparent"></div>
                     중복확인 중...
-                  </p>
+                  </div>
                 )}
               </div>
 
@@ -259,10 +265,10 @@ const RegisterPage = () => {
                   </button>
                 </div>
                 {errors.isSeller && (
-                  <p className="flex items-center gap-1 text-sm text-red-500">
+                  <div className="flex items-center gap-1 text-sm text-red-500">
                     <span className="h-1 w-1 rounded-full bg-red-500"></span>
                     {errors.isSeller.message}
-                  </p>
+                  </div>
                 )}
               </div>
 
@@ -282,7 +288,11 @@ const RegisterPage = () => {
 
               <Button
                 type="submit"
-                disabled={!isValid || isRegisterPending || duplicateCheckStatus !== "available"}
+                disabled={
+                  !isValid ||
+                  isRegisterPending ||
+                  duplicateCheckStatus !== DUPLICATE_CHECK_STATUS.AVAILABLE
+                }
                 className="h-12 w-full rounded-xl bg-blue-600 text-base font-bold transition-all duration-200 hover:bg-blue-700 disabled:bg-gray-300 disabled:text-gray-500"
               >
                 {isRegisterPending ? (

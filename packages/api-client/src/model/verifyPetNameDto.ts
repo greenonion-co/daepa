@@ -8,5 +8,5 @@
 
 export interface VerifyPetNameDto {
   /** 펫 이름 */
-  name?: string;
+  name: string;
 }

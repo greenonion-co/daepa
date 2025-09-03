@@ -6,6 +6,7 @@
  * OpenAPI spec version: 1.0
  */
 import type { BrMatingControllerFindAllOrder } from "./brMatingControllerFindAllOrder";
+import type { BrMatingControllerFindAllSpecies } from "./brMatingControllerFindAllSpecies";
 
 export type BrMatingControllerFindAllParams = {
   /**
@@ -20,4 +21,24 @@ export type BrMatingControllerFindAllParams = {
    * 페이지당 항목 수
    */
   itemPerPage?: number;
+  /**
+   * 펫 종
+   */
+  species?: BrMatingControllerFindAllSpecies;
+  /**
+   * 펫 최소 생년월일
+   */
+  startYmd?: string;
+  /**
+   * 펫 최대 생년월일
+   */
+  endYmd?: string;
+  /**
+   * 아빠 펫 ID
+   */
+  fatherId?: string;
+  /**
+   * 엄마 펫 ID
+   */
+  motherId?: string;
 };

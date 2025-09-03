@@ -49,15 +49,8 @@ const CreateLayingModal = ({
     [layingData],
   );
 
-  const { mutate: createLaying } = useMutation({
+  const { mutateAsync: createLaying } = useMutation({
     mutationFn: layingControllerCreate,
-    onSuccess: () => {
-      toast.success("산란이 추가되었습니다.");
-      queryClient.invalidateQueries({ queryKey: [brMatingControllerFindAll.name] });
-    },
-    onError: () => {
-      toast.error("산란 추가에 실패했습니다.");
-    },
   });
 
   const defaultLayingDate = useMemo(() => {
@@ -85,7 +78,7 @@ const CreateLayingModal = ({
     clutch: layingData?.length ? (layingData.length + 1).toString() : "1",
   });
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!formData.species) {
       toast.error("종은 필수 입력 항목입니다.");
       return;
@@ -101,26 +94,32 @@ const CreateLayingModal = ({
       return;
     }
 
-    // 차수 유효성 검사
-    const currentClutch = parseInt(formData.clutch, 10);
-    const minClutch = layingData?.length || 0;
-    if (currentClutch <= minClutch) {
-      toast.error(`이전 차수 ${minClutch}보다 커야 합니다.`);
-      return;
+    try {
+      // 차수 유효성 검사
+      const currentClutch = parseInt(formData.clutch, 10);
+      const minClutch = layingData?.length || 0;
+      if (currentClutch <= minClutch) {
+        toast.error(`이전 차수 ${minClutch}보다 커야 합니다.`);
+        return;
+      }
+
+      await createLaying({
+        matingId,
+        layingDate: format(new Date(formData.layingDate), "yyyy-MM-dd"),
+        temperature: formData.temperature ? parseFloat(formData.temperature) : undefined,
+        species: formData.species,
+        clutchCount: parseInt(formData.clutchCount, 10),
+        clutch: formData.clutch ? parseInt(formData.clutch, 10) : undefined,
+        motherId,
+        fatherId,
+      });
+      toast.success("산란이 추가되었습니다.");
+      queryClient.invalidateQueries({ queryKey: [brMatingControllerFindAll.name] });
+    } catch {
+      toast.error("산란 추가에 실패했습니다.");
+    } finally {
+      onClose();
     }
-
-    createLaying({
-      matingId,
-      layingDate: format(new Date(formData.layingDate), "yyyy-MM-dd"),
-      temperature: formData.temperature ? parseFloat(formData.temperature) : undefined,
-      species: formData.species,
-      clutchCount: parseInt(formData.clutchCount, 10),
-      clutch: formData.clutch ? parseInt(formData.clutch, 10) : undefined,
-      motherId,
-      fatherId,
-    });
-
-    onClose();
   };
 
   // 날짜 제한 함수

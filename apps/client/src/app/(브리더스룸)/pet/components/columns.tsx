@@ -39,8 +39,8 @@ import {
   PetDtoSpecies,
 } from "@repo/api-client";
 import LinkButton from "../../components/LinkButton";
-import useSearchStore from "../store/search";
 import { format } from "date-fns";
+import { useFilterStore } from "../../store/filter";
 
 function TableHeaderSelect({
   column,
@@ -53,7 +53,7 @@ function TableHeaderSelect({
   items: string[] | number[];
   renderItem?: (item: string | number) => string;
 }) {
-  const { searchFilters, setSearchFilters } = useSearchStore();
+  const { searchFilters, setSearchFilters } = useFilterStore();
   const columnId = column.id === "adoption_status" ? "status" : column.id;
   const handleValueChange = (value: string) => {
     if (value === "all") {

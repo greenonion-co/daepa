@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import BottomSheet from "@/components/common/BottomSheet";
+import { toast } from "sonner";
 
 interface MultipleSelectorProps {
   isOpen: boolean;
@@ -38,6 +39,7 @@ export default function MultipleSelector({
         return prev.filter((m) => m !== item);
       }
       if (prev.length >= 5) {
+        toast.error("최대 5개까지 선택할 수 있습니다.");
         return prev;
       }
       return [...prev, item];

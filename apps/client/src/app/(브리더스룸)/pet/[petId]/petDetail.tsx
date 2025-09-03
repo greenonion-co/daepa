@@ -109,13 +109,13 @@ const PetDetail = ({ pet, qrCodeDataUrl }: PetDetailProps) => {
         </div>
         <div className="grid grid-cols-2 gap-6">
           {/* 왼쪽: CardFront */}
-          <div className="h-[700px] w-full rounded-lg border-gray-300 bg-white shadow-xl dark:bg-[#18181B]">
+          <div className="h-[700px] w-full bg-white shadow-xl dark:bg-[#18181B]">
             <CardFront pet={pet} qrCodeDataUrl={qrCodeDataUrl} />
 
             {isWideScreen && pet.adoption && <AdoptionReceipt adoption={pet.adoption} />}
           </div>
           {/* 오른쪽: CardBack */}
-          <div className="w-full rounded-lg border-gray-300 bg-white shadow-xl dark:bg-[#18181B]">
+          <div className="w-full rounded-xl border-[1.5px] border-gray-300 bg-white shadow-xl dark:bg-[#18181B]">
             <CardBack pet={pet} from={from} isWideScreen={isWideScreen} />
           </div>
         </div>

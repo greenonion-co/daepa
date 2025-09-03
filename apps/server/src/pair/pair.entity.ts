@@ -6,6 +6,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { PET_SPECIES } from 'src/pet/pet.constants';
 
 @Entity({ name: 'pairs' })
 @Index('UNIQUE_PAIR', ['ownerId', 'fatherId', 'motherId'], {
@@ -17,6 +18,9 @@ export class PairEntity {
 
   @Column()
   ownerId: string;
+
+  @Column({ type: 'enum', enum: PET_SPECIES, nullable: false })
+  species: PET_SPECIES; // 종
 
   @Column()
   fatherId: string;

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import Dialog from "../../components/Form/Dialog";
 import {
   BrPetControllerFindAllFilterType,
+  PetDtoSpecies,
   PetParentDto,
   PetParentDtoStatus,
 } from "@repo/api-client";
@@ -18,6 +19,7 @@ import { PetParentDtoWithMessage } from "../store/parentLink";
 import { useUserStore } from "../../store/user";
 
 const ParentLink = ({
+  species,
   label,
   data,
   editable = true,
@@ -25,6 +27,7 @@ const ParentLink = ({
   onSelect,
   onUnlink,
 }: {
+  species?: PetDtoSpecies;
   label: "부" | "모";
   data?: PetParentDto;
   editable?: boolean;
@@ -35,7 +38,7 @@ const ParentLink = ({
   const { user } = useUserStore();
   const pathname = usePathname();
   const isMyPet = data?.owner?.userId === user?.userId;
-  const isRegisterPage = pathname.includes("register");
+  const isClickDisabled = pathname.includes("register") || pathname.includes("hatching");
   const deleteParent = () => {
     if (!data?.petId) return;
 
@@ -44,6 +47,11 @@ const ParentLink = ({
 
   const handleUnlink = (e: React.MouseEvent) => {
     e.stopPropagation();
+
+    if (isClickDisabled) {
+      deleteParent();
+      return;
+    }
 
     overlay.open(({ isOpen, close, unmount }) => (
       <Dialog
@@ -74,6 +82,7 @@ const ParentLink = ({
       <ParentSearchSelector
         isOpen={isOpen}
         onClose={close}
+        species={species}
         onSelect={(item) => {
           close();
           onSelect?.(item);
@@ -120,7 +129,7 @@ const ParentLink = ({
             passHref={false}
             onClick={(e) => {
               e.stopPropagation();
-              if (isRegisterPage) e.preventDefault();
+              if (isClickDisabled) e.preventDefault();
             }}
             className="flex flex-col items-center gap-2"
           >

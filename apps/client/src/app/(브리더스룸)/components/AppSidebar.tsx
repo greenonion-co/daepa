@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/sidebar";
 import Link from "next/link";
 import { SIDEBAR_ITEMS } from "../constants";
+import UserButton from "./UserButton";
 
 export function AppSidebar() {
   return (
@@ -19,6 +20,7 @@ export function AppSidebar() {
           <SidebarGroupLabel>브리더스룸</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
+              <UserButton />
               {SIDEBAR_ITEMS.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>

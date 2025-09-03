@@ -427,7 +427,7 @@ export const fileControllerUploadImages = (uploadImagesRequestDto: UploadImagesR
   });
 };
 
-export const brUserControllerGetUsers = (params: BrUserControllerGetUsersParams) => {
+export const brUserControllerGetUsers = (params?: BrUserControllerGetUsersParams) => {
   return useCustomInstance<BrUserControllerGetUsers200>({
     url: `http://localhost:4000/api/v1/br/user`,
     method: "GET",
@@ -2640,19 +2640,7 @@ export const getBrUserControllerGetUsersResponseMock = (
     userId: faker.string.alpha(20),
     name: faker.string.alpha(20),
     email: faker.string.alpha(20),
-    role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
     isBiz: faker.datatype.boolean(),
-    refreshToken: {},
-    refreshTokenExpiresAt: {},
-    status: faker.helpers.arrayElement([
-      "pending",
-      "active",
-      "inactive",
-      "suspended",
-      "deleted",
-    ] as const),
-    createdAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
-    updatedAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
   })),
   meta: {
     page: faker.number.int({ min: undefined, max: undefined }),

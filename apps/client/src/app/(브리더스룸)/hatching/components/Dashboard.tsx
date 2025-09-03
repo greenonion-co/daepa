@@ -21,11 +21,12 @@ import {
   ChartLegend,
   ChartLegendContent,
 } from "@/components/ui/chart";
-import { TrendingUp } from "lucide-react";
+import { ChevronsLeft, TrendingUp } from "lucide-react";
 import { memo, useMemo, useState } from "react";
 import { brPetControllerGetPetsByYear, PetDtoGrowth } from "@repo/api-client";
 import { useQuery } from "@tanstack/react-query";
 import { Switch } from "@/components/ui/switch";
+import GuideText from "../../components/GuideText";
 
 const Dashboard = memo(() => {
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
@@ -68,14 +69,18 @@ const Dashboard = memo(() => {
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
-          <div>
+          <div className="flex flex-col gap-2">
             <div className="mb-2 flex items-center gap-2">
               <Switch checked={isHatchedOnly} onCheckedChange={setIsHatchedOnly} />
               <span className="text-muted-foreground text-sm font-medium">해칭된 펫만 보기</span>
+
+              <GuideText icon={ChevronsLeft} text="해칭된 펫만 조회해보세요!" />
             </div>
 
-            <CardTitle>해칭 대시보드</CardTitle>
-            <CardDescription>1월 - 12월 {selectedYear}</CardDescription>
+            <div>
+              <CardTitle>해칭 대시보드</CardTitle>
+              <CardDescription>1월 - 12월 {selectedYear}</CardDescription>
+            </div>
           </div>
           <Select
             value={selectedYear.toString()}

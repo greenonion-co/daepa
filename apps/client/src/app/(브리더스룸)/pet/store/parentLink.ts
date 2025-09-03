@@ -2,7 +2,7 @@ import { UpdateParentRequestDtoStatus, PetDto } from "@repo/api-client";
 import { create } from "zustand";
 
 export type PetParentDtoWithMessage = PetDto & {
-  message: string;
+  message?: string;
   status?: UpdateParentRequestDtoStatus;
   isMyPet?: boolean;
 };

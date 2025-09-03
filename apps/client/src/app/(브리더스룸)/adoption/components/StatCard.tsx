@@ -9,8 +9,8 @@ interface StatCardProps {
 }
 
 const StatCard = ({ title, value, icon: Icon, bgColor }: StatCardProps) => (
-  <Card className={cn(bgColor, "dark:bg-gray-800 dark:text-gray-200")}>
-    <CardHeader className="flex flex-row items-center justify-between">
+  <Card className={cn(bgColor, "py-3 dark:bg-gray-800 dark:text-gray-200")}>
+    <CardHeader className="flex flex-row items-center">
       <CardTitle className="text-sm font-medium text-gray-800 dark:text-gray-200">
         {title}
       </CardTitle>
