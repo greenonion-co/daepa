@@ -32,7 +32,7 @@ export function Filters<TData, TParams extends AnyParams = AnyParams>({
     (searchFilters as Partial<TParams>) ?? ({} as Partial<TParams>),
   );
   const handleSearch = () => {
-    setSearchFilters(filters);
+    setSearchFilters({ ...searchFilters, ...filters });
   };
 
   const hasActiveFilters = Object.entries(searchFilters).some(
