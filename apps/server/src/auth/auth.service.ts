@@ -3,8 +3,7 @@ import {
   Injectable,
   UnauthorizedException,
   Logger,
-  HttpStatus,
-  HttpException,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 import { UserService } from 'src/user/user.service';
 import { ProviderInfo } from './auth.types';
@@ -81,10 +80,10 @@ export class AuthService {
         };
       }
 
-      throw new HttpException(
-        { code: 600, message: 'Apple 이메일이 필요합니다.' },
-        HttpStatus.UNPROCESSABLE_ENTITY,
-      );
+      throw new UnprocessableEntityException({
+        code: 600,
+        message: 'Apple 이메일이 필요합니다.',
+      });
     }
 
     // Authorization Code가 있으면 Apple 토큰 교환으로 refresh_token 확보

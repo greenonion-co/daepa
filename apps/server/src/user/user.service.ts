@@ -1,6 +1,6 @@
 import {
-  HttpException,
-  HttpStatus,
+  BadRequestException,
+  ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -126,12 +126,8 @@ export class UserService {
     try {
       const { name, isBiz } = createInitUserInfoDto;
       if (name.length < 2 || name.length > 15) {
-        throw new HttpException(
-          {
-            statusCode: HttpStatus.BAD_REQUEST,
-            message: '사용자명은 2자 이상 15자 이하여야 합니다.',
-          },
-          HttpStatus.BAD_REQUEST,
+        throw new BadRequestException(
+          '사용자명은 2자 이상 15자 이하여야 합니다.',
         );
       }
 
@@ -146,13 +142,8 @@ export class UserService {
     } catch (error) {
       if (isMySQLError(error) && error.code === 'ER_DUP_ENTRY') {
         if (error.message.includes('UNIQUE_USER_NAME')) {
-          throw new HttpException(
-            {
-              statusCode: HttpStatus.CONFLICT,
-              message:
-                '이미 사용중인 사용자명입니다. 다른 사용자명을 입력해주세요.',
-            },
-            HttpStatus.CONFLICT,
+          throw new ConflictException(
+            '이미 사용중인 사용자명입니다. 다른 사용자명을 입력해주세요.',
           );
         }
       }

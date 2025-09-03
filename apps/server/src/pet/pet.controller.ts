@@ -6,8 +6,7 @@ import {
   Param,
   Patch,
   Delete,
-  HttpException,
-  HttpStatus,
+  ConflictException,
 } from '@nestjs/common';
 import {
   CompleteHatchingDto,
@@ -285,13 +284,7 @@ export class PetController {
         message: '사용 가능한 닉네임입니다.',
       };
     } else {
-      throw new HttpException(
-        {
-          statusCode: HttpStatus.CONFLICT,
-          message: '이미 사용중인 닉네임입니다.',
-        },
-        HttpStatus.CONFLICT,
-      );
+      throw new ConflictException('이미 사용중인 닉네임입니다.');
     }
   }
 }
