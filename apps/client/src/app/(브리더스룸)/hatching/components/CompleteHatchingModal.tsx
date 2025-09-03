@@ -56,34 +56,13 @@ const CompleteHatchingModal = ({
     desc: "",
   });
 
-  const { mutate: mutateHatched } = useMutation({
+  const { mutateAsync: mutateHatched } = useMutation({
     mutationFn: (formData: UpdatePetDto) => petControllerUpdate(petId, formData),
-    onSuccess: (response) => {
-      if (response?.data) {
-        toast.success("해칭 완료");
-        queryClient.invalidateQueries({ queryKey: [brMatingControllerFindAll.name] });
-        onClose();
-      }
-    },
-    onError: (error: AxiosError<{ message: string }>) => {
-      console.error("Failed to hatch egg:", error);
-      if (error.response?.data?.message) {
-        toast.error(error.response.data.message);
-      } else {
-        toast.error("펫 등록에 실패했습니다.");
-      }
-      onClose();
-    },
   });
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!formData.hatchingDate) {
       toast.error("해칭일을 선택해주세요.");
-      return;
-    }
-
-    if (duplicateCheckStatus !== DUPLICATE_CHECK_STATUS.AVAILABLE) {
-      toast.error("이름 중복확인을 완료해주세요.");
       return;
     }
 
@@ -93,7 +72,22 @@ const CompleteHatchingModal = ({
       return;
     }
 
-    mutateHatched(formData);
+    try {
+      const { data } = await mutateHatched(formData);
+
+      if (data?.success) {
+        toast.success("해칭 완료");
+        queryClient.invalidateQueries({ queryKey: [brMatingControllerFindAll.name] });
+      }
+    } catch (error) {
+      if (error instanceof AxiosError && error.response?.data?.message) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error("해칭에 실패했습니다.");
+      }
+    } finally {
+      onClose();
+    }
   };
 
   return (
@@ -104,7 +98,7 @@ const CompleteHatchingModal = ({
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label>산란일*</Label>
+            <Label>해칭일*</Label>
             <div className="col-span-3">
               <CalendarInput
                 placeholder="해칭일을 선택하세요"

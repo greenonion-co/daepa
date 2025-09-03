@@ -1,7 +1,7 @@
 import Loading from "@/components/common/Loading";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { brUserControllerGetUsers, UserDto } from "@repo/api-client";
+import { brUserControllerGetUsers, SafeUserDto } from "@repo/api-client";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { Search } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -11,20 +11,20 @@ import { Button } from "@/components/ui/button";
 
 interface UserListProps {
   selectedUserId?: string;
-  onSelect: (user: UserDto) => void;
+  onSelect: (user: SafeUserDto) => void;
 }
 
 const UserList = ({ selectedUserId, onSelect }: UserListProps) => {
   const { ref, inView } = useInView();
   const itemPerPage = 10;
 
-  const [items, setItems] = useState<UserDto[]>([]);
   const [keyword, setKeyword] = useState("");
   const [userSearchQuery, setUserSearchQuery] = useState("");
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
     queryKey: [brUserControllerGetUsers.name, userSearchQuery],
-    queryFn: () => brUserControllerGetUsers({ page: 1, itemPerPage, keyword: userSearchQuery }),
+    queryFn: ({ pageParam = 1 }) =>
+      brUserControllerGetUsers({ page: pageParam, itemPerPage, keyword: userSearchQuery }),
     initialPageParam: 1,
     getNextPageParam: (lastPage) => {
       if (lastPage.data.meta.hasNextPage) {
@@ -32,6 +32,7 @@ const UserList = ({ selectedUserId, onSelect }: UserListProps) => {
       }
       return undefined;
     },
+    select: (data) => data.pages.flatMap((page) => page.data.data),
   });
 
   useEffect(() => {
@@ -39,12 +40,6 @@ const UserList = ({ selectedUserId, onSelect }: UserListProps) => {
       fetchNextPage();
     }
   }, [inView, fetchNextPage, hasNextPage, isFetchingNextPage]);
-
-  useEffect(() => {
-    if (data?.pages) {
-      setItems(data.pages.flatMap((page) => page.data.data));
-    }
-  }, [data?.pages]);
 
   return (
     <div className="relative">
@@ -67,9 +62,9 @@ const UserList = ({ selectedUserId, onSelect }: UserListProps) => {
         </Button>
       </div>
 
-      <ScrollArea className="h-[200] py-2">
+      <ScrollArea className="h-[200px] py-2">
         <div>
-          {items.map((item) => (
+          {data?.map((item) => (
             <UserItem
               key={item.userId}
               item={item}

@@ -73,7 +73,7 @@ const RegisterPage = () => {
 
   // 닉네임이 변경되면 중복확인 상태 초기화
   useEffect(() => {
-    setDuplicateCheckStatus("none");
+    setDuplicateCheckStatus(DUPLICATE_CHECK_STATUS.NONE);
   }, [nickname]);
 
   // 중복확인 함수
@@ -83,7 +83,7 @@ const RegisterPage = () => {
       return;
     }
 
-    setDuplicateCheckStatus("checking");
+    setDuplicateCheckStatus(DUPLICATE_CHECK_STATUS.CHECKING);
 
     try {
       const response = await mutateVerifyName({ name: nickname });
@@ -171,8 +171,14 @@ const RegisterPage = () => {
                       type="text"
                       placeholder="닉네임/업체명을 입력해주세요"
                       className={cn("h-12 pr-16")}
-                      maxLength={NICKNAME_MAX_LENGTH - 1}
+                      maxLength={NICKNAME_MAX_LENGTH}
                       {...register("nickname")}
+                      onChange={(e) => {
+                        if (e.target.value.length > NICKNAME_MAX_LENGTH) {
+                          e.target.value = e.target.value.slice(0, NICKNAME_MAX_LENGTH);
+                        }
+                        register("nickname").onChange(e);
+                      }}
                     />
                     {nickname && (
                       <div className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">

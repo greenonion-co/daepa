@@ -7,6 +7,7 @@ import {
   brPetControllerFindAll,
   BrPetControllerFindAllFilterType,
   PetDtoSex,
+  PetDtoSpecies,
 } from "@repo/api-client";
 import SelectStep from "./SelectStep";
 import LinkStep from "./LinkStep";
@@ -15,6 +16,7 @@ import { useInView } from "react-intersection-observer";
 import { PetParentDtoWithMessage } from "@/app/(브리더스룸)/pet/store/parentLink";
 
 interface ParentSearchProps {
+  species?: PetDtoSpecies;
   isOpen: boolean;
   onlySelect?: boolean;
   onClose: () => void;
@@ -25,6 +27,7 @@ interface ParentSearchProps {
 }
 
 const ParentSearchSelector = ({
+  species,
   isOpen,
   onlySelect = false,
   onClose,
@@ -41,7 +44,7 @@ const ParentSearchSelector = ({
   const itemPerPage = 10;
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
-    queryKey: [brPetControllerFindAll.name, petListType, searchQuery],
+    queryKey: [brPetControllerFindAll.name, petListType, searchQuery, species],
     queryFn: ({ pageParam = 1 }) =>
       brPetControllerFindAll({
         page: pageParam,
@@ -49,6 +52,7 @@ const ParentSearchSelector = ({
         order: "DESC",
         filterType: petListType,
         keyword: searchQuery ?? "",
+        species: species ?? undefined,
       }),
     initialPageParam: 1,
     getNextPageParam: (lastPage) => {

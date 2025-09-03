@@ -41,7 +41,7 @@ const SignInPage = () => {
             <AppleLoginButton />
             <a
               className="mb-2 flex h-[46px] w-full items-center justify-center gap-3 rounded-[12px] bg-[#F2F2F2]"
-              href={"http://localhost:4000/api/auth/sign-in/google"}
+              href={`${process.env.NEXT_PUBLIC_SERVER_BASE_URL}/api/auth/sign-in/${SOCIAL_PROVIDER.GOOGLE}`}
             >
               <Image
                 src={providerIconMap[SOCIAL_PROVIDER.GOOGLE]}
@@ -54,7 +54,7 @@ const SignInPage = () => {
 
             <a
               className="flex h-[46px] w-full items-center justify-center gap-3 rounded-[12px] bg-[#FEE500]"
-              href={"http://localhost:4000/api/auth/sign-in/kakao"}
+              href={`${process.env.NEXT_PUBLIC_SERVER_BASE_URL}/api/auth/sign-in/${SOCIAL_PROVIDER.KAKAO}`}
             >
               <Image
                 src={providerIconMap[SOCIAL_PROVIDER.KAKAO]}

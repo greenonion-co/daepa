@@ -63,6 +63,14 @@ const NameInput = ({
     }
   };
 
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.value.length > NAME_MAX_LENGTH) {
+      e.target.value = e.target.value.slice(0, NAME_MAX_LENGTH);
+    }
+
+    onChange?.(e);
+  };
+
   // 이름이 변경되면 중복확인 상태 초기화
   useEffect(() => {
     setDuplicateCheckStatus(DUPLICATE_CHECK_STATUS.NONE);
@@ -78,10 +86,11 @@ const NameInput = ({
             id="name"
             type="text"
             className={cn("h-12 pr-16")}
-            maxLength={NAME_MAX_LENGTH - 1}
+            maxLength={NAME_MAX_LENGTH}
             value={value}
-            onChange={onChange}
+            onChange={handleChange}
             disabled={disabled}
+            autoFocus
             {...props}
           />
           {value && typeof value === "string" && (

@@ -1,3 +1,5 @@
+"use client";
+
 import { XCircle, type LucideIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 

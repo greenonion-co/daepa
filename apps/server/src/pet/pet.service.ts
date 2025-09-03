@@ -39,7 +39,6 @@ import { ParentRequestEntity } from 'src/parent_request/parent_request.entity';
 import { UserNotificationService } from 'src/user_notification/user_notification.service';
 import { USER_NOTIFICATION_TYPE } from 'src/user_notification/user_notification.constant';
 import { UserNotificationEntity } from 'src/user_notification/user_notification.entity';
-import { UserEntity } from 'src/user/user.entity';
 
 const NOTIFICATION_MESSAGES = {
   PARENT_REQUEST_CANCEL: '부모 요청이 취소되었습니다.',
@@ -151,9 +150,11 @@ export class PetService {
       const adoption = await entityManager.findOne(AdoptionEntity, {
         where: { petId, isDeleted: false },
       });
-      const buyer = await entityManager.findOne(UserEntity, {
-        where: { userId: adoption?.buyerId },
-      });
+
+      let buyer: UserProfilePublicDto | null = null;
+      if (adoption?.buyerId) {
+        buyer = await this.userService.findOneProfile(adoption.buyerId);
+      }
 
       if (!pet.ownerId) {
         throw new NotFoundException('펫의 소유자를 찾을 수 없습니다.');
@@ -287,8 +288,15 @@ export class PetService {
       throw new ConflictException('이미 대기 중인 부모 연동 요청이 있습니다.');
     }
 
-    // parent_request 테이블에 요청 생성 및 알림 발송
-    if (requesterId !== parentPet.ownerId) {
+    if (requesterId === parentPet.ownerId) {
+      await entityManager.insert(ParentRequestEntity, {
+        childPetId,
+        parentPetId: parentPet.petId,
+        role: parentInfo.role,
+        message: parentInfo.message,
+        status: PARENT_STATUS.APPROVED,
+      });
+    } else {
       await this.parentRequestService.createParentRequestWithNotification(
         entityManager,
         {
@@ -296,10 +304,7 @@ export class PetService {
           parentPetId: parentPet.petId,
           role: parentInfo.role,
           message: parentInfo.message,
-          status:
-            requesterId === parentPet.ownerId
-              ? PARENT_STATUS.APPROVED
-              : PARENT_STATUS.PENDING,
+          status: PARENT_STATUS.PENDING,
         },
       );
     }

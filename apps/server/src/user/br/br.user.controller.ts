@@ -2,7 +2,7 @@ import { Controller, Get, Query } from '@nestjs/common';
 import { UserService } from '../user.service';
 import { BrAccessOnly } from 'src/common/decorators/roles.decorator';
 import { PageDto, PageMetaDto } from 'src/common/page.dto';
-import { UserDto, UserFilterDto } from '../user.dto';
+import { SafeUserDto, UserFilterDto } from '../user.dto';
 import { ApiExtraModels, ApiResponse, getSchemaPath } from '@nestjs/swagger';
 import { JwtUserPayload } from 'src/auth/strategies/jwt.strategy';
 import { JwtUser } from 'src/auth/auth.decorator';
@@ -13,7 +13,7 @@ export class BrUserController {
   constructor(private readonly userService: UserService) {}
 
   @Get('')
-  @ApiExtraModels(UserDto, PageMetaDto)
+  @ApiExtraModels(SafeUserDto, PageMetaDto)
   @ApiResponse({
     status: 200,
     description: 'BR룸 사용자 목록 조회 성공',
@@ -23,7 +23,7 @@ export class BrUserController {
       properties: {
         data: {
           type: 'array',
-          items: { $ref: getSchemaPath(UserDto) },
+          items: { $ref: getSchemaPath(SafeUserDto) },
         },
         meta: { $ref: getSchemaPath(PageMetaDto) },
       },
@@ -32,7 +32,7 @@ export class BrUserController {
   async getUsers(
     @Query() query: UserFilterDto,
     @JwtUser() token: JwtUserPayload,
-  ): Promise<PageDto<UserDto>> {
+  ): Promise<PageDto<SafeUserDto>> {
     return this.userService.getUsers(query, token.userId);
   }
 }

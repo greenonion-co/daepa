@@ -11,18 +11,17 @@ import { Table } from "@tanstack/react-table";
 import { ChevronDown, Search } from "lucide-react";
 import { TABLE_HEADER } from "../../constants";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
-import { BrPetControllerFindAllParams } from "@repo/api-client";
-import useSearchStore from "../store/search";
+import { useEffect, useState } from "react";
+import { BrPetControllerFindAllParams, PetDto } from "@repo/api-client";
+import { useFilterStore } from "../../store/filter";
 
 interface FiltersProps<TData> {
   table: Table<TData>;
 }
 
 export function Filters<TData>({ table }: FiltersProps<TData>) {
-  const { searchFilters, setSearchFilters } = useSearchStore();
   const [filters, setFilters] = useState<Partial<BrPetControllerFindAllParams>>({});
-
+  const { columnFilters, setColumnFilters, searchFilters, setSearchFilters } = useFilterStore();
   const handleSearch = () => {
     setSearchFilters(filters);
   };
@@ -35,6 +34,20 @@ export function Filters<TData>({ table }: FiltersProps<TData>) {
     setSearchFilters({});
     setFilters({});
   };
+
+  useEffect(() => {
+    if (columnFilters) return;
+
+    setColumnFilters(
+      table.getAllColumns().reduce(
+        (acc, column) => {
+          acc[column.id as keyof PetDto] = column.getIsVisible();
+          return acc;
+        },
+        {} as Partial<Record<keyof PetDto, boolean>>,
+      ),
+    );
+  }, [table, setColumnFilters, columnFilters]);
 
   return (
     <div className="flex items-center gap-2 py-2">
@@ -60,7 +73,12 @@ export function Filters<TData>({ table }: FiltersProps<TData>) {
         </Button>
       </div>
 
-      <Button variant="outline" className="relative bg-gray-200" onClick={handleResetFilters}>
+      <Button
+        disabled={!hasActiveFilters}
+        variant="outline"
+        className="relative bg-gray-200"
+        onClick={handleResetFilters}
+      >
         필터 초기화
         {hasActiveFilters && (
           <div className="absolute -right-1 -top-1 h-3 w-3 rounded-full bg-red-500" />
@@ -81,8 +99,13 @@ export function Filters<TData>({ table }: FiltersProps<TData>) {
               <DropdownMenuCheckboxItem
                 key={column.id}
                 className="capitalize"
-                checked={column.getIsVisible()}
-                onCheckedChange={(value) => column.toggleVisibility(!!value)}
+                checked={columnFilters?.[column.id as keyof PetDto]}
+                onCheckedChange={(value) => {
+                  setColumnFilters({
+                    [column.id]: !!value,
+                  });
+                }}
+                onSelect={(e) => e.preventDefault()}
               >
                 {TABLE_HEADER[column.id as keyof typeof TABLE_HEADER]}
               </DropdownMenuCheckboxItem>

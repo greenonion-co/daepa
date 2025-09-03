@@ -17,10 +17,14 @@ const PetItem = ({
       key={item.petId}
       type="button"
       className={cn(
-        "group flex cursor-pointer flex-col rounded-xl p-2 text-left",
-        disabled && "opacity-60",
+        "group flex flex-col rounded-xl p-2 text-left",
+        disabled ? "pointer-events-none cursor-not-allowed opacity-60" : "cursor-pointer",
       )}
-      onClick={() => handlePetSelect(item)}
+      disabled={disabled}
+      onClick={() => {
+        if (disabled) return;
+        handlePetSelect(item);
+      }}
     >
       <div className="flex w-full flex-col items-center gap-1">
         <div className="relative aspect-square w-full overflow-hidden rounded-lg">

@@ -1,10 +1,12 @@
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { UserDto } from "@repo/api-client";
+import { SafeUserDto } from "@repo/api-client";
+import { BadgeCheck } from "lucide-react";
 
 interface UserItemProps {
-  item: UserDto;
+  item: SafeUserDto;
   isSelected: boolean | undefined;
-  onSelect: (user: UserDto) => void;
+  onSelect: (user: SafeUserDto) => void;
 }
 
 const UserItem = ({ item, isSelected, onSelect }: UserItemProps) => {
@@ -17,6 +19,14 @@ const UserItem = ({ item, isSelected, onSelect }: UserItemProps) => {
       onClick={() => onSelect(item)}
     >
       {item.name}
+      {item.isBiz ? (
+        <Badge className="ml-2 bg-green-500 text-white">
+          <BadgeCheck />
+          사업자
+        </Badge>
+      ) : (
+        <Badge className="ml-2 bg-blue-500 text-white">일반 사용자</Badge>
+      )}
     </div>
   );
 };

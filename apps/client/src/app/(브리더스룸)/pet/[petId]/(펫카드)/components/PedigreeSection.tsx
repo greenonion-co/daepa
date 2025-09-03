@@ -69,7 +69,7 @@ const PedigreeSection = memo(({ petId, isMyPet }: PedigreeSectionProps) => {
         mutateRequestParent({
           parentId: value.petId,
           role,
-          message: value.message,
+          message: value.message ?? "",
         });
       } catch (error) {
         console.error("Failed to send notification:", error);
@@ -92,6 +92,7 @@ const PedigreeSection = memo(({ petId, isMyPet }: PedigreeSectionProps) => {
 
       <div className="grid grid-cols-2 gap-4">
         <ParentLink
+          species={formData.species}
           label="부"
           data={
             isMyPet ||
@@ -104,6 +105,7 @@ const PedigreeSection = memo(({ petId, isMyPet }: PedigreeSectionProps) => {
           editable={isMyPet}
         />
         <ParentLink
+          species={formData.species}
           label="모"
           data={
             isMyPet ||

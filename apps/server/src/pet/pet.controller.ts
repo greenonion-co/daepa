@@ -8,7 +8,6 @@ import {
   Delete,
   HttpException,
   HttpStatus,
-  BadRequestException,
 } from '@nestjs/common';
 import {
   CompleteHatchingDto,
@@ -276,9 +275,6 @@ export class PetController {
     @Body() verifyNameDto: VerifyPetNameDto,
     @JwtUser() token: JwtUserPayload,
   ): Promise<CommonResponseDto> {
-    if (!verifyNameDto.name) {
-      throw new BadRequestException('펫 이름을 입력해주세요.');
-    }
     const isExist = await this.petService.isPetNameExist(
       verifyNameDto.name,
       token.userId,

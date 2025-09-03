@@ -1,7 +1,15 @@
 import { useSidebar } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 
-const FloatingButton = ({ label, onClick }: { label: string; onClick: () => void }) => {
+const FloatingButton = ({
+  label,
+  onClick,
+  disabled,
+}: {
+  label: string;
+  onClick: () => void;
+  disabled?: boolean;
+}) => {
   const { state, isMobile } = useSidebar();
 
   return (
@@ -14,8 +22,12 @@ const FloatingButton = ({ label, onClick }: { label: string; onClick: () => void
       <div className="mx-auto max-w-[640px]">
         <button
           type="submit"
-          className="h-12 w-full cursor-pointer rounded-2xl bg-[#247DFE] text-lg font-bold text-white"
+          className={cn(
+            "h-12 w-full cursor-pointer rounded-2xl bg-[#247DFE] text-lg font-bold text-white",
+            disabled && "bg-gray-300 text-white",
+          )}
           onClick={onClick}
+          disabled={disabled}
         >
           {label}
         </button>

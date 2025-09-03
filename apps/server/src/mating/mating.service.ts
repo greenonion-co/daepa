@@ -1,5 +1,10 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { CreateMatingDto, MatingByParentsDto, MatingDto } from './mating.dto';
+import {
+  CreateMatingDto,
+  MatingByParentsDto,
+  MatingDto,
+  MatingFilterDto,
+} from './mating.dto';
 import { MatingEntity } from './mating.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
@@ -17,7 +22,6 @@ import { PET_SEX } from 'src/pet/pet.constants';
 import { LayingEntity } from 'src/laying/laying.entity';
 import { LayingDto } from 'src/laying/laying.dto';
 import { UpdateMatingDto } from './mating.dto';
-import { PageOptionsDto } from 'src/common/page.dto';
 import { PageDto, PageMetaDto } from 'src/common/page.dto';
 import { PairEntity } from 'src/pair/pair.entity';
 import { Not } from 'typeorm';
@@ -74,6 +78,7 @@ export class MatingService {
           'layings.layingDate',
           'layings.clutch',
           'pairs.id',
+          'pairs.species',
           'pairs.fatherId',
           'pairs.motherId',
           'pairs.ownerId',
@@ -96,7 +101,7 @@ export class MatingService {
   }
 
   async getMatingListFull(
-    pageOptionsDto: PageOptionsDto,
+    pageOptionsDto: MatingFilterDto,
     userId: string,
   ): Promise<PageDto<MatingByParentsDto>> {
     return this.dataSource.transaction(async (entityManager: EntityManager) => {
@@ -136,6 +141,7 @@ export class MatingService {
           'layings.layingDate',
           'layings.clutch',
           'pairs.id',
+          'pairs.species',
           'pairs.fatherId',
           'pairs.motherId',
           'pairs.ownerId',
@@ -161,6 +167,36 @@ export class MatingService {
         ])
         .where('pairs.ownerId = :userId', { userId })
         .orderBy('matings.id', pageOptionsDto.order);
+
+      if (pageOptionsDto.species) {
+        allQueryBuilder.andWhere('pairs.species = :species', {
+          species: pageOptionsDto.species,
+        });
+      }
+
+      if (pageOptionsDto.startYmd) {
+        allQueryBuilder.andWhere('matings.matingDate >= :startYmd', {
+          startYmd: pageOptionsDto.startYmd,
+        });
+      }
+
+      if (pageOptionsDto.endYmd) {
+        allQueryBuilder.andWhere('matings.matingDate <= :endYmd', {
+          endYmd: pageOptionsDto.endYmd,
+        });
+      }
+
+      if (pageOptionsDto.fatherId) {
+        allQueryBuilder.andWhere('pairs.fatherId = :fatherId', {
+          fatherId: pageOptionsDto.fatherId,
+        });
+      }
+
+      if (pageOptionsDto.motherId) {
+        allQueryBuilder.andWhere('pairs.motherId = :motherId', {
+          motherId: pageOptionsDto.motherId,
+        });
+      }
 
       const { entities } = await allQueryBuilder.getRawAndEntities();
 
@@ -200,6 +236,7 @@ export class MatingService {
           ownerId: userId,
           fatherId: createMatingDto.fatherId,
           motherId: createMatingDto.motherId,
+          species: createMatingDto.species,
         });
         pair = await entityManager.save(PairEntity, pair);
       }
@@ -258,10 +295,13 @@ export class MatingService {
         pair = await entityManager.save(PairEntity, pair);
       }
 
+      const date = new Date(updateMatingDto.matingDate);
+      const ymd = date.toISOString().slice(0, 10);
+
       // 중복 체크 (자신을 제외하고)
       const existingMating = await entityManager.existsBy(MatingEntity, {
         pairId: pair.id,
-        matingDate: new Date(updateMatingDto.matingDate),
+        matingDate: Raw((alias) => `DATE(${alias}) = :d`, { d: ymd }),
         id: Not(matingId),
       });
 

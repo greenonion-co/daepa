@@ -743,4 +743,13 @@ export class UnlinkParentDto {
   role: PARENT_ROLE;
 }
 
-export class VerifyPetNameDto extends PickType(PetBaseDto, ['name']) {}
+export class VerifyPetNameDto {
+  @ApiProperty({
+    description: '펫 이름',
+    example: '대파',
+    required: true,
+  })
+  @IsNotEmpty()
+  @IsString()
+  name: string;
+}

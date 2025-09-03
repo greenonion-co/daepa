@@ -239,6 +239,9 @@ const SettingsPage = () => {
                       placeholder="닉네임을 입력하세요"
                       value={newNickname}
                       onChange={(e) => {
+                        if (e.target.value.length > NICKNAME_MAX_LENGTH) {
+                          e.target.value = e.target.value.slice(0, NICKNAME_MAX_LENGTH);
+                        }
                         setNewNickname(e.target.value);
                         setDuplicateCheckStatus(DUPLICATE_CHECK_STATUS.NONE);
                       }}
