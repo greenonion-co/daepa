@@ -78,6 +78,7 @@ const CompleteHatchingModal = ({
       if (data?.success) {
         toast.success("해칭 완료");
         queryClient.invalidateQueries({ queryKey: [brMatingControllerFindAll.name] });
+        onClose();
       }
     } catch (error) {
       if (error instanceof AxiosError && error.response?.data?.message) {
@@ -85,8 +86,6 @@ const CompleteHatchingModal = ({
       } else {
         toast.error("해칭에 실패했습니다.");
       }
-    } finally {
-      onClose();
     }
   };
 
