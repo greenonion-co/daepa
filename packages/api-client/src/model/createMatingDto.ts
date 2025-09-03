@@ -5,6 +5,7 @@
  * Project Daepa API description
  * OpenAPI spec version: 1.0
  */
+import type { CreateMatingDtoSpecies } from "./createMatingDtoSpecies";
 
 export interface CreateMatingDto {
   /** 아빠 펫 ID */
@@ -13,4 +14,6 @@ export interface CreateMatingDto {
   motherId?: string;
   /** 메이팅 날짜 */
   matingDate: string;
+  /** 종 */
+  species: CreateMatingDtoSpecies;
 }

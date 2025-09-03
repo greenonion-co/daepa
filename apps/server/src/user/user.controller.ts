@@ -1,11 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  HttpException,
-  HttpStatus,
-  Post,
-} from '@nestjs/common';
+import { Body, ConflictException, Controller, Get, Post } from '@nestjs/common';
 import { UserService } from './user.service';
 import {
   CreateInitUserInfoDto,
@@ -76,13 +69,7 @@ export class UserController {
         message: '사용 가능한 닉네임입니다.',
       };
     } else {
-      throw new HttpException(
-        {
-          statusCode: HttpStatus.CONFLICT,
-          message: '이미 사용중인 닉네임입니다.',
-        },
-        HttpStatus.CONFLICT,
-      );
+      throw new ConflictException('이미 사용중인 닉네임입니다.');
     }
   }
 
@@ -101,12 +88,6 @@ export class UserController {
         message: '사용 가능한 이메일입니다.',
       };
     }
-    throw new HttpException(
-      {
-        statusCode: HttpStatus.CONFLICT,
-        message: '이미 사용중인 이메일입니다.',
-      },
-      HttpStatus.CONFLICT,
-    );
+    throw new ConflictException('이미 사용중인 이메일입니다.');
   }
 }

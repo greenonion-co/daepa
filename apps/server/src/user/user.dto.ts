@@ -12,6 +12,7 @@ import {
 import { OAUTH_PROVIDER } from 'src/auth/auth.constants';
 import { Exclude } from 'class-transformer';
 import { CommonResponseDto } from 'src/common/response.dto';
+import { PageOptionsDto } from 'src/common/page.dto';
 
 class UserBaseDto {
   @ApiProperty({
@@ -95,11 +96,7 @@ export class SafeUserDto extends PickType(UserBaseDto, [
   'userId',
   'name',
   'email',
-  'role',
   'isBiz',
-  'status',
-  'createdAt',
-  'updatedAt',
 ]) {}
 
 export class UserDto extends PickType(UserBaseDto, [
@@ -180,6 +177,15 @@ export class VerifyNameDto {
   name: string;
 }
 
+export class UserFilterDto extends PageOptionsDto {
+  @ApiProperty({
+    description: '검색 키워드',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  keyword?: string;
+}
 export class UserProfileResponseDto extends CommonResponseDto {
   @ApiProperty({
     description: '사용자 프로필',

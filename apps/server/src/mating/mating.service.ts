@@ -1,13 +1,19 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import {
   CreateMatingDto,
-  MatingBaseDto,
   MatingByParentsDto,
   MatingDto,
+  MatingFilterDto,
 } from './mating.dto';
 import { MatingEntity } from './mating.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, EntityManager, DataSource } from 'typeorm';
+import {
+  Repository,
+  EntityManager,
+  DataSource,
+  FindOptionsWhere,
+  Raw,
+} from 'typeorm';
 import { plainToInstance } from 'class-transformer';
 import { PetSummaryWithLayingDto } from 'src/pet/pet.dto';
 import { PetEntity } from 'src/pet/pet.entity';
@@ -16,7 +22,6 @@ import { PET_SEX } from 'src/pet/pet.constants';
 import { LayingEntity } from 'src/laying/laying.entity';
 import { LayingDto } from 'src/laying/laying.dto';
 import { UpdateMatingDto } from './mating.dto';
-import { PageOptionsDto } from 'src/common/page.dto';
 import { PageDto, PageMetaDto } from 'src/common/page.dto';
 import { PairEntity } from 'src/pair/pair.entity';
 import { Not } from 'typeorm';
@@ -73,6 +78,7 @@ export class MatingService {
           'layings.layingDate',
           'layings.clutch',
           'pairs.id',
+          'pairs.species',
           'pairs.fatherId',
           'pairs.motherId',
           'pairs.ownerId',
@@ -95,7 +101,7 @@ export class MatingService {
   }
 
   async getMatingListFull(
-    pageOptionsDto: PageOptionsDto,
+    pageOptionsDto: MatingFilterDto,
     userId: string,
   ): Promise<PageDto<MatingByParentsDto>> {
     return this.dataSource.transaction(async (entityManager: EntityManager) => {
@@ -135,6 +141,7 @@ export class MatingService {
           'layings.layingDate',
           'layings.clutch',
           'pairs.id',
+          'pairs.species',
           'pairs.fatherId',
           'pairs.motherId',
           'pairs.ownerId',
@@ -160,6 +167,36 @@ export class MatingService {
         ])
         .where('pairs.ownerId = :userId', { userId })
         .orderBy('matings.id', pageOptionsDto.order);
+
+      if (pageOptionsDto.species) {
+        allQueryBuilder.andWhere('pairs.species = :species', {
+          species: pageOptionsDto.species,
+        });
+      }
+
+      if (pageOptionsDto.startYmd) {
+        allQueryBuilder.andWhere('matings.matingDate >= :startYmd', {
+          startYmd: pageOptionsDto.startYmd,
+        });
+      }
+
+      if (pageOptionsDto.endYmd) {
+        allQueryBuilder.andWhere('matings.matingDate <= :endYmd', {
+          endYmd: pageOptionsDto.endYmd,
+        });
+      }
+
+      if (pageOptionsDto.fatherId) {
+        allQueryBuilder.andWhere('pairs.fatherId = :fatherId', {
+          fatherId: pageOptionsDto.fatherId,
+        });
+      }
+
+      if (pageOptionsDto.motherId) {
+        allQueryBuilder.andWhere('pairs.motherId = :motherId', {
+          motherId: pageOptionsDto.motherId,
+        });
+      }
 
       const { entities } = await allQueryBuilder.getRawAndEntities();
 
@@ -199,14 +236,18 @@ export class MatingService {
           ownerId: userId,
           fatherId: createMatingDto.fatherId,
           motherId: createMatingDto.motherId,
+          species: createMatingDto.species,
         });
         pair = await entityManager.save(PairEntity, pair);
       }
 
-      // 동일한 페어의 동일한 날짜에 메이팅이 있는지 확인 (exists 사용으로 성능 향상)
+      // 동일한 페어의 동일한 날짜에 메이팅이 있는지 확인
+      const date = new Date(createMatingDto.matingDate);
+      const ymd = date.toISOString().slice(0, 10);
+
       const existingMating = await entityManager.existsBy(MatingEntity, {
         pairId: pair.id,
-        matingDate: createMatingDto.matingDate,
+        matingDate: Raw((alias) => `DATE(${alias}) = :d`, { d: ymd }),
       });
 
       if (existingMating) {
@@ -215,7 +256,7 @@ export class MatingService {
 
       const matingEntity = entityManager.create(MatingEntity, {
         pairId: pair.id,
-        matingDate: createMatingDto.matingDate,
+        matingDate: ymd,
       });
       await entityManager.save(MatingEntity, matingEntity);
     });
@@ -254,10 +295,13 @@ export class MatingService {
         pair = await entityManager.save(PairEntity, pair);
       }
 
+      const date = new Date(updateMatingDto.matingDate);
+      const ymd = date.toISOString().slice(0, 10);
+
       // 중복 체크 (자신을 제외하고)
       const existingMating = await entityManager.existsBy(MatingEntity, {
         pairId: pair.id,
-        matingDate: updateMatingDto.matingDate,
+        matingDate: Raw((alias) => `DATE(${alias}) = :d`, { d: ymd }),
         id: Not(matingId),
       });
 
@@ -412,7 +456,7 @@ export class MatingService {
     });
   }
 
-  async isMatingExist(criteria: Partial<MatingBaseDto>) {
+  async isMatingExist(criteria: FindOptionsWhere<MatingEntity>) {
     const isExist = await this.matingRepository.existsBy(criteria);
     return isExist;
   }

@@ -17,7 +17,7 @@ const Header = ({ step, setStep, selectedPet, setSearchQuery, className }: Heade
 
   return (
     <div className={cn("sticky -top-[12px] z-20 mt-3 bg-white py-4 dark:bg-[#18181B]", className)}>
-      <div className="flex items-center gap-2 pb-2 pl-4">
+      <div className="flex items-center gap-2 pb-2">
         <button
           onClick={() => step === 2 && setStep(1)}
           className={`text-lg font-bold ${step === 2 ? "text-gray-400 hover:text-gray-700" : ""}`}
@@ -33,7 +33,7 @@ const Header = ({ step, setStep, selectedPet, setSearchQuery, className }: Heade
       </div>
 
       {step === 1 && (
-        <div className="flex items-center gap-2 px-2">
+        <div className="flex items-center gap-2">
           <input
             type="text"
             placeholder="부모 개체를 검색하세요"
@@ -46,7 +46,7 @@ const Header = ({ step, setStep, selectedPet, setSearchQuery, className }: Heade
               }
             }}
           />
-          <Button className="h-12 rounded-xl text-[16px]" onClick={() => setSearchQuery(keyword)}>
+          <Button className="h-11 rounded-xl text-[16px]" onClick={() => setSearchQuery(keyword)}>
             검색
           </Button>
         </div>

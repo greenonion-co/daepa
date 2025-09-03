@@ -118,7 +118,9 @@ const AdoptionDashboard = ({ data = [] }: AdoptionDashboardProps) => {
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>
             기간 선택
-            <CardDescription className="font-normal">조회할 연도와 월을 선택하세요</CardDescription>
+            <CardDescription className="mt-1 font-light">
+              조회할 연도와 월을 선택하세요
+            </CardDescription>
           </CardTitle>
 
           <div className="flex gap-4">
@@ -165,7 +167,7 @@ const AdoptionDashboard = ({ data = [] }: AdoptionDashboardProps) => {
       </Card>
 
       {/* 통계 카드들 */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-4 gap-4">
         {STATS_CARDS.map((card) => (
           <StatCard
             key={card.key}

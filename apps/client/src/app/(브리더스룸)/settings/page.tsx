@@ -40,18 +40,11 @@ import { USER_STATUS_MAP } from "@/app/(브리더스룸)/constants";
 import { cn } from "@/lib/utils";
 import { AxiosError } from "axios";
 import { tokenStorage } from "@/lib/tokenStorage";
-import { providerIconMap } from "../constants";
+import { providerIconMap } from "../../(user)/constants";
+import { DUPLICATE_CHECK_STATUS } from "../register/types";
 
 const NICKNAME_MAX_LENGTH = 15;
 const NICKNAME_MIN_LENGTH = 2;
-
-// 중복확인 상태 타입
-enum DUPLICATE_CHECK_STATUS {
-  NONE = "none",
-  CHECKING = "checking",
-  AVAILABLE = "available",
-  DUPLICATE = "duplicate",
-}
 
 const SettingsPage = () => {
   const router = useRouter();
@@ -191,7 +184,10 @@ const SettingsPage = () => {
       return;
     }
 
-    if (duplicateCheckStatus !== "available" && newNickname !== userProfile?.name) {
+    if (
+      duplicateCheckStatus !== DUPLICATE_CHECK_STATUS.AVAILABLE &&
+      newNickname !== userProfile?.name
+    ) {
       toast.error("중복확인을 먼저 진행해주세요.");
       return;
     }
@@ -243,6 +239,9 @@ const SettingsPage = () => {
                       placeholder="닉네임을 입력하세요"
                       value={newNickname}
                       onChange={(e) => {
+                        if (e.target.value.length > NICKNAME_MAX_LENGTH) {
+                          e.target.value = e.target.value.slice(0, NICKNAME_MAX_LENGTH);
+                        }
                         setNewNickname(e.target.value);
                         setDuplicateCheckStatus(DUPLICATE_CHECK_STATUS.NONE);
                       }}
@@ -251,6 +250,7 @@ const SettingsPage = () => {
                     />
                     <Button
                       variant="outline"
+                      className="h-10"
                       onClick={handleDuplicateCheck}
                       disabled={
                         isVerifyingName || !newNickname || newNickname === userProfile?.name
@@ -285,7 +285,10 @@ const SettingsPage = () => {
                     <Button
                       size="sm"
                       onClick={handleSaveNickname}
-                      disabled={isUpdatingNickname || duplicateCheckStatus !== "available"}
+                      disabled={
+                        isUpdatingNickname ||
+                        duplicateCheckStatus !== DUPLICATE_CHECK_STATUS.AVAILABLE
+                      }
                     >
                       {isUpdatingNickname ? "저장중..." : "저장"}
                     </Button>

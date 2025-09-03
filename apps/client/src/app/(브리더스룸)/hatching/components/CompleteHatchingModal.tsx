@@ -27,9 +27,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { GROWTH_KOREAN_INFO } from "../../constants";
+import NameInput from "../../components/NameInput";
+import { cn } from "@/lib/utils";
+import { useNameStore } from "../../store/name";
+import { DUPLICATE_CHECK_STATUS } from "../../register/types";
 
 interface CompleteHatchingModalProps {
   isOpen: boolean;
@@ -45,6 +48,7 @@ const CompleteHatchingModal = ({
   layingDate,
 }: CompleteHatchingModalProps) => {
   const queryClient = useQueryClient();
+  const { duplicateCheckStatus } = useNameStore();
   const [formData, setFormData] = useState<UpdatePetDto>({
     hatchingDate: format(new Date(), "yyyy-MM-dd"),
     growth: UpdatePetDtoGrowth.BABY,
@@ -52,38 +56,38 @@ const CompleteHatchingModal = ({
     desc: "",
   });
 
-  const { mutate: mutateHatched } = useMutation({
+  const { mutateAsync: mutateHatched } = useMutation({
     mutationFn: (formData: UpdatePetDto) => petControllerUpdate(petId, formData),
-    onSuccess: (response) => {
-      if (response?.data) {
-        toast.success("해칭 완료");
-        queryClient.invalidateQueries({ queryKey: [brMatingControllerFindAll.name] });
-        onClose();
-      }
-    },
-    onError: (error: AxiosError<{ message: string }>) => {
-      console.error("Failed to hatch egg:", error);
-      if (error.response?.data?.message) {
-        toast.error(error.response.data.message);
-      } else {
-        toast.error("펫 등록에 실패했습니다.");
-      }
-      onClose();
-    },
   });
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!formData.hatchingDate) {
       toast.error("해칭일을 선택해주세요.");
       return;
     }
 
-    if (!formData.name) {
-      toast.error("이름을 입력해주세요.");
+    if (!formData.name || duplicateCheckStatus !== DUPLICATE_CHECK_STATUS.AVAILABLE) {
+      toast.error("이름을 입력하고 중복확인을 완료해주세요.");
+
       return;
     }
 
-    mutateHatched(formData);
+    try {
+      const { data } = await mutateHatched(formData);
+
+      if (data?.success) {
+        toast.success("해칭 완료");
+        queryClient.invalidateQueries({ queryKey: [brMatingControllerFindAll.name] });
+      }
+    } catch (error) {
+      if (error instanceof AxiosError && error.response?.data?.message) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error("해칭에 실패했습니다.");
+      }
+    } finally {
+      onClose();
+    }
   };
 
   return (
@@ -94,7 +98,7 @@ const CompleteHatchingModal = ({
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label>산란일</Label>
+            <Label>해칭일*</Label>
             <div className="col-span-3">
               <CalendarInput
                 placeholder="해칭일을 선택하세요"
@@ -109,7 +113,7 @@ const CompleteHatchingModal = ({
           </div>
 
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="species">크기</Label>
+            <Label htmlFor="species">크기*</Label>
             <Select
               value={formData.growth}
               onValueChange={(value: PetDtoGrowth) =>
@@ -130,14 +134,17 @@ const CompleteHatchingModal = ({
           </div>
 
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="clutch">이름</Label>
+            <Label htmlFor="clutch">이름*</Label>
             <div className="col-span-3 flex flex-col gap-1">
-              <Input
-                id="name"
-                type="text"
-                placeholder="이름을 입력하세요"
+              <NameInput
                 value={formData.name}
+                placeholder="이름을 입력하세요"
                 onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
+                className={cn(
+                  "file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input shadow-xs flex h-10 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base outline-none transition-[color,box-shadow] file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
+                  "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
+                )}
+                buttonClassName="h-10"
               />
             </div>
           </div>

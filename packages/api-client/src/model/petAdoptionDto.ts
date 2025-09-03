@@ -7,6 +7,7 @@
  */
 import type { PetAdoptionDtoStatus } from "./petAdoptionDtoStatus";
 import type { PetAdoptionDtoLocation } from "./petAdoptionDtoLocation";
+import type { UserProfilePublicDto } from "./userProfilePublicDto";
 
 export interface PetAdoptionDto {
   /** 분양 아이디 */
@@ -21,8 +22,8 @@ export interface PetAdoptionDto {
   memo: string;
   /** 분양 위치 */
   location?: PetAdoptionDtoLocation;
-  /** 분양 구매자 아이디 */
-  buyerId: string;
+  /** 분양 구매자 */
+  buyer?: UserProfilePublicDto;
   /** 분양 펫 아이디 */
   petId: string;
 }

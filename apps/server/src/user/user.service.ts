@@ -1,13 +1,18 @@
 import {
-  HttpException,
-  HttpStatus,
+  BadRequestException,
+  ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindOptionsWhere, Not, Repository } from 'typeorm';
 import { UserEntity } from './user.entity';
-import { CreateInitUserInfoDto, UserDto } from './user.dto';
+import {
+  CreateInitUserInfoDto,
+  UserDto,
+  UserFilterDto,
+  SafeUserDto,
+} from './user.dto';
 import { ProviderInfo } from 'src/auth/auth.types';
 import { USER_ROLE, USER_STATUS } from './user.constant';
 import { nanoid } from 'nanoid';
@@ -16,6 +21,7 @@ import { OauthService } from 'src/auth/oauth/oauth.service';
 import { EntityManager } from 'typeorm';
 import { plainToInstance } from 'class-transformer';
 import { OauthEntity } from 'src/auth/oauth/oauth.entity';
+import { PageDto, PageMetaDto } from 'src/common/page.dto';
 
 @Injectable()
 export class UserService {
@@ -76,6 +82,15 @@ export class UserService {
     };
   }
 
+  private toSafeUserDto(entity: UserEntity): SafeUserDto {
+    return {
+      userId: entity.userId,
+      name: entity.name,
+      email: entity.email,
+      isBiz: entity.isBiz,
+    };
+  }
+
   async findOne(where: FindOptionsWhere<UserEntity>) {
     const userEntity = await this.userRepository.findOneBy(where);
 
@@ -111,12 +126,8 @@ export class UserService {
     try {
       const { name, isBiz } = createInitUserInfoDto;
       if (name.length < 2 || name.length > 15) {
-        throw new HttpException(
-          {
-            statusCode: HttpStatus.BAD_REQUEST,
-            message: '사용자명은 2자 이상 15자 이하여야 합니다.',
-          },
-          HttpStatus.BAD_REQUEST,
+        throw new BadRequestException(
+          '사용자명은 2자 이상 15자 이하여야 합니다.',
         );
       }
 
@@ -131,13 +142,8 @@ export class UserService {
     } catch (error) {
       if (isMySQLError(error) && error.code === 'ER_DUP_ENTRY') {
         if (error.message.includes('UNIQUE_USER_NAME')) {
-          throw new HttpException(
-            {
-              statusCode: HttpStatus.CONFLICT,
-              message:
-                '이미 사용중인 사용자명입니다. 다른 사용자명을 입력해주세요.',
-            },
-            HttpStatus.CONFLICT,
+          throw new ConflictException(
+            '이미 사용중인 사용자명입니다. 다른 사용자명을 입력해주세요.',
           );
         }
       }
@@ -194,5 +200,38 @@ export class UserService {
       createUserEntity,
     );
     return this.toUserDto(savedUserEntity);
+  }
+
+  async getUsers(
+    query: UserFilterDto,
+    userId: string,
+  ): Promise<PageDto<SafeUserDto>> {
+    const queryBuilder = this.userRepository
+      .createQueryBuilder('users')
+      .where('users.status = :status', {
+        status: USER_STATUS.ACTIVE,
+      })
+      .andWhere('users.userId != :userId', { userId });
+
+    if (query.keyword) {
+      queryBuilder.andWhere('users.name LIKE :keyword', {
+        keyword: `%${query.keyword}%`,
+      });
+    }
+
+    queryBuilder
+      .orderBy('users.createdAt', query.order)
+      .skip(query.skip)
+      .take(query.itemPerPage);
+
+    const [entities, total] = await queryBuilder.getManyAndCount();
+    const users = entities.map((e) => this.toSafeUserDto(e));
+
+    const pageMetaDto = new PageMetaDto({
+      totalCount: total,
+      pageOptionsDto: query,
+    });
+
+    return new PageDto(users, pageMetaDto);
   }
 }

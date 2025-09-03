@@ -16,6 +16,8 @@ import {
   PetDtoGrowth,
 } from "@repo/api-client";
 import PetCard from "./PetCard";
+import { Search } from "lucide-react";
+import GuideText from "../../components/GuideText";
 
 const RangeFilterCalendar = memo(() => {
   const [month, setMonth] = useState<Date>(new Date());
@@ -73,6 +75,8 @@ const RangeFilterCalendar = memo(() => {
 
   return (
     <div>
+      <GuideText icon={Search} text="시작일과 종료일을 선택해서 해칭 펫을 조회해보세요!" />
+
       <div className="flex gap-4">
         <Calendar
           mode="range"

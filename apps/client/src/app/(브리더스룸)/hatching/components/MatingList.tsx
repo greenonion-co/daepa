@@ -1,14 +1,14 @@
 import Loading from "@/components/common/Loading";
-import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   brMatingControllerFindAll,
   CommonResponseDto,
   MatingByDateDto,
   matingControllerCreateMating,
+  PetDtoSpecies,
 } from "@repo/api-client";
 import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Heart, Plus, ChevronUp, ChevronDown } from "lucide-react";
+import { ChevronUp, ChevronDown } from "lucide-react";
 import MatingItem from "./MatingItem";
 import { toast } from "sonner";
 import { memo, useCallback, useEffect, useState } from "react";
@@ -18,22 +18,49 @@ import { Button } from "@/components/ui/button";
 import CreateMatingForm from "./CreateMatingForm";
 import { AxiosError } from "axios";
 import { useInView } from "react-intersection-observer";
+import Filters from "./Filters";
+import { useMatingFilterStore } from "../../store/matingFilter";
+import { format } from "date-fns";
+import { isNil, omitBy } from "es-toolkit";
 
 const MatingList = memo(() => {
   const { ref, inView } = useInView();
   const queryClient = useQueryClient();
+  const { species, father, mother, startDate, endDate } = useMatingFilterStore();
   const [isCreateFormOpen, setIsCreateFormOpen] = useState(false);
   const itemPerPage = 10;
 
   // 메이팅 조회 (무한 스크롤)
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
-    queryKey: [brMatingControllerFindAll.name],
-    queryFn: ({ pageParam = 1 }) =>
-      brMatingControllerFindAll({
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useInfiniteQuery({
+    queryKey: [
+      brMatingControllerFindAll.name,
+      species,
+      father?.petId,
+      mother?.petId,
+      startDate,
+      endDate,
+    ],
+    queryFn: ({ pageParam = 1 }) => {
+      const startYmd = startDate ? format(startDate, "yyyy-MM-dd") : undefined;
+      const endYmd = endDate ? format(endDate, "yyyy-MM-dd") : undefined;
+      const filter = omitBy(
+        {
+          species: species ?? undefined,
+          fatherId: father?.petId,
+          motherId: mother?.petId,
+          startYmd,
+          endYmd,
+        },
+        isNil,
+      );
+
+      return brMatingControllerFindAll({
         page: pageParam,
         itemPerPage,
         order: "DESC",
-      }),
+        ...filter,
+      });
+    },
     initialPageParam: 1,
     getNextPageParam: (lastPage) => {
       if (lastPage.data.meta.hasNextPage) {
@@ -75,52 +102,31 @@ const MatingList = memo(() => {
     }
   }, [inView, fetchNextPage, hasNextPage, isFetchingNextPage]);
 
-  if (!items || items.length === 0) {
-    return (
-      <div className="space-y-4">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Heart className="h-5 w-5 text-pink-500" />
-                메이팅 현황
-              </div>
-              <Button
-                onClick={() => setIsCreateFormOpen(!isCreateFormOpen)}
-                className="flex items-center gap-2"
-              >
-                {isCreateFormOpen ? (
-                  <ChevronUp className="h-4 w-4" />
-                ) : (
-                  <Plus className="h-4 w-4" />
-                )}
-                {isCreateFormOpen ? "폼 닫기" : "새 메이팅 추가"}
-              </Button>
-            </CardTitle>
-            <CardDescription>등록된 메이팅이 없습니다.</CardDescription>
-          </CardHeader>
-        </Card>
-
-        {isCreateFormOpen && <CreateMatingForm onClose={() => setIsCreateFormOpen(false)} />}
-      </div>
-    );
-  }
+  if (isLoading) return <Loading />;
 
   const handleAddMatingClick = ({
+    species,
     fatherId,
     motherId,
     matingDate,
   }: {
+    species?: PetDtoSpecies;
     fatherId?: string;
     motherId?: string;
     matingDate: string;
   }) => {
+    if (!species) {
+      toast.error("종을 선택해주세요.");
+      return;
+    }
+
     if (!matingDate) {
       toast.error("메이팅 날짜를 선택해주세요.");
       return;
     }
 
     createMating({
+      species,
       matingDate,
       fatherId,
       motherId,
@@ -128,23 +134,33 @@ const MatingList = memo(() => {
   };
 
   return (
-    <div>
+    <div className="flex flex-col">
       {/* 헤더 영역 */}
-      <Button
-        onClick={() => setIsCreateFormOpen(!isCreateFormOpen)}
-        className="flex items-center gap-2 dark:bg-gray-800 dark:text-gray-200"
-      >
-        새 메이팅 추가
-        {isCreateFormOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-      </Button>
+      <div className="flex items-center justify-between px-2">
+        <h2 className="text-lg font-bold">메이팅 리스트</h2>
+
+        <Button
+          onClick={() => setIsCreateFormOpen(!isCreateFormOpen)}
+          className="cursor-pointer gap-2 dark:bg-gray-800 dark:text-gray-200"
+        >
+          새 메이팅 추가
+          {isCreateFormOpen ? (
+            <ChevronUp className="h-4 w-4" />
+          ) : (
+            <ChevronDown className="h-4 w-4" />
+          )}
+        </Button>
+      </div>
 
       {/* 폴더블 폼 */}
       {isCreateFormOpen && <CreateMatingForm onClose={() => setIsCreateFormOpen(false)} />}
 
+      {/* 필터 */}
+      <Filters />
       <div className="m-2 text-sm text-gray-600 dark:text-gray-400">검색 결과: {totalCount}개</div>
 
-      <ScrollArea className="h-[700px]">
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+      <ScrollArea>
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
           {items.map((matingGroup, index) => (
             <div
               key={index}
@@ -179,6 +195,7 @@ const MatingList = memo(() => {
                     disabledDates={matingDates(matingGroup?.matingsByDate ?? [])}
                     onConfirm={(matingDate) =>
                       handleAddMatingClick({
+                        species: matingGroup.species,
                         fatherId: matingGroup.father?.petId,
                         motherId: matingGroup.mother?.petId,
                         matingDate,
