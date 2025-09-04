@@ -15,7 +15,6 @@ import { validateStep } from "@/lib/form";
 import { FormData } from "../store/pet";
 import { toast } from "sonner";
 import { useNameStore } from "../../store/name";
-import { UnlinkParentDtoRole } from "@repo/api-client";
 
 type SELECTOR_TYPE = "species" | "growth" | "sex";
 

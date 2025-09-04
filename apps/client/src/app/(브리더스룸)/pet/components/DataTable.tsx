@@ -45,7 +45,7 @@ export const DataTable = ({
   hasFilter = true,
   isClickable = true,
 }: DataTableProps<PetDto>) => {
-  const { columnFilters } = useFilterStore();
+  const { columnFilters, searchFilters, setSearchFilters, setColumnFilters } = useFilterStore();
   const { sorting, rowSelection, setSorting, setRowSelection } = useTableStore();
 
   const router = useRouter();
@@ -80,7 +80,15 @@ export const DataTable = ({
   return (
     <div className="relative w-full">
       <div className="w-full">
-        {hasFilter && <Filters table={table} />}
+        {hasFilter && (
+          <Filters
+            table={table}
+            columnFilters={columnFilters}
+            setColumnFilters={setColumnFilters}
+            searchFilters={searchFilters}
+            setSearchFilters={setSearchFilters}
+          />
+        )}
 
         <div className="rounded-md border">
           <Table>

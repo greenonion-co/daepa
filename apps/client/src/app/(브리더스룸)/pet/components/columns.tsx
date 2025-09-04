@@ -24,15 +24,7 @@ import {
   TABLE_HEADER,
 } from "../../constants";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   AdoptionDtoStatus,
-  BrPetControllerFindAllParams,
   UpdateParentRequestDtoStatus,
   PetDto,
   PetDtoGrowth,
@@ -40,65 +32,39 @@ import {
 } from "@repo/api-client";
 import LinkButton from "../../components/LinkButton";
 import { format } from "date-fns";
+import TableHeaderSelect from "../../components/TableHeaderSelect";
 import { useFilterStore } from "../../store/filter";
 
-function TableHeaderSelect({
+const HeaderSelect = <TData,>({
   column,
   title,
   items,
-  renderItem = (item: string | number) => item.toString(),
+  renderItem,
 }: {
-  column: Column<PetDto, unknown>;
+  column: Column<TData, unknown>;
   title: string;
-  items: string[] | number[];
+  items: Array<string | number>;
   renderItem?: (item: string | number) => string;
-}) {
+}) => {
   const { searchFilters, setSearchFilters } = useFilterStore();
-  const columnId = column.id === "adoption_status" ? "status" : column.id;
-  const handleValueChange = (value: string) => {
-    if (value === "all") {
-      setSearchFilters({
-        ...searchFilters,
-        [columnId]: undefined,
-      });
-      return;
-    }
-
-    setSearchFilters({
-      ...searchFilters,
-      [columnId]: value,
-    });
-  };
-
   return (
-    <div className="mb-1 mt-1 flex flex-col items-center">
-      {title}
-      <Select
-        value={searchFilters[columnId as keyof BrPetControllerFindAllParams]?.toString() ?? "all"}
-        onValueChange={handleValueChange}
-      >
-        <SelectTrigger size="sm" className="mt-1">
-          <SelectValue placeholder="전체" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">전체</SelectItem>
-          {items.map((item) => (
-            <SelectItem key={item} value={item.toString()}>
-              {renderItem(item)}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
+    <TableHeaderSelect
+      column={column}
+      title={title}
+      items={items}
+      searchFilters={searchFilters}
+      setSearchFilters={setSearchFilters}
+      renderItem={renderItem}
+    />
   );
-}
+};
 
 export const columns: ColumnDef<PetDto>[] = [
   {
     accessorKey: "isPublic",
     header: ({ column }) => {
       return (
-        <TableHeaderSelect
+        <HeaderSelect
           column={column}
           title={TABLE_HEADER.isPublic || ""}
           items={[1, 0]}
@@ -121,7 +87,7 @@ export const columns: ColumnDef<PetDto>[] = [
     accessorKey: "adoption.status",
     header: ({ column }) => {
       return (
-        <TableHeaderSelect
+        <HeaderSelect
           column={column}
           title={TABLE_HEADER.adoption_status}
           items={Object.values(AdoptionDtoStatus)}
@@ -158,7 +124,7 @@ export const columns: ColumnDef<PetDto>[] = [
       const uniqueSpecies = Object.keys(SPECIES_KOREAN_INFO);
 
       return (
-        <TableHeaderSelect
+        <HeaderSelect
           column={column}
           title={TABLE_HEADER.species}
           items={uniqueSpecies}
@@ -177,7 +143,7 @@ export const columns: ColumnDef<PetDto>[] = [
       const uniqueSizes = Object.keys(GROWTH_KOREAN_INFO);
 
       return (
-        <TableHeaderSelect
+        <HeaderSelect
           column={column}
           title={TABLE_HEADER.growth}
           items={uniqueSizes}
@@ -226,7 +192,7 @@ export const columns: ColumnDef<PetDto>[] = [
       const uniqueSexes = Object.keys(GENDER_KOREAN_INFO);
 
       return (
-        <TableHeaderSelect
+        <HeaderSelect
           column={column}
           title={TABLE_HEADER.sex}
           items={uniqueSexes}
@@ -323,7 +289,7 @@ export const columns: ColumnDef<PetDto>[] = [
     header: ({ column }) => {
       const uniqueFoods = FOOD_LIST;
 
-      return <TableHeaderSelect column={column} title={TABLE_HEADER.foods} items={uniqueFoods} />;
+      return <HeaderSelect column={column} title={TABLE_HEADER.foods} items={uniqueFoods} />;
     },
     cell: ({ row }) => {
       const foods = row.getValue("foods") as string[];

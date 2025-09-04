@@ -153,7 +153,11 @@ export class PetService {
 
       let buyer: UserProfilePublicDto | null = null;
       if (adoption?.buyerId) {
-        buyer = await this.userService.findOneProfile(adoption.buyerId);
+        try {
+          buyer = await this.userService.findOneProfile(adoption.buyerId);
+        } catch {
+          buyer = null;
+        }
       }
 
       if (!pet.ownerId) {
@@ -171,10 +175,12 @@ export class PetService {
         owner,
         father,
         mother,
-        adoption: {
-          ...adoption,
-          buyer,
-        },
+        adoption: adoption
+          ? {
+              ...adoption,
+              buyer,
+            }
+          : null,
       });
     });
   }
@@ -278,7 +284,7 @@ export class PetService {
   ): Promise<void> {
     // 기존 대기 중인 요청이 있는지 확인
     const existingRequest =
-      await this.parentRequestService.findPendingRequestByChildAndParent(
+      await this.parentRequestService.findActiveRequestByChildAndParent(
         entityManager,
         childPetId,
         parentPet.petId,

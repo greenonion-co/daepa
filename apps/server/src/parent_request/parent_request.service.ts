@@ -208,6 +208,21 @@ export class ParentRequestService {
     return await entityManager.save(ParentRequestEntity, parentRequest);
   }
 
+  async findActiveRequestByChildAndParent(
+    entityManager: EntityManager,
+    childPetId: string,
+    parentPetId: string,
+  ): Promise<ParentRequestEntity | null> {
+    return await entityManager.findOne(ParentRequestEntity, {
+      where: {
+        childPetId,
+        parentPetId,
+        status: In([PARENT_STATUS.PENDING, PARENT_STATUS.APPROVED]),
+      },
+      select: ['id', 'childPetId', 'parentPetId', 'role', 'status', 'message'],
+    });
+  }
+
   async findPendingRequestByChildAndParent(
     entityManager: EntityManager,
     childPetId: string,

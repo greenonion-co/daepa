@@ -95,7 +95,7 @@ const AdoptionReceipt = memo(({ adoption, isEditable = true }: AdoptionReceiptPr
               </div>
             )}
             분양 영수증{" "}
-            {adoption?.status !== PetAdoptionDtoStatus.SOLD && (
+            {adoption?.adoptionId && adoption?.status !== PetAdoptionDtoStatus.SOLD && (
               <>
                 {isEditable && (
                   <button className="cursor-pointer" onClick={handleEditAdoption}>

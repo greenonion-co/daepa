@@ -10,9 +10,10 @@ import { useEffect } from "react";
 import Link from "next/link";
 import Add from "@mui/icons-material/Add";
 import { useFilterStore } from "../store/filter";
-import { ScanFace } from "lucide-react";
-import { Card } from "@/components/ui/card";
+
 import Loading from "@/components/common/Loading";
+import { Card } from "@/components/ui/card";
+import { ScanFace } from "lucide-react";
 
 export default function PetPage() {
   const { ref, inView } = useInView();
@@ -60,8 +61,7 @@ export default function PetPage() {
         <h1 className="text-2xl font-bold">펫 목록</h1>
         <div className="text-sm text-gray-600">검색 결과: {totalCount}개</div>
       </div>
-
-      {items && items.length === 0 ? (
+      {items && items.length === 0 && Object.keys(searchFilters).length === 0 ? (
         <Link href="/register/1">
           <Card className="flex cursor-pointer flex-col items-center justify-center bg-blue-50 p-10 hover:bg-blue-100">
             <ScanFace className="h-10 w-10 text-blue-500" />

@@ -12,18 +12,27 @@ import { ChevronDown, Search } from "lucide-react";
 import { TABLE_HEADER } from "../../constants";
 import { Input } from "@/components/ui/input";
 import { useEffect, useState } from "react";
-import { BrPetControllerFindAllParams, PetDto } from "@repo/api-client";
-import { useFilterStore } from "../../store/filter";
+import { PetDto } from "@repo/api-client";
+import { FilterStore } from "../../store/filter";
 
-interface FiltersProps<TData> {
+type AnyParams = Record<string, string | number | string[] | number[]>;
+interface FiltersProps<TData, TParams extends AnyParams = AnyParams> extends FilterStore<TParams> {
   table: Table<TData>;
+  placeholder?: string;
 }
 
-export function Filters<TData>({ table }: FiltersProps<TData>) {
-  const [filters, setFilters] = useState<Partial<BrPetControllerFindAllParams>>({});
-  const { columnFilters, setColumnFilters, searchFilters, setSearchFilters } = useFilterStore();
+export function Filters<TData, TParams extends AnyParams = AnyParams>({
+  table,
+  searchFilters,
+  setSearchFilters,
+  columnFilters,
+  setColumnFilters,
+}: FiltersProps<TData, TParams>) {
+  const [filters, setFilters] = useState<Partial<TParams>>(
+    (searchFilters as Partial<TParams>) ?? ({} as Partial<TParams>),
+  );
   const handleSearch = () => {
-    setSearchFilters(filters);
+    setSearchFilters({ ...searchFilters, ...filters });
   };
 
   const hasActiveFilters = Object.entries(searchFilters).some(
@@ -58,7 +67,7 @@ export function Filters<TData>({ table }: FiltersProps<TData>) {
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
           <Input
             placeholder="펫 이름으로 검색"
-            value={filters.keyword || ""}
+            value={typeof filters.keyword === "string" ? filters.keyword : ""}
             onChange={(e) => setFilters((prev) => ({ ...prev, keyword: e.target.value }))}
             className="pl-10"
             onKeyDown={(e) => {

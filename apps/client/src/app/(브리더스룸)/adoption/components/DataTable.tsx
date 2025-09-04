@@ -24,6 +24,8 @@ import { overlay } from "overlay-kit";
 import AdoptionDetailModal from "./AdoptionDetailModal";
 import useTableStore from "../../pet/store/table";
 import { useQueryClient } from "@tanstack/react-query";
+import { Filters } from "../../pet/components/Filters";
+import { useAdoptionFilterStore } from "../../store/adoptionFilter";
 
 interface DataTableProps<TData> {
   columns: ColumnDef<TData>[];
@@ -41,31 +43,21 @@ export const DataTable = ({
   loaderRefAction,
 }: DataTableProps<AdoptionDto>) => {
   const queryClient = useQueryClient();
-  const {
-    sorting,
-    columnFilters,
-    columnVisibility,
-    rowSelection,
-    setSorting,
-    setColumnFilters,
-    setColumnVisibility,
-    setRowSelection,
-  } = useTableStore();
+  const { columnFilters, searchFilters, setSearchFilters, setColumnFilters } =
+    useAdoptionFilterStore();
+  const { sorting, rowSelection, setSorting, setRowSelection } = useTableStore();
 
   const table = useReactTable({
     data,
     columns,
     onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
     state: {
       sorting,
-      columnFilters,
-      columnVisibility,
+      columnVisibility: columnFilters,
       rowSelection,
     },
   });
@@ -102,6 +94,14 @@ export const DataTable = ({
   return (
     <div className="relative w-full">
       <div className="w-full">
+        <Filters
+          table={table}
+          searchFilters={searchFilters}
+          setSearchFilters={setSearchFilters}
+          columnFilters={columnFilters}
+          setColumnFilters={setColumnFilters}
+        />
+
         <div className="rounded-md border">
           <Table>
             <TableHeader>

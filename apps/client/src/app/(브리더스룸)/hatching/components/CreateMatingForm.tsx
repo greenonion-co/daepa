@@ -24,11 +24,11 @@ import { useSelect } from "../../register/hooks/useSelect";
 import { overlay } from "overlay-kit";
 import Dialog from "../../components/Form/Dialog";
 
-const MatingInitialFormData = {
+const getInitialFormData = () => ({
   father: undefined,
   mother: undefined,
   matingDate: format(new Date(), "yyyy-MM-dd"),
-};
+});
 
 interface CreateMatingFormProps {
   onClose: () => void;
@@ -42,9 +42,9 @@ const CreateMatingForm = ({ onClose }: CreateMatingFormProps) => {
     father?: PetParentDto;
     mother?: PetParentDto;
     matingDate: string;
-  }>(MatingInitialFormData);
+  }>(() => getInitialFormData());
 
-  const { mutateAsync: createMating } = useMutation({
+  const { mutateAsync: createMating, isPending } = useMutation({
     mutationFn: matingControllerCreateMating,
   });
 
@@ -91,7 +91,7 @@ const CreateMatingForm = ({ onClose }: CreateMatingFormProps) => {
 
       toast.success("메이팅이 추가되었습니다.");
       queryClient.invalidateQueries({ queryKey: [brMatingControllerFindAll.name] });
-      setFormData(MatingInitialFormData);
+      setFormData(getInitialFormData());
     } catch (error) {
       if (error instanceof AxiosError) {
         toast.error(error.response?.data?.message ?? "메이팅 추가에 실패했습니다.");
@@ -232,7 +232,9 @@ const CreateMatingForm = ({ onClose }: CreateMatingFormProps) => {
             <Button variant="outline" onClick={onClose}>
               취소
             </Button>
-            <Button onClick={handleSubmit}>메이팅 추가</Button>
+            <Button disabled={isPending} onClick={handleSubmit}>
+              {isPending ? "추가 중..." : "메이팅 추가"}
+            </Button>
           </div>
         </div>
       </div>

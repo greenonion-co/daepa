@@ -15,6 +15,7 @@ import EditAdoptionModal from "./components/EditAdoptionModal";
 import AdoptionDashboard from "./components/AdoptionDashboard";
 import { columns } from "./components/columns";
 import DataTable from "./components/DataTable";
+import { useAdoptionFilterStore } from "../store/adoptionFilter";
 import { Card } from "@/components/ui/card";
 
 const AdoptionPage = () => {
@@ -22,14 +23,15 @@ const AdoptionPage = () => {
   const { ref, inView } = useInView();
   const itemPerPage = 10;
   const [showDashboard, setShowDashboard] = useState(false);
-
+  const { searchFilters } = useAdoptionFilterStore();
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
-    queryKey: [adoptionControllerGetAllAdoptions.name],
+    queryKey: [adoptionControllerGetAllAdoptions.name, searchFilters],
     queryFn: ({ pageParam = 1 }) =>
       adoptionControllerGetAllAdoptions({
         page: pageParam,
         itemPerPage,
         order: "DESC",
+        ...searchFilters,
       }),
     initialPageParam: 1,
     getNextPageParam: (lastPage) => {
@@ -64,7 +66,7 @@ const AdoptionPage = () => {
 
   if (isLoading) return <Loading />;
 
-  if (data?.length === 0)
+  if (data && data.length === 0 && Object.keys(searchFilters).length === 0)
     return (
       <div className="container mx-auto p-6">
         <Card

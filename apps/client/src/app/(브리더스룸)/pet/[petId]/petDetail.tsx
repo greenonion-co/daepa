@@ -8,6 +8,7 @@ import { PetDto } from "@repo/api-client";
 import { ChevronDown } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import AdoptionReceipt from "./(펫카드)/components/AdoptionReceipt";
+import { useUserStore } from "../../store/user";
 
 interface PetDetailProps {
   pet: PetDto;
@@ -20,6 +21,9 @@ const PetDetail = ({ pet, qrCodeDataUrl }: PetDetailProps) => {
   const searchParams = useSearchParams();
   const from = searchParams.get("from");
   const [isWideScreen, setIsWideScreen] = useState(false);
+
+  const { user } = useUserStore();
+  const isMyPet = !!user && user.userId === pet.owner.userId;
 
   // 화면 크기 감지
   useEffect(() => {
@@ -112,7 +116,7 @@ const PetDetail = ({ pet, qrCodeDataUrl }: PetDetailProps) => {
           <div className="h-[700px] w-full bg-white shadow-xl dark:bg-[#18181B]">
             <CardFront pet={pet} qrCodeDataUrl={qrCodeDataUrl} />
 
-            {isWideScreen && pet.adoption && <AdoptionReceipt adoption={pet.adoption} />}
+            {isMyPet && isWideScreen && pet.adoption && <AdoptionReceipt adoption={pet.adoption} />}
           </div>
           {/* 오른쪽: CardBack */}
           <div className="w-full rounded-xl border-[1.5px] border-gray-300 bg-white shadow-xl dark:bg-[#18181B]">

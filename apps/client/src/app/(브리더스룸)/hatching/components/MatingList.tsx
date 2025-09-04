@@ -7,7 +7,7 @@ import {
   PetDtoSpecies,
 } from "@repo/api-client";
 import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { ChevronUp, ChevronDown } from "lucide-react";
+import { ChevronUp, ChevronDown, ChevronsDown, Cake } from "lucide-react";
 import MatingItem from "./MatingItem";
 import { toast } from "sonner";
 import { memo, useCallback, useEffect, useState } from "react";
@@ -21,6 +21,7 @@ import Filters from "./Filters";
 import { useMatingFilterStore } from "../../store/matingFilter";
 import { format } from "date-fns";
 import { isNil, omitBy } from "es-toolkit";
+import { Card } from "@/components/ui/card";
 
 const MatingList = memo(() => {
   const { ref, inView } = useInView();
@@ -28,6 +29,8 @@ const MatingList = memo(() => {
   const { species, father, mother, startDate, endDate } = useMatingFilterStore();
   const [isCreateFormOpen, setIsCreateFormOpen] = useState(false);
   const itemPerPage = 10;
+
+  const hasFilter = !!species || !!father?.petId || !!mother?.petId || !!startDate || !!endDate;
 
   // 메이팅 조회 (무한 스크롤)
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useInfiniteQuery({
@@ -95,6 +98,30 @@ const MatingList = memo(() => {
   }, [inView, fetchNextPage, hasNextPage, isFetchingNextPage]);
 
   if (isLoading) return <Loading />;
+
+  if (items && items.length === 0 && !hasFilter) {
+    return (
+      <div className="flex flex-col items-center space-y-4">
+        <span className="inline-flex animate-bounce items-center gap-2 rounded-full bg-blue-900/90 px-4 py-2 text-sm text-white">
+          <ChevronsDown className="h-4 w-4" />
+          클릭해서 메이팅을 추가해보세요!
+        </span>
+        <Card
+          className="flex w-full cursor-pointer flex-col items-center justify-center bg-blue-50 p-10 hover:bg-blue-100 dark:bg-gray-900 dark:text-gray-200"
+          onClick={() => setIsCreateFormOpen((prev) => !prev)}
+        >
+          <Cake className="h-10 w-10 text-blue-500" />
+          <div className="text-center text-gray-600 dark:text-gray-400">
+            메이팅을
+            <span className="text-blue-500">추가</span>하여
+            <div className="font-semibold text-blue-500">편리하게 관리해보세요!</div>
+          </div>
+        </Card>
+
+        {isCreateFormOpen && <CreateMatingForm onClose={() => setIsCreateFormOpen(false)} />}
+      </div>
+    );
+  }
 
   const handleAddMatingClick = async ({
     species,
