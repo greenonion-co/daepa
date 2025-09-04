@@ -23,6 +23,8 @@ export class GlobalS3ClientSingleton {
         endpoint,
         credentials: { accessKeyId, secretAccessKey },
         forcePathStyle: true,
+        maxAttempts: 3,
+        retryMode: "standard",
       });
       GlobalS3ClientSingleton.isInitialized = true;
     }
