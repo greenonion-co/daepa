@@ -3,11 +3,12 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Image from "next/image";
 import AppleLoginButton from "./AppleLoginButton";
-import { providerIconMap, SOCIAL_PROVIDER } from "../constants";
+import { providerIconMap } from "../constants";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { tokenStorage } from "@/lib/tokenStorage";
 import { toast } from "sonner";
+import { UserProfileDtoProviderItem } from "@repo/api-client";
 
 const SignInPage = () => {
   const router = useRouter();
@@ -41,10 +42,10 @@ const SignInPage = () => {
             <AppleLoginButton />
             <a
               className="mb-2 flex h-[46px] w-full items-center justify-center gap-3 rounded-[12px] bg-[#F2F2F2]"
-              href={`${process.env.NEXT_PUBLIC_SERVER_BASE_URL}/api/auth/sign-in/${SOCIAL_PROVIDER.GOOGLE}`}
+              href={`${process.env.NEXT_PUBLIC_SERVER_BASE_URL}/api/auth/sign-in/${UserProfileDtoProviderItem.google}`}
             >
               <Image
-                src={providerIconMap[SOCIAL_PROVIDER.GOOGLE]}
+                src={providerIconMap[UserProfileDtoProviderItem.google]}
                 alt="Google"
                 width={36}
                 height={36}
@@ -54,10 +55,10 @@ const SignInPage = () => {
 
             <a
               className="flex h-[46px] w-full items-center justify-center gap-3 rounded-[12px] bg-[#FEE500]"
-              href={`${process.env.NEXT_PUBLIC_SERVER_BASE_URL}/api/auth/sign-in/${SOCIAL_PROVIDER.KAKAO}`}
+              href={`${process.env.NEXT_PUBLIC_SERVER_BASE_URL}/api/auth/sign-in/${UserProfileDtoProviderItem.kakao}`}
             >
               <Image
-                src={providerIconMap[SOCIAL_PROVIDER.KAKAO]}
+                src={providerIconMap[UserProfileDtoProviderItem.kakao]}
                 alt="Kakao"
                 width={18}
                 height={18}
