@@ -1,5 +1,5 @@
 import { ApiProperty, OmitType } from '@nestjs/swagger';
-import { IsDate, IsNumber, IsString } from 'class-validator';
+import { IsDate, IsNumber, IsString, IsUrl } from 'class-validator';
 
 export class PetImageItem {
   @ApiProperty({
@@ -13,7 +13,7 @@ export class PetImageItem {
     description: '펫 이미지 원본 url',
     example: 'https://daepa.store/XXXXXXXX/bDbKDMjCVBtwRDSqvJvzH',
   })
-  @IsString()
+  @IsUrl()
   url: string;
 
   @ApiProperty({
