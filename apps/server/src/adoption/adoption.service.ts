@@ -8,13 +8,14 @@ import { FindOptionsWhere, EntityManager, DataSource } from 'typeorm';
 import { AdoptionEntity } from './adoption.entity';
 import {
   AdoptionDto,
+  AdoptionFilterDto,
   CreateAdoptionDto,
   UpdateAdoptionDto,
 } from './adoption.dto';
 import { PetService } from 'src/pet/pet.service';
 import { UserService } from 'src/user/user.service';
 import { nanoid } from 'nanoid';
-import { PageMetaDto, PageOptionsDto } from 'src/common/page.dto';
+import { PageMetaDto } from 'src/common/page.dto';
 import { PageDto } from 'src/common/page.dto';
 import {
   ADOPTION_SALE_STATUS,
@@ -139,12 +140,12 @@ export class AdoptionService {
   }
 
   async findAll(
-    pageOptionsDto: PageOptionsDto,
+    pageOptionsDto: AdoptionFilterDto,
     userId: string,
   ): Promise<PageDto<AdoptionDto>> {
     const [adoptionEntities, totalCount] = await this.dataSource.transaction(
       async (entityManager: EntityManager) => {
-        return entityManager
+        const qb = entityManager
           .createQueryBuilder(AdoptionEntity, 'adoptions')
           .leftJoinAndMapOne(
             'adoptions.pet',
@@ -166,10 +167,29 @@ export class AdoptionService {
           )
           .where('adoptions.isDeleted = :isDeleted', { isDeleted: false })
           .andWhere('adoptions.sellerId = :userId', { userId })
-          .orderBy('adoptions.createdAt', pageOptionsDto.order)
-          .skip(pageOptionsDto.skip)
-          .take(pageOptionsDto.itemPerPage)
-          .getManyAndCount();
+          .orderBy('adoptions.createdAt', pageOptionsDto.order);
+
+        if (pageOptionsDto.keyword) {
+          qb.andWhere('pets.name LIKE :keyword', {
+            keyword: `%${pageOptionsDto.keyword}%`,
+          });
+        }
+
+        if (pageOptionsDto.species) {
+          qb.andWhere('pets.species = :species', {
+            species: pageOptionsDto.species,
+          });
+        }
+
+        if (pageOptionsDto.status) {
+          qb.andWhere('adoptions.status = :status', {
+            status: pageOptionsDto.status,
+          });
+        }
+
+        qb.skip(pageOptionsDto.skip).take(pageOptionsDto.itemPerPage);
+
+        return qb.getManyAndCount();
       },
     );
 

@@ -48,6 +48,7 @@ import { FileService } from './file/file.service';
 import { R2Service } from './common/cloudflare/r2.service';
 import { PetImageEntity } from './pet_image/pet_image.entity';
 import { PetImageService } from './pet_image/pet_image.service';
+import { BrUserController } from './user/br/br.user.controller';
 
 const ENTITIES = [
   UserEntity,
@@ -101,6 +102,7 @@ const ENTITIES = [
     LayingController,
     PairController,
     FileController,
+    BrUserController,
   ],
   providers: [
     AppService,

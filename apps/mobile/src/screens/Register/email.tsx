@@ -46,31 +46,12 @@ const RegisterScreen = () => {
       mutationFn: userControllerVerifyEmail,
     });
 
-  const { mutate: mutateGetToken } = useMutation({
-    mutationFn: async (_status: UserDtoStatus) => {
-      return authControllerGetToken();
-    },
-    onSuccess: async (data, status) => {
-      navigateByStatus({ status, token: data.data.token });
-      Loading.close();
-    },
-    onError: error => {
-      console.log('getToken error', error);
-      Loading.close();
-      Toast.show('로그인에 실패했습니다. 다시 시도해주세요.');
-    },
+  const { mutateAsync: mutateGetToken } = useMutation({
+    mutationFn: authControllerGetToken,
   });
 
-  const { mutate: appleLogin } = useMutation({
+  const { mutateAsync: appleLogin } = useMutation({
     mutationFn: authControllerAppleNative,
-    onSuccess: data => {
-      mutateGetToken(data.data.status);
-    },
-    onError: error => {
-      console.log('appleLogin error', error);
-      Loading.close();
-      Toast.show('로그인에 실패했습니다. 다시 시도해주세요.');
-    },
   });
 
   const handleDuplicateCheck = async () => {
@@ -91,6 +72,19 @@ const RegisterScreen = () => {
     }
   };
 
+  const getToken = async (status: UserDtoStatus) => {
+    try {
+      const { data } = await mutateGetToken();
+      navigateByStatus({ status, token: data.token });
+    } catch (error) {
+      console.log('getToken error', error);
+      Loading.close();
+      Toast.show('로그인에 실패했습니다. 다시 시도해주세요.');
+    } finally {
+      Loading.close();
+    }
+  };
+
   const handleSubmit = async () => {
     if (
       emailDuplicateStatus !== 'available' ||
@@ -99,14 +93,25 @@ const RegisterScreen = () => {
       return;
 
     Loading.show();
-    appleLogin({
-      identityToken,
-      email,
-      authorizationCode,
-      nonce,
-      name: nickname,
-      isBiz: userType === 'biz',
-    });
+
+    try {
+      const res = await appleLogin({
+        identityToken,
+        email,
+        authorizationCode,
+        nonce,
+        name: nickname,
+        isBiz: userType === 'biz',
+      });
+
+      getToken(res.data.status);
+    } catch (error) {
+      console.log('appleLogin error', error);
+      Loading.close();
+      Toast.show('로그인에 실패했습니다. 다시 시도해주세요.');
+    } finally {
+      Loading.close();
+    }
   };
 
   return (

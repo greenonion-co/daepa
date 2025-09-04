@@ -13,6 +13,8 @@ import EditEggModal from "./EditEggModal";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
+import { AxiosError } from "axios";
+import { toast } from "sonner";
 
 interface EggItemProps {
   pet: PetSummaryWithLayingDto;
@@ -23,12 +25,24 @@ const EggItem = ({ pet, layingDate }: EggItemProps) => {
   const queryClient = useQueryClient();
   const isHatched = !!pet.hatchingDate;
 
-  const { mutate: deleteEgg } = useMutation({
+  const { mutateAsync: deleteEgg } = useMutation({
     mutationFn: petControllerDeletePet,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [brMatingControllerFindAll.name] });
-    },
   });
+
+  const handleDeleteEgg = async (eggId: string, onClose: () => void) => {
+    try {
+      await deleteEgg(eggId);
+      queryClient.invalidateQueries({ queryKey: [brMatingControllerFindAll.name] });
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        toast.error(error.response?.data?.message ?? "개체 삭제에 실패했습니다.");
+      } else {
+        toast.error("개체 삭제에 실패했습니다.");
+      }
+    } finally {
+      onClose();
+    }
+  };
 
   const handleDeleteEggClick = (e: React.MouseEvent, eggId: string) => {
     e.stopPropagation();
@@ -36,10 +50,7 @@ const EggItem = ({ pet, layingDate }: EggItemProps) => {
       <ConfirmDialog
         isOpen={isOpen}
         onCloseAction={close}
-        onConfirmAction={() => {
-          deleteEgg(eggId);
-          close();
-        }}
+        onConfirmAction={() => handleDeleteEgg(eggId, close)}
         onExit={unmount}
         title="개체 삭제 안내"
         description={`정말로 삭제하시겠습니까? \n 삭제 후 복구할 수 없습니다.`}

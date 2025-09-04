@@ -1,11 +1,11 @@
 import { Controller, Get, Query } from '@nestjs/common';
-import { PageMetaDto, PageDto, PageOptionsDto } from 'src/common/page.dto';
+import { PageMetaDto, PageDto } from 'src/common/page.dto';
 import { ApiResponse, getSchemaPath } from '@nestjs/swagger';
 import { ApiExtraModels } from '@nestjs/swagger';
 import { JwtUser } from 'src/auth/auth.decorator';
 import { JwtUserPayload } from 'src/auth/strategies/jwt.strategy';
 import { MatingService } from '../mating.service';
-import { MatingByParentsDto } from '../mating.dto';
+import { MatingByParentsDto, MatingFilterDto } from '../mating.dto';
 import { BrAccessOnly } from 'src/common/decorators/roles.decorator';
 
 @Controller('/v1/br/mating')
@@ -31,7 +31,7 @@ export class BrMatingController {
     },
   })
   async findAll(
-    @Query() pageOptionsDto: PageOptionsDto,
+    @Query() pageOptionsDto: MatingFilterDto,
     @JwtUser() token: JwtUserPayload,
   ): Promise<PageDto<MatingByParentsDto>> {
     return this.matingService.getMatingListFull(pageOptionsDto, token.userId);

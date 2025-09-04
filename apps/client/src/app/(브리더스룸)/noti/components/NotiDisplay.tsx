@@ -57,50 +57,48 @@ const NotiDisplay = memo(() => {
   const { mutateAsync: updateParentStatus } = useMutation({
     mutationFn: ({ id, status, rejectReason }: UpdateParentRequestDto & { id: number }) =>
       parentRequestControllerUpdateStatus(id, { status, rejectReason }),
-    onSuccess: (res, variables) => {
-      toast.success(
-        res?.data?.message ??
-          `부모 연동이 ${variables.status === UpdateParentRequestDtoStatus.APPROVED ? "수락" : variables.status === UpdateParentRequestDtoStatus.CANCELLED ? "취소" : "거절"} 되었습니다.`,
-      );
-
-      queryClient.invalidateQueries({ queryKey: [userNotificationControllerFindOne.name, id] });
-      queryClient.invalidateQueries({ queryKey: [userNotificationControllerFindAll.name] });
-    },
-    onError: (error: AxiosError<{ message: string }>) => {
-      toast.error(error?.response?.data?.message ?? "부모 연동 상태 변경에 실패했습니다.");
-    },
   });
 
-  const { mutate: deleteNotification } = useMutation({
+  const { mutateAsync: deleteNotification } = useMutation({
     mutationFn: ({ id, receiverId }: { id: number; receiverId: string }) =>
       userNotificationControllerDelete({ id, receiverId }),
-    onSuccess: (res) => {
-      if (res?.data?.success) {
-        toast.success("알림이 삭제되었습니다.");
-
-        queryClient.invalidateQueries({ queryKey: [userNotificationControllerFindAll.name] });
-        router.push("/noti");
-      }
-    },
-    onError: () => {
-      toast.error("알림 삭제에 실패했습니다.");
-    },
   });
 
   const handleProcessedRequest = () => {
     toast.error("이미 처리된 요청입니다.");
   };
 
-  const handleUpdate = async (status: UpdateParentRequestDtoStatus, rejectReason?: string) => {
+  const handleUpdate = async (
+    status: UpdateParentRequestDtoStatus,
+    rejectReason?: string,
+    close?: () => void,
+  ) => {
     if (alreadyProcessed) return handleProcessedRequest();
 
     if (!data?.senderId || data?.targetId === undefined || data?.targetId === null) return;
 
-    await updateParentStatus({
-      id: data.id,
-      status,
-      rejectReason,
-    });
+    try {
+      const res = await updateParentStatus({
+        id: data.id,
+        status,
+        rejectReason,
+      });
+
+      toast.success(
+        res?.data?.message ??
+          `부모 연동이 ${status === UpdateParentRequestDtoStatus.APPROVED ? "수락" : status === UpdateParentRequestDtoStatus.CANCELLED ? "취소" : "거절"} 되었습니다.`,
+      );
+    } catch (error: unknown) {
+      if (error instanceof AxiosError) {
+        toast.error(error?.response?.data?.message ?? "부모 연동 상태 변경에 실패했습니다.");
+      }
+    } finally {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: [userNotificationControllerFindOne.name, id] }),
+        queryClient.invalidateQueries({ queryKey: [userNotificationControllerFindAll.name] }),
+      ]);
+      close?.();
+    }
   };
 
   const getDetailData = () => {
@@ -168,6 +166,22 @@ const NotiDisplay = memo(() => {
     return parts.length > 0 ? parts.join(" ") : null;
   };
 
+  const handleDeleteNotification = async (close?: () => void) => {
+    if (!data?.id || !data?.receiverId) return;
+    try {
+      const res = await deleteNotification({ id: data.id, receiverId: data.receiverId });
+      if (res?.data?.success) {
+        toast.success("알림이 삭제되었습니다.");
+
+        queryClient.invalidateQueries({ queryKey: [userNotificationControllerFindAll.name] });
+        router.push("/noti");
+      }
+    } catch {
+      toast.error("알림 삭제에 실패했습니다.");
+    } finally {
+      close?.();
+    }
+  };
   return (
     <div className="flex h-full flex-col">
       <div className="flex items-center justify-between p-2">
@@ -186,10 +200,7 @@ const NotiDisplay = memo(() => {
                       onExit={unmount}
                       isOpen={isOpen}
                       onCloseAction={close}
-                      onConfirmAction={() => {
-                        deleteNotification({ id: data?.id, receiverId: data?.receiverId });
-                        close();
-                      }}
+                      onConfirmAction={() => handleDeleteNotification(close)}
                     />
                   ));
                 }
@@ -211,7 +222,13 @@ const NotiDisplay = memo(() => {
                     if (alreadyProcessed) return handleProcessedRequest();
 
                     overlay.open(({ isOpen, close }) => (
-                      <RejectModal isOpen={isOpen} close={close} handleUpdate={handleUpdate} />
+                      <RejectModal
+                        isOpen={isOpen}
+                        close={close}
+                        handleUpdate={(status, rejectReason) =>
+                          handleUpdate(status, rejectReason, close)
+                        }
+                      />
                     ));
                   }}
                   disabled={alreadyProcessed}

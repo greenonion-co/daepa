@@ -9,6 +9,7 @@ import {
   UpdatePetDto,
 } from "@repo/api-client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -28,25 +29,29 @@ const EditEggModal = ({
     temperature: egg.temperature?.toString() ?? "25",
   });
 
-  const { mutate: updateEgg } = useMutation({
+  const { mutateAsync: updateEgg } = useMutation({
     mutationFn: (data: UpdatePetDto) => petControllerUpdate(egg.petId, data),
-    onSuccess: () => {
-      toast.success("알 수정 완료");
-      queryClient.invalidateQueries({ queryKey: [brMatingControllerFindAll.name] });
-      onClose();
-    },
-    onError: () => {
-      toast.error("알 수정 실패");
-    },
   });
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const temp = parseFloat(formData.temperature);
     if (isNaN(temp)) {
       toast.error("올바른 온도를 입력해주세요.");
       return;
     }
-    updateEgg({ temperature: temp });
+    try {
+      const { data } = await updateEgg({ temperature: temp });
+      toast.success(data.message ?? "알 수정 완료");
+      queryClient.invalidateQueries({ queryKey: [brMatingControllerFindAll.name] });
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        toast.error(error.response?.data?.message ?? "알 수정 실패");
+      } else {
+        toast.error("알 수정 실패");
+      }
+    } finally {
+      onClose();
+    }
   };
 
   return (

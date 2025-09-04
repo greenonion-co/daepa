@@ -22,23 +22,12 @@ const PedigreeSection = memo(({ petId, isMyPet }: PedigreeSectionProps) => {
   const queryClient = useQueryClient();
   const { formData } = usePetStore();
 
-  const { mutate: mutateUnlinkParent } = useMutation({
+  const { mutateAsync: mutateUnlinkParent } = useMutation({
     mutationFn: ({ role }: { role: UnlinkParentDtoRole }) =>
       petControllerUnlinkParent(petId, { role }),
-    onSuccess: () => {
-      toast.success("부모 연동 해제가 완료되었습니다.");
-      queryClient.invalidateQueries({ queryKey: [petControllerFindPetByPetId.name, petId] });
-    },
-    onError: (error) => {
-      if (error instanceof AxiosError) {
-        toast.error(error.response?.data?.message);
-      } else {
-        toast.error("부모 연동 해제에 실패했습니다.");
-      }
-    },
   });
 
-  const { mutate: mutateRequestParent } = useMutation({
+  const { mutateAsync: mutateRequestParent } = useMutation({
     mutationFn: ({
       parentId,
       role,
@@ -53,37 +42,45 @@ const PedigreeSection = memo(({ petId, isMyPet }: PedigreeSectionProps) => {
         role,
         message,
       }),
-    onSuccess: () => {
-      toast.success("부모 연동 요청이 완료되었습니다.");
-      queryClient.invalidateQueries({ queryKey: [petControllerFindPetByPetId.name, petId] });
-    },
-    onError: () => {
-      toast.error("부모 연동 요청에 실패했습니다.");
-    },
   });
 
   const handleParentSelect = useCallback(
-    (role: UnlinkParentDtoRole, value: PetParentDtoWithMessage) => {
+    async (role: UnlinkParentDtoRole, value: PetParentDtoWithMessage) => {
       try {
-        // 부모 연동 요청
-        mutateRequestParent({
+        await mutateRequestParent({
           parentId: value.petId,
           role,
-          message: value.message,
+          message: value.message ?? "",
         });
+        toast.success("부모 연동 요청이 완료되었습니다.");
+        queryClient.invalidateQueries({ queryKey: [petControllerFindPetByPetId.name, petId] });
       } catch (error) {
-        console.error("Failed to send notification:", error);
+        if (error instanceof AxiosError) {
+          toast.error(error.response?.data?.message ?? "부모 연동 요청에 실패했습니다.");
+        } else {
+          toast.error("부모 연동 요청에 실패했습니다.");
+        }
       }
     },
-    [mutateRequestParent],
+    [mutateRequestParent, queryClient, petId],
   );
 
   const handleUnlink = useCallback(
-    (label: UnlinkParentDtoRole) => {
+    async (label: UnlinkParentDtoRole) => {
       if (!formData[label]?.petId) return toast.error("부모 연동 해제에 실패했습니다.");
-      mutateUnlinkParent({ role: label });
+      try {
+        await mutateUnlinkParent({ role: label });
+        toast.success("부모 연동 해제가 완료되었습니다.");
+        queryClient.invalidateQueries({ queryKey: [petControllerFindPetByPetId.name, petId] });
+      } catch (error) {
+        if (error instanceof AxiosError) {
+          toast.error(error.response?.data?.message ?? "부모 연동 해제에 실패했습니다.");
+        } else {
+          toast.error("부모 연동 해제에 실패했습니다.");
+        }
+      }
     },
-    [formData, mutateUnlinkParent],
+    [formData, mutateUnlinkParent, queryClient, petId],
   );
 
   return (
@@ -92,6 +89,7 @@ const PedigreeSection = memo(({ petId, isMyPet }: PedigreeSectionProps) => {
 
       <div className="grid grid-cols-2 gap-4">
         <ParentLink
+          species={formData.species}
           label="부"
           data={
             isMyPet ||
@@ -104,6 +102,7 @@ const PedigreeSection = memo(({ petId, isMyPet }: PedigreeSectionProps) => {
           editable={isMyPet}
         />
         <ParentLink
+          species={formData.species}
           label="모"
           data={
             isMyPet ||

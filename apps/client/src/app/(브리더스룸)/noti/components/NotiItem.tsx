@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { useRouter, useSearchParams } from "next/navigation";
 import { NOTIFICATION_TYPE } from "../../constants";
 import StatusBadge from "./StatusBadge";
+import { AxiosError } from "axios";
 
 interface NotiItemProps {
   item: UserNotificationDto;
@@ -27,27 +28,30 @@ const NotiItem = ({ item }: NotiItemProps) => {
   const searchParams = useSearchParams();
   const selectedId = Number(searchParams.get("id"));
 
-  const { mutate: updateNotification } = useMutation({
+  const { mutateAsync: updateNotification } = useMutation({
     mutationFn: (data: UpdateUserNotificationDto) => userNotificationControllerUpdate(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [userNotificationControllerFindAll.name] });
-    },
-    onError: () => {
-      toast.error("알림 읽음 처리에 실패했습니다.");
-    },
   });
 
   const handleItemClick = useCallback(
-    (item: UserNotificationDto) => {
+    async (item: UserNotificationDto) => {
       if (item.id) {
         router.push(`/noti?id=${item.id}`);
       }
 
       if (item.status === UserNotificationDtoStatus.UNREAD) {
-        updateNotification({ id: item.id, status: UserNotificationDtoStatus.READ });
+        try {
+          await updateNotification({ id: item.id, status: UserNotificationDtoStatus.READ });
+          queryClient.invalidateQueries({ queryKey: [userNotificationControllerFindAll.name] });
+        } catch (error) {
+          if (error instanceof AxiosError) {
+            toast.error(error.response?.data?.message ?? "알림 읽음 처리에 실패했습니다.");
+          } else {
+            toast.error("알림 읽음 처리에 실패했습니다.");
+          }
+        }
       }
     },
-    [router, updateNotification],
+    [router, updateNotification, queryClient],
   );
 
   useEffect(() => {

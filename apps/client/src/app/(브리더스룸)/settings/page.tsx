@@ -40,18 +40,11 @@ import { USER_STATUS_MAP } from "@/app/(브리더스룸)/constants";
 import { cn } from "@/lib/utils";
 import { AxiosError } from "axios";
 import { tokenStorage } from "@/lib/tokenStorage";
-import { providerIconMap } from "../constants";
+import { providerIconMap } from "../../(user)/constants";
+import { DUPLICATE_CHECK_STATUS } from "../register/types";
 
 const NICKNAME_MAX_LENGTH = 15;
 const NICKNAME_MIN_LENGTH = 2;
-
-// 중복확인 상태 타입
-enum DUPLICATE_CHECK_STATUS {
-  NONE = "none",
-  CHECKING = "checking",
-  AVAILABLE = "available",
-  DUPLICATE = "duplicate",
-}
 
 const SettingsPage = () => {
   const router = useRouter();
@@ -76,37 +69,32 @@ const SettingsPage = () => {
     select: (response) => response.data.data,
   });
 
-  const { mutate: signOut } = useMutation({
+  const { mutateAsync: signOut } = useMutation({
     mutationFn: authControllerSignOut,
-    onSuccess: () => {
-      tokenStorage.removeToken();
-      toast.success("로그아웃 되었습니다.");
-      router.replace("/pet");
-    },
   });
 
   const { mutateAsync: updateNickname, isPending: isUpdatingNickname } = useMutation({
     mutationFn: userControllerCreateInitUserInfo,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [userControllerGetUserProfile.name] });
-      toast.success("닉네임이 성공적으로 변경되었습니다.");
-      setIsEditingNickname(false);
-      setNewNickname("");
-      setDuplicateCheckStatus(DUPLICATE_CHECK_STATUS.NONE);
-    },
-    onError: (error: AxiosError<CommonResponseDto>) => {
-      if (error?.response?.status === 409) {
-        toast.error("이미 사용중인 닉네임입니다.");
-      } else {
-        toast.error("닉네임 변경 중 오류가 발생했습니다.");
-      }
-    },
   });
 
   const { mutateAsync: verifyName, isPending: isVerifyingName } = useMutation({
     mutationFn: userControllerVerifyName,
   });
 
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      tokenStorage.removeToken();
+      toast.success("로그아웃 되었습니다.");
+      router.replace("/pet");
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        toast.error(error.response?.data?.message ?? "로그아웃에 실패했습니다.");
+      } else {
+        toast.error("로그아웃에 실패했습니다.");
+      }
+    }
+  };
   const toggleNotification = (type: keyof typeof notifications) => {
     setNotifications((prev) => ({
       ...prev,
@@ -191,12 +179,29 @@ const SettingsPage = () => {
       return;
     }
 
-    if (duplicateCheckStatus !== "available" && newNickname !== userProfile?.name) {
+    if (
+      duplicateCheckStatus !== DUPLICATE_CHECK_STATUS.AVAILABLE &&
+      newNickname !== userProfile?.name
+    ) {
       toast.error("중복확인을 먼저 진행해주세요.");
       return;
     }
 
-    await updateNickname({ name: newNickname });
+    try {
+      await updateNickname({ name: newNickname });
+
+      queryClient.invalidateQueries({ queryKey: [userControllerGetUserProfile.name] });
+      toast.success("닉네임이 성공적으로 변경되었습니다.");
+      setIsEditingNickname(false);
+      setNewNickname("");
+      setDuplicateCheckStatus(DUPLICATE_CHECK_STATUS.NONE);
+    } catch (error) {
+      if (error instanceof AxiosError && error?.response?.status === 409) {
+        toast.error("이미 사용중인 닉네임입니다.");
+      } else {
+        toast.error("닉네임 변경 중 오류가 발생했습니다.");
+      }
+    }
   };
 
   return (
@@ -243,6 +248,9 @@ const SettingsPage = () => {
                       placeholder="닉네임을 입력하세요"
                       value={newNickname}
                       onChange={(e) => {
+                        if (e.target.value.length > NICKNAME_MAX_LENGTH) {
+                          e.target.value = e.target.value.slice(0, NICKNAME_MAX_LENGTH);
+                        }
                         setNewNickname(e.target.value);
                         setDuplicateCheckStatus(DUPLICATE_CHECK_STATUS.NONE);
                       }}
@@ -251,6 +259,7 @@ const SettingsPage = () => {
                     />
                     <Button
                       variant="outline"
+                      className="h-10"
                       onClick={handleDuplicateCheck}
                       disabled={
                         isVerifyingName || !newNickname || newNickname === userProfile?.name
@@ -285,7 +294,10 @@ const SettingsPage = () => {
                     <Button
                       size="sm"
                       onClick={handleSaveNickname}
-                      disabled={isUpdatingNickname || duplicateCheckStatus !== "available"}
+                      disabled={
+                        isUpdatingNickname ||
+                        duplicateCheckStatus !== DUPLICATE_CHECK_STATUS.AVAILABLE
+                      }
                     >
                       {isUpdatingNickname ? "저장중..." : "저장"}
                     </Button>
@@ -495,7 +507,7 @@ const SettingsPage = () => {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => signOut()}
+              onClick={handleSignOut}
               className="border-red-300 text-red-700 hover:bg-red-100 dark:border-red-700 dark:text-red-300 dark:hover:bg-red-900/30"
             >
               로그아웃

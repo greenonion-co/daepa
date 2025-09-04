@@ -3,6 +3,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { petControllerFindPetByPetId, petControllerUpdate, UpdatePetDto } from "@repo/api-client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 import { overlay } from "overlay-kit";
 import { memo, useCallback } from "react";
 import { toast } from "sonner";
@@ -14,24 +15,27 @@ interface PetVisibilityControlProps {
 const PetVisibilityControl = memo(({ petId, isPublic = false }: PetVisibilityControlProps) => {
   const queryClient = useQueryClient();
 
-  const { mutate: updatePet } = useMutation({
+  const { mutateAsync: updatePet } = useMutation({
     mutationFn: (data: UpdatePetDto) => petControllerUpdate(petId, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: [petControllerFindPetByPetId.name, petId],
-      });
-      toast.success("펫 정보가 변경되었습니다.");
-    },
-    onError: () => {
-      toast.error("펫 정보 수정에 실패했습니다.");
-    },
   });
 
   const handleUpdatePet = useCallback(
-    (newIsPublic: boolean) => {
-      updatePet({ isPublic: newIsPublic } as UpdatePetDto);
+    async (newIsPublic: boolean) => {
+      try {
+        await updatePet({ isPublic: newIsPublic } as UpdatePetDto);
+        queryClient.invalidateQueries({
+          queryKey: [petControllerFindPetByPetId.name, petId],
+        });
+        toast.success("펫 정보가 변경되었습니다.");
+      } catch (error) {
+        if (error instanceof AxiosError) {
+          toast.error(error.response?.data?.message ?? "펫 정보 수정에 실패했습니다.");
+        } else {
+          toast.error("펫 정보 수정에 실패했습니다.");
+        }
+      }
     },
-    [updatePet],
+    [updatePet, queryClient, petId],
   );
 
   const onPublicChange = useCallback(() => {

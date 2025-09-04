@@ -24,6 +24,7 @@ import { useRouter } from "next/navigation";
 import { PetDto } from "@repo/api-client";
 import Loading from "@/components/common/Loading";
 import { cn } from "@/lib/utils";
+import { useFilterStore } from "../../store/filter";
 
 interface DataTableProps<TData> {
   columns: ColumnDef<TData>[];
@@ -44,16 +45,8 @@ export const DataTable = ({
   hasFilter = true,
   isClickable = true,
 }: DataTableProps<PetDto>) => {
-  const {
-    sorting,
-    columnFilters,
-    columnVisibility,
-    rowSelection,
-    setSorting,
-    setColumnFilters,
-    setColumnVisibility,
-    setRowSelection,
-  } = useTableStore();
+  const { columnFilters, searchFilters, setSearchFilters, setColumnFilters } = useFilterStore();
+  const { sorting, rowSelection, setSorting, setRowSelection } = useTableStore();
 
   const router = useRouter();
 
@@ -61,17 +54,14 @@ export const DataTable = ({
     data,
     columns,
     onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
     state: {
       sorting,
-      columnFilters,
-      columnVisibility,
       rowSelection,
+      columnVisibility: columnFilters,
     },
   });
 
@@ -90,7 +80,15 @@ export const DataTable = ({
   return (
     <div className="relative w-full">
       <div className="w-full">
-        {hasFilter && <Filters table={table} />}
+        {hasFilter && (
+          <Filters
+            table={table}
+            columnFilters={columnFilters}
+            setColumnFilters={setColumnFilters}
+            searchFilters={searchFilters}
+            setSearchFilters={setSearchFilters}
+          />
+        )}
 
         <div className="rounded-md border">
           <Table>

@@ -15,6 +15,8 @@ import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { PetDtoGrowth, PetDtoSex, PetDtoSpecies, UnlinkParentDtoRole } from "@repo/api-client";
 import DndImagePicker from "./DndImagePicker";
+import NameInput from "../NameInput";
+
 interface FormFieldProps {
   label?: string;
   field: FormStep["field"];
@@ -79,6 +81,7 @@ export const FormField = ({
         return (
           <div className="flex gap-2">
             <ParentLink
+              species={formData.species}
               label="부"
               data={formData.father}
               onSelect={(item) => {
@@ -89,6 +92,7 @@ export const FormField = ({
               }}
             />
             <ParentLink
+              species={formData.species}
               label="모"
               data={formData.mother}
               onSelect={(item) => {
@@ -239,6 +243,22 @@ export const FormField = ({
             </PopoverContent>
           </Popover>
         );
+      case "nickname":
+        return (
+          <NameInput
+            errorMessage={error || ""}
+            disabled={disabled}
+            name={name}
+            type={field.type}
+            className={cn(inputClassName, "text-black dark:text-white")}
+            value={String(value || "")}
+            placeholder={placeholder}
+            onChange={(e) => {
+              handleChange({ type: field.name, value: e.target.value });
+            }}
+          />
+        );
+
       default:
         return (
           <input
@@ -266,7 +286,7 @@ export const FormField = ({
         <div className="h-1" />
       )}
       {renderField()}
-      {error && (
+      {name !== "name" && error && (
         <div className="mt-1 flex items-center gap-1">
           <InfoIcon className="h-4 w-4 text-red-500" />
           <p className="text-sm text-red-500">{error}</p>

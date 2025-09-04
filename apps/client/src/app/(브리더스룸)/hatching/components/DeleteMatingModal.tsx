@@ -4,7 +4,6 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { brMatingControllerFindAll, matingControllerDeleteMating } from "@repo/api-client";
 import { toast } from "sonner";
 import { AxiosError } from "axios";
-import { CommonResponseDto } from "@repo/api-client";
 import { Info } from "lucide-react";
 
 interface DeleteMatingModalProps {
@@ -17,18 +16,26 @@ interface DeleteMatingModalProps {
 const DeleteMatingModal = ({ isOpen, onClose, matingId, matingDate }: DeleteMatingModalProps) => {
   const queryClient = useQueryClient();
 
-  const { mutate: deleteMating, isPending } = useMutation({
+  const { mutateAsync: deleteMating, isPending } = useMutation({
     mutationFn: () => matingControllerDeleteMating(matingId),
-    onSuccess: (res) => {
-      toast.success(res.data.message ?? "메이팅 정보가 삭제되었습니다.");
-      queryClient.invalidateQueries({ queryKey: [brMatingControllerFindAll.name] });
-      onClose();
-    },
-    onError: (error: AxiosError<CommonResponseDto>) => {
-      toast.error(error.response?.data?.message ?? "메이팅 삭제에 실패했습니다.");
-      onClose();
-    },
   });
+
+  const handleDeleteMating = async () => {
+    try {
+      const { data } = await deleteMating();
+
+      toast.success(data.message ?? "메이팅 정보가 삭제되었습니다.");
+      queryClient.invalidateQueries({ queryKey: [brMatingControllerFindAll.name] });
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        toast.error(error.response?.data?.message ?? "메이팅 삭제에 실패했습니다.");
+      } else {
+        toast.error("메이팅 삭제에 실패했습니다.");
+      }
+    } finally {
+      onClose();
+    }
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -49,7 +56,7 @@ const DeleteMatingModal = ({ isOpen, onClose, matingId, matingDate }: DeleteMati
             <Button
               type="button"
               variant="destructive"
-              onClick={() => deleteMating()}
+              onClick={handleDeleteMating}
               disabled={isPending}
             >
               {isPending ? "삭제 중..." : "삭제"}

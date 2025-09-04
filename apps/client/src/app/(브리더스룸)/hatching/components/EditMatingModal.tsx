@@ -7,7 +7,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { brMatingControllerFindAll, matingControllerUpdateMating } from "@repo/api-client";
 import { toast } from "sonner";
 import { AxiosError } from "axios";
-import { CommonResponseDto, UpdateMatingDto } from "@repo/api-client";
+import { UpdateMatingDto } from "@repo/api-client";
 import CalendarInput from "./CalendarInput";
 import { format } from "date-fns";
 
@@ -37,26 +37,31 @@ const EditMatingModal = ({
     matingDate: currentData.matingDate,
   });
 
-  const { mutate: updateMating, isPending } = useMutation({
+  const { mutateAsync: updateMating, isPending } = useMutation({
     mutationFn: (data: UpdateMatingDto) => matingControllerUpdateMating(matingId, data),
-    onSuccess: () => {
-      toast.success("메이팅 정보가 수정되었습니다.");
-      queryClient.invalidateQueries({ queryKey: [brMatingControllerFindAll.name] });
-      onClose();
-    },
-    onError: (error: AxiosError<CommonResponseDto>) => {
-      toast.error(error.response?.data?.message ?? "메이팅 수정에 실패했습니다.");
-    },
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    updateMating({
-      fatherId: formData.fatherId || undefined,
-      motherId: formData.motherId || undefined,
-      matingDate: formData.matingDate,
-    });
+    try {
+      await updateMating({
+        fatherId: formData.fatherId || undefined,
+        motherId: formData.motherId || undefined,
+        matingDate: formData.matingDate,
+      });
+
+      toast.success("메이팅 정보가 수정되었습니다.");
+      queryClient.invalidateQueries({ queryKey: [brMatingControllerFindAll.name] });
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        toast.error(error.response?.data?.message ?? "메이팅 수정에 실패했습니다.");
+      } else {
+        toast.error("메이팅 수정에 실패했습니다.");
+      }
+    } finally {
+      onClose();
+    }
   };
 
   return (

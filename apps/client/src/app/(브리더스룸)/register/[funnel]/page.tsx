@@ -10,13 +10,62 @@ import { FormField } from "../../components/Form/FormField";
 import FloatingButton from "../../components/FloatingButton";
 import { useSelect } from "../hooks/useSelect";
 import { useMutation } from "@tanstack/react-query";
-import { CreateParentDtoRole, petControllerCreate } from "@repo/api-client";
+import { CreateParentDtoRole, CreatePetDto, petControllerCreate } from "@repo/api-client";
 import { toast } from "sonner";
 import { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
 import Loading from "@/components/common/Loading";
 import { isNil, pick, pickBy } from "es-toolkit";
 import { PhotoItem } from "../types";
+
+const formatFormData = (formData: FormData): CreatePetDto | undefined => {
+  const data = { ...formData };
+  if (data.sex && typeof data.sex === "string") {
+    const genderEntry = Object.entries(GENDER_KOREAN_INFO).find(
+      ([, koreanValue]) => koreanValue === data.sex,
+    );
+    if (genderEntry) {
+      data.sex = genderEntry[0];
+    }
+  }
+
+  const baseFields = pick(data, ["growth", "morphs", "name", "sex"]);
+
+  const requestData = pickBy(
+    {
+      desc: data?.desc,
+      hatchingDate: data?.hatchingDate,
+      weight: data?.weight ? Number(data.weight) : undefined,
+      father: data?.father?.petId
+        ? {
+            parentId: data.father.petId,
+            role: CreateParentDtoRole.FATHER,
+            isMyPet: false,
+            message: data.father?.message,
+          }
+        : undefined,
+      mother: data?.mother?.petId
+        ? {
+            parentId: data.mother.petId,
+            role: CreateParentDtoRole.MOTHER,
+            isMyPet: false,
+            message: data.mother?.message,
+          }
+        : undefined,
+      foods: data?.foods,
+      traits: data?.traits,
+      photos: data?.photos,
+      photoOrder: data?.photos?.map((photo: PhotoItem) => photo.fileName.replace("PENDING/", "")),
+    },
+    (value) => !isNil(value),
+  );
+
+  return {
+    ...baseFields,
+    ...requestData,
+    species: data.species,
+  };
+};
 
 export default function RegisterPage({ params }: { params: Promise<{ funnel: string }> }) {
   const router = useRouter();
@@ -85,60 +134,17 @@ export default function RegisterPage({ params }: { params: Promise<{ funnel: str
 
   const createPet = async (formData: FormData) => {
     try {
-      const data = { ...formData };
-      if (data.sex && typeof data.sex === "string") {
-        const genderEntry = Object.entries(GENDER_KOREAN_INFO).find(
-          ([, koreanValue]) => koreanValue === data.sex,
-        );
-        if (genderEntry) {
-          data.sex = genderEntry[0];
-        }
+      const formattedData = formatFormData(formData);
+      if (!formattedData) {
+        toast.error("개체 등록에 실패했습니다.");
+        return;
       }
 
-      const baseFields = pick(data, ["growth", "morphs", "name", "sex"]);
-
-      const requestData = pickBy(
-        {
-          desc: data?.desc,
-          hatchingDate: data?.hatchingDate,
-          weight: data?.weight ? Number(data.weight) : undefined,
-          father: data?.father?.petId
-            ? {
-                parentId: data.father.petId,
-                role: CreateParentDtoRole.FATHER,
-                isMyPet: false,
-                message: data.father?.message,
-              }
-            : undefined,
-          mother: data?.mother?.petId
-            ? {
-                parentId: data.mother.petId,
-                role: CreateParentDtoRole.MOTHER,
-                isMyPet: false,
-                message: data.mother?.message,
-              }
-            : undefined,
-          foods: data?.foods,
-          traits: data?.traits,
-          photos: data?.photos,
-          photoOrder: data?.photos?.map((photo: PhotoItem) =>
-            photo.fileName.replace("PENDING/", ""),
-          ),
-        },
-        (value) => !isNil(value),
-      );
-
-      await mutateCreatePet({
-        ...baseFields,
-        ...requestData,
-        species: data.species,
-      });
-
+      await mutateCreatePet(formattedData);
       handleSuccess();
     } catch (error) {
-      console.error("Failed to create pet:", error);
       if (error instanceof AxiosError) {
-        toast.error(error.response?.data?.message || "개체 등록에 실패했습니다.");
+        toast.error(error.response?.data?.message ?? "개체 등록에 실패했습니다.");
       } else {
         toast.error("개체 등록에 실패했습니다.");
       }

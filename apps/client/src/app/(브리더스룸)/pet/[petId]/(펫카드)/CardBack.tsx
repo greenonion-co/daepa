@@ -113,37 +113,35 @@ const CardBack = memo(({ pet, from, isWideScreen }: CardBackProps) => {
   }, [initialPetData, setFormData]);
 
   return (
-    <div className="relative h-full w-full">
-      <div className="h-full">
-        <div className="px-6 pb-20">
-          {isMyPet && (
-            <div className="flex items-center justify-between">
-              <PetVisibilityControl petId={pet.petId} isPublic={pet.isPublic} />
-
-              {isNotSold && <AdoptionStatusControl pet={pet} />}
-            </div>
-          )}
-
-          {!isWideScreen && pet.adoption && isMyPet && <AdoptionReceipt adoption={pet.adoption} />}
-
-          {/* 혈통 정보 */}
-          <PedigreeSection petId={pet.petId} isMyPet={isMyPet} />
-
-          {/* 사육 정보 */}
-          <BreedingInfoSection isEditing={isEditing} isTooltipOpen={isTooltipOpen} />
-        </div>
-
-        {/* 하단 고정 버튼 영역 */}
+    <div className="relative h-full w-full pt-2">
+      <div className="px-6 pb-20">
         {isMyPet && (
-          <CardBackActions
-            petId={pet.petId}
-            isEditing={isEditing}
-            onEditToggle={handleEditToggle}
-            onSave={handleSave}
-            onCancel={handleCancel}
-          />
+          <div className="flex items-center justify-between">
+            <PetVisibilityControl petId={pet.petId} isPublic={pet.isPublic} />
+
+            {isNotSold && <AdoptionStatusControl pet={pet} />}
+          </div>
         )}
+
+        {!isWideScreen && pet.adoption && isMyPet && <AdoptionReceipt adoption={pet.adoption} />}
+
+        {/* 혈통 정보 */}
+        <PedigreeSection petId={pet.petId} isMyPet={isMyPet} />
+
+        {/* 사육 정보 */}
+        <BreedingInfoSection isEditing={isEditing} isTooltipOpen={isTooltipOpen} />
       </div>
+
+      {/* 하단 고정 버튼 영역 */}
+      {isMyPet && (
+        <CardBackActions
+          petId={pet.petId}
+          isEditing={isEditing}
+          onEditToggle={handleEditToggle}
+          onSave={handleSave}
+          onCancel={handleCancel}
+        />
+      )}
     </div>
   );
 });

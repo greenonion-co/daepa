@@ -16,6 +16,7 @@ import {
   UpdateAdoptionDto,
 } from "@repo/api-client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 import { overlay } from "overlay-kit";
 import { memo, useCallback } from "react";
 import { toast } from "sonner";
@@ -26,14 +27,14 @@ interface AdoptionStatusControlProps {
 const AdoptionStatusControl = memo(({ pet }: AdoptionStatusControlProps) => {
   const queryClient = useQueryClient();
 
-  const refreshAndToast = useCallback(async () => {
-    await queryClient.invalidateQueries({
+  const refreshAndToast = useCallback(() => {
+    queryClient.invalidateQueries({
       queryKey: [petControllerFindPetByPetId.name, pet.petId],
     });
     toast.success("판매 상태가 변경되었습니다.", { id: "adoption-status" });
   }, [pet.petId, queryClient]);
 
-  const { mutate: updateAdoption } = useMutation({
+  const { mutateAsync: updateAdoption } = useMutation({
     mutationFn: async (data: UpdateAdoptionDto) => {
       if (!pet?.adoption?.adoptionId) {
         return adoptionControllerCreateAdoption({
@@ -43,10 +44,6 @@ const AdoptionStatusControl = memo(({ pet }: AdoptionStatusControlProps) => {
       } else {
         return adoptionControllerUpdate(pet?.adoption?.adoptionId, data);
       }
-    },
-    onSuccess: refreshAndToast,
-    onError: () => {
-      toast.error("판매 상태 변경에 실패했습니다.");
     },
   });
 
@@ -58,8 +55,8 @@ const AdoptionStatusControl = memo(({ pet }: AdoptionStatusControlProps) => {
           onClose={close}
           pet={pet}
           status={newStatus}
-          onSuccess={async () => {
-            await refreshAndToast();
+          onSuccess={() => {
+            refreshAndToast();
             close();
           }}
         />
@@ -68,23 +65,39 @@ const AdoptionStatusControl = memo(({ pet }: AdoptionStatusControlProps) => {
     [pet, refreshAndToast],
   );
 
+  const handleStatusChange = useCallback(
+    async (newStatus: string, onClose: () => void) => {
+      try {
+        await updateAdoption({ status: newStatus } as UpdateAdoptionDto);
+
+        refreshAndToast();
+      } catch (error) {
+        if (error instanceof AxiosError) {
+          toast.error(error.response?.data?.message ?? "판매 상태 변경에 실패했습니다.");
+        } else {
+          toast.error("판매 상태 변경에 실패했습니다.");
+        }
+      } finally {
+        onClose();
+      }
+    },
+    [updateAdoption, refreshAndToast],
+  );
+
   const handleStatusChangeDialog = useCallback(
     (newStatus: string) => {
       overlay.open(({ isOpen, close, unmount }) => (
         <Dialog
           isOpen={isOpen}
           onCloseAction={close}
-          onConfirmAction={() => {
-            updateAdoption({ status: newStatus } as UpdateAdoptionDto);
-            close();
-          }}
+          onConfirmAction={() => handleStatusChange(newStatus, close)}
           onExit={unmount}
           title="판매 상태 변경"
           description="판매 상태를 변경하시겠습니까?"
         />
       ));
     },
-    [updateAdoption],
+    [handleStatusChange],
   );
 
   const onSaleStatusChange = useCallback(

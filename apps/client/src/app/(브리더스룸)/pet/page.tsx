@@ -7,17 +7,21 @@ import { brPetControllerFindAll, BrPetControllerFindAllFilterType } from "@repo/
 import { useInView } from "react-intersection-observer";
 import { useEffect } from "react";
 
-import useSearchStore from "./store/search";
 import Link from "next/link";
 import Add from "@mui/icons-material/Add";
+import { useFilterStore } from "../store/filter";
+
+import Loading from "@/components/common/Loading";
+import { Card } from "@/components/ui/card";
+import { ScanFace } from "lucide-react";
 
 export default function PetPage() {
   const { ref, inView } = useInView();
-  const { searchFilters } = useSearchStore();
+  const { searchFilters } = useFilterStore();
   const itemPerPage = 10;
 
   // 일반 목록 조회
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useInfiniteQuery({
     queryKey: [brPetControllerFindAll.name, searchFilters, BrPetControllerFindAllFilterType.MY],
     queryFn: ({ pageParam = 1 }) =>
       brPetControllerFindAll({
@@ -49,20 +53,34 @@ export default function PetPage() {
     }
   }, [inView, fetchNextPage, hasNextPage, isFetchingNextPage]);
 
+  if (isLoading) return <Loading />;
+
   return (
     <div className="container mx-auto space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">펫 목록</h1>
         <div className="text-sm text-gray-600">검색 결과: {totalCount}개</div>
       </div>
-
-      <DataTable
-        columns={columns}
-        data={items ?? []}
-        hasMore={hasNextPage}
-        isFetchingMore={isFetchingNextPage}
-        loaderRefAction={ref}
-      />
+      {items && items.length === 0 && Object.keys(searchFilters).length === 0 ? (
+        <Link href="/register/1">
+          <Card className="flex cursor-pointer flex-col items-center justify-center bg-blue-50 p-10 hover:bg-blue-100">
+            <ScanFace className="h-10 w-10 text-blue-500" />
+            <div className="text-center text-gray-600">
+              나의 펫을
+              <span className="text-blue-500">등록</span>하여
+              <div className="font-semibold text-blue-500">브리더스룸을 시작해보세요!</div>
+            </div>
+          </Card>
+        </Link>
+      ) : (
+        <DataTable
+          columns={columns}
+          data={items ?? []}
+          hasMore={hasNextPage}
+          isFetchingMore={isFetchingNextPage}
+          loaderRefAction={ref}
+        />
+      )}
 
       <Link
         href="/register/1"

@@ -43,7 +43,7 @@ const CardFront = ({ pet, qrCodeDataUrl }: { pet: PetDto; qrCodeDataUrl?: string
   }, []);
 
   return (
-    <div className="relative h-full w-full">
+    <div className="relative h-full w-full overflow-hidden rounded-xl">
       {/* 이미지 컨테이너 */}
       <motion.div
         animate={{

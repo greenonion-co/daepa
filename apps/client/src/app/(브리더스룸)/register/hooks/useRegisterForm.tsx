@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from "react";
-import { useParams, usePathname, useRouter } from "next/navigation";
-import { FieldName, FormStep } from "../types";
+import { useParams, useRouter } from "next/navigation";
+import { DUPLICATE_CHECK_STATUS, FieldName, FormStep } from "../types";
 import {
   MORPH_LIST_BY_SPECIES,
   REGISTER_PAGE,
@@ -9,12 +9,12 @@ import {
 } from "../../constants";
 import { overlay } from "overlay-kit";
 import MultipleSelector from "../../components/selector/multiple";
-import { UnlinkParentDtoRole } from "@repo/api-client";
 import Dialog from "../../components/Form/Dialog";
 
 import { validateStep } from "@/lib/form";
 import { FormData } from "../store/pet";
 import { toast } from "sonner";
+import { useNameStore } from "../../store/name";
 
 type SELECTOR_TYPE = "species" | "growth" | "sex";
 
@@ -39,7 +39,7 @@ export const useRegisterForm = ({
 }: UseRegisterFormProps) => {
   const router = useRouter();
   const { funnel } = useParams();
-  const isEggRegister = usePathname().includes("egg");
+  const { duplicateCheckStatus } = useNameStore();
 
   // 다음 단계로 이동
   const goNext = useCallback(
@@ -63,30 +63,35 @@ export const useRegisterForm = ({
         return;
       }
 
-      if (isEggRegister) {
-        if (step + 1 >= formStep.length) {
-          handleSubmit(newFormData);
+      if (Number(funnel) === REGISTER_PAGE.SECOND) {
+        handleSubmit(newFormData);
+        return;
+      }
+
+      if (step === formStep.length) {
+        if (duplicateCheckStatus !== DUPLICATE_CHECK_STATUS.AVAILABLE) {
+          toast.error("닉네임 중복확인을 완료해주세요.");
           return;
         }
+        router.push("/register/2");
+        return;
+      }
 
+      if (step + 1 === Object.keys(newFormData).length) {
         setStep(step + 1);
-      } else {
-        if (Number(funnel) === REGISTER_PAGE.SECOND) {
-          handleSubmit(newFormData);
-          return;
-        }
-
-        if (step === formStep.length) {
-          router.push("/register/2");
-          return;
-        }
-
-        if (step + 1 === Object.keys(newFormData).length) {
-          setStep(step + 1);
-        }
       }
     },
-    [step, setStep, formData, router, handleSubmit, funnel, setErrors, formStep, isEggRegister],
+    [
+      step,
+      setStep,
+      formData,
+      router,
+      handleSubmit,
+      funnel,
+      setErrors,
+      formStep,
+      duplicateCheckStatus,
+    ],
   );
 
   // 입력 필드 변경
@@ -117,18 +122,11 @@ export const useRegisterForm = ({
       const newFormData = { ...formData, [type]: value };
       setFormData(newFormData);
 
-      if (
-        (![UnlinkParentDtoRole.FATHER, UnlinkParentDtoRole.MOTHER].includes(
-          type as UnlinkParentDtoRole,
-        ) &&
-          isEggRegister &&
-          step < formStep.length - 1) ||
-        (!isEggRegister && Number(funnel) === REGISTER_PAGE.FIRST && step <= formStep.length - 1)
-      ) {
+      if (Number(funnel) === REGISTER_PAGE.FIRST && step <= formStep.length - 1) {
         goNext(newFormData);
       }
     },
-    [formData, funnel, goNext, setFormData, step, isEggRegister, formStep],
+    [formData, setFormData, goNext, formStep, funnel, step],
   );
 
   // 선택 리스트 조회

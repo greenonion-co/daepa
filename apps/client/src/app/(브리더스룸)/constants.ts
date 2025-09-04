@@ -15,12 +15,12 @@ export const REGISTER_PAGE = {
 
 export const FORM_STEPS: FormStep[] = [
   {
-    title: "개체 이름 /관리번호",
+    title: "개체 이름",
     field: {
       name: "name",
-      type: "text",
+      type: "nickname",
       required: true,
-      placeholder: "개체 이름 /관리번호를 입력해주세요",
+      placeholder: "개체 이름을 입력해주세요",
       validation: (value) => value.length > 0,
     },
   },
@@ -300,6 +300,15 @@ export const TABLE_HEADER = {
   foods: "먹이",
   isPublic: "공개 여부",
   adoption_status: "분양 상태",
+  pet_name: "이름",
+  pet_species: "종",
+  pet_morphs: "모프",
+  pet_hatchingDate: "출생일",
+  status: "분양 상태",
+  buyer_name: "입양자",
+  adoptionDate: "분양 날짜",
+  price: "가격",
+  memo: "메모",
 };
 
 export const SPECIES_KOREAN_INFO: Record<PetDtoSpecies, string> = {
@@ -360,11 +369,6 @@ export const SIDEBAR_ITEMS = [
     url: "/pet",
     icon: Home,
   },
-  // {
-  //   title: "알 등록",
-  //   url: "/register/egg",
-  //   icon: Egg,
-  // },
   {
     title: "개체 등록",
     url: "/register/1",

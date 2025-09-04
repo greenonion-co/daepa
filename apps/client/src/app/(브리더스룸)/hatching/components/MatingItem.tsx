@@ -17,6 +17,8 @@ import { isAfter, isBefore } from "date-fns";
 import DropdownMenuIcon from "./DropdownMenuIcon";
 
 import EggItem from "./EggItem";
+import { AxiosError } from "axios";
+import { toast } from "sonner";
 
 interface MatingItemProps {
   mating: MatingByDateDto;
@@ -34,12 +36,9 @@ const MatingItem = ({ mating, father, mother, matingDates }: MatingItemProps) =>
     [mating.layingsByDate],
   );
 
-  const { mutate: updateLayingDate } = useMutation({
+  const { mutateAsync: updateLayingDate } = useMutation({
     mutationFn: ({ id, newLayingDate }: { id: number; newLayingDate: string }) =>
       layingControllerUpdate(id, { layingDate: newLayingDate }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [brMatingControllerFindAll.name] });
-    },
   });
 
   const handleAddLayingClick = () => {
@@ -122,6 +121,22 @@ const MatingItem = ({ mating, father, mother, matingDates }: MatingItemProps) =>
       return false;
     };
   };
+  const handleUpdateLayingDate = async (layingId: number, newLayingDate: string) => {
+    try {
+      await updateLayingDate({
+        id: layingId,
+        newLayingDate,
+      });
+      toast.success("산란일 수정에 성공했습니다.");
+      queryClient.invalidateQueries({ queryKey: [brMatingControllerFindAll.name] });
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        toast.error(error.response?.data?.message ?? "산란일 수정에 실패했습니다.");
+      } else {
+        toast.error("산란일 수정에 실패했습니다.");
+      }
+    }
+  };
 
   return (
     <div
@@ -179,12 +194,7 @@ const MatingItem = ({ mating, father, mother, matingDates }: MatingItemProps) =>
                   disabledDates={layingDates}
                   triggerText={layingDate}
                   confirmButtonText="산란 추가"
-                  onConfirm={(newLayingDate) => {
-                    updateLayingDate({
-                      id: layingId,
-                      newLayingDate,
-                    });
-                  }}
+                  onConfirm={(newLayingDate) => handleUpdateLayingDate(layingId, newLayingDate)}
                   disabled={getDisabledDates(layingDate)}
                 />
 
@@ -201,7 +211,7 @@ const MatingItem = ({ mating, father, mother, matingDates }: MatingItemProps) =>
 
           <button
             onClick={handleAddLayingClick}
-            className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg bg-blue-100 p-2 text-sm font-bold text-blue-800 transition-colors dark:bg-blue-900 dark:text-blue-200 dark:hover:bg-blue-800"
+            className="mt-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-blue-100 p-2 text-sm font-bold text-blue-800 shadow-sm transition-colors hover:bg-blue-200 hover:shadow-md dark:bg-blue-900 dark:text-blue-200 dark:hover:bg-blue-800"
           >
             <Plus className="h-4 w-4" />
             산란 추가

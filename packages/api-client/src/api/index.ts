@@ -12,6 +12,7 @@ import type {
   BrPetControllerFindAllParams,
   BrPetControllerGetPetsByDateRangeParams,
   BrPetControllerGetPetsByMonthParams,
+  BrUserControllerGetUsersParams,
   CompleteHatchingDto,
   CreateAdoptionDto,
   CreateInitUserInfoDto,
@@ -33,6 +34,7 @@ import type {
   UserNotificationControllerFindAllParams,
   VerifyEmailDto,
   VerifyNameDto,
+  VerifyPetNameDto,
 } from "../model";
 
 import { faker } from "@faker-js/faker";
@@ -45,6 +47,7 @@ import type {
   BrMatingControllerFindAll200,
   BrPetControllerFindAll200,
   BrPetControllerGetPetsByYear200,
+  BrUserControllerGetUsers200,
   CommonResponseDto,
   FilterPetListResponseDto,
   FindPetByPetIdResponseDto,
@@ -116,6 +119,15 @@ export const petControllerCompleteHatching = (
     method: "POST",
     headers: { "Content-Type": "application/json" },
     data: completeHatchingDto,
+  });
+};
+
+export const petControllerVerifyName = (verifyPetNameDto: VerifyPetNameDto) => {
+  return useCustomInstance<CommonResponseDto>({
+    url: `http://localhost:4000/api/v1/pet/duplicate-check`,
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    data: verifyPetNameDto,
   });
 };
 
@@ -414,6 +426,14 @@ export const fileControllerUploadImages = (uploadImagesRequestDto: UploadImagesR
   });
 };
 
+export const brUserControllerGetUsers = (params?: BrUserControllerGetUsersParams) => {
+  return useCustomInstance<BrUserControllerGetUsers200>({
+    url: `http://localhost:4000/api/v1/br/user`,
+    method: "GET",
+    params,
+  });
+};
+
 export type PetControllerCreateResult = NonNullable<
   Awaited<ReturnType<typeof petControllerCreate>>
 >;
@@ -434,6 +454,9 @@ export type PetControllerUnlinkParentResult = NonNullable<
 >;
 export type PetControllerCompleteHatchingResult = NonNullable<
   Awaited<ReturnType<typeof petControllerCompleteHatching>>
+>;
+export type PetControllerVerifyNameResult = NonNullable<
+  Awaited<ReturnType<typeof petControllerVerifyName>>
 >;
 export type UserNotificationControllerFindAllResult = NonNullable<
   Awaited<ReturnType<typeof userNotificationControllerFindAll>>
@@ -533,6 +556,9 @@ export type PairControllerCreateResult = NonNullable<
 >;
 export type FileControllerUploadImagesResult = NonNullable<
   Awaited<ReturnType<typeof fileControllerUploadImages>>
+>;
+export type BrUserControllerGetUsersResult = NonNullable<
+  Awaited<ReturnType<typeof brUserControllerGetUsers>>
 >;
 
 export const getPetControllerCreateResponseMock = (
@@ -774,7 +800,24 @@ export const getPetControllerFindPetByPetIdResponseMock = (
               faker.helpers.arrayElement(["ONLINE", "OFFLINE"] as const),
               undefined,
             ]),
-            buyerId: faker.string.alpha(20),
+            buyer: faker.helpers.arrayElement([
+              {
+                ...{
+                  userId: faker.string.alpha(20),
+                  name: faker.string.alpha(20),
+                  role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
+                  isBiz: faker.datatype.boolean(),
+                  status: faker.helpers.arrayElement([
+                    "pending",
+                    "active",
+                    "inactive",
+                    "suspended",
+                    "deleted",
+                  ] as const),
+                },
+              },
+              undefined,
+            ]),
             petId: faker.string.alpha(20),
           },
         },
@@ -834,6 +877,14 @@ export const getPetControllerUnlinkParentResponseMock = (
 });
 
 export const getPetControllerCompleteHatchingResponseMock = (
+  overrideResponse: Partial<CommonResponseDto> = {},
+): CommonResponseDto => ({
+  success: faker.datatype.boolean(),
+  message: faker.string.alpha(20),
+  ...overrideResponse,
+});
+
+export const getPetControllerVerifyNameResponseMock = (
   overrideResponse: Partial<CommonResponseDto> = {},
 ): CommonResponseDto => ({
   success: faker.datatype.boolean(),
@@ -1270,7 +1321,24 @@ export const getBrPetControllerFindAllResponseMock = (
             faker.helpers.arrayElement(["ONLINE", "OFFLINE"] as const),
             undefined,
           ]),
-          buyerId: faker.string.alpha(20),
+          buyer: faker.helpers.arrayElement([
+            {
+              ...{
+                userId: faker.string.alpha(20),
+                name: faker.string.alpha(20),
+                role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
+                isBiz: faker.datatype.boolean(),
+                status: faker.helpers.arrayElement([
+                  "pending",
+                  "active",
+                  "inactive",
+                  "suspended",
+                  "deleted",
+                ] as const),
+              },
+            },
+            undefined,
+          ]),
           petId: faker.string.alpha(20),
         },
       },
@@ -1528,7 +1596,24 @@ export const getBrPetControllerGetPetsByYearResponseMock = (): BrPetControllerGe
             faker.helpers.arrayElement(["ONLINE", "OFFLINE"] as const),
             undefined,
           ]),
-          buyerId: faker.string.alpha(20),
+          buyer: faker.helpers.arrayElement([
+            {
+              ...{
+                userId: faker.string.alpha(20),
+                name: faker.string.alpha(20),
+                role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
+                isBiz: faker.datatype.boolean(),
+                status: faker.helpers.arrayElement([
+                  "pending",
+                  "active",
+                  "inactive",
+                  "suspended",
+                  "deleted",
+                ] as const),
+              },
+            },
+            undefined,
+          ]),
           petId: faker.string.alpha(20),
         },
       },
@@ -1787,7 +1872,24 @@ export const getBrPetControllerGetPetsByMonthResponseMock = (
               faker.helpers.arrayElement(["ONLINE", "OFFLINE"] as const),
               undefined,
             ]),
-            buyerId: faker.string.alpha(20),
+            buyer: faker.helpers.arrayElement([
+              {
+                ...{
+                  userId: faker.string.alpha(20),
+                  name: faker.string.alpha(20),
+                  role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
+                  isBiz: faker.datatype.boolean(),
+                  status: faker.helpers.arrayElement([
+                    "pending",
+                    "active",
+                    "inactive",
+                    "suspended",
+                    "deleted",
+                  ] as const),
+                },
+              },
+              undefined,
+            ]),
             petId: faker.string.alpha(20),
           },
         },
@@ -2048,7 +2150,24 @@ export const getBrPetControllerGetPetsByDateRangeResponseMock = (
               faker.helpers.arrayElement(["ONLINE", "OFFLINE"] as const),
               undefined,
             ]),
-            buyerId: faker.string.alpha(20),
+            buyer: faker.helpers.arrayElement([
+              {
+                ...{
+                  userId: faker.string.alpha(20),
+                  name: faker.string.alpha(20),
+                  role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
+                  isBiz: faker.datatype.boolean(),
+                  status: faker.helpers.arrayElement([
+                    "pending",
+                    "active",
+                    "inactive",
+                    "suspended",
+                    "deleted",
+                  ] as const),
+                },
+              },
+              undefined,
+            ]),
             petId: faker.string.alpha(20),
           },
         },
@@ -2559,7 +2678,7 @@ export const getMatingControllerFindAllResponseMock = (
       (_, i) => i + 1,
     ).map(() => ({
       id: faker.number.int({ min: undefined, max: undefined }),
-      matingDate: `${faker.date.past().toISOString().split(".")[0]}Z`,
+      matingDate: faker.string.alpha(20),
       layingsByDate: faker.helpers.arrayElement([
         Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
           layingId: faker.number.int({ min: undefined, max: undefined }),
@@ -2805,7 +2924,7 @@ export const getBrMatingControllerFindAllResponseMock = (
       (_, i) => i + 1,
     ).map(() => ({
       id: faker.number.int({ min: undefined, max: undefined }),
-      matingDate: `${faker.date.past().toISOString().split(".")[0]}Z`,
+      matingDate: faker.string.alpha(20),
       layingsByDate: faker.helpers.arrayElement([
         Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
           layingId: faker.number.int({ min: undefined, max: undefined }),
@@ -2936,6 +3055,26 @@ export const getPairControllerCreateResponseMock = (
 
 export const getFileControllerUploadImagesResponseMock = (): string[] =>
   Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, () => faker.word.sample());
+
+export const getBrUserControllerGetUsersResponseMock = (
+  overrideResponse: Partial<BrUserControllerGetUsers200> = {},
+): BrUserControllerGetUsers200 => ({
+  data: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+    userId: faker.string.alpha(20),
+    name: faker.string.alpha(20),
+    email: faker.string.alpha(20),
+    isBiz: faker.datatype.boolean(),
+  })),
+  meta: {
+    page: faker.number.int({ min: undefined, max: undefined }),
+    itemPerPage: faker.number.int({ min: undefined, max: undefined }),
+    totalCount: faker.number.int({ min: undefined, max: undefined }),
+    totalPage: faker.number.int({ min: undefined, max: undefined }),
+    hasPreviousPage: faker.datatype.boolean(),
+    hasNextPage: faker.datatype.boolean(),
+  },
+  ...overrideResponse,
+});
 
 export const getPetControllerCreateMockHandler = (
   overrideResponse?:
@@ -3092,6 +3231,29 @@ export const getPetControllerCompleteHatchingMockHandler = (
             ? await overrideResponse(info)
             : overrideResponse
           : getPetControllerCompleteHatchingResponseMock(),
+      ),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+  });
+};
+
+export const getPetControllerVerifyNameMockHandler = (
+  overrideResponse?:
+    | CommonResponseDto
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<CommonResponseDto> | CommonResponseDto),
+) => {
+  return http.post("*/api/v1/pet/duplicate-check", async (info) => {
+    await delay(1000);
+
+    return new HttpResponse(
+      JSON.stringify(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getPetControllerVerifyNameResponseMock(),
       ),
       { status: 200, headers: { "Content-Type": "application/json" } },
     );
@@ -3832,6 +3994,29 @@ export const getFileControllerUploadImagesMockHandler = (
     );
   });
 };
+
+export const getBrUserControllerGetUsersMockHandler = (
+  overrideResponse?:
+    | BrUserControllerGetUsers200
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<BrUserControllerGetUsers200> | BrUserControllerGetUsers200),
+) => {
+  return http.get("*/api/v1/br/user", async (info) => {
+    await delay(1000);
+
+    return new HttpResponse(
+      JSON.stringify(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getBrUserControllerGetUsersResponseMock(),
+      ),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+  });
+};
 export const getProjectDaepaAPIMock = () => [
   getPetControllerCreateMockHandler(),
   getPetControllerFindPetByPetIdMockHandler(),
@@ -3840,6 +4025,7 @@ export const getProjectDaepaAPIMock = () => [
   getPetControllerLinkParentMockHandler(),
   getPetControllerUnlinkParentMockHandler(),
   getPetControllerCompleteHatchingMockHandler(),
+  getPetControllerVerifyNameMockHandler(),
   getUserNotificationControllerFindAllMockHandler(),
   getUserNotificationControllerUpdateMockHandler(),
   getUserNotificationControllerDeleteMockHandler(),
@@ -3873,4 +4059,5 @@ export const getProjectDaepaAPIMock = () => [
   getLayingControllerUpdateMockHandler(),
   getPairControllerCreateMockHandler(),
   getFileControllerUploadImagesMockHandler(),
+  getBrUserControllerGetUsersMockHandler(),
 ];

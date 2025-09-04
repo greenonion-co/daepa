@@ -11,20 +11,28 @@ import { Table } from "@tanstack/react-table";
 import { ChevronDown, Search } from "lucide-react";
 import { TABLE_HEADER } from "../../constants";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
-import { BrPetControllerFindAllParams } from "@repo/api-client";
-import useSearchStore from "../store/search";
+import { useEffect, useState } from "react";
+import { PetDto } from "@repo/api-client";
+import { FilterStore } from "../../store/filter";
 
-interface FiltersProps<TData> {
+type AnyParams = Record<string, string | number | string[] | number[]>;
+interface FiltersProps<TData, TParams extends AnyParams = AnyParams> extends FilterStore<TParams> {
   table: Table<TData>;
+  placeholder?: string;
 }
 
-export function Filters<TData>({ table }: FiltersProps<TData>) {
-  const { searchFilters, setSearchFilters } = useSearchStore();
-  const [filters, setFilters] = useState<Partial<BrPetControllerFindAllParams>>({});
-
+export function Filters<TData, TParams extends AnyParams = AnyParams>({
+  table,
+  searchFilters,
+  setSearchFilters,
+  columnFilters,
+  setColumnFilters,
+}: FiltersProps<TData, TParams>) {
+  const [filters, setFilters] = useState<Partial<TParams>>(
+    (searchFilters as Partial<TParams>) ?? ({} as Partial<TParams>),
+  );
   const handleSearch = () => {
-    setSearchFilters(filters);
+    setSearchFilters({ ...searchFilters, ...filters });
   };
 
   const hasActiveFilters = Object.entries(searchFilters).some(
@@ -36,6 +44,20 @@ export function Filters<TData>({ table }: FiltersProps<TData>) {
     setFilters({});
   };
 
+  useEffect(() => {
+    if (columnFilters) return;
+
+    setColumnFilters(
+      table.getAllColumns().reduce(
+        (acc, column) => {
+          acc[column.id as keyof PetDto] = column.getIsVisible();
+          return acc;
+        },
+        {} as Partial<Record<keyof PetDto, boolean>>,
+      ),
+    );
+  }, [table, setColumnFilters, columnFilters]);
+
   return (
     <div className="flex items-center gap-2 py-2">
       {/* 검색 */}
@@ -45,7 +67,7 @@ export function Filters<TData>({ table }: FiltersProps<TData>) {
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
           <Input
             placeholder="펫 이름으로 검색"
-            value={filters.keyword || ""}
+            value={typeof filters.keyword === "string" ? filters.keyword : ""}
             onChange={(e) => setFilters((prev) => ({ ...prev, keyword: e.target.value }))}
             className="pl-10"
             onKeyDown={(e) => {
@@ -60,7 +82,12 @@ export function Filters<TData>({ table }: FiltersProps<TData>) {
         </Button>
       </div>
 
-      <Button variant="outline" className="relative bg-gray-200" onClick={handleResetFilters}>
+      <Button
+        disabled={!hasActiveFilters}
+        variant="outline"
+        className="relative bg-gray-200"
+        onClick={handleResetFilters}
+      >
         필터 초기화
         {hasActiveFilters && (
           <div className="absolute -right-1 -top-1 h-3 w-3 rounded-full bg-red-500" />
@@ -81,8 +108,13 @@ export function Filters<TData>({ table }: FiltersProps<TData>) {
               <DropdownMenuCheckboxItem
                 key={column.id}
                 className="capitalize"
-                checked={column.getIsVisible()}
-                onCheckedChange={(value) => column.toggleVisibility(!!value)}
+                checked={columnFilters?.[column.id as keyof PetDto]}
+                onCheckedChange={(value) => {
+                  setColumnFilters({
+                    [column.id]: !!value,
+                  });
+                }}
+                onSelect={(e) => e.preventDefault()}
               >
                 {TABLE_HEADER[column.id as keyof typeof TABLE_HEADER]}
               </DropdownMenuCheckboxItem>

@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { memo, useCallback } from "react";
 import { petControllerDeletePet } from "@repo/api-client";
+import { AxiosError } from "axios";
 
 interface CardBackActionsProps {
   petId: string;
@@ -21,32 +22,36 @@ const CardBackActions = memo(
   ({ petId, isEditing, onEditToggle, onSave, onCancel }: CardBackActionsProps) => {
     const router = useRouter();
 
-    const { mutate: mutateDeletePet } = useMutation({
+    const { mutateAsync: mutateDeletePet } = useMutation({
       mutationFn: (petId: string) => petControllerDeletePet(petId),
-      onSuccess: () => {
+    });
+
+    const handleConfirmDelete = useCallback(async () => {
+      try {
+        await mutateDeletePet(petId);
         router.push("/pet");
         toast.success("펫이 삭제되었습니다.");
-      },
-      onError: () => {
-        toast.error("펫 삭제에 실패했습니다.");
-      },
-    });
+      } catch (error) {
+        if (error instanceof AxiosError) {
+          toast.error(error.response?.data?.message ?? "펫 삭제에 실패했습니다.");
+        } else {
+          toast.error("펫 삭제에 실패했습니다.");
+        }
+      }
+    }, [petId, mutateDeletePet, router]);
 
     const handleDelete = useCallback(() => {
       overlay.open(({ isOpen, close, unmount }) => (
         <Dialog
           isOpen={isOpen}
           onCloseAction={close}
-          onConfirmAction={() => {
-            mutateDeletePet(petId);
-            close();
-          }}
+          onConfirmAction={handleConfirmDelete}
           onExit={unmount}
           title="개체 삭제 안내"
           description={`정말로 삭제하시겠습니까? \n 삭제 후 복구할 수 없습니다.`}
         />
       ));
-    }, [petId, mutateDeletePet]);
+    }, [handleConfirmDelete]);
 
     const handleEditClick = useCallback(() => {
       onEditToggle();

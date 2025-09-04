@@ -14,15 +14,15 @@ import Loading from '@/components/common/Loading';
 import Toast from '@/components/common/Toast';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { RootStackParamList } from '@/navigation';
 import { isAxiosError } from 'axios';
+import { RootStackParamList } from '@/types/navigation';
 
 const AppleLoginButton = () => {
   const { navigateByStatus } = useLogin();
   const isAndroid = Platform.OS === 'android';
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
 
-  const { mutate: mutateGetToken } = useMutation({
+  const { mutateAsync: mutateGetToken } = useMutation({
     mutationFn: async (_status: UserDtoStatus) => {
       return authControllerGetToken();
     },
@@ -38,7 +38,7 @@ const AppleLoginButton = () => {
     },
   });
 
-  const { mutate: appleLogin } = useMutation({
+  const { mutateAsync: appleLogin } = useMutation({
     mutationFn: authControllerAppleNative,
     onSuccess: data => {
       mutateGetToken(data.data.status);

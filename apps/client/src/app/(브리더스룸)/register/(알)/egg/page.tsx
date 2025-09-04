@@ -14,7 +14,7 @@ import { FormStep } from "../../types";
 import FloatingButton from "@/app/(브리더스룸)/components/FloatingButton";
 import { useEggStore } from "../../store/egg";
 import { useRegisterForm } from "../../hooks/useRegisterForm";
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import { useSelect } from "../../hooks/useSelect";
 import { FormData } from "../../store/pet";
 import Loading from "@/components/common/Loading";
@@ -28,20 +28,8 @@ const EggRegisterPage = () => {
   const { handleSelect } = useSelect();
   const visibleSteps = EGG_REGISTER_STEPS.slice(-step - 1);
 
-  const { mutate: mutateCreateEgg, isPending } = useMutation({
+  const { mutateAsync: mutateCreateEgg, isPending } = useMutation({
     mutationFn: (data: CreatePetDto) => petControllerCreate(data),
-    onSuccess: () => {
-      toast.success("알 등록이 완료되었습니다.");
-      router.push("/hatching");
-    },
-    onError: (error: AxiosError<{ message: string }>) => {
-      console.error("Failed to create pet:", error);
-      if (error.response?.data?.message) {
-        toast.error(error.response.data.message);
-      } else {
-        toast.error("알 등록에 실패했습니다.");
-      }
-    },
   });
 
   useEffect(() => {
@@ -99,15 +87,9 @@ const EggRegisterPage = () => {
     e.preventDefault();
   };
 
-  const createEgg = (newFormData: FormData) => {
-    if (!newFormData?.father?.petId && !newFormData?.mother?.petId) {
-      toast.error("부모 개체 정보를 하나 이상 선택해주세요.");
-
-      return;
-    }
-
+  const formatFormData = useCallback((newFormData: FormData) => {
     try {
-      const formattedData = {
+      return {
         species: newFormData.species,
         ...(newFormData.layingDate && {
           layingDate: format(newFormData.layingDate, "yyyyMMdd"),
@@ -137,9 +119,29 @@ const EggRegisterPage = () => {
         growth: PetDtoGrowth.EGG,
         name: `${newFormData.father?.name}x${newFormData.mother?.name}(${newFormData.clutchCount ?? "@"}-${newFormData.clutch ?? "@"})`,
       };
-      mutateCreateEgg(formattedData);
     } catch (error) {
       console.error("Failed to create egg:", error);
+    }
+  }, []);
+
+  const createEgg = async (newFormData: FormData) => {
+    if (!newFormData?.father?.petId && !newFormData?.mother?.petId) {
+      toast.error("부모 개체 정보를 하나 이상 선택해주세요.");
+
+      return;
+    }
+
+    try {
+      const formattedData = formatFormData(newFormData);
+      await mutateCreateEgg(formattedData);
+      toast.success("알 등록이 완료되었습니다.");
+      router.push("/hatching");
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        toast.error(error.response?.data?.message ?? "알 등록에 실패했습니다.");
+      } else {
+        toast.error("알 등록에 실패했습니다.");
+      }
     }
   };
 

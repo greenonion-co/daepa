@@ -92,8 +92,8 @@ const CardBack = ({ pet, setIsFlipped }: CardBackProps) => {
           <h2 className="mb-3 text-xl font-bold">혈통 정보</h2>
 
           <div className="grid grid-cols-2 gap-4">
-            <ParentLink label="부" data={pet.father} editable={false} />
-            <ParentLink label="모" data={pet.mother} editable={false} />
+            <ParentLink species={pet.species} label="부" data={pet.father} editable={false} />
+            <ParentLink species={pet.species} label="모" data={pet.mother} editable={false} />
           </div>
         </div>
 
