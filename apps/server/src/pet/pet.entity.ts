@@ -90,5 +90,5 @@ export class PetEntity {
   adoption?: AdoptionEntity;
 
   @OneToOne(() => PetImageEntity, (image) => image.petId)
-  photos: PetImageEntity['files'] | null;
+  photos: PetImageEntity | null;
 }
