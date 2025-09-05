@@ -21,6 +21,7 @@ import { isNil, range, remove } from "es-toolkit";
 import { ACCEPT_IMAGE_FORMATS } from "../../constants";
 import { tokenStorage } from "@/lib/tokenStorage";
 import { PhotoItem } from "../../register/types";
+import { Chip } from "@mui/material";
 
 interface DndImagePickerProps {
   max?: number;
@@ -199,6 +200,8 @@ export default function DndImagePicker({ max = 3, disabled }: DndImagePickerProp
           // 모바일에서 스크롤과 드래그가 충돌하지 않도록 설정
           autoScroll={false}
         >
+          {disabled && photos.length === 0 && <Chip color="info" label="등록된 사진이 없습니다." />}
+
           <SortableContext items={imageNamesInOrder} strategy={rectSortingStrategy}>
             <div className={cn("grid grid-cols-3 gap-2", isDragActive && "ring-2 ring-blue-400")}>
               {photos.map((photo, index) => (

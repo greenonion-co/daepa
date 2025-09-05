@@ -52,16 +52,23 @@ export class PetImageService {
       });
     }
 
-    return entityManager.upsert(
-      PetImageEntity,
-      {
-        petId,
-        files: savedImageList,
-      },
-      {
-        conflictPaths: ['petId'],
-        skipUpdateIfNoValuesChanged: true,
-      },
-    );
+    const existing = await entityManager.findOne(PetImageEntity, {
+      where: { petId },
+    });
+
+    if (existing) {
+      return entityManager.update(
+        PetImageEntity,
+        { petId },
+        {
+          files: savedImageList,
+        },
+      );
+    }
+
+    return entityManager.insert(PetImageEntity, {
+      petId,
+      files: savedImageList,
+    });
   }
 }
