@@ -218,8 +218,8 @@ export class PetService {
 
       const { father, mother, photos, ...petData } = updatePetDto;
       if (photos) {
-        const newPhotoOrder = updatePetDto.photos?.map(
-          (photo) => photo.fileName,
+        const newPhotoOrder = updatePetDto.photos?.map((photo) =>
+          photo.fileName.replace('PENDING', petId),
         );
         petData.photoOrder = newPhotoOrder;
 
