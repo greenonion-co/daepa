@@ -9,7 +9,8 @@ import CalendarInput from "./CalendarInput";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   brMatingControllerFindAll,
-  petControllerUpdate,
+  CompleteHatchingDto,
+  petControllerCompleteHatching,
   PetDtoGrowth,
   UpdatePetDto,
   UpdatePetDtoGrowth,
@@ -57,7 +58,7 @@ const CompleteHatchingModal = ({
   });
 
   const { mutateAsync: mutateHatched } = useMutation({
-    mutationFn: (formData: UpdatePetDto) => petControllerUpdate(petId, formData),
+    mutationFn: (formData: CompleteHatchingDto) => petControllerCompleteHatching(petId, formData),
   });
 
   const handleSubmit = async () => {
@@ -123,11 +124,13 @@ const CompleteHatchingModal = ({
                 <SelectValue placeholder="크기를 선택하세요" />
               </SelectTrigger>
               <SelectContent>
-                {Object.values(PetDtoGrowth).map((growth) => (
-                  <SelectItem key={growth} value={growth} className="text-[16px]">
-                    {GROWTH_KOREAN_INFO[growth]}
-                  </SelectItem>
-                ))}
+                {Object.values(PetDtoGrowth)
+                  .filter((growth) => growth !== PetDtoGrowth.EGG)
+                  .map((growth) => (
+                    <SelectItem key={growth} value={growth} className="text-[16px]">
+                      {GROWTH_KOREAN_INFO[growth]}
+                    </SelectItem>
+                  ))}
               </SelectContent>
             </Select>
           </div>
