@@ -11,7 +11,6 @@ export type FieldName =
   | "weight"
   | "desc"
   | "photos"
-  | "photoOrder"
   | "father"
   | "mother"
   | "clutchCount"

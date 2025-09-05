@@ -16,7 +16,6 @@ import { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
 import Loading from "@/components/common/Loading";
 import { isNil, pick, pickBy } from "es-toolkit";
-import { PhotoItem } from "../types";
 
 const formatFormData = (formData: FormData): CreatePetDto | undefined => {
   const data = { ...formData };
@@ -55,7 +54,6 @@ const formatFormData = (formData: FormData): CreatePetDto | undefined => {
       foods: data?.foods,
       traits: data?.traits,
       photos: data?.photos,
-      photoOrder: data?.photos?.map((photo: PhotoItem) => photo.fileName.replace("PENDING/", "")),
     },
     (value) => !isNil(value),
   );
