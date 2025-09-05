@@ -145,7 +145,7 @@ export const FormField = ({
                   return;
                 }
 
-                if (name === "sex") {
+                if ((name === "sex" && value === PetDtoSex.FEMALE) || value === PetDtoSex.MALE) {
                   toast.error("성별은 변경할 수 없습니다.");
                   return;
                 }
@@ -243,7 +243,7 @@ export const FormField = ({
             </PopoverContent>
           </Popover>
         );
-      case "nickname":
+      case "name":
         return (
           <NameInput
             errorMessage={error || ""}

@@ -1,6 +1,7 @@
 import { Bell, Bubbles, DollarSign, Film, Home, Inbox } from "lucide-react";
 import { FormStep, SelectorConfig } from "./register/types";
 import {
+  CreateMatingDtoEggStatus,
   PetDtoGrowth,
   PetDtoSex,
   PetDtoSpecies,
@@ -18,7 +19,7 @@ export const FORM_STEPS: FormStep[] = [
     title: "개체 이름",
     field: {
       name: "name",
-      type: "nickname",
+      type: "name",
       required: true,
       placeholder: "개체 이름을 입력해주세요",
       validation: (value) => value.length > 0,
@@ -335,10 +336,17 @@ export const GROWTH_KOREAN_INFO: Record<PetDtoGrowth, string> = {
   DEAD: "사망",
 };
 
+export const EGG_STATUS_KOREAN_INFO: Record<CreateMatingDtoEggStatus, string> = {
+  UNFERTILIZED: "무정란",
+  FERTILIZED: "유정란",
+  HATCHED: "해칭완료",
+  DEAD: "사망",
+};
+
 export const FOOD_LIST = ["판게아 인섹트", "귀뚜라미", "냉동귀뚜라미", "누에", "지렙 인섹트"];
 
 export const SELECTOR_CONFIGS: Record<
-  "species" | "growth" | "sex" | "traits" | "foods",
+  "species" | "growth" | "sex" | "traits" | "foods" | "eggStatus",
   SelectorConfig
 > = {
   species: {
@@ -347,7 +355,7 @@ export const SELECTOR_CONFIGS: Record<
   },
   growth: {
     title: "크기 선택",
-    selectList: ["EGG", "BABY", "JUVENILE", "PRE_ADULT", "ADULT"],
+    selectList: ["BABY", "JUVENILE", "PRE_ADULT", "ADULT"],
   },
   sex: {
     title: "성별 선택",
@@ -360,6 +368,10 @@ export const SELECTOR_CONFIGS: Record<
   foods: {
     title: "먹이 선택",
     selectList: FOOD_LIST,
+  },
+  eggStatus: {
+    title: "알 상태 선택",
+    selectList: Object.keys(EGG_STATUS_KOREAN_INFO),
   },
 };
 

@@ -31,6 +31,11 @@ export function Filters<TData, TParams extends AnyParams = AnyParams>({
   const [filters, setFilters] = useState<Partial<TParams>>(
     (searchFilters as Partial<TParams>) ?? ({} as Partial<TParams>),
   );
+  const [initialColumnFilters, setInitialColumnFilters] = useState<
+    Partial<Record<keyof PetDto, boolean>>
+  >(columnFilters ?? {});
+
+  const hasColumnFilters = Object.values(columnFilters ?? {}).every((value) => value);
   const handleSearch = () => {
     setSearchFilters({ ...searchFilters, ...filters });
   };
@@ -44,19 +49,22 @@ export function Filters<TData, TParams extends AnyParams = AnyParams>({
     setFilters({});
   };
 
-  useEffect(() => {
-    if (columnFilters) return;
+  const resetColumnFilters = () => {
+    setColumnFilters(initialColumnFilters);
+  };
 
-    setColumnFilters(
-      table.getAllColumns().reduce(
-        (acc, column) => {
-          acc[column.id as keyof PetDto] = column.getIsVisible();
-          return acc;
-        },
-        {} as Partial<Record<keyof PetDto, boolean>>,
-      ),
+  useEffect(() => {
+    const initialColumnFilters = table.getAllColumns().reduce(
+      (acc, column) => {
+        acc[column.id as keyof PetDto] = true;
+        return acc;
+      },
+      {} as Partial<Record<keyof PetDto, boolean>>,
     );
-  }, [table, setColumnFilters, columnFilters]);
+
+    setInitialColumnFilters(initialColumnFilters);
+    setColumnFilters(initialColumnFilters);
+  }, [table, setColumnFilters]);
 
   return (
     <div className="flex items-center gap-2 py-2">
@@ -101,6 +109,15 @@ export function Filters<TData, TParams extends AnyParams = AnyParams>({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
+          <DropdownMenuCheckboxItem
+            key="all"
+            className="capitalize"
+            checked={hasColumnFilters}
+            onCheckedChange={resetColumnFilters}
+            onSelect={(e) => e.preventDefault()}
+          >
+            전체
+          </DropdownMenuCheckboxItem>
           {table
             .getAllColumns()
             .filter((column) => column.getCanHide())
