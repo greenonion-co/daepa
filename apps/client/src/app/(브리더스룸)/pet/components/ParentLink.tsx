@@ -1,6 +1,7 @@
+"use client";
+
 import { Search, X } from "lucide-react";
 import Link from "next/link";
-import Image from "next/image";
 import { overlay } from "overlay-kit";
 import ParentSearchSelector from "../../components/selector/parentSearch";
 import { Button } from "@/components/ui/button";
@@ -17,6 +18,17 @@ import { Badge } from "@/components/ui/badge";
 import { usePathname } from "next/navigation";
 import { PetParentDtoWithMessage } from "../store/parentLink";
 import { useUserStore } from "../../store/user";
+import PetThumbnail from "../../components/PetThumbnail";
+
+interface ParentLinkProps {
+  species?: PetDtoSpecies;
+  label: "부" | "모";
+  data?: PetParentDto;
+  editable?: boolean;
+  petListType?: BrPetControllerFindAllFilterType;
+  onSelect?: (item: PetParentDtoWithMessage) => void;
+  onUnlink?: () => void;
+}
 
 const ParentLink = ({
   species,
@@ -26,15 +38,7 @@ const ParentLink = ({
   petListType = BrPetControllerFindAllFilterType.ALL,
   onSelect,
   onUnlink,
-}: {
-  species?: PetDtoSpecies;
-  label: "부" | "모";
-  data?: PetParentDto;
-  editable?: boolean;
-  petListType?: BrPetControllerFindAllFilterType;
-  onSelect?: (item: PetParentDtoWithMessage) => void;
-  onUnlink?: () => void;
-}) => {
+}: ParentLinkProps) => {
   const { user } = useUserStore();
   const pathname = usePathname();
   const isMyPet = data?.owner?.userId === user?.userId;
@@ -133,18 +137,8 @@ const ParentLink = ({
             }}
             className="flex flex-col items-center gap-2"
           >
-            <div className="relative aspect-square w-full overflow-hidden rounded-lg">
-              <Image
-                src={
-                  "photos" in data && data.photos && Array.isArray(data.photos)
-                    ? data.photos[0]
-                    : "/default-pet-image.png"
-                }
-                alt={String(data.petId) || "-"}
-                fill
-                className="object-cover"
-              />
-            </div>
+            <PetThumbnail imageUrl={data.photos?.[0]?.url} />
+
             <span
               className={cn(
                 "relative font-bold after:absolute after:bottom-0 after:left-0 after:-z-10 after:h-[15px] after:w-full after:opacity-40",

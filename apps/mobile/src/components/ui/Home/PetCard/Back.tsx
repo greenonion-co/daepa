@@ -19,11 +19,10 @@ import {
   GROWTH_KOREAN_INFO,
   FIELD_LABELS,
 } from '@/services/constant/form';
-import { formatYyMmDd } from '@/utils/format';
+import { buildTransformedUrl, formatYyMmDd } from '@/utils/format';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 
-import DefaultPetImage from '@/assets/images/default-pet-image.png';
 import { RootStackParamList } from '@/types/navigation';
 
 type FormField =
@@ -122,7 +121,7 @@ const CardBack: React.FC<Props> = ({ pet, onCloseBack }) => {
               <Text style={styles.parentLabel}>부</Text>
               {pet.father ? (
                 <ImageBackground
-                  source={DefaultPetImage}
+                  source={{ uri: buildTransformedUrl(pet.father.photos?.[0]) }}
                   style={styles.backgroundImage}
                   resizeMode="cover"
                 >
@@ -148,7 +147,7 @@ const CardBack: React.FC<Props> = ({ pet, onCloseBack }) => {
               <Text style={styles.parentLabel}>모</Text>
               {pet.mother ? (
                 <ImageBackground
-                  source={DefaultPetImage}
+                  source={{ uri: buildTransformedUrl(pet.mother.photos?.[0]) }}
                   style={styles.backgroundImage}
                   resizeMode="cover"
                 >

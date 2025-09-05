@@ -460,3 +460,11 @@ export const USER_STATUS_MAP: Record<UserDtoStatus, string> = {
   suspended: "정지",
   deleted: "삭제",
 };
+
+export const ACCEPT_IMAGE_FORMATS: Record<string, string[]> = {
+  "image/jpeg": [".jpg", ".jpeg"],
+  "image/png": [".png"],
+  "image/gif": [".gif"],
+  "image/webp": [".webp"],
+  "image/avif": [".avif"],
+};

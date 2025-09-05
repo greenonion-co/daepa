@@ -1,3 +1,5 @@
+"use client";
+
 import { usePetStore } from "@/app/(브리더스룸)/register/store/pet";
 import { useState, useEffect, memo, useMemo, useCallback } from "react";
 import {
@@ -14,8 +16,9 @@ import AdoptionStatusControl from "./components/AdoptionStatusControl";
 import PedigreeSection from "./components/PedigreeSection";
 import BreedingInfoSection from "./components/BreedingInfoSection";
 import CardBackActions from "./components/CardBackActions";
-import { useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useUserStore } from "@/app/(브리더스룸)/store/user";
+import { isNil, orderBy, pick, pickBy } from "es-toolkit";
 
 interface CardBackProps {
   pet: PetDto;
@@ -28,9 +31,30 @@ const CardBack = memo(({ pet, from, isWideScreen }: CardBackProps) => {
   const { formData, setFormData, setPage } = usePetStore();
   const { user } = useUserStore();
   const isMyPet = !!user && user.userId === pet.owner.userId;
-
   const [isEditing, setIsEditing] = useState(from === "egg");
   const [isTooltipOpen, setIsTooltipOpen] = useState(false);
+
+  const initialPetData = useMemo(
+    () => ({
+      ...pet,
+      photos: orderBy(
+        pet.photos ?? [],
+        [
+          (photo) => {
+            const fileKey = photo.fileName;
+            const index = pet.photoOrder?.indexOf(fileKey);
+            return index === -1 ? Infinity : index;
+          },
+        ],
+        ["asc"],
+      ),
+    }),
+    [pet],
+  );
+
+  const { mutateAsync: mutateUpdatePet } = useMutation({
+    mutationFn: (updateData: UpdatePetDto) => petControllerUpdate(pet.petId, updateData),
+  });
 
   const isNotSold = useMemo(() => pet?.adoption?.status !== "SOLD", [pet?.adoption?.status]);
 
@@ -45,31 +69,29 @@ const CardBack = memo(({ pet, from, isWideScreen }: CardBackProps) => {
   }, [formData, from]);
 
   useEffect(() => {
-    setFormData(pet);
+    setFormData(initialPetData);
     setPage("detail");
-  }, [pet, setFormData, setPage]);
+  }, [initialPetData, setFormData, setPage]);
 
   const handleSave = useCallback(async () => {
     try {
-      const { name, species, morphs, traits, growth, sex, foods, desc, hatchingDate, weight } =
-        formData;
-
       if (!pet.petId) return;
 
-      const updateData = {
-        ...(name && { name }),
-        ...(species && { species }),
-        ...(morphs && { morphs }),
-        ...(traits && { traits }),
-        ...(growth && { growth }),
-        ...(sex && { sex }),
-        ...(foods && { foods }),
-        ...(desc && { desc }),
-        ...(hatchingDate && { hatchingDate }),
-        ...(weight && { weight }),
-      };
-
-      await petControllerUpdate(pet.petId, updateData as UpdatePetDto);
+      const pickedData = pick(formData, [
+        "name",
+        "species",
+        "morphs",
+        "traits",
+        "growth",
+        "sex",
+        "foods",
+        "desc",
+        "hatchingDate",
+        "weight",
+        "photos",
+      ]);
+      const updateData = pickBy(pickedData, (value) => !isNil(value));
+      await mutateUpdatePet(updateData);
       setIsEditing(false);
       queryClient.invalidateQueries({
         queryKey: [petControllerFindPetByPetId.name, pet.petId],
@@ -79,16 +101,16 @@ const CardBack = memo(({ pet, from, isWideScreen }: CardBackProps) => {
       console.error("Failed to update pet:", error);
       toast.error("펫 정보 수정에 실패했습니다.");
     }
-  }, [formData, pet.petId, queryClient]);
+  }, [formData, queryClient, mutateUpdatePet, pet.petId]);
 
   const handleEditToggle = useCallback(() => {
     setIsEditing(!isEditing);
   }, [isEditing]);
 
   const handleCancel = useCallback(() => {
-    setFormData(pet);
+    setFormData(initialPetData);
     setIsEditing(false);
-  }, [pet, setFormData]);
+  }, [initialPetData, setFormData]);
 
   return (
     <div className="relative h-full w-full pt-2">

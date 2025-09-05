@@ -10,6 +10,7 @@ import {
 } from 'typeorm';
 import { PET_GROWTH, PET_SEX, PET_SPECIES } from './pet.constants';
 import { AdoptionEntity } from '../adoption/adoption.entity';
+import { PetImageEntity } from 'src/pet_image/pet_image.entity';
 
 @Entity({ name: 'pets' })
 @Index('UNIQUE_PET_ID', ['petId'], { unique: true })
@@ -73,6 +74,9 @@ export class PetEntity {
   @Column({ default: false })
   isDeleted: boolean;
 
+  @Column('json', { nullable: true })
+  photoOrder: string[] | null;
+
   @CreateDateColumn()
   createdAt: Date;
 
@@ -84,4 +88,7 @@ export class PetEntity {
     nullable: true,
   })
   adoption?: AdoptionEntity;
+
+  @OneToOne(() => PetImageEntity, (image) => image.petId)
+  photos: PetImageEntity | null;
 }

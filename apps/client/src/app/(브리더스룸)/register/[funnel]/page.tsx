@@ -4,17 +4,68 @@ import { FORM_STEPS, GENDER_KOREAN_INFO, OPTION_STEPS, REGISTER_PAGE } from "../
 import { FormHeader } from "../../components/Form/FormHeader";
 import { useRegisterForm } from "../hooks/useRegisterForm";
 import { FormData, usePetStore } from "../store/pet";
-import { useEffect, use, useCallback } from "react";
+import { useEffect, use } from "react";
 import { FormField } from "../../components/Form/FormField";
 
 import FloatingButton from "../../components/FloatingButton";
 import { useSelect } from "../hooks/useSelect";
 import { useMutation } from "@tanstack/react-query";
-import { CreatePetDto, petControllerCreate } from "@repo/api-client";
+import { CreateParentDtoRole, CreatePetDto, petControllerCreate } from "@repo/api-client";
 import { toast } from "sonner";
 import { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
 import Loading from "@/components/common/Loading";
+import { isNil, pick, pickBy } from "es-toolkit";
+import { PhotoItem } from "../types";
+
+const formatFormData = (formData: FormData): CreatePetDto | undefined => {
+  const data = { ...formData };
+  if (data.sex && typeof data.sex === "string") {
+    const genderEntry = Object.entries(GENDER_KOREAN_INFO).find(
+      ([, koreanValue]) => koreanValue === data.sex,
+    );
+    if (genderEntry) {
+      data.sex = genderEntry[0];
+    }
+  }
+
+  const baseFields = pick(data, ["growth", "morphs", "name", "sex"]);
+
+  const requestData = pickBy(
+    {
+      desc: data?.desc,
+      hatchingDate: data?.hatchingDate,
+      weight: data?.weight ? Number(data.weight) : undefined,
+      father: data?.father?.petId
+        ? {
+            parentId: data.father.petId,
+            role: CreateParentDtoRole.FATHER,
+            isMyPet: false,
+            message: data.father?.message,
+          }
+        : undefined,
+      mother: data?.mother?.petId
+        ? {
+            parentId: data.mother.petId,
+            role: CreateParentDtoRole.MOTHER,
+            isMyPet: false,
+            message: data.mother?.message,
+          }
+        : undefined,
+      foods: data?.foods,
+      traits: data?.traits,
+      photos: data?.photos,
+      photoOrder: data?.photos?.map((photo: PhotoItem) => photo.fileName.replace("PENDING/", "")),
+    },
+    (value) => !isNil(value),
+  );
+
+  return {
+    ...baseFields,
+    ...requestData,
+    species: data.species,
+  };
+};
 
 export default function RegisterPage({ params }: { params: Promise<{ funnel: string }> }) {
   const router = useRouter();
@@ -25,8 +76,8 @@ export default function RegisterPage({ params }: { params: Promise<{ funnel: str
   const funnel = Number(resolvedParams.funnel);
   const visibleSteps = FORM_STEPS.slice(-step - 1);
 
-  const { mutateAsync: mutateCreatePet, isPending } = useMutation({
-    mutationFn: (data: CreatePetDto) => petControllerCreate(data),
+  const { mutateAsync: mutateCreatePet, isPending: isCreating } = useMutation({
+    mutationFn: petControllerCreate,
   });
 
   useEffect(() => {
@@ -75,54 +126,11 @@ export default function RegisterPage({ params }: { params: Promise<{ funnel: str
     }
   }, [step, funnel]);
 
-  const formatFormData = useCallback((formData: FormData): CreatePetDto | undefined => {
-    try {
-      const transformedFormData = { ...formData };
-      if (transformedFormData.sex && typeof transformedFormData.sex === "string") {
-        const genderEntry = Object.entries(GENDER_KOREAN_INFO).find(
-          ([, koreanValue]) => koreanValue === transformedFormData.sex,
-        );
-        if (genderEntry) {
-          transformedFormData.sex = genderEntry[0];
-        }
-      }
-
-      const { growth, morphs, name, sex, species, desc, ...rest } = transformedFormData;
-
-      return {
-        growth,
-        morphs,
-        name,
-        sex,
-        species,
-        ...(desc && { desc }),
-        ...(rest?.hatchingDate && {
-          hatchingDate: rest.hatchingDate,
-        }),
-        ...(rest?.weight && { weight: Number(rest.weight) }),
-        ...(rest?.father?.petId && {
-          father: {
-            parentId: rest.father.petId,
-            role: "father",
-            isMyPet: false,
-            message: rest.father?.message,
-          },
-        }),
-        ...(rest?.mother?.petId && {
-          mother: {
-            parentId: rest.mother.petId,
-            role: "mother",
-            isMyPet: false,
-            message: rest.mother?.message,
-          },
-        }),
-        ...(rest?.foods && { foods: rest.foods }),
-        ...(rest?.traits && { traits: rest.traits }),
-      };
-    } catch (error) {
-      console.error("Failed to create pet:", error);
-    }
-  }, []);
+  const handleSuccess = () => {
+    toast.success("개체 등록이 완료되었습니다.");
+    router.push(`/pet`);
+    resetForm();
+  };
 
   const createPet = async (formData: FormData) => {
     try {
@@ -133,9 +141,7 @@ export default function RegisterPage({ params }: { params: Promise<{ funnel: str
       }
 
       await mutateCreatePet(formattedData);
-      toast.success("개체 등록이 완료되었습니다.");
-      router.push(`/pet`);
-      resetForm();
+      handleSuccess();
     } catch (error) {
       if (error instanceof AxiosError) {
         toast.error(error.response?.data?.message ?? "개체 등록에 실패했습니다.");
@@ -159,7 +165,7 @@ export default function RegisterPage({ params }: { params: Promise<{ funnel: str
     handleSubmit: createPet,
   });
 
-  if (isPending) {
+  if (isCreating) {
     return <Loading />;
   }
 

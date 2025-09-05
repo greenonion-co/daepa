@@ -44,14 +44,28 @@ export class UpdateParentRequestDto {
 }
 
 export class CreateParentDto {
+  @ApiProperty({
+    description: '부모 펫 아이디',
+    example: 'XXXXXXXX',
+  })
   @IsNotEmpty()
   @IsString()
   parentId: string;
 
+  @ApiProperty({
+    description: '부모 역할',
+    enum: PARENT_ROLE,
+    'x-enumNames': Object.keys(PARENT_ROLE),
+  })
   @IsNotEmpty()
   @IsEnum(PARENT_ROLE)
   role: PARENT_ROLE;
 
+  @ApiProperty({
+    description: '연동 요청 메시지',
+    required: false,
+    example: '혈통 정보를 위해 연동 요청합니다.',
+  })
   @IsOptional()
   @IsString()
   message?: string;

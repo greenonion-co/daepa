@@ -416,11 +416,10 @@ export const pairControllerCreate = (createPairDto: CreatePairDto) => {
 
 export const fileControllerUploadImages = (uploadImagesRequestDto: UploadImagesRequestDto) => {
   const formData = new FormData();
-  formData.append(`petId`, uploadImagesRequestDto.petId);
   uploadImagesRequestDto.files.forEach((value) => formData.append(`files`, value));
 
-  return useCustomInstance<CommonResponseDto>({
-    url: `http://localhost:4000/api/v1/file/upload/pet`,
+  return useCustomInstance<string[]>({
+    url: `http://localhost:4000/api/v1/file/upload`,
     method: "POST",
     headers: { "Content-Type": "multipart/form-data" },
     data: formData,
@@ -637,6 +636,12 @@ export const getPetControllerFindPetByPetIdResponseMock = (
         ),
         undefined,
       ]),
+      photoOrder: faker.helpers.arrayElement([
+        Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+          faker.string.alpha(20),
+        ),
+        undefined,
+      ]),
       desc: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
       father: faker.helpers.arrayElement([
         {
@@ -677,6 +682,23 @@ export const getPetControllerFindPetByPetIdResponseMock = (
             ]),
             sex: faker.helpers.arrayElement([
               faker.helpers.arrayElement(["M", "F", "N"] as const),
+              undefined,
+            ]),
+            photoOrder: faker.helpers.arrayElement([
+              Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => faker.string.alpha(20),
+              ),
+              undefined,
+            ]),
+            photos: faker.helpers.arrayElement([
+              Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => ({
+                  fileName: faker.string.alpha(20),
+                  url: faker.string.alpha(20),
+                  mimeType: faker.string.alpha(20),
+                  size: faker.number.int({ min: undefined, max: undefined }),
+                }),
+              ),
               undefined,
             ]),
             relationId: faker.number.int({ min: undefined, max: undefined }),
@@ -730,6 +752,23 @@ export const getPetControllerFindPetByPetIdResponseMock = (
             ]),
             sex: faker.helpers.arrayElement([
               faker.helpers.arrayElement(["M", "F", "N"] as const),
+              undefined,
+            ]),
+            photoOrder: faker.helpers.arrayElement([
+              Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => faker.string.alpha(20),
+              ),
+              undefined,
+            ]),
+            photos: faker.helpers.arrayElement([
+              Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => ({
+                  fileName: faker.string.alpha(20),
+                  url: faker.string.alpha(20),
+                  mimeType: faker.string.alpha(20),
+                  size: faker.number.int({ min: undefined, max: undefined }),
+                }),
+              ),
               undefined,
             ]),
             relationId: faker.number.int({ min: undefined, max: undefined }),
@@ -791,6 +830,15 @@ export const getPetControllerFindPetByPetIdResponseMock = (
         "deleted",
         "cancelled",
       ] as const),
+      photos: faker.helpers.arrayElement([
+        Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+          fileName: faker.string.alpha(20),
+          url: faker.string.alpha(20),
+          mimeType: faker.string.alpha(20),
+          size: faker.number.int({ min: undefined, max: undefined }),
+        })),
+        undefined,
+      ]),
     },
   },
   ...overrideResponse,
@@ -880,6 +928,18 @@ export const getUserNotificationControllerFindAllResponseMock = (
               ...{
                 id: faker.string.alpha(20),
                 name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+                photos: faker.helpers.arrayElement([
+                  Array.from(
+                    { length: faker.number.int({ min: 1, max: 10 }) },
+                    (_, i) => i + 1,
+                  ).map(() => ({
+                    fileName: faker.string.alpha(20),
+                    url: faker.string.alpha(20),
+                    mimeType: faker.string.alpha(20),
+                    size: faker.number.int({ min: undefined, max: undefined }),
+                  })),
+                  undefined,
+                ]),
               },
             },
             undefined,
@@ -889,6 +949,18 @@ export const getUserNotificationControllerFindAllResponseMock = (
               ...{
                 id: faker.string.alpha(20),
                 name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+                photos: faker.helpers.arrayElement([
+                  Array.from(
+                    { length: faker.number.int({ min: 1, max: 10 }) },
+                    (_, i) => i + 1,
+                  ).map(() => ({
+                    fileName: faker.string.alpha(20),
+                    url: faker.string.alpha(20),
+                    mimeType: faker.string.alpha(20),
+                    size: faker.number.int({ min: undefined, max: undefined }),
+                  })),
+                  undefined,
+                ]),
               },
             },
             undefined,
@@ -972,6 +1044,18 @@ export const getUserNotificationControllerFindOneResponseMock = (
                 ...{
                   id: faker.string.alpha(20),
                   name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+                  photos: faker.helpers.arrayElement([
+                    Array.from(
+                      { length: faker.number.int({ min: 1, max: 10 }) },
+                      (_, i) => i + 1,
+                    ).map(() => ({
+                      fileName: faker.string.alpha(20),
+                      url: faker.string.alpha(20),
+                      mimeType: faker.string.alpha(20),
+                      size: faker.number.int({ min: undefined, max: undefined }),
+                    })),
+                    undefined,
+                  ]),
                 },
               },
               undefined,
@@ -981,6 +1065,18 @@ export const getUserNotificationControllerFindOneResponseMock = (
                 ...{
                   id: faker.string.alpha(20),
                   name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+                  photos: faker.helpers.arrayElement([
+                    Array.from(
+                      { length: faker.number.int({ min: 1, max: 10 }) },
+                      (_, i) => i + 1,
+                    ).map(() => ({
+                      fileName: faker.string.alpha(20),
+                      url: faker.string.alpha(20),
+                      mimeType: faker.string.alpha(20),
+                      size: faker.number.int({ min: undefined, max: undefined }),
+                    })),
+                    undefined,
+                  ]),
                 },
               },
               undefined,
@@ -1066,6 +1162,12 @@ export const getBrPetControllerFindAllResponseMock = (
       ),
       undefined,
     ]),
+    photoOrder: faker.helpers.arrayElement([
+      Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+        faker.string.alpha(20),
+      ),
+      undefined,
+    ]),
     desc: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
     father: faker.helpers.arrayElement([
       {
@@ -1106,6 +1208,23 @@ export const getBrPetControllerFindAllResponseMock = (
           ]),
           sex: faker.helpers.arrayElement([
             faker.helpers.arrayElement(["M", "F", "N"] as const),
+            undefined,
+          ]),
+          photoOrder: faker.helpers.arrayElement([
+            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
+            undefined,
+          ]),
+          photos: faker.helpers.arrayElement([
+            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+              () => ({
+                fileName: faker.string.alpha(20),
+                url: faker.string.alpha(20),
+                mimeType: faker.string.alpha(20),
+                size: faker.number.int({ min: undefined, max: undefined }),
+              }),
+            ),
             undefined,
           ]),
           relationId: faker.number.int({ min: undefined, max: undefined }),
@@ -1159,6 +1278,23 @@ export const getBrPetControllerFindAllResponseMock = (
           ]),
           sex: faker.helpers.arrayElement([
             faker.helpers.arrayElement(["M", "F", "N"] as const),
+            undefined,
+          ]),
+          photoOrder: faker.helpers.arrayElement([
+            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
+            undefined,
+          ]),
+          photos: faker.helpers.arrayElement([
+            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+              () => ({
+                fileName: faker.string.alpha(20),
+                url: faker.string.alpha(20),
+                mimeType: faker.string.alpha(20),
+                size: faker.number.int({ min: undefined, max: undefined }),
+              }),
+            ),
             undefined,
           ]),
           relationId: faker.number.int({ min: undefined, max: undefined }),
@@ -1215,6 +1351,15 @@ export const getBrPetControllerFindAllResponseMock = (
       "deleted",
       "cancelled",
     ] as const),
+    photos: faker.helpers.arrayElement([
+      Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+        fileName: faker.string.alpha(20),
+        url: faker.string.alpha(20),
+        mimeType: faker.string.alpha(20),
+        size: faker.number.int({ min: undefined, max: undefined }),
+      })),
+      undefined,
+    ]),
   })),
   meta: {
     page: faker.number.int({ min: undefined, max: undefined }),
@@ -1292,6 +1437,12 @@ export const getBrPetControllerGetPetsByYearResponseMock = (): BrPetControllerGe
       ),
       undefined,
     ]),
+    photoOrder: faker.helpers.arrayElement([
+      Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+        faker.string.alpha(20),
+      ),
+      undefined,
+    ]),
     desc: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
     father: faker.helpers.arrayElement([
       {
@@ -1332,6 +1483,23 @@ export const getBrPetControllerGetPetsByYearResponseMock = (): BrPetControllerGe
           ]),
           sex: faker.helpers.arrayElement([
             faker.helpers.arrayElement(["M", "F", "N"] as const),
+            undefined,
+          ]),
+          photoOrder: faker.helpers.arrayElement([
+            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
+            undefined,
+          ]),
+          photos: faker.helpers.arrayElement([
+            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+              () => ({
+                fileName: faker.string.alpha(20),
+                url: faker.string.alpha(20),
+                mimeType: faker.string.alpha(20),
+                size: faker.number.int({ min: undefined, max: undefined }),
+              }),
+            ),
             undefined,
           ]),
           relationId: faker.number.int({ min: undefined, max: undefined }),
@@ -1385,6 +1553,23 @@ export const getBrPetControllerGetPetsByYearResponseMock = (): BrPetControllerGe
           ]),
           sex: faker.helpers.arrayElement([
             faker.helpers.arrayElement(["M", "F", "N"] as const),
+            undefined,
+          ]),
+          photoOrder: faker.helpers.arrayElement([
+            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
+            undefined,
+          ]),
+          photos: faker.helpers.arrayElement([
+            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+              () => ({
+                fileName: faker.string.alpha(20),
+                url: faker.string.alpha(20),
+                mimeType: faker.string.alpha(20),
+                size: faker.number.int({ min: undefined, max: undefined }),
+              }),
+            ),
             undefined,
           ]),
           relationId: faker.number.int({ min: undefined, max: undefined }),
@@ -1441,6 +1626,15 @@ export const getBrPetControllerGetPetsByYearResponseMock = (): BrPetControllerGe
       "deleted",
       "cancelled",
     ] as const),
+    photos: faker.helpers.arrayElement([
+      Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+        fileName: faker.string.alpha(20),
+        url: faker.string.alpha(20),
+        mimeType: faker.string.alpha(20),
+        size: faker.number.int({ min: undefined, max: undefined }),
+      })),
+      undefined,
+    ]),
   })),
 });
 
@@ -1514,6 +1708,12 @@ export const getBrPetControllerGetPetsByMonthResponseMock = (
         ),
         undefined,
       ]),
+      photoOrder: faker.helpers.arrayElement([
+        Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+          faker.string.alpha(20),
+        ),
+        undefined,
+      ]),
       desc: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
       father: faker.helpers.arrayElement([
         {
@@ -1554,6 +1754,23 @@ export const getBrPetControllerGetPetsByMonthResponseMock = (
             ]),
             sex: faker.helpers.arrayElement([
               faker.helpers.arrayElement(["M", "F", "N"] as const),
+              undefined,
+            ]),
+            photoOrder: faker.helpers.arrayElement([
+              Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => faker.string.alpha(20),
+              ),
+              undefined,
+            ]),
+            photos: faker.helpers.arrayElement([
+              Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => ({
+                  fileName: faker.string.alpha(20),
+                  url: faker.string.alpha(20),
+                  mimeType: faker.string.alpha(20),
+                  size: faker.number.int({ min: undefined, max: undefined }),
+                }),
+              ),
               undefined,
             ]),
             relationId: faker.number.int({ min: undefined, max: undefined }),
@@ -1607,6 +1824,23 @@ export const getBrPetControllerGetPetsByMonthResponseMock = (
             ]),
             sex: faker.helpers.arrayElement([
               faker.helpers.arrayElement(["M", "F", "N"] as const),
+              undefined,
+            ]),
+            photoOrder: faker.helpers.arrayElement([
+              Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => faker.string.alpha(20),
+              ),
+              undefined,
+            ]),
+            photos: faker.helpers.arrayElement([
+              Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => ({
+                  fileName: faker.string.alpha(20),
+                  url: faker.string.alpha(20),
+                  mimeType: faker.string.alpha(20),
+                  size: faker.number.int({ min: undefined, max: undefined }),
+                }),
+              ),
               undefined,
             ]),
             relationId: faker.number.int({ min: undefined, max: undefined }),
@@ -1668,6 +1902,15 @@ export const getBrPetControllerGetPetsByMonthResponseMock = (
         "deleted",
         "cancelled",
       ] as const),
+      photos: faker.helpers.arrayElement([
+        Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+          fileName: faker.string.alpha(20),
+          url: faker.string.alpha(20),
+          mimeType: faker.string.alpha(20),
+          size: faker.number.int({ min: undefined, max: undefined }),
+        })),
+        undefined,
+      ]),
     })),
   },
   ...overrideResponse,
@@ -1743,6 +1986,12 @@ export const getBrPetControllerGetPetsByDateRangeResponseMock = (
         ),
         undefined,
       ]),
+      photoOrder: faker.helpers.arrayElement([
+        Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+          faker.string.alpha(20),
+        ),
+        undefined,
+      ]),
       desc: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
       father: faker.helpers.arrayElement([
         {
@@ -1783,6 +2032,23 @@ export const getBrPetControllerGetPetsByDateRangeResponseMock = (
             ]),
             sex: faker.helpers.arrayElement([
               faker.helpers.arrayElement(["M", "F", "N"] as const),
+              undefined,
+            ]),
+            photoOrder: faker.helpers.arrayElement([
+              Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => faker.string.alpha(20),
+              ),
+              undefined,
+            ]),
+            photos: faker.helpers.arrayElement([
+              Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => ({
+                  fileName: faker.string.alpha(20),
+                  url: faker.string.alpha(20),
+                  mimeType: faker.string.alpha(20),
+                  size: faker.number.int({ min: undefined, max: undefined }),
+                }),
+              ),
               undefined,
             ]),
             relationId: faker.number.int({ min: undefined, max: undefined }),
@@ -1836,6 +2102,23 @@ export const getBrPetControllerGetPetsByDateRangeResponseMock = (
             ]),
             sex: faker.helpers.arrayElement([
               faker.helpers.arrayElement(["M", "F", "N"] as const),
+              undefined,
+            ]),
+            photoOrder: faker.helpers.arrayElement([
+              Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => faker.string.alpha(20),
+              ),
+              undefined,
+            ]),
+            photos: faker.helpers.arrayElement([
+              Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => ({
+                  fileName: faker.string.alpha(20),
+                  url: faker.string.alpha(20),
+                  mimeType: faker.string.alpha(20),
+                  size: faker.number.int({ min: undefined, max: undefined }),
+                }),
+              ),
               undefined,
             ]),
             relationId: faker.number.int({ min: undefined, max: undefined }),
@@ -1897,6 +2180,15 @@ export const getBrPetControllerGetPetsByDateRangeResponseMock = (
         "deleted",
         "cancelled",
       ] as const),
+      photos: faker.helpers.arrayElement([
+        Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+          fileName: faker.string.alpha(20),
+          url: faker.string.alpha(20),
+          mimeType: faker.string.alpha(20),
+          size: faker.number.int({ min: undefined, max: undefined }),
+        })),
+        undefined,
+      ]),
     })),
   },
   ...overrideResponse,
@@ -2107,6 +2399,23 @@ export const getAdoptionControllerGetAllAdoptionsResponseMock = (
           faker.helpers.arrayElement(["M", "F", "N"] as const),
           undefined,
         ]),
+        photoOrder: faker.helpers.arrayElement([
+          Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+            faker.string.alpha(20),
+          ),
+          undefined,
+        ]),
+        photos: faker.helpers.arrayElement([
+          Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+            () => ({
+              fileName: faker.string.alpha(20),
+              url: faker.string.alpha(20),
+              mimeType: faker.string.alpha(20),
+              size: faker.number.int({ min: undefined, max: undefined }),
+            }),
+          ),
+          undefined,
+        ]),
       },
     },
   })),
@@ -2202,6 +2511,23 @@ export const getAdoptionControllerGetAdoptionByAdoptionIdResponseMock = (
             faker.helpers.arrayElement(["M", "F", "N"] as const),
             undefined,
           ]),
+          photoOrder: faker.helpers.arrayElement([
+            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
+            undefined,
+          ]),
+          photos: faker.helpers.arrayElement([
+            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+              () => ({
+                fileName: faker.string.alpha(20),
+                url: faker.string.alpha(20),
+                mimeType: faker.string.alpha(20),
+                size: faker.number.int({ min: undefined, max: undefined }),
+              }),
+            ),
+            undefined,
+          ]),
         },
       },
     },
@@ -2264,6 +2590,23 @@ export const getMatingControllerFindAllResponseMock = (
             faker.helpers.arrayElement(["M", "F", "N"] as const),
             undefined,
           ]),
+          photoOrder: faker.helpers.arrayElement([
+            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
+            undefined,
+          ]),
+          photos: faker.helpers.arrayElement([
+            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+              () => ({
+                fileName: faker.string.alpha(20),
+                url: faker.string.alpha(20),
+                mimeType: faker.string.alpha(20),
+                size: faker.number.int({ min: undefined, max: undefined }),
+              }),
+            ),
+            undefined,
+          ]),
         },
       },
       undefined,
@@ -2307,6 +2650,23 @@ export const getMatingControllerFindAllResponseMock = (
           ]),
           sex: faker.helpers.arrayElement([
             faker.helpers.arrayElement(["M", "F", "N"] as const),
+            undefined,
+          ]),
+          photoOrder: faker.helpers.arrayElement([
+            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
+            undefined,
+          ]),
+          photos: faker.helpers.arrayElement([
+            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+              () => ({
+                fileName: faker.string.alpha(20),
+                url: faker.string.alpha(20),
+                mimeType: faker.string.alpha(20),
+                size: faker.number.int({ min: undefined, max: undefined }),
+              }),
+            ),
             undefined,
           ]),
         },
@@ -2363,6 +2723,23 @@ export const getMatingControllerFindAllResponseMock = (
             ]),
             sex: faker.helpers.arrayElement([
               faker.helpers.arrayElement(["M", "F", "N"] as const),
+              undefined,
+            ]),
+            photoOrder: faker.helpers.arrayElement([
+              Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => faker.string.alpha(20),
+              ),
+              undefined,
+            ]),
+            photos: faker.helpers.arrayElement([
+              Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => ({
+                  fileName: faker.string.alpha(20),
+                  url: faker.string.alpha(20),
+                  mimeType: faker.string.alpha(20),
+                  size: faker.number.int({ min: undefined, max: undefined }),
+                }),
+              ),
               undefined,
             ]),
             layingId: faker.helpers.arrayElement([
@@ -2459,6 +2836,23 @@ export const getBrMatingControllerFindAllResponseMock = (
             faker.helpers.arrayElement(["M", "F", "N"] as const),
             undefined,
           ]),
+          photoOrder: faker.helpers.arrayElement([
+            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
+            undefined,
+          ]),
+          photos: faker.helpers.arrayElement([
+            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+              () => ({
+                fileName: faker.string.alpha(20),
+                url: faker.string.alpha(20),
+                mimeType: faker.string.alpha(20),
+                size: faker.number.int({ min: undefined, max: undefined }),
+              }),
+            ),
+            undefined,
+          ]),
         },
       },
       undefined,
@@ -2502,6 +2896,23 @@ export const getBrMatingControllerFindAllResponseMock = (
           ]),
           sex: faker.helpers.arrayElement([
             faker.helpers.arrayElement(["M", "F", "N"] as const),
+            undefined,
+          ]),
+          photoOrder: faker.helpers.arrayElement([
+            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
+            undefined,
+          ]),
+          photos: faker.helpers.arrayElement([
+            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+              () => ({
+                fileName: faker.string.alpha(20),
+                url: faker.string.alpha(20),
+                mimeType: faker.string.alpha(20),
+                size: faker.number.int({ min: undefined, max: undefined }),
+              }),
+            ),
             undefined,
           ]),
         },
@@ -2558,6 +2969,23 @@ export const getBrMatingControllerFindAllResponseMock = (
             ]),
             sex: faker.helpers.arrayElement([
               faker.helpers.arrayElement(["M", "F", "N"] as const),
+              undefined,
+            ]),
+            photoOrder: faker.helpers.arrayElement([
+              Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => faker.string.alpha(20),
+              ),
+              undefined,
+            ]),
+            photos: faker.helpers.arrayElement([
+              Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => ({
+                  fileName: faker.string.alpha(20),
+                  url: faker.string.alpha(20),
+                  mimeType: faker.string.alpha(20),
+                  size: faker.number.int({ min: undefined, max: undefined }),
+                }),
+              ),
               undefined,
             ]),
             layingId: faker.helpers.arrayElement([
@@ -2625,13 +3053,8 @@ export const getPairControllerCreateResponseMock = (
   ...overrideResponse,
 });
 
-export const getFileControllerUploadImagesResponseMock = (
-  overrideResponse: Partial<CommonResponseDto> = {},
-): CommonResponseDto => ({
-  success: faker.datatype.boolean(),
-  message: faker.string.alpha(20),
-  ...overrideResponse,
-});
+export const getFileControllerUploadImagesResponseMock = (): string[] =>
+  Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, () => faker.word.sample());
 
 export const getBrUserControllerGetUsersResponseMock = (
   overrideResponse: Partial<BrUserControllerGetUsers200> = {},
@@ -3553,12 +3976,10 @@ export const getPairControllerCreateMockHandler = (
 
 export const getFileControllerUploadImagesMockHandler = (
   overrideResponse?:
-    | CommonResponseDto
-    | ((
-        info: Parameters<Parameters<typeof http.post>[1]>[0],
-      ) => Promise<CommonResponseDto> | CommonResponseDto),
+    | string[]
+    | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<string[]> | string[]),
 ) => {
-  return http.post("*/api/v1/file/upload/pet", async (info) => {
+  return http.post("*/api/v1/file/upload", async (info) => {
     await delay(1000);
 
     return new HttpResponse(

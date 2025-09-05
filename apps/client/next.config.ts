@@ -5,13 +5,18 @@ const nextConfig: NextConfig = {
   reactStrictMode: false, // Strict Mode 비활성화
   images: {
     remotePatterns: [
-      // {
-      //   protocol: "https",
-      //   hostname: "**",
-      //   port: "",
-      //   pathname: "**",
-      //   search: "**",
-      // },
+      {
+        protocol: "https",
+        hostname: "daepa.store",
+        port: "",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "*.daepa.store",
+        port: "",
+        pathname: "/**",
+      },
     ],
   },
 };

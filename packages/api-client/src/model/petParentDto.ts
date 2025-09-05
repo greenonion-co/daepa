@@ -8,6 +8,7 @@
 import type { UserProfilePublicDto } from "./userProfilePublicDto";
 import type { PetParentDtoSpecies } from "./petParentDtoSpecies";
 import type { PetParentDtoSex } from "./petParentDtoSex";
+import type { PetImageItem } from "./petImageItem";
 import type { PetParentDtoStatus } from "./petParentDtoStatus";
 
 export interface PetParentDto {
@@ -27,6 +28,10 @@ export interface PetParentDto {
   hatchingDate?: string;
   /** 펫 성별(수컷, 암컷, 미구분) */
   sex?: PetParentDtoSex;
+  /** 펫 이미지 목록 */
+  photoOrder?: string[];
+  /** 펫 이미지 목록 */
+  photos?: PetImageItem[];
   /** 부모 관계 테이블 row id */
   relationId: number;
   /** 부모 관계 상태 */

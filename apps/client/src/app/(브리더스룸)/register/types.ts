@@ -1,4 +1,5 @@
 export type FieldName =
+  | "petId"
   | "species"
   | "morphs"
   | "traits"
@@ -10,6 +11,7 @@ export type FieldName =
   | "weight"
   | "desc"
   | "photos"
+  | "photoOrder"
   | "father"
   | "mother"
   | "clutchCount"
@@ -19,6 +21,13 @@ export type FieldName =
   | "layingDate"
   | "status"
   | "isPublic";
+
+export type PhotoItem = {
+  fileName: string;
+  size: number;
+  mimeType: string;
+  url: string;
+};
 
 export type FormStep = {
   title: string;

@@ -1,26 +1,29 @@
 import { Injectable } from '@nestjs/common';
 import { R2Service } from 'src/common/cloudflare/r2.service';
 import { UploadImagesRequestDto } from './file.dto';
-import { PetImageService } from 'src/pet/image/pet.image.service';
+import { randomUUID } from 'crypto';
 
 @Injectable()
 export class FileService {
-  constructor(
-    private readonly r2Service: R2Service,
-    private readonly petImageService: PetImageService,
-  ) {}
+  constructor(private readonly r2Service: R2Service) {}
 
-  async uploadImages({ petId, files }: UploadImagesRequestDto) {
+  async uploadImages({ files }: UploadImagesRequestDto) {
+    const uploadedImages: string[] = [];
+
     const uploadedFiles = await this.r2Service.upload(
-      files.map((file, index) => ({
-        buffer: file.buffer,
-        fileName: `${petId}/profile_${index + 1}`,
-        mimeType: file.mimetype,
-      })),
+      files.map((file) => {
+        const fileName = `${randomUUID()}-${file.originalname}`;
+
+        return {
+          buffer: file.buffer,
+          fileName,
+          mimeType: file.mimetype,
+        };
+      }),
     );
 
-    await this.petImageService.saveImages(petId, uploadedFiles);
+    uploadedFiles.map(({ url }) => uploadedImages.push(url));
 
-    return uploadedFiles;
+    return uploadedImages;
   }
 }

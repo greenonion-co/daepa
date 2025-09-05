@@ -9,3 +9,14 @@ export const formatYyMmDd = (input?: string | number | Date) => {
     return '-';
   }
 };
+
+export const buildTransformedUrl = (
+  raw: string | undefined,
+  transform: string = 'width=800,height=1400,format=webp',
+) => {
+  if (!raw) return '';
+  const cdnBase =
+    process.env.NEXT_PUBLIC_CDN_URL ?? 'https://daepa.store/cdn-cgi/image';
+
+  return `${cdnBase}/${transform}${raw}`;
+};

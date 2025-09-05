@@ -3,8 +3,8 @@ import { useUserStore } from "@/app/(브리더스룸)/store/user";
 import { Badge } from "@/components/ui/badge";
 import { PetDtoSex } from "@repo/api-client";
 import { Send } from "lucide-react";
-import Image from "next/image";
 import { useState } from "react";
+import PetThumbnail from "../../PetThumbnail";
 
 interface LinkStepProps {
   selectedPet: PetParentDtoWithMessage;
@@ -29,12 +29,7 @@ const LinkStep = ({ selectedPet, onSelect, onClose }: LinkStepProps) => {
           {/* 상단 정보 영역 */}
           <div className="flex gap-6">
             <div className="relative aspect-square w-72 overflow-hidden rounded-xl">
-              <Image
-                src="/default-pet-image.png"
-                alt={selectedPet.name ?? ""}
-                fill
-                className="object-cover"
-              />
+              <PetThumbnail imageUrl={selectedPet.photos?.[0]?.url} alt={selectedPet.name} />
             </div>
 
             <div className="flex-1">

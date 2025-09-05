@@ -66,3 +66,51 @@ export const getNumberToDate = (dateNumber: number) => {
   const day = parseInt(dateString.substring(6, 8), 10);
   return new Date(year, month - 1, day);
 };
+
+const CLOUDFLARE_R2_URL_BASE = process.env.NEXT_PUBLIC_CLOUDFLARE_R2_IMAGE_BASE_URL;
+export const buildR2TransformedUrl = (
+  raw: string | undefined,
+  transform: string = "width=460,height=700,format=webp",
+) => {
+  if (!raw) return "";
+
+  try {
+    const url = new URL(raw);
+    const { origin, pathname } = url;
+    // 다른 호스트면 변환 없이 원본 사용 (next.config.ts에 허용된 경우만 렌더)
+    if (origin !== CLOUDFLARE_R2_URL_BASE) return raw;
+
+    return `${CLOUDFLARE_R2_URL_BASE}/cdn-cgi/image/${transform}${pathname}`;
+  } catch {
+    return raw;
+  }
+};
+
+export const resizeImageFile = (file: File, maxWidth = 1280, quality = 0.82): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const scale = Math.min(1, maxWidth / img.width);
+        const targetW = Math.max(1, Math.floor(img.width * scale));
+        const targetH = Math.max(1, Math.floor(img.height * scale));
+        const canvas = document.createElement("canvas");
+        canvas.width = targetW;
+        canvas.height = targetH;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          resolve(reader.result as string);
+          return;
+        }
+        ctx.drawImage(img, 0, 0, targetW, targetH);
+        const dataUrl = canvas.toDataURL("image/jpeg", quality);
+        resolve(dataUrl);
+      };
+      img.onerror = () => resolve(reader.result as string);
+      img.src = String(reader.result);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+};

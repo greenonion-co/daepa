@@ -16,6 +16,7 @@ import { PetEntity } from '../pet/pet.entity';
 import { PET_SEX } from '../pet/pet.constants';
 import { UserNotificationService } from '../user_notification/user_notification.service';
 import { USER_NOTIFICATION_TYPE } from '../user_notification/user_notification.constant';
+import { PetImageEntity } from 'src/pet_image/pet_image.entity';
 
 @Injectable()
 export class ParentRequestService {
@@ -55,12 +56,14 @@ export class ParentRequestService {
           targetId: parentRequest.id,
           detailJson: {
             childPet: {
-              id: childPet?.petId,
-              name: childPet?.name,
+              id: childPet?.petId ?? '',
+              name: childPet.name,
+              photos: childPet?.photos?.files ?? undefined,
             },
             parentPet: {
-              id: parentPet?.petId,
+              id: parentPet?.petId ?? '',
               name: parentPet.name,
+              photos: parentPet?.photos?.files ?? undefined,
             },
             role: createParentRequestDto.role,
             message: createParentRequestDto.message,
@@ -146,10 +149,12 @@ export class ParentRequestService {
               childPet: {
                 id: parentRequest.childPetId,
                 name: childPet?.name,
+                photos: childPet?.photos?.files ?? undefined,
               },
               parentPet: {
                 id: parentRequest.parentPetId,
                 name: parentPet?.name,
+                photos: parentPet?.photos?.files ?? undefined,
               },
               role: parentRequest.role,
               message: parentRequest.message,
@@ -302,22 +307,51 @@ export class ParentRequestService {
     childPetId: string,
     parentPetId: string,
   ) {
-    const [childPet, parentPet] = await Promise.all([
-      entityManager.findOne(PetEntity, {
-        where: { petId: childPetId },
-        select: ['name', 'petId', 'ownerId'],
-      }),
-      entityManager.findOne(PetEntity, {
-        where: { petId: parentPetId },
-        select: ['name', 'petId', 'ownerId'],
-      }),
-    ]);
+    const [childPetInfo, parentPetInfo, childPetPhotos, parentPetPhotos] =
+      await Promise.all([
+        entityManager.findOne(PetEntity, {
+          where: { petId: childPetId },
+          select: ['name', 'petId', 'ownerId'],
+        }),
+        entityManager.findOne(PetEntity, {
+          where: { petId: parentPetId },
+          select: ['name', 'petId', 'ownerId'],
+        }),
+        entityManager.findOne(PetImageEntity, {
+          where: { petId: childPetId },
+          select: ['files'],
+        }),
+        entityManager.findOne(PetImageEntity, {
+          where: { petId: parentPetId },
+          select: ['files'],
+        }),
+      ]);
+
+    const childPet = {
+      ...childPetInfo,
+      photos: childPetPhotos,
+    };
+    const parentPet = {
+      ...parentPetInfo,
+      photos: parentPetPhotos,
+    };
+
     return { childPet, parentPet };
   }
 
   async getParentsWithRequestStatus(petId: string): Promise<{
-    father: (PetEntity & { status: PARENT_STATUS }) | null;
-    mother: (PetEntity & { status: PARENT_STATUS }) | null;
+    father:
+      | (Omit<PetEntity, 'photos'> & {
+          status: PARENT_STATUS;
+          photos?: PetImageEntity['files'];
+        })
+      | null;
+    mother:
+      | (Omit<PetEntity, 'photos'> & {
+          status: PARENT_STATUS;
+          photos?: PetImageEntity['files'];
+        })
+      | null;
   }> {
     return this.dataSource.transaction(async (entityManager: EntityManager) => {
       const parentRequests = await entityManager.find(ParentRequestEntity, {
@@ -347,10 +381,26 @@ export class ParentRequestService {
       const fatherPet = parentPets.find((pet) => pet.sex === PET_SEX.MALE);
       const motherPet = parentPets.find((pet) => pet.sex === PET_SEX.FEMALE);
 
+      const [fatherPetPhotos, motherPetPhotos] = await Promise.all([
+        fatherPet
+          ? entityManager.findOne(PetImageEntity, {
+              where: { petId: fatherPet.petId },
+              select: ['files'],
+            })
+          : undefined,
+        motherPet
+          ? entityManager.findOne(PetImageEntity, {
+              where: { petId: motherPet.petId },
+              select: ['files'],
+            })
+          : undefined,
+      ]);
+
       const father = fatherPet
         ? {
             ...fatherPet,
             status: requestMap.get(fatherPet.petId) || PARENT_STATUS.PENDING,
+            photos: fatherPetPhotos?.files ?? undefined,
           }
         : null;
 
@@ -358,6 +408,7 @@ export class ParentRequestService {
         ? {
             ...motherPet,
             status: requestMap.get(motherPet.petId) || PARENT_STATUS.PENDING,
+            photos: motherPetPhotos?.files ?? undefined,
           }
         : null;
 

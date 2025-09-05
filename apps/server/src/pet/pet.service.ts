@@ -39,6 +39,8 @@ import { ParentRequestEntity } from 'src/parent_request/parent_request.entity';
 import { UserNotificationService } from 'src/user_notification/user_notification.service';
 import { USER_NOTIFICATION_TYPE } from 'src/user_notification/user_notification.constant';
 import { UserNotificationEntity } from 'src/user_notification/user_notification.entity';
+import { PetImageService } from 'src/pet_image/pet_image.service';
+import { PetImageEntity } from 'src/pet_image/pet_image.entity';
 
 const NOTIFICATION_MESSAGES = {
   PARENT_REQUEST_CANCEL: '부모 요청이 취소되었습니다.',
@@ -56,17 +58,15 @@ export class PetService {
     private readonly layingRepository: Repository<LayingEntity>,
     private readonly userService: UserService,
     private readonly pairService: PairService,
+    private readonly petImageService: PetImageService,
     private readonly userNotificationService: UserNotificationService,
     private readonly dataSource: DataSource,
   ) {}
 
-  async createPet(
-    createPetDto: CreatePetDto,
-    ownerId: string,
-  ): Promise<{ petId: string }> {
+  async createPet(createPetDto: CreatePetDto, ownerId: string) {
     return this.dataSource.transaction(async (entityManager: EntityManager) => {
       const petId = await this.generateUniquePetId(entityManager);
-      const { father, mother, ...petData } = createPetDto;
+      const { father, mother, photos, ...petData } = createPetDto;
 
       // 펫 데이터 준비
       const petEntityData = plainToInstance(PetEntity, {
@@ -74,6 +74,14 @@ export class PetService {
         petId,
         ownerId,
       });
+
+      if (photos) {
+        await this.petImageService.saveAndUploadConfirmedImages(
+          entityManager,
+          petId,
+          photos,
+        );
+      }
 
       try {
         // 펫 생성
@@ -120,8 +128,6 @@ export class PetService {
             );
           }
         }
-
-        return { petId };
       } catch (error: unknown) {
         if (isMySQLError(error) && error.code === 'ER_DUP_ENTRY') {
           if (error.message.includes('UNIQUE_OWNER_PET_NAME')) {
@@ -164,6 +170,11 @@ export class PetService {
         throw new NotFoundException('펫의 소유자를 찾을 수 없습니다.');
       }
 
+      const { files } =
+        (await entityManager.findOne(PetImageEntity, {
+          where: { petId },
+        })) ?? {};
+
       // 소유자 정보 조회
       const owner = await this.userService.findOneProfile(pet.ownerId);
 
@@ -175,6 +186,7 @@ export class PetService {
         owner,
         father,
         mother,
+        photos: files,
         adoption: adoption
           ? {
               ...adoption,
@@ -204,7 +216,19 @@ export class PetService {
         throw new ForbiddenException('펫의 소유자가 아닙니다.');
       }
 
-      const { father, mother, ...petData } = updatePetDto;
+      const { father, mother, photos, ...petData } = updatePetDto;
+      if (photos) {
+        const newPhotoOrder = updatePetDto.photos?.map(
+          (photo) => photo.fileName,
+        );
+        petData.photoOrder = newPhotoOrder;
+
+        await this.petImageService.saveAndUploadConfirmedImages(
+          entityManager,
+          petId,
+          photos,
+        );
+      }
 
       try {
         // 펫 정보 업데이트
@@ -333,6 +357,12 @@ export class PetService {
         'adoptions',
         'adoptions',
         'adoptions.petId = pets.petId AND adoptions.isDeleted = false AND adoptions.status != :soldStatus',
+      )
+      .leftJoinAndMapOne(
+        'pets.photos',
+        'pet_images',
+        'pet_images',
+        'pet_images.petId = pets.petId',
       )
       .where(' pets.isDeleted = :isDeleted AND pets.growth != :eggGrowth', {
         isDeleted: false,
@@ -467,23 +497,25 @@ export class PetService {
 
     // PetDto로 변환하면서 parent_request 상태 정보 포함
     const petDtos = await Promise.all(
-      petEntities.map(async (pet) => {
-        if (!pet.ownerId) {
+      petEntities.map(async (petRaw) => {
+        const { ownerId, petId, photos, ...pet } = petRaw;
+
+        if (!ownerId) {
           throw new NotFoundException('펫의 소유자를 찾을 수 없습니다.');
         }
 
-        const owner = await this.userService.findOneProfile(pet.ownerId);
+        const owner = await this.userService.findOneProfile(ownerId);
 
         const { father, mother } =
-          await this.parentRequestService.getParentsWithRequestStatus(
-            pet.petId,
-          );
+          await this.parentRequestService.getParentsWithRequestStatus(petId);
 
         return plainToInstance(PetDto, {
           ...pet,
+          petId,
           owner,
           father,
           mother,
+          photos: photos?.files,
         });
       }),
     );

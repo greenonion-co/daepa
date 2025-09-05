@@ -6,7 +6,6 @@ import {
   Body,
 } from '@nestjs/common';
 import { ApiConsumes, ApiResponse, ApiBody } from '@nestjs/swagger';
-import { CommonResponseDto } from 'src/common/response.dto';
 import { FileService } from './file.service';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { UploadImagesRequestDto } from './file.dto';
@@ -15,7 +14,7 @@ import { UploadImagesRequestDto } from './file.dto';
 export class FileController {
   constructor(private readonly fileService: FileService) {}
 
-  @Post('upload/pet')
+  @Post('upload')
   @UseInterceptors(
     FilesInterceptor('files', 3, {
       // 최대 3개 파일
@@ -23,9 +22,8 @@ export class FileController {
         fileSize: 10 * 1024 * 1024, // 10MB
       },
       fileFilter: (req, file, callback) => {
-        if (
-          !file.originalname.match(/\.(jpg|jpeg|png|gif|webp|heic|heif|avif)$/)
-        ) {
+        const name = (file.originalname || '').toLowerCase();
+        if (!name.match(/\.(jpg|jpeg|png|gif|webp|avif)$/)) {
           return callback(new Error('허용되지 않는 이미지 형식입니다.'), false);
         }
         callback(null, true);
@@ -37,7 +35,12 @@ export class FileController {
   @ApiResponse({
     status: 200,
     description: '파일 업로드가 완료되었습니다.',
-    type: CommonResponseDto,
+    schema: {
+      type: 'array',
+      items: {
+        type: 'string',
+      },
+    },
   })
   @ApiResponse({
     status: 400,
@@ -47,13 +50,7 @@ export class FileController {
     status: 413,
     description: '파일 크기가 너무 큽니다 (최대 10MB)',
   })
-  async uploadImages(
-    @Body() uploadImagesDto: Pick<UploadImagesRequestDto, 'petId'>,
-    @UploadedFiles() files: Express.Multer.File[],
-  ) {
-    return await this.fileService.uploadImages({
-      petId: uploadImagesDto.petId,
-      files,
-    });
+  async uploadImages(@UploadedFiles() files: Express.Multer.File[]) {
+    return await this.fileService.uploadImages({ files });
   }
 }

@@ -5,7 +5,6 @@ import { Separator } from "@/components/ui/separator";
 import { format, formatDistanceToNow } from "date-fns";
 import { ko } from "date-fns/locale";
 import { ArrowUpRight } from "lucide-react";
-import Image from "next/image";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -23,7 +22,7 @@ import { toast } from "sonner";
 import { NOTIFICATION_TYPE } from "../../constants";
 import { Badge } from "@/components/ui/badge";
 import NotiTitle from "./NotiTitle";
-import { cn, formatDateToYYYYMMDDString } from "@/lib/utils";
+import { buildR2TransformedUrl, cn, formatDateToYYYYMMDDString } from "@/lib/utils";
 import { useRouter, useSearchParams } from "next/navigation";
 import { isPlainObject, isString } from "es-toolkit";
 import { isNumber } from "@/lib/typeGuards";
@@ -33,6 +32,7 @@ import RejectModal from "./RejectModal";
 import { AxiosError } from "axios";
 import StatusBadge from "./StatusBadge";
 import Dialog from "../../components/Form/Dialog";
+import PetThumbnail from "../../components/PetThumbnail";
 
 const NotiDisplay = memo(() => {
   const router = useRouter();
@@ -324,22 +324,11 @@ const NotiDisplay = memo(() => {
             className="group mx-4 mt-4 flex flex-col rounded-lg border p-3 shadow-sm transition-all duration-200 hover:scale-[1.02] hover:shadow-md"
           >
             <div className="flex flex-col gap-3">
-              {detailData && "photos" in detailData && detailData?.photos ? (
-                <div className="relative h-48 w-full overflow-hidden rounded-lg">
-                  <Image
-                    src={
-                      "photos" in detailData && Array.isArray(detailData.photos)
-                        ? (detailData.photos[0] ?? "/default-pet-image.png")
-                        : "/default-pet-image.png"
-                    }
-                    alt={
-                      safeData?.childPet?.name && isString(safeData.childPet.name)
-                        ? safeData.childPet.name
-                        : "펫 이미지"
-                    }
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 768px) 100vw, 384px"
+              {detailData?.childPet?.photos ? (
+                <div className="relative w-full overflow-hidden rounded-lg">
+                  <PetThumbnail
+                    imageUrl={buildR2TransformedUrl(detailData?.childPet?.photos[0]?.url)}
+                    alt={detailData?.childPet?.name}
                   />
                 </div>
               ) : (

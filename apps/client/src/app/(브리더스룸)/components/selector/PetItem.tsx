@@ -1,6 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { PetParentDtoWithMessage } from "@/app/(브리더스룸)/pet/store/parentLink";
-import Image from "next/image";
+import PetThumbnail from "../PetThumbnail";
 import { cn } from "@/lib/utils";
 
 const PetItem = ({
@@ -28,12 +28,7 @@ const PetItem = ({
     >
       <div className="flex w-full flex-col items-center gap-1">
         <div className="relative aspect-square w-full overflow-hidden rounded-lg">
-          <Image
-            src={"/default-pet-image.png"}
-            alt={item.name ?? ""}
-            fill
-            className="object-cover transition-opacity"
-          />
+          <PetThumbnail imageUrl={item.photos?.[0]?.url} alt={item.name} />
         </div>
         <div className="flex w-full flex-col items-center gap-1">
           <div className="relative">
@@ -43,7 +38,7 @@ const PetItem = ({
           </div>
           <div className="flex flex-wrap justify-center gap-1">
             {item.morphs?.map((morph) => (
-              <Badge key={morph} className="bg-blue-800 text-black text-white">
+              <Badge key={morph} className="bg-blue-800 text-white">
                 {morph}
               </Badge>
             ))}

@@ -8,6 +8,7 @@ import {
   IsBoolean,
   IsDate,
   IsNotEmpty,
+  ValidateNested,
 } from 'class-validator';
 import {
   PET_ADOPTION_LOCATION,
@@ -18,6 +19,7 @@ import {
   PET_LIST_FILTER_TYPE,
 } from './pet.constants';
 import {
+  ApiExtraModels,
   ApiProperty,
   OmitType,
   PartialType,
@@ -33,6 +35,7 @@ import { UserProfilePublicDto } from 'src/user/user.dto';
 import { CreateParentDto } from 'src/parent_request/parent_request.dto';
 import { PageOptionsDto } from 'src/common/page.dto';
 import { CommonResponseDto } from 'src/common/response.dto';
+import { PetImageItem, UpsertPetImageDto } from 'src/pet_image/pet_image.dto';
 
 export class PetBaseDto {
   @ApiProperty({
@@ -151,9 +154,14 @@ export class PetBaseDto {
   @IsArray()
   foods?: string[];
 
+  @ApiProperty({
+    description: '펫 이미지 목록',
+    example: ['fileName1', 'fileName2'],
+    required: false,
+  })
   @IsOptional()
   @IsArray()
-  photos?: string[];
+  photoOrder?: string[];
 
   @ApiProperty({
     description: '펫 소개말',
@@ -173,9 +181,21 @@ export class PetSummaryDto extends PickType(PetBaseDto, [
   'morphs',
   'traits',
   'sex',
-  'photos',
+  'photoOrder',
   'hatchingDate',
 ]) {
+  @ApiProperty({
+    description: '펫 이미지 목록',
+    required: false,
+    type: 'array',
+    items: { $ref: getSchemaPath(PetImageItem) },
+  })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => PetImageItem)
+  photos?: PetImageItem[];
+
   @Exclude()
   declare growth?: PET_GROWTH;
 
@@ -292,6 +312,18 @@ export class PetParentDto extends PartialType(PetSummaryDto) {
   })
   @IsEnum(PARENT_STATUS)
   status: PARENT_STATUS;
+
+  @ApiProperty({
+    description: '펫 이미지 목록',
+    required: false,
+    type: 'array',
+    items: { $ref: getSchemaPath(PetImageItem) },
+  })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => PetImageItem)
+  photos?: PetImageItem[];
 }
 
 export class PetAdoptionDto {
@@ -404,6 +436,18 @@ export class PetDto extends PetBaseDto {
   @IsEnum(PARENT_STATUS)
   status?: PARENT_STATUS;
 
+  @ApiProperty({
+    description: '펫 이미지 목록',
+    required: false,
+    type: 'array',
+    items: { $ref: getSchemaPath(PetImageItem) },
+  })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => PetImageItem)
+  photos?: PetImageItem[];
+
   @Exclude()
   declare createdAt?: Date;
 
@@ -411,6 +455,7 @@ export class PetDto extends PetBaseDto {
   declare updatedAt?: Date;
 }
 
+@ApiExtraModels(UpsertPetImageDto)
 export class CreatePetDto extends OmitType(PetBaseDto, [
   'petId',
   'owner',
@@ -478,6 +523,16 @@ export class CreatePetDto extends OmitType(PetBaseDto, [
   @IsOptional()
   @IsNumber()
   clutchOrder?: number;
+
+  @ApiProperty({
+    description: '펫 이미지 목록',
+    required: false,
+    type: 'array',
+    items: { $ref: getSchemaPath(UpsertPetImageDto) },
+  })
+  @IsOptional()
+  @IsArray()
+  photos?: UpsertPetImageDto[];
 }
 
 export class UpdatePetDto extends PartialType(CreatePetDto) {}
