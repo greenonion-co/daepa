@@ -1,16 +1,8 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Post,
-  Patch,
-  Delete,
-  Param,
-} from '@nestjs/common';
+import { Body, Controller, Post, Patch, Delete, Param } from '@nestjs/common';
 import { MatingService } from './mating.service';
 import { JwtUser } from 'src/auth/auth.decorator';
 import { JwtUserPayload } from 'src/auth/strategies/jwt.strategy';
-import { CreateMatingDto, MatingDetailResponseDto } from './mating.dto';
+import { CreateMatingDto } from './mating.dto';
 import { CommonResponseDto } from 'src/common/response.dto';
 import { ApiResponse } from '@nestjs/swagger';
 import { UpdateMatingDto } from './mating.dto';
@@ -20,23 +12,6 @@ import { BrAccessOnly } from 'src/common/decorators/roles.decorator';
 @BrAccessOnly()
 export class MatingController {
   constructor(private readonly matingService: MatingService) {}
-
-  @Get()
-  @ApiResponse({
-    status: 200,
-    description: '메이팅 정보 조회가 완료되었습니다.',
-    type: MatingDetailResponseDto,
-  })
-  async findAll(
-    @JwtUser() token: JwtUserPayload,
-  ): Promise<MatingDetailResponseDto> {
-    const data = await this.matingService.findAll(token.userId);
-    return {
-      success: true,
-      message: '메이팅 정보 조회가 완료되었습니다.',
-      data,
-    };
-  }
 
   @Post()
   @ApiResponse({
