@@ -1,9 +1,14 @@
 "use client";
 
 import BottomSheet from "@/components/common/BottomSheet";
-import { GENDER_KOREAN_INFO, GROWTH_KOREAN_INFO, SPECIES_KOREAN_INFO } from "../../constants";
+import {
+  EGG_STATUS_KOREAN_INFO,
+  GENDER_KOREAN_INFO,
+  GROWTH_KOREAN_INFO,
+  SPECIES_KOREAN_INFO,
+} from "../../constants";
 import { useEffect, useState } from "react";
-import { PetDtoGrowth, PetDtoSpecies } from "@repo/api-client";
+import { CreateMatingDtoEggStatus, PetDtoGrowth, PetDtoSpecies } from "@repo/api-client";
 import { PetDtoSex } from "@repo/api-client";
 
 interface SelectorProps {
@@ -43,7 +48,9 @@ const SelectButton = ({
         ? SPECIES_KOREAN_INFO[item as PetDtoSpecies]
         : type === "growth"
           ? GROWTH_KOREAN_INFO[item as PetDtoGrowth]
-          : item}
+          : type === "eggStatus"
+            ? EGG_STATUS_KOREAN_INFO[item as CreateMatingDtoEggStatus]
+            : item}
   </button>
 );
 

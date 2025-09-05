@@ -15,7 +15,7 @@ export const useSelect = () => {
       value: string;
       handleNext: (value: { type: FieldName; value: string }) => void;
     }) => {
-      if (type === "species" || type === "growth" || type === "sex") {
+      if (type === "eggStatus" || type === "species" || type === "growth" || type === "sex") {
         const config = SELECTOR_CONFIGS[type];
 
         overlay.open(({ isOpen, close, unmount }) => {

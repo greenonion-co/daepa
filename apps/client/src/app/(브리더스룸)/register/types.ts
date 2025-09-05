@@ -20,7 +20,8 @@ export type FieldName =
   | "parents"
   | "layingDate"
   | "status"
-  | "isPublic";
+  | "isPublic"
+  | "eggStatus";
 
 export type PhotoItem = {
   fileName: string;

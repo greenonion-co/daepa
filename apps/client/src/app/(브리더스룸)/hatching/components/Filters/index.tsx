@@ -1,8 +1,9 @@
 import { useSelect } from "../../../register/hooks/useSelect";
 import { useMatingFilterStore } from "../../../store/matingFilter";
-import { SPECIES_KOREAN_INFO } from "../../../constants";
+import { EGG_STATUS_KOREAN_INFO, SPECIES_KOREAN_INFO } from "../../../constants";
 import {
   BrPetControllerFindAllFilterType,
+  CreateMatingDtoEggStatus,
   PetDtoSex,
   PetDtoSpecies,
   PetParentDto,
@@ -18,6 +19,7 @@ const Filters = () => {
   const { handleSelect } = useSelect();
   const {
     species,
+    eggStatus,
     father,
     mother,
     startDate,
@@ -27,6 +29,7 @@ const Filters = () => {
     setMother,
     setStartDate,
     setEndDate,
+    setEggStatus,
     reset,
   } = useMatingFilterStore();
 
@@ -53,6 +56,22 @@ const Filters = () => {
 
   return (
     <div className="flex w-full items-center gap-2 overflow-x-auto overflow-y-hidden whitespace-nowrap p-2">
+      <FilterItem
+        value={eggStatus ? EGG_STATUS_KOREAN_INFO[eggStatus] : undefined}
+        placeholder="알 상태"
+        onClick={() => {
+          handleSelect({
+            type: "eggStatus",
+            value: eggStatus ?? "",
+            handleNext: ({ value }) => {
+              setEggStatus(value as CreateMatingDtoEggStatus);
+            },
+          });
+        }}
+        onClose={() => {
+          setEggStatus(null);
+        }}
+      />
       <FilterItem
         value={species ? SPECIES_KOREAN_INFO[species] : undefined}
         placeholder="종"
