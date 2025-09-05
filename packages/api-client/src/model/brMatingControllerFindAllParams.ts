@@ -7,6 +7,7 @@
  */
 import type { BrMatingControllerFindAllOrder } from "./brMatingControllerFindAllOrder";
 import type { BrMatingControllerFindAllSpecies } from "./brMatingControllerFindAllSpecies";
+import type { BrMatingControllerFindAllEggStatus } from "./brMatingControllerFindAllEggStatus";
 
 export type BrMatingControllerFindAllParams = {
   /**
@@ -41,4 +42,8 @@ export type BrMatingControllerFindAllParams = {
    * 엄마 펫 ID
    */
   motherId?: string;
+  /**
+   * 알 상태
+   */
+  eggStatus?: BrMatingControllerFindAllEggStatus;
 };

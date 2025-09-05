@@ -54,4 +54,6 @@ export interface UpdatePetDto {
   clutchOrder?: number;
   /** 펫 이미지 목록 */
   photos?: UpsertPetImageDto[];
+  /** 알 상태 */
+  eggStatus?: string;
 }

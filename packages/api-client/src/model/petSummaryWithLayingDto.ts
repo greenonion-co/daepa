@@ -9,6 +9,7 @@ import type { UserProfilePublicDto } from "./userProfilePublicDto";
 import type { PetSummaryWithLayingDtoSpecies } from "./petSummaryWithLayingDtoSpecies";
 import type { PetSummaryWithLayingDtoSex } from "./petSummaryWithLayingDtoSex";
 import type { PetImageItem } from "./petImageItem";
+import type { PetSummaryWithLayingDtoEggStatus } from "./petSummaryWithLayingDtoEggStatus";
 
 export interface PetSummaryWithLayingDto {
   /** 펫 아이디 */
@@ -39,4 +40,6 @@ export interface PetSummaryWithLayingDto {
   clutchOrder?: number;
   /** 펫 온도 */
   temperature?: number;
+  /** 펫 상태 */
+  eggStatus: PetSummaryWithLayingDtoEggStatus;
 }
