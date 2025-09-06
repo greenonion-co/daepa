@@ -47,10 +47,10 @@ export class AdoptionService {
         petId: pet.petId,
         name: pet.name,
         species: pet.species,
-        morphs: petDetail.morphs,
-        traits: petDetail.traits,
+        morphs: petDetail?.morphs,
+        traits: petDetail?.traits,
         hatchingDate: pet.hatchingDate,
-        sex: petDetail.sex,
+        sex: petDetail?.sex,
       },
     };
   }

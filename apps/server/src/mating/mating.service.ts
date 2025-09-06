@@ -45,6 +45,7 @@ type MergedPet = Partial<PetEntity> & {
   temperature?: number;
   eggStatus?: EGG_STATUS;
   morphs?: string[];
+  traits?: string[];
   sex?: PET_SEX;
   weight?: number;
 };
@@ -462,10 +463,11 @@ export class MatingService {
       }
     } else {
       if (petDetail) {
-        const { morphs, sex, weight } = petDetail;
+        const { morphs, sex, weight, traits } = petDetail;
         if (morphs) merged.morphs = morphs;
         if (sex) merged.sex = sex;
         if (weight) merged.weight = weight;
+        if (traits) merged.traits = traits;
       }
     }
 

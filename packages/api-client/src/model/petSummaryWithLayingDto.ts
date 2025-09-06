@@ -40,6 +40,6 @@ export interface PetSummaryWithLayingDto {
   clutchOrder?: number;
   /** 펫 온도 */
   temperature?: number;
-  /** 펫 상태 */
+  /** 알 상태 */
   eggStatus: PetSummaryWithLayingDtoEggStatus;
 }

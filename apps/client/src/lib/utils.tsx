@@ -78,11 +78,11 @@ export const buildR2TransformedUrl = (
     const url = new URL(raw);
     const { origin, pathname } = url;
     // 다른 호스트면 변환 없이 원본 사용 (next.config.ts에 허용된 경우만 렌더)
-    if (origin === CLOUDFLARE_R2_URL_BASE) return raw;
+    if (origin !== CLOUDFLARE_R2_URL_BASE) return raw;
 
     return `${CLOUDFLARE_R2_URL_BASE}/cdn-cgi/image/${transform}${pathname}`;
   } catch {
-    return `${CLOUDFLARE_R2_URL_BASE}/cdn-cgi/image/${transform}${raw}`;
+    return raw;
   }
 };
 

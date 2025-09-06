@@ -9,6 +9,7 @@ import {
   IsDate,
   IsNotEmpty,
   ValidateNested,
+  ValidateIf,
 } from 'class-validator';
 import {
   PET_ADOPTION_LOCATION,
@@ -268,11 +269,12 @@ export class PetSummaryWithLayingDto extends PetSummaryDto {
   temperature?: number;
 
   @ApiProperty({
-    description: '펫 상태',
+    description: '알 상태',
     example: 'HATCHED',
     enum: EGG_STATUS,
     'x-enumNames': Object.keys(EGG_STATUS),
   })
+  @ValidateIf((o: Pick<PetBaseDto, 'growth'>) => o.growth === PET_GROWTH.EGG)
   @IsOptional()
   @IsEnum(EGG_STATUS)
   eggStatus?: EGG_STATUS;

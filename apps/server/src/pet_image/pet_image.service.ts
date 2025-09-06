@@ -52,23 +52,15 @@ export class PetImageService {
       });
     }
 
-    const existing = await entityManager.findOne(PetImageEntity, {
-      where: { petId },
-    });
-
-    if (existing) {
-      return entityManager.update(
-        PetImageEntity,
-        { petId },
-        {
-          files: savedImageList,
-        },
-      );
-    }
-
-    return entityManager.insert(PetImageEntity, {
-      petId,
-      files: savedImageList,
-    });
+    return entityManager
+      .createQueryBuilder()
+      .insert()
+      .into(PetImageEntity)
+      .values({
+        petId,
+        files: savedImageList,
+      })
+      .orUpdate(['files'], ['petId'])
+      .execute();
   }
 }

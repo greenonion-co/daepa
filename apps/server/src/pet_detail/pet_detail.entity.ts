@@ -10,7 +10,7 @@ import {
 import { PET_SEX } from './pet_detail.constants';
 
 @Entity({ name: 'pet_details' })
-@Index('UNIQUE_PET_ID', ['petId'], { unique: true })
+@Index('UNIQUE_PET_DETAIL_PET_ID', ['petId'], { unique: true })
 export class PetDetailEntity {
   @Exclude()
   @PrimaryGeneratedColumn()

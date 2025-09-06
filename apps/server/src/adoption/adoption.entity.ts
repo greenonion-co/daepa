@@ -66,7 +66,7 @@ export class AdoptionEntity {
   @JoinColumn({ name: 'petId', referencedColumnName: 'petId' })
   pet: PetEntity;
 
-  @OneToOne(() => PetDetailEntity, (petDetail) => petDetail.petId, {
+  @OneToOne(() => PetDetailEntity, {
     createForeignKeyConstraints: false,
   })
   @JoinColumn({ name: 'petId', referencedColumnName: 'petId' })

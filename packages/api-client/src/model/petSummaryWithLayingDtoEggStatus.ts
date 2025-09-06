@@ -7,7 +7,7 @@
  */
 
 /**
- * 펫 상태
+ * 알 상태
  */
 export type PetSummaryWithLayingDtoEggStatus =
   (typeof PetSummaryWithLayingDtoEggStatus)[keyof typeof PetSummaryWithLayingDtoEggStatus];
