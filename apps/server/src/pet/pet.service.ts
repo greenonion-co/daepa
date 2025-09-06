@@ -497,13 +497,7 @@ export class PetService {
     // PetDto로 변환하면서 parent_request 상태 정보 포함
     const petDtos = await Promise.all(
       petEntities.map(async (petRaw) => {
-        const { ownerId, petId, photos, ...pet } = petRaw;
-
-        if (!ownerId) {
-          throw new NotFoundException('펫의 소유자를 찾을 수 없습니다.');
-        }
-
-        const owner = await this.userService.findOneProfile(ownerId);
+        const { petId, photos, ...pet } = petRaw;
 
         const { father, mother } =
           await this.parentRequestService.getParentsWithRequestStatus(petId);
@@ -511,7 +505,6 @@ export class PetService {
         const petDto = plainToInstance(PetDto, {
           ...pet,
           petId,
-          owner,
           father,
           mother,
           photos: photos?.files,
@@ -589,13 +582,7 @@ export class PetService {
     // PetDto로 변환하면서 parent_request 상태 정보 포함
     const petDtos = await Promise.all(
       petEntities.map(async (petRaw) => {
-        const { ownerId, petId, photos, ...pet } = petRaw;
-
-        if (!ownerId) {
-          throw new NotFoundException('펫의 소유자를 찾을 수 없습니다.');
-        }
-
-        const owner = await this.userService.findOneProfile(ownerId);
+        const { petId, photos, ...pet } = petRaw;
 
         const { father, mother } =
           await this.parentRequestService.getParentsWithRequestStatus(petId);
@@ -603,7 +590,6 @@ export class PetService {
         const petDto = plainToInstance(PetDto, {
           ...pet,
           petId,
-          owner,
           father,
           mother,
           photos: photos?.files,
