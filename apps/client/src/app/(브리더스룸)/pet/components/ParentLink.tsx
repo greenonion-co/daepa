@@ -7,7 +7,7 @@ import ParentSearchSelector from "../../components/selector/parentSearch";
 import { Button } from "@/components/ui/button";
 import Dialog from "../../components/Form/Dialog";
 import {
-  BrPetControllerFindAllFilterType,
+  PetControllerFindAllFilterType,
   PetDtoSpecies,
   PetParentDto,
   PetParentDtoStatus,
@@ -25,7 +25,7 @@ interface ParentLinkProps {
   label: "부" | "모";
   data?: PetParentDto;
   editable?: boolean;
-  petListType?: BrPetControllerFindAllFilterType;
+  petListType?: PetControllerFindAllFilterType;
   onSelect?: (item: PetParentDtoWithMessage) => void;
   onUnlink?: () => void;
 }
@@ -35,7 +35,7 @@ const ParentLink = ({
   label,
   data,
   editable = true,
-  petListType = BrPetControllerFindAllFilterType.ALL,
+  petListType = PetControllerFindAllFilterType.ALL,
   onSelect,
   onUnlink,
 }: ParentLinkProps) => {

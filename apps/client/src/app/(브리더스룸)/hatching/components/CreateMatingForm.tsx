@@ -155,7 +155,7 @@ const CreateMatingForm = ({ onClose }: CreateMatingFormProps) => {
       handleNext,
     });
   };
-
+  console.log("here");
   return (
     <Card className="mt-2 w-full border-2 border-blue-200 bg-blue-50/50 dark:bg-gray-800 dark:text-gray-200">
       <CardHeader>

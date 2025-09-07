@@ -6,11 +6,11 @@
  * OpenAPI spec version: 1.0
  */
 
-export type BrPetControllerFindAllFilterType =
-  (typeof BrPetControllerFindAllFilterType)[keyof typeof BrPetControllerFindAllFilterType];
+export type PetControllerFindAllFilterType =
+  (typeof PetControllerFindAllFilterType)[keyof typeof PetControllerFindAllFilterType];
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const BrPetControllerFindAllFilterType = {
+export const PetControllerFindAllFilterType = {
   ALL: "ALL",
   MY: "MY",
   NOT_MY: "NOT_MY",

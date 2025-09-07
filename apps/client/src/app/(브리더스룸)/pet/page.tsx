@@ -3,7 +3,7 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { columns } from "./components/columns";
 import DataTable from "./components/DataTable";
-import { brPetControllerFindAll, BrPetControllerFindAllFilterType } from "@repo/api-client";
+import { brPetControllerFindAll } from "@repo/api-client";
 import { useInView } from "react-intersection-observer";
 import { useEffect } from "react";
 
@@ -22,13 +22,12 @@ export default function PetPage() {
 
   // 일반 목록 조회
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useInfiniteQuery({
-    queryKey: [brPetControllerFindAll.name, searchFilters, BrPetControllerFindAllFilterType.MY],
+    queryKey: [brPetControllerFindAll.name, searchFilters],
     queryFn: ({ pageParam = 1 }) =>
       brPetControllerFindAll({
         page: pageParam,
         itemPerPage,
         order: "DESC",
-        filterType: BrPetControllerFindAllFilterType.MY,
         ...searchFilters,
       }),
     initialPageParam: 1,

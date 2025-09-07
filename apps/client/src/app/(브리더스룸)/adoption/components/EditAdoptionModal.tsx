@@ -9,7 +9,6 @@ import { SPECIES_KOREAN_INFO } from "../../constants";
 import {
   AdoptionDtoStatus,
   brPetControllerFindAll,
-  BrPetControllerFindAllFilterType,
   BrPetControllerFindAllOrder,
   PetDto,
 } from "@repo/api-client";
@@ -71,7 +70,6 @@ const EditAdoptionModal = ({
         itemPerPage,
         order: BrPetControllerFindAllOrder.DESC,
         keyword,
-        filterType: BrPetControllerFindAllFilterType.MY,
       }),
     initialPageParam: 1,
     getNextPageParam: (lastPage) => {

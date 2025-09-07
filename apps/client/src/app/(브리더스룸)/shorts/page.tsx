@@ -2,7 +2,7 @@
 
 import { useInView } from "react-intersection-observer";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { brPetControllerFindAll } from "@repo/api-client";
+import { petControllerFindAll } from "@repo/api-client";
 import { useEffect } from "react";
 import Loading from "@/components/common/Loading";
 import ShortsCard from "../pet/[petId]/(펫카드)/Shorts";
@@ -13,9 +13,9 @@ export default function ShortsPage() {
   const itemPerPage = 10;
 
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
-    queryKey: [brPetControllerFindAll.name],
+    queryKey: [petControllerFindAll.name],
     queryFn: ({ pageParam = 1 }) =>
-      brPetControllerFindAll({
+      petControllerFindAll({
         page: pageParam,
         itemPerPage,
         order: "DESC",

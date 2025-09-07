@@ -5,7 +5,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import Loading from "@/components/common/Loading";
 import { PetParentDtoWithMessage } from "@/app/(브리더스룸)/pet/store/parentLink";
 import { useUserStore } from "@/app/(브리더스룸)/store/user";
-import { BrPetControllerFindAllFilterType } from "@repo/api-client";
+import { PetControllerFindAllFilterType } from "@repo/api-client";
 
 const SelectStep = ({
   pets,
@@ -20,7 +20,7 @@ const SelectStep = ({
   hasMore: boolean;
   isFetchingMore: boolean;
   loaderRefAction: (node?: Element | null) => void;
-  petListType: BrPetControllerFindAllFilterType;
+  petListType: PetControllerFindAllFilterType;
 }) => {
   const { user } = useUserStore();
   const [tab, setTab] = useState<"my" | "others">("my");
@@ -34,7 +34,7 @@ const SelectStep = ({
           setTab(value as "my" | "others");
         }}
       >
-        {petListType === BrPetControllerFindAllFilterType.ALL && (
+        {petListType === PetControllerFindAllFilterType.ALL && (
           <TabsList className="grid h-12 w-full grid-cols-2 rounded-full p-1">
             <TabsTrigger
               value="my"

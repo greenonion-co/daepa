@@ -37,4 +37,5 @@ export enum PET_GROWTH {
 export enum PET_LIST_FILTER_TYPE {
   ALL = 'ALL',
   MY = 'MY',
+  NOT_MY = 'NOT_MY',
 }
