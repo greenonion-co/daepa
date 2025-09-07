@@ -489,7 +489,7 @@ export class PetService {
       );
     }
 
-    this.buildPetListSearchFilterQuery(queryBuilder, pageOptionsDto, false);
+    this.buildPetListSearchFilterQuery(queryBuilder, pageOptionsDto);
 
     // 정렬 및 페이지네이션
     queryBuilder
@@ -538,6 +538,9 @@ export class PetService {
     pageOptionsDto: PetFilterDto,
     userId: string,
   ): Promise<PageDto<PetDto>> {
+    // BR api는 자신의 펫 조회
+    pageOptionsDto.filterType = PET_LIST_FILTER_TYPE.MY;
+
     const queryBuilder = this.petRepository
       .createQueryBuilder('pets')
       .where(
@@ -574,7 +577,7 @@ export class PetService {
         'pet_images.petId = pets.petId',
       );
 
-    this.buildPetListSearchFilterQuery(queryBuilder, pageOptionsDto, true);
+    this.buildPetListSearchFilterQuery(queryBuilder, pageOptionsDto);
 
     // 정렬 및 페이지네이션
     queryBuilder
@@ -1130,7 +1133,6 @@ export class PetService {
   private buildPetListSearchFilterQuery(
     queryBuilder: SelectQueryBuilder<PetEntity>,
     pageOptionsDto: PetFilterDto,
-    allowSearchPrivatePet: boolean, // 자신의 숨김 펫 조회 가능 여부
   ) {
     // 키워드 검색
     if (pageOptionsDto.keyword) {
@@ -1154,8 +1156,11 @@ export class PetService {
       });
     }
 
-    // 공개 여부 필터링
-    if (allowSearchPrivatePet && pageOptionsDto.isPublic !== undefined) {
+    // 공개 여부 필터링 (자신의 펫인 경우에만 공개 여부 필터링 적용)
+    if (
+      pageOptionsDto.filterType === PET_LIST_FILTER_TYPE.MY &&
+      pageOptionsDto.isPublic !== undefined
+    ) {
       queryBuilder.andWhere('pets.isPublic = :isPublic', {
         isPublic: pageOptionsDto.isPublic,
       });

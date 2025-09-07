@@ -1,12 +1,7 @@
 import { useSelect } from "../../../register/hooks/useSelect";
 import { useMatingFilterStore } from "../../../store/matingFilter";
 import { SPECIES_KOREAN_INFO } from "../../../constants";
-import {
-  BrPetControllerFindAllFilterType,
-  PetDtoSex,
-  PetDtoSpecies,
-  PetParentDto,
-} from "@repo/api-client";
+import { PetDtoSex, PetDtoSpecies, PetParentDto } from "@repo/api-client";
 import CalendarInput from "../CalendarInput";
 import { overlay } from "overlay-kit";
 import ParentSearchSelector from "../../../components/selector/parentSearch";
@@ -45,7 +40,7 @@ const Filters = () => {
         }}
         sex={sex}
         onExit={unmount}
-        petListType={BrPetControllerFindAllFilterType.MY}
+        showTab={false}
         onlySelect
         species={species ?? undefined}
       />

@@ -93,7 +93,7 @@ const ParentLink = ({
         }}
         sex={label === "부" ? "M" : "F"}
         onExit={unmount}
-        petListType={petListType}
+        showTab={petListType === PetControllerFindAllFilterType.ALL}
       />
     ));
   };

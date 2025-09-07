@@ -5,7 +5,7 @@ import BottomSheet from "@/components/common/BottomSheet";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import {
   petControllerFindAll,
-  PetControllerFindAllFilterType,
+  PetControllerFindAllFilterType as PetListType,
   PetDtoSex,
   PetDtoSpecies,
 } from "@repo/api-client";
@@ -16,29 +16,30 @@ import { useInView } from "react-intersection-observer";
 import { PetParentDtoWithMessage } from "@/app/(브리더스룸)/pet/store/parentLink";
 
 interface ParentSearchProps {
+  sex?: PetDtoSex;
   species?: PetDtoSpecies;
   isOpen: boolean;
   onlySelect?: boolean;
+  showTab: boolean;
   onClose: () => void;
   onSelect: (item: PetParentDtoWithMessage) => void;
   onExit: () => void;
-  sex?: PetDtoSex;
-  petListType?: PetControllerFindAllFilterType;
 }
 
 const ParentSearchSelector = ({
+  sex = "F",
   species,
   isOpen,
   onlySelect = false,
+  showTab,
   onClose,
   onSelect,
   onExit,
-  sex = "F",
-  petListType = PetControllerFindAllFilterType.ALL,
 }: ParentSearchProps) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [step, setStep] = useState(1);
   const [selectedPet, setSelectedPet] = useState<PetParentDtoWithMessage | null>(null);
+  const [petListType, setPetListType] = useState<PetListType>(PetListType.MY);
   const contentRef = useRef<HTMLDivElement>(null);
   const { ref, inView } = useInView();
   const itemPerPage = 10;
@@ -109,7 +110,8 @@ const ParentSearchSelector = ({
               hasMore={hasNextPage}
               isFetchingMore={isFetchingNextPage}
               loaderRefAction={ref}
-              petListType={petListType}
+              showTab={showTab}
+              onTabChange={setPetListType}
             />
           ) : (
             <LinkStep

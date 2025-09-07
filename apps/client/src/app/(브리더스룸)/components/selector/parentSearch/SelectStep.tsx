@@ -5,45 +5,48 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import Loading from "@/components/common/Loading";
 import { PetParentDtoWithMessage } from "@/app/(브리더스룸)/pet/store/parentLink";
 import { useUserStore } from "@/app/(브리더스룸)/store/user";
-import { PetControllerFindAllFilterType } from "@repo/api-client";
+import { PetControllerFindAllFilterType as PetListType } from "@repo/api-client";
 
 const SelectStep = ({
   pets,
   handlePetSelect,
   hasMore,
   isFetchingMore,
+  showTab,
   loaderRefAction,
-  petListType,
+  onTabChange,
 }: {
   pets: PetParentDtoWithMessage[];
   handlePetSelect: (pet: PetParentDtoWithMessage) => void;
   hasMore: boolean;
   isFetchingMore: boolean;
+  showTab: boolean;
   loaderRefAction: (node?: Element | null) => void;
-  petListType: PetControllerFindAllFilterType;
+  onTabChange: (tab: PetListType) => void;
 }) => {
   const { user } = useUserStore();
-  const [tab, setTab] = useState<"my" | "others">("my");
+  const [tab, setTab] = useState<PetListType>(PetListType.MY);
 
   return (
     <div className="h-full overflow-y-auto px-2">
       <Tabs
-        defaultValue="my"
+        defaultValue={PetListType.MY}
         className="w-full"
         onValueChange={(value) => {
-          setTab(value as "my" | "others");
+          setTab(value as PetListType);
+          onTabChange(value as PetListType);
         }}
       >
-        {petListType === PetControllerFindAllFilterType.ALL && (
+        {showTab && (
           <TabsList className="grid h-12 w-full grid-cols-2 rounded-full p-1">
             <TabsTrigger
-              value="my"
+              value={PetListType.MY}
               className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full text-sm text-zinc-600 data-[state=active]:font-bold dark:text-zinc-200"
             >
               내 개체
             </TabsTrigger>
             <TabsTrigger
-              value="others"
+              value={PetListType.NOT_MY}
               className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full text-sm text-zinc-600 data-[state=active]:font-bold dark:text-zinc-200"
             >
               타인의 개체
@@ -55,7 +58,7 @@ const SelectStep = ({
           <div className="mb-10 grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7">
             {pets
               ?.filter((pet) =>
-                tab === "my"
+                tab === PetListType.MY
                   ? pet.owner?.userId === user?.userId
                   : pet.owner?.userId !== user?.userId,
               )
