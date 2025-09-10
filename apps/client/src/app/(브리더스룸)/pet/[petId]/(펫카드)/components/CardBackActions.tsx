@@ -45,7 +45,10 @@ const CardBackActions = memo(
         <Dialog
           isOpen={isOpen}
           onCloseAction={close}
-          onConfirmAction={handleConfirmDelete}
+          onConfirmAction={() => {
+            handleConfirmDelete();
+            close();
+          }}
           onExit={unmount}
           title="개체 삭제 안내"
           description={`정말로 삭제하시겠습니까? \n 삭제 후 복구할 수 없습니다.`}
