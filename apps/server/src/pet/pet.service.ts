@@ -90,25 +90,26 @@ export class PetService {
         ...petData
       } = createPetDto;
 
-      // 공통 펫 데이터 준비
-      const petEntityData = plainToInstance(PetEntity, {
-        ...petData,
-        petId,
-        ownerId,
-      });
-
       if (photos) {
-        const newPhotoOrder = photos.map((photo) => photo.fileName);
-        petData.photoOrder = newPhotoOrder;
-
         await this.petImageService.saveAndUploadConfirmedImages(
           entityManager,
           petId,
           photos,
         );
+
+        const newPhotoOrder = photos.map((photo) =>
+          photo.fileName.replace('PENDING/', `${petId}/`),
+        );
+        petData.photoOrder = newPhotoOrder;
       }
 
       try {
+        // 공통 펫 데이터 준비
+        const petEntityData = plainToInstance(PetEntity, {
+          ...petData,
+          petId,
+          ownerId,
+        });
         // 펫 생성
         await entityManager.insert(PetEntity, petEntityData);
 
@@ -283,14 +284,16 @@ export class PetService {
 
       try {
         if (photos) {
-          const newPhotoOrder = photos.map((photo) => photo.fileName);
-          petData.photoOrder = newPhotoOrder;
-
           await this.petImageService.saveAndUploadConfirmedImages(
             entityManager,
             petId,
             photos,
           );
+
+          const newPhotoOrder = photos.map((photo) =>
+            photo.fileName.replace('PENDING/', `${petId}/`),
+          );
+          petData.photoOrder = newPhotoOrder;
         }
 
         // 펫 기본 정보 업데이트
@@ -648,7 +651,14 @@ export class PetService {
       }
 
       try {
-        await entityManager.update(PetEntity, { petId }, { isDeleted: true });
+        await entityManager.update(
+          PetEntity,
+          { petId },
+          {
+            name: `DELETED_${existingPet.name}_${Date.now()}`,
+            isDeleted: true,
+          },
+        );
 
         if (existingPet.type === PET_TYPE.PET) {
           // 자식 펫이 있는지 확인 (이 펫을 부모로 하는 펫들)
