@@ -8,7 +8,7 @@ import {
   UpdateDateColumn,
   OneToOne,
 } from 'typeorm';
-import { PET_GROWTH, PET_SPECIES } from './pet.constants';
+import { PET_SPECIES, PET_TYPE } from './pet.constants';
 import { AdoptionEntity } from '../adoption/adoption.entity';
 import { PetImageEntity } from 'src/pet_image/pet_image.entity';
 import { PetDetailEntity } from 'src/pet_detail/pet_detail.entity';
@@ -25,6 +25,13 @@ export class PetEntity {
   @Column()
   petId: string;
 
+  @Column({
+    type: 'enum',
+    enum: PET_TYPE,
+    default: PET_TYPE.PET,
+  })
+  type: PET_TYPE;
+
   @Column({ nullable: true })
   ownerId?: string;
 
@@ -39,9 +46,6 @@ export class PetEntity {
 
   @Column({ type: 'enum', enum: PET_SPECIES })
   species: PET_SPECIES; // 종
-
-  @Column({ type: 'enum', enum: PET_GROWTH, nullable: true })
-  growth?: PET_GROWTH; // 성장단계
 
   @Column({ type: 'tinyint', nullable: true })
   clutchOrder?: number; // 동배 번호(같은 차수 내 구분)

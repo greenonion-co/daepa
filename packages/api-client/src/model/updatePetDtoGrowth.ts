@@ -13,7 +13,6 @@ export type UpdatePetDtoGrowth = (typeof UpdatePetDtoGrowth)[keyof typeof Update
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const UpdatePetDtoGrowth = {
-  EGG: "EGG",
   BABY: "BABY",
   JUVENILE: "JUVENILE",
   PRE_ADULT: "PRE_ADULT",

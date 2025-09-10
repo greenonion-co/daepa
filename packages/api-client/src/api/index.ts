@@ -568,6 +568,10 @@ export const getPetControllerFindAllResponseMock = (
 ): PetControllerFindAll200 => ({
   data: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
     petId: faker.string.alpha(20),
+    type: faker.helpers.arrayElement([
+      faker.helpers.arrayElement(["EGG", "PET"] as const),
+      undefined,
+    ]),
     owner: {
       ...{
         userId: faker.string.alpha(20),
@@ -602,14 +606,7 @@ export const getPetControllerFindAllResponseMock = (
       undefined,
     ]),
     growth: faker.helpers.arrayElement([
-      faker.helpers.arrayElement([
-        "EGG",
-        "BABY",
-        "JUVENILE",
-        "PRE_ADULT",
-        "ADULT",
-        "DEAD",
-      ] as const),
+      faker.helpers.arrayElement(["BABY", "JUVENILE", "PRE_ADULT", "ADULT", "DEAD"] as const),
       undefined,
     ]),
     isPublic: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
@@ -809,6 +806,10 @@ export const getPetControllerFindPetByPetIdResponseMock = (
   data: {
     ...{
       petId: faker.string.alpha(20),
+      type: faker.helpers.arrayElement([
+        faker.helpers.arrayElement(["EGG", "PET"] as const),
+        undefined,
+      ]),
       owner: {
         ...{
           userId: faker.string.alpha(20),
@@ -843,14 +844,7 @@ export const getPetControllerFindPetByPetIdResponseMock = (
         undefined,
       ]),
       growth: faker.helpers.arrayElement([
-        faker.helpers.arrayElement([
-          "EGG",
-          "BABY",
-          "JUVENILE",
-          "PRE_ADULT",
-          "ADULT",
-          "DEAD",
-        ] as const),
+        faker.helpers.arrayElement(["BABY", "JUVENILE", "PRE_ADULT", "ADULT", "DEAD"] as const),
         undefined,
       ]),
       isPublic: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
@@ -1291,6 +1285,10 @@ export const getBrPetControllerFindAllResponseMock = (
 ): BrPetControllerFindAll200 => ({
   data: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
     petId: faker.string.alpha(20),
+    type: faker.helpers.arrayElement([
+      faker.helpers.arrayElement(["EGG", "PET"] as const),
+      undefined,
+    ]),
     owner: {
       ...{
         userId: faker.string.alpha(20),
@@ -1325,14 +1323,7 @@ export const getBrPetControllerFindAllResponseMock = (
       undefined,
     ]),
     growth: faker.helpers.arrayElement([
-      faker.helpers.arrayElement([
-        "EGG",
-        "BABY",
-        "JUVENILE",
-        "PRE_ADULT",
-        "ADULT",
-        "DEAD",
-      ] as const),
+      faker.helpers.arrayElement(["BABY", "JUVENILE", "PRE_ADULT", "ADULT", "DEAD"] as const),
       undefined,
     ]),
     isPublic: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
@@ -1522,6 +1513,10 @@ export const getBrPetControllerGetPetsByYearResponseMock = (): BrPetControllerGe
     (_, i) => i + 1,
   ).map(() => ({
     petId: faker.string.alpha(20),
+    type: faker.helpers.arrayElement([
+      faker.helpers.arrayElement(["EGG", "PET"] as const),
+      undefined,
+    ]),
     owner: {
       ...{
         userId: faker.string.alpha(20),
@@ -1556,14 +1551,7 @@ export const getBrPetControllerGetPetsByYearResponseMock = (): BrPetControllerGe
       undefined,
     ]),
     growth: faker.helpers.arrayElement([
-      faker.helpers.arrayElement([
-        "EGG",
-        "BABY",
-        "JUVENILE",
-        "PRE_ADULT",
-        "ADULT",
-        "DEAD",
-      ] as const),
+      faker.helpers.arrayElement(["BABY", "JUVENILE", "PRE_ADULT", "ADULT", "DEAD"] as const),
       undefined,
     ]),
     isPublic: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
@@ -1749,6 +1737,10 @@ export const getBrPetControllerGetPetsByMonthResponseMock = (
       (_, i) => i + 1,
     ).map(() => ({
       petId: faker.string.alpha(20),
+      type: faker.helpers.arrayElement([
+        faker.helpers.arrayElement(["EGG", "PET"] as const),
+        undefined,
+      ]),
       owner: {
         ...{
           userId: faker.string.alpha(20),
@@ -1783,14 +1775,7 @@ export const getBrPetControllerGetPetsByMonthResponseMock = (
         undefined,
       ]),
       growth: faker.helpers.arrayElement([
-        faker.helpers.arrayElement([
-          "EGG",
-          "BABY",
-          "JUVENILE",
-          "PRE_ADULT",
-          "ADULT",
-          "DEAD",
-        ] as const),
+        faker.helpers.arrayElement(["BABY", "JUVENILE", "PRE_ADULT", "ADULT", "DEAD"] as const),
         undefined,
       ]),
       isPublic: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
@@ -1983,6 +1968,10 @@ export const getBrPetControllerGetPetsByDateRangeResponseMock = (
       (_, i) => i + 1,
     ).map(() => ({
       petId: faker.string.alpha(20),
+      type: faker.helpers.arrayElement([
+        faker.helpers.arrayElement(["EGG", "PET"] as const),
+        undefined,
+      ]),
       owner: {
         ...{
           userId: faker.string.alpha(20),
@@ -2017,14 +2006,7 @@ export const getBrPetControllerGetPetsByDateRangeResponseMock = (
         undefined,
       ]),
       growth: faker.helpers.arrayElement([
-        faker.helpers.arrayElement([
-          "EGG",
-          "BABY",
-          "JUVENILE",
-          "PRE_ADULT",
-          "ADULT",
-          "DEAD",
-        ] as const),
+        faker.helpers.arrayElement(["BABY", "JUVENILE", "PRE_ADULT", "ADULT", "DEAD"] as const),
         undefined,
       ]),
       isPublic: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
@@ -2389,6 +2371,10 @@ export const getAdoptionControllerGetAllAdoptionsResponseMock = (
     pet: {
       ...{
         petId: faker.string.alpha(20),
+        type: faker.helpers.arrayElement([
+          faker.helpers.arrayElement(["EGG", "PET"] as const),
+          undefined,
+        ]),
         name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
         species: faker.helpers.arrayElement(["CR", "LE", "FT", "KN", "LC", "GG"] as const),
         morphs: faker.helpers.arrayElement([
@@ -2501,6 +2487,10 @@ export const getAdoptionControllerGetAdoptionByAdoptionIdResponseMock = (
       pet: {
         ...{
           petId: faker.string.alpha(20),
+          type: faker.helpers.arrayElement([
+            faker.helpers.arrayElement(["EGG", "PET"] as const),
+            undefined,
+          ]),
           name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
           species: faker.helpers.arrayElement(["CR", "LE", "FT", "KN", "LC", "GG"] as const),
           morphs: faker.helpers.arrayElement([
@@ -2587,6 +2577,10 @@ export const getBrMatingControllerFindAllResponseMock = (
       {
         ...{
           petId: faker.string.alpha(20),
+          type: faker.helpers.arrayElement([
+            faker.helpers.arrayElement(["EGG", "PET"] as const),
+            undefined,
+          ]),
           owner: {
             ...{
               userId: faker.string.alpha(20),
@@ -2649,6 +2643,10 @@ export const getBrMatingControllerFindAllResponseMock = (
       {
         ...{
           petId: faker.string.alpha(20),
+          type: faker.helpers.arrayElement([
+            faker.helpers.arrayElement(["EGG", "PET"] as const),
+            undefined,
+          ]),
           owner: {
             ...{
               userId: faker.string.alpha(20),
@@ -2722,6 +2720,10 @@ export const getBrMatingControllerFindAllResponseMock = (
             (_, i) => i + 1,
           ).map(() => ({
             petId: faker.string.alpha(20),
+            type: faker.helpers.arrayElement([
+              faker.helpers.arrayElement(["EGG", "PET"] as const),
+              undefined,
+            ]),
             owner: {
               ...{
                 userId: faker.string.alpha(20),

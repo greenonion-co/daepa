@@ -7,15 +7,12 @@
  */
 
 /**
- * 펫 성장단계
+ * 펫 타입
  */
-export type PetDtoGrowth = (typeof PetDtoGrowth)[keyof typeof PetDtoGrowth];
+export type UpdatePetDtoType = (typeof UpdatePetDtoType)[keyof typeof UpdatePetDtoType];
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const PetDtoGrowth = {
-  BABY: "BABY",
-  JUVENILE: "JUVENILE",
-  PRE_ADULT: "PRE_ADULT",
-  ADULT: "ADULT",
-  DEAD: "DEAD",
+export const UpdatePetDtoType = {
+  EGG: "EGG",
+  PET: "PET",
 } as const;

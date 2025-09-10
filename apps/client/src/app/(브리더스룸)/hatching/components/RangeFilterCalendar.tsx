@@ -13,7 +13,7 @@ import { DateRange } from "react-day-picker";
 import {
   brPetControllerGetPetsByDateRange,
   brPetControllerGetPetsByMonth,
-  PetDtoGrowth,
+  PetDtoType,
 } from "@repo/api-client";
 import PetCard from "./PetCard";
 import { Search } from "lucide-react";
@@ -57,8 +57,8 @@ const RangeFilterCalendar = memo(() => {
 
     return Object.entries(monthlyData).reduce(
       (acc, [date, pets]) => {
-        const hatched = pets.filter((pet) => pet.growth !== PetDtoGrowth.EGG).length;
-        const notHatched = pets.filter((pet) => pet.growth === PetDtoGrowth.EGG).length;
+        const hatched = pets.filter((pet) => pet.type === PetDtoType.PET).length;
+        const notHatched = pets.filter((pet) => pet.type === PetDtoType.EGG).length;
 
         acc[date] = {
           hatched,
@@ -112,14 +112,14 @@ const RangeFilterCalendar = memo(() => {
                 해칭된 펫 (
                 {Object.values(visibleData || {})
                   .flat()
-                  .filter((pet) => pet.growth !== PetDtoGrowth.EGG).length || 0}
+                  .filter((pet) => pet.type === PetDtoType.PET).length || 0}
                 )
               </TabsTrigger>
               <TabsTrigger value="notHatched">
                 해칭되지 않은 펫 (
                 {Object.values(visibleData || {})
                   .flat()
-                  .filter((pet) => pet.growth === PetDtoGrowth.EGG).length || 0}
+                  .filter((pet) => pet.type === PetDtoType.EGG).length || 0}
                 )
               </TabsTrigger>
             </TabsList>
@@ -131,9 +131,9 @@ const RangeFilterCalendar = memo(() => {
               .filter(([, pets]) => {
                 if (tab === "all") return pets.length > 0;
                 if (tab === "hatched")
-                  return pets.filter((pet) => pet.growth !== PetDtoGrowth.EGG).length > 0;
+                  return pets.filter((pet) => pet.type === PetDtoType.PET).length > 0;
                 if (tab === "notHatched")
-                  return pets.filter((pet) => pet.growth === PetDtoGrowth.EGG).length > 0;
+                  return pets.filter((pet) => pet.type === PetDtoType.EGG).length > 0;
               })
               .map(([date, pets]) => <PetCard key={date} date={date} pets={pets} tab={tab} />)
           )}

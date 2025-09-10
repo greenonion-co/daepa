@@ -11,7 +11,6 @@ export type PetControllerFindAllGrowth =
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const PetControllerFindAllGrowth = {
-  EGG: "EGG",
   BABY: "BABY",
   JUVENILE: "JUVENILE",
   PRE_ADULT: "PRE_ADULT",

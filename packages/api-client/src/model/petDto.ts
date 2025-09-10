@@ -5,6 +5,7 @@
  * Project Daepa API description
  * OpenAPI spec version: 1.0
  */
+import type { PetDtoType } from "./petDtoType";
 import type { UserProfilePublicDto } from "./userProfilePublicDto";
 import type { PetDtoSpecies } from "./petDtoSpecies";
 import type { PetDtoGrowth } from "./petDtoGrowth";
@@ -17,6 +18,8 @@ import type { PetImageItem } from "./petImageItem";
 export interface PetDto {
   /** 펫 아이디 */
   petId: string;
+  /** 펫 타입(egg/pet) */
+  type?: PetDtoType;
   /** 펫 주인 정보 */
   owner: UserProfilePublicDto;
   /** 펫 이름 */

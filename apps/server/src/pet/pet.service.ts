@@ -23,6 +23,7 @@ import {
   PET_SEX,
   ADOPTION_SALE_STATUS,
   PET_LIST_FILTER_TYPE,
+  PET_TYPE,
 } from './pet.constants';
 import { ParentRequestService } from '../parent_request/parent_request.service';
 import {
@@ -82,6 +83,7 @@ export class PetService {
         traits,
         foods,
         weight,
+        growth,
         temperature,
         eggStatus,
         photos,
@@ -96,6 +98,9 @@ export class PetService {
       });
 
       if (photos) {
+        const newPhotoOrder = photos.map((photo) => photo.fileName);
+        petData.photoOrder = newPhotoOrder;
+
         await this.petImageService.saveAndUploadConfirmedImages(
           entityManager,
           petId,
@@ -108,7 +113,7 @@ export class PetService {
         await entityManager.insert(PetEntity, petEntityData);
 
         // growth에 따라 적절한 details 테이블에 데이터 저장
-        if (petData.growth === PET_GROWTH.EGG) {
+        if (petData.type === PET_TYPE.EGG) {
           await entityManager.insert(EggDetailEntity, {
             petId,
             temperature,
@@ -122,6 +127,7 @@ export class PetService {
             traits,
             foods,
             weight,
+            growth,
           });
         }
 
@@ -176,7 +182,7 @@ export class PetService {
       let petDetail: PetDetailEntity | null = null;
       let eggDetail: EggDetailEntity | null = null;
 
-      if (pet.growth === PET_GROWTH.EGG) {
+      if (pet.type === PET_TYPE.EGG) {
         eggDetail = await entityManager.findOne(EggDetailEntity, {
           where: { petId },
         });
@@ -223,6 +229,7 @@ export class PetService {
           traits: petDetail.traits,
           foods: petDetail.foods,
           weight: petDetail.weight,
+          growth: petDetail.growth,
         }),
         ...(eggDetail && {
           temperature: eggDetail.temperature,
@@ -267,6 +274,7 @@ export class PetService {
         traits,
         foods,
         weight,
+        growth,
         temperature,
         eggStatus,
         photos,
@@ -275,9 +283,7 @@ export class PetService {
 
       try {
         if (photos) {
-          const newPhotoOrder = updatePetDto.photos?.map(
-            (photo) => photo.fileName,
-          );
+          const newPhotoOrder = photos.map((photo) => photo.fileName);
           petData.photoOrder = newPhotoOrder;
 
           await this.petImageService.saveAndUploadConfirmedImages(
@@ -290,7 +296,7 @@ export class PetService {
         // 펫 기본 정보 업데이트
         await entityManager.update(PetEntity, { petId }, petData);
 
-        if (existingPet.growth === PET_GROWTH.EGG) {
+        if (existingPet.type === PET_TYPE.EGG) {
           await entityManager.update(
             EggDetailEntity,
             { petId },
@@ -306,6 +312,7 @@ export class PetService {
           if (traits) updateData.traits = traits;
           if (foods) updateData.foods = foods;
           if (weight) updateData.weight = weight;
+          if (growth) updateData.growth = growth;
 
           if (Object.keys(updateData).length > 0) {
             await entityManager.update(PetDetailEntity, { petId }, updateData);
@@ -337,14 +344,14 @@ export class PetService {
     // 부모 펫 정보 조회
     const parentPet = await this.petRepository.findOne({
       where: { petId: parentInfo.parentId },
-      select: ['petId', 'ownerId', 'name', 'growth'],
+      select: ['petId', 'ownerId', 'name', 'type'],
     });
 
     if (!parentPet?.petId) {
       throw new NotFoundException('부모로 지정된 펫을 찾을 수 없습니다.');
     }
 
-    if (parentPet.growth === PET_GROWTH.EGG) {
+    if (parentPet.type === PET_TYPE.EGG) {
       throw new BadRequestException('알은 부모로 지정할 수 없습니다.');
     }
 
@@ -437,9 +444,9 @@ export class PetService {
   ): Promise<PageDto<PetDto>> {
     const queryBuilder = this.petRepository
       .createQueryBuilder('pets')
-      .where('pets.isDeleted = :isDeleted AND pets.growth != :eggGrowth', {
+      .where('pets.isDeleted = :isDeleted AND pets.type = :eggGrowth', {
         isDeleted: false,
-        eggGrowth: PET_GROWTH.EGG,
+        type: PET_TYPE.PET,
       })
       .leftJoinAndMapOne(
         'pets.owner',
@@ -515,6 +522,7 @@ export class PetService {
             traits: pet.petDetail.traits,
             foods: pet.petDetail.foods,
             weight: pet.petDetail.weight,
+            growth: pet.petDetail.growth,
           });
         }
 
@@ -536,11 +544,11 @@ export class PetService {
     const queryBuilder = this.petRepository
       .createQueryBuilder('pets')
       .where(
-        'pets.ownerId = :userId AND pets.isDeleted = :isDeleted AND pets.growth != :eggGrowth',
+        'pets.ownerId = :userId AND pets.isDeleted = :isDeleted AND pets.type = :type',
         {
           userId,
           isDeleted: false,
-          eggGrowth: PET_GROWTH.EGG,
+          type: PET_TYPE.PET,
         },
       )
       .leftJoinAndMapOne(
@@ -603,6 +611,7 @@ export class PetService {
             traits: pet.petDetail.traits,
             foods: pet.petDetail.foods,
             weight: pet.petDetail.weight,
+            growth: pet.petDetail.growth,
           });
         }
 
@@ -638,35 +647,53 @@ export class PetService {
         throw new BadRequestException('분양 정보가 있어 삭제할 수 없습니다.');
       }
 
-      // 자식 펫이 있는지 확인 (이 펫을 부모로 하는 펫들)
-      const childrenPets = await entityManager.existsBy(ParentRequestEntity, {
-        parentPetId: petId,
-        status: In([PARENT_STATUS.APPROVED, PARENT_STATUS.PENDING]),
-      });
-
-      if (childrenPets) {
-        throw new BadRequestException('자식 펫이 있어 삭제할 수 없습니다.');
-      }
-
       try {
         await entityManager.update(PetEntity, { petId }, { isDeleted: true });
 
+        if (existingPet.type === PET_TYPE.PET) {
+          // 자식 펫이 있는지 확인 (이 펫을 부모로 하는 펫들)
+          const childrenPets = await entityManager.existsBy(
+            ParentRequestEntity,
+            {
+              parentPetId: petId,
+              status: In([PARENT_STATUS.APPROVED, PARENT_STATUS.PENDING]),
+            },
+          );
+
+          if (childrenPets) {
+            throw new BadRequestException('자식 펫이 있어 삭제할 수 없습니다.');
+          }
+
+          // layingId가 있고, 해당 laying에 연동된 다른 펫이 없으면 laying도 삭제
+          if (existingPet.layingId) {
+            const remainingPets = await entityManager.existsBy(PetEntity, {
+              layingId: existingPet.layingId,
+              isDeleted: false,
+            });
+
+            if (!remainingPets) {
+              await entityManager.delete(LayingEntity, {
+                id: existingPet.layingId,
+              });
+            }
+          }
+
+          await entityManager.update(
+            PetDetailEntity,
+            { petId },
+            { isDeleted: true },
+          );
+        } else {
+          await entityManager.update(
+            EggDetailEntity,
+            { petId },
+            { isDeleted: true },
+          );
+        }
+
+        // TODO! entityManager 사용 방식으로 변경
         // 연관된 parent_request들을 모두 삭제 상태로 변경
         await this.parentRequestService.deleteAllParentRequestsByPet(petId);
-
-        // layingId가 있고, 해당 laying에 연동된 다른 펫이 없으면 laying도 삭제
-        if (existingPet.layingId) {
-          const remainingPets = await entityManager.existsBy(PetEntity, {
-            layingId: existingPet.layingId,
-            isDeleted: false,
-          });
-
-          if (!remainingPets) {
-            await entityManager.delete(LayingEntity, {
-              id: existingPet.layingId,
-            });
-          }
-        }
 
         return { petId };
       } catch {
@@ -695,19 +722,19 @@ export class PetService {
         throw new ForbiddenException('펫의 소유자가 아닙니다.');
       }
 
-      if (existingPet.growth !== PET_GROWTH.EGG) {
+      if (existingPet.type !== PET_TYPE.EGG) {
         throw new BadRequestException('이미 부화한 펫입니다.');
       }
 
-      const { hatchingDate, name, growth, desc } = hatchingData;
+      const { hatchingDate, name, desc } = hatchingData;
 
       await entityManager.update(
         PetEntity,
         { petId },
         {
+          type: PET_TYPE.PET,
           hatchingDate,
           name,
-          growth,
           desc,
         },
       );
@@ -720,6 +747,7 @@ export class PetService {
 
       await entityManager.insert(PetDetailEntity, {
         petId,
+        growth: PET_GROWTH.BABY,
         sex: PET_SEX.NON,
       });
 
@@ -814,6 +842,7 @@ export class PetService {
             traits: pet.petDetail.traits,
             foods: pet.petDetail.foods,
             weight: pet.petDetail.weight,
+            growth: pet.petDetail.growth,
           }),
           ...(pet.eggDetail && {
             temperature: pet.eggDetail.temperature,
@@ -825,7 +854,7 @@ export class PetService {
 
     // EGG인 펫들의 layingDate 정보 가져오기
     const eggPetIds = petEntities
-      .filter((pet) => pet.growth === PET_GROWTH.EGG && pet.layingId)
+      .filter((pet) => pet.type === PET_TYPE.EGG && pet.layingId)
       .map((pet) => pet.layingId);
 
     const layings =
@@ -845,7 +874,7 @@ export class PetService {
       (acc, petDto) => {
         let dateToUse: Date | undefined;
 
-        if (petDto.growth === PET_GROWTH.EGG) {
+        if (petDto.type === PET_TYPE.EGG) {
           // EGG인 경우 layingDate 사용
           const petEntity = petEntities.find((p) => p.petId === petDto.petId);
           if (petEntity?.layingId) {
@@ -927,7 +956,7 @@ export class PetService {
       }
 
       let parentSex: PET_SEX | undefined;
-      if (parentPet.growth !== PET_GROWTH.EGG) {
+      if (parentPet.type === PET_TYPE.PET) {
         const parentDetails = await entityManager.findOne(PetDetailEntity, {
           where: { petId: parentPet.petId },
           select: ['sex'],
@@ -1119,7 +1148,7 @@ export class PetService {
         isDeleted: false,
       },
     });
-    return !!isExist;
+    return isExist;
   }
 
   private buildPetListSearchFilterQuery(

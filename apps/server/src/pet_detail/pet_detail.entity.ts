@@ -7,7 +7,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { PET_SEX } from 'src/pet/pet.constants';
+import { PET_GROWTH, PET_SEX } from 'src/pet/pet.constants';
 
 @Entity({ name: 'pet_details' })
 @Index('UNIQUE_PET_DETAIL_PET_ID', ['petId'], { unique: true })
@@ -18,6 +18,9 @@ export class PetDetailEntity {
 
   @Column()
   petId: string;
+
+  @Column({ type: 'enum', enum: PET_GROWTH, nullable: true })
+  growth?: PET_GROWTH; // 성장단계
 
   @Column({ type: 'enum', enum: PET_SEX, nullable: true })
   sex?: PET_SEX;
@@ -33,6 +36,9 @@ export class PetDetailEntity {
 
   @Column({ type: 'decimal', precision: 10, scale: 1, nullable: true })
   weight?: number; // 몸무게(g)
+
+  @Column({ default: false })
+  isDeleted: boolean;
 
   @CreateDateColumn()
   createdAt: Date;

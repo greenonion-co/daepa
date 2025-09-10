@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/chart";
 import { ChevronsLeft, TrendingUp } from "lucide-react";
 import { memo, useMemo, useState } from "react";
-import { brPetControllerGetPetsByYear, PetDtoGrowth } from "@repo/api-client";
+import { brPetControllerGetPetsByYear, PetDtoGrowth, PetDtoType } from "@repo/api-client";
 import { useQuery } from "@tanstack/react-query";
 import { Switch } from "@/components/ui/switch";
 import GuideText from "../../components/GuideText";
@@ -49,12 +49,12 @@ const Dashboard = memo(() => {
       // yyyy-MM-dd 형식에서 월 추출
       const month = new Date(date).getMonth();
       monthlyHatched[month] += pets.filter(
-        (pet) => pet.growth !== PetDtoGrowth.EGG && pet.growth !== PetDtoGrowth.DEAD,
+        (pet) => pet.type === PetDtoType.PET && pet.growth !== PetDtoGrowth.DEAD,
       ).length;
 
       monthlyNotHatched[month] += isHatchedOnly
         ? 0
-        : pets.filter((pet) => pet.growth === PetDtoGrowth.EGG).length;
+        : pets.filter((pet) => pet.type === PetDtoType.EGG).length;
     });
 
     return Array.from({ length: 12 }, (_, index) => ({

@@ -9,7 +9,7 @@ import { LayingEntity } from './laying.entity';
 import { CreateLayingDto, UpdateLayingDto } from './laying.dto';
 import { PetService } from '../pet/pet.service';
 import { CreatePetDto } from '../pet/pet.dto';
-import { PET_GROWTH } from 'src/pet/pet.constants';
+import { PET_TYPE } from 'src/pet/pet.constants';
 import { PARENT_ROLE } from 'src/parent_request/parent_request.constants';
 import { range } from 'es-toolkit';
 
@@ -53,7 +53,7 @@ export class LayingService {
           temperature,
           layingId: savedLaying.id,
           clutchOrder: i,
-          growth: PET_GROWTH.EGG,
+          type: PET_TYPE.EGG,
           ...(createLayingDto.motherId && {
             mother: {
               parentId: createLayingDto.motherId,

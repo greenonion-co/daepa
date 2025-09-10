@@ -5,15 +5,12 @@
  * Project Daepa API description
  * OpenAPI spec version: 1.0
  */
-import type { CompleteHatchingDtoGrowth } from "./completeHatchingDtoGrowth";
 
 export interface CompleteHatchingDto {
   /** 펫 이름 */
   name?: string;
   /** 펫 출생일 */
   hatchingDate?: string;
-  /** 펫 성장단계 */
-  growth?: CompleteHatchingDtoGrowth;
   /** 펫 소개말 */
   desc?: string;
 }

@@ -18,6 +18,7 @@ import {
   PET_SPECIES,
   PET_GROWTH,
   PET_LIST_FILTER_TYPE,
+  PET_TYPE,
 } from './pet.constants';
 import {
   ApiExtraModels,
@@ -46,6 +47,16 @@ export class PetBaseDto {
   })
   @IsString()
   petId: string;
+
+  @ApiProperty({
+    description: '펫 타입(egg/pet)',
+    example: 'PET',
+    enum: PET_TYPE,
+    'x-enumNames': Object.keys(PET_TYPE),
+    required: false,
+  })
+  @IsEnum(PET_TYPE)
+  type?: PET_TYPE;
 
   @ApiProperty({
     description: '펫 주인 정보',
@@ -177,6 +188,7 @@ export class PetBaseDto {
 
 export class PetSummaryDto extends PickType(PetBaseDto, [
   'petId',
+  'type',
   'name',
   'owner',
   'species',
@@ -274,7 +286,7 @@ export class PetSummaryWithLayingDto extends PetSummaryDto {
     enum: EGG_STATUS,
     'x-enumNames': Object.keys(EGG_STATUS),
   })
-  @ValidateIf((o: Pick<PetBaseDto, 'growth'>) => o.growth === PET_GROWTH.EGG)
+  @ValidateIf((o: Pick<PetBaseDto, 'type'>) => o.type === PET_TYPE.EGG)
   @IsOptional()
   @IsEnum(EGG_STATUS)
   eggStatus?: EGG_STATUS;
@@ -444,6 +456,17 @@ export class CreatePetDto extends OmitType(PetBaseDto, [
   'petId',
   'owner',
 ] as const) {
+  @ApiProperty({
+    description: '펫 타입',
+    example: 'PET',
+    enum: PET_TYPE,
+    'x-enumNames': Object.keys(PET_TYPE),
+    required: false,
+  })
+  @IsOptional()
+  @IsEnum(PET_TYPE)
+  type?: PET_TYPE;
+
   @ApiProperty({
     description: '아빠 개체 정보',
     required: false,
@@ -733,7 +756,6 @@ export class CompleteHatchingDto extends PickType(UpdatePetDto, [
   'hatchingDate',
   'name',
   'desc',
-  'growth',
 ]) {}
 
 export class PetHatchingDateRangeDto {

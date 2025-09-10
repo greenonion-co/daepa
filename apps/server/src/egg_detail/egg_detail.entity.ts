@@ -25,6 +25,9 @@ export class EggDetailEntity {
   @Column({ type: 'enum', enum: EGG_STATUS, nullable: true })
   status?: EGG_STATUS;
 
+  @Column({ default: false })
+  isDeleted: boolean;
+
   @CreateDateColumn()
   createdAt: Date;
 

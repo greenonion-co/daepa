@@ -20,7 +20,7 @@ import { PetEntity } from 'src/pet/pet.entity';
 import { PetDetailEntity } from 'src/pet_detail/pet_detail.entity';
 import { EggDetailEntity } from 'src/egg_detail/egg_detail.entity';
 import { groupBy } from 'es-toolkit';
-import { PET_GROWTH, PET_SEX } from 'src/pet/pet.constants';
+import { PET_SEX, PET_TYPE } from 'src/pet/pet.constants';
 import { LayingEntity } from 'src/laying/laying.entity';
 import { LayingDto } from 'src/laying/laying.dto';
 import { UpdateMatingDto } from './mating.dto';
@@ -456,7 +456,7 @@ export class MatingService {
 
     const { eggDetail, petDetail, ...rest } = pet;
     const merged: MergedPet = { ...(rest as Partial<PetEntity>) };
-    if (pet.growth === PET_GROWTH.EGG) {
+    if (pet.type === PET_TYPE.EGG) {
       if (eggDetail) {
         merged.temperature = eggDetail.temperature;
         merged.eggStatus = eggDetail.status;

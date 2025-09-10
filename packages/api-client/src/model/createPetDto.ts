@@ -5,6 +5,7 @@
  * Project Daepa API description
  * OpenAPI spec version: 1.0
  */
+import type { CreatePetDtoType } from "./createPetDtoType";
 import type { CreatePetDtoSpecies } from "./createPetDtoSpecies";
 import type { CreatePetDtoGrowth } from "./createPetDtoGrowth";
 import type { CreatePetDtoSex } from "./createPetDtoSex";
@@ -12,6 +13,8 @@ import type { CreateParentDto } from "./createParentDto";
 import type { UpsertPetImageDto } from "./upsertPetImageDto";
 
 export interface CreatePetDto {
+  /** 펫 타입 */
+  type?: CreatePetDtoType;
   /** 펫 이름 */
   name?: string;
   /** 펫 종 */
