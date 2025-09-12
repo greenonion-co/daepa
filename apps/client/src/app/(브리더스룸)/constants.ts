@@ -293,9 +293,9 @@ export const TABLE_HEADER = {
   sex: "성별",
   growth: "크기",
   weight: "몸무게",
-  mother: "모",
-  father: "부",
-  hatchingDate: "생년월일",
+  father: "부개체",
+  mother: "모개체",
+  hatchingDate: "해칭일",
   desc: "설명",
   foods: "먹이",
   isPublic: "공개 여부",
@@ -327,7 +327,6 @@ export const GENDER_KOREAN_INFO: Record<PetDtoSex, string> = {
 };
 
 export const GROWTH_KOREAN_INFO: Record<PetDtoGrowth, string> = {
-  EGG: "알",
   BABY: "베이비",
   JUVENILE: "아성체",
   PRE_ADULT: "준성체",
