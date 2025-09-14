@@ -28,7 +28,7 @@ export interface PetSummaryWithLayingDto {
   /** 펫 이미지 목록 */
   photoOrder?: string[];
   /** 펫 상세 정보 */
-  petDetailSummary: PetDetailSummaryDto;
+  petDetailSummary?: PetDetailSummaryDto;
   /** 펫 이미지 목록 */
   photos?: PetImageItem[];
   /** 산란 아이디 */

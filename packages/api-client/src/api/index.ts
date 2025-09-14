@@ -601,52 +601,58 @@ export const getPetControllerFindAllResponseMock = (
       undefined,
     ]),
     desc: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
-    petDetail: {
-      ...{
-        growth: faker.helpers.arrayElement([
-          faker.helpers.arrayElement(["BABY", "JUVENILE", "PRE_ADULT", "ADULT", "DEAD"] as const),
-          undefined,
-        ]),
-        sex: faker.helpers.arrayElement([
-          faker.helpers.arrayElement(["M", "F", "N"] as const),
-          undefined,
-        ]),
-        morphs: faker.helpers.arrayElement([
-          Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.string.alpha(20),
-          ),
-          undefined,
-        ]),
-        traits: faker.helpers.arrayElement([
-          Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.string.alpha(20),
-          ),
-          undefined,
-        ]),
-        foods: faker.helpers.arrayElement([
-          Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.string.alpha(20),
-          ),
-          undefined,
-        ]),
-        weight: faker.helpers.arrayElement([
-          faker.number.int({ min: undefined, max: undefined }),
-          undefined,
-        ]),
+    petDetail: faker.helpers.arrayElement([
+      {
+        ...{
+          growth: faker.helpers.arrayElement([
+            faker.helpers.arrayElement(["BABY", "JUVENILE", "PRE_ADULT", "ADULT", "DEAD"] as const),
+            undefined,
+          ]),
+          sex: faker.helpers.arrayElement([
+            faker.helpers.arrayElement(["M", "F", "N"] as const),
+            undefined,
+          ]),
+          morphs: faker.helpers.arrayElement([
+            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
+            undefined,
+          ]),
+          traits: faker.helpers.arrayElement([
+            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
+            undefined,
+          ]),
+          foods: faker.helpers.arrayElement([
+            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
+            undefined,
+          ]),
+          weight: faker.helpers.arrayElement([
+            faker.number.int({ min: undefined, max: undefined }),
+            undefined,
+          ]),
+        },
       },
-    },
-    eggDetail: {
-      ...{
-        temperature: faker.helpers.arrayElement([
-          faker.number.int({ min: undefined, max: undefined }),
-          undefined,
-        ]),
-        status: faker.helpers.arrayElement([
-          faker.helpers.arrayElement(["UNFERTILIZED", "FERTILIZED", "HATCHED", "DEAD"] as const),
-          undefined,
-        ]),
+      undefined,
+    ]),
+    eggDetail: faker.helpers.arrayElement([
+      {
+        ...{
+          temperature: faker.helpers.arrayElement([
+            faker.number.int({ min: undefined, max: undefined }),
+            undefined,
+          ]),
+          status: faker.helpers.arrayElement([
+            faker.helpers.arrayElement(["UNFERTILIZED", "FERTILIZED", "HATCHED", "DEAD"] as const),
+            undefined,
+          ]),
+        },
       },
-    },
+      undefined,
+    ]),
     father: faker.helpers.arrayElement([
       {
         ...{
@@ -664,26 +670,31 @@ export const getPetControllerFindAllResponseMock = (
             "deleted",
             "cancelled",
           ] as const),
-          petDetailSummary: {
-            ...{
-              sex: faker.helpers.arrayElement([
-                faker.helpers.arrayElement(["M", "F", "N"] as const),
-                undefined,
-              ]),
-              morphs: faker.helpers.arrayElement([
-                Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-                  () => faker.string.alpha(20),
-                ),
-                undefined,
-              ]),
-              traits: faker.helpers.arrayElement([
-                Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-                  () => faker.string.alpha(20),
-                ),
-                undefined,
-              ]),
+          petDetailSummary: faker.helpers.arrayElement([
+            {
+              ...{
+                sex: faker.helpers.arrayElement([
+                  faker.helpers.arrayElement(["M", "F", "N"] as const),
+                  undefined,
+                ]),
+                morphs: faker.helpers.arrayElement([
+                  Array.from(
+                    { length: faker.number.int({ min: 1, max: 10 }) },
+                    (_, i) => i + 1,
+                  ).map(() => faker.string.alpha(20)),
+                  undefined,
+                ]),
+                traits: faker.helpers.arrayElement([
+                  Array.from(
+                    { length: faker.number.int({ min: 1, max: 10 }) },
+                    (_, i) => i + 1,
+                  ).map(() => faker.string.alpha(20)),
+                  undefined,
+                ]),
+              },
             },
-          },
+            undefined,
+          ]),
           photos: faker.helpers.arrayElement([
             Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
               () => ({
@@ -731,26 +742,31 @@ export const getPetControllerFindAllResponseMock = (
             "deleted",
             "cancelled",
           ] as const),
-          petDetailSummary: {
-            ...{
-              sex: faker.helpers.arrayElement([
-                faker.helpers.arrayElement(["M", "F", "N"] as const),
-                undefined,
-              ]),
-              morphs: faker.helpers.arrayElement([
-                Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-                  () => faker.string.alpha(20),
-                ),
-                undefined,
-              ]),
-              traits: faker.helpers.arrayElement([
-                Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-                  () => faker.string.alpha(20),
-                ),
-                undefined,
-              ]),
+          petDetailSummary: faker.helpers.arrayElement([
+            {
+              ...{
+                sex: faker.helpers.arrayElement([
+                  faker.helpers.arrayElement(["M", "F", "N"] as const),
+                  undefined,
+                ]),
+                morphs: faker.helpers.arrayElement([
+                  Array.from(
+                    { length: faker.number.int({ min: 1, max: 10 }) },
+                    (_, i) => i + 1,
+                  ).map(() => faker.string.alpha(20)),
+                  undefined,
+                ]),
+                traits: faker.helpers.arrayElement([
+                  Array.from(
+                    { length: faker.number.int({ min: 1, max: 10 }) },
+                    (_, i) => i + 1,
+                  ).map(() => faker.string.alpha(20)),
+                  undefined,
+                ]),
+              },
             },
-          },
+            undefined,
+          ]),
           photos: faker.helpers.arrayElement([
             Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
               () => ({
@@ -893,52 +909,69 @@ export const getPetControllerFindPetByPetIdResponseMock = (
         undefined,
       ]),
       desc: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
-      petDetail: {
-        ...{
-          growth: faker.helpers.arrayElement([
-            faker.helpers.arrayElement(["BABY", "JUVENILE", "PRE_ADULT", "ADULT", "DEAD"] as const),
-            undefined,
-          ]),
-          sex: faker.helpers.arrayElement([
-            faker.helpers.arrayElement(["M", "F", "N"] as const),
-            undefined,
-          ]),
-          morphs: faker.helpers.arrayElement([
-            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-            undefined,
-          ]),
-          traits: faker.helpers.arrayElement([
-            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-            undefined,
-          ]),
-          foods: faker.helpers.arrayElement([
-            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-            undefined,
-          ]),
-          weight: faker.helpers.arrayElement([
-            faker.number.int({ min: undefined, max: undefined }),
-            undefined,
-          ]),
+      petDetail: faker.helpers.arrayElement([
+        {
+          ...{
+            growth: faker.helpers.arrayElement([
+              faker.helpers.arrayElement([
+                "BABY",
+                "JUVENILE",
+                "PRE_ADULT",
+                "ADULT",
+                "DEAD",
+              ] as const),
+              undefined,
+            ]),
+            sex: faker.helpers.arrayElement([
+              faker.helpers.arrayElement(["M", "F", "N"] as const),
+              undefined,
+            ]),
+            morphs: faker.helpers.arrayElement([
+              Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => faker.string.alpha(20),
+              ),
+              undefined,
+            ]),
+            traits: faker.helpers.arrayElement([
+              Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => faker.string.alpha(20),
+              ),
+              undefined,
+            ]),
+            foods: faker.helpers.arrayElement([
+              Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => faker.string.alpha(20),
+              ),
+              undefined,
+            ]),
+            weight: faker.helpers.arrayElement([
+              faker.number.int({ min: undefined, max: undefined }),
+              undefined,
+            ]),
+          },
         },
-      },
-      eggDetail: {
-        ...{
-          temperature: faker.helpers.arrayElement([
-            faker.number.int({ min: undefined, max: undefined }),
-            undefined,
-          ]),
-          status: faker.helpers.arrayElement([
-            faker.helpers.arrayElement(["UNFERTILIZED", "FERTILIZED", "HATCHED", "DEAD"] as const),
-            undefined,
-          ]),
+        undefined,
+      ]),
+      eggDetail: faker.helpers.arrayElement([
+        {
+          ...{
+            temperature: faker.helpers.arrayElement([
+              faker.number.int({ min: undefined, max: undefined }),
+              undefined,
+            ]),
+            status: faker.helpers.arrayElement([
+              faker.helpers.arrayElement([
+                "UNFERTILIZED",
+                "FERTILIZED",
+                "HATCHED",
+                "DEAD",
+              ] as const),
+              undefined,
+            ]),
+          },
         },
-      },
+        undefined,
+      ]),
       father: faker.helpers.arrayElement([
         {
           ...{
@@ -956,28 +989,31 @@ export const getPetControllerFindPetByPetIdResponseMock = (
               "deleted",
               "cancelled",
             ] as const),
-            petDetailSummary: {
-              ...{
-                sex: faker.helpers.arrayElement([
-                  faker.helpers.arrayElement(["M", "F", "N"] as const),
-                  undefined,
-                ]),
-                morphs: faker.helpers.arrayElement([
-                  Array.from(
-                    { length: faker.number.int({ min: 1, max: 10 }) },
-                    (_, i) => i + 1,
-                  ).map(() => faker.string.alpha(20)),
-                  undefined,
-                ]),
-                traits: faker.helpers.arrayElement([
-                  Array.from(
-                    { length: faker.number.int({ min: 1, max: 10 }) },
-                    (_, i) => i + 1,
-                  ).map(() => faker.string.alpha(20)),
-                  undefined,
-                ]),
+            petDetailSummary: faker.helpers.arrayElement([
+              {
+                ...{
+                  sex: faker.helpers.arrayElement([
+                    faker.helpers.arrayElement(["M", "F", "N"] as const),
+                    undefined,
+                  ]),
+                  morphs: faker.helpers.arrayElement([
+                    Array.from(
+                      { length: faker.number.int({ min: 1, max: 10 }) },
+                      (_, i) => i + 1,
+                    ).map(() => faker.string.alpha(20)),
+                    undefined,
+                  ]),
+                  traits: faker.helpers.arrayElement([
+                    Array.from(
+                      { length: faker.number.int({ min: 1, max: 10 }) },
+                      (_, i) => i + 1,
+                    ).map(() => faker.string.alpha(20)),
+                    undefined,
+                  ]),
+                },
               },
-            },
+              undefined,
+            ]),
             photos: faker.helpers.arrayElement([
               Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
                 () => ({
@@ -1025,28 +1061,31 @@ export const getPetControllerFindPetByPetIdResponseMock = (
               "deleted",
               "cancelled",
             ] as const),
-            petDetailSummary: {
-              ...{
-                sex: faker.helpers.arrayElement([
-                  faker.helpers.arrayElement(["M", "F", "N"] as const),
-                  undefined,
-                ]),
-                morphs: faker.helpers.arrayElement([
-                  Array.from(
-                    { length: faker.number.int({ min: 1, max: 10 }) },
-                    (_, i) => i + 1,
-                  ).map(() => faker.string.alpha(20)),
-                  undefined,
-                ]),
-                traits: faker.helpers.arrayElement([
-                  Array.from(
-                    { length: faker.number.int({ min: 1, max: 10 }) },
-                    (_, i) => i + 1,
-                  ).map(() => faker.string.alpha(20)),
-                  undefined,
-                ]),
+            petDetailSummary: faker.helpers.arrayElement([
+              {
+                ...{
+                  sex: faker.helpers.arrayElement([
+                    faker.helpers.arrayElement(["M", "F", "N"] as const),
+                    undefined,
+                  ]),
+                  morphs: faker.helpers.arrayElement([
+                    Array.from(
+                      { length: faker.number.int({ min: 1, max: 10 }) },
+                      (_, i) => i + 1,
+                    ).map(() => faker.string.alpha(20)),
+                    undefined,
+                  ]),
+                  traits: faker.helpers.arrayElement([
+                    Array.from(
+                      { length: faker.number.int({ min: 1, max: 10 }) },
+                      (_, i) => i + 1,
+                    ).map(() => faker.string.alpha(20)),
+                    undefined,
+                  ]),
+                },
               },
-            },
+              undefined,
+            ]),
             photos: faker.helpers.arrayElement([
               Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
                 () => ({
@@ -1430,52 +1469,58 @@ export const getBrPetControllerFindAllResponseMock = (
       undefined,
     ]),
     desc: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
-    petDetail: {
-      ...{
-        growth: faker.helpers.arrayElement([
-          faker.helpers.arrayElement(["BABY", "JUVENILE", "PRE_ADULT", "ADULT", "DEAD"] as const),
-          undefined,
-        ]),
-        sex: faker.helpers.arrayElement([
-          faker.helpers.arrayElement(["M", "F", "N"] as const),
-          undefined,
-        ]),
-        morphs: faker.helpers.arrayElement([
-          Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.string.alpha(20),
-          ),
-          undefined,
-        ]),
-        traits: faker.helpers.arrayElement([
-          Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.string.alpha(20),
-          ),
-          undefined,
-        ]),
-        foods: faker.helpers.arrayElement([
-          Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.string.alpha(20),
-          ),
-          undefined,
-        ]),
-        weight: faker.helpers.arrayElement([
-          faker.number.int({ min: undefined, max: undefined }),
-          undefined,
-        ]),
+    petDetail: faker.helpers.arrayElement([
+      {
+        ...{
+          growth: faker.helpers.arrayElement([
+            faker.helpers.arrayElement(["BABY", "JUVENILE", "PRE_ADULT", "ADULT", "DEAD"] as const),
+            undefined,
+          ]),
+          sex: faker.helpers.arrayElement([
+            faker.helpers.arrayElement(["M", "F", "N"] as const),
+            undefined,
+          ]),
+          morphs: faker.helpers.arrayElement([
+            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
+            undefined,
+          ]),
+          traits: faker.helpers.arrayElement([
+            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
+            undefined,
+          ]),
+          foods: faker.helpers.arrayElement([
+            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
+            undefined,
+          ]),
+          weight: faker.helpers.arrayElement([
+            faker.number.int({ min: undefined, max: undefined }),
+            undefined,
+          ]),
+        },
       },
-    },
-    eggDetail: {
-      ...{
-        temperature: faker.helpers.arrayElement([
-          faker.number.int({ min: undefined, max: undefined }),
-          undefined,
-        ]),
-        status: faker.helpers.arrayElement([
-          faker.helpers.arrayElement(["UNFERTILIZED", "FERTILIZED", "HATCHED", "DEAD"] as const),
-          undefined,
-        ]),
+      undefined,
+    ]),
+    eggDetail: faker.helpers.arrayElement([
+      {
+        ...{
+          temperature: faker.helpers.arrayElement([
+            faker.number.int({ min: undefined, max: undefined }),
+            undefined,
+          ]),
+          status: faker.helpers.arrayElement([
+            faker.helpers.arrayElement(["UNFERTILIZED", "FERTILIZED", "HATCHED", "DEAD"] as const),
+            undefined,
+          ]),
+        },
       },
-    },
+      undefined,
+    ]),
     father: faker.helpers.arrayElement([
       {
         ...{
@@ -1493,26 +1538,31 @@ export const getBrPetControllerFindAllResponseMock = (
             "deleted",
             "cancelled",
           ] as const),
-          petDetailSummary: {
-            ...{
-              sex: faker.helpers.arrayElement([
-                faker.helpers.arrayElement(["M", "F", "N"] as const),
-                undefined,
-              ]),
-              morphs: faker.helpers.arrayElement([
-                Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-                  () => faker.string.alpha(20),
-                ),
-                undefined,
-              ]),
-              traits: faker.helpers.arrayElement([
-                Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-                  () => faker.string.alpha(20),
-                ),
-                undefined,
-              ]),
+          petDetailSummary: faker.helpers.arrayElement([
+            {
+              ...{
+                sex: faker.helpers.arrayElement([
+                  faker.helpers.arrayElement(["M", "F", "N"] as const),
+                  undefined,
+                ]),
+                morphs: faker.helpers.arrayElement([
+                  Array.from(
+                    { length: faker.number.int({ min: 1, max: 10 }) },
+                    (_, i) => i + 1,
+                  ).map(() => faker.string.alpha(20)),
+                  undefined,
+                ]),
+                traits: faker.helpers.arrayElement([
+                  Array.from(
+                    { length: faker.number.int({ min: 1, max: 10 }) },
+                    (_, i) => i + 1,
+                  ).map(() => faker.string.alpha(20)),
+                  undefined,
+                ]),
+              },
             },
-          },
+            undefined,
+          ]),
           photos: faker.helpers.arrayElement([
             Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
               () => ({
@@ -1560,26 +1610,31 @@ export const getBrPetControllerFindAllResponseMock = (
             "deleted",
             "cancelled",
           ] as const),
-          petDetailSummary: {
-            ...{
-              sex: faker.helpers.arrayElement([
-                faker.helpers.arrayElement(["M", "F", "N"] as const),
-                undefined,
-              ]),
-              morphs: faker.helpers.arrayElement([
-                Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-                  () => faker.string.alpha(20),
-                ),
-                undefined,
-              ]),
-              traits: faker.helpers.arrayElement([
-                Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-                  () => faker.string.alpha(20),
-                ),
-                undefined,
-              ]),
+          petDetailSummary: faker.helpers.arrayElement([
+            {
+              ...{
+                sex: faker.helpers.arrayElement([
+                  faker.helpers.arrayElement(["M", "F", "N"] as const),
+                  undefined,
+                ]),
+                morphs: faker.helpers.arrayElement([
+                  Array.from(
+                    { length: faker.number.int({ min: 1, max: 10 }) },
+                    (_, i) => i + 1,
+                  ).map(() => faker.string.alpha(20)),
+                  undefined,
+                ]),
+                traits: faker.helpers.arrayElement([
+                  Array.from(
+                    { length: faker.number.int({ min: 1, max: 10 }) },
+                    (_, i) => i + 1,
+                  ).map(() => faker.string.alpha(20)),
+                  undefined,
+                ]),
+              },
             },
-          },
+            undefined,
+          ]),
           photos: faker.helpers.arrayElement([
             Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
               () => ({
@@ -1712,52 +1767,58 @@ export const getBrPetControllerGetPetsByYearResponseMock = (): BrPetControllerGe
       undefined,
     ]),
     desc: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
-    petDetail: {
-      ...{
-        growth: faker.helpers.arrayElement([
-          faker.helpers.arrayElement(["BABY", "JUVENILE", "PRE_ADULT", "ADULT", "DEAD"] as const),
-          undefined,
-        ]),
-        sex: faker.helpers.arrayElement([
-          faker.helpers.arrayElement(["M", "F", "N"] as const),
-          undefined,
-        ]),
-        morphs: faker.helpers.arrayElement([
-          Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.string.alpha(20),
-          ),
-          undefined,
-        ]),
-        traits: faker.helpers.arrayElement([
-          Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.string.alpha(20),
-          ),
-          undefined,
-        ]),
-        foods: faker.helpers.arrayElement([
-          Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.string.alpha(20),
-          ),
-          undefined,
-        ]),
-        weight: faker.helpers.arrayElement([
-          faker.number.int({ min: undefined, max: undefined }),
-          undefined,
-        ]),
+    petDetail: faker.helpers.arrayElement([
+      {
+        ...{
+          growth: faker.helpers.arrayElement([
+            faker.helpers.arrayElement(["BABY", "JUVENILE", "PRE_ADULT", "ADULT", "DEAD"] as const),
+            undefined,
+          ]),
+          sex: faker.helpers.arrayElement([
+            faker.helpers.arrayElement(["M", "F", "N"] as const),
+            undefined,
+          ]),
+          morphs: faker.helpers.arrayElement([
+            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
+            undefined,
+          ]),
+          traits: faker.helpers.arrayElement([
+            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
+            undefined,
+          ]),
+          foods: faker.helpers.arrayElement([
+            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
+            undefined,
+          ]),
+          weight: faker.helpers.arrayElement([
+            faker.number.int({ min: undefined, max: undefined }),
+            undefined,
+          ]),
+        },
       },
-    },
-    eggDetail: {
-      ...{
-        temperature: faker.helpers.arrayElement([
-          faker.number.int({ min: undefined, max: undefined }),
-          undefined,
-        ]),
-        status: faker.helpers.arrayElement([
-          faker.helpers.arrayElement(["UNFERTILIZED", "FERTILIZED", "HATCHED", "DEAD"] as const),
-          undefined,
-        ]),
+      undefined,
+    ]),
+    eggDetail: faker.helpers.arrayElement([
+      {
+        ...{
+          temperature: faker.helpers.arrayElement([
+            faker.number.int({ min: undefined, max: undefined }),
+            undefined,
+          ]),
+          status: faker.helpers.arrayElement([
+            faker.helpers.arrayElement(["UNFERTILIZED", "FERTILIZED", "HATCHED", "DEAD"] as const),
+            undefined,
+          ]),
+        },
       },
-    },
+      undefined,
+    ]),
     father: faker.helpers.arrayElement([
       {
         ...{
@@ -1775,26 +1836,31 @@ export const getBrPetControllerGetPetsByYearResponseMock = (): BrPetControllerGe
             "deleted",
             "cancelled",
           ] as const),
-          petDetailSummary: {
-            ...{
-              sex: faker.helpers.arrayElement([
-                faker.helpers.arrayElement(["M", "F", "N"] as const),
-                undefined,
-              ]),
-              morphs: faker.helpers.arrayElement([
-                Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-                  () => faker.string.alpha(20),
-                ),
-                undefined,
-              ]),
-              traits: faker.helpers.arrayElement([
-                Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-                  () => faker.string.alpha(20),
-                ),
-                undefined,
-              ]),
+          petDetailSummary: faker.helpers.arrayElement([
+            {
+              ...{
+                sex: faker.helpers.arrayElement([
+                  faker.helpers.arrayElement(["M", "F", "N"] as const),
+                  undefined,
+                ]),
+                morphs: faker.helpers.arrayElement([
+                  Array.from(
+                    { length: faker.number.int({ min: 1, max: 10 }) },
+                    (_, i) => i + 1,
+                  ).map(() => faker.string.alpha(20)),
+                  undefined,
+                ]),
+                traits: faker.helpers.arrayElement([
+                  Array.from(
+                    { length: faker.number.int({ min: 1, max: 10 }) },
+                    (_, i) => i + 1,
+                  ).map(() => faker.string.alpha(20)),
+                  undefined,
+                ]),
+              },
             },
-          },
+            undefined,
+          ]),
           photos: faker.helpers.arrayElement([
             Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
               () => ({
@@ -1842,26 +1908,31 @@ export const getBrPetControllerGetPetsByYearResponseMock = (): BrPetControllerGe
             "deleted",
             "cancelled",
           ] as const),
-          petDetailSummary: {
-            ...{
-              sex: faker.helpers.arrayElement([
-                faker.helpers.arrayElement(["M", "F", "N"] as const),
-                undefined,
-              ]),
-              morphs: faker.helpers.arrayElement([
-                Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-                  () => faker.string.alpha(20),
-                ),
-                undefined,
-              ]),
-              traits: faker.helpers.arrayElement([
-                Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-                  () => faker.string.alpha(20),
-                ),
-                undefined,
-              ]),
+          petDetailSummary: faker.helpers.arrayElement([
+            {
+              ...{
+                sex: faker.helpers.arrayElement([
+                  faker.helpers.arrayElement(["M", "F", "N"] as const),
+                  undefined,
+                ]),
+                morphs: faker.helpers.arrayElement([
+                  Array.from(
+                    { length: faker.number.int({ min: 1, max: 10 }) },
+                    (_, i) => i + 1,
+                  ).map(() => faker.string.alpha(20)),
+                  undefined,
+                ]),
+                traits: faker.helpers.arrayElement([
+                  Array.from(
+                    { length: faker.number.int({ min: 1, max: 10 }) },
+                    (_, i) => i + 1,
+                  ).map(() => faker.string.alpha(20)),
+                  undefined,
+                ]),
+              },
             },
-          },
+            undefined,
+          ]),
           photos: faker.helpers.arrayElement([
             Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
               () => ({
@@ -1990,52 +2061,69 @@ export const getBrPetControllerGetPetsByMonthResponseMock = (
         undefined,
       ]),
       desc: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
-      petDetail: {
-        ...{
-          growth: faker.helpers.arrayElement([
-            faker.helpers.arrayElement(["BABY", "JUVENILE", "PRE_ADULT", "ADULT", "DEAD"] as const),
-            undefined,
-          ]),
-          sex: faker.helpers.arrayElement([
-            faker.helpers.arrayElement(["M", "F", "N"] as const),
-            undefined,
-          ]),
-          morphs: faker.helpers.arrayElement([
-            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-            undefined,
-          ]),
-          traits: faker.helpers.arrayElement([
-            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-            undefined,
-          ]),
-          foods: faker.helpers.arrayElement([
-            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-            undefined,
-          ]),
-          weight: faker.helpers.arrayElement([
-            faker.number.int({ min: undefined, max: undefined }),
-            undefined,
-          ]),
+      petDetail: faker.helpers.arrayElement([
+        {
+          ...{
+            growth: faker.helpers.arrayElement([
+              faker.helpers.arrayElement([
+                "BABY",
+                "JUVENILE",
+                "PRE_ADULT",
+                "ADULT",
+                "DEAD",
+              ] as const),
+              undefined,
+            ]),
+            sex: faker.helpers.arrayElement([
+              faker.helpers.arrayElement(["M", "F", "N"] as const),
+              undefined,
+            ]),
+            morphs: faker.helpers.arrayElement([
+              Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => faker.string.alpha(20),
+              ),
+              undefined,
+            ]),
+            traits: faker.helpers.arrayElement([
+              Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => faker.string.alpha(20),
+              ),
+              undefined,
+            ]),
+            foods: faker.helpers.arrayElement([
+              Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => faker.string.alpha(20),
+              ),
+              undefined,
+            ]),
+            weight: faker.helpers.arrayElement([
+              faker.number.int({ min: undefined, max: undefined }),
+              undefined,
+            ]),
+          },
         },
-      },
-      eggDetail: {
-        ...{
-          temperature: faker.helpers.arrayElement([
-            faker.number.int({ min: undefined, max: undefined }),
-            undefined,
-          ]),
-          status: faker.helpers.arrayElement([
-            faker.helpers.arrayElement(["UNFERTILIZED", "FERTILIZED", "HATCHED", "DEAD"] as const),
-            undefined,
-          ]),
+        undefined,
+      ]),
+      eggDetail: faker.helpers.arrayElement([
+        {
+          ...{
+            temperature: faker.helpers.arrayElement([
+              faker.number.int({ min: undefined, max: undefined }),
+              undefined,
+            ]),
+            status: faker.helpers.arrayElement([
+              faker.helpers.arrayElement([
+                "UNFERTILIZED",
+                "FERTILIZED",
+                "HATCHED",
+                "DEAD",
+              ] as const),
+              undefined,
+            ]),
+          },
         },
-      },
+        undefined,
+      ]),
       father: faker.helpers.arrayElement([
         {
           ...{
@@ -2053,28 +2141,31 @@ export const getBrPetControllerGetPetsByMonthResponseMock = (
               "deleted",
               "cancelled",
             ] as const),
-            petDetailSummary: {
-              ...{
-                sex: faker.helpers.arrayElement([
-                  faker.helpers.arrayElement(["M", "F", "N"] as const),
-                  undefined,
-                ]),
-                morphs: faker.helpers.arrayElement([
-                  Array.from(
-                    { length: faker.number.int({ min: 1, max: 10 }) },
-                    (_, i) => i + 1,
-                  ).map(() => faker.string.alpha(20)),
-                  undefined,
-                ]),
-                traits: faker.helpers.arrayElement([
-                  Array.from(
-                    { length: faker.number.int({ min: 1, max: 10 }) },
-                    (_, i) => i + 1,
-                  ).map(() => faker.string.alpha(20)),
-                  undefined,
-                ]),
+            petDetailSummary: faker.helpers.arrayElement([
+              {
+                ...{
+                  sex: faker.helpers.arrayElement([
+                    faker.helpers.arrayElement(["M", "F", "N"] as const),
+                    undefined,
+                  ]),
+                  morphs: faker.helpers.arrayElement([
+                    Array.from(
+                      { length: faker.number.int({ min: 1, max: 10 }) },
+                      (_, i) => i + 1,
+                    ).map(() => faker.string.alpha(20)),
+                    undefined,
+                  ]),
+                  traits: faker.helpers.arrayElement([
+                    Array.from(
+                      { length: faker.number.int({ min: 1, max: 10 }) },
+                      (_, i) => i + 1,
+                    ).map(() => faker.string.alpha(20)),
+                    undefined,
+                  ]),
+                },
               },
-            },
+              undefined,
+            ]),
             photos: faker.helpers.arrayElement([
               Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
                 () => ({
@@ -2122,28 +2213,31 @@ export const getBrPetControllerGetPetsByMonthResponseMock = (
               "deleted",
               "cancelled",
             ] as const),
-            petDetailSummary: {
-              ...{
-                sex: faker.helpers.arrayElement([
-                  faker.helpers.arrayElement(["M", "F", "N"] as const),
-                  undefined,
-                ]),
-                morphs: faker.helpers.arrayElement([
-                  Array.from(
-                    { length: faker.number.int({ min: 1, max: 10 }) },
-                    (_, i) => i + 1,
-                  ).map(() => faker.string.alpha(20)),
-                  undefined,
-                ]),
-                traits: faker.helpers.arrayElement([
-                  Array.from(
-                    { length: faker.number.int({ min: 1, max: 10 }) },
-                    (_, i) => i + 1,
-                  ).map(() => faker.string.alpha(20)),
-                  undefined,
-                ]),
+            petDetailSummary: faker.helpers.arrayElement([
+              {
+                ...{
+                  sex: faker.helpers.arrayElement([
+                    faker.helpers.arrayElement(["M", "F", "N"] as const),
+                    undefined,
+                  ]),
+                  morphs: faker.helpers.arrayElement([
+                    Array.from(
+                      { length: faker.number.int({ min: 1, max: 10 }) },
+                      (_, i) => i + 1,
+                    ).map(() => faker.string.alpha(20)),
+                    undefined,
+                  ]),
+                  traits: faker.helpers.arrayElement([
+                    Array.from(
+                      { length: faker.number.int({ min: 1, max: 10 }) },
+                      (_, i) => i + 1,
+                    ).map(() => faker.string.alpha(20)),
+                    undefined,
+                  ]),
+                },
               },
-            },
+              undefined,
+            ]),
             photos: faker.helpers.arrayElement([
               Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
                 () => ({
@@ -2279,52 +2373,69 @@ export const getBrPetControllerGetPetsByDateRangeResponseMock = (
         undefined,
       ]),
       desc: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
-      petDetail: {
-        ...{
-          growth: faker.helpers.arrayElement([
-            faker.helpers.arrayElement(["BABY", "JUVENILE", "PRE_ADULT", "ADULT", "DEAD"] as const),
-            undefined,
-          ]),
-          sex: faker.helpers.arrayElement([
-            faker.helpers.arrayElement(["M", "F", "N"] as const),
-            undefined,
-          ]),
-          morphs: faker.helpers.arrayElement([
-            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-            undefined,
-          ]),
-          traits: faker.helpers.arrayElement([
-            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-            undefined,
-          ]),
-          foods: faker.helpers.arrayElement([
-            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-            undefined,
-          ]),
-          weight: faker.helpers.arrayElement([
-            faker.number.int({ min: undefined, max: undefined }),
-            undefined,
-          ]),
+      petDetail: faker.helpers.arrayElement([
+        {
+          ...{
+            growth: faker.helpers.arrayElement([
+              faker.helpers.arrayElement([
+                "BABY",
+                "JUVENILE",
+                "PRE_ADULT",
+                "ADULT",
+                "DEAD",
+              ] as const),
+              undefined,
+            ]),
+            sex: faker.helpers.arrayElement([
+              faker.helpers.arrayElement(["M", "F", "N"] as const),
+              undefined,
+            ]),
+            morphs: faker.helpers.arrayElement([
+              Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => faker.string.alpha(20),
+              ),
+              undefined,
+            ]),
+            traits: faker.helpers.arrayElement([
+              Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => faker.string.alpha(20),
+              ),
+              undefined,
+            ]),
+            foods: faker.helpers.arrayElement([
+              Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => faker.string.alpha(20),
+              ),
+              undefined,
+            ]),
+            weight: faker.helpers.arrayElement([
+              faker.number.int({ min: undefined, max: undefined }),
+              undefined,
+            ]),
+          },
         },
-      },
-      eggDetail: {
-        ...{
-          temperature: faker.helpers.arrayElement([
-            faker.number.int({ min: undefined, max: undefined }),
-            undefined,
-          ]),
-          status: faker.helpers.arrayElement([
-            faker.helpers.arrayElement(["UNFERTILIZED", "FERTILIZED", "HATCHED", "DEAD"] as const),
-            undefined,
-          ]),
+        undefined,
+      ]),
+      eggDetail: faker.helpers.arrayElement([
+        {
+          ...{
+            temperature: faker.helpers.arrayElement([
+              faker.number.int({ min: undefined, max: undefined }),
+              undefined,
+            ]),
+            status: faker.helpers.arrayElement([
+              faker.helpers.arrayElement([
+                "UNFERTILIZED",
+                "FERTILIZED",
+                "HATCHED",
+                "DEAD",
+              ] as const),
+              undefined,
+            ]),
+          },
         },
-      },
+        undefined,
+      ]),
       father: faker.helpers.arrayElement([
         {
           ...{
@@ -2342,28 +2453,31 @@ export const getBrPetControllerGetPetsByDateRangeResponseMock = (
               "deleted",
               "cancelled",
             ] as const),
-            petDetailSummary: {
-              ...{
-                sex: faker.helpers.arrayElement([
-                  faker.helpers.arrayElement(["M", "F", "N"] as const),
-                  undefined,
-                ]),
-                morphs: faker.helpers.arrayElement([
-                  Array.from(
-                    { length: faker.number.int({ min: 1, max: 10 }) },
-                    (_, i) => i + 1,
-                  ).map(() => faker.string.alpha(20)),
-                  undefined,
-                ]),
-                traits: faker.helpers.arrayElement([
-                  Array.from(
-                    { length: faker.number.int({ min: 1, max: 10 }) },
-                    (_, i) => i + 1,
-                  ).map(() => faker.string.alpha(20)),
-                  undefined,
-                ]),
+            petDetailSummary: faker.helpers.arrayElement([
+              {
+                ...{
+                  sex: faker.helpers.arrayElement([
+                    faker.helpers.arrayElement(["M", "F", "N"] as const),
+                    undefined,
+                  ]),
+                  morphs: faker.helpers.arrayElement([
+                    Array.from(
+                      { length: faker.number.int({ min: 1, max: 10 }) },
+                      (_, i) => i + 1,
+                    ).map(() => faker.string.alpha(20)),
+                    undefined,
+                  ]),
+                  traits: faker.helpers.arrayElement([
+                    Array.from(
+                      { length: faker.number.int({ min: 1, max: 10 }) },
+                      (_, i) => i + 1,
+                    ).map(() => faker.string.alpha(20)),
+                    undefined,
+                  ]),
+                },
               },
-            },
+              undefined,
+            ]),
             photos: faker.helpers.arrayElement([
               Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
                 () => ({
@@ -2411,28 +2525,31 @@ export const getBrPetControllerGetPetsByDateRangeResponseMock = (
               "deleted",
               "cancelled",
             ] as const),
-            petDetailSummary: {
-              ...{
-                sex: faker.helpers.arrayElement([
-                  faker.helpers.arrayElement(["M", "F", "N"] as const),
-                  undefined,
-                ]),
-                morphs: faker.helpers.arrayElement([
-                  Array.from(
-                    { length: faker.number.int({ min: 1, max: 10 }) },
-                    (_, i) => i + 1,
-                  ).map(() => faker.string.alpha(20)),
-                  undefined,
-                ]),
-                traits: faker.helpers.arrayElement([
-                  Array.from(
-                    { length: faker.number.int({ min: 1, max: 10 }) },
-                    (_, i) => i + 1,
-                  ).map(() => faker.string.alpha(20)),
-                  undefined,
-                ]),
+            petDetailSummary: faker.helpers.arrayElement([
+              {
+                ...{
+                  sex: faker.helpers.arrayElement([
+                    faker.helpers.arrayElement(["M", "F", "N"] as const),
+                    undefined,
+                  ]),
+                  morphs: faker.helpers.arrayElement([
+                    Array.from(
+                      { length: faker.number.int({ min: 1, max: 10 }) },
+                      (_, i) => i + 1,
+                    ).map(() => faker.string.alpha(20)),
+                    undefined,
+                  ]),
+                  traits: faker.helpers.arrayElement([
+                    Array.from(
+                      { length: faker.number.int({ min: 1, max: 10 }) },
+                      (_, i) => i + 1,
+                    ).map(() => faker.string.alpha(20)),
+                    undefined,
+                  ]),
+                },
               },
-            },
+              undefined,
+            ]),
             photos: faker.helpers.arrayElement([
               Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
                 () => ({
@@ -2723,26 +2840,29 @@ export const getAdoptionControllerGetAllAdoptionsResponseMock = (
           ),
           undefined,
         ]),
-        petDetailSummary: {
-          ...{
-            sex: faker.helpers.arrayElement([
-              faker.helpers.arrayElement(["M", "F", "N"] as const),
-              undefined,
-            ]),
-            morphs: faker.helpers.arrayElement([
-              Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-                () => faker.string.alpha(20),
-              ),
-              undefined,
-            ]),
-            traits: faker.helpers.arrayElement([
-              Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-                () => faker.string.alpha(20),
-              ),
-              undefined,
-            ]),
+        petDetailSummary: faker.helpers.arrayElement([
+          {
+            ...{
+              sex: faker.helpers.arrayElement([
+                faker.helpers.arrayElement(["M", "F", "N"] as const),
+                undefined,
+              ]),
+              morphs: faker.helpers.arrayElement([
+                Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                  () => faker.string.alpha(20),
+                ),
+                undefined,
+              ]),
+              traits: faker.helpers.arrayElement([
+                Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                  () => faker.string.alpha(20),
+                ),
+                undefined,
+              ]),
+            },
           },
-        },
+          undefined,
+        ]),
         photos: faker.helpers.arrayElement([
           Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
             () => ({
@@ -2843,26 +2963,31 @@ export const getAdoptionControllerGetAdoptionByAdoptionIdResponseMock = (
             ),
             undefined,
           ]),
-          petDetailSummary: {
-            ...{
-              sex: faker.helpers.arrayElement([
-                faker.helpers.arrayElement(["M", "F", "N"] as const),
-                undefined,
-              ]),
-              morphs: faker.helpers.arrayElement([
-                Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-                  () => faker.string.alpha(20),
-                ),
-                undefined,
-              ]),
-              traits: faker.helpers.arrayElement([
-                Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-                  () => faker.string.alpha(20),
-                ),
-                undefined,
-              ]),
+          petDetailSummary: faker.helpers.arrayElement([
+            {
+              ...{
+                sex: faker.helpers.arrayElement([
+                  faker.helpers.arrayElement(["M", "F", "N"] as const),
+                  undefined,
+                ]),
+                morphs: faker.helpers.arrayElement([
+                  Array.from(
+                    { length: faker.number.int({ min: 1, max: 10 }) },
+                    (_, i) => i + 1,
+                  ).map(() => faker.string.alpha(20)),
+                  undefined,
+                ]),
+                traits: faker.helpers.arrayElement([
+                  Array.from(
+                    { length: faker.number.int({ min: 1, max: 10 }) },
+                    (_, i) => i + 1,
+                  ).map(() => faker.string.alpha(20)),
+                  undefined,
+                ]),
+              },
             },
-          },
+            undefined,
+          ]),
           photos: faker.helpers.arrayElement([
             Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
               () => ({
@@ -2952,26 +3077,31 @@ export const getBrMatingControllerFindAllResponseMock = (
             ),
             undefined,
           ]),
-          petDetailSummary: {
-            ...{
-              sex: faker.helpers.arrayElement([
-                faker.helpers.arrayElement(["M", "F", "N"] as const),
-                undefined,
-              ]),
-              morphs: faker.helpers.arrayElement([
-                Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-                  () => faker.string.alpha(20),
-                ),
-                undefined,
-              ]),
-              traits: faker.helpers.arrayElement([
-                Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-                  () => faker.string.alpha(20),
-                ),
-                undefined,
-              ]),
+          petDetailSummary: faker.helpers.arrayElement([
+            {
+              ...{
+                sex: faker.helpers.arrayElement([
+                  faker.helpers.arrayElement(["M", "F", "N"] as const),
+                  undefined,
+                ]),
+                morphs: faker.helpers.arrayElement([
+                  Array.from(
+                    { length: faker.number.int({ min: 1, max: 10 }) },
+                    (_, i) => i + 1,
+                  ).map(() => faker.string.alpha(20)),
+                  undefined,
+                ]),
+                traits: faker.helpers.arrayElement([
+                  Array.from(
+                    { length: faker.number.int({ min: 1, max: 10 }) },
+                    (_, i) => i + 1,
+                  ).map(() => faker.string.alpha(20)),
+                  undefined,
+                ]),
+              },
             },
-          },
+            undefined,
+          ]),
           photos: faker.helpers.arrayElement([
             Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
               () => ({
@@ -3022,26 +3152,31 @@ export const getBrMatingControllerFindAllResponseMock = (
             ),
             undefined,
           ]),
-          petDetailSummary: {
-            ...{
-              sex: faker.helpers.arrayElement([
-                faker.helpers.arrayElement(["M", "F", "N"] as const),
-                undefined,
-              ]),
-              morphs: faker.helpers.arrayElement([
-                Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-                  () => faker.string.alpha(20),
-                ),
-                undefined,
-              ]),
-              traits: faker.helpers.arrayElement([
-                Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-                  () => faker.string.alpha(20),
-                ),
-                undefined,
-              ]),
+          petDetailSummary: faker.helpers.arrayElement([
+            {
+              ...{
+                sex: faker.helpers.arrayElement([
+                  faker.helpers.arrayElement(["M", "F", "N"] as const),
+                  undefined,
+                ]),
+                morphs: faker.helpers.arrayElement([
+                  Array.from(
+                    { length: faker.number.int({ min: 1, max: 10 }) },
+                    (_, i) => i + 1,
+                  ).map(() => faker.string.alpha(20)),
+                  undefined,
+                ]),
+                traits: faker.helpers.arrayElement([
+                  Array.from(
+                    { length: faker.number.int({ min: 1, max: 10 }) },
+                    (_, i) => i + 1,
+                  ).map(() => faker.string.alpha(20)),
+                  undefined,
+                ]),
+              },
             },
-          },
+            undefined,
+          ]),
           photos: faker.helpers.arrayElement([
             Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
               () => ({
@@ -3103,28 +3238,31 @@ export const getBrMatingControllerFindAllResponseMock = (
               ),
               undefined,
             ]),
-            petDetailSummary: {
-              ...{
-                sex: faker.helpers.arrayElement([
-                  faker.helpers.arrayElement(["M", "F", "N"] as const),
-                  undefined,
-                ]),
-                morphs: faker.helpers.arrayElement([
-                  Array.from(
-                    { length: faker.number.int({ min: 1, max: 10 }) },
-                    (_, i) => i + 1,
-                  ).map(() => faker.string.alpha(20)),
-                  undefined,
-                ]),
-                traits: faker.helpers.arrayElement([
-                  Array.from(
-                    { length: faker.number.int({ min: 1, max: 10 }) },
-                    (_, i) => i + 1,
-                  ).map(() => faker.string.alpha(20)),
-                  undefined,
-                ]),
+            petDetailSummary: faker.helpers.arrayElement([
+              {
+                ...{
+                  sex: faker.helpers.arrayElement([
+                    faker.helpers.arrayElement(["M", "F", "N"] as const),
+                    undefined,
+                  ]),
+                  morphs: faker.helpers.arrayElement([
+                    Array.from(
+                      { length: faker.number.int({ min: 1, max: 10 }) },
+                      (_, i) => i + 1,
+                    ).map(() => faker.string.alpha(20)),
+                    undefined,
+                  ]),
+                  traits: faker.helpers.arrayElement([
+                    Array.from(
+                      { length: faker.number.int({ min: 1, max: 10 }) },
+                      (_, i) => i + 1,
+                    ).map(() => faker.string.alpha(20)),
+                    undefined,
+                  ]),
+                },
               },
-            },
+              undefined,
+            ]),
             photos: faker.helpers.arrayElement([
               Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
                 () => ({

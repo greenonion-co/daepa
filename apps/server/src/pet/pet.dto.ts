@@ -130,6 +130,7 @@ export class PetBaseDto {
   @ApiProperty({
     description: '펫 상세 정보',
     type: PetDetailDto,
+    required: false,
   })
   @ValidateNested()
   @Type(() => PetDetailDto)
@@ -139,6 +140,7 @@ export class PetBaseDto {
   @ApiProperty({
     description: '알 상세 정보',
     type: EggDetailDto,
+    required: false,
   })
   @ValidateNested()
   @Type(() => EggDetailDto)
@@ -158,6 +160,7 @@ export class PetSummaryDto extends PickType(PetBaseDto, [
   @ApiProperty({
     description: '펫 상세 정보',
     type: PetDetailSummaryDto,
+    required: false,
   })
   @ValidateNested()
   @Type(() => PetDetailSummaryDto)
@@ -200,6 +203,7 @@ export class PetSummaryWithoutOwnerDto extends PickType(PetBaseDto, [
   @ApiProperty({
     description: '펫 상세 정보',
     type: PetDetailSummaryDto,
+    required: false,
   })
   @ValidateNested()
   @Type(() => PetDetailSummaryDto)
@@ -304,6 +308,7 @@ export class PetParentDto extends PickType(PetSummaryDto, [
   @ApiProperty({
     description: '펫 상세 정보',
     type: PetDetailSummaryDto,
+    required: false,
   })
   @ValidateNested()
   @Type(() => PetDetailSummaryDto)

@@ -23,7 +23,7 @@ export interface PetParentDto {
   /** 부모 관계 상태 */
   status: PetParentDtoStatus;
   /** 펫 상세 정보 */
-  petDetailSummary: PetDetailSummaryDto;
+  petDetailSummary?: PetDetailSummaryDto;
   /** 펫 이미지 목록 */
   photos?: PetImageItem[];
   /** 펫 주인 정보 */

@@ -35,9 +35,9 @@ export interface PetDto {
   /** 펫 소개말 */
   desc?: string;
   /** 펫 상세 정보 */
-  petDetail: PetDetailDto;
+  petDetail?: PetDetailDto;
   /** 알 상세 정보 */
-  eggDetail: EggDetailDto;
+  eggDetail?: EggDetailDto;
   /** 아빠 개체 정보 */
   father?: PetParentDto;
   /** 엄마 개체 정보 */
