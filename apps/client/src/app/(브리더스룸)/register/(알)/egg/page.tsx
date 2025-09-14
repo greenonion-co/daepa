@@ -1,7 +1,7 @@
 "use client";
 
 import { EGG_REGISTER_STEPS } from "../../../constants";
-import { CreatePetDto, petControllerCreate, PetDtoGrowth } from "@repo/api-client";
+import { CreatePetDto, petControllerCreate, PetDtoType } from "@repo/api-client";
 import { FormField } from "../../../components/Form/FormField";
 
 import { cn } from "@/lib/utils";
@@ -116,7 +116,7 @@ const EggRegisterPage = () => {
         ...(newFormData.clutch && { clutch: Number(newFormData.clutch) }),
         clutchCount: Number(newFormData.clutchCount),
         desc: newFormData.desc,
-        growth: PetDtoGrowth.EGG,
+        type: PetDtoType.EGG,
         name: `${newFormData.father?.name}x${newFormData.mother?.name}(${newFormData.clutchCount ?? "@"}-${newFormData.clutch ?? "@"})`,
       };
     } catch (error) {
