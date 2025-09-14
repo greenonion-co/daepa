@@ -123,16 +123,16 @@ const CardFront = ({ pet, qrCodeDataUrl }: { pet: PetDto; qrCodeDataUrl?: string
               <h1 className="text-2xl font-bold">{pet.name}</h1>
               <div className="whitespace-nowrap text-sm text-gray-300">
                 <div>
-                  {pet.petDetail.weight && `${pet.petDetail.weight}g / `}
+                  {pet.petDetail?.weight && `${pet.petDetail?.weight}g / `}
                   {pet.hatchingDate ? format(pet.hatchingDate, "yy.MM.dd") : "-"}
                 </div>
                 {SPECIES_KOREAN_INFO[pet.species]} /{" "}
-                {GENDER_KOREAN_INFO[pet.petDetail.sex ?? PetDtoSex.NON]}
+                {GENDER_KOREAN_INFO[pet.petDetail?.sex ?? PetDtoSex.NON]}
               </div>
             </div>
             <div className="scrollbar-hide overflow-x-auto">
               <div className="flex gap-1">
-                {pet.petDetail.morphs?.map((morph) => (
+                {pet.petDetail?.morphs?.map((morph) => (
                   <Badge
                     key={morph}
                     className="whitespace-nowrap bg-yellow-500/80 font-bold text-black backdrop-blur-sm"
@@ -140,7 +140,7 @@ const CardFront = ({ pet, qrCodeDataUrl }: { pet: PetDto; qrCodeDataUrl?: string
                     {morph}
                   </Badge>
                 ))}
-                {pet.petDetail.traits?.map((trait) => (
+                {pet.petDetail?.traits?.map((trait) => (
                   <Badge
                     key={trait}
                     className="whitespace-nowrap bg-white font-bold text-black backdrop-blur-sm"
