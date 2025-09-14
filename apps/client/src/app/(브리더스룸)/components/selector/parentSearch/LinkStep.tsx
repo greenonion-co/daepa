@@ -18,7 +18,7 @@ const LinkStep = ({ selectedPet, onSelect, onClose }: LinkStepProps) => {
 
   const defaultMessage = (pet: PetParentDtoWithMessage) => {
     return `안녕하세요, ${pet.owner?.name}님.\n${pet.name}를 ${
-      pet.petDetail.sex?.toString() === PetDtoSex.MALE ? "부" : "모"
+      pet.sex?.toString() === PetDtoSex.MALE ? "부" : "모"
     } 개체로 등록하고 싶습니다.`;
   };
 
@@ -37,7 +37,7 @@ const LinkStep = ({ selectedPet, onSelect, onClose }: LinkStepProps) => {
                 <div className="mb-2 flex items-center gap-2">
                   <h3 className="text-2xl font-bold">{selectedPet.name}</h3>
                   <Badge variant="outline" className="bg-blue-50 text-black">
-                    {selectedPet.petDetail.sex?.toString() === PetDtoSex.MALE ? "수컷" : "암컷"}
+                    {selectedPet.sex?.toString() === PetDtoSex.MALE ? "수컷" : "암컷"}
                   </Badge>
                 </div>
                 <p className="text-gray-600">소유자: {selectedPet.owner?.name}</p>
@@ -47,7 +47,7 @@ const LinkStep = ({ selectedPet, onSelect, onClose }: LinkStepProps) => {
                 <div>
                   <h4 className="mb-1.5 text-sm font-medium text-gray-500">모프</h4>
                   <div className="flex flex-wrap gap-1">
-                    {selectedPet.petDetail.morphs?.map((morph) => (
+                    {selectedPet.morphs?.map((morph) => (
                       <Badge key={morph} className="bg-blue-800 text-white">
                         {morph}
                       </Badge>
@@ -58,7 +58,7 @@ const LinkStep = ({ selectedPet, onSelect, onClose }: LinkStepProps) => {
                 <div>
                   <h4 className="mb-1.5 text-sm font-medium text-gray-500">특성</h4>
                   <div className="flex flex-wrap gap-1">
-                    {selectedPet.petDetail.traits?.map((trait) => (
+                    {selectedPet.traits?.map((trait) => (
                       <Badge
                         variant="outline"
                         key={trait}

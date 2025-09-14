@@ -450,8 +450,8 @@ export class PetService {
       .leftJoinAndMapOne(
         'pets.petDetail',
         'pet_details',
-        'pet_details',
-        'pet_details.petId = pets.petId',
+        'petDetail',
+        'petDetail.petId = pets.petId',
       )
       .leftJoinAndMapOne(
         'pets.adoption',
@@ -495,7 +495,8 @@ export class PetService {
     // PetDto로 변환하면서 parent_request 상태 정보 포함
     const petDtos = await Promise.all(
       petEntities.map(async (petRaw) => {
-        const { petId, photos, ...pet } = petRaw;
+        const { petId, petDetail, photos, ...pet } = petRaw;
+        const { growth, sex, morphs, traits, foods, weight } = petDetail ?? {};
 
         const { father, mother } =
           await this.parentRequestService.getParentsWithRequestStatus(petId);
@@ -503,6 +504,12 @@ export class PetService {
         const petDto = plainToInstance(PetDto, {
           ...pet,
           petId,
+          growth,
+          sex,
+          morphs,
+          traits,
+          foods,
+          weight,
           father,
           mother,
           photos: photos?.files,
@@ -542,8 +549,8 @@ export class PetService {
       .leftJoinAndMapOne(
         'pets.petDetail',
         'pet_details',
-        'pet_details',
-        'pet_details.petId = pets.petId',
+        'petDetail',
+        'petDetail.petId = pets.petId',
       )
       .leftJoinAndMapOne(
         'pets.adoption',
@@ -573,7 +580,8 @@ export class PetService {
     // PetDto로 변환하면서 parent_request 상태 정보 포함
     const petDtos = await Promise.all(
       petEntities.map(async (petRaw) => {
-        const { petId, photos, ...pet } = petRaw;
+        const { petId, petDetail, photos, ...pet } = petRaw;
+        const { growth, sex, morphs, traits, foods, weight } = petDetail ?? {};
 
         const { father, mother } =
           await this.parentRequestService.getParentsWithRequestStatus(petId);
@@ -581,6 +589,12 @@ export class PetService {
         const petDto = plainToInstance(PetDto, {
           ...pet,
           petId,
+          growth,
+          sex,
+          morphs,
+          traits,
+          foods,
+          weight,
           father,
           mother,
           photos: photos?.files,

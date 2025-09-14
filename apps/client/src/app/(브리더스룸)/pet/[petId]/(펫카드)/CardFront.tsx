@@ -206,9 +206,9 @@ const CardFront = ({ pet, qrCodeDataUrl }: { pet: PetDto; qrCodeDataUrl?: string
               className={cn("text-sm font-medium", isExpanded ? "text-gray-200" : "text-gray-600")}
             >
               <div className="flex flex-wrap items-center gap-2">
-                {pet.petDetail?.weight && (
+                {pet.weight && (
                   <span className="inline-flex items-center gap-1">
-                    <span className="font-semibold">{pet.petDetail.weight}g</span>
+                    <span className="font-semibold">{pet.weight}g</span>
                   </span>
                 )}
                 {pet.hatchingDate && (
@@ -225,7 +225,7 @@ const CardFront = ({ pet, qrCodeDataUrl }: { pet: PetDto; qrCodeDataUrl?: string
                 )}
                 <span>
                   {SPECIES_KOREAN_INFO[pet.species]} ·{" "}
-                  {GENDER_KOREAN_INFO[pet.petDetail?.sex ?? PetDtoSex.NON]}
+                  {GENDER_KOREAN_INFO[pet.sex ?? PetDtoSex.NON]}
                 </span>
               </div>
             </div>
@@ -233,7 +233,7 @@ const CardFront = ({ pet, qrCodeDataUrl }: { pet: PetDto; qrCodeDataUrl?: string
 
           <div className="scrollbar-hide overflow-x-auto">
             <div className="flex gap-1.5">
-              {pet.petDetail?.morphs?.map((morph) => (
+              {pet.morphs?.map((morph) => (
                 <Badge
                   key={morph}
                   className="whitespace-nowrap bg-yellow-500/90 font-bold text-black backdrop-blur-sm"
@@ -241,7 +241,7 @@ const CardFront = ({ pet, qrCodeDataUrl }: { pet: PetDto; qrCodeDataUrl?: string
                   {morph}
                 </Badge>
               ))}
-              {pet.petDetail?.traits?.map((trait) => (
+              {pet.traits?.map((trait) => (
                 <Badge
                   variant="outline"
                   key={trait}

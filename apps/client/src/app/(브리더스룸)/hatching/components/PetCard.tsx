@@ -35,8 +35,7 @@ const PetCard = ({ date, pets, tab }: PetCardProps) => {
                   <div className="font-medium">{pet.name}</div>
 
                   <div className="text-sm text-gray-600 dark:text-gray-400">
-                    {SPECIES_KOREAN_INFO[pet.species]} •{" "}
-                    {GENDER_KOREAN_INFO[pet.petDetail.sex ?? "N"]}
+                    {SPECIES_KOREAN_INFO[pet.species]} • {GENDER_KOREAN_INFO[pet.sex ?? "N"]}
                   </div>
                   {pet.hatchingDate && (
                     <div className="text-sm text-gray-500 dark:text-gray-400">

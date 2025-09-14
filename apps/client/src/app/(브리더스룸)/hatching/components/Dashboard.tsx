@@ -49,7 +49,7 @@ const Dashboard = memo(() => {
       // yyyy-MM-dd 형식에서 월 추출
       const month = new Date(date).getMonth();
       monthlyHatched[month] += pets.filter(
-        (pet) => pet.type === PetDtoType.PET && pet.petDetail.growth !== PetDtoGrowth.DEAD,
+        (pet) => pet.type === PetDtoType.PET && pet.growth !== PetDtoGrowth.DEAD,
       ).length;
 
       monthlyNotHatched[month] += isHatchedOnly

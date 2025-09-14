@@ -10,6 +10,8 @@ import type { UserProfilePublicDto } from "./userProfilePublicDto";
 import type { PetDtoSpecies } from "./petDtoSpecies";
 import type { PetDetailDto } from "./petDetailDto";
 import type { EggDetailDto } from "./eggDetailDto";
+import type { PetDtoGrowth } from "./petDtoGrowth";
+import type { PetDtoSex } from "./petDtoSex";
 import type { PetParentDto } from "./petParentDto";
 import type { PetAdoptionDto } from "./petAdoptionDto";
 import type { PetDtoStatus } from "./petDtoStatus";
@@ -38,6 +40,18 @@ export interface PetDto {
   petDetail?: PetDetailDto;
   /** 알 상세 정보 */
   eggDetail?: EggDetailDto;
+  /** 펫 성장단계 */
+  growth?: PetDtoGrowth;
+  /** 펫 성별(수컷, 암컷, 미구분) */
+  sex?: PetDtoSex;
+  /** 펫 모프 */
+  morphs?: string[];
+  /** 펫 형질 */
+  traits?: string[];
+  /** 펫 먹이 */
+  foods?: string[];
+  /** 펫 몸무게(g) */
+  weight?: number;
   /** 아빠 개체 정보 */
   father?: PetParentDto;
   /** 엄마 개체 정보 */

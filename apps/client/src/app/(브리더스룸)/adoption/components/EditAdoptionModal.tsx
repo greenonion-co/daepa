@@ -165,9 +165,7 @@ const EditAdoptionModal = ({
               <ScrollArea className="h-[400px]">
                 <div className="mb-10 grid grid-cols-2 gap-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
                   {pets
-                    ?.filter((pet) =>
-                      tab === "male" ? pet.petDetail.sex === "M" : pet.petDetail.sex === "F",
-                    )
+                    ?.filter((pet) => (tab === "male" ? pet.sex === "M" : pet.sex === "F"))
                     .map((pet) => {
                       const disabled = adoptionData?.some(
                         (adoption) => adoption.petId === pet.petId,
@@ -215,9 +213,9 @@ const EditAdoptionModal = ({
                 </div>
               </div>
               <div className="flex flex-col text-sm text-gray-600">
-                {selectedPet.petDetail.morphs && selectedPet.petDetail.morphs.length > 0 && (
+                {selectedPet.morphs && selectedPet.morphs.length > 0 && (
                   <div className="flex flex-wrap gap-2">
-                    {selectedPet.petDetail.morphs.map((morph: string) => `#${morph}`).join(" ")}
+                    {selectedPet.morphs.map((morph: string) => `#${morph}`).join(" ")}
                   </div>
                 )}
                 {selectedPet?.hatchingDate && (

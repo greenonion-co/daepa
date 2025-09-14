@@ -43,7 +43,7 @@ export default function PetPage() {
     }),
   });
 
-  const { items, totalCount } = data ?? { items: [], totalCount: 0 };
+  const { items, totalCount } = data ?? {};
 
   // 무한 스크롤 처리
   useEffect(() => {
