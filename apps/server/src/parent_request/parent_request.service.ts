@@ -396,7 +396,7 @@ export class ParentRequestService {
       if (parentData.length === 0) {
         return { father: null, mother: null };
       }
-      console.log(parentData);
+
       let father: PetParentDto | null = null;
       let mother: PetParentDto | null = null;
 
