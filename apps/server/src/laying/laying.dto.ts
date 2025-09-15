@@ -7,7 +7,7 @@ import {
   IsString,
 } from 'class-validator';
 import { PET_SPECIES } from 'src/pet/pet.constants';
-import { PetSummaryWithLayingDto } from 'src/pet/pet.dto';
+import { PetSummaryLayingDto } from 'src/pet/pet.dto';
 
 export class LayingBaseDto {
   @ApiProperty({
@@ -152,7 +152,7 @@ export class LayingByDateDto {
   @ApiProperty({
     description: '산란 정보',
     isArray: true,
-    type: PetSummaryWithLayingDto,
+    type: PetSummaryLayingDto,
   })
-  layings: PetSummaryWithLayingDto[];
+  layings: PetSummaryLayingDto[];
 }

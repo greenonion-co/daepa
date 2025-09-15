@@ -50,13 +50,10 @@ export class AdoptionService {
         ...omitBy(
           {
             name: pet.name ?? undefined,
-            photoOrder: pet.photoOrder ?? undefined,
             hatchingDate: pet.hatchingDate ?? undefined,
-            petDetailSummary: {
-              morphs: petDetail?.morphs ?? undefined,
-              traits: petDetail?.traits ?? undefined,
-              sex: petDetail?.sex ?? undefined,
-            },
+            sex: petDetail?.sex ?? undefined,
+            morphs: petDetail?.morphs ?? undefined,
+            traits: petDetail?.traits ?? undefined,
           },
           isNil,
         ),
@@ -165,7 +162,7 @@ export class AdoptionService {
             'pets.petId = adoptions.petId',
           )
           .leftJoinAndMapOne(
-            'adoptions.petDetail', // 중첩 객체로 매핑
+            'adoptions.petDetail',
             'pet_details',
             'pet_details',
             'pet_details.petId = pets.petId',
@@ -210,25 +207,9 @@ export class AdoptionService {
       },
     );
 
-    const adoptionDtos = adoptionEntities.map((adoption) => {
-      const { pet, petDetail, ...adoptionData } = adoption;
-      return {
-        ...adoptionData,
-        pet: {
-          petId: pet.petId,
-          type: pet.type,
-          name: pet.name ?? undefined,
-          species: pet.species,
-          photoOrder: pet.photoOrder ?? undefined,
-          hatchingDate: pet.hatchingDate ?? undefined,
-          petDetailSummary: {
-            morphs: petDetail?.morphs ?? undefined,
-            traits: petDetail?.traits ?? undefined,
-            sex: petDetail?.sex ?? undefined,
-          },
-        },
-      };
-    });
+    const adoptionDtos = adoptionEntities.map((entity) =>
+      this.toAdoptionDtoOptimized(entity),
+    );
 
     const pageMetaDto = new PageMetaDto({ totalCount, pageOptionsDto });
 
@@ -277,13 +258,13 @@ export class AdoptionService {
           'adoptions.createdAt',
           'adoptions.updatedAt',
           'pets.petId',
+          'pets.type',
           'pets.name',
           'pets.species',
           'pets.hatchingDate',
+          'pet_details.sex',
           'pet_details.morphs',
           'pet_details.traits',
-          'pet_details.sex',
-          'pets.ownerId',
           'seller.userId',
           'seller.name',
           'seller.role',
@@ -305,7 +286,6 @@ export class AdoptionService {
       }
 
       const adoptionEntity = await queryBuilder.getOne();
-
       if (!adoptionEntity) {
         return null;
       }

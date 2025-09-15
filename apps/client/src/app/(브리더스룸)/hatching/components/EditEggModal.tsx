@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import {
   brMatingControllerFindAll,
   petControllerUpdate,
-  PetSummaryWithLayingDto,
+  PetSummaryLayingDto,
   UpdatePetDto,
 } from "@repo/api-client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -20,7 +20,7 @@ const EditEggModal = ({
 }: {
   isOpen: boolean;
   onClose: () => void;
-  egg: PetSummaryWithLayingDto;
+  egg: PetSummaryLayingDto;
 }) => {
   const queryClient = useQueryClient();
   const [formData, setFormData] = useState<{

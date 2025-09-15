@@ -39,10 +39,7 @@ import { PageOptionsDto } from 'src/common/page.dto';
 import { CommonResponseDto } from 'src/common/response.dto';
 import { PetImageItem, UpsertPetImageDto } from 'src/pet_image/pet_image.dto';
 import { EGG_STATUS } from 'src/egg_detail/egg_detail.constants';
-import {
-  PetDetailDto,
-  PetDetailSummaryDto,
-} from 'src/pet_detail/pet_detatil.dto';
+import { PetDetailDto } from 'src/pet_detail/pet_detatil.dto';
 import { EggDetailDto } from 'src/egg_detail/egg_detail.dto';
 
 export class PetBaseDto {
@@ -158,14 +155,47 @@ export class PetSummaryDto extends PickType(PetBaseDto, [
   'hatchingDate',
 ]) {
   @ApiProperty({
-    description: '펫 상세 정보',
-    type: PetDetailSummaryDto,
+    description: '펫 성별(수컷, 암컷, 미구분)',
+    example: 'M',
+    required: false,
+    enum: PET_SEX,
+    'x-enumNames': Object.keys(PET_SEX),
+  })
+  @IsOptional()
+  @IsEnum(PET_SEX)
+  sex?: PET_SEX;
+
+  @ApiProperty({
+    description: '펫 모프',
+    example: ['릴리화이트', '아잔틱헷100%'],
     required: false,
   })
-  @ValidateNested()
-  @Type(() => PetDetailSummaryDto)
   @IsOptional()
-  petDetailSummary?: PetDetailSummaryDto;
+  @IsArray()
+  morphs?: string[];
+
+  @ApiProperty({
+    description: '펫 형질',
+    example: ['트익할', '풀핀'],
+    required: false,
+  })
+  @IsOptional()
+  @IsArray()
+  traits?: string[];
+
+  @ApiProperty({
+    description: '펫 몸무게(g)',
+    example: 10,
+    required: false,
+  })
+  @IsOptional()
+  @IsNumber()
+  @Transform(({ value }) => {
+    if (value === null || value === undefined) return undefined;
+    const num = Number(value);
+    return isNaN(num) ? undefined : num;
+  })
+  weight?: number;
 
   @ApiProperty({
     description: '펫 이미지 목록',
@@ -192,24 +222,16 @@ export class PetSummaryDto extends PickType(PetBaseDto, [
   declare isDeleted?: boolean;
 }
 
-export class PetSummaryWithoutOwnerDto extends PickType(PetBaseDto, [
+export class PetSummaryAdoptionDto extends PickType(PetSummaryDto, [
   'petId',
   'type',
   'name',
   'species',
-  'photoOrder',
+  'sex',
+  'morphs',
+  'traits',
   'hatchingDate',
 ]) {
-  @ApiProperty({
-    description: '펫 상세 정보',
-    type: PetDetailSummaryDto,
-    required: false,
-  })
-  @ValidateNested()
-  @Type(() => PetDetailSummaryDto)
-  @IsOptional()
-  petDetailSummary?: PetDetailSummaryDto;
-
   @ApiProperty({
     description: '펫 이미지 목록',
     required: false,
@@ -235,7 +257,16 @@ export class PetSummaryWithoutOwnerDto extends PickType(PetBaseDto, [
   declare isDeleted?: boolean;
 }
 
-export class PetSummaryWithLayingDto extends PetSummaryDto {
+export class PetSummaryLayingDto extends PickType(PetSummaryDto, [
+  'petId',
+  'name',
+  'species',
+  'hatchingDate',
+  'sex',
+  'weight',
+  'morphs',
+  'traits',
+]) {
   @ApiProperty({
     description: '산란 아이디',
     example: 1,
@@ -289,11 +320,15 @@ export class PetSummaryWithLayingDto extends PetSummaryDto {
   @IsOptional()
   @IsEnum(EGG_STATUS)
   eggStatus?: EGG_STATUS;
+
+  @Exclude()
+  declare owner: UserProfilePublicDto;
 }
 
 export class PetParentDto extends PickType(PetSummaryDto, [
   'petId',
   'name',
+  'owner',
   'species',
   'hatchingDate',
 ]) {
@@ -306,14 +341,33 @@ export class PetParentDto extends PickType(PetSummaryDto, [
   status: PARENT_STATUS;
 
   @ApiProperty({
-    description: '펫 상세 정보',
-    type: PetDetailSummaryDto,
+    description: '펫 성별(수컷, 암컷, 미구분)',
+    example: 'M',
+    required: false,
+    enum: PET_SEX,
+    'x-enumNames': Object.keys(PET_SEX),
+  })
+  @IsOptional()
+  @IsEnum(PET_SEX)
+  sex?: PET_SEX;
+
+  @ApiProperty({
+    description: '펫 모프',
+    example: ['릴리화이트', '아잔틱헷100%'],
     required: false,
   })
-  @ValidateNested()
-  @Type(() => PetDetailSummaryDto)
   @IsOptional()
-  petDetailSummary?: PetDetailSummaryDto;
+  @IsArray()
+  morphs?: string[];
+
+  @ApiProperty({
+    description: '펫 형질',
+    example: ['트익할', '풀핀'],
+    required: false,
+  })
+  @IsOptional()
+  @IsArray()
+  traits?: string[];
 
   @ApiProperty({
     description: '펫 이미지 목록',
@@ -326,16 +380,6 @@ export class PetParentDto extends PickType(PetSummaryDto, [
   @ValidateNested({ each: true })
   @Type(() => PetImageItem)
   photos?: PetImageItem[];
-
-  @ApiProperty({
-    description: '펫 주인 정보',
-    type: UserProfilePublicDto,
-  })
-  @IsOptional()
-  @IsObject()
-  @ValidateNested({ each: true })
-  @Type(() => UserProfilePublicDto)
-  owner?: UserProfilePublicDto;
 }
 
 export class PetAdoptionDto {

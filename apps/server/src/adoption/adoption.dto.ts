@@ -10,7 +10,7 @@ import { ApiProperty, PartialType, PickType } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
 import { UserProfilePublicDto } from '../user/user.dto';
 
-import { PetSummaryWithoutOwnerDto } from '../pet/pet.dto';
+import { PetSummaryAdoptionDto } from '../pet/pet.dto';
 import {
   ADOPTION_SALE_STATUS,
   PET_ADOPTION_LOCATION,
@@ -203,11 +203,11 @@ export class AdoptionDto extends PickType(AdoptionBaseDto, [
 
   @ApiProperty({
     description: '펫 정보',
-    type: PetSummaryWithoutOwnerDto,
+    type: PetSummaryAdoptionDto,
   })
   @ValidateNested()
-  @Type(() => PetSummaryWithoutOwnerDto)
-  pet: PetSummaryWithoutOwnerDto;
+  @Type(() => PetSummaryAdoptionDto)
+  pet: PetSummaryAdoptionDto;
 }
 
 export class AdoptionDetailResponseDto extends CommonResponseDto {

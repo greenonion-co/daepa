@@ -15,7 +15,7 @@ import {
   Raw,
 } from 'typeorm';
 import { plainToInstance } from 'class-transformer';
-import { PetSummaryWithLayingDto } from 'src/pet/pet.dto';
+import { PetSummaryLayingDto } from 'src/pet/pet.dto';
 import { PetEntity } from 'src/pet/pet.entity';
 import { PetDetailEntity } from 'src/pet_detail/pet_detail.entity';
 import { EggDetailEntity } from 'src/egg_detail/egg_detail.entity';
@@ -131,10 +131,10 @@ export class MatingService {
           'parents.name',
           'parents.species',
           'parents.hatchingDate',
-          'parentDetail.morphs',
           'parentDetail.sex',
+          'parentDetail.morphs',
+          'parentDetail.traits',
           'parentDetail.weight',
-          'parentDetail.growth',
           'children.petId',
           'children.name',
           'children.species',
@@ -355,11 +355,11 @@ export class MatingService {
 
       const parentsDto = mating.parents?.map((parent) => {
         const merged = this.mergePetWithDetail(parent);
-        return plainToInstance(PetSummaryWithLayingDto, merged);
+        return plainToInstance(PetSummaryLayingDto, merged);
       });
       const childrenDto = mating.children?.map((child) => {
         const merged = this.mergePetWithDetail(child);
-        return plainToInstance(PetSummaryWithLayingDto, merged);
+        return plainToInstance(PetSummaryLayingDto, merged);
       });
 
       return {
@@ -384,12 +384,8 @@ export class MatingService {
 
     return Object.values(groupedByParents).map((matingByParents) => {
       const { parents } = matingByParents[0];
-      const father = parents?.find(
-        (parent) => parent.petDetailSummary?.sex === PET_SEX.MALE,
-      );
-      const mother = parents?.find(
-        (parent) => parent.petDetailSummary?.sex === PET_SEX.FEMALE,
-      );
+      const father = parents?.find((parent) => parent.sex === PET_SEX.MALE);
+      const mother = parents?.find((parent) => parent.sex === PET_SEX.FEMALE);
 
       const matingsByDate = matingByParents
         .map((mating) => {
@@ -417,7 +413,7 @@ export class MatingService {
 
   private groupLayingsByDate(
     layings: LayingDto[] | undefined,
-    children: PetSummaryWithLayingDto[] | undefined,
+    children: PetSummaryLayingDto[] | undefined,
   ) {
     if (!layings?.length) return;
 

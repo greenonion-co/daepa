@@ -8,7 +8,7 @@
 import type { AdoptionDtoLocation } from "./adoptionDtoLocation";
 import type { AdoptionDtoStatus } from "./adoptionDtoStatus";
 import type { UserProfilePublicDto } from "./userProfilePublicDto";
-import type { PetSummaryWithoutOwnerDto } from "./petSummaryWithoutOwnerDto";
+import type { PetSummaryAdoptionDto } from "./petSummaryAdoptionDto";
 
 export interface AdoptionDto {
   /** 분양 ID */
@@ -30,5 +30,5 @@ export interface AdoptionDto {
   /** 입양자 정보 */
   buyer?: UserProfilePublicDto;
   /** 펫 정보 */
-  pet: PetSummaryWithoutOwnerDto;
+  pet: PetSummaryAdoptionDto;
 }

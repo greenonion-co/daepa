@@ -1,7 +1,7 @@
 import {
   brMatingControllerFindAll,
   petControllerDeletePet,
-  PetSummaryWithLayingDto,
+  PetSummaryLayingDto,
 } from "@repo/api-client";
 import { CheckSquare, Edit, Egg, Thermometer, Trash2 } from "lucide-react";
 import Link from "next/link";
@@ -17,7 +17,7 @@ import { AxiosError } from "axios";
 import { toast } from "sonner";
 
 interface EggItemProps {
-  pet: PetSummaryWithLayingDto;
+  pet: PetSummaryLayingDto;
   layingDate: string;
 }
 
@@ -58,7 +58,7 @@ const EggItem = ({ pet, layingDate }: EggItemProps) => {
     ));
   };
 
-  const handleEditEggClick = (e: React.MouseEvent, egg: PetSummaryWithLayingDto) => {
+  const handleEditEggClick = (e: React.MouseEvent, egg: PetSummaryLayingDto) => {
     e.stopPropagation();
     overlay.open(({ isOpen, close }) => <EditEggModal isOpen={isOpen} onClose={close} egg={egg} />);
   };
