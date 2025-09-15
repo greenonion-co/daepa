@@ -222,10 +222,20 @@ export class PetService {
       const { father, mother } =
         await this.parentRequestService.getParentsWithRequestStatus(petId);
 
+      const { growth, sex, morphs, traits, foods, weight } = petDetail ?? {};
+      const { temperature, status: eggStatus } = eggDetail ?? {};
+
       return plainToInstance(PetDto, {
         ...pet,
-        petDetail,
+        growth,
+        sex,
+        morphs,
+        traits,
+        foods,
+        weight,
         eggDetail,
+        temperature,
+        eggStatus,
         owner,
         father,
         mother,
@@ -454,6 +464,12 @@ export class PetService {
         'petDetail.petId = pets.petId',
       )
       .leftJoinAndMapOne(
+        'pets.eggDetail',
+        'egg_details',
+        'eggDetail',
+        'eggDetail.petId = pets.petId',
+      )
+      .leftJoinAndMapOne(
         'pets.adoption',
         'adoptions',
         'adoptions',
@@ -495,8 +511,7 @@ export class PetService {
     // PetDto로 변환하면서 parent_request 상태 정보 포함
     const petDtos = await Promise.all(
       petEntities.map(async (petRaw) => {
-        const { petId, petDetail, photos, ...pet } = petRaw;
-        const { growth, sex, morphs, traits, foods, weight } = petDetail ?? {};
+        const { petId, photos, ...pet } = petRaw;
 
         const { father, mother } =
           await this.parentRequestService.getParentsWithRequestStatus(petId);
@@ -504,12 +519,18 @@ export class PetService {
         const petDto = plainToInstance(PetDto, {
           ...pet,
           petId,
-          growth,
-          sex,
-          morphs,
-          traits,
-          foods,
-          weight,
+          ...(pet.petDetail && {
+            sex: pet.petDetail.sex,
+            morphs: pet.petDetail.morphs,
+            traits: pet.petDetail.traits,
+            foods: pet.petDetail.foods,
+            weight: pet.petDetail.weight,
+            growth: pet.petDetail.growth,
+          }),
+          ...(pet.eggDetail && {
+            temperature: pet.eggDetail.temperature,
+            eggStatus: pet.eggDetail.status,
+          }),
           father,
           mother,
           photos: photos?.files,
@@ -553,6 +574,12 @@ export class PetService {
         'petDetail.petId = pets.petId',
       )
       .leftJoinAndMapOne(
+        'pets.eggDetail',
+        'egg_details',
+        'eggDetail',
+        'eggDetail.petId = pets.petId',
+      )
+      .leftJoinAndMapOne(
         'pets.adoption',
         'adoptions',
         'adoptions',
@@ -580,8 +607,7 @@ export class PetService {
     // PetDto로 변환하면서 parent_request 상태 정보 포함
     const petDtos = await Promise.all(
       petEntities.map(async (petRaw) => {
-        const { petId, petDetail, photos, ...pet } = petRaw;
-        const { growth, sex, morphs, traits, foods, weight } = petDetail ?? {};
+        const { petId, photos, ...pet } = petRaw;
 
         const { father, mother } =
           await this.parentRequestService.getParentsWithRequestStatus(petId);
@@ -589,12 +615,18 @@ export class PetService {
         const petDto = plainToInstance(PetDto, {
           ...pet,
           petId,
-          growth,
-          sex,
-          morphs,
-          traits,
-          foods,
-          weight,
+          ...(pet.petDetail && {
+            sex: pet.petDetail.sex,
+            morphs: pet.petDetail.morphs,
+            traits: pet.petDetail.traits,
+            foods: pet.petDetail.foods,
+            weight: pet.petDetail.weight,
+            growth: pet.petDetail.growth,
+          }),
+          ...(pet.eggDetail && {
+            temperature: pet.eggDetail.temperature,
+            eggStatus: pet.eggDetail.status,
+          }),
           father,
           mother,
           photos: photos?.files,

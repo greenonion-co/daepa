@@ -12,6 +12,7 @@ import type { PetDetailDto } from "./petDetailDto";
 import type { EggDetailDto } from "./eggDetailDto";
 import type { PetDtoGrowth } from "./petDtoGrowth";
 import type { PetDtoSex } from "./petDtoSex";
+import type { PetDtoEggStatus } from "./petDtoEggStatus";
 import type { PetParentDto } from "./petParentDto";
 import type { PetAdoptionDto } from "./petAdoptionDto";
 import type { PetDtoStatus } from "./petDtoStatus";
@@ -52,6 +53,10 @@ export interface PetDto {
   foods?: string[];
   /** 펫 몸무게(g) */
   weight?: number;
+  /** 부화 온도 */
+  temperature?: number;
+  /** 알 상태 */
+  eggStatus?: PetDtoEggStatus;
   /** 아빠 개체 정보 */
   father?: PetParentDto;
   /** 엄마 개체 정보 */

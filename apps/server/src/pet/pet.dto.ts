@@ -477,6 +477,26 @@ export class PetDto extends PetBaseDto {
   weight?: number;
 
   @ApiProperty({
+    description: '부화 온도',
+    example: 25,
+    required: false,
+  })
+  @IsOptional()
+  @IsNumber()
+  temperature?: number;
+
+  @ApiProperty({
+    description: '알 상태',
+    example: EGG_STATUS.UNFERTILIZED,
+    enum: EGG_STATUS,
+    required: false,
+    'x-enumNames': Object.keys(EGG_STATUS),
+  })
+  @IsOptional()
+  @IsEnum(EGG_STATUS)
+  eggStatus?: EGG_STATUS;
+
+  @ApiProperty({
     description: '아빠 개체 정보',
     example: {},
     required: false,

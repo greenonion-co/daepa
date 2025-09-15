@@ -683,6 +683,14 @@ export const getPetControllerFindAllResponseMock = (
       faker.number.int({ min: undefined, max: undefined }),
       undefined,
     ]),
+    temperature: faker.helpers.arrayElement([
+      faker.number.int({ min: undefined, max: undefined }),
+      undefined,
+    ]),
+    eggStatus: faker.helpers.arrayElement([
+      faker.helpers.arrayElement(["UNFERTILIZED", "FERTILIZED", "HATCHED", "DEAD"] as const),
+      undefined,
+    ]),
     father: faker.helpers.arrayElement([
       {
         ...{
@@ -1030,6 +1038,14 @@ export const getPetControllerFindPetByPetIdResponseMock = (
       ]),
       weight: faker.helpers.arrayElement([
         faker.number.int({ min: undefined, max: undefined }),
+        undefined,
+      ]),
+      temperature: faker.helpers.arrayElement([
+        faker.number.int({ min: undefined, max: undefined }),
+        undefined,
+      ]),
+      eggStatus: faker.helpers.arrayElement([
+        faker.helpers.arrayElement(["UNFERTILIZED", "FERTILIZED", "HATCHED", "DEAD"] as const),
         undefined,
       ]),
       father: faker.helpers.arrayElement([
@@ -1611,6 +1627,14 @@ export const getBrPetControllerFindAllResponseMock = (
       faker.number.int({ min: undefined, max: undefined }),
       undefined,
     ]),
+    temperature: faker.helpers.arrayElement([
+      faker.number.int({ min: undefined, max: undefined }),
+      undefined,
+    ]),
+    eggStatus: faker.helpers.arrayElement([
+      faker.helpers.arrayElement(["UNFERTILIZED", "FERTILIZED", "HATCHED", "DEAD"] as const),
+      undefined,
+    ]),
     father: faker.helpers.arrayElement([
       {
         ...{
@@ -1937,6 +1961,14 @@ export const getBrPetControllerGetPetsByYearResponseMock = (): BrPetControllerGe
     ]),
     weight: faker.helpers.arrayElement([
       faker.number.int({ min: undefined, max: undefined }),
+      undefined,
+    ]),
+    temperature: faker.helpers.arrayElement([
+      faker.number.int({ min: undefined, max: undefined }),
+      undefined,
+    ]),
+    eggStatus: faker.helpers.arrayElement([
+      faker.helpers.arrayElement(["UNFERTILIZED", "FERTILIZED", "HATCHED", "DEAD"] as const),
       undefined,
     ]),
     father: faker.helpers.arrayElement([
@@ -2272,6 +2304,14 @@ export const getBrPetControllerGetPetsByMonthResponseMock = (
       ]),
       weight: faker.helpers.arrayElement([
         faker.number.int({ min: undefined, max: undefined }),
+        undefined,
+      ]),
+      temperature: faker.helpers.arrayElement([
+        faker.number.int({ min: undefined, max: undefined }),
+        undefined,
+      ]),
+      eggStatus: faker.helpers.arrayElement([
+        faker.helpers.arrayElement(["UNFERTILIZED", "FERTILIZED", "HATCHED", "DEAD"] as const),
         undefined,
       ]),
       father: faker.helpers.arrayElement([
@@ -2614,6 +2654,14 @@ export const getBrPetControllerGetPetsByDateRangeResponseMock = (
       ]),
       weight: faker.helpers.arrayElement([
         faker.number.int({ min: undefined, max: undefined }),
+        undefined,
+      ]),
+      temperature: faker.helpers.arrayElement([
+        faker.number.int({ min: undefined, max: undefined }),
+        undefined,
+      ]),
+      eggStatus: faker.helpers.arrayElement([
+        faker.helpers.arrayElement(["UNFERTILIZED", "FERTILIZED", "HATCHED", "DEAD"] as const),
         undefined,
       ]),
       father: faker.helpers.arrayElement([
