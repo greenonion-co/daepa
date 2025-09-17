@@ -40,9 +40,11 @@ export class AdoptionService {
       throw new Error('Pet information is required for adoption');
     }
 
-    const { pet, petDetail, ...adoptionData } = entity;
+    const { pet, petDetail, seller, buyer, ...adoptionData } = entity;
     return {
       ...adoptionData,
+      seller,
+      buyer,
       pet: {
         petId: pet.petId,
         type: pet.type,
