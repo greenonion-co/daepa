@@ -644,6 +644,7 @@ export class CreatePetDto extends OmitType(PetBaseDto, [
   })
   @IsOptional()
   @IsArray()
+  @IsString({ each: true })
   morphs?: string[];
 
   @ApiProperty({
@@ -653,6 +654,7 @@ export class CreatePetDto extends OmitType(PetBaseDto, [
   })
   @IsOptional()
   @IsArray()
+  @IsString({ each: true })
   traits?: string[];
 
   @ApiProperty({
@@ -662,6 +664,7 @@ export class CreatePetDto extends OmitType(PetBaseDto, [
   })
   @IsOptional()
   @IsArray()
+  @IsString({ each: true })
   foods?: string[];
 
   @ApiProperty({
