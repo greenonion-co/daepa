@@ -143,13 +143,43 @@ export class UserProfileDto extends PickType(UserBaseDto, [
   declare updatedAt?: Date;
 }
 
-export class UserProfilePublicDto extends PickType(UserBaseDto, [
-  'userId',
-  'name',
-  'role',
-  'isBiz',
-  'status',
-]) {
+// 타인에게 노출되는 사용자 정보
+export class UserProfilePublicDto extends PickType(UserBaseDto, ['status']) {
+  @ApiProperty({
+    description: '회원 고유 ID',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  userId?: string;
+
+  @ApiProperty({
+    description: '회원 이름',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  name?: string;
+
+  @ApiProperty({
+    description: '회원 역할',
+    enum: USER_ROLE,
+    'x-enumNames': Object.keys(USER_ROLE),
+    required: false,
+  })
+  @IsEnum(USER_ROLE)
+  @IsOptional()
+  role?: USER_ROLE;
+
+  @ApiProperty({
+    description: '사업자 여부',
+    example: true,
+    required: false,
+  })
+  @IsBoolean()
+  @IsOptional()
+  isBiz?: boolean;
+
   @Exclude()
   declare provider?: OAUTH_PROVIDER[];
 

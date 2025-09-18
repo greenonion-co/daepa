@@ -193,14 +193,14 @@ export class AdoptionDto extends PickType(AdoptionBaseDto, [
     description: '분양자 정보',
   })
   @IsOptional()
-  seller?: Partial<UserProfilePublicDto>;
+  seller?: UserProfilePublicDto;
 
   @ApiProperty({
     description: '입양자 정보',
     required: false,
   })
   @IsOptional()
-  buyer?: Partial<UserProfilePublicDto>;
+  buyer?: UserProfilePublicDto;
 
   @ApiProperty({
     description: '펫 정보',

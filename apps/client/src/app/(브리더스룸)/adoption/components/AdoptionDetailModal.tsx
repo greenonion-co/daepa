@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 
 import { useQuery } from "@tanstack/react-query";
-import { adoptionControllerGetAdoptionByAdoptionId, PetAdoptionDtoStatus } from "@repo/api-client";
+import { adoptionControllerGetAdoption, PetAdoptionDtoStatus } from "@repo/api-client";
 import { GENDER_KOREAN_INFO, SPECIES_KOREAN_INFO } from "../../constants";
 import { getStatusBadge } from "@/lib/utils";
 import Loading from "@/components/common/Loading";
@@ -35,8 +35,8 @@ const AdoptionDetailModal = ({
     isLoading,
     error,
   } = useQuery({
-    queryKey: [adoptionControllerGetAdoptionByAdoptionId.name, adoptionId],
-    queryFn: () => adoptionControllerGetAdoptionByAdoptionId(adoptionId),
+    queryKey: [adoptionControllerGetAdoption.name, adoptionId],
+    queryFn: () => adoptionControllerGetAdoption(adoptionId),
     enabled: !!adoptionId,
     select: (data) => data.data.data,
   });

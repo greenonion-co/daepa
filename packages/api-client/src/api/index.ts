@@ -322,7 +322,7 @@ export const adoptionControllerGetAllAdoptions = (
   });
 };
 
-export const adoptionControllerGetAdoptionByAdoptionId = (adoptionId: string) => {
+export const adoptionControllerGetAdoption = (adoptionId: string) => {
   return useCustomInstance<AdoptionDetailResponseDto>({
     url: `http://localhost:4000/api/v1/adoption/${adoptionId}`,
     method: "GET",
@@ -526,8 +526,8 @@ export type AdoptionControllerCreateAdoptionResult = NonNullable<
 export type AdoptionControllerGetAllAdoptionsResult = NonNullable<
   Awaited<ReturnType<typeof adoptionControllerGetAllAdoptions>>
 >;
-export type AdoptionControllerGetAdoptionByAdoptionIdResult = NonNullable<
-  Awaited<ReturnType<typeof adoptionControllerGetAdoptionByAdoptionId>>
+export type AdoptionControllerGetAdoptionResult = NonNullable<
+  Awaited<ReturnType<typeof adoptionControllerGetAdoption>>
 >;
 export type AdoptionControllerUpdateResult = NonNullable<
   Awaited<ReturnType<typeof adoptionControllerUpdate>>
@@ -574,10 +574,6 @@ export const getPetControllerFindAllResponseMock = (
     ]),
     owner: {
       ...{
-        userId: faker.string.alpha(20),
-        name: faker.string.alpha(20),
-        role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
-        isBiz: faker.datatype.boolean(),
         status: faker.helpers.arrayElement([
           "pending",
           "active",
@@ -585,6 +581,13 @@ export const getPetControllerFindAllResponseMock = (
           "suspended",
           "deleted",
         ] as const),
+        userId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+        name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+        role: faker.helpers.arrayElement([
+          faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
+          undefined,
+        ]),
+        isBiz: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
       },
     },
     name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
@@ -697,10 +700,6 @@ export const getPetControllerFindAllResponseMock = (
           petId: faker.string.alpha(20),
           owner: {
             ...{
-              userId: faker.string.alpha(20),
-              name: faker.string.alpha(20),
-              role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
-              isBiz: faker.datatype.boolean(),
               status: faker.helpers.arrayElement([
                 "pending",
                 "active",
@@ -708,6 +707,13 @@ export const getPetControllerFindAllResponseMock = (
                 "suspended",
                 "deleted",
               ] as const),
+              userId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+              name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+              role: faker.helpers.arrayElement([
+                faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
+                undefined,
+              ]),
+              isBiz: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
             },
           },
           name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
@@ -760,10 +766,6 @@ export const getPetControllerFindAllResponseMock = (
           petId: faker.string.alpha(20),
           owner: {
             ...{
-              userId: faker.string.alpha(20),
-              name: faker.string.alpha(20),
-              role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
-              isBiz: faker.datatype.boolean(),
               status: faker.helpers.arrayElement([
                 "pending",
                 "active",
@@ -771,6 +773,13 @@ export const getPetControllerFindAllResponseMock = (
                 "suspended",
                 "deleted",
               ] as const),
+              userId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+              name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+              role: faker.helpers.arrayElement([
+                faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
+                undefined,
+              ]),
+              isBiz: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
             },
           },
           name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
@@ -832,10 +841,6 @@ export const getPetControllerFindAllResponseMock = (
           buyer: faker.helpers.arrayElement([
             {
               ...{
-                userId: faker.string.alpha(20),
-                name: faker.string.alpha(20),
-                role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
-                isBiz: faker.datatype.boolean(),
                 status: faker.helpers.arrayElement([
                   "pending",
                   "active",
@@ -843,6 +848,13 @@ export const getPetControllerFindAllResponseMock = (
                   "suspended",
                   "deleted",
                 ] as const),
+                userId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+                name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+                role: faker.helpers.arrayElement([
+                  faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
+                  undefined,
+                ]),
+                isBiz: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
               },
             },
             undefined,
@@ -902,10 +914,6 @@ export const getPetControllerFindPetByPetIdResponseMock = (
       ]),
       owner: {
         ...{
-          userId: faker.string.alpha(20),
-          name: faker.string.alpha(20),
-          role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
-          isBiz: faker.datatype.boolean(),
           status: faker.helpers.arrayElement([
             "pending",
             "active",
@@ -913,6 +921,13 @@ export const getPetControllerFindPetByPetIdResponseMock = (
             "suspended",
             "deleted",
           ] as const),
+          userId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+          name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+          role: faker.helpers.arrayElement([
+            faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
+            undefined,
+          ]),
+          isBiz: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
         },
       },
       name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
@@ -1036,10 +1051,6 @@ export const getPetControllerFindPetByPetIdResponseMock = (
             petId: faker.string.alpha(20),
             owner: {
               ...{
-                userId: faker.string.alpha(20),
-                name: faker.string.alpha(20),
-                role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
-                isBiz: faker.datatype.boolean(),
                 status: faker.helpers.arrayElement([
                   "pending",
                   "active",
@@ -1047,6 +1058,13 @@ export const getPetControllerFindPetByPetIdResponseMock = (
                   "suspended",
                   "deleted",
                 ] as const),
+                userId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+                name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+                role: faker.helpers.arrayElement([
+                  faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
+                  undefined,
+                ]),
+                isBiz: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
               },
             },
             name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
@@ -1099,10 +1117,6 @@ export const getPetControllerFindPetByPetIdResponseMock = (
             petId: faker.string.alpha(20),
             owner: {
               ...{
-                userId: faker.string.alpha(20),
-                name: faker.string.alpha(20),
-                role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
-                isBiz: faker.datatype.boolean(),
                 status: faker.helpers.arrayElement([
                   "pending",
                   "active",
@@ -1110,6 +1124,13 @@ export const getPetControllerFindPetByPetIdResponseMock = (
                   "suspended",
                   "deleted",
                 ] as const),
+                userId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+                name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+                role: faker.helpers.arrayElement([
+                  faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
+                  undefined,
+                ]),
+                isBiz: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
               },
             },
             name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
@@ -1176,10 +1197,6 @@ export const getPetControllerFindPetByPetIdResponseMock = (
             buyer: faker.helpers.arrayElement([
               {
                 ...{
-                  userId: faker.string.alpha(20),
-                  name: faker.string.alpha(20),
-                  role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
-                  isBiz: faker.datatype.boolean(),
                   status: faker.helpers.arrayElement([
                     "pending",
                     "active",
@@ -1187,6 +1204,13 @@ export const getPetControllerFindPetByPetIdResponseMock = (
                     "suspended",
                     "deleted",
                   ] as const),
+                  userId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+                  name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+                  role: faker.helpers.arrayElement([
+                    faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
+                    undefined,
+                  ]),
+                  isBiz: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
                 },
               },
               undefined,
@@ -1482,10 +1506,6 @@ export const getBrPetControllerFindAllResponseMock = (
     ]),
     owner: {
       ...{
-        userId: faker.string.alpha(20),
-        name: faker.string.alpha(20),
-        role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
-        isBiz: faker.datatype.boolean(),
         status: faker.helpers.arrayElement([
           "pending",
           "active",
@@ -1493,6 +1513,13 @@ export const getBrPetControllerFindAllResponseMock = (
           "suspended",
           "deleted",
         ] as const),
+        userId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+        name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+        role: faker.helpers.arrayElement([
+          faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
+          undefined,
+        ]),
+        isBiz: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
       },
     },
     name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
@@ -1605,10 +1632,6 @@ export const getBrPetControllerFindAllResponseMock = (
           petId: faker.string.alpha(20),
           owner: {
             ...{
-              userId: faker.string.alpha(20),
-              name: faker.string.alpha(20),
-              role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
-              isBiz: faker.datatype.boolean(),
               status: faker.helpers.arrayElement([
                 "pending",
                 "active",
@@ -1616,6 +1639,13 @@ export const getBrPetControllerFindAllResponseMock = (
                 "suspended",
                 "deleted",
               ] as const),
+              userId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+              name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+              role: faker.helpers.arrayElement([
+                faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
+                undefined,
+              ]),
+              isBiz: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
             },
           },
           name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
@@ -1668,10 +1698,6 @@ export const getBrPetControllerFindAllResponseMock = (
           petId: faker.string.alpha(20),
           owner: {
             ...{
-              userId: faker.string.alpha(20),
-              name: faker.string.alpha(20),
-              role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
-              isBiz: faker.datatype.boolean(),
               status: faker.helpers.arrayElement([
                 "pending",
                 "active",
@@ -1679,6 +1705,13 @@ export const getBrPetControllerFindAllResponseMock = (
                 "suspended",
                 "deleted",
               ] as const),
+              userId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+              name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+              role: faker.helpers.arrayElement([
+                faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
+                undefined,
+              ]),
+              isBiz: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
             },
           },
           name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
@@ -1740,10 +1773,6 @@ export const getBrPetControllerFindAllResponseMock = (
           buyer: faker.helpers.arrayElement([
             {
               ...{
-                userId: faker.string.alpha(20),
-                name: faker.string.alpha(20),
-                role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
-                isBiz: faker.datatype.boolean(),
                 status: faker.helpers.arrayElement([
                   "pending",
                   "active",
@@ -1751,6 +1780,13 @@ export const getBrPetControllerFindAllResponseMock = (
                   "suspended",
                   "deleted",
                 ] as const),
+                userId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+                name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+                role: faker.helpers.arrayElement([
+                  faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
+                  undefined,
+                ]),
+                isBiz: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
               },
             },
             undefined,
@@ -1800,10 +1836,6 @@ export const getBrPetControllerGetPetsByYearResponseMock = (): BrPetControllerGe
     ]),
     owner: {
       ...{
-        userId: faker.string.alpha(20),
-        name: faker.string.alpha(20),
-        role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
-        isBiz: faker.datatype.boolean(),
         status: faker.helpers.arrayElement([
           "pending",
           "active",
@@ -1811,6 +1843,13 @@ export const getBrPetControllerGetPetsByYearResponseMock = (): BrPetControllerGe
           "suspended",
           "deleted",
         ] as const),
+        userId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+        name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+        role: faker.helpers.arrayElement([
+          faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
+          undefined,
+        ]),
+        isBiz: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
       },
     },
     name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
@@ -1923,10 +1962,6 @@ export const getBrPetControllerGetPetsByYearResponseMock = (): BrPetControllerGe
           petId: faker.string.alpha(20),
           owner: {
             ...{
-              userId: faker.string.alpha(20),
-              name: faker.string.alpha(20),
-              role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
-              isBiz: faker.datatype.boolean(),
               status: faker.helpers.arrayElement([
                 "pending",
                 "active",
@@ -1934,6 +1969,13 @@ export const getBrPetControllerGetPetsByYearResponseMock = (): BrPetControllerGe
                 "suspended",
                 "deleted",
               ] as const),
+              userId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+              name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+              role: faker.helpers.arrayElement([
+                faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
+                undefined,
+              ]),
+              isBiz: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
             },
           },
           name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
@@ -1986,10 +2028,6 @@ export const getBrPetControllerGetPetsByYearResponseMock = (): BrPetControllerGe
           petId: faker.string.alpha(20),
           owner: {
             ...{
-              userId: faker.string.alpha(20),
-              name: faker.string.alpha(20),
-              role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
-              isBiz: faker.datatype.boolean(),
               status: faker.helpers.arrayElement([
                 "pending",
                 "active",
@@ -1997,6 +2035,13 @@ export const getBrPetControllerGetPetsByYearResponseMock = (): BrPetControllerGe
                 "suspended",
                 "deleted",
               ] as const),
+              userId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+              name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+              role: faker.helpers.arrayElement([
+                faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
+                undefined,
+              ]),
+              isBiz: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
             },
           },
           name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
@@ -2058,10 +2103,6 @@ export const getBrPetControllerGetPetsByYearResponseMock = (): BrPetControllerGe
           buyer: faker.helpers.arrayElement([
             {
               ...{
-                userId: faker.string.alpha(20),
-                name: faker.string.alpha(20),
-                role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
-                isBiz: faker.datatype.boolean(),
                 status: faker.helpers.arrayElement([
                   "pending",
                   "active",
@@ -2069,6 +2110,13 @@ export const getBrPetControllerGetPetsByYearResponseMock = (): BrPetControllerGe
                   "suspended",
                   "deleted",
                 ] as const),
+                userId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+                name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+                role: faker.helpers.arrayElement([
+                  faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
+                  undefined,
+                ]),
+                isBiz: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
               },
             },
             undefined,
@@ -2114,10 +2162,6 @@ export const getBrPetControllerGetPetsByMonthResponseMock = (
       ]),
       owner: {
         ...{
-          userId: faker.string.alpha(20),
-          name: faker.string.alpha(20),
-          role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
-          isBiz: faker.datatype.boolean(),
           status: faker.helpers.arrayElement([
             "pending",
             "active",
@@ -2125,6 +2169,13 @@ export const getBrPetControllerGetPetsByMonthResponseMock = (
             "suspended",
             "deleted",
           ] as const),
+          userId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+          name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+          role: faker.helpers.arrayElement([
+            faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
+            undefined,
+          ]),
+          isBiz: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
         },
       },
       name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
@@ -2248,10 +2299,6 @@ export const getBrPetControllerGetPetsByMonthResponseMock = (
             petId: faker.string.alpha(20),
             owner: {
               ...{
-                userId: faker.string.alpha(20),
-                name: faker.string.alpha(20),
-                role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
-                isBiz: faker.datatype.boolean(),
                 status: faker.helpers.arrayElement([
                   "pending",
                   "active",
@@ -2259,6 +2306,13 @@ export const getBrPetControllerGetPetsByMonthResponseMock = (
                   "suspended",
                   "deleted",
                 ] as const),
+                userId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+                name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+                role: faker.helpers.arrayElement([
+                  faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
+                  undefined,
+                ]),
+                isBiz: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
               },
             },
             name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
@@ -2311,10 +2365,6 @@ export const getBrPetControllerGetPetsByMonthResponseMock = (
             petId: faker.string.alpha(20),
             owner: {
               ...{
-                userId: faker.string.alpha(20),
-                name: faker.string.alpha(20),
-                role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
-                isBiz: faker.datatype.boolean(),
                 status: faker.helpers.arrayElement([
                   "pending",
                   "active",
@@ -2322,6 +2372,13 @@ export const getBrPetControllerGetPetsByMonthResponseMock = (
                   "suspended",
                   "deleted",
                 ] as const),
+                userId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+                name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+                role: faker.helpers.arrayElement([
+                  faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
+                  undefined,
+                ]),
+                isBiz: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
               },
             },
             name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
@@ -2388,10 +2445,6 @@ export const getBrPetControllerGetPetsByMonthResponseMock = (
             buyer: faker.helpers.arrayElement([
               {
                 ...{
-                  userId: faker.string.alpha(20),
-                  name: faker.string.alpha(20),
-                  role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
-                  isBiz: faker.datatype.boolean(),
                   status: faker.helpers.arrayElement([
                     "pending",
                     "active",
@@ -2399,6 +2452,13 @@ export const getBrPetControllerGetPetsByMonthResponseMock = (
                     "suspended",
                     "deleted",
                   ] as const),
+                  userId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+                  name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+                  role: faker.helpers.arrayElement([
+                    faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
+                    undefined,
+                  ]),
+                  isBiz: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
                 },
               },
               undefined,
@@ -2446,10 +2506,6 @@ export const getBrPetControllerGetPetsByDateRangeResponseMock = (
       ]),
       owner: {
         ...{
-          userId: faker.string.alpha(20),
-          name: faker.string.alpha(20),
-          role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
-          isBiz: faker.datatype.boolean(),
           status: faker.helpers.arrayElement([
             "pending",
             "active",
@@ -2457,6 +2513,13 @@ export const getBrPetControllerGetPetsByDateRangeResponseMock = (
             "suspended",
             "deleted",
           ] as const),
+          userId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+          name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+          role: faker.helpers.arrayElement([
+            faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
+            undefined,
+          ]),
+          isBiz: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
         },
       },
       name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
@@ -2580,10 +2643,6 @@ export const getBrPetControllerGetPetsByDateRangeResponseMock = (
             petId: faker.string.alpha(20),
             owner: {
               ...{
-                userId: faker.string.alpha(20),
-                name: faker.string.alpha(20),
-                role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
-                isBiz: faker.datatype.boolean(),
                 status: faker.helpers.arrayElement([
                   "pending",
                   "active",
@@ -2591,6 +2650,13 @@ export const getBrPetControllerGetPetsByDateRangeResponseMock = (
                   "suspended",
                   "deleted",
                 ] as const),
+                userId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+                name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+                role: faker.helpers.arrayElement([
+                  faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
+                  undefined,
+                ]),
+                isBiz: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
               },
             },
             name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
@@ -2643,10 +2709,6 @@ export const getBrPetControllerGetPetsByDateRangeResponseMock = (
             petId: faker.string.alpha(20),
             owner: {
               ...{
-                userId: faker.string.alpha(20),
-                name: faker.string.alpha(20),
-                role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
-                isBiz: faker.datatype.boolean(),
                 status: faker.helpers.arrayElement([
                   "pending",
                   "active",
@@ -2654,6 +2716,13 @@ export const getBrPetControllerGetPetsByDateRangeResponseMock = (
                   "suspended",
                   "deleted",
                 ] as const),
+                userId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+                name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+                role: faker.helpers.arrayElement([
+                  faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
+                  undefined,
+                ]),
+                isBiz: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
               },
             },
             name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
@@ -2720,10 +2789,6 @@ export const getBrPetControllerGetPetsByDateRangeResponseMock = (
             buyer: faker.helpers.arrayElement([
               {
                 ...{
-                  userId: faker.string.alpha(20),
-                  name: faker.string.alpha(20),
-                  role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
-                  isBiz: faker.datatype.boolean(),
                   status: faker.helpers.arrayElement([
                     "pending",
                     "active",
@@ -2731,6 +2796,13 @@ export const getBrPetControllerGetPetsByDateRangeResponseMock = (
                     "suspended",
                     "deleted",
                   ] as const),
+                  userId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+                  name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+                  role: faker.helpers.arrayElement([
+                    faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
+                    undefined,
+                  ]),
+                  isBiz: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
                 },
               },
               undefined,
@@ -2910,10 +2982,6 @@ export const getAdoptionControllerGetAllAdoptionsResponseMock = (
     status: faker.helpers.arrayElement(["NFS", "ON_SALE", "ON_RESERVATION", "SOLD"] as const),
     seller: {
       ...{
-        userId: faker.string.alpha(20),
-        name: faker.string.alpha(20),
-        role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
-        isBiz: faker.datatype.boolean(),
         status: faker.helpers.arrayElement([
           "pending",
           "active",
@@ -2921,15 +2989,18 @@ export const getAdoptionControllerGetAllAdoptionsResponseMock = (
           "suspended",
           "deleted",
         ] as const),
+        userId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+        name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+        role: faker.helpers.arrayElement([
+          faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
+          undefined,
+        ]),
+        isBiz: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
       },
     },
     buyer: faker.helpers.arrayElement([
       {
         ...{
-          userId: faker.string.alpha(20),
-          name: faker.string.alpha(20),
-          role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
-          isBiz: faker.datatype.boolean(),
           status: faker.helpers.arrayElement([
             "pending",
             "active",
@@ -2937,6 +3008,13 @@ export const getAdoptionControllerGetAllAdoptionsResponseMock = (
             "suspended",
             "deleted",
           ] as const),
+          userId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+          name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+          role: faker.helpers.arrayElement([
+            faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
+            undefined,
+          ]),
+          isBiz: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
         },
       },
       undefined,
@@ -2995,7 +3073,7 @@ export const getAdoptionControllerGetAllAdoptionsResponseMock = (
   ...overrideResponse,
 });
 
-export const getAdoptionControllerGetAdoptionByAdoptionIdResponseMock = (
+export const getAdoptionControllerGetAdoptionResponseMock = (
   overrideResponse: Partial<AdoptionDetailResponseDto> = {},
 ): AdoptionDetailResponseDto => ({
   success: faker.datatype.boolean(),
@@ -3020,10 +3098,6 @@ export const getAdoptionControllerGetAdoptionByAdoptionIdResponseMock = (
       status: faker.helpers.arrayElement(["NFS", "ON_SALE", "ON_RESERVATION", "SOLD"] as const),
       seller: {
         ...{
-          userId: faker.string.alpha(20),
-          name: faker.string.alpha(20),
-          role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
-          isBiz: faker.datatype.boolean(),
           status: faker.helpers.arrayElement([
             "pending",
             "active",
@@ -3031,15 +3105,18 @@ export const getAdoptionControllerGetAdoptionByAdoptionIdResponseMock = (
             "suspended",
             "deleted",
           ] as const),
+          userId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+          name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+          role: faker.helpers.arrayElement([
+            faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
+            undefined,
+          ]),
+          isBiz: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
         },
       },
       buyer: faker.helpers.arrayElement([
         {
           ...{
-            userId: faker.string.alpha(20),
-            name: faker.string.alpha(20),
-            role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
-            isBiz: faker.datatype.boolean(),
             status: faker.helpers.arrayElement([
               "pending",
               "active",
@@ -3047,6 +3124,13 @@ export const getAdoptionControllerGetAdoptionByAdoptionIdResponseMock = (
               "suspended",
               "deleted",
             ] as const),
+            userId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+            name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+            role: faker.helpers.arrayElement([
+              faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
+              undefined,
+            ]),
+            isBiz: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
           },
         },
         undefined,
@@ -3144,10 +3228,6 @@ export const getBrMatingControllerFindAllResponseMock = (
           ]),
           owner: {
             ...{
-              userId: faker.string.alpha(20),
-              name: faker.string.alpha(20),
-              role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
-              isBiz: faker.datatype.boolean(),
               status: faker.helpers.arrayElement([
                 "pending",
                 "active",
@@ -3155,6 +3235,13 @@ export const getBrMatingControllerFindAllResponseMock = (
                 "suspended",
                 "deleted",
               ] as const),
+              userId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+              name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+              role: faker.helpers.arrayElement([
+                faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
+                undefined,
+              ]),
+              isBiz: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
             },
           },
           name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
@@ -3214,10 +3301,6 @@ export const getBrMatingControllerFindAllResponseMock = (
           ]),
           owner: {
             ...{
-              userId: faker.string.alpha(20),
-              name: faker.string.alpha(20),
-              role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
-              isBiz: faker.datatype.boolean(),
               status: faker.helpers.arrayElement([
                 "pending",
                 "active",
@@ -3225,6 +3308,13 @@ export const getBrMatingControllerFindAllResponseMock = (
                 "suspended",
                 "deleted",
               ] as const),
+              userId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+              name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+              role: faker.helpers.arrayElement([
+                faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
+                undefined,
+              ]),
+              isBiz: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
             },
           },
           name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
@@ -4077,7 +4167,7 @@ export const getAdoptionControllerGetAllAdoptionsMockHandler = (
   });
 };
 
-export const getAdoptionControllerGetAdoptionByAdoptionIdMockHandler = (
+export const getAdoptionControllerGetAdoptionMockHandler = (
   overrideResponse?:
     | AdoptionDetailResponseDto
     | ((
@@ -4093,7 +4183,7 @@ export const getAdoptionControllerGetAdoptionByAdoptionIdMockHandler = (
           ? typeof overrideResponse === "function"
             ? await overrideResponse(info)
             : overrideResponse
-          : getAdoptionControllerGetAdoptionByAdoptionIdResponseMock(),
+          : getAdoptionControllerGetAdoptionResponseMock(),
       ),
       { status: 200, headers: { "Content-Type": "application/json" } },
     );
@@ -4381,7 +4471,7 @@ export const getProjectDaepaAPIMock = () => [
   getUserControllerVerifyEmailMockHandler(),
   getAdoptionControllerCreateAdoptionMockHandler(),
   getAdoptionControllerGetAllAdoptionsMockHandler(),
-  getAdoptionControllerGetAdoptionByAdoptionIdMockHandler(),
+  getAdoptionControllerGetAdoptionMockHandler(),
   getAdoptionControllerUpdateMockHandler(),
   getMatingControllerCreateMatingMockHandler(),
   getMatingControllerUpdateMatingMockHandler(),
