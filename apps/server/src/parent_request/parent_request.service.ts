@@ -308,10 +308,12 @@ export class ParentRequestService {
     });
   }
 
-  async deleteAllParentRequestsByPet(petId: string): Promise<void> {
-    return this.dataSource.transaction(async (entityManager: EntityManager) => {
-      // 해당 펫과 관련된 모든 parent_request를 병렬로 DELETED 상태로 변경
-      await entityManager
+  async deleteAllParentRequestsByPet(
+    petId: string,
+    manager?: EntityManager,
+  ): Promise<void> {
+    const run = async (em: EntityManager) => {
+      await em
         .createQueryBuilder()
         .update(ParentRequestEntity)
         .set({ status: PARENT_STATUS.DELETED })
@@ -320,6 +322,15 @@ export class ParentRequestService {
         })
         .andWhere('(childPetId = :petId OR parentPetId = :petId)', { petId })
         .execute();
+    };
+
+    if (manager) {
+      await run(manager);
+      return;
+    }
+
+    return this.dataSource.transaction(async (entityManager: EntityManager) => {
+      await run(entityManager);
     });
   }
 

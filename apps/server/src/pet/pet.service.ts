@@ -696,9 +696,11 @@ export class PetService {
           );
         }
 
-        // TODO! entityManager 사용 방식으로 변경
         // 연관된 parent_request들을 모두 삭제 상태로 변경
-        await this.parentRequestService.deleteAllParentRequestsByPet(petId);
+        await this.parentRequestService.deleteAllParentRequestsByPet(
+          petId,
+          entityManager,
+        );
 
         return { petId };
       } catch {
@@ -971,7 +973,7 @@ export class PetService {
             '부모 펫의 detail 정보를 찾을 수 없습니다.',
           );
         }
-        if (parentDetails?.sex) {
+        if (parentDetails.sex) {
           parentSex = parentDetails.sex;
         }
       } else {
