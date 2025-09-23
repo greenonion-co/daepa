@@ -966,6 +966,11 @@ export class PetService {
           where: { petId: parentPet.petId },
           select: ['sex'],
         });
+        if (!parentDetails) {
+          throw new BadRequestException(
+            '부모 펫의 detail 정보를 찾을 수 없습니다.',
+          );
+        }
         if (parentDetails?.sex) {
           parentSex = parentDetails.sex;
         }
