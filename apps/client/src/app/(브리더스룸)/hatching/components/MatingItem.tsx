@@ -2,7 +2,7 @@ import {
   brMatingControllerFindAll,
   layingControllerUpdate,
   MatingByDateDto,
-  PetSummaryDto,
+  PetSummaryLayingDto,
 } from "@repo/api-client";
 import { ChevronDown, ChevronUp, Plus, Edit, Trash2 } from "lucide-react";
 import { overlay } from "overlay-kit";
@@ -22,12 +22,13 @@ import { toast } from "sonner";
 
 interface MatingItemProps {
   mating: MatingByDateDto;
-  father?: PetSummaryDto;
-  mother?: PetSummaryDto;
+  father?: PetSummaryLayingDto;
+  mother?: PetSummaryLayingDto;
   matingDates: string[];
 }
 
 const MatingItem = ({ mating, father, mother, matingDates }: MatingItemProps) => {
+  console.log(mating);
   const queryClient = useQueryClient();
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -65,7 +66,7 @@ const MatingItem = ({ mating, father, mother, matingDates }: MatingItemProps) =>
         currentData={{
           fatherId: father?.petId,
           motherId: mother?.petId,
-          matingDate: mating.matingDate,
+          matingDate: mating.matingDate ?? "",
         }}
         matingDates={matingDates}
       />

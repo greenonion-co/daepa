@@ -20,7 +20,7 @@ import { useInView } from "react-intersection-observer";
 import Filters from "./Filters";
 import { useMatingFilterStore } from "../../store/matingFilter";
 import { format } from "date-fns";
-import { isNil, omitBy } from "es-toolkit";
+import { compact, isNil, omitBy } from "es-toolkit";
 import { Card } from "@/components/ui/card";
 
 const MatingList = memo(() => {
@@ -82,10 +82,10 @@ const MatingList = memo(() => {
   });
 
   // 메이팅 날짜들을 추출하여 Calendar용 날짜 배열 생성
-  const matingDates = useCallback((matingDates: MatingByDateDto[]) => {
+  const getMatingDates = useCallback((matingDates: MatingByDateDto[]) => {
     if (!matingDates) return [];
 
-    return matingDates.map((mating) => mating.matingDate);
+    return compact(matingDates.map((mating) => mating.matingDate));
   }, []);
 
   const { items, totalCount } = data ?? { items: [], totalCount: 0 };
@@ -221,7 +221,7 @@ const MatingList = memo(() => {
                   <CalendarSelect
                     triggerText="메이팅을 추가하려면 날짜를 선택하세요"
                     confirmButtonText="메이팅 추가"
-                    disabledDates={matingDates(matingGroup?.matingsByDate ?? [])}
+                    disabledDates={getMatingDates(matingGroup?.matingsByDate ?? [])}
                     onConfirm={(matingDate) =>
                       handleAddMatingClick({
                         species: matingGroup.father?.species,
@@ -238,7 +238,7 @@ const MatingList = memo(() => {
                     mating={mating}
                     father={matingGroup.father}
                     mother={matingGroup.mother}
-                    matingDates={matingDates(matingGroup?.matingsByDate ?? [])}
+                    matingDates={getMatingDates(matingGroup?.matingsByDate ?? [])}
                   />
                 ))}
               </div>

@@ -10,7 +10,7 @@ interface DeleteMatingModalProps {
   isOpen: boolean;
   onClose: () => void;
   matingId: number;
-  matingDate: string;
+  matingDate?: string;
 }
 
 const DeleteMatingModal = ({ isOpen, onClose, matingId, matingDate }: DeleteMatingModalProps) => {
@@ -44,7 +44,9 @@ const DeleteMatingModal = ({ isOpen, onClose, matingId, matingDate }: DeleteMati
           <DialogTitle>메이팅 삭제</DialogTitle>
         </DialogHeader>
         <div className="space-y-1">
-          <p className="text-sm text-gray-900">{matingDate} 메이팅 정보를 삭제하시겠습니까?</p>
+          <p className="text-sm text-gray-900">
+            {matingDate ?? "(날짜 없음)"}의 메이팅 정보를 삭제하시겠습니까?
+          </p>
           <p className="flex items-center gap-1 text-xs text-red-600">
             <Info className="h-4 w-4" />
             연관된 알이 있는 경우 삭제할 수 없습니다.
