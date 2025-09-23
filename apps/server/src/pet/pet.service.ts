@@ -36,7 +36,6 @@ import { PageDto, PageMetaDto } from 'src/common/page.dto';
 import { UpdatePetDto } from './pet.dto';
 import { AdoptionEntity } from '../adoption/adoption.entity';
 import { format, startOfMonth, endOfMonth } from 'date-fns';
-import { PairService } from 'src/pair/pair.service';
 import { CreateParentDto } from 'src/parent_request/parent_request.dto';
 import { LayingEntity } from 'src/laying/laying.entity';
 import { isMySQLError } from 'src/common/error';
@@ -66,7 +65,6 @@ export class PetService {
     @InjectRepository(LayingEntity)
     private readonly layingRepository: Repository<LayingEntity>,
     private readonly userService: UserService,
-    private readonly pairService: PairService,
     private readonly petImageService: PetImageService,
     private readonly userNotificationService: UserNotificationService,
     private readonly dataSource: DataSource,
@@ -138,45 +136,6 @@ export class PetService {
         }
         if (mother) {
           await this.handleParentRequest(entityManager, petId, ownerId, mother);
-        }
-
-        // 부모 모두 있고, 둘 다 내 펫인 경우, pair 정보 없을 시 생성
-        let fatherOwnerId: string | null = null;
-        let motherOwnerId: string | null = null;
-
-        if (father?.parentId) {
-          const fatherPet = await entityManager.findOne(PetEntity, {
-            where: { petId: father.parentId },
-            select: ['ownerId'],
-          });
-          if (fatherPet?.ownerId) {
-            fatherOwnerId = fatherPet.ownerId;
-          }
-        }
-        if (mother?.parentId) {
-          const motherPet = await entityManager.findOne(PetEntity, {
-            where: { petId: mother.parentId },
-            select: ['ownerId'],
-          });
-          if (motherPet?.ownerId) {
-            motherOwnerId = motherPet.ownerId;
-          }
-        }
-
-        if (
-          father &&
-          mother &&
-          fatherOwnerId === ownerId &&
-          motherOwnerId === ownerId
-        ) {
-          await this.pairService.createPair(
-            {
-              ownerId,
-              fatherId: father.parentId,
-              motherId: mother.parentId,
-            },
-            entityManager,
-          );
         }
       } catch (error: unknown) {
         if (isMySQLError(error) && error.code === 'ER_DUP_ENTRY') {
