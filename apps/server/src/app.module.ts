@@ -43,8 +43,6 @@ import { LayingService } from './laying/laying.service';
 import { PairEntity } from './pair/pair.entity';
 import { PairController } from './pair/pair.controller';
 import { PairService } from './pair/pair.service';
-import { FileController } from './file/file.controller';
-import { FileService } from './file/file.service';
 import { R2Service } from './common/cloudflare/r2.service';
 import { PetImageEntity } from './pet_image/pet_image.entity';
 import { PetImageService } from './pet_image/pet_image.service';
@@ -105,7 +103,6 @@ const ENTITIES = [
     ParentRequestController,
     LayingController,
     PairController,
-    FileController,
     BrUserController,
   ],
   providers: [
@@ -124,7 +121,6 @@ const ENTITIES = [
     LayingService,
     PairService,
     R2Service,
-    FileService,
     PetImageService,
     {
       provide: APP_GUARD,
