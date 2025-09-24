@@ -195,7 +195,10 @@ export class PetService {
       let buyer: UserProfilePublicDto | null = null;
       if (adoption?.buyerId) {
         try {
-          buyer = await this.userService.findOneProfile(adoption.buyerId);
+          buyer = await this.userService.findOneProfile(
+            adoption.buyerId,
+            entityManager,
+          );
         } catch {
           buyer = null;
         }
@@ -211,10 +214,16 @@ export class PetService {
         })) ?? {};
 
       // 소유자 정보 조회
-      const owner = await this.userService.findOneProfile(pet.ownerId);
+      const owner = await this.userService.findOneProfile(
+        pet.ownerId,
+        entityManager,
+      );
 
       const { father, mother } =
-        await this.parentRequestService.getParentsWithRequestStatus(petId);
+        await this.parentRequestService.getParentsWithRequestStatus(
+          petId,
+          entityManager,
+        );
 
       const { growth, sex, morphs, traits, foods, weight } = petDetail ?? {};
       const { temperature, status: eggStatus } = eggDetail ?? {};

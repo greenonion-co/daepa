@@ -1,17 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { PetImageEntity } from './pet_image.entity';
-import { EntityManager, Repository } from 'typeorm';
+import { EntityManager } from 'typeorm';
 import { PetImageItem, UpsertPetImageDto } from './pet_image.dto';
-import { InjectRepository } from '@nestjs/typeorm';
 import { R2Service } from 'src/common/cloudflare/r2.service';
 
 @Injectable()
 export class PetImageService {
-  constructor(
-    @InjectRepository(PetImageEntity)
-    private readonly petImageRepository: Repository<PetImageEntity>,
-    private readonly r2Service: R2Service,
-  ) {}
+  constructor(private readonly r2Service: R2Service) {}
 
   async saveAndUploadConfirmedImages(
     entityManager: EntityManager,

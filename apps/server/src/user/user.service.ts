@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindOptionsWhere, Not, Repository } from 'typeorm';
+import { DataSource, FindOptionsWhere, Not, Repository } from 'typeorm';
 import { UserEntity } from './user.entity';
 import {
   CreateInitUserInfoDto,
@@ -29,6 +29,7 @@ export class UserService {
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
     private readonly oauthService: OauthService,
+    private readonly dataSource: DataSource,
   ) {}
 
   async generateUserId() {
@@ -101,22 +102,35 @@ export class UserService {
     return this.toUserDto(userEntity);
   }
 
-  async findOneProfile(userId: string) {
-    const userEntity = await this.userRepository.findOneBy({
-      userId,
-    });
-    if (!userEntity) {
-      throw new NotFoundException('사용자를 찾을 수 없습니다.');
+  async findOneProfile(userId: string, manager?: EntityManager) {
+    const run = async (em: EntityManager) => {
+      const userEntity = await this.userRepository.findOneBy({
+        userId,
+      });
+      if (!userEntity) {
+        throw new NotFoundException('사용자를 찾을 수 없습니다.');
+      }
+
+      const userProviders = await this.oauthService.findAllProvidersByEmail(
+        userEntity.email,
+        em,
+      );
+
+      return {
+        ...this.toUserDto(userEntity),
+        provider: userProviders,
+      };
+    };
+
+    if (manager) {
+      return await run(manager);
     }
 
-    const userProviders = await this.oauthService.findAllProvidersByEmail(
-      userEntity.email,
+    return await this.dataSource.transaction(
+      async (entityManager: EntityManager) => {
+        return await run(entityManager);
+      },
     );
-
-    return {
-      ...this.toUserDto(userEntity),
-      provider: userProviders,
-    };
   }
 
   async createInitUserInfo(
