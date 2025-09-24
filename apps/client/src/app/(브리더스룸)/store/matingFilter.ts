@@ -1,15 +1,15 @@
-import { PetDtoSpecies, PetParentDto } from "@repo/api-client";
+import { PetDto, PetDtoSpecies } from "@repo/api-client";
 import { create } from "zustand";
 
 interface MatingFilterStore {
   species: PetDtoSpecies | null;
-  mother: PetParentDto | null;
-  father: PetParentDto | null;
+  mother: PetDto | null;
+  father: PetDto | null;
   startDate?: string;
   endDate?: string;
   setSpecies: (species: PetDtoSpecies | null) => void;
-  setMother: (mother: PetParentDto | null) => void;
-  setFather: (father: PetParentDto | null) => void;
+  setMother: (mother: PetDto | null) => void;
+  setFather: (father: PetDto | null) => void;
   setStartDate: (startDate?: string) => void;
   setEndDate: (endDate?: string) => void;
   reset: () => void;

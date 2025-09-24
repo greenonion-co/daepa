@@ -1,4 +1,4 @@
-import { AdoptionDtoStatus, PetAdoptionDtoLocation, UserProfilePublicDto } from "@repo/api-client";
+import { UserProfilePublicDto, AdoptionDtoStatus, PetAdoptionDtoLocation } from "@repo/api-client";
 
 export interface AdoptionEditFormDto {
   price?: number;

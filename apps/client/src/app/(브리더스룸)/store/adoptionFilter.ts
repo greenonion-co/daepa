@@ -1,9 +1,9 @@
 import { create } from "zustand";
-import { AdoptionControllerGetAllAdoptionsParams, AdoptionDto, PetDto } from "@repo/api-client";
+import { AdoptionControllerGetAllAdoptionsParams, PetDto } from "@repo/api-client";
 import { FilterStore } from "./filter";
 
 export const useAdoptionFilterStore = create<
-  FilterStore<AdoptionControllerGetAllAdoptionsParams, keyof AdoptionDto>
+  FilterStore<AdoptionControllerGetAllAdoptionsParams>
 >()((set) => ({
   searchFilters: {},
   columnFilters: undefined,

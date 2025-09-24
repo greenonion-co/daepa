@@ -2,7 +2,6 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import {
   CreateMatingDto,
   MatingByParentsDto,
-  MatingDto,
   MatingFilterDto,
 } from './mating.dto';
 import { MatingEntity } from './mating.entity';
@@ -14,23 +13,46 @@ import {
   FindOptionsWhere,
   Raw,
 } from 'typeorm';
-import { plainToInstance } from 'class-transformer';
-import { PetSummaryWithLayingDto } from 'src/pet/pet.dto';
+import { PetSummaryLayingDto } from 'src/pet/pet.dto';
 import { PetEntity } from 'src/pet/pet.entity';
-import { groupBy } from 'es-toolkit';
+import { PetDetailEntity } from 'src/pet_detail/pet_detail.entity';
+import { EggDetailEntity } from 'src/egg_detail/egg_detail.entity';
+import { groupBy, isNil, omitBy } from 'es-toolkit';
 import { PET_SEX } from 'src/pet/pet.constants';
 import { LayingEntity } from 'src/laying/laying.entity';
-import { LayingDto } from 'src/laying/laying.dto';
 import { UpdateMatingDto } from './mating.dto';
 import { PageDto, PageMetaDto } from 'src/common/page.dto';
 import { PairEntity } from 'src/pair/pair.entity';
 import { Not } from 'typeorm';
 
-interface MatingWithRelations extends Omit<MatingEntity, 'pair'> {
-  layings?: Partial<LayingEntity>[];
-  pair?: Partial<PairEntity>;
-  parents?: Partial<PetEntity>[];
-  children?: Partial<PetEntity>[];
+interface MatingsWithPair {
+  id: number;
+  matingDate?: Date;
+  pair: {
+    id: number;
+    fatherId: string;
+    motherId: string;
+  };
+}
+
+interface LayingLite {
+  id: number;
+  matingId: number;
+  layingDate: Date;
+  clutch?: number;
+}
+
+interface MatingRelationsCombined {
+  id: number;
+  matingDate?: Date;
+  pair: {
+    id: number;
+    fatherId: string;
+    motherId: string;
+  };
+  layings?: LayingLite[];
+  parents?: PetSummaryLayingDto[];
+  children?: PetSummaryLayingDto[];
 }
 
 @Injectable()
@@ -38,182 +60,266 @@ export class MatingService {
   constructor(
     @InjectRepository(MatingEntity)
     private readonly matingRepository: Repository<MatingEntity>,
-    @InjectRepository(LayingEntity)
-    private readonly layingRepository: Repository<LayingEntity>,
-    @InjectRepository(PairEntity)
-    private readonly pairRepository: Repository<PairEntity>,
-    @InjectRepository(PetEntity)
-    private readonly petRepository: Repository<PetEntity>,
     private readonly dataSource: DataSource,
   ) {}
-
-  async findAll(userId: string): Promise<MatingByParentsDto[]> {
-    return this.dataSource.transaction(async (entityManager: EntityManager) => {
-      const entities = (await entityManager
-        .createQueryBuilder(MatingEntity, 'matings')
-        .leftJoinAndMapMany(
-          'matings.layings',
-          LayingEntity,
-          'layings',
-          'layings.matingId = matings.id',
-        )
-        .leftJoinAndMapOne(
-          'matings.pair',
-          PairEntity,
-          'pairs',
-          'pairs.id = matings.pairId',
-        )
-        .leftJoinAndMapMany(
-          'matings.parents',
-          PetEntity,
-          'parents',
-          'parents.petId IN (pairs.fatherId, pairs.motherId)',
-        )
-        .select([
-          'matings.id',
-          'matings.matingDate',
-          'matings.pairId',
-          'matings.createdAt',
-          'layings.id',
-          'layings.layingDate',
-          'layings.clutch',
-          'pairs.id',
-          'pairs.species',
-          'pairs.fatherId',
-          'pairs.motherId',
-          'pairs.ownerId',
-          'parents.petId',
-          'parents.name',
-          'parents.morphs',
-          'parents.species',
-          'parents.sex',
-          'parents.hatchingDate',
-          'parents.growth',
-          'parents.weight',
-        ])
-        .where('pairs.ownerId = :userId', { userId })
-        .orderBy('matings.createdAt', 'DESC')
-        .addOrderBy('layings.layingDate', 'ASC')
-        .getMany()) as MatingWithRelations[];
-
-      return this.formatResponseByDate(entities);
-    });
-  }
 
   async getMatingListFull(
     pageOptionsDto: MatingFilterDto,
     userId: string,
   ): Promise<PageDto<MatingByParentsDto>> {
-    return this.dataSource.transaction(async (entityManager: EntityManager) => {
-      // 모든 메이팅 데이터를 가져와서 가공
-      const allQueryBuilder = entityManager
-        .createQueryBuilder(MatingEntity, 'matings')
-        .leftJoinAndMapMany(
-          'matings.layings',
-          LayingEntity,
-          'layings',
-          'layings.matingId = matings.id',
+    // 1) matings + pair: 필터/정렬/페이징
+    const baseQb = this.dataSource
+      .createQueryBuilder(MatingEntity, 'matings')
+      .innerJoinAndMapOne(
+        'matings.pair',
+        PairEntity,
+        'pairs',
+        'pairs.id = matings.pairId',
+      )
+      .select([
+        'matings.id',
+        'matings.matingDate',
+        'matings.pairId',
+        'pairs.id',
+        'pairs.species',
+        'pairs.fatherId',
+        'pairs.motherId',
+        'pairs.ownerId',
+      ])
+      .where('pairs.ownerId = :userId', { userId });
+
+    if (pageOptionsDto.species) {
+      baseQb.andWhere('pairs.species = :species', {
+        species: pageOptionsDto.species,
+      });
+    }
+    if (pageOptionsDto.startYmd) {
+      baseQb.andWhere('matings.matingDate >= :startYmd', {
+        startYmd: pageOptionsDto.startYmd,
+      });
+    }
+    if (pageOptionsDto.endYmd) {
+      baseQb.andWhere('matings.matingDate <= :endYmd', {
+        endYmd: pageOptionsDto.endYmd,
+      });
+    }
+    if (pageOptionsDto.fatherId) {
+      baseQb.andWhere('pairs.fatherId = :fatherId', {
+        fatherId: pageOptionsDto.fatherId,
+      });
+    }
+    if (pageOptionsDto.motherId) {
+      baseQb.andWhere('pairs.motherId = :motherId', {
+        motherId: pageOptionsDto.motherId,
+      });
+    }
+
+    const order = (pageOptionsDto.order ?? 'DESC') as 'ASC' | 'DESC';
+    baseQb.orderBy('matings.id', order);
+
+    const totalCount = await baseQb.getCount();
+    const matingsEntities = await baseQb
+      .skip(pageOptionsDto.skip)
+      .take(pageOptionsDto.itemPerPage)
+      .getMany();
+
+    if (!matingsEntities.length) {
+      const pageMetaDto = new PageMetaDto({ totalCount, pageOptionsDto });
+      return new PageDto([], pageMetaDto);
+    }
+
+    const matingsWithPair: MatingsWithPair[] = matingsEntities.map(
+      (mating) => ({
+        id: mating.id,
+        matingDate: mating.matingDate ?? undefined,
+        pair: {
+          id: mating.pair.id,
+          fatherId: mating.pair.fatherId,
+          motherId: mating.pair.motherId,
+        },
+      }),
+    );
+    const matingIds = matingsWithPair.map((mating) => mating.id);
+
+    // 2) layings: matingIds로 배치 조회
+    const layingsEntities = await this.dataSource
+      .createQueryBuilder(LayingEntity, 'layings')
+      .where('layings.matingId IN (:...matingIds)', { matingIds })
+      .select([
+        'layings.id',
+        'layings.matingId',
+        'layings.layingDate',
+        'layings.clutch',
+      ])
+      .getMany();
+
+    const layingsForMating: LayingLite[] = layingsEntities.map((laying) => ({
+      id: laying.id,
+      matingId: laying.matingId ?? -1,
+      layingDate: laying.layingDate,
+      clutch: laying.clutch,
+    }));
+    const layingIds = layingsForMating.map((l) => l.id);
+
+    // 3) children(+details): layingIds로 배치 조회, eggStatus 필터는 여기서
+    let childrenDtos: PetSummaryLayingDto[] = [];
+    if (layingIds.length) {
+      const childrenQb = this.dataSource
+        .createQueryBuilder(PetEntity, 'c')
+        .leftJoinAndMapOne(
+          'c.petDetail',
+          PetDetailEntity,
+          'cd',
+          'cd.petId = c.petId',
         )
         .leftJoinAndMapOne(
-          'matings.pair',
-          PairEntity,
-          'pairs',
-          'pairs.id = matings.pairId',
+          'c.eggDetail',
+          EggDetailEntity,
+          'ced',
+          'ced.petId = c.petId',
         )
-        .leftJoinAndMapMany(
-          'matings.parents',
-          PetEntity,
-          'parents',
-          'parents.petId IN (pairs.fatherId, pairs.motherId)',
-        )
-        .leftJoinAndMapMany(
-          'matings.children',
-          PetEntity,
-          'children',
-          'children.layingId IN (SELECT layings.id FROM layings WHERE layings.matingId = matings.id) AND children.isDeleted = false',
-        )
+        .where('c.layingId IN (:...layingIds)', { layingIds })
+        .andWhere('c.isDeleted = false')
         .select([
-          'matings.id',
-          'matings.matingDate',
-          'matings.pairId',
-          'matings.createdAt',
-          'layings.id',
-          'layings.layingDate',
-          'layings.clutch',
-          'pairs.id',
-          'pairs.species',
-          'pairs.fatherId',
-          'pairs.motherId',
-          'pairs.ownerId',
-          'parents.petId',
-          'parents.name',
-          'parents.morphs',
-          'parents.species',
-          'parents.sex',
-          'parents.hatchingDate',
-          'parents.growth',
-          'parents.weight',
-          'children.petId',
-          'children.name',
-          'children.species',
-          'children.morphs',
-          'children.sex',
-          'children.hatchingDate',
-          'children.growth',
-          'children.weight',
-          'children.clutchOrder',
-          'children.layingId',
-          'children.temperature',
+          'c.petId',
+          'c.name',
+          'c.species',
+          'c.hatchingDate',
+          'c.clutchOrder',
+          'c.layingId',
+          'cd.sex',
+          'cd.morphs',
+          'cd.traits',
+          'ced.temperature',
+          'ced.status',
+        ]);
+      if (pageOptionsDto.eggStatus) {
+        childrenQb.andWhere('ced.status = :eggStatus', {
+          eggStatus: pageOptionsDto.eggStatus,
+        });
+      }
+      const childrenEntities = await childrenQb.getMany();
+      childrenDtos = childrenEntities.map((c) => ({
+        petId: c.petId,
+        species: c.species,
+        ...omitBy(
+          {
+            name: c.name ?? undefined,
+            hatchingDate: c.hatchingDate ?? undefined,
+            sex: c.petDetail?.sex ?? undefined,
+            morphs: c.petDetail?.morphs ?? undefined,
+            traits: c.petDetail?.traits ?? undefined,
+            clutchOrder: c.clutchOrder ?? undefined,
+            temperature: c.eggDetail?.temperature ?? undefined,
+            eggStatus: c.eggDetail?.status ?? undefined,
+            layingId: c.layingId ?? undefined,
+          },
+          isNil,
+        ),
+      }));
+    }
+
+    // parents(+detail): fatherId/motherId로 배치 조회
+    const parentPetIds = Array.from(
+      new Set(
+        matingsWithPair
+          .flatMap((m) => [m.pair?.fatherId, m.pair?.motherId])
+          .filter(Boolean),
+      ),
+    );
+    let parentDtos: PetSummaryLayingDto[] = [];
+    if (parentPetIds.length) {
+      const parentEntities = await this.dataSource
+        .createQueryBuilder(PetEntity, 'p')
+        .leftJoinAndMapOne(
+          'p.petDetail',
+          PetDetailEntity,
+          'pd',
+          'pd.petId = p.petId',
+        )
+        .where('p.petId IN (:...parentPetIds)', { parentPetIds })
+        .select([
+          'p.petId',
+          'p.name',
+          'p.species',
+          'p.hatchingDate',
+          'pd.sex',
+          'pd.morphs',
+          'pd.traits',
+          'pd.weight',
         ])
-        .where('pairs.ownerId = :userId', { userId })
-        .orderBy('matings.id', pageOptionsDto.order);
+        .getMany();
 
-      if (pageOptionsDto.species) {
-        allQueryBuilder.andWhere('pairs.species = :species', {
-          species: pageOptionsDto.species,
-        });
-      }
+      parentDtos = parentEntities.map((p) => ({
+        petId: p.petId,
+        species: p.species,
+        ...omitBy(
+          {
+            name: p.name ?? undefined,
+            hatchingDate: p.hatchingDate ?? undefined,
+            sex: p.petDetail?.sex ?? undefined,
+            morphs: p.petDetail?.morphs ?? undefined,
+            traits: p.petDetail?.traits ?? undefined,
+            weight: p.petDetail?.weight ?? undefined,
+          },
+          isNil,
+        ),
+      }));
+    }
 
-      if (pageOptionsDto.startYmd) {
-        allQueryBuilder.andWhere('matings.matingDate >= :startYmd', {
-          startYmd: pageOptionsDto.startYmd,
-        });
-      }
+    // 메모리 조립
+    const layingsByMatingIdMap = new Map<number, LayingLite[]>();
+    for (const laying of layingsForMating) {
+      const arr = layingsByMatingIdMap.get(laying.matingId ?? -1) || [];
+      arr.push(laying);
+      layingsByMatingIdMap.set(laying.matingId ?? -1, arr);
+    }
 
-      if (pageOptionsDto.endYmd) {
-        allQueryBuilder.andWhere('matings.matingDate <= :endYmd', {
-          endYmd: pageOptionsDto.endYmd,
-        });
-      }
+    const childrenByLayingIdMap = new Map<number, PetSummaryLayingDto[]>();
+    for (const child of childrenDtos) {
+      if (child.layingId == null) continue;
+      const arr = childrenByLayingIdMap.get(child.layingId) || [];
+      arr.push(child);
+      childrenByLayingIdMap.set(child.layingId, arr);
+    }
 
-      if (pageOptionsDto.fatherId) {
-        allQueryBuilder.andWhere('pairs.fatherId = :fatherId', {
-          fatherId: pageOptionsDto.fatherId,
-        });
-      }
+    const parentsByPetIdMap = new Map<string, PetSummaryLayingDto>();
+    for (const parent of parentDtos) {
+      parentsByPetIdMap.set(parent.petId, parent);
+    }
 
-      if (pageOptionsDto.motherId) {
-        allQueryBuilder.andWhere('pairs.motherId = :motherId', {
-          motherId: pageOptionsDto.motherId,
-        });
-      }
+    const combinedFromMaps: MatingRelationsCombined[] = matingsWithPair.map(
+      (mating) => {
+        const layings = layingsByMatingIdMap.get(mating.id) || [];
 
-      const { entities } = await allQueryBuilder.getRawAndEntities();
+        const children: PetSummaryLayingDto[] = [];
+        for (const laying of layings) {
+          const childrenForLaying = childrenByLayingIdMap.get(laying.id) || [];
+          children.push(...childrenForLaying);
+        }
 
-      // 가공된 데이터 생성
-      const allMatingList = this.formatResponseByDate(
-        entities as MatingWithRelations[],
-      );
+        const parents: PetSummaryLayingDto[] = [];
+        const father = parentsByPetIdMap.get(mating.pair.fatherId);
+        const mother = parentsByPetIdMap.get(mating.pair.motherId);
+        if (father) {
+          parents.push(father);
+        }
+        if (mother) {
+          parents.push(mother);
+        }
 
-      // 가공 후 데이터로 페이지네이션 적용
-      const totalCount = allMatingList.length;
-      const startIndex = pageOptionsDto.skip;
-      const endIndex = startIndex + pageOptionsDto.itemPerPage;
-      const paginatedMatingList = allMatingList.slice(startIndex, endIndex);
+        return {
+          ...mating,
+          layings,
+          children,
+          parents,
+        };
+      },
+    );
 
-      const pageMetaDto = new PageMetaDto({ totalCount, pageOptionsDto });
-      return new PageDto(paginatedMatingList, pageMetaDto);
-    });
+    const result = this.formatResponseByDate(combinedFromMaps);
+    const pageMetaDto = new PageMetaDto({ totalCount, pageOptionsDto });
+    return new PageDto(result, pageMetaDto);
   }
 
   async saveMating(userId: string, createMatingDto: CreateMatingDto) {
@@ -354,38 +460,12 @@ export class MatingService {
     });
   }
 
-  private formatResponseByDate(data: MatingWithRelations[]) {
-    const resultDto = data.map((mating) => {
-      const matingDto = plainToInstance(MatingDto, {
-        id: mating.id,
-        matingDate: mating.matingDate,
-        fatherId: mating.pair?.fatherId,
-        motherId: mating.pair?.motherId,
-      });
-      const layingDto = mating.layings?.map((laying) =>
-        plainToInstance(LayingDto, laying),
-      );
-
-      const parentsDto = mating.parents?.map((parent) =>
-        plainToInstance(PetSummaryWithLayingDto, parent),
-      );
-      const childrenDto = mating.children?.map((child) =>
-        plainToInstance(PetSummaryWithLayingDto, child),
-      );
-      return {
-        ...matingDto,
-        layings: layingDto,
-        parents: parentsDto,
-        children: childrenDto,
-      };
-    });
-
-    const groupedByParents = groupBy(resultDto, (mating) => {
-      const fatherId = mating.fatherId ?? 'null';
-      const motherId = mating.motherId ?? 'null';
-
+  private formatResponseByDate(data: MatingRelationsCombined[]) {
+    const groupedByParents = groupBy(data, (mating) => {
+      const fatherId = mating.pair?.fatherId ?? null;
+      const motherId = mating.pair?.motherId ?? null;
       // 부모 중 null 값이 있는 경우 각각 다른 그룹으로 처리
-      if (mating.fatherId === null || mating.motherId === null) {
+      if (fatherId === null || motherId === null) {
         return `${fatherId}-${motherId}-${mating.id}`;
       }
 
@@ -408,10 +488,18 @@ export class MatingService {
             layingsByDate,
           };
         })
-        .sort(
-          (a, b) =>
-            new Date(b.matingDate).getTime() - new Date(a.matingDate).getTime(),
-        );
+        .sort((a, b) => {
+          const aHasMatingDate = !!a.matingDate;
+          const bHasMatingDate = !!b.matingDate;
+          if (aHasMatingDate !== bHasMatingDate) return aHasMatingDate ? -1 : 1; // 날짜 있는 항목이 먼저
+          if (aHasMatingDate && bHasMatingDate) {
+            return (
+              new Date(b.matingDate!).getTime() -
+              new Date(a.matingDate!).getTime()
+            ); // 둘 다 날짜 있음 → 날짜 내림차순
+          }
+          return b.id - a.id; // 둘 다 날짜 없음 → id 내림차순
+        });
 
       return {
         father,
@@ -422,8 +510,8 @@ export class MatingService {
   }
 
   private groupLayingsByDate(
-    layings: LayingDto[] | undefined,
-    children: PetSummaryWithLayingDto[] | undefined,
+    layings: LayingLite[] | undefined,
+    children: PetSummaryLayingDto[] | undefined,
   ) {
     if (!layings?.length) return;
 

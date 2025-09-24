@@ -5,14 +5,14 @@
  * Project Daepa API description
  * OpenAPI spec version: 1.0
  */
-import type { PetSummaryDto } from "./petSummaryDto";
+import type { PetSummaryLayingDto } from "./petSummaryLayingDto";
 import type { MatingByDateDto } from "./matingByDateDto";
 
 export interface MatingByParentsDto {
   /** 아빠 펫 정보 */
-  father?: PetSummaryDto;
+  father?: PetSummaryLayingDto;
   /** 엄마 펫 정보 */
-  mother?: PetSummaryDto;
+  mother?: PetSummaryLayingDto;
   /** 메이팅 정보 */
   matingsByDate: MatingByDateDto[];
 }

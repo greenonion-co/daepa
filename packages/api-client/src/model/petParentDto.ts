@@ -7,9 +7,9 @@
  */
 import type { UserProfilePublicDto } from "./userProfilePublicDto";
 import type { PetParentDtoSpecies } from "./petParentDtoSpecies";
+import type { PetParentDtoStatus } from "./petParentDtoStatus";
 import type { PetParentDtoSex } from "./petParentDtoSex";
 import type { PetImageItem } from "./petImageItem";
-import type { PetParentDtoStatus } from "./petParentDtoStatus";
 
 export interface PetParentDto {
   /** 펫 아이디 */
@@ -17,23 +17,19 @@ export interface PetParentDto {
   /** 펫 주인 정보 */
   owner: UserProfilePublicDto;
   /** 펫 이름 */
-  name: string;
+  name?: string;
   /** 펫 종 */
   species: PetParentDtoSpecies;
+  /** 펫 출생일 */
+  hatchingDate?: string;
+  /** 부모 관계 상태 */
+  status: PetParentDtoStatus;
+  /** 펫 성별(수컷, 암컷, 미구분) */
+  sex?: PetParentDtoSex;
   /** 펫 모프 */
   morphs?: string[];
   /** 펫 형질 */
   traits?: string[];
-  /** 펫 출생일 */
-  hatchingDate?: string;
-  /** 펫 성별(수컷, 암컷, 미구분) */
-  sex?: PetParentDtoSex;
-  /** 펫 이미지 목록 */
-  photoOrder?: string[];
   /** 펫 이미지 목록 */
   photos?: PetImageItem[];
-  /** 부모 관계 테이블 row id */
-  relationId: number;
-  /** 부모 관계 상태 */
-  status: PetParentDtoStatus;
 }

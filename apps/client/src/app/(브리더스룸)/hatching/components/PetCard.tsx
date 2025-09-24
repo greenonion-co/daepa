@@ -1,6 +1,6 @@
 import { format } from "date-fns";
 import { GENDER_KOREAN_INFO, SPECIES_KOREAN_INFO } from "../../constants";
-import { PetDto, PetDtoGrowth } from "@repo/api-client";
+import { PetDto, PetDtoType } from "@repo/api-client";
 import { Card, CardContent } from "@/components/ui/card";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -19,15 +19,15 @@ const PetCard = ({ date, pets, tab }: PetCardProps) => {
         {pets
           .filter((pet) => {
             if (tab === "all") return true;
-            if (tab === "hatched") return pet.growth !== PetDtoGrowth.EGG;
-            if (tab === "notHatched") return pet.growth === PetDtoGrowth.EGG;
+            if (tab === "hatched") return pet.type === PetDtoType.PET;
+            if (tab === "notHatched") return pet.type === PetDtoType.EGG;
           })
           .map((pet) => (
             <Link href={`/pet/${pet.petId}`} key={pet.petId} className="w-full">
               <Card
                 className={cn(
                   "cursor-pointer",
-                  pet.growth !== PetDtoGrowth.EGG &&
+                  pet.type === PetDtoType.PET &&
                     "bg-muted dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-800",
                 )}
               >

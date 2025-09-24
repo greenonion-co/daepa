@@ -5,6 +5,7 @@
  * Project Daepa API description
  * OpenAPI spec version: 1.0
  */
+import type { PetSummaryDtoType } from "./petSummaryDtoType";
 import type { UserProfilePublicDto } from "./userProfilePublicDto";
 import type { PetSummaryDtoSpecies } from "./petSummaryDtoSpecies";
 import type { PetSummaryDtoSex } from "./petSummaryDtoSex";
@@ -13,22 +14,26 @@ import type { PetImageItem } from "./petImageItem";
 export interface PetSummaryDto {
   /** 펫 아이디 */
   petId: string;
+  /** 펫 타입(egg/pet) */
+  type?: PetSummaryDtoType;
   /** 펫 주인 정보 */
   owner: UserProfilePublicDto;
   /** 펫 이름 */
   name?: string;
   /** 펫 종 */
   species: PetSummaryDtoSpecies;
+  /** 펫 출생일 */
+  hatchingDate?: string;
+  /** 펫 이미지 목록 */
+  photoOrder?: string[];
+  /** 펫 성별(수컷, 암컷, 미구분) */
+  sex?: PetSummaryDtoSex;
   /** 펫 모프 */
   morphs?: string[];
   /** 펫 형질 */
   traits?: string[];
-  /** 펫 출생일 */
-  hatchingDate?: string;
-  /** 펫 성별(수컷, 암컷, 미구분) */
-  sex?: PetSummaryDtoSex;
-  /** 펫 이미지 목록 */
-  photoOrder?: string[];
+  /** 펫 몸무게(g) */
+  weight?: number;
   /** 펫 이미지 목록 */
   photos?: PetImageItem[];
 }

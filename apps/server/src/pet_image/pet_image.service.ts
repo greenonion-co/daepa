@@ -52,6 +52,10 @@ export class PetImageService {
       });
     }
 
+    if (savedImageList.length === 0) {
+      return entityManager.delete(PetImageEntity, { petId });
+    }
+
     return entityManager.upsert(
       PetImageEntity,
       {

@@ -5,32 +5,27 @@
  * Project Daepa API description
  * OpenAPI spec version: 1.0
  */
-import type { UserProfilePublicDto } from "./userProfilePublicDto";
 import type { PetSummaryWithLayingDtoSpecies } from "./petSummaryWithLayingDtoSpecies";
 import type { PetSummaryWithLayingDtoSex } from "./petSummaryWithLayingDtoSex";
-import type { PetImageItem } from "./petImageItem";
+import type { PetSummaryWithLayingDtoEggStatus } from "./petSummaryWithLayingDtoEggStatus";
 
 export interface PetSummaryWithLayingDto {
   /** 펫 아이디 */
   petId: string;
-  /** 펫 주인 정보 */
-  owner: UserProfilePublicDto;
   /** 펫 이름 */
   name?: string;
   /** 펫 종 */
   species: PetSummaryWithLayingDtoSpecies;
-  /** 펫 모프 */
-  morphs?: string[];
-  /** 펫 형질 */
-  traits?: string[];
   /** 펫 출생일 */
   hatchingDate?: string;
   /** 펫 성별(수컷, 암컷, 미구분) */
   sex?: PetSummaryWithLayingDtoSex;
-  /** 펫 이미지 목록 */
-  photoOrder?: string[];
-  /** 펫 이미지 목록 */
-  photos?: PetImageItem[];
+  /** 펫 모프 */
+  morphs?: string[];
+  /** 펫 형질 */
+  traits?: string[];
+  /** 펫 몸무게(g) */
+  weight?: number;
   /** 산란 아이디 */
   layingId?: number;
   /** 산란 클러치 */
@@ -39,4 +34,6 @@ export interface PetSummaryWithLayingDto {
   clutchOrder?: number;
   /** 펫 온도 */
   temperature?: number;
+  /** 알 상태 */
+  eggStatus: PetSummaryWithLayingDtoEggStatus;
 }

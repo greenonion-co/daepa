@@ -1,24 +1,22 @@
 import { create } from "zustand";
-import { BrPetControllerFindAllParams, PetDto } from "@repo/api-client";
+import { PetControllerFindAllParams, PetDto } from "@repo/api-client";
 import { VisibilityState } from "@tanstack/react-table";
 
-export interface FilterStore<P extends object, C extends string = string> {
-  searchFilters: Partial<P>;
+export interface FilterStore<PetControllerFindAllParams> {
+  searchFilters: Partial<PetControllerFindAllParams>;
   columnFilters?: VisibilityState;
-  setSearchFilters: (filters: Partial<P>) => void;
-  setColumnFilters: (columnFilters: Partial<Record<C, boolean>>) => void;
+  setSearchFilters: (filters: Partial<PetControllerFindAllParams>) => void;
+  setColumnFilters: (columnFilters: Partial<VisibilityState>) => void;
 }
 
-export const useFilterStore = create<FilterStore<BrPetControllerFindAllParams, keyof PetDto>>()(
-  (set) => ({
-    searchFilters: {},
-    columnFilters: undefined,
+export const useFilterStore = create<FilterStore<PetControllerFindAllParams>>()((set) => ({
+  searchFilters: {},
+  columnFilters: undefined,
 
-    // Actions
-    setSearchFilters: (filters) => set({ searchFilters: filters }),
-    setColumnFilters: (newFilter: Partial<Record<keyof PetDto, boolean>>) =>
-      set((state) => ({
-        columnFilters: state.columnFilters ? { ...state.columnFilters, ...newFilter } : newFilter,
-      })),
-  }),
-);
+  // Actions
+  setSearchFilters: (filters) => set({ searchFilters: filters }),
+  setColumnFilters: (newFilter: Partial<Record<keyof PetDto, boolean>>) =>
+    set((state) => ({
+      columnFilters: state.columnFilters ? { ...state.columnFilters, ...newFilter } : newFilter,
+    })),
+}));

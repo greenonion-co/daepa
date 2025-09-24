@@ -11,7 +11,7 @@ export interface MatingByDateDto {
   /** 메이팅 ID */
   id: number;
   /** 메이팅 날짜 */
-  matingDate: string;
+  matingDate?: string;
   /** 산란 정보 */
   layingsByDate?: LayingByDateDto[];
 }

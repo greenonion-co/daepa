@@ -4,10 +4,11 @@ import { useState, useEffect, useRef } from "react";
 import BottomSheet from "@/components/common/BottomSheet";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import {
-  brPetControllerFindAll,
-  BrPetControllerFindAllFilterType,
+  petControllerFindAll,
+  PetControllerFindAllFilterType as PetListType,
   PetDtoSex,
   PetDtoSpecies,
+  PetDto,
 } from "@repo/api-client";
 import SelectStep from "./SelectStep";
 import LinkStep from "./LinkStep";
@@ -16,37 +17,37 @@ import { useInView } from "react-intersection-observer";
 import { PetParentDtoWithMessage } from "@/app/(브리더스룸)/pet/store/parentLink";
 
 interface ParentSearchProps {
+  sex?: PetDtoSex;
   species?: PetDtoSpecies;
   isOpen: boolean;
   onlySelect?: boolean;
+  showTab: boolean;
   onClose: () => void;
-  onSelect: (item: PetParentDtoWithMessage) => void;
+  onSelect: (item: PetDto) => void;
   onExit: () => void;
-  sex?: PetDtoSex;
-  petListType?: BrPetControllerFindAllFilterType;
 }
 
 const ParentSearchSelector = ({
+  sex = "F",
   species,
   isOpen,
   onlySelect = false,
+  showTab,
   onClose,
   onSelect,
   onExit,
-  sex = "F",
-  petListType = BrPetControllerFindAllFilterType.ALL,
 }: ParentSearchProps) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [step, setStep] = useState(1);
   const [selectedPet, setSelectedPet] = useState<PetParentDtoWithMessage | null>(null);
+  const [petListType, setPetListType] = useState<PetListType>(PetListType.MY);
   const contentRef = useRef<HTMLDivElement>(null);
   const { ref, inView } = useInView();
   const itemPerPage = 10;
-
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
-    queryKey: [brPetControllerFindAll.name, petListType, searchQuery, species],
+    queryKey: [petControllerFindAll.name, petListType, searchQuery, species],
     queryFn: ({ pageParam = 1 }) =>
-      brPetControllerFindAll({
+      petControllerFindAll({
         page: pageParam,
         itemPerPage,
         order: "DESC",
@@ -61,6 +62,7 @@ const ParentSearchSelector = ({
       }
       return undefined;
     },
+    // TODO!: 이러면 새로 등록한 개체가 바로 조회되지 않음
     staleTime: 5 * 60 * 1000, // 5분 동안 데이터를 'fresh'하게 유지
     select: (data) =>
       data.pages.flatMap((page) => page.data.data).filter((pet) => pet.sex?.toString() === sex),
@@ -98,7 +100,7 @@ const ParentSearchSelector = ({
         <Header
           step={step}
           setStep={setStep}
-          selectedPet={selectedPet ?? ({} as PetParentDtoWithMessage)}
+          selectedPetName={selectedPet?.name ?? ""}
           setSearchQuery={setSearchQuery}
         />
         <div ref={contentRef} className="relative flex-1">
@@ -109,7 +111,8 @@ const ParentSearchSelector = ({
               hasMore={hasNextPage}
               isFetchingMore={isFetchingNextPage}
               loaderRefAction={ref}
-              petListType={petListType}
+              showTab={showTab}
+              onTabChange={setPetListType}
             />
           ) : (
             <LinkStep

@@ -13,4 +13,5 @@ export type BrPetControllerFindAllFilterType =
 export const BrPetControllerFindAllFilterType = {
   ALL: "ALL",
   MY: "MY",
+  NOT_MY: "NOT_MY",
 } as const;

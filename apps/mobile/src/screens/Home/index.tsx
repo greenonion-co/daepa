@@ -10,8 +10,8 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import {
-  brPetControllerFindAll,
-  BrPetControllerFindAllFilterType,
+  petControllerFindAll,
+  PetControllerFindAllFilterType,
   PetDto,
 } from '@repo/api-client';
 import { useInfiniteQuery } from '@tanstack/react-query';
@@ -37,16 +37,13 @@ const HomeScreen = () => {
     refetch,
     isRefetching,
   } = useInfiniteQuery({
-    queryKey: [
-      brPetControllerFindAll.name,
-      BrPetControllerFindAllFilterType.ALL,
-    ],
+    queryKey: [petControllerFindAll.name, PetControllerFindAllFilterType.ALL],
     queryFn: ({ pageParam = 1 }) =>
-      brPetControllerFindAll({
+      petControllerFindAll({
         page: pageParam,
         itemPerPage: ITEM_PER_PAGE,
         order: 'DESC',
-        filterType: BrPetControllerFindAllFilterType.ALL,
+        filterType: PetControllerFindAllFilterType.ALL,
         // ...searchFilters,
       }),
     initialPageParam: 1,

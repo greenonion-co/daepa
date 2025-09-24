@@ -7,6 +7,10 @@
  */
 
 export interface CompleteHatchingDto {
-  /** 해칭 날짜 */
-  hatchingDate: string;
+  /** 펫 이름 */
+  name?: string;
+  /** 펫 출생일 */
+  hatchingDate?: string;
+  /** 펫 소개말 */
+  desc?: string;
 }

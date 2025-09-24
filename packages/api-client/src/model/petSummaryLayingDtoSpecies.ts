@@ -7,13 +7,13 @@
  */
 
 /**
- * 종
+ * 펫 종
  */
-export type MatingByParentsDtoSpecies =
-  (typeof MatingByParentsDtoSpecies)[keyof typeof MatingByParentsDtoSpecies];
+export type PetSummaryLayingDtoSpecies =
+  (typeof PetSummaryLayingDtoSpecies)[keyof typeof PetSummaryLayingDtoSpecies];
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const MatingByParentsDtoSpecies = {
+export const PetSummaryLayingDtoSpecies = {
   CRESTED: "CR",
   LEOPARD: "LE",
   FATTAIL: "FT",

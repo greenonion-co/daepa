@@ -144,11 +144,6 @@ export const FormField = ({
                   toast.error("종은 변경할 수 없습니다.");
                   return;
                 }
-
-                if (name === "sex") {
-                  toast.error("성별은 변경할 수 없습니다.");
-                  return;
-                }
               }
 
               handleSelect({

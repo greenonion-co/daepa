@@ -9,7 +9,6 @@ import { SPECIES_KOREAN_INFO } from "../../constants";
 import {
   AdoptionDtoStatus,
   brPetControllerFindAll,
-  BrPetControllerFindAllFilterType,
   BrPetControllerFindAllOrder,
   PetDto,
 } from "@repo/api-client";
@@ -71,7 +70,6 @@ const EditAdoptionModal = ({
         itemPerPage,
         order: BrPetControllerFindAllOrder.DESC,
         keyword,
-        filterType: BrPetControllerFindAllFilterType.MY,
       }),
     initialPageParam: 1,
     getNextPageParam: (lastPage) => {
@@ -132,7 +130,7 @@ const EditAdoptionModal = ({
             <Header
               step={step}
               setStep={setStep}
-              selectedPet={selectedPet}
+              selectedPetName={selectedPet?.name ?? ""}
               setSearchQuery={setKeyword}
               className="py-0"
             />
@@ -215,7 +213,7 @@ const EditAdoptionModal = ({
                 </div>
               </div>
               <div className="flex flex-col text-sm text-gray-600">
-                {selectedPet?.morphs && selectedPet.morphs.length > 0 && (
+                {selectedPet.morphs && selectedPet.morphs.length > 0 && (
                   <div className="flex flex-wrap gap-2">
                     {selectedPet.morphs.map((morph: string) => `#${morph}`).join(" ")}
                   </div>

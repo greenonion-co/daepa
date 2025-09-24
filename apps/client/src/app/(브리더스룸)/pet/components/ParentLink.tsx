@@ -7,14 +7,13 @@ import ParentSearchSelector from "../../components/selector/parentSearch";
 import { Button } from "@/components/ui/button";
 import Dialog from "../../components/Form/Dialog";
 import {
-  BrPetControllerFindAllFilterType,
+  PetControllerFindAllFilterType,
   PetDtoSpecies,
   PetParentDto,
   PetParentDtoStatus,
 } from "@repo/api-client";
 import { cn } from "@/lib/utils";
 import ParentStatusBadge from "../../components/ParentStatusBadge";
-import { Badge } from "@/components/ui/badge";
 import { usePathname } from "next/navigation";
 import { PetParentDtoWithMessage } from "../store/parentLink";
 import { useUserStore } from "../../store/user";
@@ -25,7 +24,7 @@ interface ParentLinkProps {
   label: "부" | "모";
   data?: PetParentDto;
   editable?: boolean;
-  petListType?: BrPetControllerFindAllFilterType;
+  petListType?: PetControllerFindAllFilterType;
   onSelect?: (item: PetParentDtoWithMessage) => void;
   onUnlink?: () => void;
 }
@@ -35,7 +34,7 @@ const ParentLink = ({
   label,
   data,
   editable = true,
-  petListType = BrPetControllerFindAllFilterType.ALL,
+  petListType = PetControllerFindAllFilterType.ALL,
   onSelect,
   onUnlink,
 }: ParentLinkProps) => {
@@ -93,7 +92,7 @@ const ParentLink = ({
         }}
         sex={label === "부" ? "M" : "F"}
         onExit={unmount}
-        petListType={petListType}
+        showTab={petListType === PetControllerFindAllFilterType.ALL}
       />
     ));
   };
@@ -102,21 +101,12 @@ const ParentLink = ({
     <div className="flex-1">
       <dt className="mb-2 flex items-center gap-2 text-xs font-medium text-gray-500 dark:text-gray-400">
         {label}
-
+        {/* TODO!: isMyPet이 아닌 경우 해당 주인의 정보를 노출 */}
         {data?.status && <ParentStatusBadge status={data.status} isMyPet={isMyPet} />}
       </dt>
 
       {data?.petId ? (
         <div className="group relative block h-full w-full transition-opacity hover:opacity-95">
-          {!data?.status && isMyPet && (
-            <Badge
-              variant="outline"
-              className="absolute left-1 top-1 z-10 bg-blue-50 text-xs font-bold"
-            >
-              My
-            </Badge>
-          )}
-
           {editable && (
             <Button
               variant="ghost"

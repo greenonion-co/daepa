@@ -5,6 +5,7 @@ import {
 } from 'src/pet/pet.constants';
 import { PetEntity } from 'src/pet/pet.entity';
 import { UserEntity } from 'src/user/user.entity';
+import { PetDetailEntity } from 'src/pet_detail/pet_detail.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -13,8 +14,6 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToOne,
-  JoinColumn,
-  ManyToOne,
 } from 'typeorm';
 
 @Entity({ name: 'adoptions' })
@@ -62,16 +61,16 @@ export class AdoptionEntity {
 
   // 펫과의 관계 수정
   @OneToOne(() => PetEntity, (pet) => pet.adoption)
-  @JoinColumn({ name: 'petId', referencedColumnName: 'petId' })
   pet: PetEntity;
 
-  // 판매자와의 관계
-  @ManyToOne(() => UserEntity, { nullable: true })
-  @JoinColumn({ name: 'sellerId', referencedColumnName: 'userId' })
+  // petDetail을 위한 임시 속성 (쿼리에서만 사용)
+  petDetail?: Partial<PetDetailEntity>;
+
+  // // 판매자와의 관계
+  @OneToOne(() => UserEntity, (user) => user.userId)
   seller: UserEntity;
 
-  // 구매자와의 관계
-  @ManyToOne(() => UserEntity, { nullable: true })
-  @JoinColumn({ name: 'buyerId', referencedColumnName: 'userId' })
+  // // 구매자와의 관계
+  @OneToOne(() => UserEntity, (user) => user.userId, { nullable: true })
   buyer: UserEntity;
 }

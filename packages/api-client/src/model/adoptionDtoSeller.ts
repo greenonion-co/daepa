@@ -6,9 +6,7 @@
  * OpenAPI spec version: 1.0
  */
 
-export interface PetImageDto {
-  /** 펫 이미지 파일 */
-  fileName: string;
-  /** 펫 이미지 원본 url */
-  url: string;
-}
+/**
+ * 분양자 정보
+ */
+export type AdoptionDtoSeller = { [key: string]: unknown };

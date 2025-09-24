@@ -1,18 +1,17 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { PetSummaryDto } from "@repo/api-client";
 import { ChevronRight } from "lucide-react";
 import { useState } from "react";
 
 interface HeaderProps {
   step: number;
   setStep: (step: number) => void;
-  selectedPet?: PetSummaryDto;
+  selectedPetName?: string;
   className?: string;
   setSearchQuery: (searchQuery: string) => void;
 }
 
-const Header = ({ step, setStep, selectedPet, setSearchQuery, className }: HeaderProps) => {
+const Header = ({ step, setStep, selectedPetName, setSearchQuery, className }: HeaderProps) => {
   const [keyword, setKeyword] = useState("");
 
   return (
@@ -22,12 +21,12 @@ const Header = ({ step, setStep, selectedPet, setSearchQuery, className }: Heade
           onClick={() => step === 2 && setStep(1)}
           className={`text-lg font-bold ${step === 2 ? "text-gray-400 hover:text-gray-700" : ""}`}
         >
-          부모 개체 검색
+          개체 검색
         </button>
         {step === 2 && (
           <>
             <ChevronRight className="h-5 w-5 text-gray-500" />
-            <span className="text-lg font-bold">{selectedPet?.name}</span>
+            <span className="text-lg font-bold">{selectedPetName}</span>
           </>
         )}
       </div>

@@ -61,6 +61,25 @@ const HeaderSelect = <TData,>({
 
 export const columns: ColumnDef<PetDto>[] = [
   {
+    accessorKey: "species",
+    header: ({ column }) => {
+      const uniqueSpecies = Object.keys(SPECIES_KOREAN_INFO);
+
+      return (
+        <HeaderSelect
+          column={column}
+          title={TABLE_HEADER.species}
+          items={uniqueSpecies}
+          renderItem={(item) => SPECIES_KOREAN_INFO[item as PetDtoSpecies]}
+        />
+      );
+    },
+    cell: ({ row }) => {
+      const species = row.getValue("species") as PetDtoSpecies;
+      return <div className="capitalize">{SPECIES_KOREAN_INFO[species]}</div>;
+    },
+  },
+  {
     accessorKey: "isPublic",
     header: ({ column }) => {
       return (
@@ -82,7 +101,6 @@ export const columns: ColumnDef<PetDto>[] = [
       );
     },
   },
-
   {
     accessorKey: "adoption.status",
     header: ({ column }) => {
@@ -116,44 +134,6 @@ export const columns: ColumnDef<PetDto>[] = [
           {name}
         </div>
       );
-    },
-  },
-  {
-    accessorKey: "species",
-    header: ({ column }) => {
-      const uniqueSpecies = Object.keys(SPECIES_KOREAN_INFO);
-
-      return (
-        <HeaderSelect
-          column={column}
-          title={TABLE_HEADER.species}
-          items={uniqueSpecies}
-          renderItem={(item) => SPECIES_KOREAN_INFO[item as PetDtoSpecies]}
-        />
-      );
-    },
-    cell: ({ row }) => {
-      const species = row.getValue("species") as PetDtoSpecies;
-      return <div className="capitalize">{SPECIES_KOREAN_INFO[species]}</div>;
-    },
-  },
-  {
-    accessorKey: "growth",
-    header: ({ column }) => {
-      const uniqueSizes = Object.keys(GROWTH_KOREAN_INFO);
-
-      return (
-        <HeaderSelect
-          column={column}
-          title={TABLE_HEADER.growth}
-          items={uniqueSizes}
-          renderItem={(item) => GROWTH_KOREAN_INFO[item as keyof typeof GROWTH_KOREAN_INFO]}
-        />
-      );
-    },
-    cell: ({ row }) => {
-      const growth = row.getValue("growth") as PetDtoGrowth;
-      return <div>{GROWTH_KOREAN_INFO[growth]}</div>;
     },
   },
   {
@@ -210,6 +190,25 @@ export const columns: ColumnDef<PetDto>[] = [
     },
   },
   {
+    accessorKey: "growth",
+    header: ({ column }) => {
+      const uniqueSizes = Object.keys(GROWTH_KOREAN_INFO);
+
+      return (
+        <HeaderSelect
+          column={column}
+          title={TABLE_HEADER.growth}
+          items={uniqueSizes}
+          renderItem={(item) => GROWTH_KOREAN_INFO[item as keyof typeof GROWTH_KOREAN_INFO]}
+        />
+      );
+    },
+    cell: ({ row }) => {
+      const growth = row.getValue("growth") as PetDtoGrowth;
+      return <div>{GROWTH_KOREAN_INFO[growth]}</div>;
+    },
+  },
+  {
     accessorKey: "weight",
     header: TABLE_HEADER.weight,
     cell: ({ row }) => (
@@ -227,17 +226,17 @@ export const columns: ColumnDef<PetDto>[] = [
     },
   },
   {
-    accessorKey: "mother",
-    header: TABLE_HEADER.mother,
+    accessorKey: "father",
+    header: TABLE_HEADER.father,
     cell: ({ row }) => {
-      const mother = row.original.mother;
-      const status = mother?.status ?? "approved";
-      return mother?.petId ? (
+      const father = row.original.father;
+      const status = father?.status ?? "approved";
+
+      return father?.petId ? (
         <LinkButton
-          href={`/pet/${mother.petId}`}
-          label={mother.name ?? ""}
+          href={`/pet/${father.petId}`}
+          label={father.name ?? ""}
           tooltip="펫 상세 페이지로 이동"
-          // status가 없으면 내 펫
           className={`${STATUS_MAP[status].color} hover:text-accent/80 font-semibold text-white`}
           icon={
             status === UpdateParentRequestDtoStatus.APPROVED ? (
@@ -251,17 +250,17 @@ export const columns: ColumnDef<PetDto>[] = [
     },
   },
   {
-    accessorKey: "father",
-    header: TABLE_HEADER.father,
+    accessorKey: "mother",
+    header: TABLE_HEADER.mother,
     cell: ({ row }) => {
-      const father = row.original.father;
-      const status = father?.status ?? "approved";
-
-      return father?.petId ? (
+      const mother = row.original.mother;
+      const status = mother?.status ?? "approved";
+      return mother?.petId ? (
         <LinkButton
-          href={`/pet/${father.petId}`}
-          label={father.name ?? ""}
+          href={`/pet/${mother.petId}`}
+          label={mother.name ?? ""}
           tooltip="펫 상세 페이지로 이동"
+          // status가 없으면 내 펫
           className={`${STATUS_MAP[status].color} hover:text-accent/80 font-semibold text-white`}
           icon={
             status === UpdateParentRequestDtoStatus.APPROVED ? (

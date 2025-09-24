@@ -6,7 +6,6 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
   ManyToOne,
-  JoinColumn,
 } from 'typeorm';
 import { PairEntity } from '../pair/pair.entity';
 
@@ -21,10 +20,6 @@ export class MatingEntity {
   @Column()
   pairId: number;
 
-  @ManyToOne(() => PairEntity)
-  @JoinColumn({ name: 'pairId', referencedColumnName: 'id' })
-  pair: PairEntity;
-
   @Column({ type: 'date', nullable: true })
   matingDate?: Date;
 
@@ -33,4 +28,7 @@ export class MatingEntity {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @ManyToOne(() => PairEntity)
+  pair: PairEntity;
 }

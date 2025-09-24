@@ -7,6 +7,7 @@ import {
   Patch,
   Delete,
   ConflictException,
+  Query,
 } from '@nestjs/common';
 import {
   CompleteHatchingDto,
@@ -15,17 +16,49 @@ import {
   FindPetByPetIdResponseDto,
   UnlinkParentDto,
   VerifyPetNameDto,
+  PetDto,
+  PetFilterDto,
 } from './pet.dto';
 import { PetService } from './pet.service';
-import { ApiResponse, ApiParam } from '@nestjs/swagger';
+import {
+  ApiResponse,
+  ApiParam,
+  ApiExtraModels,
+  getSchemaPath,
+} from '@nestjs/swagger';
 import { CommonResponseDto } from 'src/common/response.dto';
 import { JwtUser } from 'src/auth/auth.decorator';
 import { JwtUserPayload } from 'src/auth/strategies/jwt.strategy';
 import { CreateParentDto } from 'src/parent_request/parent_request.dto';
+import { PageDto, PageMetaDto } from 'src/common/page.dto';
 
 @Controller('/v1/pet')
 export class PetController {
   constructor(private readonly petService: PetService) {}
+
+  @Get()
+  @ApiExtraModels(PetDto, PageMetaDto)
+  @ApiResponse({
+    status: 200,
+    description: 'BR룸 펫 목록 조회 성공',
+    schema: {
+      type: 'object',
+      required: ['data', 'meta'],
+      properties: {
+        data: {
+          type: 'array',
+          items: { $ref: getSchemaPath(PetDto) },
+        },
+        meta: { $ref: getSchemaPath(PageMetaDto) },
+      },
+    },
+  })
+  async findAll(
+    @Query() pageOptionsDto: PetFilterDto,
+    @JwtUser() token: JwtUserPayload,
+  ): Promise<PageDto<PetDto>> {
+    return this.petService.getPetListFull(pageOptionsDto, token.userId);
+  }
 
   @Post()
   @ApiResponse({
@@ -255,7 +288,7 @@ export class PetController {
     await this.petService.completeHatching(
       petId,
       token.userId,
-      completeHatchingDto.hatchingDate,
+      completeHatchingDto,
     );
 
     return {

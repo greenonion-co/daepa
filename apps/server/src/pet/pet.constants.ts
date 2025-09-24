@@ -1,3 +1,8 @@
+export enum PET_TYPE {
+  EGG = 'EGG',
+  PET = 'PET',
+}
+
 export enum PET_SEX {
   MALE = 'M',
   FEMALE = 'F',
@@ -26,7 +31,6 @@ export enum PET_ADOPTION_LOCATION {
 }
 
 export enum PET_GROWTH {
-  EGG = 'EGG', // 알
   BABY = 'BABY', // 베이비
   JUVENILE = 'JUVENILE', // 아성체
   PRE_ADULT = 'PRE_ADULT', // 준성체
@@ -37,4 +41,5 @@ export enum PET_GROWTH {
 export enum PET_LIST_FILTER_TYPE {
   ALL = 'ALL',
   MY = 'MY',
+  NOT_MY = 'NOT_MY',
 }

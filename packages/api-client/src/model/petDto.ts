@@ -5,10 +5,14 @@
  * Project Daepa API description
  * OpenAPI spec version: 1.0
  */
+import type { PetDtoType } from "./petDtoType";
 import type { UserProfilePublicDto } from "./userProfilePublicDto";
 import type { PetDtoSpecies } from "./petDtoSpecies";
+import type { PetDetailDto } from "./petDetailDto";
+import type { EggDetailDto } from "./eggDetailDto";
 import type { PetDtoGrowth } from "./petDtoGrowth";
 import type { PetDtoSex } from "./petDtoSex";
+import type { PetDtoEggStatus } from "./petDtoEggStatus";
 import type { PetParentDto } from "./petParentDto";
 import type { PetAdoptionDto } from "./petAdoptionDto";
 import type { PetDtoStatus } from "./petDtoStatus";
@@ -17,32 +21,42 @@ import type { PetImageItem } from "./petImageItem";
 export interface PetDto {
   /** 펫 아이디 */
   petId: string;
+  /** 펫 타입(egg/pet) */
+  type?: PetDtoType;
   /** 펫 주인 정보 */
   owner: UserProfilePublicDto;
   /** 펫 이름 */
   name?: string;
   /** 펫 종 */
   species: PetDtoSpecies;
-  /** 펫 모프 */
-  morphs?: string[];
-  /** 펫 형질 */
-  traits?: string[];
   /** 펫 출생일 */
   hatchingDate?: string;
-  /** 펫 성장단계 */
-  growth?: PetDtoGrowth;
   /** 펫 공개 여부 */
   isPublic?: boolean;
-  /** 펫 성별(수컷, 암컷, 미구분) */
-  sex?: PetDtoSex;
-  /** 펫 몸무게(g) */
-  weight?: number;
-  /** 펫 먹이 */
-  foods?: string[];
   /** 펫 이미지 목록 */
   photoOrder?: string[];
   /** 펫 소개말 */
   desc?: string;
+  /** 펫 상세 정보 */
+  petDetail?: PetDetailDto;
+  /** 알 상세 정보 */
+  eggDetail?: EggDetailDto;
+  /** 펫 성장단계 */
+  growth?: PetDtoGrowth;
+  /** 펫 성별(수컷, 암컷, 미구분) */
+  sex?: PetDtoSex;
+  /** 펫 모프 */
+  morphs?: string[];
+  /** 펫 형질 */
+  traits?: string[];
+  /** 펫 먹이 */
+  foods?: string[];
+  /** 펫 몸무게(g) */
+  weight?: number;
+  /** 부화 온도 */
+  temperature?: number;
+  /** 알 상태 */
+  eggStatus?: PetDtoEggStatus;
   /** 아빠 개체 정보 */
   father?: PetParentDto;
   /** 엄마 개체 정보 */

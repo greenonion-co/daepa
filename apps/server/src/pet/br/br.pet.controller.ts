@@ -44,7 +44,7 @@ export class BrPetController {
     @Query() pageOptionsDto: PetFilterDto,
     @JwtUser() token: JwtUserPayload,
   ): Promise<PageDto<PetDto>> {
-    return this.petService.getPetListFull(pageOptionsDto, token.userId);
+    return this.petService.getBrPetListFull(pageOptionsDto, token.userId);
   }
 
   @Get('hatching/year/:year')

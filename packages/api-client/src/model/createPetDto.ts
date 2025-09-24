@@ -5,37 +5,41 @@
  * Project Daepa API description
  * OpenAPI spec version: 1.0
  */
+import type { CreatePetDtoType } from "./createPetDtoType";
 import type { CreatePetDtoSpecies } from "./createPetDtoSpecies";
 import type { CreatePetDtoGrowth } from "./createPetDtoGrowth";
 import type { CreatePetDtoSex } from "./createPetDtoSex";
 import type { CreateParentDto } from "./createParentDto";
 import type { UpsertPetImageDto } from "./upsertPetImageDto";
+import type { CreatePetDtoEggStatus } from "./createPetDtoEggStatus";
 
 export interface CreatePetDto {
+  /** 펫 타입 */
+  type?: CreatePetDtoType;
   /** 펫 이름 */
   name?: string;
   /** 펫 종 */
   species: CreatePetDtoSpecies;
-  /** 펫 모프 */
-  morphs?: string[];
-  /** 펫 형질 */
-  traits?: string[];
   /** 펫 출생일 */
   hatchingDate?: string;
-  /** 펫 성장단계 */
-  growth?: CreatePetDtoGrowth;
   /** 펫 공개 여부 */
   isPublic?: boolean;
-  /** 펫 성별(수컷, 암컷, 미구분) */
-  sex?: CreatePetDtoSex;
-  /** 펫 몸무게(g) */
-  weight?: number;
-  /** 펫 먹이 */
-  foods?: string[];
   /** 펫 이미지 목록 */
   photoOrder?: string[];
   /** 펫 소개말 */
   desc?: string;
+  /** 펫 성장단계 */
+  growth?: CreatePetDtoGrowth;
+  /** 펫 성별(수컷, 암컷, 미구분) */
+  sex?: CreatePetDtoSex;
+  /** 펫 모프 */
+  morphs?: string[];
+  /** 펫 형질 */
+  traits?: string[];
+  /** 펫 먹이 */
+  foods?: string[];
+  /** 펫 몸무게(g) */
+  weight?: number;
   /** 아빠 개체 정보 */
   father?: CreateParentDto;
   /** 엄마 개체 정보 */
@@ -54,4 +58,6 @@ export interface CreatePetDto {
   clutchOrder?: number;
   /** 펫 이미지 목록 */
   photos?: UpsertPetImageDto[];
+  /** 알 상태 */
+  eggStatus?: CreatePetDtoEggStatus;
 }

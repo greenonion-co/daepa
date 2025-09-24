@@ -5,18 +5,18 @@
  * Project Daepa API description
  * OpenAPI spec version: 1.0
  */
-import type { UserProfilePublicDtoRole } from "./userProfilePublicDtoRole";
 import type { UserProfilePublicDtoStatus } from "./userProfilePublicDtoStatus";
+import type { UserProfilePublicDtoRole } from "./userProfilePublicDtoRole";
 
 export interface UserProfilePublicDto {
-  /** 회원 고유 ID */
-  userId: string;
-  /** 회원 이름 */
-  name: string;
-  /** 회원 역할 */
-  role: UserProfilePublicDtoRole;
-  /** 사업자 여부 */
-  isBiz: boolean;
   /** 유저 상태 */
   status: UserProfilePublicDtoStatus;
+  /** 회원 고유 ID */
+  userId?: string;
+  /** 회원 이름 */
+  name?: string;
+  /** 회원 역할 */
+  role?: UserProfilePublicDtoRole;
+  /** 사업자 여부 */
+  isBiz?: boolean;
 }

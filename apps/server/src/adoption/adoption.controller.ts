@@ -83,10 +83,10 @@ export class AdoptionController {
     status: 404,
     description: '분양 정보를 찾을 수 없음',
   })
-  async getAdoptionByAdoptionId(
+  async getAdoption(
     @Param('adoptionId') adoptionId: string,
   ): Promise<AdoptionDetailResponseDto> {
-    const data = await this.adoptionService.findByAdoptionId(adoptionId);
+    const data = await this.adoptionService.findOne({ adoptionId });
     return {
       success: true,
       message: '펫별 분양 정보 조회 성공',
