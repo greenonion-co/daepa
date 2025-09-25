@@ -11,8 +11,6 @@ import {
   brMatingControllerFindAll,
   CompleteHatchingDto,
   petControllerCompleteHatching,
-  UpdatePetDto,
-  UpdatePetDtoGrowth,
 } from "@repo/api-client";
 import { toast } from "sonner";
 import { AxiosError } from "axios";
@@ -41,9 +39,8 @@ const CompleteHatchingModal = ({
 }: CompleteHatchingModalProps) => {
   const queryClient = useQueryClient();
   const { duplicateCheckStatus } = useNameStore();
-  const [formData, setFormData] = useState<UpdatePetDto>({
+  const [formData, setFormData] = useState<CompleteHatchingDto>({
     hatchingDate: format(new Date(), "yyyy-MM-dd"),
-    growth: UpdatePetDtoGrowth.BABY,
     name: "",
     desc: "",
   });
