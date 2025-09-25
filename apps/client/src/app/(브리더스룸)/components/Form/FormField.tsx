@@ -3,7 +3,12 @@ import { FieldName, FormErrors, FormStep } from "../../register/types";
 import NumberField from "./NumberField";
 import Close from "@mui/icons-material/Close";
 import ParentLink from "../../pet/components/ParentLink";
-import { GENDER_KOREAN_INFO, GROWTH_KOREAN_INFO, SPECIES_KOREAN_INFO } from "../../constants";
+import {
+  EGG_STATUS_KOREAN_INFO,
+  GENDER_KOREAN_INFO,
+  GROWTH_KOREAN_INFO,
+  SPECIES_KOREAN_INFO,
+} from "../../constants";
 import { toast } from "sonner";
 import { CalendarIcon, InfoIcon } from "lucide-react";
 import { useSelect } from "../../register/hooks/useSelect";
@@ -13,7 +18,13 @@ import { usePathname } from "next/navigation";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
-import { PetDtoGrowth, PetDtoSex, PetDtoSpecies, UnlinkParentDtoRole } from "@repo/api-client";
+import {
+  EggDetailDtoStatus,
+  PetDtoGrowth,
+  PetDtoSex,
+  PetDtoSpecies,
+  UnlinkParentDtoRole,
+} from "@repo/api-client";
 import DndImagePicker from "./DndImagePicker";
 import NameInput from "../NameInput";
 
@@ -159,7 +170,9 @@ export const FormField = ({
                 ? (SPECIES_KOREAN_INFO[value as PetDtoSpecies] ?? placeholder)
                 : name === "growth"
                   ? (GROWTH_KOREAN_INFO[value as PetDtoGrowth] ?? placeholder)
-                  : ((value as string) ?? placeholder)}
+                  : name === "eggStatus"
+                    ? (EGG_STATUS_KOREAN_INFO[value as EggDetailDtoStatus] ?? placeholder)
+                    : ((value as string) ?? placeholder)}
           </div>
         );
       case "multipleSelect":

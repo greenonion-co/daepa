@@ -7,6 +7,7 @@ import {
   PetDto,
   petControllerUpdate,
   petControllerFindPetByPetId,
+  PetDtoType,
 } from "@repo/api-client";
 import { toast } from "sonner";
 
@@ -19,6 +20,8 @@ import CardBackActions from "./components/CardBackActions";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useUserStore } from "@/app/(브리더스룸)/store/user";
 import { isNil, orderBy, pick, pickBy } from "es-toolkit";
+import { useNameStore } from "@/app/(브리더스룸)/store/name";
+import { DUPLICATE_CHECK_STATUS } from "@/app/(브리더스룸)/register/types";
 
 interface CardBackProps {
   pet: PetDto;
@@ -29,6 +32,7 @@ interface CardBackProps {
 const CardBack = memo(({ pet, from, isWideScreen }: CardBackProps) => {
   const queryClient = useQueryClient();
   const { formData, setFormData, setPage } = usePetStore();
+  const { duplicateCheckStatus } = useNameStore();
   const { user } = useUserStore();
   const isMyPet = !!user && user.userId === pet.owner.userId;
   const [isEditing, setIsEditing] = useState(from === "egg");
@@ -77,6 +81,11 @@ const CardBack = memo(({ pet, from, isWideScreen }: CardBackProps) => {
     try {
       if (!pet.petId) return;
 
+      if (pet.name !== formData.name && duplicateCheckStatus !== DUPLICATE_CHECK_STATUS.AVAILABLE) {
+        toast.error("이름 중복확인을 완료해주세요.");
+        return;
+      }
+
       const pickedData = pick(formData, [
         "name",
         "species",
@@ -89,6 +98,8 @@ const CardBack = memo(({ pet, from, isWideScreen }: CardBackProps) => {
         "hatchingDate",
         "weight",
         "photos",
+        "temperature",
+        "eggStatus",
       ]);
       const updateData = pickBy(pickedData, (value) => !isNil(value));
       await mutateUpdatePet(updateData);
@@ -101,7 +112,7 @@ const CardBack = memo(({ pet, from, isWideScreen }: CardBackProps) => {
       console.error("Failed to update pet:", error);
       toast.error("펫 정보 수정에 실패했습니다.");
     }
-  }, [formData, queryClient, mutateUpdatePet, pet.petId]);
+  }, [formData, queryClient, mutateUpdatePet, pet.petId, duplicateCheckStatus, pet.name]);
 
   const handleEditToggle = useCallback(() => {
     setIsEditing(!isEditing);
@@ -129,7 +140,11 @@ const CardBack = memo(({ pet, from, isWideScreen }: CardBackProps) => {
         <PedigreeSection petId={pet.petId} isMyPet={isMyPet} />
 
         {/* 사육 정보 */}
-        <BreedingInfoSection isEditing={isEditing} isTooltipOpen={isTooltipOpen} />
+        <BreedingInfoSection
+          isEgg={pet.type === PetDtoType.EGG}
+          isEditing={isEditing}
+          isTooltipOpen={isTooltipOpen}
+        />
       </div>
 
       {/* 하단 고정 버튼 영역 */}

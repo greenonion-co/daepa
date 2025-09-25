@@ -20,7 +20,8 @@ export type FieldName =
   | "layingDate"
   | "status"
   | "isPublic"
-  | "eggStatus";
+  | "eggStatus"
+  | "temperature";
 
 export type PhotoItem = {
   fileName: string;

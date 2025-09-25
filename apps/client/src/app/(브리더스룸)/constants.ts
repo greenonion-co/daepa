@@ -127,7 +127,26 @@ export const OPTION_STEPS: FormStep[] = [
       validation: (value) => value.length > 0,
     },
   },
-
+  {
+    title: "해칭 온도",
+    field: {
+      name: "temperature",
+      type: "number",
+      required: false,
+      unit: "°C",
+      placeholder: "해칭 온도를 입력해주세요",
+      validation: (value) => !isNaN(Number(value)) && Number(value) > 0,
+    },
+  },
+  {
+    title: "알 상태",
+    field: {
+      name: "eggStatus",
+      type: "select",
+      required: false,
+      placeholder: "알 상태를 선택해주세요",
+    },
+  },
   {
     title: "상세 설명",
     field: {
