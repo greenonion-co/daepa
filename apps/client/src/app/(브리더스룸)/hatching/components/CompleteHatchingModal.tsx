@@ -9,8 +9,8 @@ import CalendarInput from "./CalendarInput";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   brMatingControllerFindAll,
-  petControllerUpdate,
-  PetDtoGrowth,
+  CompleteHatchingDto,
+  petControllerCompleteHatching,
   UpdatePetDto,
   UpdatePetDtoGrowth,
 } from "@repo/api-client";
@@ -20,15 +20,7 @@ import { useState } from "react";
 import { format, isBefore } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { GROWTH_KOREAN_INFO } from "../../constants";
 import NameInput from "../../components/NameInput";
 import { cn } from "@/lib/utils";
 import { useNameStore } from "../../store/name";
@@ -57,7 +49,7 @@ const CompleteHatchingModal = ({
   });
 
   const { mutateAsync: mutateHatched } = useMutation({
-    mutationFn: (formData: UpdatePetDto) => petControllerUpdate(petId, formData),
+    mutationFn: (formData: CompleteHatchingDto) => petControllerCompleteHatching(petId, formData),
   });
 
   const handleSubmit = async () => {
@@ -109,27 +101,6 @@ const CompleteHatchingModal = ({
                 disabled={(date) => isBefore(date, new Date(layingDate))}
               />
             </div>
-          </div>
-
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="species">크기*</Label>
-            <Select
-              value={formData.growth}
-              onValueChange={(value: PetDtoGrowth) =>
-                setFormData((prev) => ({ ...prev, growth: value }))
-              }
-            >
-              <SelectTrigger className="col-span-3 w-full text-[16px]">
-                <SelectValue placeholder="크기를 선택하세요" />
-              </SelectTrigger>
-              <SelectContent>
-                {Object.values(PetDtoGrowth).map((growth) => (
-                  <SelectItem key={growth} value={growth} className="text-[16px]">
-                    {GROWTH_KOREAN_INFO[growth]}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
           </div>
 
           <div className="grid grid-cols-4 items-center gap-4">
