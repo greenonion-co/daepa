@@ -67,11 +67,9 @@ export class LayingService {
           }),
         }));
 
-        await Promise.all(
-          petDtos.map((petDto) =>
-            this.petService.createPet(petDto, ownerId, entityManager),
-          ),
-        );
+        for (const petDto of petDtos) {
+          await this.petService.createPet(petDto, ownerId, entityManager);
+        }
       }
 
       return savedLaying;
