@@ -117,14 +117,16 @@ export class MatingService {
     const order = (pageOptionsDto.order ?? 'DESC') as 'ASC' | 'DESC';
     baseQb.orderBy('matings.id', order);
 
-    const totalCount = await baseQb.getCount();
     const matingsEntities = await baseQb
       .skip(pageOptionsDto.skip)
       .take(pageOptionsDto.itemPerPage)
       .getMany();
 
     if (!matingsEntities.length) {
-      const pageMetaDto = new PageMetaDto({ totalCount, pageOptionsDto });
+      const pageMetaDto = new PageMetaDto({
+        totalCount: 0,
+        pageOptionsDto,
+      });
       return new PageDto([], pageMetaDto);
     }
 
@@ -318,7 +320,10 @@ export class MatingService {
     );
 
     const result = this.formatResponseByDate(combinedFromMaps);
-    const pageMetaDto = new PageMetaDto({ totalCount, pageOptionsDto });
+    const pageMetaDto = new PageMetaDto({
+      totalCount: result.length,
+      pageOptionsDto,
+    });
     return new PageDto(result, pageMetaDto);
   }
 

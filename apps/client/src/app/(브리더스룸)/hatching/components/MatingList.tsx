@@ -190,7 +190,9 @@ const MatingList = memo(() => {
       {isCreateFormOpen && <CreateMatingForm onClose={() => setIsCreateFormOpen(false)} />}
       {/* 필터 */}
       <Filters />
-      <div className="m-2 text-sm text-gray-600 dark:text-gray-400">검색 결과: {totalCount}개</div>
+      <div className="m-2 text-sm text-gray-600 dark:text-gray-400">
+        총 {totalCount}쌍의 페어가 존재합니다.
+      </div>
       <ScrollArea>
         <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
           {items.map((matingGroup, index) => (
