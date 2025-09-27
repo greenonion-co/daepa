@@ -44,9 +44,8 @@ export class LayingService {
       const savedLaying = await entityManager.save(LayingEntity, layingEntity);
 
       // clutchCount만큼 펫을 배치로 생성
-      if (createLayingDto.clutchCount && createLayingDto.clutchCount > 0) {
-        const { clutchCount, temperature, species } = createLayingDto;
-
+      const { clutchCount, temperature, species } = createLayingDto;
+      if (clutchCount && clutchCount > 0) {
         // 펫 생성 DTO들을 미리 준비
         const petDtos: CreatePetDto[] = range(1, clutchCount + 1).map((i) => ({
           species,
@@ -68,9 +67,9 @@ export class LayingService {
           }),
         }));
 
-        await Promise.all(
-          petDtos.map((petDto) => this.petService.createPet(petDto, ownerId)),
-        );
+        for (const petDto of petDtos) {
+          await this.petService.createPet(petDto, ownerId, entityManager);
+        }
       }
 
       return savedLaying;
@@ -78,17 +77,11 @@ export class LayingService {
   }
 
   async updateLaying(id: number, updateLayingDto: UpdateLayingDto) {
-    return this.dataSource.transaction(async (entityManager: EntityManager) => {
-      // 존재 여부와 업데이트를 한 번에 처리
-      const result = await entityManager.update(
-        LayingEntity,
-        { id },
-        updateLayingDto,
-      );
+    // 존재 여부와 업데이트를 한 번에 처리
+    const result = await this.layingRepository.update({ id }, updateLayingDto);
 
-      if (result.affected === 0) {
-        throw new NotFoundException('산란 정보를 찾을 수 없습니다.');
-      }
-    });
+    if (result.affected === 0) {
+      throw new NotFoundException('산란 정보를 찾을 수 없습니다.');
+    }
   }
 }

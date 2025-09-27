@@ -371,12 +371,15 @@ export class ParentRequestService {
     return { childPet, parentPet };
   }
 
-  async getParentsWithRequestStatus(petId: string): Promise<{
+  async getParentsWithRequestStatus(
+    petId: string,
+    manager?: EntityManager,
+  ): Promise<{
     father: PetParentDto | null;
     mother: PetParentDto | null;
   }> {
-    return this.dataSource.transaction(async (entityManager: EntityManager) => {
-      const parentData = await entityManager
+    const run = async (em: EntityManager) => {
+      const parentData = await em
         .createQueryBuilder(ParentRequestEntity, 'pr')
         .leftJoin(PetEntity, 'p', 'p.petId = pr.parentPetId')
         .leftJoin(PetDetailEntity, 'pd', 'pd.petId = pr.parentPetId')
@@ -438,6 +441,14 @@ export class ParentRequestService {
       }
 
       return { father, mother };
+    };
+
+    if (manager) {
+      return await run(manager);
+    }
+
+    return this.dataSource.transaction(async (entityManager: EntityManager) => {
+      return await run(entityManager);
     });
   }
 

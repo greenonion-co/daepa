@@ -18,7 +18,6 @@ import type {
   CreateInitUserInfoDto,
   CreateLayingDto,
   CreateMatingDto,
-  CreatePairDto,
   CreateParentDto,
   CreatePetDto,
   DeleteUserNotificationDto,
@@ -31,7 +30,6 @@ import type {
   UpdateParentRequestDto,
   UpdatePetDto,
   UpdateUserNotificationDto,
-  UploadImagesRequestDto,
   UserNotificationControllerFindAllParams,
   VerifyEmailDto,
   VerifyNameDto,
@@ -407,27 +405,6 @@ export const layingControllerUpdate = (id: number, updateLayingDto: UpdateLaying
   });
 };
 
-export const pairControllerCreate = (createPairDto: CreatePairDto) => {
-  return useCustomInstance<CommonResponseDto>({
-    url: `http://localhost:4000/api/v1/pairs`,
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    data: createPairDto,
-  });
-};
-
-export const fileControllerUploadImages = (uploadImagesRequestDto: UploadImagesRequestDto) => {
-  const formData = new FormData();
-  uploadImagesRequestDto.files.forEach((value) => formData.append(`files`, value));
-
-  return useCustomInstance<string[]>({
-    url: `http://localhost:4000/api/v1/file/upload`,
-    method: "POST",
-    headers: { "Content-Type": "multipart/form-data" },
-    data: formData,
-  });
-};
-
 export const brUserControllerGetUsers = (params?: BrUserControllerGetUsersParams) => {
   return useCustomInstance<BrUserControllerGetUsers200>({
     url: `http://localhost:4000/api/v1/br/user`,
@@ -552,12 +529,6 @@ export type LayingControllerCreateResult = NonNullable<
 >;
 export type LayingControllerUpdateResult = NonNullable<
   Awaited<ReturnType<typeof layingControllerUpdate>>
->;
-export type PairControllerCreateResult = NonNullable<
-  Awaited<ReturnType<typeof pairControllerCreate>>
->;
-export type FileControllerUploadImagesResult = NonNullable<
-  Awaited<ReturnType<typeof fileControllerUploadImages>>
 >;
 export type BrUserControllerGetUsersResult = NonNullable<
   Awaited<ReturnType<typeof brUserControllerGetUsers>>
@@ -3437,17 +3408,6 @@ export const getLayingControllerUpdateResponseMock = (
   ...overrideResponse,
 });
 
-export const getPairControllerCreateResponseMock = (
-  overrideResponse: Partial<CommonResponseDto> = {},
-): CommonResponseDto => ({
-  success: faker.datatype.boolean(),
-  message: faker.string.alpha(20),
-  ...overrideResponse,
-});
-
-export const getFileControllerUploadImagesResponseMock = (): string[] =>
-  Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, () => faker.word.sample());
-
 export const getBrUserControllerGetUsersResponseMock = (
   overrideResponse: Partial<BrUserControllerGetUsers200> = {},
 ): BrUserControllerGetUsers200 => ({
@@ -4343,50 +4303,6 @@ export const getLayingControllerUpdateMockHandler = (
   });
 };
 
-export const getPairControllerCreateMockHandler = (
-  overrideResponse?:
-    | CommonResponseDto
-    | ((
-        info: Parameters<Parameters<typeof http.post>[1]>[0],
-      ) => Promise<CommonResponseDto> | CommonResponseDto),
-) => {
-  return http.post("*/api/v1/pairs", async (info) => {
-    await delay(1000);
-
-    return new HttpResponse(
-      JSON.stringify(
-        overrideResponse !== undefined
-          ? typeof overrideResponse === "function"
-            ? await overrideResponse(info)
-            : overrideResponse
-          : getPairControllerCreateResponseMock(),
-      ),
-      { status: 201, headers: { "Content-Type": "application/json" } },
-    );
-  });
-};
-
-export const getFileControllerUploadImagesMockHandler = (
-  overrideResponse?:
-    | string[]
-    | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<string[]> | string[]),
-) => {
-  return http.post("*/api/v1/file/upload", async (info) => {
-    await delay(1000);
-
-    return new HttpResponse(
-      JSON.stringify(
-        overrideResponse !== undefined
-          ? typeof overrideResponse === "function"
-            ? await overrideResponse(info)
-            : overrideResponse
-          : getFileControllerUploadImagesResponseMock(),
-      ),
-      { status: 200, headers: { "Content-Type": "application/json" } },
-    );
-  });
-};
-
 export const getBrUserControllerGetUsersMockHandler = (
   overrideResponse?:
     | BrUserControllerGetUsers200
@@ -4449,7 +4365,5 @@ export const getProjectDaepaAPIMock = () => [
   getParentRequestControllerUpdateStatusMockHandler(),
   getLayingControllerCreateMockHandler(),
   getLayingControllerUpdateMockHandler(),
-  getPairControllerCreateMockHandler(),
-  getFileControllerUploadImagesMockHandler(),
   getBrUserControllerGetUsersMockHandler(),
 ];

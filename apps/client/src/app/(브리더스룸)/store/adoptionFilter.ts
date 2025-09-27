@@ -6,7 +6,7 @@ export const useAdoptionFilterStore = create<
   FilterStore<AdoptionControllerGetAllAdoptionsParams>
 >()((set) => ({
   searchFilters: {},
-  columnFilters: undefined,
+  columnFilters: {},
 
   // Actions
   setSearchFilters: (filters) => set({ searchFilters: filters }),

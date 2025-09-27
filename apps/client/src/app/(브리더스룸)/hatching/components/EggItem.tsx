@@ -1,7 +1,10 @@
 import {
   brMatingControllerFindAll,
   petControllerDeletePet,
+  petControllerUpdate,
   PetSummaryLayingDto,
+  UpdatePetDto,
+  UpdatePetDtoEggStatus,
 } from "@repo/api-client";
 import { CheckSquare, Edit, Egg, Thermometer, Trash2 } from "lucide-react";
 import Link from "next/link";
@@ -15,6 +18,13 @@ import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { AxiosError } from "axios";
 import { toast } from "sonner";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface EggItemProps {
   pet: PetSummaryLayingDto;
@@ -24,6 +34,10 @@ interface EggItemProps {
 const EggItem = ({ pet, layingDate }: EggItemProps) => {
   const queryClient = useQueryClient();
   const isHatched = !!pet.hatchingDate;
+
+  const { mutateAsync: updateEggStatus } = useMutation({
+    mutationFn: (data: UpdatePetDto) => petControllerUpdate(pet.petId, data),
+  });
 
   const { mutateAsync: deleteEgg } = useMutation({
     mutationFn: petControllerDeletePet,
@@ -101,9 +115,30 @@ const EggItem = ({ pet, layingDate }: EggItemProps) => {
       {!isHatched ? (
         <div className="flex items-center">
           {pet.temperature && (
-            <div className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400">
-              <Thermometer className="h-3 w-3" />
-              <span>{pet.temperature}°C</span>
+            <div className="flex flex-col items-center gap-1 text-sm text-gray-600 dark:text-gray-400">
+              <div className="flex items-center gap-1">
+                <Thermometer className="h-3 w-3" />
+                <span>{pet.temperature}°C</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <Select
+                  value={pet.eggStatus}
+                  onValueChange={async (value: UpdatePetDtoEggStatus) => {
+                    await updateEggStatus({ eggStatus: value });
+                    toast.success("상태가 변경되었습니다.");
+                    queryClient.invalidateQueries({ queryKey: [brMatingControllerFindAll.name] });
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="알 상태" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="FERTILIZED">유정란</SelectItem>
+                    <SelectItem value="UNFERTILIZED">무정란</SelectItem>
+                    <SelectItem value="DEAD">중지</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           )}
           <DropdownMenuIcon

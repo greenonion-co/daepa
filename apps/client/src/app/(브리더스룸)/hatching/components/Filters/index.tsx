@@ -1,7 +1,7 @@
 import { useSelect } from "../../../register/hooks/useSelect";
 import { useMatingFilterStore } from "../../../store/matingFilter";
-import { SPECIES_KOREAN_INFO } from "../../../constants";
-import { PetDtoSex, PetDtoSpecies } from "@repo/api-client";
+import { EGG_STATUS_KOREAN_INFO, SPECIES_KOREAN_INFO } from "../../../constants";
+import { EggDetailDtoStatus, PetDtoSex, PetDtoSpecies } from "@repo/api-client";
 import CalendarInput from "../CalendarInput";
 import { overlay } from "overlay-kit";
 import ParentSearchSelector from "../../../components/selector/parentSearch";
@@ -13,6 +13,7 @@ const Filters = () => {
   const { handleSelect } = useSelect();
   const {
     species,
+    eggStatus,
     father,
     mother,
     startDate,
@@ -20,6 +21,7 @@ const Filters = () => {
     setSpecies,
     setFather,
     setMother,
+    setEggStatus,
     setStartDate,
     setEndDate,
     reset,
@@ -48,6 +50,22 @@ const Filters = () => {
 
   return (
     <div className="flex w-full items-center gap-2 overflow-x-auto overflow-y-hidden whitespace-nowrap p-2">
+      <FilterItem
+        value={eggStatus ? EGG_STATUS_KOREAN_INFO[eggStatus] : undefined}
+        placeholder="알 상태"
+        onClick={() => {
+          handleSelect({
+            type: "eggStatus",
+            value: eggStatus ?? "",
+            handleNext: ({ value }) => {
+              setEggStatus(value as EggDetailDtoStatus);
+            },
+          });
+        }}
+        onClose={() => {
+          setEggStatus(null);
+        }}
+      />
       <FilterItem
         value={species ? SPECIES_KOREAN_INFO[species] : undefined}
         placeholder="종"

@@ -1,9 +1,14 @@
 "use client";
 
 import BottomSheet from "@/components/common/BottomSheet";
-import { GENDER_KOREAN_INFO, GROWTH_KOREAN_INFO, SPECIES_KOREAN_INFO } from "../../constants";
+import {
+  EGG_STATUS_KOREAN_INFO,
+  GENDER_KOREAN_INFO,
+  GROWTH_KOREAN_INFO,
+  SPECIES_KOREAN_INFO,
+} from "../../constants";
 import { useEffect, useState } from "react";
-import { PetDtoGrowth, PetDtoSpecies } from "@repo/api-client";
+import { EggDetailDtoStatus, PetDtoGrowth, PetDtoSpecies } from "@repo/api-client";
 import { PetDtoSex } from "@repo/api-client";
 
 interface SelectorProps {
@@ -16,6 +21,21 @@ interface SelectorProps {
   type?: string;
   onExit: () => void;
 }
+
+const getDisplayLabel = (item: string, type?: string) => {
+  switch (type) {
+    case "sex":
+      return GENDER_KOREAN_INFO[item as PetDtoSex] ?? item;
+    case "species":
+      return SPECIES_KOREAN_INFO[item as PetDtoSpecies] ?? item;
+    case "growth":
+      return GROWTH_KOREAN_INFO[item as PetDtoGrowth] ?? item;
+    case "eggStatus":
+      return EGG_STATUS_KOREAN_INFO[item as EggDetailDtoStatus] ?? item;
+    default:
+      return item;
+  }
+};
 
 const SelectButton = ({
   item,
@@ -37,13 +57,7 @@ const SelectButton = ({
     } `}
     onClick={onClick}
   >
-    {type === "sex"
-      ? GENDER_KOREAN_INFO[item as PetDtoSex]
-      : type === "species"
-        ? SPECIES_KOREAN_INFO[item as PetDtoSpecies]
-        : type === "growth"
-          ? GROWTH_KOREAN_INFO[item as PetDtoGrowth]
-          : item}
+    {getDisplayLabel(item, type)}
   </button>
 );
 

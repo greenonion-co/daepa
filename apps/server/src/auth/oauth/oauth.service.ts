@@ -5,7 +5,7 @@ import { catchError, firstValueFrom } from 'rxjs';
 import { ProviderInfo } from '../auth.types';
 import { OauthEntity } from './oauth.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindOptionsWhere, Repository } from 'typeorm';
+import { DataSource, FindOptionsWhere, Repository } from 'typeorm';
 import { instanceToPlain } from 'class-transformer';
 import { plainToInstance } from 'class-transformer';
 import { OauthDto } from './oauth.dto';
@@ -24,6 +24,7 @@ export class OauthService {
     @InjectRepository(OauthEntity)
     private readonly oauthRepository: Repository<OauthEntity>,
     private readonly httpService: HttpService,
+    private readonly dataSource: DataSource,
   ) {}
 
   async findOne(where: FindOptionsWhere<OauthEntity>) {
@@ -45,15 +46,30 @@ export class OauthService {
     return oauthEntities;
   }
 
-  async findAllProvidersByEmail(email: string): Promise<OAUTH_PROVIDER[]> {
-    const oauthEntities = await this.oauthRepository.find({
-      where: {
-        email,
-      },
-      select: ['provider'],
-    });
+  async findAllProvidersByEmail(
+    email: string,
+    manager?: EntityManager,
+  ): Promise<OAUTH_PROVIDER[]> {
+    const run = async (em: EntityManager) => {
+      const oauthEntities = await em.find(OauthEntity, {
+        where: {
+          email,
+        },
+        select: ['provider'],
+      });
 
-    return oauthEntities.map((oauth) => oauth.provider);
+      return oauthEntities.map((oauth) => oauth.provider);
+    };
+
+    if (manager) {
+      return await run(manager);
+    }
+
+    return await this.dataSource.transaction(
+      async (entityManager: EntityManager) => {
+        return await run(entityManager);
+      },
+    );
   }
 
   async createOauthInfo(providerInfo: { userId: string } & ProviderInfo) {

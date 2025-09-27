@@ -26,11 +26,12 @@ import { Card } from "@/components/ui/card";
 const MatingList = memo(() => {
   const { ref, inView } = useInView();
   const queryClient = useQueryClient();
-  const { species, father, mother, startDate, endDate } = useMatingFilterStore();
+  const { species, father, mother, startDate, endDate, eggStatus } = useMatingFilterStore();
   const [isCreateFormOpen, setIsCreateFormOpen] = useState(false);
   const itemPerPage = 10;
 
-  const hasFilter = !!species || !!father?.petId || !!mother?.petId || !!startDate || !!endDate;
+  const hasFilter =
+    !!species || !!father?.petId || !!mother?.petId || !!startDate || !!endDate || !!eggStatus;
 
   // 메이팅 조회 (무한 스크롤)
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useInfiniteQuery({
@@ -41,6 +42,7 @@ const MatingList = memo(() => {
       mother?.petId,
       startDate,
       endDate,
+      eggStatus,
     ],
     queryFn: ({ pageParam = 1 }) => {
       const startYmd = startDate ? format(startDate, "yyyy-MM-dd") : undefined;
@@ -52,6 +54,7 @@ const MatingList = memo(() => {
           motherId: mother?.petId,
           startYmd,
           endYmd,
+          eggStatus: eggStatus ?? undefined,
         },
         isNil,
       );

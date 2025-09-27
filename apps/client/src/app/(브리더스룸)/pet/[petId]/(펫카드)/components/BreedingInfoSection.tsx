@@ -5,7 +5,6 @@ import {
   SELECTOR_CONFIGS,
 } from "@/app/(브리더스룸)/constants";
 import { FieldName, FormStep } from "@/app/(브리더스룸)/register/types";
-import { PetSummaryDto } from "@repo/api-client";
 
 import { usePetStore } from "@/app/(브리더스룸)/register/store/pet";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
@@ -16,106 +15,111 @@ import { memo, useCallback, useMemo } from "react";
 import { overlay } from "overlay-kit";
 import MultipleSelector from "@/app/(브리더스룸)/components/selector/multiple";
 
+const PET_REQUIRED_FIELDS = ["name", "sex", "growth", "morphs", "species"];
+const EGG_REQUIRED_FIELDS = ["name", "species", "growth", "temperature", "eggStatus"];
+const PET_DETAIL_FIELDS = ["traits", "foods", "hatchingDate", "weight", "desc", "photos"];
+const EGG_DETAIL_FIELDS = ["temperature", "eggStatus"];
+
 interface BreedingInfoSectionProps {
+  isEgg: boolean;
   isEditing: boolean;
   isTooltipOpen: boolean;
 }
 
-const BreedingInfoSection = memo(({ isEditing, isTooltipOpen }: BreedingInfoSectionProps) => {
-  const { formData, errors, setFormData } = usePetStore();
+const BreedingInfoSection = memo(
+  ({ isEgg = false, isEditing, isTooltipOpen }: BreedingInfoSectionProps) => {
+    const { formData, errors, setFormData } = usePetStore();
 
-  const visibleFields = useMemo(
-    () => [
-      ...[...FORM_STEPS].reverse(),
-      ...OPTION_STEPS.filter((step) =>
-        ["traits", "foods", "hatchingDate", "weight", "name", "desc", "photos"].includes(
-          step.field.name,
-        ),
-      ),
-    ],
-    [],
-  );
+    const visibleFields = useMemo(() => {
+      const requiredFields = isEgg ? EGG_REQUIRED_FIELDS : PET_REQUIRED_FIELDS;
+      const detailFields = isEgg ? EGG_DETAIL_FIELDS : PET_DETAIL_FIELDS;
+      return [
+        ...FORM_STEPS.filter((step) => requiredFields.includes(step.field.name)),
+        ...OPTION_STEPS.filter((step) => detailFields.includes(step.field.name)),
+      ];
+    }, [isEgg]);
 
-  const handleChange = useCallback(
-    (value: { type: FieldName; value: string | string[] | PetSummaryDto | null }) => {
-      if (!isEditing) return;
-      setFormData((prev) => ({ ...prev, [value.type]: value.value }));
-    },
-    [isEditing, setFormData],
-  );
+    const handleChange = useCallback(
+      (value: { type: FieldName; value: string | string[] | null }) => {
+        if (!isEditing) return;
+        setFormData((prev) => ({ ...prev, [value.type]: value.value }));
+      },
+      [isEditing, setFormData],
+    );
 
-  const getSelectList = useCallback(
-    (type: FieldName) => {
-      switch (type) {
-        case "morphs":
-          return (
-            MORPH_LIST_BY_SPECIES[formData.species as keyof typeof MORPH_LIST_BY_SPECIES] ?? []
-          );
-        default:
-          return SELECTOR_CONFIGS[type as keyof typeof SELECTOR_CONFIGS].selectList ?? [];
-      }
-    },
-    [formData.species],
-  );
+    const getSelectList = useCallback(
+      (type: FieldName) => {
+        switch (type) {
+          case "morphs":
+            return (
+              MORPH_LIST_BY_SPECIES[formData.species as keyof typeof MORPH_LIST_BY_SPECIES] ?? []
+            );
+          default:
+            return SELECTOR_CONFIGS[type as keyof typeof SELECTOR_CONFIGS].selectList ?? [];
+        }
+      },
+      [formData.species],
+    );
 
-  const handleMultipleSelect = useCallback(
-    (type: FieldName) => {
-      overlay.open(({ isOpen, close, unmount }) => (
-        <MultipleSelector
-          isOpen={isOpen}
-          onCloseAction={close}
-          onSelectAction={(value) => {
-            handleChange({ type, value });
-            close();
-          }}
-          selectList={getSelectList(type) || []}
-          initialValue={formData[type]}
-          onExit={unmount}
+    const handleMultipleSelect = useCallback(
+      (type: FieldName) => {
+        overlay.open(({ isOpen, close, unmount }) => (
+          <MultipleSelector
+            isOpen={isOpen}
+            onCloseAction={close}
+            onSelectAction={(value) => {
+              handleChange({ type, value });
+              close();
+            }}
+            selectList={getSelectList(type) || []}
+            initialValue={formData[type]}
+            onExit={unmount}
+          />
+        ));
+      },
+      [getSelectList, formData, handleChange],
+    );
+
+    const renderFormField = useCallback(
+      (step: FormStep) => (
+        <FormField
+          field={step.field}
+          formData={formData}
+          errors={errors}
+          handleChange={handleChange}
+          disabled={!isEditing}
+          handleMultipleSelect={handleMultipleSelect}
         />
-      ));
-    },
-    [getSelectList, formData, handleChange],
-  );
+      ),
+      [formData, errors, handleChange, isEditing, handleMultipleSelect],
+    );
 
-  const renderFormField = useCallback(
-    (step: FormStep) => (
-      <FormField
-        field={step.field}
-        formData={formData}
-        errors={errors}
-        handleChange={handleChange}
-        disabled={!isEditing}
-        handleMultipleSelect={handleMultipleSelect}
-      />
-    ),
-    [formData, errors, handleChange, isEditing, handleMultipleSelect],
-  );
+    const renderInfoItem = useCallback(
+      (step: FormStep) => (
+        <InfoItem
+          key={step.field.name}
+          label={step.title}
+          className={step.field.type === "textarea" ? "" : "flex gap-4"}
+          value={renderFormField(step)}
+        />
+      ),
+      [renderFormField],
+    );
 
-  const renderInfoItem = useCallback(
-    (step: FormStep) => (
-      <InfoItem
-        key={step.field.name}
-        label={step.title}
-        className={step.field.type === "textarea" ? "" : "flex gap-4"}
-        value={renderFormField(step)}
-      />
-    ),
-    [renderFormField],
-  );
+    return (
+      <div>
+        <div className="mb-2 flex items-center gap-1">
+          <h2 className="text-xl font-bold">사육 정보</h2>
+          {isTooltipOpen && <BreedingInfoTooltip isTooltipOpen={isTooltipOpen} />}
+        </div>
 
-  return (
-    <div>
-      <div className="mb-2 flex items-center gap-1">
-        <h2 className="text-xl font-bold">사육 정보</h2>
-        {isTooltipOpen && <BreedingInfoTooltip isTooltipOpen={isTooltipOpen} />}
+        <div className="space-y-4">
+          <div>{visibleFields.map(renderInfoItem)}</div>
+        </div>
       </div>
-
-      <div className="space-y-4">
-        <div>{visibleFields.map(renderInfoItem)}</div>
-      </div>
-    </div>
-  );
-});
+    );
+  },
+);
 
 const BreedingInfoTooltip = memo(({ isTooltipOpen }: { isTooltipOpen: boolean }) => {
   return (
