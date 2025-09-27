@@ -51,22 +51,6 @@ const Filters = () => {
   return (
     <div className="flex w-full items-center gap-2 overflow-x-auto overflow-y-hidden whitespace-nowrap p-2">
       <FilterItem
-        value={eggStatus ? EGG_STATUS_KOREAN_INFO[eggStatus] : undefined}
-        placeholder="알 상태"
-        onClick={() => {
-          handleSelect({
-            type: "eggStatus",
-            value: eggStatus ?? "",
-            handleNext: ({ value }) => {
-              setEggStatus(value as EggDetailDtoStatus);
-            },
-          });
-        }}
-        onClose={() => {
-          setEggStatus(null);
-        }}
-      />
-      <FilterItem
         value={species ? SPECIES_KOREAN_INFO[species] : undefined}
         placeholder="종"
         onClose={() => {
@@ -104,6 +88,22 @@ const Filters = () => {
               openParentSearchSelector(PetDtoSex.FEMALE);
             }}
           />
+          <FilterItem
+            value={eggStatus ? EGG_STATUS_KOREAN_INFO[eggStatus] : undefined}
+            placeholder="알 상태"
+            onClick={() => {
+              handleSelect({
+                type: "eggStatus",
+                value: eggStatus ?? "",
+                handleNext: ({ value }) => {
+                  setEggStatus(value as EggDetailDtoStatus);
+                },
+              });
+            }}
+            onClose={() => {
+              setEggStatus(null);
+            }}
+          />
         </>
       )}
 
@@ -130,7 +130,7 @@ const Filters = () => {
         {endDate && <X className="h-4 w-4" onClick={() => setEndDate(undefined)} />}
       </div>
 
-      {(species || father || mother || startDate || endDate) && (
+      {(eggStatus || species || father || mother || startDate || endDate) && (
         <div
           className="flex shrink-0 cursor-pointer items-center gap-2 rounded-full border-2 border-red-500 bg-red-500/10 pb-1 pl-3 pr-3 pt-1 text-[14px] font-semibold text-red-500"
           onClick={reset}
