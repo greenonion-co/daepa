@@ -91,7 +91,7 @@ const MatingList = memo(() => {
     return compact(matingDates.map((mating) => mating.matingDate));
   }, []);
 
-  const { items, totalCount } = data ?? { items: [], totalCount: 0 };
+  const { items, totalCount: totalPairsCount } = data ?? { items: [], totalCount: 0 };
 
   // 무한 스크롤 처리
   useEffect(() => {
@@ -191,7 +191,7 @@ const MatingList = memo(() => {
       {/* 필터 */}
       <Filters />
       <div className="m-2 text-sm text-gray-600 dark:text-gray-400">
-        총 {totalCount}쌍의 페어가 존재합니다.
+        총 {totalPairsCount}쌍의 페어가 존재합니다.
       </div>
       <ScrollArea>
         <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
