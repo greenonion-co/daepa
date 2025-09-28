@@ -19,7 +19,7 @@ import { PET_SEX, PET_SPECIES, PET_TYPE } from '../pet/pet.constants';
 import { UserNotificationService } from '../user_notification/user_notification.service';
 import { USER_NOTIFICATION_TYPE } from '../user_notification/user_notification.constant';
 import { PetImageEntity } from 'src/pet_image/pet_image.entity';
-import { PetParentDto } from 'src/pet/pet.dto';
+import { PetParentDto, UnlinkParentDto } from 'src/pet/pet.dto';
 import { PetDetailEntity } from 'src/pet_detail/pet_detail.entity';
 import { UserEntity } from 'src/user/user.entity';
 import { USER_ROLE, USER_STATUS } from 'src/user/user.constant';
@@ -152,6 +152,107 @@ export class ParentRequestService {
           throw new InternalServerErrorException('알림 생성에 실패했습니다.');
         }
       }
+    });
+  }
+
+  async unlinkParent(
+    petId: string,
+    userId: string,
+    unlinkParentDto: UnlinkParentDto,
+  ) {
+    const { role } = unlinkParentDto;
+    return this.dataSource.transaction(async (entityManager: EntityManager) => {
+      // 펫 존재 여부 및 소유권 확인
+      const pet = await entityManager.findOne(PetEntity, {
+        where: { petId, isDeleted: false },
+      });
+      if (!pet) {
+        throw new NotFoundException('펫을 찾을 수 없습니다.');
+      }
+      if (pet.ownerId !== userId) {
+        throw new ForbiddenException('펫의 소유자가 아닙니다.');
+      }
+
+      // 해당 role의 부모 관계 찾기
+      const parentRequest = await entityManager.findOne(ParentRequestEntity, {
+        where: {
+          childPetId: petId,
+          role,
+          status: In([PARENT_STATUS.PENDING, PARENT_STATUS.APPROVED]),
+        },
+      });
+
+      if (!parentRequest) {
+        throw new NotFoundException('해당 부모 관계를 찾을 수 없습니다.');
+      }
+
+      if (parentRequest.status === PARENT_STATUS.PENDING) {
+        const { childPet, parentPet } = await this.getPetInfo(
+          entityManager,
+          parentRequest.childPetId,
+          parentRequest.parentPetId,
+        );
+
+        if (!childPet?.ownerId || !parentPet?.ownerId) {
+          throw new NotFoundException('주인 정보를 찾을 수 없습니다.');
+        }
+
+        await entityManager
+          .createQueryBuilder()
+          .update(UserNotificationEntity)
+          .set({
+            detailJson: () => `JSON_SET(detailJson, '$.status', :status)`,
+          })
+          .setParameter('status', PARENT_STATUS.CANCELLED)
+          .where({
+            senderId: childPet.ownerId,
+            receiverId: parentPet.ownerId,
+            type: USER_NOTIFICATION_TYPE.PARENT_REQUEST,
+            targetId: parentRequest.id,
+          })
+          .execute();
+
+        try {
+          await this.userNotificationService.createUserNotification(
+            entityManager,
+            childPet.ownerId,
+            {
+              receiverId: parentPet.ownerId,
+              type: USER_NOTIFICATION_TYPE.PARENT_CANCEL,
+              targetId: parentRequest.id,
+              detailJson: {
+                status: PARENT_STATUS.CANCELLED,
+                childPet: {
+                  id: parentRequest.childPetId,
+                  name: childPet?.name ?? undefined,
+                },
+                parentPet: {
+                  id: parentRequest.parentPetId,
+                  name: parentPet?.name ?? undefined,
+                },
+                role: parentRequest.role,
+                message: '부모 요청이 취소되었습니다.',
+              },
+            },
+          );
+        } catch (error: unknown) {
+          const err = error as { code?: string };
+          if (err?.code === 'ER_DUP_ENTRY') {
+            throw new ConflictException('동일한 취소 알림이 이미 존재합니다.');
+          }
+          throw new InternalServerErrorException(
+            '취소 알림 생성에 실패했습니다.',
+          );
+        }
+      }
+
+      await entityManager.update(
+        ParentRequestEntity,
+        { id: parentRequest.id },
+        {
+          status: PARENT_STATUS.CANCELLED,
+        },
+      );
     });
   }
 

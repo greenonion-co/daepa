@@ -14,7 +14,6 @@ import {
   CreatePetDto,
   UpdatePetDto,
   FindPetByPetIdResponseDto,
-  UnlinkParentDto,
   VerifyPetNameDto,
   PetDto,
   PetFilterDto,
@@ -175,42 +174,6 @@ export class PetController {
     return {
       success: true,
       message: '펫 삭제가 완료되었습니다.',
-    };
-  }
-
-  @Delete(':petId/parent')
-  @ApiParam({
-    name: 'petId',
-    description: '펫 아이디',
-    example: 'XXXXXXXX',
-  })
-  @ApiResponse({
-    status: 200,
-    description: '부모 연동 해제가 완료되었습니다.',
-    type: CommonResponseDto,
-  })
-  @ApiResponse({
-    status: 404,
-    description: '펫을 찾을 수 없습니다.',
-  })
-  @ApiResponse({
-    status: 403,
-    description: '펫의 소유자가 아닙니다.',
-  })
-  @ApiResponse({
-    status: 404,
-    description: '해당 부모 관계를 찾을 수 없습니다.',
-  })
-  async unlinkParent(
-    @Param('petId') petId: string,
-    @Body() body: UnlinkParentDto,
-    @JwtUser() token: JwtUserPayload,
-  ): Promise<CommonResponseDto> {
-    await this.petService.unlinkParent(petId, body.role, token.userId);
-
-    return {
-      success: true,
-      message: '부모 연동 해제가 완료되었습니다.',
     };
   }
 

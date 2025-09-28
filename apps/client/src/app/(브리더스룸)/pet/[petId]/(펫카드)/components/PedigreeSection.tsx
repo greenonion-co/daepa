@@ -4,7 +4,7 @@ import { PetParentDtoWithMessage } from "../../../store/parentLink";
 import {
   petControllerFindPetByPetId,
   parentRequestControllerLinkParent,
-  petControllerUnlinkParent,
+  parentRequestControllerUnlinkParent,
   UnlinkParentDtoRole,
   UpdateParentRequestDtoStatus,
 } from "@repo/api-client";
@@ -24,7 +24,7 @@ const PedigreeSection = memo(({ petId, isMyPet }: PedigreeSectionProps) => {
 
   const { mutateAsync: mutateUnlinkParent } = useMutation({
     mutationFn: ({ role }: { role: UnlinkParentDtoRole }) =>
-      petControllerUnlinkParent(petId, { role }),
+      parentRequestControllerUnlinkParent(petId, { role }),
   });
 
   const { mutateAsync: mutateRequestParent } = useMutation({
