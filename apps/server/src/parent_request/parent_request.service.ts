@@ -78,6 +78,7 @@ export class ParentRequestService {
           type: USER_NOTIFICATION_TYPE.PARENT_REQUEST,
           targetId: parentRequest.id,
           detailJson: {
+            status: createParentRequestDto.status,
             childPet: {
               id: childPet?.petId ?? '',
               name: childPet.name ?? undefined,
