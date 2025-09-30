@@ -30,7 +30,7 @@ export class ParentRequestController {
     example: 'XXXXXXXX',
   })
   @ApiResponse({
-    status: 200,
+    status: 201,
     description: '부모 연동 요청이 완료되었습니다.',
     type: CommonResponseDto,
   })
