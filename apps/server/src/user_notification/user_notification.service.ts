@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -80,7 +81,12 @@ export class UserNotificationService {
 
   async deleteUserNotification(
     dto: DeleteUserNotificationDto,
+    userId: string,
   ): Promise<DeleteResult> {
+    if (dto.receiverId !== userId) {
+      throw new ForbiddenException('권한이 없습니다.');
+    }
+
     return await this.userNotificationRepository.update(
       { id: dto.id, receiverId: dto.receiverId, isDeleted: false },
       { isDeleted: true },
@@ -93,7 +99,7 @@ export class UserNotificationService {
   ): Promise<UserNotificationDto | null> {
     const userNotificationEntity =
       await this.userNotificationRepository.findOne({
-        where: { id, isDeleted: false, receiverId: userId },
+        where: { id, receiverId: userId, isDeleted: false },
       });
 
     if (!userNotificationEntity) {

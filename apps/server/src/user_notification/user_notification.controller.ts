@@ -2,7 +2,6 @@ import {
   Body,
   Controller,
   Delete,
-  ForbiddenException,
   Get,
   Param,
   Patch,
@@ -79,18 +78,12 @@ export class UserNotificationController {
     type: CommonResponseDto,
   })
   async delete(
+    @JwtUser() token: JwtUserPayload,
     @Body() deleteUserNotificationDto: DeleteUserNotificationDto,
   ): Promise<CommonResponseDto> {
-    // TODO: 권한 체크
-    // const isMyNotification =
-    //   deleteUserNotificationDto.receiverId === 'JWT token id';
-    const isMyNotification = true;
-    if (!isMyNotification) {
-      throw new ForbiddenException('권한이 없습니다.');
-    }
-
     await this.userNotificationService.deleteUserNotification(
       deleteUserNotificationDto,
+      token.userId,
     );
     return {
       success: true,

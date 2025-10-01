@@ -10,7 +10,10 @@ import {
   USER_NOTIFICATION_STATUS,
   USER_NOTIFICATION_TYPE,
 } from './user_notification.constant';
-import { UserNotificationDetailJson } from './user_notification.dto';
+
+export interface DetailJson {
+  [key: string]: any;
+}
 
 @Entity({ name: 'user_notifications' })
 @Index(['senderId', 'receiverId', 'type', 'targetId'], { unique: true })
@@ -38,7 +41,7 @@ export class UserNotificationEntity {
   status: USER_NOTIFICATION_STATUS; // 알림 상태
 
   @Column({ nullable: true, type: 'json' })
-  detailJson?: UserNotificationDetailJson | null;
+  detailJson?: DetailJson | null;
 
   @CreateDateColumn()
   createdAt: Date; // 알림 생성 시간

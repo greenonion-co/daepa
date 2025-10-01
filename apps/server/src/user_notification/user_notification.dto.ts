@@ -23,6 +23,7 @@ import {
   PARENT_STATUS,
 } from 'src/parent_request/parent_request.constants';
 import { PetImageItem } from 'src/pet_image/pet_image.dto';
+import { DetailJson } from './user_notification.entity';
 
 @ApiExtraModels(PetImageItem)
 export class NotificationPetDto {
@@ -53,7 +54,7 @@ export class NotificationPetDto {
   photos?: PetImageItem[];
 }
 
-export class UserNotificationDetailJson {
+export class ParentRequestDetailJson implements DetailJson {
   @ApiProperty({
     description: '부모 연동 상태',
     example: PARENT_STATUS.PENDING,
@@ -168,7 +169,7 @@ export class UserNotificationDto {
   })
   @IsOptional()
   @IsJSON()
-  detailJson?: UserNotificationDetailJson;
+  detailJson?: ParentRequestDetailJson;
 
   @ApiProperty({
     description: '알림 생성 시간',
