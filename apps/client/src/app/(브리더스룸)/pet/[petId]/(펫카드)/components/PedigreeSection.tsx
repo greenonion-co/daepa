@@ -3,8 +3,8 @@ import ParentLink from "../../../components/ParentLink";
 import { PetParentDtoWithMessage } from "../../../store/parentLink";
 import {
   petControllerFindPetByPetId,
-  petControllerLinkParent,
-  petControllerUnlinkParent,
+  parentRequestControllerLinkParent,
+  parentRequestControllerUnlinkParent,
   UnlinkParentDtoRole,
   UpdateParentRequestDtoStatus,
 } from "@repo/api-client";
@@ -24,7 +24,7 @@ const PedigreeSection = memo(({ petId, isMyPet }: PedigreeSectionProps) => {
 
   const { mutateAsync: mutateUnlinkParent } = useMutation({
     mutationFn: ({ role }: { role: UnlinkParentDtoRole }) =>
-      petControllerUnlinkParent(petId, { role }),
+      parentRequestControllerUnlinkParent(petId, { role }),
   });
 
   const { mutateAsync: mutateRequestParent } = useMutation({
@@ -37,7 +37,7 @@ const PedigreeSection = memo(({ petId, isMyPet }: PedigreeSectionProps) => {
       role: UnlinkParentDtoRole;
       message: string;
     }) =>
-      petControllerLinkParent(petId, {
+      parentRequestControllerLinkParent(petId, {
         parentId,
         role,
         message,

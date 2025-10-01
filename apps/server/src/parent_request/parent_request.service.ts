@@ -4,16 +4,19 @@ import {
   ConflictException,
   BadRequestException,
   InternalServerErrorException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { EntityManager, DataSource, In } from 'typeorm';
 import { ParentRequestEntity } from './parent_request.entity';
 import {
+  CreateParentDto,
   CreateParentRequestDto,
+  UnlinkParentDto,
   UpdateParentRequestDto,
 } from './parent_request.dto';
-import { PARENT_STATUS } from './parent_request.constants';
+import { PARENT_ROLE, PARENT_STATUS } from './parent_request.constants';
 import { PetEntity } from '../pet/pet.entity';
-import { PET_SEX, PET_SPECIES } from '../pet/pet.constants';
+import { PET_SEX, PET_SPECIES, PET_TYPE } from '../pet/pet.constants';
 import { UserNotificationService } from '../user_notification/user_notification.service';
 import { USER_NOTIFICATION_TYPE } from '../user_notification/user_notification.constant';
 import { PetImageEntity } from 'src/pet_image/pet_image.entity';
@@ -21,6 +24,8 @@ import { PetParentDto } from 'src/pet/pet.dto';
 import { PetDetailEntity } from 'src/pet_detail/pet_detail.entity';
 import { UserEntity } from 'src/user/user.entity';
 import { USER_ROLE, USER_STATUS } from 'src/user/user.constant';
+import { UserNotificationEntity } from 'src/user_notification/user_notification.entity';
+import { CreateUserNotificationDto } from 'src/user_notification/user_notification.dto';
 
 interface ParentRawData {
   pr_status: PARENT_STATUS;
@@ -46,61 +51,225 @@ export class ParentRequestService {
     private readonly dataSource: DataSource,
   ) {}
 
-  async createParentRequestWithNotification(
-    entityManager: EntityManager,
-    createParentRequestDto: CreateParentRequestDto,
-  ): Promise<ParentRequestEntity> {
-    // 자식 펫과 부모 펫 정보를 병렬로 조회 (성능 향상)
-    const { childPet, parentPet } = await this.getPetInfo(
-      entityManager,
-      createParentRequestDto.childPetId,
-      createParentRequestDto.parentPetId,
-    );
+  async linkParent(
+    childPetId: string,
+    userId: string,
+    createParentDto: CreateParentDto,
+    manager?: EntityManager,
+  ) {
+    const run = async (entityManager: EntityManager) => {
+      const { parentId, role, message } = createParentDto;
+      // 펫 존재 여부 및 소유권 확인
+      const { childPet, parentPet } = await this.getPetInfo(
+        entityManager,
+        childPetId,
+        parentId,
+      );
+      if (!childPet) {
+        throw new NotFoundException('펫을 찾을 수 없습니다.');
+      }
+      if (!parentPet) {
+        throw new NotFoundException('부모로 지정된 펫을 찾을 수 없습니다.');
+      }
+      if (childPet.petId === parentPet.petId) {
+        throw new BadRequestException('자기 자신을 부모로 지정할 수 없습니다.');
+      }
+      if (!parentPet.ownerId || !childPet.ownerId) {
+        throw new NotFoundException('주인 정보를 찾을 수 없습니다.');
+      }
+      if (childPet.ownerId !== userId) {
+        throw new ForbiddenException('펫의 소유자가 아닙니다.');
+      }
+      if (parentPet.type === PET_TYPE.EGG) {
+        throw new BadRequestException('알은 부모로 지정할 수 없습니다.');
+      }
+      if (
+        role === PARENT_ROLE.FATHER &&
+        parentPet.petDetail?.sex !== PET_SEX.MALE
+      ) {
+        throw new BadRequestException(
+          '아버지로 지정된 펫은 수컷이어야 합니다.',
+        );
+      }
+      if (
+        role === PARENT_ROLE.MOTHER &&
+        parentPet.petDetail?.sex !== PET_SEX.FEMALE
+      ) {
+        throw new BadRequestException(
+          '어머니로 지정된 펫은 암컷이어야 합니다.',
+        );
+      }
+      // 기존 부모 요청 확인
+      const existingRequest = await entityManager
+        .createQueryBuilder(ParentRequestEntity, 'parentRequest')
+        .setLock('pessimistic_write')
+        .where({
+          childPetId,
+          role,
+          status: In([PARENT_STATUS.PENDING, PARENT_STATUS.APPROVED]),
+        })
+        .getOne();
+      if (existingRequest) {
+        throw new ConflictException('이미 존재하는 부모 연동 요청입니다.');
+      }
 
-    if (!parentPet?.ownerId || !childPet?.ownerId) {
-      throw new NotFoundException('주인 정보를 찾을 수 없습니다.');
+      const isParentMyPet = userId === parentPet.ownerId;
+      // 부모 관계 생성
+      const parentRequest = await entityManager.save(ParentRequestEntity, {
+        childPetId,
+        parentPetId: parentId,
+        role,
+        message,
+        status: isParentMyPet ? PARENT_STATUS.APPROVED : PARENT_STATUS.PENDING,
+      });
+
+      // 내 펫이 아닌 경우 요청 알림 전송
+      if (!isParentMyPet) {
+        try {
+          await this.userNotificationService.createUserNotification(
+            entityManager,
+            childPet.ownerId,
+            {
+              receiverId: parentPet.ownerId,
+              type: USER_NOTIFICATION_TYPE.PARENT_REQUEST,
+              targetId: parentRequest.id,
+              detailJson: {
+                status: PARENT_STATUS.PENDING,
+                childPet: {
+                  id: childPet?.petId ?? '',
+                  name: childPet.name ?? undefined,
+                  photos: childPet?.photos?.files ?? undefined,
+                },
+                parentPet: {
+                  id: parentPet?.petId ?? '',
+                  name: parentPet.name ?? undefined,
+                  photos: parentPet?.photos?.files ?? undefined,
+                },
+                role,
+                message,
+              },
+            },
+          );
+        } catch (error: unknown) {
+          const err = error as Partial<{ code: string }>;
+
+          if (err && err.code === 'ER_DUP_ENTRY') {
+            throw new ConflictException('동일한 알림이 이미 존재합니다.');
+          }
+          throw new InternalServerErrorException('알림 생성에 실패했습니다.');
+        }
+      }
+    };
+
+    if (manager) {
+      await run(manager);
+      return;
     }
 
-    // parent_request 테이블에 요청 생성
-    const parentRequest = await this.createParentRequest(
-      entityManager,
-      createParentRequestDto,
-    );
+    return this.dataSource.transaction(async (entityManager: EntityManager) => {
+      await run(entityManager);
+    });
+  }
 
-    try {
-      await this.userNotificationService.createUserNotification(
-        entityManager,
-        childPet.ownerId,
+  async unlinkParent(
+    petId: string,
+    userId: string,
+    unlinkParentDto: UnlinkParentDto,
+  ) {
+    const { role } = unlinkParentDto;
+    return this.dataSource.transaction(async (entityManager: EntityManager) => {
+      // 펫 존재 여부 및 소유권 확인
+      const pet = await entityManager.findOne(PetEntity, {
+        where: { petId, isDeleted: false },
+      });
+      if (!pet) {
+        throw new NotFoundException('펫을 찾을 수 없습니다.');
+      }
+      if (pet.ownerId !== userId) {
+        throw new ForbiddenException('펫의 소유자가 아닙니다.');
+      }
+
+      // 해당 role의 부모 관계 찾기
+      const parentRequest = await entityManager.findOne(ParentRequestEntity, {
+        where: {
+          childPetId: petId,
+          role,
+          status: In([PARENT_STATUS.PENDING, PARENT_STATUS.APPROVED]),
+        },
+      });
+
+      if (!parentRequest) {
+        throw new NotFoundException('해당 부모 관계를 찾을 수 없습니다.');
+      }
+
+      if (parentRequest.status === PARENT_STATUS.PENDING) {
+        const { childPet, parentPet } = await this.getPetInfo(
+          entityManager,
+          parentRequest.childPetId,
+          parentRequest.parentPetId,
+        );
+
+        if (!childPet?.ownerId || !parentPet?.ownerId) {
+          throw new NotFoundException('주인 정보를 찾을 수 없습니다.');
+        }
+
+        await entityManager
+          .createQueryBuilder()
+          .update(UserNotificationEntity)
+          .set({
+            detailJson: () => `JSON_SET(detailJson, '$.status', :status)`,
+          })
+          .setParameter('status', PARENT_STATUS.CANCELLED)
+          .where({
+            senderId: childPet.ownerId,
+            receiverId: parentPet.ownerId,
+            type: USER_NOTIFICATION_TYPE.PARENT_REQUEST,
+            targetId: parentRequest.id,
+          })
+          .execute();
+
+        try {
+          await this.userNotificationService.createUserNotification(
+            entityManager,
+            childPet.ownerId,
+            {
+              receiverId: parentPet.ownerId,
+              type: USER_NOTIFICATION_TYPE.PARENT_CANCEL,
+              targetId: parentRequest.id,
+              detailJson: {
+                status: PARENT_STATUS.CANCELLED,
+                childPet: {
+                  id: parentRequest.childPetId,
+                  name: childPet?.name ?? undefined,
+                },
+                parentPet: {
+                  id: parentRequest.parentPetId,
+                  name: parentPet?.name ?? undefined,
+                },
+                role: parentRequest.role,
+                message: '부모 요청이 취소되었습니다.',
+              },
+            },
+          );
+        } catch (error: unknown) {
+          const err = error as { code?: string };
+          if (err?.code === 'ER_DUP_ENTRY') {
+            throw new ConflictException('동일한 취소 알림이 이미 존재합니다.');
+          }
+          throw new InternalServerErrorException(
+            '취소 알림 생성에 실패했습니다.',
+          );
+        }
+      }
+
+      await entityManager.update(
+        ParentRequestEntity,
+        { id: parentRequest.id },
         {
-          receiverId: parentPet.ownerId,
-          type: USER_NOTIFICATION_TYPE.PARENT_REQUEST,
-          targetId: parentRequest.id,
-          detailJson: {
-            childPet: {
-              id: childPet?.petId ?? '',
-              name: childPet.name ?? undefined,
-              photos: childPet?.photos?.files ?? undefined,
-            },
-            parentPet: {
-              id: parentPet?.petId ?? '',
-              name: parentPet.name ?? undefined,
-              photos: parentPet?.photos?.files ?? undefined,
-            },
-            role: createParentRequestDto.role,
-            message: createParentRequestDto.message,
-          },
+          status: PARENT_STATUS.CANCELLED,
         },
       );
-    } catch (error: unknown) {
-      const err = error as Partial<{ code: string }>;
-
-      if (err && err.code === 'ER_DUP_ENTRY') {
-        throw new ConflictException('동일한 알림이 이미 존재합니다.');
-      }
-      throw new InternalServerErrorException('알림 생성에 실패했습니다.');
-    }
-
-    return parentRequest;
+    });
   }
 
   async updateParentRequestByNotificationId(
@@ -109,17 +278,22 @@ export class ParentRequestService {
     updateParentRequestDto: UpdateParentRequestDto,
   ) {
     return this.dataSource.transaction(async (entityManager: EntityManager) => {
-      const notification = await this.userNotificationService.findOne(
-        notificationId,
-        userId,
+      const existingNotification = await entityManager.findOneBy(
+        UserNotificationEntity,
+        {
+          id: notificationId,
+          receiverId: userId,
+          isDeleted: false,
+          type: USER_NOTIFICATION_TYPE.PARENT_REQUEST,
+        },
       );
 
-      if (!notification) {
+      if (!existingNotification) {
         throw new NotFoundException('알림을 찾을 수 없습니다.');
       }
 
       const parentRequest = await entityManager.findOneBy(ParentRequestEntity, {
-        id: notification.targetId,
+        id: existingNotification.targetId,
       });
 
       if (!parentRequest) {
@@ -127,6 +301,9 @@ export class ParentRequestService {
       }
 
       //parentRequest의 상태가 pending이 아니면 오류 발생
+      if (parentRequest.status === updateParentRequestDto.status) {
+        throw new BadRequestException('유효한 요청이 아닙니다.');
+      }
       if (parentRequest.status === PARENT_STATUS.APPROVED) {
         throw new BadRequestException('이미 수락된 처리된 요청입니다.');
       }
@@ -147,56 +324,56 @@ export class ParentRequestService {
         throw new NotFoundException('주인 정보를 찾을 수 없습니다.');
       }
 
-      // 상태 업데이트
+      // 부모 요청 상태 업데이트
       await entityManager.update(
         ParentRequestEntity,
         { id: parentRequest.id },
         updateParentRequestDto,
       );
 
-      // 상태가 변경된 경우에만 알림 처리
-      if (parentRequest.status !== updateParentRequestDto.status) {
-        // 새로운 알림 보내기
-        await this.userNotificationService.createUserNotification(
-          entityManager,
-          parentPet.ownerId,
-          {
-            receiverId: notification.senderId,
-            type: this.getNotificationTypeByStatus(
-              updateParentRequestDto.status,
-            ),
-            targetId: parentRequest.id,
-            detailJson: {
-              childPet: {
-                id: parentRequest.childPetId,
-                name: childPet?.name ?? undefined,
-                photos: childPet?.photos?.files ?? undefined,
-              },
-              parentPet: {
-                id: parentRequest.parentPetId,
-                name: parentPet?.name ?? undefined,
-                photos: parentPet?.photos?.files ?? undefined,
-              },
-              role: parentRequest.role,
-              message: parentRequest.message,
-              ...(updateParentRequestDto.status === PARENT_STATUS.REJECTED && {
-                rejectReason: updateParentRequestDto.rejectReason,
-              }),
-            },
+      // 상대방에게 답장 알림 전송
+      const createNotification: CreateUserNotificationDto = {
+        receiverId: existingNotification.senderId,
+        type: this.getNotificationTypeByStatus(updateParentRequestDto.status),
+        targetId: parentRequest.id,
+        detailJson: {
+          status: updateParentRequestDto.status,
+          childPet: {
+            id: parentRequest.childPetId,
+            name: childPet?.name ?? undefined,
+            photos: childPet?.photos?.files ?? undefined,
           },
-        );
+          parentPet: {
+            id: parentRequest.parentPetId,
+            name: parentPet?.name ?? undefined,
+            photos: parentPet?.photos?.files ?? undefined,
+          },
+          role: parentRequest.role,
+          message: parentRequest.message,
+          ...(updateParentRequestDto.status === PARENT_STATUS.REJECTED && {
+            rejectReason: updateParentRequestDto.rejectReason,
+          }),
+        },
+      };
+      await this.userNotificationService.createUserNotification(
+        entityManager,
+        parentPet.ownerId,
+        createNotification,
+      );
 
-        await this.userNotificationService.updateUserNotificationDetailJson(
-          entityManager,
-          notification.id,
-          {
-            status: updateParentRequestDto.status,
-            ...(updateParentRequestDto.status === PARENT_STATUS.REJECTED && {
-              rejectReason: updateParentRequestDto.rejectReason,
-            }),
-          },
-        );
-      }
+      // 기존 알림 상태 업데이트
+      const updateExistingNotification = {
+        ...existingNotification.detailJson,
+        status: updateParentRequestDto.status,
+        ...(updateParentRequestDto.status === PARENT_STATUS.REJECTED && {
+          rejectReason: updateParentRequestDto.rejectReason,
+        }),
+      };
+      await entityManager.update(
+        UserNotificationEntity,
+        { id: existingNotification.id },
+        { detailJson: updateExistingNotification },
+      );
     });
   }
 
@@ -342,13 +519,27 @@ export class ParentRequestService {
     const [childPetInfo, parentPetInfo, childPetPhotos, parentPetPhotos] =
       await Promise.all([
         entityManager.findOne(PetEntity, {
-          where: { petId: childPetId },
+          where: { petId: childPetId, isDeleted: false },
           select: ['name', 'petId', 'ownerId'],
         }),
-        entityManager.findOne(PetEntity, {
-          where: { petId: parentPetId },
-          select: ['name', 'petId', 'ownerId'],
-        }),
+        entityManager
+          .createQueryBuilder(PetEntity, 'pet')
+          .innerJoinAndMapOne(
+            'pet.petDetail',
+            PetDetailEntity,
+            'petDetail',
+            'petDetail.petId = pet.petId',
+          )
+          .select([
+            'pet.type',
+            'pet.name',
+            'pet.petId',
+            'pet.ownerId',
+            'petDetail.sex',
+          ])
+          .where('pet.petId = :parentPetId', { parentPetId })
+          .andWhere('pet.isDeleted = :isDeleted', { isDeleted: false })
+          .getOne(),
         entityManager.findOne(PetImageEntity, {
           where: { petId: childPetId },
           select: ['files'],
@@ -359,14 +550,18 @@ export class ParentRequestService {
         }),
       ]);
 
-    const childPet = {
-      ...childPetInfo,
-      photos: childPetPhotos,
-    };
-    const parentPet = {
-      ...parentPetInfo,
-      photos: parentPetPhotos,
-    };
+    const childPet = childPetInfo
+      ? {
+          ...childPetInfo,
+          photos: childPetPhotos,
+        }
+      : null;
+    const parentPet = parentPetInfo
+      ? {
+          ...parentPetInfo,
+          photos: parentPetPhotos,
+        }
+      : null;
 
     return { childPet, parentPet };
   }

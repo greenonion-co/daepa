@@ -70,3 +70,15 @@ export class CreateParentDto {
   @IsString()
   message?: string;
 }
+
+export class UnlinkParentDto {
+  @ApiProperty({
+    description: '부모 역할',
+    enum: PARENT_ROLE,
+    'x-enumNames': Object.keys(PARENT_ROLE),
+    example: PARENT_ROLE.FATHER,
+  })
+  @IsEnum(PARENT_ROLE)
+  @IsNotEmpty()
+  role: PARENT_ROLE;
+}

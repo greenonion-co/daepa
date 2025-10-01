@@ -1012,18 +1012,6 @@ export class FilterPetListResponseDto extends CommonResponseDto {
   data: Record<string, PetDto[]>;
 }
 
-export class UnlinkParentDto {
-  @ApiProperty({
-    description: '부모 역할',
-    enum: PARENT_ROLE,
-    'x-enumNames': Object.keys(PARENT_ROLE),
-    example: PARENT_ROLE.FATHER,
-  })
-  @IsEnum(PARENT_ROLE)
-  @IsNotEmpty()
-  role: PARENT_ROLE;
-}
-
 export class VerifyPetNameDto {
   @ApiProperty({
     description: '펫 이름',
