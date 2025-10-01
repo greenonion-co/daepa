@@ -37,7 +37,7 @@ export class UserNotificationService {
     );
   }
 
-  async getAllReceiverNotifications(
+  async getUserNotifications(
     dto: PageOptionsDto,
     userId: string,
   ): Promise<PageDto<UserNotificationEntity>> {

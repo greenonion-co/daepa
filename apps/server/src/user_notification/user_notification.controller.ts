@@ -48,7 +48,7 @@ export class UserNotificationController {
     @Query() pageOptionsDto: PageOptionsDto,
     @JwtUser() token: JwtUserPayload,
   ) {
-    return this.userNotificationService.getAllReceiverNotifications(
+    return this.userNotificationService.getUserNotifications(
       pageOptionsDto,
       token.userId,
     );
