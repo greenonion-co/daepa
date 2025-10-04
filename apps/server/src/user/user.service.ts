@@ -191,29 +191,37 @@ export class UserService {
     return !!isExist;
   }
 
-  // Transaction 처리를 위해 EntityManager를 받는 메서드 추가
-  async createUserWithEntityManager(
-    entityManager: EntityManager,
+  async createUser(
     providerInfo: ProviderInfo,
     status: USER_STATUS,
+    manager?: EntityManager,
   ) {
-    const userId = await this.generateUserId();
-    const pendingName = `USER_${userId}`;
-    const createUserEntity = plainToInstance(UserEntity, {
-      userId,
-      name: pendingName,
-      email: providerInfo.email,
-      role: USER_ROLE.USER,
-      provider: providerInfo.provider,
-      providerId: providerInfo.providerId,
-      status,
-    });
+    const run = async (em: EntityManager) => {
+      const userId = await this.generateUserId();
+      const pendingName = `USER_${userId}`;
+      const createUserEntity = plainToInstance(UserEntity, {
+        userId,
+        name: pendingName,
+        email: providerInfo.email,
+        role: USER_ROLE.USER,
+        provider: providerInfo.provider,
+        providerId: providerInfo.providerId,
+        status,
+      });
 
-    const savedUserEntity = await entityManager.save(
-      UserEntity,
-      createUserEntity,
+      const savedUserEntity = await em.save(UserEntity, createUserEntity);
+      return this.toUserDto(savedUserEntity);
+    };
+
+    if (manager) {
+      return await run(manager);
+    }
+
+    return await this.dataSource.transaction(
+      async (entityManager: EntityManager) => {
+        return await run(entityManager);
+      },
     );
-    return this.toUserDto(savedUserEntity);
   }
 
   async getUserListSimple(

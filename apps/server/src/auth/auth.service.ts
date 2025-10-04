@@ -159,12 +159,11 @@ export class AuthService {
         };
       } else {
         // 해당 이메일 최초 가입
-        const newUserCreated =
-          await this.userService.createUserWithEntityManager(
-            entityManager,
-            providerInfo,
-            USER_STATUS.PENDING,
-          );
+        const newUserCreated = await this.userService.createUser(
+          providerInfo,
+          USER_STATUS.PENDING,
+          entityManager,
+        );
         newOAuthUser = {
           userId: newUserCreated.userId,
           status: newUserCreated.status,
