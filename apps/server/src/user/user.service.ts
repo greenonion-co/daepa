@@ -11,7 +11,7 @@ import {
   CreateInitUserInfoDto,
   UserDto,
   UserFilterDto,
-  SafeUserDto,
+  UserSimpleDto,
 } from './user.dto';
 import { ProviderInfo } from 'src/auth/auth.types';
 import { USER_ROLE, USER_STATUS } from './user.constant';
@@ -83,7 +83,7 @@ export class UserService {
     };
   }
 
-  private toSafeUserDto(entity: UserEntity): SafeUserDto {
+  private toUserSimpleDto(entity: UserEntity): UserSimpleDto {
     return {
       userId: entity.userId,
       name: entity.name,
@@ -216,10 +216,10 @@ export class UserService {
     return this.toUserDto(savedUserEntity);
   }
 
-  async getUsers(
+  async getUserListSimple(
     query: UserFilterDto,
     userId: string,
-  ): Promise<PageDto<SafeUserDto>> {
+  ): Promise<PageDto<UserSimpleDto>> {
     const queryBuilder = this.userRepository
       .createQueryBuilder('users')
       .where('users.status = :status', {
@@ -239,7 +239,7 @@ export class UserService {
       .take(query.itemPerPage);
 
     const [entities, total] = await queryBuilder.getManyAndCount();
-    const users = entities.map((e) => this.toSafeUserDto(e));
+    const users = entities.map((e) => this.toUserSimpleDto(e));
 
     const pageMetaDto = new PageMetaDto({
       totalCount: total,

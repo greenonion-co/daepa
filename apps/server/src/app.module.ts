@@ -44,7 +44,6 @@ import { PairEntity } from './pair/pair.entity';
 import { R2Service } from './common/cloudflare/r2.service';
 import { PetImageEntity } from './pet_image/pet_image.entity';
 import { PetImageService } from './pet_image/pet_image.service';
-import { BrUserController } from './user/br/br.user.controller';
 import { EggDetailEntity } from './egg_detail/egg_detail.entity';
 import { PetDetailEntity } from './pet_detail/pet_detail.entity';
 
@@ -100,7 +99,6 @@ const ENTITIES = [
     BrMatingController,
     ParentRequestController,
     LayingController,
-    BrUserController,
   ],
   providers: [
     AppService,

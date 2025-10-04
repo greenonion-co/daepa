@@ -92,7 +92,7 @@ class UserBaseDto {
   updatedAt: Date;
 }
 
-export class SafeUserDto extends PickType(UserBaseDto, [
+export class UserSimpleDto extends PickType(UserBaseDto, [
   'userId',
   'name',
   'email',

@@ -1,19 +1,53 @@
-import { Body, ConflictException, Controller, Get, Post } from '@nestjs/common';
+import {
+  Body,
+  ConflictException,
+  Controller,
+  Get,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { UserService } from './user.service';
 import {
   CreateInitUserInfoDto,
+  UserSimpleDto,
+  UserFilterDto,
   UserProfileResponseDto,
   VerifyNameDto,
 } from './user.dto';
 import { CommonResponseDto } from 'src/common/response.dto';
-import { ApiResponse } from '@nestjs/swagger';
+import { ApiExtraModels, ApiResponse, getSchemaPath } from '@nestjs/swagger';
 import { JwtUser, Public } from 'src/auth/auth.decorator';
 import { JwtUserPayload } from 'src/auth/strategies/jwt.strategy';
 import { VerifyEmailDto } from './user.dto';
+import { PageDto, PageMetaDto } from 'src/common/page.dto';
 
 @Controller('/v1/user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
+
+  @Get('/simple')
+  @ApiExtraModels(UserSimpleDto, PageMetaDto)
+  @ApiResponse({
+    status: 200,
+    description: '사용자 간단정보 목록 조회',
+    schema: {
+      type: 'object',
+      required: ['data', 'meta'],
+      properties: {
+        data: {
+          type: 'array',
+          items: { $ref: getSchemaPath(UserSimpleDto) },
+        },
+        meta: { $ref: getSchemaPath(PageMetaDto) },
+      },
+    },
+  })
+  async getUserListSimple(
+    @Query() query: UserFilterDto,
+    @JwtUser() token: JwtUserPayload,
+  ): Promise<PageDto<UserSimpleDto>> {
+    return this.userService.getUserListSimple(query, token.userId);
+  }
 
   @Get('/profile')
   @ApiResponse({

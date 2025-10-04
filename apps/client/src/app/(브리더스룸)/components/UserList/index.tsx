@@ -1,7 +1,7 @@
 import Loading from "@/components/common/Loading";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { brUserControllerGetUsers, SafeUserDto } from "@repo/api-client";
+import { userControllerGetUserListSimple, UserSimpleDto } from "@repo/api-client";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { Search } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 
 interface UserListProps {
   selectedUserId?: string;
-  onSelect: (user: SafeUserDto) => void;
+  onSelect: (user: UserSimpleDto) => void;
 }
 
 const UserList = ({ selectedUserId, onSelect }: UserListProps) => {
@@ -22,9 +22,9 @@ const UserList = ({ selectedUserId, onSelect }: UserListProps) => {
   const [userSearchQuery, setUserSearchQuery] = useState("");
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
-    queryKey: [brUserControllerGetUsers.name, userSearchQuery],
+    queryKey: [userControllerGetUserListSimple.name, userSearchQuery],
     queryFn: ({ pageParam = 1 }) =>
-      brUserControllerGetUsers({ page: pageParam, itemPerPage, keyword: userSearchQuery }),
+      userControllerGetUserListSimple({ page: pageParam, itemPerPage, keyword: userSearchQuery }),
     initialPageParam: 1,
     getNextPageParam: (lastPage) => {
       if (lastPage.data.meta.hasNextPage) {

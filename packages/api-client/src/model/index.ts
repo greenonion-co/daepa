@@ -147,3 +147,7 @@ export * from "./userProfileResponseDto";
 export * from "./verifyEmailDto";
 export * from "./verifyNameDto";
 export * from "./verifyPetNameDto";
+export * from "./userControllerGetUserListSimple200";
+export * from "./userControllerGetUserListSimpleOrder";
+export * from "./userControllerGetUserListSimpleParams";
+export * from "./userSimpleDto";

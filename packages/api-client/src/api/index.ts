@@ -12,7 +12,6 @@ import type {
   BrPetControllerFindAllParams,
   BrPetControllerGetPetsByDateRangeParams,
   BrPetControllerGetPetsByMonthParams,
-  BrUserControllerGetUsersParams,
   CompleteHatchingDto,
   CreateAdoptionDto,
   CreateInitUserInfoDto,
@@ -30,6 +29,7 @@ import type {
   UpdateParentRequestDto,
   UpdatePetDto,
   UpdateUserNotificationDto,
+  UserControllerGetUserListSimpleParams,
   UserNotificationControllerFindAllParams,
   VerifyEmailDto,
   VerifyNameDto,
@@ -46,12 +46,12 @@ import type {
   BrMatingControllerFindAll200,
   BrPetControllerFindAll200,
   BrPetControllerGetPetsByYear200,
-  BrUserControllerGetUsers200,
   CommonResponseDto,
   FilterPetListResponseDto,
   FindPetByPetIdResponseDto,
   PetControllerFindAll200,
   TokenResponseDto,
+  UserControllerGetUserListSimple200,
   UserDto,
   UserNotificationControllerFindAll200,
   UserNotificationResponseDto,
@@ -249,6 +249,14 @@ export const authControllerDeleteAccount = () => {
   });
 };
 
+export const userControllerGetUserListSimple = (params?: UserControllerGetUserListSimpleParams) => {
+  return useCustomInstance<UserControllerGetUserListSimple200>({
+    url: `http://localhost:4000/api/v1/user/simple`,
+    method: "GET",
+    params,
+  });
+};
+
 export const userControllerGetUserProfile = () => {
   return useCustomInstance<UserProfileResponseDto>({
     url: `http://localhost:4000/api/v1/user/profile`,
@@ -411,14 +419,6 @@ export const layingControllerUpdate = (id: number, updateLayingDto: UpdateLaying
   });
 };
 
-export const brUserControllerGetUsers = (params?: BrUserControllerGetUsersParams) => {
-  return useCustomInstance<BrUserControllerGetUsers200>({
-    url: `http://localhost:4000/api/v1/br/user`,
-    method: "GET",
-    params,
-  });
-};
-
 export type PetControllerFindAllResult = NonNullable<
   Awaited<ReturnType<typeof petControllerFindAll>>
 >;
@@ -485,6 +485,9 @@ export type AuthControllerSignOutResult = NonNullable<
 export type AuthControllerDeleteAccountResult = NonNullable<
   Awaited<ReturnType<typeof authControllerDeleteAccount>>
 >;
+export type UserControllerGetUserListSimpleResult = NonNullable<
+  Awaited<ReturnType<typeof userControllerGetUserListSimple>>
+>;
 export type UserControllerGetUserProfileResult = NonNullable<
   Awaited<ReturnType<typeof userControllerGetUserProfile>>
 >;
@@ -535,9 +538,6 @@ export type LayingControllerCreateResult = NonNullable<
 >;
 export type LayingControllerUpdateResult = NonNullable<
   Awaited<ReturnType<typeof layingControllerUpdate>>
->;
-export type BrUserControllerGetUsersResult = NonNullable<
-  Awaited<ReturnType<typeof brUserControllerGetUsers>>
 >;
 
 export const getPetControllerFindAllResponseMock = (
@@ -2735,6 +2735,26 @@ export const getAuthControllerDeleteAccountResponseMock = (
   ...overrideResponse,
 });
 
+export const getUserControllerGetUserListSimpleResponseMock = (
+  overrideResponse: Partial<UserControllerGetUserListSimple200> = {},
+): UserControllerGetUserListSimple200 => ({
+  data: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+    userId: faker.string.alpha(20),
+    name: faker.string.alpha(20),
+    email: faker.string.alpha(20),
+    isBiz: faker.datatype.boolean(),
+  })),
+  meta: {
+    page: faker.number.int({ min: undefined, max: undefined }),
+    itemPerPage: faker.number.int({ min: undefined, max: undefined }),
+    totalCount: faker.number.int({ min: undefined, max: undefined }),
+    totalPage: faker.number.int({ min: undefined, max: undefined }),
+    hasPreviousPage: faker.datatype.boolean(),
+    hasNextPage: faker.datatype.boolean(),
+  },
+  ...overrideResponse,
+});
+
 export const getUserControllerGetUserProfileResponseMock = (
   overrideResponse: Partial<UserProfileResponseDto> = {},
 ): UserProfileResponseDto => ({
@@ -3286,26 +3306,6 @@ export const getLayingControllerUpdateResponseMock = (
   ...overrideResponse,
 });
 
-export const getBrUserControllerGetUsersResponseMock = (
-  overrideResponse: Partial<BrUserControllerGetUsers200> = {},
-): BrUserControllerGetUsers200 => ({
-  data: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-    userId: faker.string.alpha(20),
-    name: faker.string.alpha(20),
-    email: faker.string.alpha(20),
-    isBiz: faker.datatype.boolean(),
-  })),
-  meta: {
-    page: faker.number.int({ min: undefined, max: undefined }),
-    itemPerPage: faker.number.int({ min: undefined, max: undefined }),
-    totalCount: faker.number.int({ min: undefined, max: undefined }),
-    totalPage: faker.number.int({ min: undefined, max: undefined }),
-    hasPreviousPage: faker.datatype.boolean(),
-    hasNextPage: faker.datatype.boolean(),
-  },
-  ...overrideResponse,
-});
-
 export const getPetControllerFindAllMockHandler = (
   overrideResponse?:
     | PetControllerFindAll200
@@ -3790,6 +3790,29 @@ export const getAuthControllerDeleteAccountMockHandler = (
   });
 };
 
+export const getUserControllerGetUserListSimpleMockHandler = (
+  overrideResponse?:
+    | UserControllerGetUserListSimple200
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<UserControllerGetUserListSimple200> | UserControllerGetUserListSimple200),
+) => {
+  return http.get("*/api/v1/user/simple", async (info) => {
+    await delay(1000);
+
+    return new HttpResponse(
+      JSON.stringify(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getUserControllerGetUserListSimpleResponseMock(),
+      ),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+  });
+};
+
 export const getUserControllerGetUserProfileMockHandler = (
   overrideResponse?:
     | UserProfileResponseDto
@@ -4180,29 +4203,6 @@ export const getLayingControllerUpdateMockHandler = (
     );
   });
 };
-
-export const getBrUserControllerGetUsersMockHandler = (
-  overrideResponse?:
-    | BrUserControllerGetUsers200
-    | ((
-        info: Parameters<Parameters<typeof http.get>[1]>[0],
-      ) => Promise<BrUserControllerGetUsers200> | BrUserControllerGetUsers200),
-) => {
-  return http.get("*/api/v1/br/user", async (info) => {
-    await delay(1000);
-
-    return new HttpResponse(
-      JSON.stringify(
-        overrideResponse !== undefined
-          ? typeof overrideResponse === "function"
-            ? await overrideResponse(info)
-            : overrideResponse
-          : getBrUserControllerGetUsersResponseMock(),
-      ),
-      { status: 200, headers: { "Content-Type": "application/json" } },
-    );
-  });
-};
 export const getProjectDaepaAPIMock = () => [
   getPetControllerFindAllMockHandler(),
   getPetControllerCreateMockHandler(),
@@ -4226,6 +4226,7 @@ export const getProjectDaepaAPIMock = () => [
   getAuthControllerGetTokenMockHandler(),
   getAuthControllerSignOutMockHandler(),
   getAuthControllerDeleteAccountMockHandler(),
+  getUserControllerGetUserListSimpleMockHandler(),
   getUserControllerGetUserProfileMockHandler(),
   getUserControllerCreateInitUserInfoMockHandler(),
   getUserControllerVerifyNameMockHandler(),
@@ -4243,5 +4244,4 @@ export const getProjectDaepaAPIMock = () => [
   getParentRequestControllerUpdateStatusMockHandler(),
   getLayingControllerCreateMockHandler(),
   getLayingControllerUpdateMockHandler(),
-  getBrUserControllerGetUsersMockHandler(),
 ];
