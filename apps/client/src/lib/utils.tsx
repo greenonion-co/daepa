@@ -125,10 +125,8 @@ export const castDetailJson = <T extends UserNotificationDtoDetailJson>(
   detailJson: UserNotificationDtoDetailJson | undefined | null,
 ): T | undefined | null => {
   if (!type || !detailJson || !isPlainObject(detailJson)) {
-    return detailJson as T;
+    return null;
   }
 
-  if (type === UserNotificationDtoType.PARENT_REQUEST) {
-    return detailJson as T;
-  }
+  return detailJson as T;
 };
