@@ -10,6 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   parentRequestControllerUpdateStatus,
+  ParentRequestDetailJson,
   UpdateParentRequestDto,
   UpdateParentRequestDtoStatus,
   userNotificationControllerDelete,
@@ -34,6 +35,15 @@ import StatusBadge from "./StatusBadge";
 import Dialog from "../../components/Form/Dialog";
 import PetThumbnail from "../../components/PetThumbnail";
 
+const getSafeDetailData = (
+  detailData: ParentRequestDetailJson | null,
+): ParentRequestDetailJson | null => {
+  if (!detailData || !isPlainObject(detailData)) {
+    return null;
+  }
+  return detailData;
+};
+
 const NotiDisplay = memo(() => {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -48,7 +58,7 @@ const NotiDisplay = memo(() => {
     select: (res) => res?.data?.data,
   });
 
-  const detailData = data?.detailJson;
+  const detailData = data?.detailJson as ParentRequestDetailJson;
   const alreadyProcessed =
     data?.type === UserNotificationDtoType.PARENT_REQUEST &&
     !!data?.detailJson?.status &&
@@ -101,14 +111,7 @@ const NotiDisplay = memo(() => {
     }
   };
 
-  const getDetailData = () => {
-    if (!detailData || !isPlainObject(detailData)) {
-      return null;
-    }
-    return detailData;
-  };
-
-  const safeData = getDetailData();
+  const safeData = getSafeDetailData(detailData);
 
   const renderMorphs = () => {
     if (
