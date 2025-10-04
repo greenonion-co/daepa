@@ -114,7 +114,7 @@ export class ParentRequestDetailJson extends DetailJson {
   rejectReason?: string;
 }
 
-@ApiExtraModels(DetailJson)
+@ApiExtraModels(DetailJson, ParentRequestDetailJson)
 export class UserNotificationDto {
   @ApiProperty({
     description: '알림 아이디',
