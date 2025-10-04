@@ -1,6 +1,10 @@
 "use client";
 
-import { userNotificationControllerFindAll, UserNotificationDtoStatus } from "@repo/api-client";
+import {
+  ParentRequestDetailJson,
+  userNotificationControllerFindAll,
+  UserNotificationDtoStatus,
+} from "@repo/api-client";
 import { useQuery } from "@tanstack/react-query";
 import { Bell } from "lucide-react";
 import Link from "next/link";
@@ -50,7 +54,7 @@ const NotiButton = () => {
     .slice(0, 4)
     .map((n) => {
       const info = NOTIFICATION_TYPE[n.type as keyof typeof NOTIFICATION_TYPE];
-      const rawMessage = n?.detailJson?.message ?? "";
+      const rawMessage = (n?.detailJson as ParentRequestDetailJson)?.message ?? "";
       const message = rawMessage.length > 50 ? `${rawMessage.slice(0, 50)}...` : rawMessage;
 
       return {
