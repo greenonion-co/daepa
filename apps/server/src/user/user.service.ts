@@ -234,7 +234,7 @@ export class UserService {
     }
 
     queryBuilder
-      .orderBy('users.createdAt', query.order)
+      .orderBy('users.name', query.order)
       .skip(query.skip)
       .take(query.itemPerPage);
 
