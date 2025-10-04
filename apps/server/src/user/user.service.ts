@@ -178,7 +178,7 @@ export class UserService {
         status: Not(USER_STATUS.DELETED),
       },
     });
-    return !!isExist;
+    return isExist;
   }
 
   async isEmailExist(email: string) {
@@ -188,7 +188,7 @@ export class UserService {
         status: Not(USER_STATUS.DELETED),
       },
     });
-    return !!isExist;
+    return isExist;
   }
 
   async createUser(
