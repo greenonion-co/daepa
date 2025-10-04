@@ -171,10 +171,13 @@ export class AuthService {
       }
 
       // OAuth 정보 생성
-      await this.oauthService.createOauthInfoWithEntityManager(entityManager, {
-        ...providerInfo,
-        userId: newOAuthUser.userId,
-      });
+      await this.oauthService.createOauthInfo(
+        {
+          ...providerInfo,
+          userId: newOAuthUser.userId,
+        },
+        entityManager,
+      );
 
       return {
         userId: newOAuthUser.userId,

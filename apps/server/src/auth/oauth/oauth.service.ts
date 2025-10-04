@@ -72,15 +72,29 @@ export class OauthService {
     );
   }
 
-  async createOauthInfo(providerInfo: { userId: string } & ProviderInfo) {
-    const { email, provider, providerId } = providerInfo;
+  async createOauthInfo(
+    providerInfo: { userId: string } & ProviderInfo,
+    manager?: EntityManager,
+  ) {
+    const run = async (em: EntityManager) => {
+      await em.insert(OauthEntity, {
+        email: providerInfo.email,
+        provider: providerInfo.provider,
+        providerId: providerInfo.providerId,
+        refreshToken: providerInfo.refreshToken,
+        userId: providerInfo.userId,
+      });
+    };
 
-    await this.oauthRepository.insert({
-      email,
-      provider,
-      providerId,
-      userId: providerInfo.userId,
-    });
+    if (manager) {
+      return await run(manager);
+    }
+
+    return await this.dataSource.transaction(
+      async (entityManager: EntityManager) => {
+        return await run(entityManager);
+      },
+    );
   }
 
   async deleteAllOauthInfoByEmail(email: string): Promise<void> {
@@ -336,19 +350,5 @@ export class OauthService {
       this.logger.error(data ?? error.message);
       throw error;
     }
-  }
-
-  // Transaction 처리를 위해 EntityManager를 받는 메서드 추가
-  async createOauthInfoWithEntityManager(
-    entityManager: EntityManager,
-    providerInfo: { userId: string } & ProviderInfo,
-  ) {
-    await entityManager.insert(OauthEntity, {
-      email: providerInfo.email,
-      provider: providerInfo.provider,
-      providerId: providerInfo.providerId,
-      refreshToken: providerInfo.refreshToken,
-      userId: providerInfo.userId,
-    });
   }
 }
