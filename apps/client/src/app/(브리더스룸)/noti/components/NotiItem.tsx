@@ -1,8 +1,5 @@
 import {
   ParentLinkDetailJson,
-  UpdateUserNotificationDto,
-  userNotificationControllerFindAll,
-  userNotificationControllerUpdate,
   UserNotificationDto,
   UserNotificationDtoStatus,
 } from "@repo/api-client";
@@ -12,12 +9,10 @@ import { castDetailJson, cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import { ko } from "date-fns/locale";
 import { useCallback, useEffect } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
 import { NOTIFICATION_TYPE } from "../../constants";
 import StatusBadge from "./StatusBadge";
-import { AxiosError } from "axios";
 import useUserNotificationStore from "../../store/userNotification";
+import { useNotificationRead } from "@/hooks/useNotificationRead";
 
 interface NotiItemProps {
   item: UserNotificationDto;
@@ -26,35 +21,18 @@ interface NotiItemProps {
 const NotiItem = ({ item }: NotiItemProps) => {
   const { notification } = useUserNotificationStore();
   const selectedNotificationId = notification?.id;
-
-  const queryClient = useQueryClient();
+  const { setNotificationRead } = useNotificationRead();
 
   const { setNotification } = useUserNotificationStore();
-
-  const { mutateAsync: updateNotification } = useMutation({
-    mutationFn: (data: UpdateUserNotificationDto) => userNotificationControllerUpdate(data),
-  });
 
   const handleItemClick = useCallback(
     async (item: UserNotificationDto) => {
       if (item) {
         setNotification(item);
-      }
-
-      if (item.status === UserNotificationDtoStatus.UNREAD) {
-        try {
-          await updateNotification({ id: item.id, status: UserNotificationDtoStatus.READ });
-          queryClient.invalidateQueries({ queryKey: [userNotificationControllerFindAll.name] });
-        } catch (error) {
-          if (error instanceof AxiosError) {
-            toast.error(error.response?.data?.message ?? "알림 읽음 처리에 실패했습니다.");
-          } else {
-            toast.error("알림 읽음 처리에 실패했습니다.");
-          }
-        }
+        await setNotificationRead(item);
       }
     },
-    [setNotification, updateNotification, queryClient],
+    [setNotification, setNotificationRead],
   );
 
   useEffect(() => {
