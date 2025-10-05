@@ -19,6 +19,8 @@ interface NotiItemProps {
 }
 
 const NotiItem = ({ item }: NotiItemProps) => {
+  const detailJson = castDetailJson<ParentLinkDetailJson>(item.type, item?.detailJson);
+
   const { notification } = useUserNotificationStore();
   const selectedNotificationId = notification?.id;
   const { setNotificationRead } = useNotificationRead();
@@ -43,8 +45,6 @@ const NotiItem = ({ item }: NotiItemProps) => {
       }
     }
   }, [selectedNotificationId]);
-
-  const detailJson = castDetailJson<ParentLinkDetailJson>(item.type, item?.detailJson);
 
   return (
     <button
@@ -91,7 +91,7 @@ const NotiItem = ({ item }: NotiItemProps) => {
         />
       </div>
       <div className="text-muted-foreground line-clamp-2 text-xs">
-        {item.detailJson?.message?.substring(0, 300)}
+        {detailJson?.message?.substring(0, 300)}
       </div>
     </button>
   );
