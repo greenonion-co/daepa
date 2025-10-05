@@ -17,7 +17,6 @@ import {
   getSchemaPath,
   PickType,
 } from '@nestjs/swagger';
-import { CommonResponseDto } from 'src/common/response.dto';
 import {
   PARENT_ROLE,
   PARENT_STATUS,
@@ -210,12 +209,3 @@ export class DeleteUserNotificationDto extends PickType(UserNotificationDto, [
   'id',
   'receiverId',
 ]) {}
-
-export class UserNotificationResponseDto extends CommonResponseDto {
-  @ApiProperty({
-    description: '알림 정보',
-    type: UserNotificationDto,
-    nullable: true,
-  })
-  data: UserNotificationDto | null;
-}

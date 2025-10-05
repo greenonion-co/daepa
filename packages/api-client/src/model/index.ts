@@ -134,8 +134,6 @@ export * from "./userNotificationDto";
 export * from "./userNotificationDtoDetailJson";
 export * from "./userNotificationDtoStatus";
 export * from "./userNotificationDtoType";
-export * from "./userNotificationResponseDto";
-export * from "./userNotificationResponseDtoData";
 export * from "./userProfileDto";
 export * from "./userProfileDtoProviderItem";
 export * from "./userProfileDtoRole";

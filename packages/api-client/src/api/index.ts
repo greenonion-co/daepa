@@ -56,7 +56,6 @@ import type {
   UserControllerGetUserListSimple200,
   UserDto,
   UserNotificationControllerFindAll200,
-  UserNotificationResponseDto,
   UserProfileResponseDto,
 } from "../model";
 
@@ -151,13 +150,6 @@ export const userNotificationControllerDelete = (
     method: "DELETE",
     headers: { "Content-Type": "application/json" },
     data: deleteUserNotificationDto,
-  });
-};
-
-export const userNotificationControllerFindOne = (id: number) => {
-  return useCustomInstance<UserNotificationResponseDto>({
-    url: `http://localhost:4000/api/v1/user-notification/${id}`,
-    method: "GET",
   });
 };
 
@@ -450,9 +442,6 @@ export type UserNotificationControllerUpdateResult = NonNullable<
 >;
 export type UserNotificationControllerDeleteResult = NonNullable<
   Awaited<ReturnType<typeof userNotificationControllerDelete>>
->;
-export type UserNotificationControllerFindOneResult = NonNullable<
-  Awaited<ReturnType<typeof userNotificationControllerFindOne>>
 >;
 export type BrPetControllerFindAllResult = NonNullable<
   Awaited<ReturnType<typeof brPetControllerFindAll>>
@@ -1375,112 +1364,6 @@ export const getUserNotificationControllerDeleteResponseMock = (
 ): CommonResponseDto => ({
   success: faker.datatype.boolean(),
   message: faker.string.alpha(20),
-  ...overrideResponse,
-});
-
-export const getUserNotificationControllerFindOneResponseDetailJsonMock = (
-  overrideResponse: Partial<DetailJson> = {},
-): DetailJson => ({
-  ...{ message: faker.helpers.arrayElement([faker.string.alpha(20), undefined]) },
-  ...overrideResponse,
-});
-
-export const getUserNotificationControllerFindOneResponseParentLinkDetailJsonMock = (
-  overrideResponse: Partial<ParentLinkDetailJson> = {},
-): ParentLinkDetailJson => ({
-  ...{
-    message: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
-    status: faker.helpers.arrayElement([
-      faker.helpers.arrayElement([
-        "pending",
-        "approved",
-        "rejected",
-        "deleted",
-        "cancelled",
-      ] as const),
-      undefined,
-    ]),
-    childPet: faker.helpers.arrayElement([
-      {
-        ...{
-          id: faker.string.alpha(20),
-          name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
-          photos: faker.helpers.arrayElement([
-            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-              () => ({
-                fileName: faker.string.alpha(20),
-                url: faker.string.alpha(20),
-                mimeType: faker.string.alpha(20),
-                size: faker.number.int({ min: undefined, max: undefined }),
-              }),
-            ),
-            undefined,
-          ]),
-        },
-      },
-      undefined,
-    ]),
-    parentPet: faker.helpers.arrayElement([
-      {
-        ...{
-          id: faker.string.alpha(20),
-          name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
-          photos: faker.helpers.arrayElement([
-            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-              () => ({
-                fileName: faker.string.alpha(20),
-                url: faker.string.alpha(20),
-                mimeType: faker.string.alpha(20),
-                size: faker.number.int({ min: undefined, max: undefined }),
-              }),
-            ),
-            undefined,
-          ]),
-        },
-      },
-      undefined,
-    ]),
-    role: faker.helpers.arrayElement([
-      faker.helpers.arrayElement(["father", "mother"] as const),
-      undefined,
-    ]),
-    rejectReason: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
-  },
-  ...overrideResponse,
-});
-
-export const getUserNotificationControllerFindOneResponseMock = (
-  overrideResponse: Partial<UserNotificationResponseDto> = {},
-): UserNotificationResponseDto => ({
-  success: faker.datatype.boolean(),
-  message: faker.string.alpha(20),
-  data: {
-    ...{
-      id: faker.number.int({ min: undefined, max: undefined }),
-      senderId: faker.string.alpha(20),
-      receiverId: faker.string.alpha(20),
-      type: faker.helpers.arrayElement([
-        "parent_request",
-        "parent_accept",
-        "parent_reject",
-        "parent_cancel",
-      ] as const),
-      targetId: faker.helpers.arrayElement([
-        faker.number.int({ min: undefined, max: undefined }),
-        undefined,
-      ]),
-      status: faker.helpers.arrayElement(["read", "unread", "deleted"] as const),
-      detailJson: faker.helpers.arrayElement([
-        faker.helpers.arrayElement([
-          { ...getUserNotificationControllerFindOneResponseDetailJsonMock() },
-          { ...getUserNotificationControllerFindOneResponseParentLinkDetailJsonMock() },
-        ]),
-        undefined,
-      ]),
-      createdAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
-      updatedAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
-    },
-  },
   ...overrideResponse,
 });
 
@@ -3692,29 +3575,6 @@ export const getUserNotificationControllerDeleteMockHandler = (
   });
 };
 
-export const getUserNotificationControllerFindOneMockHandler = (
-  overrideResponse?:
-    | UserNotificationResponseDto
-    | ((
-        info: Parameters<Parameters<typeof http.get>[1]>[0],
-      ) => Promise<UserNotificationResponseDto> | UserNotificationResponseDto),
-) => {
-  return http.get("*/api/v1/user-notification/:id", async (info) => {
-    await delay(1000);
-
-    return new HttpResponse(
-      JSON.stringify(
-        overrideResponse !== undefined
-          ? typeof overrideResponse === "function"
-            ? await overrideResponse(info)
-            : overrideResponse
-          : getUserNotificationControllerFindOneResponseMock(),
-      ),
-      { status: 200, headers: { "Content-Type": "application/json" } },
-    );
-  });
-};
-
 export const getBrPetControllerFindAllMockHandler = (
   overrideResponse?:
     | BrPetControllerFindAll200
@@ -4370,7 +4230,6 @@ export const getProjectDaepaAPIMock = () => [
   getUserNotificationControllerFindAllMockHandler(),
   getUserNotificationControllerUpdateMockHandler(),
   getUserNotificationControllerDeleteMockHandler(),
-  getUserNotificationControllerFindOneMockHandler(),
   getBrPetControllerFindAllMockHandler(),
   getBrPetControllerGetPetsByYearMockHandler(),
   getBrPetControllerGetPetsByMonthMockHandler(),
