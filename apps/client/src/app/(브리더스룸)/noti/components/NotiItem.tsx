@@ -37,6 +37,7 @@ const NotiItem = ({ item }: NotiItemProps) => {
     async (item: UserNotificationDto) => {
       if (item.id) {
         router.push(`/noti?id=${item.id}`);
+        // 여기를 router.push 대신 item을 넘겨주는것으로.
       }
 
       if (item.status === UserNotificationDtoStatus.UNREAD) {
@@ -74,7 +75,10 @@ const NotiItem = ({ item }: NotiItemProps) => {
         "flex flex-col items-start gap-2 rounded-lg border p-3 text-left text-sm shadow-sm transition-all duration-200 hover:scale-[1.01] hover:shadow-md",
         item.id === selectedId && "bg-blue-200 dark:bg-gray-800",
       )}
-      onClick={() => handleItemClick(item)}
+      onClick={() => {
+        handleItemClick(item);
+        console.log("clicked", item);
+      }}
     >
       <div className="flex w-full flex-col gap-1">
         <div className="flex items-center">

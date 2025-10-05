@@ -17,6 +17,8 @@ import { TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { NOTIFICATION_TYPE } from "@/app/(브리더스룸)/constants";
 import { castDetailJson } from "@/lib/utils";
 
+const NOTI_BUTTON_QUERY_KEY = "layout-noti-button";
+
 const ringBell = keyframes`
   0% { transform: rotate(0); }
   20% { transform: rotate(15deg); }
@@ -38,9 +40,10 @@ const NotiButton = () => {
   const isNotiPage = pathname.includes("noti");
 
   const { data: notifications } = useQuery({
-    queryKey: [userNotificationControllerFindAll.name],
+    queryKey: [userNotificationControllerFindAll.name, NOTI_BUTTON_QUERY_KEY],
     queryFn: () =>
       userNotificationControllerFindAll({
+        itemPerPage: 5,
         order: "DESC",
       }),
     select: (response) => response.data.data,
@@ -52,7 +55,6 @@ const NotiButton = () => {
 
   const recentNotifications = notifications
     ?.filter((n) => n.status === UserNotificationDtoStatus.UNREAD)
-    .slice(0, 4)
     .map((n) => {
       const info = NOTIFICATION_TYPE[n.type as keyof typeof NOTIFICATION_TYPE];
       const rawMessage = castDetailJson<ParentLinkDetailJson>(n.type, n?.detailJson)?.message ?? "";

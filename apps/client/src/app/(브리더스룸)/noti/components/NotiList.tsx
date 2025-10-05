@@ -1,58 +1,30 @@
-import {
-  userNotificationControllerFindAll,
-  UserNotificationDto,
-  UserNotificationDtoStatus,
-} from "@repo/api-client";
+import { UserNotificationDto } from "@repo/api-client";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 import Loading from "@/components/common/Loading";
-import { useInfiniteQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useInView } from "react-intersection-observer";
 
 import NotiItem from "./NotiItem";
 
-const NotiList = ({ tab }: { tab: "all" | "unread" }) => {
-  const [items, setItems] = useState<UserNotificationDto[]>([]);
+const NotiList = ({
+  items,
+  hasNextPage,
+  isFetchingNextPage,
+  fetchNextPage,
+}: {
+  items: UserNotificationDto[];
+  hasNextPage: boolean;
+  isFetchingNextPage: boolean;
+  fetchNextPage: () => void;
+}) => {
   const { ref, inView } = useInView();
-
-  const itemPerPage = 10;
-
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
-    queryKey: [userNotificationControllerFindAll.name, itemPerPage],
-    queryFn: ({ pageParam = 1 }) =>
-      userNotificationControllerFindAll({
-        page: pageParam,
-        itemPerPage,
-        order: "DESC",
-      }),
-    initialPageParam: 1,
-    getNextPageParam: (lastPage) => {
-      if (lastPage.data.meta.hasNextPage) {
-        return lastPage.data.meta.page + 1;
-      }
-      return undefined;
-    },
-  });
 
   useEffect(() => {
     if (inView && hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
     }
   }, [inView, fetchNextPage, hasNextPage, isFetchingNextPage]);
-
-  useEffect(() => {
-    if (!data?.pages) return;
-    if (tab === "all") {
-      setItems(data?.pages.flatMap((page) => page.data.data) ?? []);
-    } else {
-      setItems(
-        data?.pages
-          .flatMap((page) => page.data.data)
-          ?.filter((item) => item.status === UserNotificationDtoStatus.UNREAD) ?? [],
-      );
-    }
-  }, [data?.pages, tab]);
 
   return (
     <ScrollArea className="h-[calc(100vh-200px)]">
