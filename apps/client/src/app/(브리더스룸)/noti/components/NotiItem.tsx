@@ -29,9 +29,14 @@ const NotiItem = ({ item }: NotiItemProps) => {
 
   const handleItemClick = useCallback(
     async (item: UserNotificationDto) => {
-      if (item) {
-        setNotification(item);
+      if (!item) return;
+
+      setNotification(item);
+
+      try {
         await setNotificationRead(item);
+      } catch (error) {
+        console.error(error);
       }
     },
     [setNotification, setNotificationRead],
