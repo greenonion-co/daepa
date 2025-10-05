@@ -181,6 +181,9 @@ export class UserProfilePublicDto extends PickType(UserBaseDto, ['status']) {
   isBiz?: boolean;
 
   @Exclude()
+  declare email?: string;
+
+  @Exclude()
   declare provider?: OAUTH_PROVIDER[];
 
   @Exclude()
