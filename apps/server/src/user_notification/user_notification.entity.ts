@@ -13,7 +13,13 @@ import {
 import { DetailJson } from './user_notification.dto';
 
 @Entity({ name: 'user_notifications' })
-@Index(['senderId', 'receiverId', 'type', 'targetId'], { unique: true })
+@Index(
+  'UNIQUE_SENDER_RECEIVER_TYPE_TARGET',
+  ['senderId', 'receiverId', 'type', 'targetId'],
+  {
+    unique: true,
+  },
+)
 export class UserNotificationEntity {
   @PrimaryGeneratedColumn()
   id: number;
