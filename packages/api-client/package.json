@@ -21,7 +21,8 @@
     "typescript": "^5.8.2"
   },
   "scripts": {
-    "generate": "orval --config ./orval.config.js",
+    "generate": "NODE_ENV=development orval --config ./orval.config.js",
+    "generate:prod": "NODE_ENV=production orval --config ./orval.config.js",
     "generate:watch": "orval --config ./orval.config.js --watch"
   }
 }
