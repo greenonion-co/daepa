@@ -12,19 +12,15 @@ export class R2Service {
   private s3Client: S3Client;
 
   constructor(private configService: ConfigService) {
-    const endpoint = this.configService.get<string>(
+    const endpoint = this.configService.getOrThrow<string>(
       'CLOUDFLARE_R2_API_BASE_URL',
     );
-    const accessKeyId = this.configService.get<string>(
+    const accessKeyId = this.configService.getOrThrow<string>(
       'CLOUDFLARE_R2_ACCESS_KEY_ID',
     );
-    const secretAccessKey = this.configService.get<string>(
+    const secretAccessKey = this.configService.getOrThrow<string>(
       'CLOUDFLARE_R2_SECRET_ACCESS_KEY',
     );
-
-    if (!endpoint || !accessKeyId || !secretAccessKey) {
-      throw new Error('Cloudflare R2 환경변수가 올바르지 않습니다.');
-    }
 
     this.s3Client = new S3Client({
       region: 'auto',
