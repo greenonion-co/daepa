@@ -2,9 +2,12 @@ import Axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 import { authControllerGetToken } from "..";
 
 export const AXIOS_INSTANCE = Axios.create({
-  baseURL: "http://localhost:4000",
   withCredentials: true,
 });
+
+export const setAxiosInstanceBaseURL = (baseURL: string) => {
+  AXIOS_INSTANCE.defaults.baseURL = baseURL;
+};
 
 // 토큰 갱신 중복 요청 방지를 위한 플래그
 let isRefreshing = false;

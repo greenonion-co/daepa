@@ -61,16 +61,12 @@ import type {
 
 import { useCustomInstance } from "./mutator/use-custom-instance";
 export const petControllerFindAll = (params?: PetControllerFindAllParams) => {
-  return useCustomInstance<PetControllerFindAll200>({
-    url: `http://localhost:4000/api/v1/pet`,
-    method: "GET",
-    params,
-  });
+  return useCustomInstance<PetControllerFindAll200>({ url: `/api/v1/pet`, method: "GET", params });
 };
 
 export const petControllerCreate = (createPetDto: CreatePetDto) => {
   return useCustomInstance<CommonResponseDto>({
-    url: `http://localhost:4000/api/v1/pet`,
+    url: `/api/v1/pet`,
     method: "POST",
     headers: { "Content-Type": "application/json" },
     data: createPetDto,
@@ -79,14 +75,14 @@ export const petControllerCreate = (createPetDto: CreatePetDto) => {
 
 export const petControllerFindPetByPetId = (petId: string) => {
   return useCustomInstance<FindPetByPetIdResponseDto>({
-    url: `http://localhost:4000/api/v1/pet/${petId}`,
+    url: `/api/v1/pet/${petId}`,
     method: "GET",
   });
 };
 
 export const petControllerUpdate = (petId: string, updatePetDto: UpdatePetDto) => {
   return useCustomInstance<CommonResponseDto>({
-    url: `http://localhost:4000/api/v1/pet/${petId}`,
+    url: `/api/v1/pet/${petId}`,
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     data: updatePetDto,
@@ -94,10 +90,7 @@ export const petControllerUpdate = (petId: string, updatePetDto: UpdatePetDto) =
 };
 
 export const petControllerDeletePet = (petId: string) => {
-  return useCustomInstance<CommonResponseDto>({
-    url: `http://localhost:4000/api/v1/pet/${petId}`,
-    method: "DELETE",
-  });
+  return useCustomInstance<CommonResponseDto>({ url: `/api/v1/pet/${petId}`, method: "DELETE" });
 };
 
 export const petControllerCompleteHatching = (
@@ -105,7 +98,7 @@ export const petControllerCompleteHatching = (
   completeHatchingDto: CompleteHatchingDto,
 ) => {
   return useCustomInstance<CommonResponseDto>({
-    url: `http://localhost:4000/api/v1/pet/${petId}/hatching`,
+    url: `/api/v1/pet/${petId}/hatching`,
     method: "POST",
     headers: { "Content-Type": "application/json" },
     data: completeHatchingDto,
@@ -114,7 +107,7 @@ export const petControllerCompleteHatching = (
 
 export const petControllerVerifyName = (verifyPetNameDto: VerifyPetNameDto) => {
   return useCustomInstance<CommonResponseDto>({
-    url: `http://localhost:4000/api/v1/pet/duplicate-check`,
+    url: `/api/v1/pet/duplicate-check`,
     method: "POST",
     headers: { "Content-Type": "application/json" },
     data: verifyPetNameDto,
@@ -125,7 +118,7 @@ export const userNotificationControllerFindAll = (
   params?: UserNotificationControllerFindAllParams,
 ) => {
   return useCustomInstance<UserNotificationControllerFindAll200>({
-    url: `http://localhost:4000/api/v1/user-notification`,
+    url: `/api/v1/user-notification`,
     method: "GET",
     params,
   });
@@ -135,7 +128,7 @@ export const userNotificationControllerUpdate = (
   updateUserNotificationDto: UpdateUserNotificationDto,
 ) => {
   return useCustomInstance<CommonResponseDto>({
-    url: `http://localhost:4000/api/v1/user-notification`,
+    url: `/api/v1/user-notification`,
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     data: updateUserNotificationDto,
@@ -146,7 +139,7 @@ export const userNotificationControllerDelete = (
   deleteUserNotificationDto: DeleteUserNotificationDto,
 ) => {
   return useCustomInstance<CommonResponseDto>({
-    url: `http://localhost:4000/api/v1/user-notification`,
+    url: `/api/v1/user-notification`,
     method: "DELETE",
     headers: { "Content-Type": "application/json" },
     data: deleteUserNotificationDto,
@@ -155,7 +148,7 @@ export const userNotificationControllerDelete = (
 
 export const brPetControllerFindAll = (params?: BrPetControllerFindAllParams) => {
   return useCustomInstance<BrPetControllerFindAll200>({
-    url: `http://localhost:4000/api/v1/br/pet`,
+    url: `/api/v1/br/pet`,
     method: "GET",
     params,
   });
@@ -163,14 +156,14 @@ export const brPetControllerFindAll = (params?: BrPetControllerFindAllParams) =>
 
 export const brPetControllerGetPetsByYear = (year: string) => {
   return useCustomInstance<BrPetControllerGetPetsByYear200>({
-    url: `http://localhost:4000/api/v1/br/pet/hatching/year/${year}`,
+    url: `/api/v1/br/pet/hatching/year/${year}`,
     method: "GET",
   });
 };
 
 export const brPetControllerGetPetsByMonth = (params: BrPetControllerGetPetsByMonthParams) => {
   return useCustomInstance<FilterPetListResponseDto>({
-    url: `http://localhost:4000/api/v1/br/pet/hatching/month`,
+    url: `/api/v1/br/pet/hatching/month`,
     method: "GET",
     params,
   });
@@ -180,7 +173,7 @@ export const brPetControllerGetPetsByDateRange = (
   params: BrPetControllerGetPetsByDateRangeParams,
 ) => {
   return useCustomInstance<FilterPetListResponseDto>({
-    url: `http://localhost:4000/api/v1/br/pet/hatching/date-range`,
+    url: `/api/v1/br/pet/hatching/date-range`,
     method: "GET",
     params,
   });
@@ -190,7 +183,7 @@ export const authControllerKakaoNative = (
   kakaoNativeLoginRequestDto: KakaoNativeLoginRequestDto,
 ) => {
   return useCustomInstance<UserDto>({
-    url: `http://localhost:4000/api/auth/sign-in/kakao/native`,
+    url: `/api/auth/sign-in/kakao/native`,
     method: "POST",
     headers: { "Content-Type": "application/json" },
     data: kakaoNativeLoginRequestDto,
@@ -201,7 +194,7 @@ export const authControllerAppleNative = (
   appleNativeLoginRequestDto: AppleNativeLoginRequestDto,
 ) => {
   return useCustomInstance<UserDto>({
-    url: `http://localhost:4000/api/auth/sign-in/apple/native`,
+    url: `/api/auth/sign-in/apple/native`,
     method: "POST",
     headers: { "Content-Type": "application/json" },
     data: appleNativeLoginRequestDto,
@@ -209,58 +202,40 @@ export const authControllerAppleNative = (
 };
 
 export const authControllerKakaoLogin = () => {
-  return useCustomInstance<unknown>({
-    url: `http://localhost:4000/api/auth/sign-in/kakao`,
-    method: "GET",
-  });
+  return useCustomInstance<unknown>({ url: `/api/auth/sign-in/kakao`, method: "GET" });
 };
 
 export const authControllerGoogleLogin = () => {
-  return useCustomInstance<unknown>({
-    url: `http://localhost:4000/api/auth/sign-in/google`,
-    method: "GET",
-  });
+  return useCustomInstance<unknown>({ url: `/api/auth/sign-in/google`, method: "GET" });
 };
 
 export const authControllerGetToken = () => {
-  return useCustomInstance<TokenResponseDto>({
-    url: `http://localhost:4000/api/auth/token`,
-    method: "GET",
-  });
+  return useCustomInstance<TokenResponseDto>({ url: `/api/auth/token`, method: "GET" });
 };
 
 export const authControllerSignOut = () => {
-  return useCustomInstance<CommonResponseDto>({
-    url: `http://localhost:4000/api/auth/sign-out`,
-    method: "POST",
-  });
+  return useCustomInstance<CommonResponseDto>({ url: `/api/auth/sign-out`, method: "POST" });
 };
 
 export const authControllerDeleteAccount = () => {
-  return useCustomInstance<CommonResponseDto>({
-    url: `http://localhost:4000/api/auth/delete-account`,
-    method: "POST",
-  });
+  return useCustomInstance<CommonResponseDto>({ url: `/api/auth/delete-account`, method: "POST" });
 };
 
 export const userControllerGetUserListSimple = (params?: UserControllerGetUserListSimpleParams) => {
   return useCustomInstance<UserControllerGetUserListSimple200>({
-    url: `http://localhost:4000/api/v1/user/simple`,
+    url: `/api/v1/user/simple`,
     method: "GET",
     params,
   });
 };
 
 export const userControllerGetUserProfile = () => {
-  return useCustomInstance<UserProfileResponseDto>({
-    url: `http://localhost:4000/api/v1/user/profile`,
-    method: "GET",
-  });
+  return useCustomInstance<UserProfileResponseDto>({ url: `/api/v1/user/profile`, method: "GET" });
 };
 
 export const userControllerCreateInitUserInfo = (createInitUserInfoDto: CreateInitUserInfoDto) => {
   return useCustomInstance<CommonResponseDto>({
-    url: `http://localhost:4000/api/v1/user/init-info`,
+    url: `/api/v1/user/init-info`,
     method: "POST",
     headers: { "Content-Type": "application/json" },
     data: createInitUserInfoDto,
@@ -269,7 +244,7 @@ export const userControllerCreateInitUserInfo = (createInitUserInfoDto: CreateIn
 
 export const userControllerVerifyName = (verifyNameDto: VerifyNameDto) => {
   return useCustomInstance<CommonResponseDto>({
-    url: `http://localhost:4000/api/v1/user/verify-name`,
+    url: `/api/v1/user/verify-name`,
     method: "POST",
     headers: { "Content-Type": "application/json" },
     data: verifyNameDto,
@@ -278,7 +253,7 @@ export const userControllerVerifyName = (verifyNameDto: VerifyNameDto) => {
 
 export const userControllerVerifyEmail = (verifyEmailDto: VerifyEmailDto) => {
   return useCustomInstance<CommonResponseDto>({
-    url: `http://localhost:4000/api/v1/user/verify-email`,
+    url: `/api/v1/user/verify-email`,
     method: "POST",
     headers: { "Content-Type": "application/json" },
     data: verifyEmailDto,
@@ -287,7 +262,7 @@ export const userControllerVerifyEmail = (verifyEmailDto: VerifyEmailDto) => {
 
 export const adoptionControllerCreateAdoption = (createAdoptionDto: CreateAdoptionDto) => {
   return useCustomInstance<CommonResponseDto>({
-    url: `http://localhost:4000/api/v1/adoption`,
+    url: `/api/v1/adoption`,
     method: "POST",
     headers: { "Content-Type": "application/json" },
     data: createAdoptionDto,
@@ -298,7 +273,7 @@ export const adoptionControllerGetAllAdoptions = (
   params?: AdoptionControllerGetAllAdoptionsParams,
 ) => {
   return useCustomInstance<AdoptionControllerGetAllAdoptions200>({
-    url: `http://localhost:4000/api/v1/adoption`,
+    url: `/api/v1/adoption`,
     method: "GET",
     params,
   });
@@ -306,7 +281,7 @@ export const adoptionControllerGetAllAdoptions = (
 
 export const adoptionControllerGetAdoption = (adoptionId: string) => {
   return useCustomInstance<AdoptionDetailResponseDto>({
-    url: `http://localhost:4000/api/v1/adoption/${adoptionId}`,
+    url: `/api/v1/adoption/${adoptionId}`,
     method: "GET",
   });
 };
@@ -316,7 +291,7 @@ export const adoptionControllerUpdate = (
   updateAdoptionDto: UpdateAdoptionDto,
 ) => {
   return useCustomInstance<CommonResponseDto>({
-    url: `http://localhost:4000/api/v1/adoption/${adoptionId}`,
+    url: `/api/v1/adoption/${adoptionId}`,
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     data: updateAdoptionDto,
@@ -325,7 +300,7 @@ export const adoptionControllerUpdate = (
 
 export const matingControllerCreateMating = (createMatingDto: CreateMatingDto) => {
   return useCustomInstance<CommonResponseDto>({
-    url: `http://localhost:4000/api/v1/mating`,
+    url: `/api/v1/mating`,
     method: "POST",
     headers: { "Content-Type": "application/json" },
     data: createMatingDto,
@@ -337,7 +312,7 @@ export const matingControllerUpdateMating = (
   updateMatingDto: UpdateMatingDto,
 ) => {
   return useCustomInstance<CommonResponseDto>({
-    url: `http://localhost:4000/api/v1/mating/${matingId}`,
+    url: `/api/v1/mating/${matingId}`,
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     data: updateMatingDto,
@@ -346,14 +321,14 @@ export const matingControllerUpdateMating = (
 
 export const matingControllerDeleteMating = (matingId: number) => {
   return useCustomInstance<CommonResponseDto>({
-    url: `http://localhost:4000/api/v1/mating/${matingId}`,
+    url: `/api/v1/mating/${matingId}`,
     method: "DELETE",
   });
 };
 
 export const brMatingControllerFindAll = (params?: BrMatingControllerFindAllParams) => {
   return useCustomInstance<BrMatingControllerFindAll200>({
-    url: `http://localhost:4000/api/v1/br/mating`,
+    url: `/api/v1/br/mating`,
     method: "GET",
     params,
   });
@@ -364,7 +339,7 @@ export const parentRequestControllerLinkParent = (
   createParentDto: CreateParentDto,
 ) => {
   return useCustomInstance<CommonResponseDto>({
-    url: `http://localhost:4000/api/v1/parent-requests/${petId}`,
+    url: `/api/v1/parent-requests/${petId}`,
     method: "POST",
     headers: { "Content-Type": "application/json" },
     data: createParentDto,
@@ -376,7 +351,7 @@ export const parentRequestControllerUnlinkParent = (
   unlinkParentDto: UnlinkParentDto,
 ) => {
   return useCustomInstance<CommonResponseDto>({
-    url: `http://localhost:4000/api/v1/parent-requests/${petId}`,
+    url: `/api/v1/parent-requests/${petId}`,
     method: "DELETE",
     headers: { "Content-Type": "application/json" },
     data: unlinkParentDto,
@@ -388,7 +363,7 @@ export const parentRequestControllerUpdateStatus = (
   updateParentRequestDto: UpdateParentRequestDto,
 ) => {
   return useCustomInstance<CommonResponseDto>({
-    url: `http://localhost:4000/api/v1/parent-requests/${id}/status`,
+    url: `/api/v1/parent-requests/${id}/status`,
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     data: updateParentRequestDto,
@@ -397,7 +372,7 @@ export const parentRequestControllerUpdateStatus = (
 
 export const layingControllerCreate = (createLayingDto: CreateLayingDto) => {
   return useCustomInstance<CommonResponseDto>({
-    url: `http://localhost:4000/api/v1/layings`,
+    url: `/api/v1/layings`,
     method: "POST",
     headers: { "Content-Type": "application/json" },
     data: createLayingDto,
@@ -406,7 +381,7 @@ export const layingControllerCreate = (createLayingDto: CreateLayingDto) => {
 
 export const layingControllerUpdate = (id: number, updateLayingDto: UpdateLayingDto) => {
   return useCustomInstance<CommonResponseDto>({
-    url: `http://localhost:4000/api/v1/layings/${id}`,
+    url: `/api/v1/layings/${id}`,
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     data: updateLayingDto,
