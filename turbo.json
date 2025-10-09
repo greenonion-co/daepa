@@ -8,7 +8,35 @@
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "outputs": [".next/**", "!.next/cache/**", "dist/**"]
+      "outputs": [".next/**", "!.next/cache/**", "dist/**"],
+      "env": [
+        "NODE_ENV",
+        "CLIENT_BASE_URL",
+        "SERVER_BASE_URL",
+        "MYSQL_HOST",
+        "MYSQL_ROOT_PASSWORD",
+        "MYSQL_DATABASE",
+        "MYSQL_USER",
+        "MYSQL_PASSWORD",
+        "MYSQL_PORT",
+        "JWT_SECRET",
+        "JWT_REFRESH_SECRET",
+        "IMAGE_FILE_SALT",
+        "KAKAO_CLIENT_ID",
+        "KAKAO_CLIENT_SECRET",
+        "KAKAO_SERVICE_APP_ADMIN_KEY",
+        "GOOGLE_CLIENT_ID",
+        "GOOGLE_CLIENT_SECRET",
+        "NAVER_CLIENT_ID",
+        "NAVER_CLIENT_SECRET",
+        "CLIENT_BASE_URL",
+        "SERVER_BASE_URL",
+        "CLOUDFLARE_R2_IMAGE_BUCKET_NAME",
+        "CLOUDFLARE_R2_IMAGE_BASE_URL",
+        "CLOUDFLARE_R2_API_BASE_URL",
+        "CLOUDFLARE_R2_ACCESS_KEY_ID",
+        "CLOUDFLARE_R2_SECRET_ACCESS_KEY"
+      ]
     },
     "lint": {
       "dependsOn": ["^lint"]
