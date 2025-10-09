@@ -24,12 +24,14 @@ import { JwtUserPayload } from './strategies/jwt.strategy';
 import { RequestWithCookies } from 'src/types/request';
 import { CommonResponseDto } from 'src/common/response.dto';
 import { OAUTH_PROVIDER } from './auth.constants';
+import { ConfigService } from '@nestjs/config';
 
 @Controller('/auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly userService: UserService,
+    private readonly configService: ConfigService,
   ) {}
 
   @Post('sign-in/kakao/native')
@@ -168,8 +170,10 @@ export class AuthController {
       maxAge: 180 * 24 * 60 * 60 * 1000, // 180일
     });
 
+    const clientBaseUrl =
+      this.configService.getOrThrow<string>('CLIENT_BASE_URL');
     return res.redirect(
-      `${process.env.CLIENT_BASE_URL}/sign-in/auth?status=${validatedUser.userStatus}`,
+      `${clientBaseUrl}/sign-in/auth?status=${validatedUser.userStatus}`,
     );
   }
 
@@ -200,8 +204,10 @@ export class AuthController {
       maxAge: 180 * 24 * 60 * 60 * 1000, // 180일
     });
 
+    const clientBaseUrl =
+      this.configService.getOrThrow<string>('CLIENT_BASE_URL');
     return res.redirect(
-      `${process.env.CLIENT_BASE_URL}/sign-in/auth?status=${validatedUser.userStatus}`,
+      `${clientBaseUrl}/sign-in/auth?status=${validatedUser.userStatus}`,
     );
   }
 
