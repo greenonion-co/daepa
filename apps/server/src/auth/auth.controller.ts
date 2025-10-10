@@ -167,7 +167,6 @@ export class AuthController {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'none',
-      domain: new URL(process.env.CLIENT_BASE_URL ?? '').hostname,
       maxAge: 180 * 24 * 60 * 60 * 1000, // 180일
     });
 
@@ -202,7 +201,6 @@ export class AuthController {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'none',
-      domain: new URL(process.env.CLIENT_BASE_URL ?? '').hostname,
       maxAge: 180 * 24 * 60 * 60 * 1000, // 180일
     });
 
