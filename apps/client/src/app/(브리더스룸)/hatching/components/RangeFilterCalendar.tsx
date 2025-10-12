@@ -15,7 +15,7 @@ import {
   brPetControllerGetPetsByMonth,
   PetDtoType,
 } from "@repo/api-client";
-import PetCard from "./PetCard";
+import HatchingPetCard from "./HatchingPetCard";
 import { Search } from "lucide-react";
 import GuideText from "../../components/GuideText";
 
@@ -135,7 +135,9 @@ const RangeFilterCalendar = memo(() => {
                 if (tab === "notHatched")
                   return pets.filter((pet) => pet.type === PetDtoType.EGG).length > 0;
               })
-              .map(([date, pets]) => <PetCard key={date} date={date} pets={pets} tab={tab} />)
+              .map(([date, pets]) => (
+                <HatchingPetCard key={date} date={date} pets={pets} tab={tab} />
+              ))
           )}
         </ScrollArea>
       </div>

@@ -1,6 +1,6 @@
 import { format } from "date-fns";
 import { GENDER_KOREAN_INFO, SPECIES_KOREAN_INFO } from "../../constants";
-import { PetDto, PetDtoType } from "@repo/api-client";
+import { PetDto, PetDtoType, PetParentDto } from "@repo/api-client";
 import { Card, CardContent } from "@/components/ui/card";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -11,7 +11,7 @@ interface PetCardProps {
   tab: "all" | "hatched" | "notHatched";
 }
 
-const PetCard = ({ date, pets, tab }: PetCardProps) => {
+const HatchingPetCard = ({ date, pets, tab }: PetCardProps) => {
   return (
     <div className="mb-4">
       <h3 className="mb-2 text-sm font-medium">{format(new Date(date), "yyyy년 MM월 dd일")}</h3>
@@ -43,10 +43,18 @@ const PetCard = ({ date, pets, tab }: PetCardProps) => {
                     </div>
                   )}
                   {pet.father && (
-                    <div className="text-xs text-gray-400">아빠: {pet.father.name}</div>
+                    <div className="text-xs text-gray-400">
+                      {pet.father.isHidden
+                        ? "비공개 처리됨"
+                        : "부: " + (pet.father as PetParentDto).name}
+                    </div>
                   )}
                   {pet.mother && (
-                    <div className="text-xs text-gray-400">엄마: {pet.mother.name}</div>
+                    <div className="text-xs text-gray-400">
+                      {pet.mother.isHidden
+                        ? "비공개 처리됨"
+                        : "모: " + (pet.mother as PetParentDto).name}
+                    </div>
                   )}
                 </CardContent>
               </Card>
@@ -57,4 +65,4 @@ const PetCard = ({ date, pets, tab }: PetCardProps) => {
   );
 };
 
-export default PetCard;
+export default HatchingPetCard;
