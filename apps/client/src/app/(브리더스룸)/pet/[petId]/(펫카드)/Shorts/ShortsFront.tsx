@@ -6,7 +6,15 @@ import { GENDER_KOREAN_INFO, SPECIES_KOREAN_INFO } from "@/app/(브리더스룸)
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 
-const CardFront = ({ pet, qrCodeDataUrl }: { pet: PetDto; qrCodeDataUrl?: string }) => {
+const ShortsFront = ({
+  pet,
+  qrCodeDataUrl,
+  onFlip,
+}: {
+  pet: PetDto;
+  qrCodeDataUrl?: string;
+  onFlip: () => void;
+}) => {
   const [dragStart, setDragStart] = useState(0);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
@@ -21,7 +29,14 @@ const CardFront = ({ pet, qrCodeDataUrl }: { pet: PetDto; qrCodeDataUrl?: string
   };
 
   return (
-    <div className="absolute h-full w-full [-webkit-backface-visibility:hidden] [backface-visibility:hidden] [transform:rotateY(0deg)]">
+    <div
+      className="absolute h-full w-full [-webkit-backface-visibility:hidden] [backface-visibility:hidden] [transform:rotateY(0deg)]"
+      onClick={(e) => {
+        e.stopPropagation();
+        console.log("clicked front");
+        onFlip();
+      }}
+    >
       <div className="relative h-full overflow-hidden rounded-xl border-gray-300 bg-white shadow-xl dark:bg-[#18181B]">
         {/* 이미지 컨테이너 */}
         <motion.div
@@ -157,4 +172,4 @@ const CardFront = ({ pet, qrCodeDataUrl }: { pet: PetDto; qrCodeDataUrl?: string
   );
 };
 
-export default CardFront;
+export default ShortsFront;

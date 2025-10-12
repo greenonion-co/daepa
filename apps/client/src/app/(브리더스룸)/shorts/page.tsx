@@ -46,7 +46,7 @@ export default function ShortsPage() {
 
   return (
     <div
-      className="scrollbar-hide fixed inset-0 top-10 snap-y snap-mandatory overflow-y-auto bg-[#FAFAFA] dark:bg-zinc-900"
+      className="scrollbar-hide absolute inset-0 top-10 snap-y snap-mandatory overflow-y-auto bg-[#FAFAFA] dark:bg-zinc-900"
       style={{ scrollSnapType: "y mandatory" }}
     >
       {data?.map((item, index) => (

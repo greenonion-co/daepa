@@ -16,10 +16,10 @@ interface ExtendedPetDto extends PetDto {
 }
 interface CardBackProps {
   pet: ExtendedPetDto;
-  setIsFlipped: (isFlipped: boolean) => void;
+  onFlip: () => void;
 }
 
-const CardBack = ({ pet, setIsFlipped }: CardBackProps) => {
+const ShortsBack = ({ pet, onFlip }: CardBackProps) => {
   const visibleFields = [
     ...[...FORM_STEPS].reverse(),
     ...OPTION_STEPS.filter((step) =>
@@ -83,7 +83,7 @@ const CardBack = ({ pet, setIsFlipped }: CardBackProps) => {
       className="absolute h-full w-full overflow-auto rounded-xl border-gray-300 bg-white shadow-xl [-webkit-backface-visibility:hidden] [backface-visibility:hidden] [transform:rotateY(180deg)] dark:bg-[#18181B]"
       onClick={(e) => {
         e.stopPropagation();
-        setIsFlipped(false);
+        onFlip();
       }}
     >
       <div className="px-6 pb-20">
@@ -123,4 +123,4 @@ const CardBack = ({ pet, setIsFlipped }: CardBackProps) => {
   );
 };
 
-export default CardBack;
+export default ShortsBack;
