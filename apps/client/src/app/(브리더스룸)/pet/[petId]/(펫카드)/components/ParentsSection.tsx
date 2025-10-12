@@ -13,12 +13,12 @@ import { usePetStore } from "@/app/(브리더스룸)/register/store/pet";
 import { memo, useCallback } from "react";
 import { AxiosError } from "axios";
 
-interface PedigreeSectionProps {
+interface ParentsSectionProps {
   petId: string;
   isMyPet: boolean;
 }
 
-const PedigreeSection = memo(({ petId, isMyPet }: PedigreeSectionProps) => {
+const ParentsSection = memo(({ petId, isMyPet }: ParentsSectionProps) => {
   const queryClient = useQueryClient();
   const { formData } = usePetStore();
 
@@ -119,6 +119,6 @@ const PedigreeSection = memo(({ petId, isMyPet }: PedigreeSectionProps) => {
   );
 });
 
-PedigreeSection.displayName = "PedigreeSection";
+ParentsSection.displayName = "ParentsSection";
 
-export default PedigreeSection;
+export default ParentsSection;

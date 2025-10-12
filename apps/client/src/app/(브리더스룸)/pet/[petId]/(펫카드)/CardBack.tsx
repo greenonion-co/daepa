@@ -14,7 +14,7 @@ import { toast } from "sonner";
 import AdoptionReceipt from "./components/AdoptionReceipt";
 import PetVisibilityControl from "./components/PetVisibilityControl";
 import AdoptionStatusControl from "./components/AdoptionStatusControl";
-import PedigreeSection from "./components/PedigreeSection";
+import ParentsSection from "./components/ParentsSection";
 import BreedingInfoSection from "./components/BreedingInfoSection";
 import CardBackActions from "./components/CardBackActions";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -137,7 +137,7 @@ const CardBack = memo(({ pet, from, isWideScreen }: CardBackProps) => {
         {!isWideScreen && pet.adoption && isMyPet && <AdoptionReceipt adoption={pet.adoption} />}
 
         {/* 혈통 정보 */}
-        <PedigreeSection petId={pet.petId} isMyPet={isMyPet} />
+        <ParentsSection petId={pet.petId} isMyPet={isMyPet} />
 
         {/* 사육 정보 */}
         <BreedingInfoSection
