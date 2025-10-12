@@ -18,7 +18,12 @@ import {
 } from 'typeorm';
 import { nanoid } from 'nanoid';
 import { plainToInstance } from 'class-transformer';
-import { CompleteHatchingDto, CreatePetDto, PetDto } from './pet.dto';
+import {
+  CompleteHatchingDto,
+  CreatePetDto,
+  PetDto,
+  PetParentDto,
+} from './pet.dto';
 import {
   PET_GROWTH,
   PET_SEX,
@@ -167,7 +172,7 @@ export class PetService {
     });
   }
 
-  async findPetByPetId(petId: string): Promise<PetDto> {
+  async findPetByPetId(petId: string, userId: string): Promise<PetDto> {
     return this.dataSource.transaction(async (entityManager: EntityManager) => {
       const pet = await entityManager.findOne(PetEntity, {
         where: { petId, isDeleted: false },
@@ -228,6 +233,10 @@ export class PetService {
           entityManager,
         );
 
+      // father, mother pet이 isPublic이 아닌 경우, ownerId가 자신인 경우에만 펫 정보 반환
+      const fatherDisplayable = this.getParentPublicSafe(father, userId);
+      const motherDisplayable = this.getParentPublicSafe(mother, userId);
+
       const { growth, sex, morphs, traits, foods, weight } = petDetail ?? {};
       const { temperature, status: eggStatus } = eggDetail ?? {};
 
@@ -243,8 +252,8 @@ export class PetService {
         temperature,
         eggStatus,
         owner,
-        father,
-        mother,
+        father: fatherDisplayable,
+        mother: motherDisplayable,
         photos: files,
         adoption: adoption
           ? {
@@ -416,6 +425,8 @@ export class PetService {
 
         const { father, mother } =
           await this.parentRequestService.getParentsWithRequestStatus(petId);
+        const fatherDisplayable = this.getParentPublicSafe(father, userId);
+        const motherDisplayable = this.getParentPublicSafe(mother, userId);
 
         const petDto = plainToInstance(PetDto, {
           ...pet,
@@ -432,8 +443,8 @@ export class PetService {
             temperature: pet.eggDetail.temperature,
             eggStatus: pet.eggDetail.status,
           }),
-          father,
-          mother,
+          father: fatherDisplayable,
+          mother: motherDisplayable,
           photos: photos?.files,
         });
 
@@ -512,6 +523,8 @@ export class PetService {
 
         const { father, mother } =
           await this.parentRequestService.getParentsWithRequestStatus(petId);
+        const fatherDisplayable = this.getParentPublicSafe(father, userId);
+        const motherDisplayable = this.getParentPublicSafe(mother, userId);
 
         const petDto = plainToInstance(PetDto, {
           ...pet,
@@ -528,8 +541,8 @@ export class PetService {
             temperature: pet.eggDetail.temperature,
             eggStatus: pet.eggDetail.status,
           }),
-          father,
-          mother,
+          father: fatherDisplayable,
+          mother: motherDisplayable,
           photos: photos?.files,
         });
 
@@ -693,7 +706,7 @@ export class PetService {
 
   async getPetListByHatchingDate(
     dateRange: { startDate?: Date; endDate?: Date },
-    userId?: string,
+    userId: string,
   ): Promise<Record<string, PetDto[]>> {
     const queryBuilder = this.petRepository
       .createQueryBuilder('pets')
@@ -766,12 +779,14 @@ export class PetService {
           await this.parentRequestService.getParentsWithRequestStatus(
             pet.petId,
           );
+        const fatherDisplayable = this.getParentPublicSafe(father, userId);
+        const motherDisplayable = this.getParentPublicSafe(mother, userId);
 
         return plainToInstance(PetDto, {
           ...pet,
           owner,
-          father,
-          mother,
+          father: fatherDisplayable,
+          mother: motherDisplayable,
           ...(pet.petDetail && {
             sex: pet.petDetail.sex,
             morphs: pet.petDetail.morphs,
@@ -843,7 +858,7 @@ export class PetService {
 
   async getPetListByYear(
     year: number,
-    userId?: string,
+    userId: string,
   ): Promise<Record<string, PetDto[]>> {
     const startDate = new Date(year, 0, 1);
     const endDate = new Date(year, 11, 31);
@@ -853,7 +868,7 @@ export class PetService {
 
   async getPetListByMonth(
     month: Date,
-    userId?: string,
+    userId: string,
   ): Promise<Record<string, PetDto[]>> {
     const startDate = new Date(month.getFullYear(), month.getMonth(), 1);
     const endDate = new Date(month.getFullYear(), month.getMonth() + 1, 0);
@@ -989,5 +1004,18 @@ export class PetService {
         growth: pageOptionsDto.growth,
       });
     }
+  }
+
+  private getParentPublicSafe(parent: PetParentDto | null, userId: string) {
+    if (!parent) return null;
+
+    if (
+      parent.isDeleted ||
+      (!parent.isPublic && parent.owner?.userId !== userId)
+    ) {
+      return { isHidden: true };
+    }
+
+    return parent;
   }
 }

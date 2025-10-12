@@ -13,7 +13,8 @@ import type { EggDetailDto } from "./eggDetailDto";
 import type { PetDtoGrowth } from "./petDtoGrowth";
 import type { PetDtoSex } from "./petDtoSex";
 import type { PetDtoEggStatus } from "./petDtoEggStatus";
-import type { PetParentDto } from "./petParentDto";
+import type { PetDtoFather } from "./petDtoFather";
+import type { PetDtoMother } from "./petDtoMother";
 import type { PetAdoptionDto } from "./petAdoptionDto";
 import type { PetDtoStatus } from "./petDtoStatus";
 import type { PetImageItem } from "./petImageItem";
@@ -31,12 +32,14 @@ export interface PetDto {
   species: PetDtoSpecies;
   /** 펫 출생일 */
   hatchingDate?: string;
-  /** 펫 공개 여부 */
-  isPublic?: boolean;
   /** 펫 이미지 목록 */
   photoOrder?: string[];
   /** 펫 소개말 */
   desc?: string;
+  /** 펫 공개 여부 */
+  isPublic?: boolean;
+  /** 펫 삭제 여부 */
+  isDeleted?: boolean;
   /** 펫 상세 정보 */
   petDetail?: PetDetailDto;
   /** 알 상세 정보 */
@@ -58,9 +61,9 @@ export interface PetDto {
   /** 알 상태 */
   eggStatus?: PetDtoEggStatus;
   /** 아빠 개체 정보 */
-  father?: PetParentDto;
+  father?: PetDtoFather;
   /** 엄마 개체 정보 */
-  mother?: PetParentDto;
+  mother?: PetDtoMother;
   /** 분양 정보 */
   adoption?: PetAdoptionDto;
   /** 부모 관계 상태 */

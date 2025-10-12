@@ -33,6 +33,8 @@ interface ParentRawData {
   p_name: string | null;
   p_species: string;
   p_hatching_date: Date | null;
+  p_is_public: 0 | 1;
+  p_is_deleted: 0 | 1;
   pd_sex: PET_SEX | null;
   pd_morphs: string[] | null;
   pd_traits: string[] | null;
@@ -586,6 +588,8 @@ export class ParentRequestService {
           'p.name',
           'p.species',
           'p.hatchingDate',
+          'p.isPublic',
+          'p.isDeleted',
           'pd.sex',
           'pd.morphs',
           'pd.traits',
@@ -627,6 +631,8 @@ export class ParentRequestService {
             isBiz: row.user_is_biz,
             status: row.user_status,
           },
+          isPublic: !!row.p_is_public,
+          isDeleted: !!row.p_is_deleted,
         };
 
         const info = { ...base, photos: row.img_files ?? undefined };

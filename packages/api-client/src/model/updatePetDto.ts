@@ -22,12 +22,14 @@ export interface UpdatePetDto {
   species?: UpdatePetDtoSpecies;
   /** 펫 출생일 */
   hatchingDate?: string;
-  /** 펫 공개 여부 */
-  isPublic?: boolean;
   /** 펫 이미지 목록 */
   photoOrder?: string[];
   /** 펫 소개말 */
   desc?: string;
+  /** 펫 공개 여부 */
+  isPublic?: boolean;
+  /** 펫 삭제 여부 */
+  isDeleted?: boolean;
   /** 펫 성장단계 */
   growth?: UpdatePetDtoGrowth;
   /** 펫 성별(수컷, 암컷, 미구분) */

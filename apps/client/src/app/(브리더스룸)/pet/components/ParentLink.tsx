@@ -1,6 +1,6 @@
 "use client";
 
-import { Search, X } from "lucide-react";
+import { Search, X, Lock } from "lucide-react";
 import Link from "next/link";
 import { overlay } from "overlay-kit";
 import ParentSearchSelector from "../../components/selector/parentSearch";
@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import Dialog from "../../components/Form/Dialog";
 import {
   PetControllerFindAllFilterType,
+  PetDtoFather,
+  PetDtoMother,
   PetDtoSpecies,
   PetParentDto,
   PetParentDtoStatus,
@@ -18,11 +20,12 @@ import { usePathname } from "next/navigation";
 import { PetParentDtoWithMessage } from "../store/parentLink";
 import { useUserStore } from "../../store/user";
 import PetThumbnail from "../../components/PetThumbnail";
+import { useCallback } from "react";
 
 interface ParentLinkProps {
   species?: PetDtoSpecies;
   label: "부" | "모";
-  data?: PetParentDto;
+  data?: PetDtoFather | PetDtoMother;
   editable?: boolean;
   petListType?: PetControllerFindAllFilterType;
   onSelect?: (item: PetParentDtoWithMessage) => void;
@@ -32,7 +35,7 @@ interface ParentLinkProps {
 const ParentLink = ({
   species,
   label,
-  data,
+  data = {} as PetDtoFather | PetDtoMother,
   editable = true,
   petListType = PetControllerFindAllFilterType.ALL,
   onSelect,
@@ -40,42 +43,48 @@ const ParentLink = ({
 }: ParentLinkProps) => {
   const { user } = useUserStore();
   const pathname = usePathname();
-  const isMyPet = data?.owner?.userId === user?.userId;
   const isClickDisabled = pathname.includes("register") || pathname.includes("hatching");
-  const deleteParent = () => {
-    if (!data?.petId) return;
 
-    onUnlink?.();
-  };
+  const deleteParent = useCallback(
+    (data: PetParentDto) => {
+      if (!data?.petId) return;
 
-  const handleUnlink = (e: React.MouseEvent) => {
-    e.stopPropagation();
+      onUnlink?.();
+    },
+    [onUnlink],
+  );
 
-    if (isClickDisabled) {
-      deleteParent();
-      return;
-    }
+  const handleUnlink = useCallback(
+    (e: React.MouseEvent, data: PetParentDto) => {
+      e.stopPropagation();
 
-    overlay.open(({ isOpen, close, unmount }) => (
-      <Dialog
-        isOpen={isOpen}
-        onCloseAction={close}
-        onConfirmAction={() => {
-          deleteParent();
-          close();
-        }}
-        title={
-          data?.status === PetParentDtoStatus.APPROVED ? "부모 연동 해제" : "부모 연동 요청 취소"
-        }
-        description={
-          data?.status === PetParentDtoStatus.APPROVED
-            ? `부모 연동을 해제하시겠습니까? \n 해제 후 다시 연동 요청을 해야 합니다.`
-            : "부모 연동 요청을 취소하시겠습니까? \n 부모 개체 주인에게 취소 알림이 발송됩니다."
-        }
-        onExit={unmount}
-      />
-    ));
-  };
+      if (isClickDisabled) {
+        deleteParent(data);
+        return;
+      }
+
+      overlay.open(({ isOpen, close, unmount }) => (
+        <Dialog
+          isOpen={isOpen}
+          onCloseAction={close}
+          onConfirmAction={() => {
+            deleteParent(data);
+            close();
+          }}
+          title={
+            data?.status === PetParentDtoStatus.APPROVED ? "부모 연동 해제" : "부모 연동 요청 취소"
+          }
+          description={
+            data?.status === PetParentDtoStatus.APPROVED
+              ? `부모 연동을 해제하시겠습니까? \n 해제 후 다시 연동 요청을 해야 합니다.`
+              : "부모 연동 요청을 취소하시겠습니까? \n 부모 개체 주인에게 취소 알림이 발송됩니다."
+          }
+          onExit={unmount}
+        />
+      ));
+    },
+    [deleteParent, isClickDisabled],
+  );
 
   const handleSelect = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -97,29 +106,53 @@ const ParentLink = ({
     ));
   };
 
+  // 비공개 펫인 경우
+  if (data?.isHidden) {
+    return (
+      <div className="flex-1">
+        <dt className="mb-2 flex items-center gap-2 text-xs font-medium text-gray-500 dark:text-gray-400">
+          {label}
+        </dt>
+        <div className="flex flex-col items-center gap-2">
+          <div className="relative aspect-square w-full overflow-hidden rounded-lg bg-gray-200/50 dark:bg-gray-700/50">
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
+              <Lock className="h-6 w-6 text-gray-400 dark:text-gray-500" />
+              <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                브리더에 의해 비공개 처리된 개체입니다.
+              </span>
+            </div>
+          </div>
+          <span className="text-sm text-gray-400 dark:text-gray-500">비공개</span>
+        </div>
+      </div>
+    );
+  }
+
+  const parent = data as PetParentDto;
+  const isMyPet = parent?.owner?.userId === user?.userId;
   return (
     <div className="flex-1">
       <dt className="mb-2 flex items-center gap-2 text-xs font-medium text-gray-500 dark:text-gray-400">
         {label}
         {/* TODO!: isMyPet이 아닌 경우 해당 주인의 정보를 노출 */}
-        {data?.status && <ParentStatusBadge status={data.status} isMyPet={isMyPet} />}
+        {parent?.status && <ParentStatusBadge status={parent.status} isMyPet={isMyPet} />}
       </dt>
 
-      {data?.petId ? (
+      {parent?.petId ? (
         <div className="group relative block h-full w-full transition-opacity hover:opacity-95">
           {editable && (
             <Button
               variant="ghost"
               size="sm"
               className="absolute right-1 top-1 z-10 h-6 w-6 rounded-full bg-black/50 p-0 hover:bg-black/70"
-              onClick={handleUnlink}
+              onClick={(e) => handleUnlink(e, parent)}
             >
               <X className="h-4 w-4 text-white" />
             </Button>
           )}
 
           <Link
-            href={`/pet/${data.petId}`}
+            href={`/pet/${parent.petId}`}
             passHref={false}
             onClick={(e) => {
               e.stopPropagation();
@@ -127,7 +160,7 @@ const ParentLink = ({
             }}
             className="flex flex-col items-center gap-2"
           >
-            <PetThumbnail imageUrl={data.photos?.[0]?.url} />
+            <PetThumbnail imageUrl={parent.photos?.[0]?.url} />
 
             <span
               className={cn(
@@ -135,7 +168,7 @@ const ParentLink = ({
                 label === "모" ? "after:bg-red-400" : "after:bg-[#247DFE]",
               )}
             >
-              {data.name || "-"}
+              {parent.name || "-"}
             </span>
           </Link>
         </div>

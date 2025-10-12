@@ -93,8 +93,9 @@ export class PetController {
   })
   async findPetByPetId(
     @Param('petId') petId: string,
+    @JwtUser() token: JwtUserPayload,
   ): Promise<FindPetByPetIdResponseDto> {
-    const data = await this.petService.findPetByPetId(petId);
+    const data = await this.petService.findPetByPetId(petId, token.userId);
     return {
       success: true,
       message: '펫 정보 조회 성공',

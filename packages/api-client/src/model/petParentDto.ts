@@ -22,6 +22,10 @@ export interface PetParentDto {
   species: PetParentDtoSpecies;
   /** 펫 출생일 */
   hatchingDate?: string;
+  /** 펫 공개 여부 */
+  isPublic?: boolean;
+  /** 펫 삭제 여부 */
+  isDeleted?: boolean;
   /** 부모 관계 상태 */
   status: PetParentDtoStatus;
   /** 펫 성별(수컷, 암컷, 미구분) */
@@ -32,4 +36,6 @@ export interface PetParentDto {
   traits?: string[];
   /** 펫 이미지 목록 */
   photos?: PetImageItem[];
+  /** 숨김 여부 */
+  isHidden?: boolean;
 }

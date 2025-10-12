@@ -42,6 +42,15 @@ import { EGG_STATUS } from 'src/egg_detail/egg_detail.constants';
 import { PetDetailDto } from 'src/pet_detail/pet_detail.dto';
 import { EggDetailDto } from 'src/egg_detail/egg_detail.dto';
 
+export class HiddenParentDto {
+  @ApiProperty({
+    description: '숨김 여부',
+    example: true,
+  })
+  @IsBoolean()
+  isHidden: boolean;
+}
+
 export class PetBaseDto {
   @ApiProperty({
     description: '펫 아이디',
@@ -98,15 +107,6 @@ export class PetBaseDto {
   hatchingDate?: Date;
 
   @ApiProperty({
-    description: '펫 공개 여부',
-    example: false,
-    required: false,
-  })
-  @IsOptional()
-  @IsBoolean()
-  isPublic?: boolean;
-
-  @ApiProperty({
     description: '펫 이미지 목록',
     example: ['fileName1', 'fileName2'],
     required: false,
@@ -123,6 +123,24 @@ export class PetBaseDto {
   @IsOptional()
   @IsString()
   desc?: string;
+
+  @ApiProperty({
+    description: '펫 공개 여부',
+    example: false,
+    required: false,
+  })
+  @IsOptional()
+  @IsBoolean()
+  isPublic?: boolean;
+
+  @ApiProperty({
+    description: '펫 삭제 여부',
+    example: false,
+    required: false,
+  })
+  @IsOptional()
+  @IsBoolean()
+  isDeleted?: boolean;
 
   @ApiProperty({
     description: '펫 상세 정보',
@@ -153,6 +171,8 @@ export class PetSummaryDto extends PickType(PetBaseDto, [
   'species',
   'photoOrder',
   'hatchingDate',
+  'isPublic',
+  'isDeleted',
 ]) {
   @ApiProperty({
     description: '펫 성별(수컷, 암컷, 미구분)',
@@ -328,6 +348,8 @@ export class PetParentDto extends PickType(PetSummaryDto, [
   'owner',
   'species',
   'hatchingDate',
+  'isPublic',
+  'isDeleted',
 ]) {
   @ApiProperty({
     description: '부모 관계 상태',
@@ -377,6 +399,15 @@ export class PetParentDto extends PickType(PetSummaryDto, [
   @ValidateNested({ each: true })
   @Type(() => PetImageItem)
   photos?: PetImageItem[];
+
+  @ApiProperty({
+    description: '숨김 여부',
+    example: true,
+    required: false,
+  })
+  @IsOptional()
+  @IsBoolean()
+  isHidden?: boolean;
 }
 
 export class PetAdoptionDto {
@@ -453,6 +484,7 @@ export class PetAdoptionDto {
   petId: string;
 }
 
+@ApiExtraModels(PetParentDto, HiddenParentDto)
 export class PetDto extends PetBaseDto {
   @ApiProperty({
     description: '펫 성장단계',
@@ -541,19 +573,27 @@ export class PetDto extends PetBaseDto {
     description: '아빠 개체 정보',
     example: {},
     required: false,
+    oneOf: [
+      { $ref: getSchemaPath(PetParentDto) },
+      { $ref: getSchemaPath(HiddenParentDto) },
+    ],
   })
   @IsOptional()
   @IsObject()
-  father?: PetParentDto;
+  father?: PetParentDto | HiddenParentDto;
 
   @ApiProperty({
     description: '엄마 개체 정보',
     example: {},
     required: false,
+    oneOf: [
+      { $ref: getSchemaPath(PetParentDto) },
+      { $ref: getSchemaPath(HiddenParentDto) },
+    ],
   })
   @IsOptional()
   @IsObject()
-  mother?: PetParentDto;
+  mother?: PetParentDto | HiddenParentDto;
 
   @ApiProperty({
     description: '분양 정보',
