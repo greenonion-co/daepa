@@ -193,7 +193,7 @@ const MatingItem = ({ mating, father, mother, matingDates }: MatingItemProps) =>
                 <CalendarSelect
                   disabledDates={layingDates}
                   triggerText={layingDate}
-                  confirmButtonText="산란 추가"
+                  confirmButtonText="산란 날짜 추가"
                   onConfirm={(newLayingDate) => handleUpdateLayingDate(layingId, newLayingDate)}
                   disabled={getDisabledDates(layingDate)}
                 />
@@ -214,7 +214,7 @@ const MatingItem = ({ mating, father, mother, matingDates }: MatingItemProps) =>
             className="mt-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-blue-100 p-2 text-sm font-bold text-blue-800 shadow-sm transition-colors hover:bg-blue-200 hover:shadow-md dark:bg-blue-900 dark:text-blue-200 dark:hover:bg-blue-800"
           >
             <Plus className="h-4 w-4" />
-            산란 추가
+            산란 날짜 추가
           </button>
         </div>
       )}

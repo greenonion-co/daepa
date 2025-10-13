@@ -108,18 +108,18 @@ const RangeFilterCalendar = memo(() => {
               <TabsTrigger value="all">
                 전체 ({Object.values(visibleData).flat().length || 0})
               </TabsTrigger>
-              <TabsTrigger value="hatched">
-                해칭된 펫 (
-                {Object.values(visibleData || {})
-                  .flat()
-                  .filter((pet) => pet.type === PetDtoType.PET).length || 0}
-                )
-              </TabsTrigger>
               <TabsTrigger value="notHatched">
-                해칭되지 않은 펫 (
+                알 (
                 {Object.values(visibleData || {})
                   .flat()
                   .filter((pet) => pet.type === PetDtoType.EGG).length || 0}
+                )
+              </TabsTrigger>
+              <TabsTrigger value="hatched">
+                해칭 완료 (
+                {Object.values(visibleData || {})
+                  .flat()
+                  .filter((pet) => pet.type === PetDtoType.PET).length || 0}
                 )
               </TabsTrigger>
             </TabsList>

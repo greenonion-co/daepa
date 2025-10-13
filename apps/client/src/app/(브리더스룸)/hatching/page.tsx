@@ -9,7 +9,7 @@ const HatchingPage = () => {
   return (
     <div>
       <div className="flex items-center px-4 py-1">
-        <h1 className="text-xl font-bold">산란 관리</h1>
+        <h1 className="text-xl font-bold">메이팅 & 해칭 관리</h1>
       </div>
 
       <Tabs defaultValue="mating" className="flex flex-col gap-4">

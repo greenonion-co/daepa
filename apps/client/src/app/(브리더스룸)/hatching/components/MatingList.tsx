@@ -224,7 +224,7 @@ const MatingList = memo(() => {
               <div className="flex flex-col gap-2 px-1">
                 <div className="flex w-full items-center justify-center gap-2 rounded-lg bg-yellow-100 p-2 text-sm font-semibold text-yellow-800 transition-colors hover:bg-yellow-200 dark:bg-yellow-900 dark:text-yellow-500 dark:hover:bg-yellow-800">
                   <CalendarSelect
-                    triggerText="메이팅을 추가하려면 날짜를 선택하세요"
+                    triggerText="메이팅 날짜 추가"
                     confirmButtonText="메이팅 추가"
                     disabledDates={getMatingDates(matingGroup?.matingsByDate ?? [])}
                     onConfirm={(matingDate) =>
