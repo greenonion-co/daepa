@@ -57,8 +57,6 @@ export * from "./eggDetailDtoStatus";
 export * from "./filterPetListResponseDto";
 export * from "./filterPetListResponseDtoData";
 export * from "./findPetByPetIdResponseDto";
-export * from "./hiddenParentDto";
-export * from "./hiddenParentDtoIsHidden";
 export * from "./kakaoNativeLoginRequestDto";
 export * from "./layingByDateDto";
 export * from "./matingByDateDto";
