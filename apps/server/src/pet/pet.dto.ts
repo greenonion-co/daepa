@@ -46,7 +46,7 @@ import { EggDetailDto } from 'src/egg_detail/egg_detail.dto';
 export class PetHiddenStatusDto {
   @ApiProperty({
     description: '숨김 처리된 원인',
-    example: true,
+    example: PET_HIDDEN_STATUS.SECRET,
     enum: PET_HIDDEN_STATUS,
     'x-enumNames': Object.keys(PET_HIDDEN_STATUS),
   })
