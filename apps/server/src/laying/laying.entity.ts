@@ -1,10 +1,8 @@
-import { PetEntity } from 'src/pet/pet.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
   Index,
-  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -34,7 +32,4 @@ export class LayingEntity {
 
   @UpdateDateColumn()
   updatedAt: Date;
-
-  @OneToOne(() => PetEntity, (pet) => pet.laying)
-  pet: PetEntity;
 }

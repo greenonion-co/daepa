@@ -88,8 +88,5 @@ export class PetEntity {
   })
   eggDetail: EggDetailEntity | null;
 
-  @OneToOne(() => LayingEntity, (laying) => laying.pet, {
-    nullable: true,
-  })
   laying: LayingEntity | null;
 }
