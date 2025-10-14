@@ -739,8 +739,7 @@ export class PetService {
         'pets.owner',
         'users',
         'users',
-        'users.userId = :userId',
-        { userId },
+        'users.userId = pets.ownerId',
       )
       .leftJoinAndMapOne(
         'pets.petDetail',
@@ -748,10 +747,14 @@ export class PetService {
         'petDetail',
         'petDetail.petId = pets.petId',
       )
-      .where('pets.type = :petType AND pets.isDeleted = :isDeleted', {
-        petType: PET_TYPE.PET,
-        isDeleted: false,
-      })
+      .where(
+        'pets.ownerId = :userId AND pets.type = :petType AND pets.isDeleted = :isDeleted',
+        {
+          userId,
+          petType: PET_TYPE.PET,
+          isDeleted: false,
+        },
+      )
       .andWhere('pets.hatchingDate BETWEEN :startDate AND :endDate', {
         startDate,
         endDate,
@@ -776,8 +779,7 @@ export class PetService {
         'pets.owner',
         'users',
         'users',
-        'users.userId = :userId',
-        { userId },
+        'users.userId = pets.ownerId',
       )
       .leftJoinAndMapOne(
         'pets.eggDetail',
@@ -791,10 +793,14 @@ export class PetService {
         'layings',
         'layings.id = pets.layingId',
       )
-      .where('pets.type = :petType AND pets.isDeleted = :isDeleted', {
-        petType: PET_TYPE.EGG,
-        isDeleted: false,
-      })
+      .where(
+        'pets.ownerId = :userId AND pets.type = :petType AND pets.isDeleted = :isDeleted',
+        {
+          userId,
+          petType: PET_TYPE.EGG,
+          isDeleted: false,
+        },
+      )
       .andWhere('layings.layingDate BETWEEN :startDate AND :endDate', {
         startDate,
         endDate,
