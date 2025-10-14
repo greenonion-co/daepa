@@ -88,6 +88,6 @@ export class PetEntity {
   })
   eggDetail: EggDetailEntity | null;
 
-  @OneToOne(() => UserEntity, (user) => user.userId)
+  @OneToOne(() => UserEntity, (user) => user.pet)
   owner: UserEntity | null;
 }

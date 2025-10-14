@@ -10,6 +10,7 @@ import {
 import { Exclude } from 'class-transformer';
 import { USER_ROLE, USER_STATUS } from './user.constant';
 import { AdoptionEntity } from 'src/adoption/adoption.entity';
+import { PetEntity } from 'src/pet/pet.entity';
 
 @Entity({ name: 'users' })
 @Index('UNIQUE_USER_ID', ['userId'], { unique: true })
@@ -61,4 +62,7 @@ export class UserEntity {
 
   @OneToOne(() => AdoptionEntity, (adoption) => adoption.buyer)
   buyerAdoption: AdoptionEntity;
+
+  @OneToOne(() => PetEntity, (pet) => pet.owner)
+  pet: PetEntity;
 }
