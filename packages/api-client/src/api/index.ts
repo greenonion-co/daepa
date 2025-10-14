@@ -50,9 +50,9 @@ import type {
   DetailJson,
   FilterPetListResponseDto,
   FindPetByPetIdResponseDto,
-  HiddenParentDto,
   ParentLinkDetailJson,
   PetControllerFindAll200,
+  PetHiddenStatusDto,
   PetParentDto,
   TokenResponseDto,
   UserControllerGetUserListSimple200,
@@ -571,14 +571,16 @@ export const getPetControllerFindAllResponsePetParentDtoMock = (
       })),
       undefined,
     ]),
-    isHidden: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
   },
   ...overrideResponse,
 });
 
-export const getPetControllerFindAllResponseHiddenParentDtoMock = (
-  overrideResponse: Partial<HiddenParentDto> = {},
-): HiddenParentDto => ({ ...{ isHidden: faker.datatype.boolean() }, ...overrideResponse });
+export const getPetControllerFindAllResponsePetHiddenStatusDtoMock = (
+  overrideResponse: Partial<PetHiddenStatusDto> = {},
+): PetHiddenStatusDto => ({
+  ...{ hiddenStatus: faker.helpers.arrayElement(["SECRET", "PENDING", "DELETED"] as const) },
+  ...overrideResponse,
+});
 
 export const getPetControllerFindAllResponseMock = (
   overrideResponse: Partial<PetControllerFindAll200> = {},
@@ -715,14 +717,14 @@ export const getPetControllerFindAllResponseMock = (
     father: faker.helpers.arrayElement([
       faker.helpers.arrayElement([
         { ...getPetControllerFindAllResponsePetParentDtoMock() },
-        { ...getPetControllerFindAllResponseHiddenParentDtoMock() },
+        { ...getPetControllerFindAllResponsePetHiddenStatusDtoMock() },
       ]),
       undefined,
     ]),
     mother: faker.helpers.arrayElement([
       faker.helpers.arrayElement([
         { ...getPetControllerFindAllResponsePetParentDtoMock() },
-        { ...getPetControllerFindAllResponseHiddenParentDtoMock() },
+        { ...getPetControllerFindAllResponsePetHiddenStatusDtoMock() },
       ]),
       undefined,
     ]),
@@ -863,14 +865,16 @@ export const getPetControllerFindPetByPetIdResponsePetParentDtoMock = (
       })),
       undefined,
     ]),
-    isHidden: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
   },
   ...overrideResponse,
 });
 
-export const getPetControllerFindPetByPetIdResponseHiddenParentDtoMock = (
-  overrideResponse: Partial<HiddenParentDto> = {},
-): HiddenParentDto => ({ ...{ isHidden: faker.datatype.boolean() }, ...overrideResponse });
+export const getPetControllerFindPetByPetIdResponsePetHiddenStatusDtoMock = (
+  overrideResponse: Partial<PetHiddenStatusDto> = {},
+): PetHiddenStatusDto => ({
+  ...{ hiddenStatus: faker.helpers.arrayElement(["SECRET", "PENDING", "DELETED"] as const) },
+  ...overrideResponse,
+});
 
 export const getPetControllerFindPetByPetIdResponseMock = (
   overrideResponse: Partial<FindPetByPetIdResponseDto> = {},
@@ -1021,14 +1025,14 @@ export const getPetControllerFindPetByPetIdResponseMock = (
       father: faker.helpers.arrayElement([
         faker.helpers.arrayElement([
           { ...getPetControllerFindPetByPetIdResponsePetParentDtoMock() },
-          { ...getPetControllerFindPetByPetIdResponseHiddenParentDtoMock() },
+          { ...getPetControllerFindPetByPetIdResponsePetHiddenStatusDtoMock() },
         ]),
         undefined,
       ]),
       mother: faker.helpers.arrayElement([
         faker.helpers.arrayElement([
           { ...getPetControllerFindPetByPetIdResponsePetParentDtoMock() },
-          { ...getPetControllerFindPetByPetIdResponseHiddenParentDtoMock() },
+          { ...getPetControllerFindPetByPetIdResponsePetHiddenStatusDtoMock() },
         ]),
         undefined,
       ]),
@@ -1317,14 +1321,16 @@ export const getBrPetControllerFindAllResponsePetParentDtoMock = (
       })),
       undefined,
     ]),
-    isHidden: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
   },
   ...overrideResponse,
 });
 
-export const getBrPetControllerFindAllResponseHiddenParentDtoMock = (
-  overrideResponse: Partial<HiddenParentDto> = {},
-): HiddenParentDto => ({ ...{ isHidden: faker.datatype.boolean() }, ...overrideResponse });
+export const getBrPetControllerFindAllResponsePetHiddenStatusDtoMock = (
+  overrideResponse: Partial<PetHiddenStatusDto> = {},
+): PetHiddenStatusDto => ({
+  ...{ hiddenStatus: faker.helpers.arrayElement(["SECRET", "PENDING", "DELETED"] as const) },
+  ...overrideResponse,
+});
 
 export const getBrPetControllerFindAllResponseMock = (
   overrideResponse: Partial<BrPetControllerFindAll200> = {},
@@ -1461,14 +1467,14 @@ export const getBrPetControllerFindAllResponseMock = (
     father: faker.helpers.arrayElement([
       faker.helpers.arrayElement([
         { ...getBrPetControllerFindAllResponsePetParentDtoMock() },
-        { ...getBrPetControllerFindAllResponseHiddenParentDtoMock() },
+        { ...getBrPetControllerFindAllResponsePetHiddenStatusDtoMock() },
       ]),
       undefined,
     ]),
     mother: faker.helpers.arrayElement([
       faker.helpers.arrayElement([
         { ...getBrPetControllerFindAllResponsePetParentDtoMock() },
-        { ...getBrPetControllerFindAllResponseHiddenParentDtoMock() },
+        { ...getBrPetControllerFindAllResponsePetHiddenStatusDtoMock() },
       ]),
       undefined,
     ]),
@@ -1601,14 +1607,16 @@ export const getBrPetControllerGetPetsByYearResponsePetParentDtoMock = (
       })),
       undefined,
     ]),
-    isHidden: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
   },
   ...overrideResponse,
 });
 
-export const getBrPetControllerGetPetsByYearResponseHiddenParentDtoMock = (
-  overrideResponse: Partial<HiddenParentDto> = {},
-): HiddenParentDto => ({ ...{ isHidden: faker.datatype.boolean() }, ...overrideResponse });
+export const getBrPetControllerGetPetsByYearResponsePetHiddenStatusDtoMock = (
+  overrideResponse: Partial<PetHiddenStatusDto> = {},
+): PetHiddenStatusDto => ({
+  ...{ hiddenStatus: faker.helpers.arrayElement(["SECRET", "PENDING", "DELETED"] as const) },
+  ...overrideResponse,
+});
 
 export const getBrPetControllerGetPetsByYearResponseMock = (): BrPetControllerGetPetsByYear200 => ({
   [faker.string.alphanumeric(5)]: Array.from(
@@ -1746,14 +1754,14 @@ export const getBrPetControllerGetPetsByYearResponseMock = (): BrPetControllerGe
     father: faker.helpers.arrayElement([
       faker.helpers.arrayElement([
         { ...getBrPetControllerGetPetsByYearResponsePetParentDtoMock() },
-        { ...getBrPetControllerGetPetsByYearResponseHiddenParentDtoMock() },
+        { ...getBrPetControllerGetPetsByYearResponsePetHiddenStatusDtoMock() },
       ]),
       undefined,
     ]),
     mother: faker.helpers.arrayElement([
       faker.helpers.arrayElement([
         { ...getBrPetControllerGetPetsByYearResponsePetParentDtoMock() },
-        { ...getBrPetControllerGetPetsByYearResponseHiddenParentDtoMock() },
+        { ...getBrPetControllerGetPetsByYearResponsePetHiddenStatusDtoMock() },
       ]),
       undefined,
     ]),
@@ -1877,14 +1885,16 @@ export const getBrPetControllerGetPetsByMonthResponsePetParentDtoMock = (
       })),
       undefined,
     ]),
-    isHidden: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
   },
   ...overrideResponse,
 });
 
-export const getBrPetControllerGetPetsByMonthResponseHiddenParentDtoMock = (
-  overrideResponse: Partial<HiddenParentDto> = {},
-): HiddenParentDto => ({ ...{ isHidden: faker.datatype.boolean() }, ...overrideResponse });
+export const getBrPetControllerGetPetsByMonthResponsePetHiddenStatusDtoMock = (
+  overrideResponse: Partial<PetHiddenStatusDto> = {},
+): PetHiddenStatusDto => ({
+  ...{ hiddenStatus: faker.helpers.arrayElement(["SECRET", "PENDING", "DELETED"] as const) },
+  ...overrideResponse,
+});
 
 export const getBrPetControllerGetPetsByMonthResponseMock = (
   overrideResponse: Partial<FilterPetListResponseDto> = {},
@@ -2038,14 +2048,14 @@ export const getBrPetControllerGetPetsByMonthResponseMock = (
       father: faker.helpers.arrayElement([
         faker.helpers.arrayElement([
           { ...getBrPetControllerGetPetsByMonthResponsePetParentDtoMock() },
-          { ...getBrPetControllerGetPetsByMonthResponseHiddenParentDtoMock() },
+          { ...getBrPetControllerGetPetsByMonthResponsePetHiddenStatusDtoMock() },
         ]),
         undefined,
       ]),
       mother: faker.helpers.arrayElement([
         faker.helpers.arrayElement([
           { ...getBrPetControllerGetPetsByMonthResponsePetParentDtoMock() },
-          { ...getBrPetControllerGetPetsByMonthResponseHiddenParentDtoMock() },
+          { ...getBrPetControllerGetPetsByMonthResponsePetHiddenStatusDtoMock() },
         ]),
         undefined,
       ]),
@@ -2176,14 +2186,16 @@ export const getBrPetControllerGetPetsByDateRangeResponsePetParentDtoMock = (
       })),
       undefined,
     ]),
-    isHidden: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
   },
   ...overrideResponse,
 });
 
-export const getBrPetControllerGetPetsByDateRangeResponseHiddenParentDtoMock = (
-  overrideResponse: Partial<HiddenParentDto> = {},
-): HiddenParentDto => ({ ...{ isHidden: faker.datatype.boolean() }, ...overrideResponse });
+export const getBrPetControllerGetPetsByDateRangeResponsePetHiddenStatusDtoMock = (
+  overrideResponse: Partial<PetHiddenStatusDto> = {},
+): PetHiddenStatusDto => ({
+  ...{ hiddenStatus: faker.helpers.arrayElement(["SECRET", "PENDING", "DELETED"] as const) },
+  ...overrideResponse,
+});
 
 export const getBrPetControllerGetPetsByDateRangeResponseMock = (
   overrideResponse: Partial<FilterPetListResponseDto> = {},
@@ -2337,14 +2349,14 @@ export const getBrPetControllerGetPetsByDateRangeResponseMock = (
       father: faker.helpers.arrayElement([
         faker.helpers.arrayElement([
           { ...getBrPetControllerGetPetsByDateRangeResponsePetParentDtoMock() },
-          { ...getBrPetControllerGetPetsByDateRangeResponseHiddenParentDtoMock() },
+          { ...getBrPetControllerGetPetsByDateRangeResponsePetHiddenStatusDtoMock() },
         ]),
         undefined,
       ]),
       mother: faker.helpers.arrayElement([
         faker.helpers.arrayElement([
           { ...getBrPetControllerGetPetsByDateRangeResponsePetParentDtoMock() },
-          { ...getBrPetControllerGetPetsByDateRangeResponseHiddenParentDtoMock() },
+          { ...getBrPetControllerGetPetsByDateRangeResponsePetHiddenStatusDtoMock() },
         ]),
         undefined,
       ]),

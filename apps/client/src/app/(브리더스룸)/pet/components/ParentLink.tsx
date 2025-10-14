@@ -11,6 +11,7 @@ import {
   PetDtoFather,
   PetDtoMother,
   PetDtoSpecies,
+  PetHiddenStatusDtoHiddenStatus,
   PetParentDto,
   PetParentDtoStatus,
 } from "@repo/api-client";
@@ -106,73 +107,18 @@ const ParentLink = ({
     ));
   };
 
-  // 비공개 펫인 경우
-  if (data?.isHidden) {
+  // 보여져야 할 부모개체가 없는 경우
+  const hasNoDisplayableParent =
+    !data ||
+    ("hiddenStatus" in data && data.hiddenStatus !== PetHiddenStatusDtoHiddenStatus.SECRET) ||
+    (!("hiddenStatus" in data) && !data?.petId);
+
+  if (hasNoDisplayableParent) {
     return (
       <div className="flex-1">
         <dt className="mb-2 flex items-center gap-2 text-xs font-medium text-gray-500 dark:text-gray-400">
           {label}
         </dt>
-        <div className="flex flex-col items-center gap-2">
-          <div className="relative aspect-square w-full overflow-hidden rounded-lg bg-gray-200/50 dark:bg-gray-700/50">
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
-              <Lock className="h-6 w-6 text-gray-400 dark:text-gray-500" />
-              <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                브리더에 의해 비공개 처리된 개체입니다.
-              </span>
-            </div>
-          </div>
-          <span className="text-sm text-gray-400 dark:text-gray-500">비공개</span>
-        </div>
-      </div>
-    );
-  }
-
-  const parent = data as PetParentDto;
-  const isMyPet = parent?.owner?.userId === user?.userId;
-  return (
-    <div className="flex-1">
-      <dt className="mb-2 flex items-center gap-2 text-xs font-medium text-gray-500 dark:text-gray-400">
-        {label}
-        {/* TODO!: isMyPet이 아닌 경우 해당 주인의 정보를 노출 */}
-        {parent?.status && <ParentStatusBadge status={parent.status} isMyPet={isMyPet} />}
-      </dt>
-
-      {parent?.petId ? (
-        <div className="group relative block h-full w-full transition-opacity hover:opacity-95">
-          {editable && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="absolute right-1 top-1 z-10 h-6 w-6 rounded-full bg-black/50 p-0 hover:bg-black/70"
-              onClick={(e) => handleUnlink(e, parent)}
-            >
-              <X className="h-4 w-4 text-white" />
-            </Button>
-          )}
-
-          <Link
-            href={`/pet/${parent.petId}`}
-            passHref={false}
-            onClick={(e) => {
-              e.stopPropagation();
-              if (isClickDisabled) e.preventDefault();
-            }}
-            className="flex flex-col items-center gap-2"
-          >
-            <PetThumbnail imageUrl={parent.photos?.[0]?.url} />
-
-            <span
-              className={cn(
-                "relative font-bold after:absolute after:bottom-0 after:left-0 after:-z-10 after:h-[15px] after:w-full after:opacity-40",
-                label === "모" ? "after:bg-red-400" : "after:bg-[#247DFE]",
-              )}
-            >
-              {parent.name || "-"}
-            </span>
-          </Link>
-        </div>
-      ) : (
         <div className="flex flex-col items-center gap-2">
           <button
             className="relative aspect-square w-full cursor-pointer overflow-hidden rounded-lg bg-gray-100 transition-colors hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-700"
@@ -185,7 +131,74 @@ const ParentLink = ({
             )}
           </button>
         </div>
-      )}
+      </div>
+    );
+  }
+
+  // 비공개 펫인 경우
+  if ("hiddenStatus" in data && data.hiddenStatus === PetHiddenStatusDtoHiddenStatus.SECRET) {
+    return (
+      <div className="flex-1">
+        <dt className="mb-2 flex items-center gap-2 text-xs font-medium text-gray-500 dark:text-gray-400">
+          {label}
+        </dt>
+        <div className="flex flex-col items-center gap-2">
+          <div className="relative aspect-square w-full overflow-hidden rounded-lg bg-gray-200/50 dark:bg-gray-700/50">
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
+              <Lock className="h-6 w-6 text-gray-400 dark:text-gray-500" />
+              <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                비공개 개체입니다.
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const parent = data as PetParentDto;
+  const isMyPet = parent.owner.userId === user?.userId;
+  return (
+    <div className="flex-1">
+      <dt className="mb-2 flex items-center gap-2 text-xs font-medium text-gray-500 dark:text-gray-400">
+        {label}
+        {/* TODO!: isMyPet이 아닌 경우 해당 주인의 정보를 노출 */}
+        {parent?.status && <ParentStatusBadge status={parent.status} isMyPet={isMyPet} />}
+      </dt>
+
+      <div className="group relative block h-full w-full transition-opacity hover:opacity-95">
+        {editable && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="absolute right-1 top-1 z-10 h-6 w-6 rounded-full bg-black/50 p-0 hover:bg-black/70"
+            onClick={(e) => handleUnlink(e, parent)}
+          >
+            <X className="h-4 w-4 text-white" />
+          </Button>
+        )}
+
+        <Link
+          href={`/pet/${parent.petId}`}
+          passHref={false}
+          onClick={(e) => {
+            e.stopPropagation();
+            if (isClickDisabled) e.preventDefault();
+          }}
+          className="flex flex-col items-center gap-2"
+        >
+          <PetThumbnail imageUrl={parent.photos?.[0]?.url} />
+
+          <span
+            className={cn(
+              "relative font-bold after:absolute after:bottom-0 after:left-0 after:-z-10 after:h-[15px] after:w-full after:opacity-40",
+              label === "모" ? "after:bg-red-400" : "after:bg-[#247DFE]",
+            )}
+          >
+            {parent.name || "-"}
+          </span>
+        </Link>
+      </div>
     </div>
   );
 };

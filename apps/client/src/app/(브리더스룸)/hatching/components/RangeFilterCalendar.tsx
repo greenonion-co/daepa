@@ -23,7 +23,7 @@ const RangeFilterCalendar = memo(() => {
   const [month, setMonth] = useState<Date>(new Date());
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
 
-  const [tab, setTab] = useState<"all" | "hatched" | "notHatched">("all");
+  const [tab, setTab] = useState<"all" | "hatched" | "egg">("all");
 
   // 월별 해칭된 펫 조회
   const { data: monthlyData, isPending: monthlyIsPending } = useQuery({
@@ -58,16 +58,16 @@ const RangeFilterCalendar = memo(() => {
     return Object.entries(monthlyData).reduce(
       (acc, [date, pets]) => {
         const hatched = pets.filter((pet) => pet.type === PetDtoType.PET).length;
-        const notHatched = pets.filter((pet) => pet.type === PetDtoType.EGG).length;
+        const egg = pets.filter((pet) => pet.type === PetDtoType.EGG).length;
 
         acc[date] = {
           hatched,
-          notHatched, // 해칭된 펫만 조회하므로 0
+          egg, // 해칭된 펫만 조회하므로 0
           total: pets.length,
         };
         return acc;
       },
-      {} as Record<string, { hatched: number; notHatched: number; total: number }>,
+      {} as Record<string, { hatched: number; egg: number; total: number }>,
     );
   }, [monthlyData]);
 
@@ -101,25 +101,25 @@ const RangeFilterCalendar = memo(() => {
           </div>
           <Tabs
             defaultValue="all"
-            onValueChange={(value) => setTab(value as "all" | "hatched" | "notHatched")}
+            onValueChange={(value) => setTab(value as "all" | "hatched" | "egg")}
             className="sticky top-0 z-10 pb-2"
           >
             <TabsList>
               <TabsTrigger value="all">
                 전체 ({Object.values(visibleData).flat().length || 0})
               </TabsTrigger>
-              <TabsTrigger value="hatched">
-                해칭된 펫 (
-                {Object.values(visibleData || {})
-                  .flat()
-                  .filter((pet) => pet.type === PetDtoType.PET).length || 0}
-                )
-              </TabsTrigger>
-              <TabsTrigger value="notHatched">
-                해칭되지 않은 펫 (
+              <TabsTrigger value="egg">
+                알 (
                 {Object.values(visibleData || {})
                   .flat()
                   .filter((pet) => pet.type === PetDtoType.EGG).length || 0}
+                )
+              </TabsTrigger>
+              <TabsTrigger value="hatched">
+                해칭 완료 (
+                {Object.values(visibleData || {})
+                  .flat()
+                  .filter((pet) => pet.type === PetDtoType.PET).length || 0}
                 )
               </TabsTrigger>
             </TabsList>
@@ -132,7 +132,7 @@ const RangeFilterCalendar = memo(() => {
                 if (tab === "all") return pets.length > 0;
                 if (tab === "hatched")
                   return pets.filter((pet) => pet.type === PetDtoType.PET).length > 0;
-                if (tab === "notHatched")
+                if (tab === "egg")
                   return pets.filter((pet) => pet.type === PetDtoType.EGG).length > 0;
               })
               .map(([date, pets]) => (

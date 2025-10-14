@@ -36,6 +36,4 @@ export interface PetParentDto {
   traits?: string[];
   /** 펫 이미지 목록 */
   photos?: PetImageItem[];
-  /** 숨김 여부 */
-  isHidden?: boolean;
 }

@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./select";
 import { useEffect } from "react";
-type EggCounts = Record<string, { hatched: number; notHatched: number; total: number }>;
+type EggCounts = Record<string, { hatched: number; egg: number; total: number }>;
 
 function Calendar({
   className,
@@ -80,15 +80,15 @@ function Calendar({
       components={{
         DayContent: ({ date }: { date: Date }) => {
           const dateKey = format(date, "yyyy-MM-dd");
-          const count = eggCounts?.[dateKey] ?? { hatched: 0, notHatched: 0, total: 0 };
+          const count = eggCounts?.[dateKey] ?? { hatched: 0, egg: 0, total: 0 };
 
           return (
             <div className="flex flex-col items-center gap-1">
               <span className="text-sm font-medium">{date.getDate()}</span>
               <div className="flex flex-col items-center gap-0.5">
-                {count.notHatched > 0 && (
+                {count.egg > 0 && (
                   <span className="rounded-full bg-gray-100 px-1.5 py-0.5 text-xs font-medium text-gray-700 dark:bg-gray-700 dark:text-gray-200">
-                    🥚 {count.notHatched}
+                    🥚 {count.egg}
                   </span>
                 )}
                 {count.hatched > 0 && (

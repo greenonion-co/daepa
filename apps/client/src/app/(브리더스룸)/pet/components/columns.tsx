@@ -31,11 +31,13 @@ import {
   PetDtoGrowth,
   PetDtoSpecies,
   PetParentDto,
+  PetHiddenStatusDtoHiddenStatus,
 } from "@repo/api-client";
 import LinkButton from "../../components/LinkButton";
 import { format } from "date-fns";
 import TableHeaderSelect from "../../components/TableHeaderSelect";
 import { useFilterStore } from "../../store/filter";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 const HeaderSelect = <TData,>({
   column,
@@ -231,11 +233,22 @@ export const columns: ColumnDef<PetDto>[] = [
     accessorKey: "father",
     header: TABLE_HEADER.father,
     cell: ({ row }) => {
-      if (row.original.father?.isHidden) {
-        return <Lock className="w- h-5 text-gray-400 dark:text-gray-500" />;
-      }
       if (!row.original.father) {
         return <span>-</span>;
+      }
+
+      if (
+        "hiddenStatus" in row.original.father &&
+        row.original.father?.hiddenStatus === PetHiddenStatusDtoHiddenStatus.SECRET
+      ) {
+        return (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Lock className="h-5 w-5 text-gray-400 dark:text-gray-500" />
+            </TooltipTrigger>
+            <TooltipContent>브리더에 의해 비공개 처리된 펫입니다</TooltipContent>
+          </Tooltip>
+        );
       }
 
       const father = row.original.father as PetParentDto;
@@ -259,11 +272,22 @@ export const columns: ColumnDef<PetDto>[] = [
     accessorKey: "mother",
     header: TABLE_HEADER.mother,
     cell: ({ row }) => {
-      if (row.original.mother?.isHidden) {
-        return <Lock className="w- h-5 text-gray-400 dark:text-gray-500" />;
-      }
       if (!row.original.mother) {
         return <span>-</span>;
+      }
+
+      if (
+        "hiddenStatus" in row.original.mother &&
+        row.original.mother?.hiddenStatus === PetHiddenStatusDtoHiddenStatus.SECRET
+      ) {
+        return (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Lock className="h-5 w-5 text-gray-400 dark:text-gray-500" />
+            </TooltipTrigger>
+            <TooltipContent>브리더에 의해 비공개 처리된 펫입니다</TooltipContent>
+          </Tooltip>
+        );
       }
 
       const mother = row.original.mother as PetParentDto;
