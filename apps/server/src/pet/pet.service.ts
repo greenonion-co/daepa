@@ -58,8 +58,6 @@ export class PetService {
     @InjectRepository(PetEntity)
     private readonly petRepository: Repository<PetEntity>,
     private readonly parentRequestService: ParentRequestService,
-    @InjectRepository(LayingEntity)
-    private readonly layingRepository: Repository<LayingEntity>,
     private readonly userService: UserService,
     private readonly petImageService: PetImageService,
     private readonly dataSource: DataSource,
@@ -158,7 +156,8 @@ export class PetService {
         }
 
         throw new InternalServerErrorException(
-          '펫 생성 중 오류가 발생했습니다.',
+          '펫 생성 중 오류가 발생했습니다.' +
+            (error instanceof Error ? error.message : ''),
         );
       }
     };
@@ -725,20 +724,23 @@ export class PetService {
     dateRange: { startDate?: Date; endDate?: Date },
     userId: string,
   ): Promise<Record<string, PetDto[]>> {
-    const queryBuilder = this.dataSource
+    const startDate = format(
+      dateRange?.startDate ?? startOfMonth(new Date()),
+      'yyyy-MM-dd',
+    );
+    const endDate = format(
+      dateRange?.endDate ?? endOfMonth(new Date()),
+      'yyyy-MM-dd',
+    );
+
+    const petQueryBuilder = this.dataSource
       .createQueryBuilder(PetEntity, 'pets')
       .innerJoinAndMapOne(
         'pets.owner',
         'users',
         'users',
-        'users.userId = pets.ownerId AND users.userId = :userId',
+        'users.userId = :userId',
         { userId },
-      )
-      .innerJoinAndMapOne(
-        'pets.laying',
-        'layings',
-        'layings',
-        'layings.id = pets.layingId',
       )
       .leftJoinAndMapOne(
         'pets.petDetail',
@@ -746,13 +748,14 @@ export class PetService {
         'petDetail',
         'petDetail.petId = pets.petId',
       )
-      .leftJoinAndMapOne(
-        'pets.eggDetail',
-        'egg_details',
-        'eggDetail',
-        'eggDetail.petId = pets.petId',
-      )
-      .where('pets.isDeleted = :isDeleted', { isDeleted: false })
+      .where('pets.type = :petType AND pets.isDeleted = :isDeleted', {
+        petType: PET_TYPE.PET,
+        isDeleted: false,
+      })
+      .andWhere('pets.hatchingDate BETWEEN :startDate AND :endDate', {
+        startDate,
+        endDate,
+      })
       .select([
         'pets',
         'users.userId',
@@ -760,34 +763,62 @@ export class PetService {
         'users.role',
         'users.isBiz',
         'users.status',
-        'layings.layingDate',
         'petDetail.sex',
         'petDetail.morphs',
         'petDetail.traits',
         'petDetail.foods',
         'petDetail.weight',
+      ]);
+
+    const eggQueryBuilder = this.dataSource
+      .createQueryBuilder(PetEntity, 'pets')
+      .innerJoinAndMapOne(
+        'pets.owner',
+        'users',
+        'users',
+        'users.userId = :userId',
+        { userId },
+      )
+      .leftJoinAndMapOne(
+        'pets.eggDetail',
+        'egg_details',
+        'eggDetail',
+        'eggDetail.petId = pets.petId',
+      )
+      .innerJoinAndMapOne(
+        'pets.laying',
+        'layings',
+        'layings',
+        'layings.id = pets.layingId',
+      )
+      .where('pets.type = :petType AND pets.isDeleted = :isDeleted', {
+        petType: PET_TYPE.EGG,
+        isDeleted: false,
+      })
+      .andWhere('layings.layingDate BETWEEN :startDate AND :endDate', {
+        startDate,
+        endDate,
+      })
+      .select([
+        'pets',
+        'users.userId',
+        'users.name',
+        'users.role',
+        'users.isBiz',
+        'users.status',
+        'layings.id',
+        'layings.layingDate',
         'eggDetail.temperature',
         'eggDetail.status',
       ]);
 
-    const startDate = dateRange?.startDate ?? startOfMonth(new Date());
-    const endDate = dateRange?.endDate ?? endOfMonth(new Date());
+    const [petEntities, eggEntities] = await Promise.all([
+      petQueryBuilder.getMany(),
+      eggQueryBuilder.getMany(),
+    ]);
 
-    queryBuilder.andWhere(
-      '(pets.hatchingDate >= :startDate AND pets.hatchingDate <= :endDate) OR (layings.layingDate >= :startDate AND layings.layingDate <= :endDate)',
-      {
-        startDate: format(startDate, 'yyyy-MM-dd'),
-        endDate: format(endDate, 'yyyy-MM-dd'),
-      },
-    );
-
-    if (userId) {
-      queryBuilder.andWhere('users.userId = :userId', { userId });
-    }
-
-    const petEntities = await queryBuilder.getMany();
     const petDtos = await Promise.all(
-      petEntities.map(async (pet) => {
+      [...petEntities, ...eggEntities].map(async (pet) => {
         const { father, mother } =
           await this.parentRequestService.getParentsWithRequestStatus(
             pet.petId,
@@ -797,7 +828,6 @@ export class PetService {
 
         return plainToInstance(PetDto, {
           ...pet,
-          owner: pet.owner,
           father: fatherDisplayable,
           mother: motherDisplayable,
           ...(pet.petDetail && {
@@ -816,42 +846,15 @@ export class PetService {
       }),
     );
 
-    // EGG인 펫들의 layingDate 정보 가져오기
-    const eggPetIds = petEntities
-      .filter((pet) => pet.type === PET_TYPE.EGG && pet.layingId)
-      .map((pet) => pet.layingId);
-
-    const layings =
-      eggPetIds.length > 0
-        ? await this.layingRepository.find({
-            where: { id: In(eggPetIds) },
-            select: ['id', 'layingDate'],
-          })
-        : [];
-
-    const layingMap = new Map(
-      layings.map((laying) => [laying.id, laying.layingDate]),
-    );
-
-    // 날짜별로 그룹화 (EGG는 layingDate 기준, 나머지는 hatchingDate 기준)
+    // 날짜별로 그룹화 (EGG는 layingDate 기준, PET은 hatchingDate 기준)
     const petsByDate = petDtos.reduce(
       (acc, petDto) => {
         let dateToUse: Date | undefined;
 
-        if (petDto.type === PET_TYPE.EGG) {
-          // EGG인 경우 layingDate 사용
-          const petEntity = petEntities.find((p) => p.petId === petDto.petId);
-          if (petEntity?.layingId) {
-            const layingDate = layingMap.get(petEntity.layingId);
-            if (layingDate) {
-              dateToUse = new Date(layingDate);
-            }
-          }
-        } else {
-          // EGG가 아닌 경우 hatchingDate 사용
-          if (petDto.hatchingDate) {
-            dateToUse = petDto.hatchingDate;
-          }
+        if (petDto.type === PET_TYPE.EGG && petDto.laying?.layingDate) {
+          dateToUse = petDto.laying.layingDate;
+        } else if (petDto.type === PET_TYPE.PET && petDto.hatchingDate) {
+          dateToUse = petDto.hatchingDate;
         }
 
         if (!dateToUse) return acc;

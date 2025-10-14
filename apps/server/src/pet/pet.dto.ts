@@ -42,6 +42,7 @@ import { PetImageItem, UpsertPetImageDto } from 'src/pet_image/pet_image.dto';
 import { EGG_STATUS } from 'src/egg_detail/egg_detail.constants';
 import { PetDetailDto } from 'src/pet_detail/pet_detail.dto';
 import { EggDetailDto } from 'src/egg_detail/egg_detail.dto';
+import { LayingDto } from 'src/laying/laying.dto';
 
 export class PetHiddenStatusDto {
   @ApiProperty({
@@ -164,6 +165,16 @@ export class PetBaseDto {
   @Type(() => EggDetailDto)
   @IsOptional()
   eggDetail?: EggDetailDto;
+
+  @ApiProperty({
+    description: '산란 정보',
+    type: LayingDto,
+    required: false,
+  })
+  @ValidateNested()
+  @Type(() => LayingDto)
+  @IsOptional()
+  laying?: LayingDto;
 }
 
 export class PetSummaryDto extends PickType(PetBaseDto, [

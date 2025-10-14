@@ -13,7 +13,7 @@ import { AdoptionEntity } from '../adoption/adoption.entity';
 import { PetImageEntity } from 'src/pet_image/pet_image.entity';
 import { PetDetailEntity } from 'src/pet_detail/pet_detail.entity';
 import { EggDetailEntity } from 'src/egg_detail/egg_detail.entity';
-import { UserEntity } from 'src/user/user.entity';
+import { LayingEntity } from 'src/laying/laying.entity';
 
 @Entity({ name: 'pets' })
 @Index('UNIQUE_PET_ID', ['petId'], { unique: true })
@@ -88,6 +88,8 @@ export class PetEntity {
   })
   eggDetail: EggDetailEntity | null;
 
-  @OneToOne(() => UserEntity, (user) => user.pet)
-  owner: UserEntity | null;
+  @OneToOne(() => LayingEntity, (laying) => laying.id, {
+    nullable: true,
+  })
+  laying: LayingEntity | null;
 }
