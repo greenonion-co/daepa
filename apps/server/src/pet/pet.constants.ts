@@ -43,3 +43,9 @@ export enum PET_LIST_FILTER_TYPE {
   MY = 'MY',
   NOT_MY = 'NOT_MY',
 }
+
+export enum PET_HIDDEN_STATUS {
+  SECRET = 'SECRET',
+  PENDING = 'PENDING',
+  DELETED = 'DELETED',
+}

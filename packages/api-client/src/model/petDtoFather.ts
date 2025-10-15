@@ -6,9 +6,9 @@
  * OpenAPI spec version: 1.0
  */
 import type { PetParentDto } from "./petParentDto";
-import type { HiddenParentDto } from "./hiddenParentDto";
+import type { PetHiddenStatusDto } from "./petHiddenStatusDto";
 
 /**
  * 아빠 개체 정보
  */
-export type PetDtoFather = PetParentDto | HiddenParentDto;
+export type PetDtoFather = PetParentDto | PetHiddenStatusDto;

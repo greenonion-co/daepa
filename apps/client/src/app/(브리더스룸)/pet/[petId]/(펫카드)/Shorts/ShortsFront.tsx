@@ -33,7 +33,6 @@ const ShortsFront = ({
       className="absolute h-full w-full [-webkit-backface-visibility:hidden] [backface-visibility:hidden] [transform:rotateY(0deg)]"
       onClick={(e) => {
         e.stopPropagation();
-        console.log("clicked front");
         onFlip();
       }}
     >

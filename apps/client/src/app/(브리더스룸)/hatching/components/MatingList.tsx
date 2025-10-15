@@ -5,6 +5,7 @@ import {
   MatingByDateDto,
   matingControllerCreateMating,
   PetDtoSpecies,
+  PetSummaryLayingDto,
 } from "@repo/api-client";
 import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ChevronUp, ChevronDown, ChevronsDown, Cake } from "lucide-react";
@@ -22,6 +23,29 @@ import { useMatingFilterStore } from "../../store/matingFilter";
 import { format } from "date-fns";
 import { compact, isNil, omitBy } from "es-toolkit";
 import { Card } from "@/components/ui/card";
+
+const ParentInfo = ({ parent }: { parent: PetSummaryLayingDto | undefined }) => {
+  if (!parent) return "-";
+
+  return (
+    <div className="flex w-full flex-col items-center justify-center">
+      <div>
+        <span>{parent.name}</span>
+        {parent.weight && <span className="text-xs text-gray-500">({parent.weight}g)</span>}
+      </div>
+      {(parent.morphs || parent.traits) && (
+        <div className="flex flex-col items-center justify-center">
+          {parent.morphs && (
+            <span className="text-xs text-gray-500">{parent.morphs.join(" | ")}</span>
+          )}
+          {parent.traits && (
+            <span className="text-xs text-gray-500">{parent.traits.join(" | ")}</span>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
 
 const MatingList = memo(() => {
   const { ref, inView } = useInView();
@@ -205,9 +229,9 @@ const MatingList = memo(() => {
                   {matingGroup.father && (
                     <Link
                       href={`/pet/${matingGroup.father.petId}`}
-                      className="flex flex-1 items-center justify-center rounded-md bg-blue-100 p-1 text-blue-800 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-200 dark:hover:bg-blue-800"
+                      className="flex flex-1 items-center rounded-md bg-blue-100 p-1 text-blue-800 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-200 dark:hover:bg-blue-800"
                     >
-                      {matingGroup.father.name}
+                      <ParentInfo parent={matingGroup.father} />
                     </Link>
                   )}
                   {matingGroup.mother && (
@@ -215,7 +239,7 @@ const MatingList = memo(() => {
                       href={`/pet/${matingGroup.mother.petId}`}
                       className="flex flex-1 items-center justify-center rounded-md bg-pink-100 p-1 text-pink-800 hover:bg-pink-200 dark:bg-pink-900 dark:text-pink-200 dark:hover:bg-pink-800"
                     >
-                      {matingGroup.mother.name}
+                      <ParentInfo parent={matingGroup.mother} />
                     </Link>
                   )}
                 </div>
@@ -224,7 +248,7 @@ const MatingList = memo(() => {
               <div className="flex flex-col gap-2 px-1">
                 <div className="flex w-full items-center justify-center gap-2 rounded-lg bg-yellow-100 p-2 text-sm font-semibold text-yellow-800 transition-colors hover:bg-yellow-200 dark:bg-yellow-900 dark:text-yellow-500 dark:hover:bg-yellow-800">
                   <CalendarSelect
-                    triggerText="메이팅을 추가하려면 날짜를 선택하세요"
+                    triggerText="메이팅 날짜 추가"
                     confirmButtonText="메이팅 추가"
                     disabledDates={getMatingDates(matingGroup?.matingsByDate ?? [])}
                     onConfirm={(matingDate) =>
