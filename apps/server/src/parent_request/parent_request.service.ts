@@ -102,6 +102,19 @@ export class ParentRequestService {
           '어머니로 지정된 펫은 암컷이어야 합니다.',
         );
       }
+      const isMyChild = await entityManager.exists(ParentRequestEntity, {
+        where: {
+          childPetId: parentPet.petId,
+          parentPetId: childPetId,
+          status: PARENT_STATUS.APPROVED,
+        },
+      });
+      if (isMyChild) {
+        throw new BadRequestException(
+          '자식 관계의 펫을 부모로 지정할 수 없습니다.',
+        );
+      }
+
       // TODO!: 페어가 삭제된 경우에 대한 처리가 필요. IsDeleted를 추가하고 체크해야함
       const isPair = await entityManager.exists(PairEntity, {
         where: {
@@ -117,7 +130,9 @@ export class ParentRequestService {
         },
       });
       if (isPair) {
-        throw new BadRequestException('페어를 부모로 지정할 수 없습니다.');
+        throw new BadRequestException(
+          '내 펫의 페어를 부모로 지정할 수 없습니다.',
+        );
       }
 
       // 기존 부모 요청 확인
