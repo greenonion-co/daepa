@@ -15,6 +15,7 @@ import LinkStep from "./LinkStep";
 import Header from "./Header";
 import { useInView } from "react-intersection-observer";
 import { PetParentDtoWithMessage } from "@/app/(브리더스룸)/pet/store/parentLink";
+import { useParams } from "next/navigation";
 
 interface ParentSearchProps {
   sex?: PetDtoSex;
@@ -37,6 +38,7 @@ const ParentSearchSelector = ({
   onSelect,
   onExit,
 }: ParentSearchProps) => {
+  const { petId } = useParams();
   const [searchQuery, setSearchQuery] = useState("");
   const [step, setStep] = useState(1);
   const [selectedPet, setSelectedPet] = useState<PetParentDtoWithMessage | null>(null);
@@ -65,7 +67,9 @@ const ParentSearchSelector = ({
     // TODO!: 이러면 새로 등록한 개체가 바로 조회되지 않음
     staleTime: 5 * 60 * 1000, // 5분 동안 데이터를 'fresh'하게 유지
     select: (data) =>
-      data.pages.flatMap((page) => page.data.data).filter((pet) => pet.sex?.toString() === sex),
+      data.pages
+        .flatMap((page) => page.data.data)
+        .filter((pet) => pet.petId !== petId && pet.sex?.toString() === sex),
   });
 
   useEffect(() => {
