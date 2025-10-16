@@ -52,7 +52,9 @@ const ParentsSection = memo(({ petId, isMyPet }: ParentsSectionProps) => {
           role,
           message: value.message ?? "",
         });
-        toast.success("부모 연동 요청이 완료되었습니다.");
+        toast.success(
+          value.isMyPet ? "부모 등록이 완료되었습니다." : "부모 연동 요청이 완료되었습니다.",
+        );
         queryClient.invalidateQueries({ queryKey: [petControllerFindPetByPetId.name, petId] });
       } catch (error) {
         if (error instanceof AxiosError) {
@@ -92,13 +94,18 @@ const ParentsSection = memo(({ petId, isMyPet }: ParentsSectionProps) => {
           species={formData.species}
           label="부"
           data={
-            // 내 펫인 경우는 모든 정보를, 내 펫이 아닌 경우는 부모요청이 승인된 경우에만 정보를 노출
+            // 내 펫인 경우는 모든 상태를, 내 펫이 아닌 경우는 부모요청이 승인된 상태에만 정보를 노출
             isMyPet ||
             (!isMyPet && formData.father?.status === UpdateParentRequestDtoStatus.APPROVED)
               ? formData.father
               : null
           }
-          onSelect={(item) => handleParentSelect(UnlinkParentDtoRole.FATHER, item)}
+          onSelect={(selectedPet) =>
+            handleParentSelect(UnlinkParentDtoRole.FATHER, {
+              ...selectedPet,
+              isMyPet: isMyPet,
+            })
+          }
           onUnlink={() => handleUnlink(UnlinkParentDtoRole.FATHER)}
           editable={isMyPet}
         />
@@ -111,7 +118,12 @@ const ParentsSection = memo(({ petId, isMyPet }: ParentsSectionProps) => {
               ? formData.mother
               : null
           }
-          onSelect={(item) => handleParentSelect(UnlinkParentDtoRole.MOTHER, item)}
+          onSelect={(selectedPet) =>
+            handleParentSelect(UnlinkParentDtoRole.MOTHER, {
+              ...selectedPet,
+              isMyPet: isMyPet,
+            })
+          }
           onUnlink={() => handleUnlink(UnlinkParentDtoRole.MOTHER)}
           editable={isMyPet}
         />
