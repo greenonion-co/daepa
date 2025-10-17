@@ -26,6 +26,7 @@ import { UserEntity } from 'src/user/user.entity';
 import { USER_ROLE, USER_STATUS } from 'src/user/user.constant';
 import { UserNotificationEntity } from 'src/user_notification/user_notification.entity';
 import { CreateUserNotificationDto } from 'src/user_notification/user_notification.dto';
+import { PairEntity } from 'src/pair/pair.entity';
 
 interface ParentRawData {
   pr_status: PARENT_STATUS;
@@ -101,6 +102,39 @@ export class ParentRequestService {
           '어머니로 지정된 펫은 암컷이어야 합니다.',
         );
       }
+      const isMyChild = await entityManager.exists(ParentRequestEntity, {
+        where: {
+          childPetId: parentPet.petId,
+          parentPetId: childPetId,
+          status: PARENT_STATUS.APPROVED,
+        },
+      });
+      if (isMyChild) {
+        throw new BadRequestException(
+          '자식 관계의 펫을 부모로 지정할 수 없습니다.',
+        );
+      }
+
+      // TODO!: 페어가 삭제된 경우에 대한 처리가 필요. IsDeleted를 추가하고 체크해야함
+      const isPair = await entityManager.exists(PairEntity, {
+        where: {
+          ownerId: childPet.ownerId,
+          fatherId:
+            parentPet.petDetail?.sex === PET_SEX.MALE
+              ? parentPet.petId
+              : childPetId,
+          motherId:
+            parentPet.petDetail?.sex === PET_SEX.FEMALE
+              ? parentPet.petId
+              : childPetId,
+        },
+      });
+      if (isPair) {
+        throw new BadRequestException(
+          '내 펫의 페어를 부모로 지정할 수 없습니다.',
+        );
+      }
+
       // 기존 부모 요청 확인
       const existingRequest = await entityManager
         .createQueryBuilder(ParentRequestEntity, 'parentRequest')
