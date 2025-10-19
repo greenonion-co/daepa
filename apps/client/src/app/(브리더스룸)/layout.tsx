@@ -5,17 +5,29 @@ import { AppSidebar } from "./components/AppSidebar";
 import NotiButton from "./noti/components/NotiButton";
 import { useEffect } from "react";
 import { useUserStore } from "./store/user";
+import { UserProfileDtoRole } from "@repo/api-client";
+import { redirect } from "next/navigation";
+
+const ROLES_BR_ALLOWED = [
+  UserProfileDtoRole.BREEDER,
+  UserProfileDtoRole.ADMIN,
+] as UserProfileDtoRole[];
 
 export default function BrLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const { initialize } = useUserStore();
+  const { initialize, user } = useUserStore();
 
   useEffect(() => {
     initialize();
   }, [initialize]);
+
+  if (!user || !ROLES_BR_ALLOWED.includes(user.role)) {
+    // TODO!: 브리더스룸 소개 및 결제 안내 페이지 추가 후, 해당 페이지로 리다이렉트 처리
+    redirect("/");
+  }
 
   return (
     <>
