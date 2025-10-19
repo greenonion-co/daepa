@@ -40,8 +40,8 @@ import { USER_STATUS_MAP } from "@/app/(브리더스룸)/constants";
 import { cn } from "@/lib/utils";
 import { AxiosError } from "axios";
 import { tokenStorage } from "@/lib/tokenStorage";
-import { providerIconMap } from "../constants";
-import { DUPLICATE_CHECK_STATUS } from "../../(브리더스룸)/register/types";
+import { providerIconMap } from "../../(user)/constants";
+import { DUPLICATE_CHECK_STATUS } from "../register/types";
 
 const NICKNAME_MAX_LENGTH = 15;
 const NICKNAME_MIN_LENGTH = 2;
