@@ -292,6 +292,7 @@ export class PetSummaryAdoptionDto extends PickType(PetSummaryDto, [
 }
 
 export class PetSummaryLayingDto extends PickType(PetSummaryDto, [
+  'type',
   'petId',
   'name',
   'species',

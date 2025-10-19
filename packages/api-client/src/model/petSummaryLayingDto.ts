@@ -5,6 +5,7 @@
  * Project Daepa API description
  * OpenAPI spec version: 1.0
  */
+import type { PetSummaryLayingDtoType } from "./petSummaryLayingDtoType";
 import type { PetSummaryLayingDtoSpecies } from "./petSummaryLayingDtoSpecies";
 import type { PetSummaryLayingDtoSex } from "./petSummaryLayingDtoSex";
 import type { PetSummaryLayingDtoEggStatus } from "./petSummaryLayingDtoEggStatus";
@@ -12,6 +13,8 @@ import type { PetSummaryLayingDtoEggStatus } from "./petSummaryLayingDtoEggStatu
 export interface PetSummaryLayingDto {
   /** 펫 아이디 */
   petId: string;
+  /** 펫 타입(egg/pet) */
+  type?: PetSummaryLayingDtoType;
   /** 펫 이름 */
   name?: string;
   /** 펫 종 */

@@ -1,4 +1,4 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
 import { BrAccessOnly } from 'src/common/decorators/roles.decorator';
 import { PairDto, PairFilterDto } from './pair.dto';
 import { ApiResponse, getSchemaPath } from '@nestjs/swagger';
@@ -25,5 +25,17 @@ export class PairController {
     @JwtUser() token: JwtUserPayload,
   ) {
     return this.pairService.getPairList(token.userId, query.species);
+  }
+
+  @Get(':pairId')
+  @ApiResponse({
+    status: 200,
+    description: '페어 상세 정보 조회 성공',
+  })
+  async getPairById(
+    @Param('pairId') pairId: string,
+    @JwtUser() token: JwtUserPayload,
+  ) {
+    return this.pairService.getPairById(pairId, token.userId);
   }
 }
