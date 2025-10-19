@@ -192,9 +192,8 @@ export class PairService {
       eggQueryBuilder.getMany(),
     ]);
 
-    console.log('hereL ', [...petEntities, ...eggEntities]);
     // pet들을 layingId별로 그룹화
-    const petsByLayingId = new Map<number, any[]>();
+    const petsByLayingId = new Map<number, PetSummaryLayingDto[]>();
     [...petEntities, ...eggEntities].forEach((pet) => {
       if (pet.layingId) {
         const existing = petsByLayingId.get(pet.layingId) || [];
@@ -204,15 +203,15 @@ export class PairService {
           type: pet.type,
           ...omitBy(
             {
-              name: pet.name,
-              hatchingDate: pet.hatchingDate,
-              clutchOrder: pet.clutchOrder,
-              sex: pet.petDetail?.sex,
-              morphs: pet.petDetail?.morphs,
-              traits: pet.petDetail?.traits,
-              weight: pet.petDetail?.weight,
-              temperature: pet.eggDetail?.temperature,
-              eggStatus: pet.eggDetail?.status,
+              name: pet.name ?? undefined,
+              hatchingDate: pet.hatchingDate ?? undefined,
+              clutchOrder: pet.clutchOrder ?? undefined,
+              sex: pet.petDetail?.sex ?? undefined,
+              morphs: pet.petDetail?.morphs ?? undefined,
+              traits: pet.petDetail?.traits ?? undefined,
+              weight: pet.petDetail?.weight ?? undefined,
+              temperature: pet.eggDetail?.temperature ?? undefined,
+              eggStatus: pet.eggDetail?.status ?? undefined,
             },
             isNil,
           ),
