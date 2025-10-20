@@ -77,7 +77,7 @@ export class PairService {
         pairId,
         userId,
       })
-      .innerJoinAndMapMany(
+      .leftJoinAndMapMany(
         'matings',
         MatingEntity,
         'matings',
