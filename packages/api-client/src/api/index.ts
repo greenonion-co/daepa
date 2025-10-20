@@ -51,6 +51,7 @@ import type {
   DetailJson,
   FilterPetListResponseDto,
   FindPetByPetIdResponseDto,
+  PairDetailDto,
   PairDto,
   ParentLinkDetailJson,
   PetControllerFindAll200,
@@ -396,8 +397,8 @@ export const pairControllerGetPairList = (params: PairControllerGetPairListParam
   return useCustomInstance<PairDto[]>({ url: `/api/v1/pairs`, method: "GET", params });
 };
 
-export const pairControllerGetPairById = (pairId: string) => {
-  return useCustomInstance<void>({ url: `/api/v1/pairs/${pairId}`, method: "GET" });
+export const pairControllerGetPairDetail = (pairId: string) => {
+  return useCustomInstance<PairDetailDto>({ url: `/api/v1/pairs/${pairId}`, method: "GET" });
 };
 
 export type PetControllerFindAllResult = NonNullable<
@@ -520,8 +521,8 @@ export type LayingControllerUpdateResult = NonNullable<
 export type PairControllerGetPairListResult = NonNullable<
   Awaited<ReturnType<typeof pairControllerGetPairList>>
 >;
-export type PairControllerGetPairByIdResult = NonNullable<
-  Awaited<ReturnType<typeof pairControllerGetPairById>>
+export type PairControllerGetPairDetailResult = NonNullable<
+  Awaited<ReturnType<typeof pairControllerGetPairDetail>>
 >;
 
 export const getPetControllerFindAllResponsePetParentDtoMock = (
@@ -3167,6 +3168,87 @@ export const getLayingControllerUpdateResponseMock = (
 export const getPairControllerGetPairListResponseMock = (): PairDto[] =>
   Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({}));
 
+export const getPairControllerGetPairDetailResponseMock = (
+  overrideResponse: Partial<PairDetailDto> = {},
+): PairDetailDto => ({
+  pairId: faker.number.int({ min: undefined, max: undefined }),
+  fatherId: faker.string.alpha(20),
+  motherId: faker.string.alpha(20),
+  matings: faker.helpers.arrayElement([
+    Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+      matingId: faker.number.int({ min: undefined, max: undefined }),
+      matingDate: faker.string.alpha(20),
+      layings: faker.helpers.arrayElement([
+        Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+          clutch: faker.helpers.arrayElement([
+            faker.number.int({ min: undefined, max: undefined }),
+            undefined,
+          ]),
+          layingId: faker.number.int({ min: undefined, max: undefined }),
+          layingDate: faker.string.alpha(20),
+          pets: faker.helpers.arrayElement([
+            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+              () => ({
+                petId: faker.string.alpha(20),
+                type: faker.helpers.arrayElement([
+                  faker.helpers.arrayElement(["EGG", "PET"] as const),
+                  undefined,
+                ]),
+                name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+                species: faker.helpers.arrayElement(["CR", "LE", "FT", "KN", "LC", "GG"] as const),
+                hatchingDate: faker.helpers.arrayElement([
+                  faker.date.past().toISOString().split("T")[0],
+                  undefined,
+                ]),
+                sex: faker.helpers.arrayElement([
+                  faker.helpers.arrayElement(["M", "F", "N"] as const),
+                  undefined,
+                ]),
+                morphs: faker.helpers.arrayElement([
+                  Array.from(
+                    { length: faker.number.int({ min: 1, max: 10 }) },
+                    (_, i) => i + 1,
+                  ).map(() => faker.string.alpha(20)),
+                  undefined,
+                ]),
+                traits: faker.helpers.arrayElement([
+                  Array.from(
+                    { length: faker.number.int({ min: 1, max: 10 }) },
+                    (_, i) => i + 1,
+                  ).map(() => faker.string.alpha(20)),
+                  undefined,
+                ]),
+                weight: faker.helpers.arrayElement([
+                  faker.number.int({ min: undefined, max: undefined }),
+                  undefined,
+                ]),
+                clutchOrder: faker.helpers.arrayElement([
+                  faker.number.int({ min: undefined, max: undefined }),
+                  undefined,
+                ]),
+                temperature: faker.helpers.arrayElement([
+                  faker.number.int({ min: undefined, max: undefined }),
+                  undefined,
+                ]),
+                eggStatus: faker.helpers.arrayElement([
+                  "UNFERTILIZED",
+                  "FERTILIZED",
+                  "HATCHED",
+                  "DEAD",
+                ] as const),
+              }),
+            ),
+            undefined,
+          ]),
+        })),
+        undefined,
+      ]),
+    })),
+    undefined,
+  ]),
+  ...overrideResponse,
+});
+
 export const getPetControllerFindAllMockHandler = (
   overrideResponse?:
     | PetControllerFindAll200
@@ -4063,17 +4145,26 @@ export const getPairControllerGetPairListMockHandler = (
   });
 };
 
-export const getPairControllerGetPairByIdMockHandler = (
+export const getPairControllerGetPairDetailMockHandler = (
   overrideResponse?:
-    | void
-    | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<void> | void),
+    | PairDetailDto
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<PairDetailDto> | PairDetailDto),
 ) => {
   return http.get("*/api/v1/pairs/:pairId", async (info) => {
     await delay(1000);
-    if (typeof overrideResponse === "function") {
-      await overrideResponse(info);
-    }
-    return new HttpResponse(null, { status: 200 });
+
+    return new HttpResponse(
+      JSON.stringify(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getPairControllerGetPairDetailResponseMock(),
+      ),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
   });
 };
 export const getProjectDaepaAPIMock = () => [
@@ -4117,5 +4208,5 @@ export const getProjectDaepaAPIMock = () => [
   getLayingControllerCreateMockHandler(),
   getLayingControllerUpdateMockHandler(),
   getPairControllerGetPairListMockHandler(),
-  getPairControllerGetPairByIdMockHandler(),
+  getPairControllerGetPairDetailMockHandler(),
 ];
