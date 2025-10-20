@@ -3322,7 +3322,10 @@ export const getPairControllerGetPairDetailResponseMock = (
   matings: faker.helpers.arrayElement([
     Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
       matingId: faker.number.int({ min: undefined, max: undefined }),
-      matingDate: faker.date.past().toISOString().split("T")[0],
+      matingDate: faker.helpers.arrayElement([
+        faker.date.past().toISOString().split("T")[0],
+        undefined,
+      ]),
       layings: faker.helpers.arrayElement([
         Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
           clutch: faker.helpers.arrayElement([
@@ -3330,7 +3333,10 @@ export const getPairControllerGetPairDetailResponseMock = (
             undefined,
           ]),
           layingId: faker.number.int({ min: undefined, max: undefined }),
-          layingDate: faker.date.past().toISOString().split("T")[0],
+          layingDate: faker.helpers.arrayElement([
+            faker.date.past().toISOString().split("T")[0],
+            undefined,
+          ]),
           pets: faker.helpers.arrayElement([
             Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
               () => ({

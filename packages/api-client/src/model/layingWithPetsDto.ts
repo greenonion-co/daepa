@@ -13,7 +13,7 @@ export interface LayingWithPetsDto {
   /** 산란 ID */
   layingId: number;
   /** 산란 날짜 */
-  layingDate: string;
+  layingDate?: string;
   /** 펫 정보 */
   pets?: PetLayingDto[];
 }
