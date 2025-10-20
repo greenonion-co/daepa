@@ -118,6 +118,7 @@ class LayingWithPetsDto extends PickType(LayingBaseDto, ['clutch']) {
   @ApiProperty({
     description: '산란 날짜',
     example: '2025-01-01',
+    format: 'date',
   })
   @IsString()
   layingDate: string;
@@ -144,6 +145,7 @@ class MatingWithLayingsDto {
   @ApiProperty({
     description: '메이팅 날짜',
     example: '2025-01-01',
+    format: 'date',
   })
   @IsString()
   matingDate: string;
