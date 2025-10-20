@@ -7,7 +7,6 @@
  */
 import type { UpdatePetDtoType } from "./updatePetDtoType";
 import type { UpdatePetDtoSpecies } from "./updatePetDtoSpecies";
-import type { LayingDto } from "./layingDto";
 import type { UpdatePetDtoGrowth } from "./updatePetDtoGrowth";
 import type { UpdatePetDtoSex } from "./updatePetDtoSex";
 import type { CreateParentDto } from "./createParentDto";
@@ -31,8 +30,6 @@ export interface UpdatePetDto {
   isPublic?: boolean;
   /** 펫 삭제 여부 */
   isDeleted?: boolean;
-  /** 산란 정보 */
-  laying?: LayingDto;
   /** 펫 성장단계 */
   growth?: UpdatePetDtoGrowth;
   /** 펫 성별(수컷, 암컷, 미구분) */

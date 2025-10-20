@@ -694,6 +694,7 @@ export class CreatePetDto extends OmitType(PetBaseDto, [
   'owner',
   'petDetail',
   'eggDetail',
+  'laying',
 ] as const) {
   @ApiProperty({
     description: '펫 타입',
