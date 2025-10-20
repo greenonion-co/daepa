@@ -1,13 +1,14 @@
-import { ApiProperty, PickType } from '@nestjs/swagger';
+import { ApiProperty, getSchemaPath, PickType } from '@nestjs/swagger';
 import {
+  IsArray,
   IsDate,
   IsEnum,
   IsNumber,
+  IsObject,
   IsOptional,
   IsString,
 } from 'class-validator';
 import { PET_SPECIES } from 'src/pet/pet.constants';
-import { PetSummaryLayingDto } from 'src/pet/pet.dto';
 
 export class LayingBaseDto {
   @ApiProperty({
@@ -151,7 +152,10 @@ export class LayingByDateDto {
 
   @ApiProperty({
     description: '산란 정보',
-    type: PetSummaryLayingDto,
+    type: 'array',
+    items: { $ref: getSchemaPath('PetSummaryLayingDto') },
   })
-  layings: PetSummaryLayingDto[];
+  @IsArray()
+  @IsObject({ each: true })
+  layings: any[];
 }
