@@ -332,6 +332,7 @@ export class PetLayingDto extends PickType(PetSummaryDto, [
     example: 'HATCHED',
     enum: EGG_STATUS,
     'x-enumNames': Object.keys(EGG_STATUS),
+    required: false,
   })
   @ValidateIf((o: Pick<PetBaseDto, 'type'>) => o.type === PET_TYPE.EGG)
   @IsOptional()

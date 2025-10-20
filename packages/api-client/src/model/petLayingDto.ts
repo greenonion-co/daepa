@@ -34,5 +34,5 @@ export interface PetLayingDto {
   /** 펫 온도 */
   temperature?: number;
   /** 알 상태 */
-  eggStatus: PetLayingDtoEggStatus;
+  eggStatus?: PetLayingDtoEggStatus;
 }
