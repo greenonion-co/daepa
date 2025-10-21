@@ -1,19 +1,12 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Table } from "@tanstack/react-table";
-import { ChevronDown, Search } from "lucide-react";
-import { TABLE_HEADER } from "../../constants";
-import { Input } from "@/components/ui/input";
-import { useEffect, useState } from "react";
-import { PetDto } from "@repo/api-client";
+import { MORPH_LIST_BY_SPECIES } from "../../constants";
 import { FilterStore } from "../../store/filter";
+import SelectFilter from "../../components/SelectFilter";
+import { cn } from "@/lib/utils";
+import MultiSelectFilter from "../../components/MultiSelectFilter";
+import { PetDtoSpecies } from "@repo/api-client";
 
 type AnyParams = Record<string, string | number | string[] | number[]>;
 interface FiltersProps<TData, TParams extends AnyParams = AnyParams> extends FilterStore<TParams> {
@@ -22,123 +15,84 @@ interface FiltersProps<TData, TParams extends AnyParams = AnyParams> extends Fil
 }
 
 export function Filters<TData, TParams extends AnyParams = AnyParams>({
-  table,
   searchFilters,
   setSearchFilters,
-  columnFilters,
-  setColumnFilters,
 }: FiltersProps<TData, TParams>) {
-  const [filters, setFilters] = useState<Partial<TParams>>(
-    (searchFilters as Partial<TParams>) ?? ({} as Partial<TParams>),
-  );
-  const [initialColumnFilters, setInitialColumnFilters] = useState<
-    Partial<Record<keyof PetDto, boolean>>
-  >(columnFilters ?? {});
-
-  const hasColumnFilters = Object.values(columnFilters ?? {}).every((value) => value);
-
-  const handleSearch = () => {
-    setSearchFilters({ ...searchFilters, ...filters });
-  };
-
-  const hasActiveFilters = Object.entries(searchFilters).some(
-    ([key, value]) => value !== undefined && value !== "" && value !== null && key !== "keyword",
-  );
-
   const handleResetFilters = () => {
     setSearchFilters({});
-    setFilters({});
   };
-
-  const resetColumnFilters = () => {
-    setColumnFilters(initialColumnFilters);
-  };
-
-  useEffect(() => {
-    const initialColumnFilters = table.getAllColumns().reduce(
-      (acc, column) => {
-        acc[column.id as keyof PetDto] = true;
-        return acc;
-      },
-      {} as Partial<Record<keyof PetDto, boolean>>,
-    );
-
-    setInitialColumnFilters(initialColumnFilters);
-    setColumnFilters(initialColumnFilters);
-  }, [table, setColumnFilters]);
 
   return (
-    <div className="flex items-center gap-2 py-2">
-      {/* 검색 */}
-      <div className="flex items-center gap-2">
-        {/* 간단한 키워드 검색 */}
-        <div className="relative max-w-sm flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
-          <Input
-            placeholder="펫 이름으로 검색"
-            value={typeof filters.keyword === "string" ? filters.keyword : ""}
-            onChange={(e) => setFilters((prev) => ({ ...prev, keyword: e.target.value }))}
-            className="pl-10"
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                handleSearch();
-              }
-            }}
-          />
-        </div>
-        <Button variant="outline" size="icon" onClick={handleSearch}>
-          검색
-        </Button>
+    <div className="mb-4 flex flex-wrap items-center gap-2">
+      <div className="flex h-[32px] items-center gap-2 rounded-lg bg-gray-100 px-1">
+        <button
+          onClick={() => setSearchFilters({ ...searchFilters, isPublic: undefined })}
+          className={cn(
+            "cursor-pointer rounded-lg px-2 py-1 text-sm font-semibold text-gray-800",
+            searchFilters.isPublic === undefined ? "bg-white shadow-sm" : "text-gray-600",
+          )}
+        >
+          전체
+        </button>
+        <button
+          onClick={() => setSearchFilters({ ...searchFilters, isPublic: 1 })}
+          className={cn(
+            "cursor-pointer rounded-lg px-2 py-1 text-sm font-semibold text-gray-800",
+            searchFilters.isPublic === 1 ? "bg-white shadow-sm" : "text-gray-600",
+          )}
+        >
+          공개
+        </button>
+        <button
+          onClick={() => setSearchFilters({ ...searchFilters, isPublic: 0 })}
+          className={cn(
+            "cursor-pointer rounded-lg px-2 py-1 text-sm font-semibold text-gray-800",
+            searchFilters.isPublic === 0 ? "bg-white shadow-sm" : "text-gray-600",
+          )}
+        >
+          비공개
+        </button>
       </div>
 
-      <Button
-        disabled={!hasActiveFilters}
-        variant="outline"
-        className="relative bg-gray-200"
-        onClick={handleResetFilters}
-      >
-        필터 초기화
-        {hasActiveFilters && (
-          <div className="absolute -right-1 -top-1 h-3 w-3 rounded-full bg-red-500" />
-        )}
-      </Button>
+      <SelectFilter
+        type="species"
+        initialItem={searchFilters.species}
+        onSelect={(item) => {
+          if (!item) {
+            setSearchFilters({ ...searchFilters, morphs: undefined });
+          }
+          setSearchFilters({ ...searchFilters, species: item });
+        }}
+      />
+      {searchFilters.species && (
+        <MultiSelectFilter
+          type="morphs"
+          title="모프"
+          selectList={MORPH_LIST_BY_SPECIES[searchFilters.species as PetDtoSpecies]}
+        />
+      )}
+      <SelectFilter
+        type="growth"
+        initialItem={searchFilters.growth}
+        onSelect={(item) => setSearchFilters({ ...searchFilters, growth: item })}
+      />
+      <SelectFilter
+        type="sex"
+        initialItem={searchFilters.sex}
+        onSelect={(item) => setSearchFilters({ ...searchFilters, sex: item })}
+      />
+      <SelectFilter
+        type="foods"
+        initialItem={searchFilters.foods}
+        onSelect={(item) => setSearchFilters({ ...searchFilters, foods: item })}
+      />
 
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="outline">
-            필터 <ChevronDown className="ml-1 h-4 w-4" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuCheckboxItem
-            key="all"
-            className="capitalize"
-            checked={hasColumnFilters}
-            onCheckedChange={resetColumnFilters}
-            onSelect={(e) => e.preventDefault()}
-          >
-            전체
-          </DropdownMenuCheckboxItem>
-          {table
-            .getAllColumns()
-            .filter((column) => column.getCanHide())
-            .map((column) => (
-              <DropdownMenuCheckboxItem
-                key={column.id}
-                className="capitalize"
-                checked={columnFilters?.[column.id as keyof PetDto]}
-                onCheckedChange={(value) => {
-                  setColumnFilters({
-                    [column.id]: !!value,
-                  });
-                }}
-                onSelect={(e) => e.preventDefault()}
-              >
-                {TABLE_HEADER[column.id as keyof typeof TABLE_HEADER]}
-              </DropdownMenuCheckboxItem>
-            ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <button
+        onClick={handleResetFilters}
+        className="h-[32px] cursor-pointer rounded-lg px-3 text-sm text-blue-700 underline hover:bg-blue-100"
+      >
+        필터 되돌리기
+      </button>
     </div>
   );
 }

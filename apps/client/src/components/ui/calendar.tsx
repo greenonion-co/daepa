@@ -7,7 +7,6 @@ import { format } from "date-fns";
 
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./select";
 import { useEffect } from "react";
 type EggCounts = Record<string, { hatched: number; egg: number; total: number }>;
 
@@ -25,7 +24,6 @@ function Calendar({
 
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 11 }, (_, i) => currentYear - 10 + i);
-  const months = Array.from({ length: 12 }, (_, i) => i + 1);
 
   useEffect(() => {
     onMonthChange?.(currentMonth);
@@ -42,7 +40,7 @@ function Calendar({
       className={cn("p-3", className)}
       classNames={{
         months: "flex flex-col sm:flex-row",
-        month: "flex flex-col gap-4",
+        month: "flex flex-col gap-2",
         caption: "flex justify-center pt-1 relative items-center w-full",
         caption_label: "text-sm font-medium",
         nav: "flex items-center gap-1",
@@ -54,7 +52,7 @@ function Calendar({
         nav_button_next: "absolute right-1",
         table: "w-full border-collapse space-x-1",
         head_row: "flex",
-        head_cell: "text-muted-foreground rounded-md w-11 font-normal text-[0.8rem] py-2",
+        head_cell: "text-muted-foreground rounded-md w-9 font-normal text-[0.8rem] py-2",
         row: "flex w-full mt-2",
         cell: cn(
           "relative p-0 text-center text-sm focus-within:relative focus-within:z-20 [&:has([aria-selected])]:bg-accent [&:has([aria-selected].day-range-end)]:rounded-r-md",
@@ -65,13 +63,13 @@ function Calendar({
         day: cn(
           buttonVariants({ variant: "ghost" }),
           eggCounts ? "w-11 h-20" : "size-11",
-          "p-0 font-normal aria-selected:opacity-100 hover:bg-gray-50",
+          "p-0 size-9 font-normal aria-selected:opacity-100 hover:bg-gray-50",
         ),
         day_range_start: "day-range-start aria-selected:bg-zinc-500 aria-selected:text-zinc-100",
         day_range_end: "day-range-end aria-selected:bg-zinc-500 aria-selected:text-zinc-100",
         day_selected: "bg-zinc-800 text-zinc-100 focus:bg-zinc-800 focus:text-zinc-100",
         day_today: "bg-accent text-accent-foreground border-[1.8px] border-zinc-200",
-        day_outside: "day-outside text-muted-foreground aria-selected:text-muted-foreground",
+        day_outside: "day-outside text-gray-200 aria-selected:text-blue-500",
         day_disabled: "text-muted-foreground opacity-50",
         day_range_middle: "aria-selected:bg-accent aria-selected:text-accent-foreground",
         day_hidden: "invisible",
@@ -113,48 +111,12 @@ function Calendar({
           const isMaxMonth = isMaxYear && month === 12;
 
           return (
-            <>
-              <div className="flex items-center justify-center gap-2">
-                <Select
-                  value={year.toString()}
-                  onValueChange={(newYear) => {
-                    const newDate = new Date(parseInt(newYear), month - 1);
-                    setCurrentMonth(newDate);
-                  }}
-                >
-                  <SelectTrigger className="w-[100px]">
-                    <SelectValue>{year}</SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    {years.map((y) => (
-                      <SelectItem key={y} value={y.toString()}>
-                        {y}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-
-                <Select
-                  value={month.toString()}
-                  onValueChange={(newMonth) => {
-                    const newDate = new Date(year, parseInt(newMonth) - 1);
-                    setCurrentMonth(newDate);
-                  }}
-                >
-                  <SelectTrigger className="w-[100px]">
-                    <SelectValue>{month}월</SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    {months.map((m) => (
-                      <SelectItem key={m} value={m.toString()}>
-                        {m}월
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+            <div className="flex items-center justify-between pl-2">
+              <div className="text-sm font-medium">
+                {year}년 {month}월
               </div>
 
-              <div className="flex w-full items-center justify-between">
+              <div className="flex items-center gap-1">
                 <button
                   onClick={() => {
                     const newDate = new Date(year, month - 2);
@@ -162,17 +124,12 @@ function Calendar({
                   }}
                   disabled={isMinMonth}
                   className={cn(
-                    buttonVariants({ variant: "outline" }),
-                    "size-7 bg-transparent p-0",
+                    "size-7 border-none p-0",
                     isMinMonth ? "cursor-not-allowed opacity-30" : "opacity-50 hover:opacity-100",
                   )}
                 >
                   <ChevronLeft className="size-4" />
                 </button>
-                <div className="flex flex-col items-center">
-                  <div className="font-medium">{month}월</div>
-                  <div className="text-muted-foreground text-sm">{year}</div>
-                </div>
                 <button
                   onClick={() => {
                     const newDate = new Date(year, month);
@@ -180,15 +137,14 @@ function Calendar({
                   }}
                   disabled={isMaxMonth}
                   className={cn(
-                    buttonVariants({ variant: "outline" }),
-                    "size-7 bg-transparent p-0",
+                    "size-7 border-none",
                     isMaxMonth ? "cursor-not-allowed opacity-30" : "opacity-50 hover:opacity-100",
                   )}
                 >
                   <ChevronRight className="size-4" />
                 </button>
               </div>
-            </>
+            </div>
           );
         },
       }}

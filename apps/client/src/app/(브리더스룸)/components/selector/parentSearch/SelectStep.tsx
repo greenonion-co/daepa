@@ -28,7 +28,7 @@ const SelectStep = ({
   const [tab, setTab] = useState<PetListType>(PetListType.MY);
 
   return (
-    <div className="h-full overflow-y-auto px-2">
+    <div className="h-full overflow-y-auto">
       <Tabs
         defaultValue={PetListType.MY}
         className="w-full"

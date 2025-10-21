@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import BottomSheet from "@/components/common/BottomSheet";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import {
   petControllerFindAll,
@@ -15,6 +14,7 @@ import LinkStep from "./LinkStep";
 import Header from "./Header";
 import { useInView } from "react-intersection-observer";
 import { PetParentDtoWithMessage } from "@/app/(브리더스룸)/pet/store/parentLink";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 
 interface ParentSearchProps {
   sex?: PetDtoSex;
@@ -95,35 +95,39 @@ const ParentSearchSelector = ({
   };
 
   return (
-    <BottomSheet isOpen={isOpen} onClose={onClose} fullWidth>
-      <div className="flex h-[90vh] flex-col">
-        <Header
-          step={step}
-          setStep={setStep}
-          selectedPetName={selectedPet?.name ?? ""}
-          setSearchQuery={setSearchQuery}
-        />
-        <div ref={contentRef} className="relative flex-1">
-          {step === 1 ? (
-            <SelectStep
-              pets={data as PetParentDtoWithMessage[]}
-              handlePetSelect={handlePetSelect}
-              hasMore={hasNextPage}
-              isFetchingMore={isFetchingNextPage}
-              loaderRefAction={ref}
-              showTab={showTab}
-              onTabChange={setPetListType}
-            />
-          ) : (
-            <LinkStep
-              selectedPet={selectedPet ?? ({} as PetParentDtoWithMessage)}
-              onSelect={onSelect}
-              onClose={onClose}
-            />
-          )}
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-h-[800px] rounded-2xl sm:max-w-[720px]">
+        <DialogTitle />
+
+        <div className="flex h-[90vh] flex-col">
+          <Header
+            step={step}
+            setStep={setStep}
+            selectedPetName={selectedPet?.name ?? ""}
+            setSearchQuery={setSearchQuery}
+          />
+          <div ref={contentRef} className="relative flex-1">
+            {step === 1 ? (
+              <SelectStep
+                pets={data as PetParentDtoWithMessage[]}
+                handlePetSelect={handlePetSelect}
+                hasMore={hasNextPage}
+                isFetchingMore={isFetchingNextPage}
+                loaderRefAction={ref}
+                showTab={showTab}
+                onTabChange={setPetListType}
+              />
+            ) : (
+              <LinkStep
+                selectedPet={selectedPet ?? ({} as PetParentDtoWithMessage)}
+                onSelect={onSelect}
+                onClose={onClose}
+              />
+            )}
+          </div>
         </div>
-      </div>
-    </BottomSheet>
+      </DialogContent>
+    </Dialog>
   );
 };
 

@@ -1,5 +1,5 @@
-import { Bell, Bubbles, DollarSign, Film, Home, Inbox } from "lucide-react";
-import { FormStep, SelectorConfig } from "./register/types";
+import { Bubbles, DollarSign, Home } from "lucide-react";
+import { FormStep } from "./register/types";
 import {
   EggDetailDtoStatus,
   PetDtoGrowth,
@@ -271,7 +271,7 @@ export const EGG_EDIT_STEPS: FormStep[] = [
   },
 ];
 
-export const MORPH_LIST_BY_SPECIES: Record<keyof typeof SPECIES_KOREAN_INFO, string[]> = {
+export const MORPH_LIST_BY_SPECIES: Record<PetDtoSpecies, string[]> = {
   CR: [
     "노멀",
     "루왁",
@@ -318,7 +318,7 @@ export const TABLE_HEADER = {
   hatchingDate: "해칭일",
   desc: "설명",
   foods: "먹이",
-  isPublic: "공개 여부",
+  isPublic: "공개",
   adoption_status: "분양 상태",
   pet_name: "이름",
   pet_species: "종",
@@ -329,6 +329,15 @@ export const TABLE_HEADER = {
   adoptionDate: "분양 날짜",
   price: "가격",
   memo: "메모",
+};
+
+export const SPECIES_KOREAN_ALIAS_INFO: Record<PetDtoSpecies, string> = {
+  CR: "크레",
+  LE: "레오파드",
+  FT: "펫테일",
+  KN: "납테일",
+  LC: "리키",
+  GG: "가고일",
 };
 
 export const SPECIES_KOREAN_INFO: Record<PetDtoSpecies, string> = {
@@ -364,43 +373,167 @@ export const EGG_STATUS_KOREAN_INFO: Record<EggDetailDtoStatus, string> = {
 export const FOOD_LIST = ["판게아 인섹트", "귀뚜라미", "냉동귀뚜라미", "누에", "지렙 인섹트"];
 
 export const SELECTOR_CONFIGS: Record<
-  "species" | "growth" | "sex" | "traits" | "foods" | "eggStatus",
-  SelectorConfig
+  "species" | "growth" | "sex" | "foods" | "eggStatus" | "traits",
+  { title: string; selectList: { key: string; value: string }[] }
 > = {
   species: {
-    title: "종 선택",
-    selectList: Object.keys(SPECIES_KOREAN_INFO),
+    title: "종",
+    selectList: [
+      {
+        key: "CR",
+        value: "크레스티드 게코",
+      },
+      {
+        key: "LE",
+        value: "레오파드 게코",
+      },
+      {
+        key: "FT",
+        value: "펫테일 게코",
+      },
+      {
+        key: "KN",
+        value: "납테일 게코",
+      },
+      {
+        key: "LC",
+        value: "리키에너스",
+      },
+      {
+        key: "GG",
+        value: "가고일 게코",
+      },
+    ],
   },
   growth: {
-    title: "크기 선택",
-    selectList: ["BABY", "JUVENILE", "PRE_ADULT", "ADULT"],
+    title: "크기",
+    selectList: [
+      {
+        key: "BABY",
+        value: "베이비",
+      },
+      {
+        key: "JUVENILE",
+        value: "아성체",
+      },
+      {
+        key: "PRE_ADULT",
+        value: "준성체",
+      },
+      {
+        key: "ADULT",
+        value: "성체",
+      },
+      {
+        key: "DEAD",
+        value: "사망",
+      },
+    ],
   },
   sex: {
-    title: "성별 선택",
-    selectList: Object.keys(GENDER_KOREAN_INFO),
+    title: "성별",
+    selectList: [
+      {
+        key: "M",
+        value: "수컷",
+      },
+
+      {
+        key: "F",
+        value: "암컷",
+      },
+      {
+        key: "N",
+        value: "미구분",
+      },
+    ],
+  },
+
+  foods: {
+    title: "먹이",
+    selectList: [
+      {
+        key: "판게아 인섹트",
+        value: "판게아 인섹트",
+      },
+      {
+        key: "귀뚜라미",
+        value: "귀뚜라미",
+      },
+      {
+        key: "누에",
+        value: "누에",
+      },
+      {
+        key: "지렙 인섹트",
+        value: "지렙 인섹트",
+      },
+    ],
   },
   traits: {
-    title: "형질 선택",
-    selectList: ["노멀", "크림시클", "하리퀸", "다크", "파이어", "트라이컬러", "기타"],
-  },
-  foods: {
-    title: "먹이 선택",
-    selectList: FOOD_LIST,
+    title: "형질",
+    selectList: [
+      {
+        key: "트익할",
+        value: "트익할",
+      },
+      {
+        key: "풀핀",
+        value: "풀핀",
+      },
+      {
+        key: "노멀",
+        value: "노멀",
+      },
+      {
+        key: "하리퀸",
+        value: "하리퀸",
+      },
+      {
+        key: "다크",
+        value: "다크",
+      },
+      {
+        key: "파이어",
+        value: "파이어",
+      },
+      {
+        key: "트라이컬러",
+        value: "트라이컬러",
+      },
+      {
+        key: "기타",
+        value: "기타",
+      },
+    ],
   },
   eggStatus: {
-    title: "알 상태 선택",
-    selectList: Object.keys(EggDetailDtoStatus),
+    title: "알 상태",
+    selectList: [
+      {
+        key: "UNFERTILIZED",
+        value: "무정란",
+      },
+      {
+        key: "FERTILIZED",
+        value: "유정란",
+      },
+      {
+        key: "HATCHED",
+        value: "해칭완료",
+      },
+    ],
   },
 };
 
 export const SIDEBAR_ITEMS = [
+  // {
+  //   title: "개체 등록",
+  //   url: "/register/1",
+  //   icon: Inbox,
+  // },
   {
-    title: "개체 등록",
-    url: "/register/1",
-    icon: Inbox,
-  },
-  {
-    title: "마이펫",
+    title: "홈",
     url: "/pet",
     icon: Home,
   },
@@ -414,16 +547,16 @@ export const SIDEBAR_ITEMS = [
     url: "/hatching",
     icon: Bubbles,
   },
-  {
-    title: "알림",
-    url: "/noti",
-    icon: Bell,
-  },
-  {
-    title: "쇼츠",
-    url: "/shorts",
-    icon: Film,
-  },
+  // {
+  //   title: "알림",
+  //   url: "/noti",
+  //   icon: Bell,
+  // },
+  // {
+  //   title: "쇼츠",
+  //   url: "/shorts",
+  //   icon: Film,
+  // },
 ];
 
 export const FOOD_BADGE_COLORS: Record<string, string> = {

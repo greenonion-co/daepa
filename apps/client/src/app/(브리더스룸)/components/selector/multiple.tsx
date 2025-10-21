@@ -7,7 +7,7 @@ import { toast } from "sonner";
 interface MultipleSelectorProps {
   isOpen: boolean;
   initialValue: string[];
-  selectList: string[];
+  selectList: { key: string; value: string }[];
   onCloseAction: () => void;
   onSelectAction: (selectedItems: string[]) => void;
   onExit: () => void;
@@ -65,15 +65,15 @@ export default function MultipleSelector({
           <span className="text-sm text-gray-500">{selectedItems.length}/5 선택됨</span>
         </div>
         <div className="max-h-[50vh] overflow-y-auto">
-          {selectList?.map((item) => (
+          {selectList?.map(({ key, value }) => (
             <button
-              key={item}
+              key={key}
               className={`mb-2 mr-2 rounded-full pb-1 pl-4 pr-3 pt-1 ${
-                selectedItems.includes(item) ? "bg-[#1A56B3] text-[#D9E1EC]" : "hover:bg-gray-100"
+                selectedItems.includes(key) ? "bg-[#1A56B3] text-[#D9E1EC]" : "hover:bg-gray-100"
               } dark:hover:bg-gray-800`}
-              onClick={() => handleMultipleSelect(item)}
+              onClick={() => handleMultipleSelect(key)}
             >
-              {item}
+              {value}
             </button>
           ))}
         </div>

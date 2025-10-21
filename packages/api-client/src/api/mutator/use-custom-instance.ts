@@ -9,6 +9,23 @@ export const setAxiosInstanceBaseURL = (baseURL: string) => {
   AXIOS_INSTANCE.defaults.baseURL = baseURL;
 };
 
+// Customize query param serialization: arrays -> single key with JSON string value
+AXIOS_INSTANCE.defaults.paramsSerializer = {
+  serialize: (params: Record<string, unknown>) => {
+    const usp = new URLSearchParams();
+    if (!params) return usp.toString();
+    Object.entries(params).forEach(([key, value]) => {
+      if (value === undefined || value === null) return;
+      if (Array.isArray(value)) {
+        usp.append(key, JSON.stringify(value));
+        return;
+      }
+      usp.append(key, String(value));
+    });
+    return usp.toString();
+  },
+};
+
 // 토큰 갱신 중복 요청 방지를 위한 플래그
 let isRefreshing = false;
 let failedQueue: Array<{
