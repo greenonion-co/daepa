@@ -46,6 +46,8 @@ import { PetImageEntity } from './pet_image/pet_image.entity';
 import { PetImageService } from './pet_image/pet_image.service';
 import { EggDetailEntity } from './egg_detail/egg_detail.entity';
 import { PetDetailEntity } from './pet_detail/pet_detail.entity';
+import { PairController } from './pair/pair.controller';
+import { PairService } from './pair/pair.service';
 
 const ENTITIES = [
   UserEntity,
@@ -102,6 +104,7 @@ const ENTITIES = [
     BrMatingController,
     ParentRequestController,
     LayingController,
+    PairController,
   ],
   providers: [
     AppService,
@@ -119,6 +122,7 @@ const ENTITIES = [
     LayingService,
     R2Service,
     PetImageService,
+    PairService,
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,

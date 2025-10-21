@@ -5,38 +5,34 @@
  * Project Daepa API description
  * OpenAPI spec version: 1.0
  */
-import type { PetSummaryLayingDtoType } from "./petSummaryLayingDtoType";
-import type { PetSummaryLayingDtoSpecies } from "./petSummaryLayingDtoSpecies";
-import type { PetSummaryLayingDtoSex } from "./petSummaryLayingDtoSex";
-import type { PetSummaryLayingDtoEggStatus } from "./petSummaryLayingDtoEggStatus";
+import type { PetLayingDtoType } from "./petLayingDtoType";
+import type { PetLayingDtoSpecies } from "./petLayingDtoSpecies";
+import type { PetLayingDtoSex } from "./petLayingDtoSex";
+import type { PetLayingDtoEggStatus } from "./petLayingDtoEggStatus";
 
-export interface PetSummaryLayingDto {
+export interface PetLayingDto {
   /** 펫 아이디 */
   petId: string;
   /** 펫 타입(egg/pet) */
-  type?: PetSummaryLayingDtoType;
+  type?: PetLayingDtoType;
   /** 펫 이름 */
   name?: string;
   /** 펫 종 */
-  species: PetSummaryLayingDtoSpecies;
+  species: PetLayingDtoSpecies;
   /** 펫 출생일 */
   hatchingDate?: string;
   /** 펫 성별(수컷, 암컷, 미구분) */
-  sex?: PetSummaryLayingDtoSex;
+  sex?: PetLayingDtoSex;
   /** 펫 모프 */
   morphs?: string[];
   /** 펫 형질 */
   traits?: string[];
   /** 펫 몸무게(g) */
   weight?: number;
-  /** 산란 아이디 */
-  layingId?: number;
-  /** 산란 클러치 */
-  clutch?: number;
   /** 산란 클러치 순서 */
   clutchOrder?: number;
   /** 펫 온도 */
   temperature?: number;
   /** 알 상태 */
-  eggStatus: PetSummaryLayingDtoEggStatus;
+  eggStatus?: PetLayingDtoEggStatus;
 }
