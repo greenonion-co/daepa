@@ -120,7 +120,7 @@ const PetDetail = ({ pet, qrCodeDataUrl }: PetDetailProps) => {
           </div>
           {/* 오른쪽: CardBack */}
           <div className="w-full rounded-xl border-[1.5px] border-gray-300 bg-white shadow-xl dark:bg-[#18181B]">
-            <CardBack pet={pet} from={from} isWideScreen={isWideScreen} />
+            <CardBack pet={pet} from={from} isMyPet={isMyPet} isWideScreen={isWideScreen} />
           </div>
         </div>
       </div>
@@ -143,8 +143,8 @@ const PetDetail = ({ pet, qrCodeDataUrl }: PetDetailProps) => {
           <div className="h-[700px] shrink-0">
             <CardFront pet={pet} qrCodeDataUrl={qrCodeDataUrl} />
           </div>
-          <div className="h-[700px] shrink-0 pt-6">
-            <CardBack pet={pet} from={from} isWideScreen={isWideScreen} />
+          <div className="pt-6ㅠ h-[700px] shrink-0">
+            <CardBack pet={pet} from={from} isMyPet={isMyPet} isWideScreen={isWideScreen} />
           </div>
         </div>
       </div>

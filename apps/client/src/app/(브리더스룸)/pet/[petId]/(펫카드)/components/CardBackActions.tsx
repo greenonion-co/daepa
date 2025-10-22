@@ -72,7 +72,7 @@ const CardBackActions = memo(
     return (
       <div
         className={cn(
-          "sticky bottom-0 left-0 flex p-4",
+          "fixed bottom-0 left-0 z-10 flex w-full p-8 pb-2",
           isEditing ? "justify-end" : "justify-between",
         )}
       >
@@ -86,7 +86,7 @@ const CardBackActions = memo(
             </Button>
           </div>
         ) : (
-          <div className="flex flex-1 justify-between">
+          <div className="flex flex-1 justify-end gap-2">
             <Button variant="destructive" size="sm" onClick={handleDelete} className="text-white">
               삭제하기
             </Button>
