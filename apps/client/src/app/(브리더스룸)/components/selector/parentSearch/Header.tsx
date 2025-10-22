@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Search } from "lucide-react";
 import { useState } from "react";
 
 interface HeaderProps {
@@ -19,7 +20,7 @@ const Header = ({ step, setStep, selectedPetName, setSearchQuery, className }: H
       <div className="flex items-center gap-2 pb-2">
         <button
           onClick={() => step === 2 && setStep(1)}
-          className={`text-lg font-bold ${step === 2 ? "text-gray-400 hover:text-gray-700" : ""}`}
+          className={`text-[16px] font-bold ${step === 2 ? "text-gray-400 hover:text-gray-700" : ""}`}
         >
           개체 검색
         </button>
@@ -32,20 +33,22 @@ const Header = ({ step, setStep, selectedPetName, setSearchQuery, className }: H
       </div>
 
       {step === 1 && (
-        <div className="flex items-center gap-2">
-          <input
-            type="text"
-            placeholder="부모 개체를 검색하세요"
-            className="w-full rounded-xl border border-gray-200 p-3 text-sm font-normal focus:border-gray-500 focus:outline-none"
-            value={keyword}
-            onChange={(e) => setKeyword(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                setSearchQuery(keyword);
-              }
-            }}
-          />
-          <Button className="h-11 rounded-xl text-[16px]" onClick={() => setSearchQuery(keyword)}>
+        <div className="flex items-center gap-1">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+            <Input
+              placeholder="펫 이름으로 검색하세요"
+              className="h-8 rounded-lg bg-gray-100 pl-9"
+              value={keyword}
+              onChange={(e) => setKeyword(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  setSearchQuery(keyword);
+                }
+              }}
+            />
+          </div>
+          <Button className="h-8 rounded-lg text-[14px]" onClick={() => setSearchQuery(keyword)}>
             검색
           </Button>
         </div>

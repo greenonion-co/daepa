@@ -134,7 +134,12 @@ export const useRegisterForm = ({
     (type: FieldName) => {
       switch (type) {
         case "morphs":
-          return MORPH_LIST_BY_SPECIES[formData.species as keyof typeof MORPH_LIST_BY_SPECIES];
+          return MORPH_LIST_BY_SPECIES[formData.species as keyof typeof MORPH_LIST_BY_SPECIES].map(
+            (morph) => ({
+              key: morph,
+              value: morph,
+            }),
+          );
         default:
           return SELECTOR_CONFIGS[type as SELECTOR_TYPE].selectList;
       }
