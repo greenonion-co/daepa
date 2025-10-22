@@ -100,7 +100,7 @@ const ParentSearchSelector = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-h-[800px] rounded-2xl sm:max-w-[720px]">
+      <DialogContent className="rounded-4xl max-h-[800px] sm:max-w-[720px]">
         <DialogTitle />
 
         <div className="flex h-[90vh] flex-col">
@@ -119,7 +119,8 @@ const ParentSearchSelector = ({
                 isFetchingMore={isFetchingNextPage}
                 loaderRefAction={ref}
                 showTab={showTab}
-                onTabChange={setPetListType}
+                searchType={petListType}
+                setSearchType={setPetListType}
               />
             ) : (
               <LinkStep
