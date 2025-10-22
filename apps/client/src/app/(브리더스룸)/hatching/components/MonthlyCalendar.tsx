@@ -10,7 +10,7 @@ import { brPetControllerGetPetsByMonth, PetDto, PetDtoType } from "@repo/api-cli
 import HatchingPetCard from "./HatchingPetCard";
 
 import { Calendar } from "./Calendar";
-import { format, getWeekOfMonth, startOfWeek } from "date-fns";
+import { format, getWeekOfMonth } from "date-fns";
 import { cn } from "@/lib/utils";
 
 const MonthlyCalendar = memo(() => {
@@ -92,15 +92,6 @@ const MonthlyCalendar = memo(() => {
           onSelect={(date) => {
             if (!date) return;
             setSelectedDate(date);
-            const from = startOfWeek(date, { weekStartsOn: 1 });
-
-            // 해당 주차 헤더로 스크롤 이동
-            const week = getWeekOfMonth(from, { weekStartsOn: 1 });
-            const weekKey = `${format(from, "yyyy-MM")}-w${week}`;
-            const el = groupRefs.current[weekKey];
-            if (el && typeof el.scrollIntoView === "function") {
-              el.scrollIntoView({ behavior: "smooth", block: "start" });
-            }
           }}
           eggCounts={petCounts}
         />
@@ -153,9 +144,21 @@ const MonthlyCalendar = memo(() => {
                       if (tab === "egg")
                         return pets.filter((pet) => pet.type === PetDtoType.EGG).length > 0;
                     })
-                    .map(([date, pets]) => (
-                      <HatchingPetCard key={date} date={date} pets={pets} tab={tab} />
-                    ))}
+                    .map(([date, pets]) => {
+                      const isSelected =
+                        new Date(selectedDate ?? "").toLocaleDateString() ===
+                        new Date(date).toLocaleDateString();
+
+                      return (
+                        <HatchingPetCard
+                          key={date}
+                          isSelected={isSelected}
+                          date={date}
+                          pets={pets}
+                          tab={tab}
+                        />
+                      );
+                    })}
                 </div>
               ))
             )}

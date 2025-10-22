@@ -8,7 +8,7 @@ import {
   PetSummaryLayingDto,
 } from "@repo/api-client";
 import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { ChevronsDown, Cake } from "lucide-react";
+import { ChevronsDown, Cake, TriangleAlert } from "lucide-react";
 import { toast } from "sonner";
 import { memo, useEffect, useState } from "react";
 import CreateMatingForm from "./CreateMatingForm";
@@ -24,11 +24,17 @@ import { cn } from "@/lib/utils";
 import MatingDetailDialog from "./MatingDetailDialog";
 
 const ParentInfo = ({ parent }: { parent: PetSummaryLayingDto | undefined }) => {
-  if (!parent) return "-";
+  if (!parent)
+    return (
+      <div className="flex flex-1 flex-col items-center justify-center gap-1 text-[12px] text-gray-500">
+        <TriangleAlert className="h-4 w-4" />
+        정보없음
+      </div>
+    );
 
   return (
-    <div className="flex gap-1">
-      <div className="flex h-10 w-10 rounded-2xl border border-gray-200 bg-white text-blue-800 shadow-md dark:bg-blue-900 dark:text-blue-200 dark:hover:bg-blue-800" />
+    <div className="flex flex-1 gap-1">
+      {/* <div className="flex h-10 w-10 rounded-2xl border border-gray-200 bg-white text-blue-800 shadow-md dark:bg-blue-900 dark:text-blue-200 dark:hover:bg-blue-800" /> */}
 
       <div className="flex flex-1 flex-col">
         <div className="mb-1">
@@ -222,24 +228,13 @@ const MatingList = memo(() => {
                 setIsOpen(true);
                 setMatingGroup(matingGroup);
               }}
-              className="flex cursor-pointer flex-col gap-4 rounded-2xl bg-gray-100 px-2 py-4 shadow-md hover:shadow-xl dark:border-gray-700"
+              className="flex cursor-pointer flex-col gap-4 rounded-2xl bg-gray-100 px-4 py-4 shadow-md hover:shadow-xl dark:border-gray-700"
             >
               <div>
                 <div className="flex flex-1 gap-2">
-                  {matingGroup.father && (
-                    <div className="flex flex-1 flex-col">
-                      <span className="text-sm text-gray-500">부</span>
-
-                      <ParentInfo parent={matingGroup.father} />
-                    </div>
-                  )}
-                  {matingGroup.mother && (
-                    <div className="flex flex-1 flex-col">
-                      <span className="text-sm text-gray-500">모</span>
-
-                      <ParentInfo parent={matingGroup.mother} />
-                    </div>
-                  )}
+                  <ParentInfo parent={matingGroup.father} />
+                  x
+                  <ParentInfo parent={matingGroup.mother} />
                 </div>
               </div>
             </div>

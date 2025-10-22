@@ -1,3 +1,4 @@
+"use client";
 import { format } from "date-fns";
 import {
   EGG_STATUS_KOREAN_INFO,
@@ -18,11 +19,13 @@ import { cn } from "@/lib/utils";
 import { ko } from "date-fns/locale";
 import { useRouter } from "next/navigation";
 import TooltipText from "../../components/TooltipText";
+import { useEffect, useRef } from "react";
 
 interface PetCardProps {
   date: string;
   pets: PetDto[];
   tab: "all" | "hatched" | "egg";
+  isSelected: boolean;
 }
 
 const getParentInfo = (parent: PetDtoFather | PetDtoMother | undefined) => {
@@ -39,10 +42,24 @@ const getParentInfo = (parent: PetDtoFather | PetDtoMother | undefined) => {
   return parent.name;
 };
 
-const HatchingPetCard = ({ date, pets, tab }: PetCardProps) => {
+const HatchingPetCard = ({ date, pets, tab, isSelected }: PetCardProps) => {
   const router = useRouter();
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (isSelected) {
+      ref.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [isSelected]);
+
   return (
-    <div className="mb-7 pr-1">
+    <div
+      ref={ref}
+      className={cn(
+        "mb-7 scroll-mt-20",
+        isSelected && "rounded-xl border-[1.5px] border-blue-200 shadow-md",
+      )}
+    >
       <div className="flex flex-wrap">
         {pets
           .filter((pet) => {
