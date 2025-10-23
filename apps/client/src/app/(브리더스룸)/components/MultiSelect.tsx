@@ -2,21 +2,31 @@
 
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
-import { SELECTOR_CONFIGS } from "../constants";
-import { Check, ChevronDown } from "lucide-react";
+import { Check, ChevronDown, X } from "lucide-react";
 
-interface SelectFilterProps {
-  type: "species" | "growth" | "sex" | "foods" | "eggStatus";
-  initialItem: any;
-  onSelect: (item: any) => void;
+interface MultiSelectProps {
+  title: string;
+  selectList: string[];
   disabled?: boolean;
+  initialItems: string[];
+  onSelect: (items?: string[]) => void;
 }
 
-const SelectFilter = ({ type, initialItem, onSelect, disabled = false }: SelectFilterProps) => {
+const MultiSelect = ({
+  title,
+  selectList,
+  disabled = false,
+  initialItems,
+  onSelect,
+}: MultiSelectProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedItem, setSelectedItem] = useState<string | undefined>(initialItem);
+  const [selectedItems, setSelectedItems] = useState<string[] | undefined>([]);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isEntering, setIsEntering] = useState(false);
+
+  useEffect(() => {
+    setSelectedItems(initialItems);
+  }, [initialItems]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -50,32 +60,35 @@ const SelectFilter = ({ type, initialItem, onSelect, disabled = false }: SelectF
     <div ref={containerRef} className="relative">
       <div
         className={cn(
-          "flex h-[32px] w-fit cursor-pointer items-center gap-1 rounded-lg px-2 py-1 text-[14px] font-[500]",
-          initialItem ? "bg-blue-100 text-blue-600" : "bg-gray-100 text-gray-800",
+          "flex min-h-[32px] cursor-pointer items-center gap-1 rounded-lg px-2 py-1 text-[14px] font-[500]",
+          selectedItems && selectedItems.length > 0
+            ? "bg-blue-100 text-blue-600"
+            : "bg-gray-100 text-gray-800",
           disabled && "cursor-not-allowed",
         )}
         onClick={() => {
           if (disabled) return;
-          setIsOpen((prev) => !prev);
+          setIsOpen(!isOpen);
         }}
       >
         {disabled ? (
-          <div>
-            {initialItem
-              ? SELECTOR_CONFIGS[type].selectList.find((item) => item.key === initialItem)?.value
-              : "미정"}
-          </div>
+          selectedItems && selectedItems.length > 0 ? (
+            <div>{selectedItems?.join(" | ")}</div>
+          ) : (
+            <div>-</div>
+          )
         ) : (
           <>
             <div>
-              {SELECTOR_CONFIGS[type].title}
-              {initialItem &&
-                `・${SELECTOR_CONFIGS[type].selectList.find((item) => item.key === initialItem)?.value}`}
+              {title}
+              {selectedItems &&
+                selectedItems.length > 0 &&
+                `・${selectedItems[0]} ${selectedItems.length > 1 ? `외 ${selectedItems.length - 1}개` : ""}`}
             </div>
             <ChevronDown
               className={cn(
                 "h-4 w-4 text-gray-600",
-                initialItem ? "text-blue-600" : "text-gray-600",
+                selectedItems ? "text-blue-600" : "text-gray-600",
               )}
             />
           </>
@@ -92,23 +105,50 @@ const SelectFilter = ({ type, initialItem, onSelect, disabled = false }: SelectF
               : "-translate-y-1 scale-95 opacity-0",
           )}
         >
-          <div className="mb-2 font-[500]">{SELECTOR_CONFIGS[type].title}</div>
-          <div className="mb-4">
-            {SELECTOR_CONFIGS[type].selectList.map((item) => {
+          <div className="mb-2 font-[500]">{title}</div>
+          <div className="mb-2 flex flex-nowrap gap-1 overflow-x-auto overflow-y-hidden pb-1">
+            {selectedItems?.map((item) => {
               return (
                 <div
-                  key={item.key}
+                  className="flex shrink-0 items-center whitespace-nowrap rounded-full bg-blue-100 px-2 py-0.5 text-[12px] text-blue-600"
+                  key={item}
+                >
+                  {item}
+                  <button
+                    className="cursor-pointer"
+                    onClick={() => {
+                      setSelectedItems((prev) => {
+                        return prev?.filter((m) => m !== item);
+                      });
+                    }}
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+          <div className="mb-4 max-h-[240px] overflow-y-auto">
+            {selectList.map((item) => {
+              return (
+                <div
+                  key={item}
                   className={cn(
                     "flex cursor-pointer items-center justify-between rounded-xl px-2 py-2 text-gray-600 hover:bg-gray-100",
-                    selectedItem === item.key && "text-blue-700",
+                    selectedItems?.includes(item) && "text-blue-700",
                   )}
                   onClick={() => {
-                    setSelectedItem(item.key);
+                    setSelectedItems((prev) => {
+                      if (prev?.includes(item)) {
+                        return prev?.filter((m) => m !== item);
+                      }
+                      return [...(prev || []), item];
+                    });
                   }}
                 >
-                  {item.value}
+                  {item}
 
-                  {selectedItem === item.key && <Check className="h-4 w-4 text-blue-600" />}
+                  {selectedItems?.includes(item) && <Check className="h-4 w-4 text-blue-600" />}
                 </div>
               );
             })}
@@ -117,7 +157,7 @@ const SelectFilter = ({ type, initialItem, onSelect, disabled = false }: SelectF
           <div className="flex justify-end gap-2">
             <button
               onClick={() => {
-                setSelectedItem(undefined);
+                setSelectedItems(undefined);
               }}
               className="h-[32px] cursor-pointer rounded-lg bg-gray-100 px-3 text-sm font-semibold text-gray-600 hover:bg-gray-200"
             >
@@ -125,7 +165,7 @@ const SelectFilter = ({ type, initialItem, onSelect, disabled = false }: SelectF
             </button>
             <button
               onClick={() => {
-                onSelect(selectedItem);
+                onSelect(selectedItems);
                 setIsOpen(false);
               }}
               className="h-[32px] cursor-pointer rounded-lg bg-blue-500 px-3 text-sm font-semibold text-white hover:bg-blue-600"
@@ -139,4 +179,4 @@ const SelectFilter = ({ type, initialItem, onSelect, disabled = false }: SelectF
   );
 };
 
-export default SelectFilter;
+export default MultiSelect;

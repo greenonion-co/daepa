@@ -6,15 +6,23 @@ import { cn } from "@/lib/utils";
 import { Check, ChevronDown, X } from "lucide-react";
 
 interface MultiSelectFilterProps {
-  type: "morphs" | "traits";
+  type: "morphs" | "traits" | "foods";
   title: string;
   selectList: string[];
+  disabled?: boolean;
 }
 
-const MultiSelectFilter = ({ type, title, selectList }: MultiSelectFilterProps) => {
+const MultiSelectFilter = ({
+  type,
+  title,
+  selectList,
+  disabled = false,
+}: MultiSelectFilterProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const { searchFilters, setSearchFilters } = useFilterStore();
-  const [selectedItem, setSelectedItem] = useState<string[] | undefined>(searchFilters[type]);
+  const [selectedItem, setSelectedItem] = useState<string[] | undefined>(
+    searchFilters[type] as string[],
+  );
   const containerRef = useRef<HTMLDivElement>(null);
   const [isEntering, setIsEntering] = useState(false);
 
@@ -56,21 +64,32 @@ const MultiSelectFilter = ({ type, title, selectList }: MultiSelectFilterProps) 
             : "bg-gray-100 text-gray-800",
         )}
         onClick={() => {
+          if (disabled) return;
           setIsOpen(!isOpen);
         }}
       >
-        <div>
-          {title}
-          {searchFilters[type] &&
-            searchFilters[type].length > 0 &&
-            `・${searchFilters[type][0]} ${searchFilters[type].length > 1 ? `외 ${searchFilters[type].length - 1}개` : ""}`}
-        </div>
-        <ChevronDown
-          className={cn(
-            "h-4 w-4 text-gray-600",
-            searchFilters[type] ? "text-blue-600" : "text-gray-600",
-          )}
-        />
+        {disabled ? (
+          selectedItem && selectedItem.length > 0 ? (
+            <div>{selectedItem?.join(" | ")}</div>
+          ) : (
+            <div>-</div>
+          )
+        ) : (
+          <>
+            <div>
+              {title}
+              {searchFilters[type] &&
+                searchFilters[type].length > 0 &&
+                `・${searchFilters[type][0]} ${searchFilters[type].length > 1 ? `외 ${searchFilters[type].length - 1}개` : ""}`}
+            </div>
+            <ChevronDown
+              className={cn(
+                "h-4 w-4 text-gray-600",
+                searchFilters[type] ? "text-blue-600" : "text-gray-600",
+              )}
+            />
+          </>
+        )}
       </div>
 
       {isOpen && (

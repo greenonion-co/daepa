@@ -7,13 +7,14 @@ import { DayModifiers, ModifiersStyles } from "react-day-picker";
 import { useState } from "react";
 
 interface CalendarInputProps {
-  placeholder: string;
+  placeholder?: string;
   value?: string;
   formatString?: string;
   modifiers?: DayModifiers;
   modifiersStyles?: ModifiersStyles;
   onSelect: (date?: Date) => void;
   disabled?: (date: Date) => boolean;
+  editable?: boolean;
   closeOnSelect?: boolean;
 }
 
@@ -23,6 +24,7 @@ const CalendarInput = ({
   formatString = "yyyy년 MM월 dd일",
   onSelect,
   disabled,
+  editable = true,
   modifiers,
   modifiersStyles,
   closeOnSelect = true,
@@ -30,20 +32,31 @@ const CalendarInput = ({
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <Popover open={isOpen} onOpenChange={setIsOpen}>
+    <Popover
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!editable) return;
+        setIsOpen(open);
+      }}
+    >
       <PopoverTrigger
         asChild
         className={cn(
           "flex h-[32px] w-fit cursor-pointer items-center gap-1 rounded-lg px-2 py-1 text-[14px] font-[500]",
           value ? "bg-blue-100 text-blue-600" : "bg-gray-100 text-gray-800",
+          !editable && "cursor-not-allowed",
         )}
       >
-        <div>
+        <div aria-disabled={!editable}>
           {placeholder}
-          {value && isValid(new Date(value)) && `・${format(new Date(value), formatString)}`}
-          <ChevronDown
-            className={cn("h-4 w-4 text-gray-600", value ? "text-blue-600" : "text-gray-600")}
-          />
+          {value &&
+            isValid(new Date(value)) &&
+            `${placeholder ? "・" : ""}${format(new Date(value), formatString)}`}
+          {editable && (
+            <ChevronDown
+              className={cn("h-4 w-4 text-gray-600", value ? "text-blue-600" : "text-gray-600")}
+            />
+          )}
         </div>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">

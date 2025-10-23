@@ -1,10 +1,11 @@
 "use client";
 
 import { petControllerFindPetByPetId } from "@repo/api-client";
-import PetDetail from "./petDetail";
-import { generateQRCode } from "@/lib/utils";
-import { use, useEffect, useState } from "react";
+import { use } from "react";
 import { useQuery } from "@tanstack/react-query";
+
+import BreedingInfo from "./components/사육정보";
+import Header from "./components/Header";
 
 interface PetDetailPageProps {
   params: Promise<{
@@ -14,25 +15,31 @@ interface PetDetailPageProps {
 
 function PetDetailPage({ params }: PetDetailPageProps) {
   const { petId } = use(params);
-  const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string>("");
 
-  const { data } = useQuery({
+  const { data: pet } = useQuery({
     queryKey: [petControllerFindPetByPetId.name, petId],
     queryFn: () => petControllerFindPetByPetId(petId),
     select: (response) => response.data.data,
   });
 
-  useEffect(() => {
-    const fetchQrCode = async () => {
-      const qrCode = await generateQRCode(`${"http://192.168.45.46:3000"}/pet/${petId}`);
-      setQrCodeDataUrl(qrCode);
-    };
-    fetchQrCode();
-  }, [petId]);
+  if (!pet) return null;
 
-  if (!data) return null;
+  return (
+    <div className="flex h-full flex-1 flex-col">
+      <Header pet={pet} />
 
-  return <PetDetail pet={data} qrCodeDataUrl={qrCodeDataUrl} />;
+      <div className="flex">
+        {/* 사육정보 (개체 이름, 종, 성별, 크기, 모프, 형질, 먹이) */}
+        <BreedingInfo petId={petId} />
+
+        {/* 사진 */}
+
+        {/* 혈통 정보 */}
+
+        {/* 분양 정보 */}
+      </div>
+    </div>
+  );
 }
 
 export default PetDetailPage;
