@@ -42,7 +42,6 @@ import { AdoptionEntity } from '../adoption/adoption.entity';
 import { format, startOfMonth, endOfMonth } from 'date-fns';
 import { LayingEntity } from 'src/laying/laying.entity';
 import { isMySQLError } from 'src/common/error';
-import { UserProfilePublicDto } from 'src/user/user.dto';
 import { ParentRequestEntity } from 'src/parent_request/parent_request.entity';
 import { PetImageService } from 'src/pet_image/pet_image.service';
 import { PetImageEntity } from 'src/pet_image/pet_image.entity';
@@ -195,23 +194,6 @@ export class PetService {
         });
       }
 
-      // adoption 정보를 petId로 조회
-      const adoption = await entityManager.findOne(AdoptionEntity, {
-        where: { petId, isDeleted: false },
-      });
-
-      let buyer: UserProfilePublicDto | null = null;
-      if (adoption?.buyerId) {
-        try {
-          buyer = await this.userService.findOneProfile(
-            adoption.buyerId,
-            entityManager,
-          );
-        } catch {
-          buyer = null;
-        }
-      }
-
       if (!pet.ownerId) {
         throw new NotFoundException('펫의 소유자를 찾을 수 없습니다.');
       }
@@ -255,12 +237,6 @@ export class PetService {
         father: fatherDisplayable,
         mother: motherDisplayable,
         photos: files,
-        adoption: adoption
-          ? {
-              ...adoption,
-              buyer,
-            }
-          : null,
       });
     });
   }
