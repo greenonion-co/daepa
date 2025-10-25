@@ -1290,7 +1290,7 @@ export class FindPetByPetIdResponseDto extends CommonResponseDto {
   data: PetFullDto;
 }
 
-export class FindPetParentsResponseDto extends CommonResponseDto {
+export class GetParentsByPetIdResponseDto extends CommonResponseDto {
   @ApiProperty({
     description: '펫 부모 정보',
     type: 'object',
