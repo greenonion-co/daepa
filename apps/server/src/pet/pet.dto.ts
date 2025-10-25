@@ -1290,6 +1290,33 @@ export class FindPetByPetIdResponseDto extends CommonResponseDto {
   data: PetFullDto;
 }
 
+export class FindPetParentsResponseDto extends CommonResponseDto {
+  @ApiProperty({
+    description: '펫 부모 정보',
+    type: 'object',
+    properties: {
+      father: {
+        description: '아빠 개체 정보',
+        oneOf: [
+          { $ref: getSchemaPath(PetParentDto) },
+          { $ref: getSchemaPath(PetHiddenStatusDto) },
+        ],
+      },
+      mother: {
+        description: '엄마 개체 정보',
+        oneOf: [
+          { $ref: getSchemaPath(PetParentDto) },
+          { $ref: getSchemaPath(PetHiddenStatusDto) },
+        ],
+      },
+    },
+  })
+  data: {
+    father?: PetParentDto | PetHiddenStatusDto;
+    mother?: PetParentDto | PetHiddenStatusDto;
+  };
+}
+
 export class FilterPetListResponseDto extends CommonResponseDto {
   @ApiProperty({
     description: '날짜 범위별 해칭 펫 목록',

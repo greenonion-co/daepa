@@ -217,8 +217,16 @@ export class PetService {
         );
 
       // father, mother pet이 isPublic이 아닌 경우, ownerId가 자신인 경우에만 펫 정보 반환
-      const fatherDisplayable = this.getParentPublicSafe(father, pet, userId);
-      const motherDisplayable = this.getParentPublicSafe(mother, pet, userId);
+      const fatherDisplayable = this.getParentPublicSafe(
+        father,
+        pet.ownerId,
+        userId,
+      );
+      const motherDisplayable = this.getParentPublicSafe(
+        mother,
+        pet.ownerId,
+        userId,
+      );
 
       const { growth, sex, morphs, traits, foods, weight } = petDetail ?? {};
       const { temperature, status: eggStatus } = eggDetail ?? {};
@@ -404,12 +412,12 @@ export class PetService {
           await this.parentRequestService.getParentsWithRequestStatus(petId);
         const fatherDisplayable = this.getParentPublicSafe(
           father,
-          petRaw,
+          petRaw.ownerId,
           userId,
         );
         const motherDisplayable = this.getParentPublicSafe(
           mother,
-          petRaw,
+          petRaw.ownerId,
           userId,
         );
 
@@ -510,12 +518,12 @@ export class PetService {
           await this.parentRequestService.getParentsWithRequestStatus(petId);
         const fatherDisplayable = this.getParentPublicSafe(
           father,
-          petRaw,
+          petRaw.ownerId,
           userId,
         );
         const motherDisplayable = this.getParentPublicSafe(
           mother,
-          petRaw,
+          petRaw.ownerId,
           userId,
         );
 
@@ -635,6 +643,17 @@ export class PetService {
         );
       }
     });
+  }
+
+  async findParentsByPetId(petId: string, userId: string) {
+    const { father, mother } =
+      await this.parentRequestService.getParentsWithRequestStatus(petId);
+    const fatherDisplayable = this.getParentPublicSafe(father, userId, userId);
+    const motherDisplayable = this.getParentPublicSafe(mother, userId, userId);
+    return {
+      father: fatherDisplayable ?? undefined,
+      mother: motherDisplayable ?? undefined,
+    };
   }
 
   async completeHatching(
@@ -806,8 +825,16 @@ export class PetService {
           await this.parentRequestService.getParentsWithRequestStatus(
             pet.petId,
           );
-        const fatherDisplayable = this.getParentPublicSafe(father, pet, userId);
-        const motherDisplayable = this.getParentPublicSafe(mother, pet, userId);
+        const fatherDisplayable = this.getParentPublicSafe(
+          father,
+          pet.ownerId,
+          userId,
+        );
+        const motherDisplayable = this.getParentPublicSafe(
+          mother,
+          pet.ownerId,
+          userId,
+        );
 
         return plainToInstance(PetDto, {
           ...pet,
@@ -1007,7 +1034,7 @@ export class PetService {
 
   private getParentPublicSafe(
     parent: PetParentDto | null,
-    child: PetEntity,
+    childOwnerId: string | null,
     userId: string,
   ) {
     if (!parent) return null;
@@ -1023,7 +1050,7 @@ export class PetService {
     if (
       parent.status === PARENT_STATUS.PENDING &&
       parent.owner?.userId !== userId &&
-      child.ownerId !== userId
+      childOwnerId !== userId
     ) {
       return { hiddenStatus: PET_HIDDEN_STATUS.PENDING };
     }
