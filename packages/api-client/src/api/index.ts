@@ -51,7 +51,7 @@ import type {
   DetailJson,
   FilterPetListResponseDto,
   FindPetByPetIdResponseDto,
-  FindPetParentsResponseDto,
+  GetParentsByPetIdResponseDto,
   PairDetailDto,
   PairDto,
   ParentLinkDetailJson,
@@ -121,7 +121,7 @@ export const petControllerVerifyName = (verifyPetNameDto: VerifyPetNameDto) => {
 };
 
 export const petControllerGetParentsByPetId = (petId: string) => {
-  return useCustomInstance<FindPetParentsResponseDto>({
+  return useCustomInstance<GetParentsByPetIdResponseDto>({
     url: `/api/v1/pet/parents/${petId}`,
     method: "GET",
   });
@@ -1234,8 +1234,8 @@ export const getPetControllerGetParentsByPetIdResponsePetHiddenStatusDtoMock = (
 });
 
 export const getPetControllerGetParentsByPetIdResponseMock = (
-  overrideResponse: Partial<FindPetParentsResponseDto> = {},
-): FindPetParentsResponseDto => ({
+  overrideResponse: Partial<GetParentsByPetIdResponseDto> = {},
+): GetParentsByPetIdResponseDto => ({
   success: faker.datatype.boolean(),
   message: faker.string.alpha(20),
   data: {
@@ -3632,10 +3632,10 @@ export const getPetControllerVerifyNameMockHandler = (
 
 export const getPetControllerGetParentsByPetIdMockHandler = (
   overrideResponse?:
-    | FindPetParentsResponseDto
+    | GetParentsByPetIdResponseDto
     | ((
         info: Parameters<Parameters<typeof http.get>[1]>[0],
-      ) => Promise<FindPetParentsResponseDto> | FindPetParentsResponseDto),
+      ) => Promise<GetParentsByPetIdResponseDto> | GetParentsByPetIdResponseDto),
 ) => {
   return http.get("*/api/v1/pet/parents/:petId", async (info) => {
     await delay(1000);

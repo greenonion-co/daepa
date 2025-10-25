@@ -5,13 +5,13 @@
  * Project Daepa API description
  * OpenAPI spec version: 1.0
  */
-import type { FindPetParentsResponseDtoData } from "./findPetParentsResponseDtoData";
+import type { GetParentsByPetIdResponseDtoData } from "./getParentsByPetIdResponseDtoData";
 
-export interface FindPetParentsResponseDto {
+export interface GetParentsByPetIdResponseDto {
   /** 성공 여부 */
   success: boolean;
   /** 메시지 */
   message: string;
   /** 펫 부모 정보 */
-  data: FindPetParentsResponseDtoData;
+  data: GetParentsByPetIdResponseDtoData;
 }

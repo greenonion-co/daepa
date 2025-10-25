@@ -9,6 +9,6 @@ import type { PetParentDto } from "./petParentDto";
 import type { PetHiddenStatusDto } from "./petHiddenStatusDto";
 
 /**
- * 아빠 개체 정보
+ * 엄마 개체 정보
  */
-export type FindPetParentsResponseDtoDataFather = PetParentDto | PetHiddenStatusDto;
+export type GetParentsByPetIdResponseDtoDataMother = PetParentDto | PetHiddenStatusDto;
