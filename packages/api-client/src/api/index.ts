@@ -1095,49 +1095,6 @@ export const getPetControllerFindPetByPetIdResponseMock = (
         ]),
         undefined,
       ]),
-      adoption: faker.helpers.arrayElement([
-        {
-          ...{
-            adoptionId: faker.string.alpha(20),
-            price: faker.number.int({ min: undefined, max: undefined }),
-            status: faker.helpers.arrayElement([
-              "NFS",
-              "ON_SALE",
-              "ON_RESERVATION",
-              "SOLD",
-            ] as const),
-            adoptionDate: `${faker.date.past().toISOString().split(".")[0]}Z`,
-            memo: faker.string.alpha(20),
-            location: faker.helpers.arrayElement([
-              faker.helpers.arrayElement(["ONLINE", "OFFLINE"] as const),
-              undefined,
-            ]),
-            buyer: faker.helpers.arrayElement([
-              {
-                ...{
-                  status: faker.helpers.arrayElement([
-                    "pending",
-                    "active",
-                    "inactive",
-                    "suspended",
-                    "deleted",
-                  ] as const),
-                  userId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
-                  name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
-                  role: faker.helpers.arrayElement([
-                    faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
-                    undefined,
-                  ]),
-                  isBiz: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
-                },
-              },
-              undefined,
-            ]),
-            petId: faker.string.alpha(20),
-          },
-        },
-        undefined,
-      ]),
       status: faker.helpers.arrayElement([
         "pending",
         "approved",

@@ -689,6 +689,148 @@ export class PetDto extends PetBaseDto {
   declare updatedAt?: Date;
 }
 
+@ApiExtraModels(PetParentDto, PetHiddenStatusDto)
+export class PetFullDto extends PetBaseDto {
+  @ApiProperty({
+    description: '펫 성장단계',
+    example: 'JUNIOR',
+    required: false,
+    enum: PET_GROWTH,
+    'x-enumNames': Object.keys(PET_GROWTH),
+  })
+  @IsOptional()
+  @IsEnum(PET_GROWTH)
+  growth?: PET_GROWTH;
+
+  @ApiProperty({
+    description: '펫 성별(수컷, 암컷, 미구분)',
+    example: 'M',
+    required: false,
+    enum: PET_SEX,
+    'x-enumNames': Object.keys(PET_SEX),
+  })
+  @IsOptional()
+  @IsEnum(PET_SEX)
+  sex?: PET_SEX;
+
+  @ApiProperty({
+    description: '펫 모프',
+    example: ['릴리화이트', '아잔틱헷100%'],
+    required: false,
+  })
+  @IsOptional()
+  @IsArray()
+  morphs?: string[];
+
+  @ApiProperty({
+    description: '펫 형질',
+    example: ['트익할', '풀핀'],
+    required: false,
+  })
+  @IsOptional()
+  @IsArray()
+  traits?: string[];
+
+  @ApiProperty({
+    description: '펫 먹이',
+    example: ['판게아 인섹트', '귀뚜라미'],
+    required: false,
+  })
+  @IsOptional()
+  @IsArray()
+  foods?: string[];
+
+  @ApiProperty({
+    description: '펫 몸무게(g)',
+    example: 10,
+    required: false,
+  })
+  @IsOptional()
+  @IsNumber()
+  @Transform(({ value }) => {
+    if (value === null || value === undefined) return undefined;
+    const num = Number(value);
+    return isNaN(num) ? undefined : num;
+  })
+  weight?: number;
+
+  @ApiProperty({
+    description: '부화 온도',
+    example: 25,
+    required: false,
+  })
+  @IsOptional()
+  @IsNumber()
+  temperature?: number;
+
+  @ApiProperty({
+    description: '알 상태',
+    example: EGG_STATUS.UNFERTILIZED,
+    enum: EGG_STATUS,
+    required: false,
+    'x-enumNames': Object.keys(EGG_STATUS),
+  })
+  @IsOptional()
+  @IsEnum(EGG_STATUS)
+  eggStatus?: EGG_STATUS;
+
+  @ApiProperty({
+    description: '아빠 개체 정보',
+    example: {},
+    required: false,
+    oneOf: [
+      { $ref: getSchemaPath(PetParentDto) },
+      { $ref: getSchemaPath(PetHiddenStatusDto) },
+    ],
+  })
+  @IsOptional()
+  @IsObject()
+  father?: PetParentDto | PetHiddenStatusDto;
+
+  @ApiProperty({
+    description: '엄마 개체 정보',
+    example: {},
+    required: false,
+    oneOf: [
+      { $ref: getSchemaPath(PetParentDto) },
+      { $ref: getSchemaPath(PetHiddenStatusDto) },
+    ],
+  })
+  @IsOptional()
+  @IsObject()
+  mother?: PetParentDto | PetHiddenStatusDto;
+
+  @ApiProperty({
+    description: '부모 관계 상태',
+    enum: PARENT_STATUS,
+    'x-enumNames': Object.keys(PARENT_STATUS),
+  })
+  @IsOptional()
+  @IsEnum(PARENT_STATUS)
+  status?: PARENT_STATUS;
+
+  @ApiProperty({
+    description: '펫 이미지 목록',
+    required: false,
+    type: 'array',
+    items: { $ref: getSchemaPath(PetImageItem) },
+  })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => PetImageItem)
+  photos?: PetImageItem[];
+
+  @Exclude()
+  declare petDetail?: PetDetailBaseDto | undefined;
+
+  @Exclude()
+  declare createdAt?: Date;
+
+  @Exclude()
+  declare updatedAt?: Date;
+}
+
 @ApiExtraModels(UpsertPetImageDto)
 export class CreatePetDto extends OmitType(PetBaseDto, [
   'petId',
@@ -1143,9 +1285,9 @@ export class PetHatchingDateRangeDto {
 export class FindPetByPetIdResponseDto extends CommonResponseDto {
   @ApiProperty({
     description: '펫 정보',
-    type: PetDto,
+    type: PetFullDto,
   })
-  data: PetDto;
+  data: PetFullDto;
 }
 
 export class FilterPetListResponseDto extends CommonResponseDto {

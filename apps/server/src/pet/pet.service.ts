@@ -22,6 +22,7 @@ import {
   CompleteHatchingDto,
   CreatePetDto,
   PetDto,
+  PetFullDto,
   PetParentDto,
 } from './pet.dto';
 import {
@@ -171,7 +172,7 @@ export class PetService {
     });
   }
 
-  async findPetByPetId(petId: string, userId: string): Promise<PetDto> {
+  async findPetByPetId(petId: string, userId: string): Promise<PetFullDto> {
     return this.dataSource.transaction(async (entityManager: EntityManager) => {
       const pet = await entityManager.findOne(PetEntity, {
         where: { petId, isDeleted: false },
@@ -222,7 +223,7 @@ export class PetService {
       const { growth, sex, morphs, traits, foods, weight } = petDetail ?? {};
       const { temperature, status: eggStatus } = eggDetail ?? {};
 
-      return plainToInstance(PetDto, {
+      return plainToInstance(PetFullDto, {
         ...pet,
         growth,
         sex,
