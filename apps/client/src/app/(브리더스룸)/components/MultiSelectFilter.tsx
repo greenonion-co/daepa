@@ -48,13 +48,16 @@ const MultiSelectFilter = ({ type, title, selectList }: MultiSelectFilterProps) 
 
   return (
     <div ref={containerRef} className="relative">
-      <div
+      <button
+        type="button"
         className={cn(
           "flex h-[32px] cursor-pointer items-center gap-1 rounded-lg px-2 py-1 text-[14px] font-[500]",
           searchFilters[type] && searchFilters[type].length > 0
             ? "bg-blue-100 text-blue-600"
             : "bg-gray-100 text-gray-800",
         )}
+        aria-expanded={isOpen}
+        aria-haspopup="listbox"
         onClick={() => {
           setIsOpen(!isOpen);
         }}
@@ -68,10 +71,12 @@ const MultiSelectFilter = ({ type, title, selectList }: MultiSelectFilterProps) 
         <ChevronDown
           className={cn(
             "h-4 w-4 text-gray-600",
-            searchFilters[type] ? "text-blue-600" : "text-gray-600",
+            searchFilters[type] && searchFilters[type].length > 0
+              ? "text-blue-600"
+              : "text-gray-600",
           )}
         />
-      </div>
+      </button>
 
       {isOpen && (
         <div
@@ -93,6 +98,7 @@ const MultiSelectFilter = ({ type, title, selectList }: MultiSelectFilterProps) 
                 >
                   {item}
                   <button
+                    type="button"
                     className="cursor-pointer"
                     onClick={() => {
                       setSelectedItem((prev) => {
@@ -134,6 +140,7 @@ const MultiSelectFilter = ({ type, title, selectList }: MultiSelectFilterProps) 
 
           <div className="flex justify-end gap-2">
             <button
+              type="button"
               onClick={() => {
                 setSelectedItem(undefined);
               }}
@@ -142,6 +149,7 @@ const MultiSelectFilter = ({ type, title, selectList }: MultiSelectFilterProps) 
               초기화
             </button>
             <button
+              type="button"
               onClick={() => {
                 setSearchFilters({
                   ...searchFilters,

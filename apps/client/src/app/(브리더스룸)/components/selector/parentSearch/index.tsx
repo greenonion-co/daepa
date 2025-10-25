@@ -100,10 +100,10 @@ const ParentSearchSelector = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="rounded-4xl max-h-[800px] sm:max-w-[720px]">
-        <DialogTitle />
+      <DialogContent className="rounded-4xl max-h-[90vh] sm:max-w-[720px]">
+        <DialogTitle className="sr-only">부모 개체 선택</DialogTitle>
 
-        <div className="flex h-[90vh] flex-col">
+        <div className="flex h-full flex-col">
           <Header
             step={step}
             setStep={setStep}

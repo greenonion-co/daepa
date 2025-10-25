@@ -58,10 +58,11 @@ export function Filters<TData, TParams extends AnyParams = AnyParams>({
         type="species"
         initialItem={searchFilters.species}
         onSelect={(item) => {
-          if (!item) {
-            setSearchFilters({ ...searchFilters, morphs: undefined });
-          }
-          setSearchFilters({ ...searchFilters, species: item });
+          setSearchFilters({
+            ...searchFilters,
+            species: item,
+            morphs: undefined,
+          });
         }}
       />
       {searchFilters.species && (

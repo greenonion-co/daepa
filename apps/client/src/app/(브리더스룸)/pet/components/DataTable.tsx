@@ -1,6 +1,6 @@
 "use client";
 
-import * as React from "react";
+import React, { useEffect, useRef } from "react";
 import {
   ColumnDef,
   flexRender,
@@ -36,7 +36,7 @@ interface DataTableProps<TData> {
   loaderRefAction: (node?: Element | null) => void;
   hasFilter?: boolean;
   isClickable?: boolean;
-  refetch: () => void;
+  refetch: () => Promise<unknown> | void;
 }
 
 export const DataTable = ({
@@ -50,6 +50,7 @@ export const DataTable = ({
   isClickable = true,
   refetch,
 }: DataTableProps<PetDto>) => {
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const { columnFilters, searchFilters, setSearchFilters, setColumnFilters } = useFilterStore();
   const { sorting, rowSelection, setSorting, setRowSelection } = useTableStore();
 
@@ -83,6 +84,14 @@ export const DataTable = ({
     router.push(`/pet/${id}`);
   };
 
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
+
   return (
     <div className="relative w-full">
       <div className="w-full">
@@ -102,11 +111,11 @@ export const DataTable = ({
             setIsRefreshing(true);
             try {
               const maybe = refetch();
-              if ((maybe as unknown as Promise<unknown>)?.then) {
-                await (maybe as unknown as Promise<unknown>);
+              if (maybe && typeof maybe.then === "function") {
+                await maybe;
               }
             } finally {
-              setTimeout(() => setIsRefreshing(false), 500);
+              timeoutRef.current = setTimeout(() => setIsRefreshing(false), 500);
             }
           }}
           className="flex w-fit cursor-pointer items-center gap-1 rounded-lg px-2 py-1 text-[12px] text-gray-600 hover:bg-blue-100 hover:text-blue-700"

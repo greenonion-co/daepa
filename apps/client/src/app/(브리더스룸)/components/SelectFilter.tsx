@@ -7,13 +7,15 @@ import { Check, ChevronDown } from "lucide-react";
 
 interface SelectFilterProps {
   type: "species" | "growth" | "sex" | "foods" | "eggStatus";
-  initialItem: any;
-  onSelect: (item: any) => void;
+  initialItem?: string | number | string[] | number[] | undefined;
+  onSelect: (item: string | number | string[] | number[] | undefined) => void;
 }
 
 const SelectFilter = ({ type, initialItem, onSelect }: SelectFilterProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedItem, setSelectedItem] = useState<string | undefined>(initialItem);
+  const [selectedItem, setSelectedItem] = useState<
+    string | number | string[] | number[] | undefined
+  >(initialItem);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isEntering, setIsEntering] = useState(false);
 
@@ -23,6 +25,7 @@ const SelectFilter = ({ type, initialItem, onSelect }: SelectFilterProps) => {
     const handlePointerDown = (event: MouseEvent | TouchEvent) => {
       const root = containerRef.current;
       if (root && !root.contains(event.target as Node)) {
+        setSelectedItem(initialItem);
         setIsOpen(false);
       }
     };
@@ -33,7 +36,11 @@ const SelectFilter = ({ type, initialItem, onSelect }: SelectFilterProps) => {
       document.removeEventListener("mousedown", handlePointerDown);
       document.removeEventListener("touchstart", handlePointerDown);
     };
-  }, [isOpen]);
+  }, [isOpen, initialItem]);
+
+  useEffect(() => {
+    setSelectedItem(initialItem);
+  }, [initialItem]);
 
   useEffect(() => {
     if (isOpen) {
@@ -47,9 +54,12 @@ const SelectFilter = ({ type, initialItem, onSelect }: SelectFilterProps) => {
 
   return (
     <div ref={containerRef} className="relative">
-      <div
+      <button
+        type="button"
+        aria-expanded={isOpen}
+        aria-haspopup="listbox"
         className={cn(
-          "flex h-[32px] cursor-pointer items-center gap-1 rounded-lg px-2 py-1 text-[14px] font-[500]",
+          "flex h-[32px] items-center gap-1 rounded-lg px-2 py-1 text-[14px] font-[500]",
           initialItem ? "bg-blue-100 text-blue-600" : "bg-gray-100 text-gray-800",
         )}
         onClick={() => {
@@ -64,7 +74,7 @@ const SelectFilter = ({ type, initialItem, onSelect }: SelectFilterProps) => {
         <ChevronDown
           className={cn("h-4 w-4 text-gray-600", initialItem ? "text-blue-600" : "text-gray-600")}
         />
-      </div>
+      </button>
 
       {isOpen && (
         <div
