@@ -6,7 +6,7 @@ import {
   PetAdoptionDtoLocation,
   PetAdoptionDtoStatus,
   UpdateAdoptionDto,
-  adoptionControllerGetAdoption,
+  adoptionControllerGetAdoptionByPetId,
 } from "@repo/api-client";
 import { FormItem } from "../page";
 import SelectFilter from "@/app/(브리더스룸)/components/SelectFilter";
@@ -25,19 +25,18 @@ import { toast } from "sonner";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 interface AdoptionInfoProps {
-  adoptionId?: string;
   petId: string;
 }
 
-const AdoptionInfo = ({ petId, adoptionId }: AdoptionInfoProps) => {
+const AdoptionInfo = ({ petId }: AdoptionInfoProps) => {
   const [disabled, setDisabled] = useState(true);
   const { formData, setFormData } = usePetStore();
   const [isEditing, setIsEditing] = useState(false);
 
   const { data: adoption, refetch } = useQuery({
-    queryKey: [adoptionControllerGetAdoption.name, adoptionId],
-    queryFn: () => adoptionControllerGetAdoption(adoptionId ?? ""),
-    enabled: !!adoptionId,
+    queryKey: [adoptionControllerGetAdoptionByPetId.name, petId],
+    queryFn: () => adoptionControllerGetAdoptionByPetId(petId),
+    enabled: !!petId,
     select: (response) => response.data.data,
   });
 

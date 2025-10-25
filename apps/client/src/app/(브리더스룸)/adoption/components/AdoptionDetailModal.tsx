@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 
 import { useQuery } from "@tanstack/react-query";
-import { adoptionControllerGetAdoption, PetAdoptionDtoStatus } from "@repo/api-client";
+import { adoptionControllerGetAdoptionByPetId, PetAdoptionDtoStatus } from "@repo/api-client";
 import { GENDER_KOREAN_INFO, SPECIES_KOREAN_INFO } from "../../constants";
 import { getStatusBadge } from "@/lib/utils";
 import Loading from "@/components/common/Loading";
@@ -17,17 +17,12 @@ import { Badge } from "@/components/ui/badge";
 
 interface AdoptionDetailModalProps {
   isOpen: boolean;
+  petId: string;
   onClose: () => void;
-  adoptionId: string;
   onUpdate: () => void;
 }
 
-const AdoptionDetailModal = ({
-  isOpen,
-  onClose,
-  adoptionId,
-  onUpdate,
-}: AdoptionDetailModalProps) => {
+const AdoptionDetailModal = ({ isOpen, petId, onClose, onUpdate }: AdoptionDetailModalProps) => {
   const [isEditing, setIsEditing] = useState(false);
 
   const {
@@ -35,9 +30,9 @@ const AdoptionDetailModal = ({
     isLoading,
     error,
   } = useQuery({
-    queryKey: [adoptionControllerGetAdoption.name, adoptionId],
-    queryFn: () => adoptionControllerGetAdoption(adoptionId),
-    enabled: !!adoptionId,
+    queryKey: [adoptionControllerGetAdoptionByPetId.name, petId],
+    queryFn: () => adoptionControllerGetAdoptionByPetId(petId),
+    enabled: !!petId,
     select: (data) => data.data.data,
   });
 
@@ -48,7 +43,7 @@ const AdoptionDetailModal = ({
   const petSummary = adoptionData?.pet;
   if (!petSummary) return null;
 
-  const { petId, name, species, hatchingDate, sex, morphs, traits } = petSummary;
+  const { name, species, hatchingDate, sex, morphs, traits } = petSummary;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>

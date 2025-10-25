@@ -64,10 +64,10 @@ export const DataTable = ({
 
   const handleRowClick = ({
     e,
-    adoptionId,
+    petId,
   }: {
     e: React.MouseEvent<HTMLTableRowElement>;
-    adoptionId: string;
+    petId: string;
   }) => {
     // checkbox나 버튼 클릭 시에는 detail 모달을 열지 않음
     if (
@@ -81,7 +81,7 @@ export const DataTable = ({
       <AdoptionDetailModal
         isOpen={isOpen}
         onClose={close}
-        adoptionId={adoptionId}
+        petId={petId}
         onUpdate={() => {
           queryClient.invalidateQueries({
             queryKey: [adoptionControllerGetAllAdoptions.name],
@@ -127,7 +127,7 @@ export const DataTable = ({
                       key={row.id}
                       data-state={row.getIsSelected() && "selected"}
                       className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
-                      onClick={(e) => handleRowClick({ e, adoptionId: row.original.adoptionId })}
+                      onClick={(e) => handleRowClick({ e, petId: row.original.petId })}
                     >
                       {row.getVisibleCells().map((cell) => (
                         <TableCell key={cell.id}>

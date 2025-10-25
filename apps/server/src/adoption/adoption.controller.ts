@@ -73,7 +73,7 @@ export class AdoptionController {
     return this.adoptionService.findAll(pageOptionsDto, token.userId);
   }
 
-  @Get('/:adoptionId')
+  @Get('/:petId')
   @ApiResponse({
     status: 200,
     description: '펫별 분양 정보 조회 성공',
@@ -83,10 +83,10 @@ export class AdoptionController {
     status: 404,
     description: '분양 정보를 찾을 수 없음',
   })
-  async getAdoption(
-    @Param('adoptionId') adoptionId: string,
+  async getAdoptionByPetId(
+    @Param('petId') petId: string,
   ): Promise<AdoptionDetailResponseDto> {
-    const data = await this.adoptionService.findOne({ adoptionId });
+    const data = await this.adoptionService.findOne({ petId });
     return {
       success: true,
       message: '펫별 분양 정보 조회 성공',

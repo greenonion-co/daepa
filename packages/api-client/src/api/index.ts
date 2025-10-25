@@ -284,9 +284,9 @@ export const adoptionControllerGetAllAdoptions = (
   });
 };
 
-export const adoptionControllerGetAdoption = (adoptionId: string) => {
+export const adoptionControllerGetAdoptionByPetId = (petId: string) => {
   return useCustomInstance<AdoptionDetailResponseDto>({
-    url: `/api/v1/adoption/${adoptionId}`,
+    url: `/api/v1/adoption/${petId}`,
     method: "GET",
   });
 };
@@ -485,8 +485,8 @@ export type AdoptionControllerCreateAdoptionResult = NonNullable<
 export type AdoptionControllerGetAllAdoptionsResult = NonNullable<
   Awaited<ReturnType<typeof adoptionControllerGetAllAdoptions>>
 >;
-export type AdoptionControllerGetAdoptionResult = NonNullable<
-  Awaited<ReturnType<typeof adoptionControllerGetAdoption>>
+export type AdoptionControllerGetAdoptionByPetIdResult = NonNullable<
+  Awaited<ReturnType<typeof adoptionControllerGetAdoptionByPetId>>
 >;
 export type AdoptionControllerUpdateResult = NonNullable<
   Awaited<ReturnType<typeof adoptionControllerUpdate>>
@@ -2784,7 +2784,7 @@ export const getAdoptionControllerGetAllAdoptionsResponseMock = (
   ...overrideResponse,
 });
 
-export const getAdoptionControllerGetAdoptionResponseMock = (
+export const getAdoptionControllerGetAdoptionByPetIdResponseMock = (
   overrideResponse: Partial<AdoptionDetailResponseDto> = {},
 ): AdoptionDetailResponseDto => ({
   success: faker.datatype.boolean(),
@@ -3982,14 +3982,14 @@ export const getAdoptionControllerGetAllAdoptionsMockHandler = (
   });
 };
 
-export const getAdoptionControllerGetAdoptionMockHandler = (
+export const getAdoptionControllerGetAdoptionByPetIdMockHandler = (
   overrideResponse?:
     | AdoptionDetailResponseDto
     | ((
         info: Parameters<Parameters<typeof http.get>[1]>[0],
       ) => Promise<AdoptionDetailResponseDto> | AdoptionDetailResponseDto),
 ) => {
-  return http.get("*/api/v1/adoption/:adoptionId", async (info) => {
+  return http.get("*/api/v1/adoption/:petId", async (info) => {
     await delay(1000);
 
     return new HttpResponse(
@@ -3998,7 +3998,7 @@ export const getAdoptionControllerGetAdoptionMockHandler = (
           ? typeof overrideResponse === "function"
             ? await overrideResponse(info)
             : overrideResponse
-          : getAdoptionControllerGetAdoptionResponseMock(),
+          : getAdoptionControllerGetAdoptionByPetIdResponseMock(),
       ),
       { status: 200, headers: { "Content-Type": "application/json" } },
     );
@@ -4307,7 +4307,7 @@ export const getProjectDaepaAPIMock = () => [
   getUserControllerVerifyEmailMockHandler(),
   getAdoptionControllerCreateAdoptionMockHandler(),
   getAdoptionControllerGetAllAdoptionsMockHandler(),
-  getAdoptionControllerGetAdoptionMockHandler(),
+  getAdoptionControllerGetAdoptionByPetIdMockHandler(),
   getAdoptionControllerUpdateMockHandler(),
   getMatingControllerCreateMatingMockHandler(),
   getMatingControllerUpdateMatingMockHandler(),
