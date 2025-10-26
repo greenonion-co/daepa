@@ -64,7 +64,7 @@ const LayingItem = ({
 
     return (date: Date) => {
       // 메이팅 날짜 이전은 비활성화
-      if (matingDate && isBefore(date, matingDate)) {
+      if (matingDate && isBefore(date, toDate(matingDate))) {
         return true;
       }
 
@@ -79,7 +79,7 @@ const LayingItem = ({
       }
 
       // 현재 산란일 자체는 비활성화
-      if (date.getTime() === new Date(currentLayingDate).getTime()) {
+      if (date.getTime() === toDate(currentLayingDate).getTime()) {
         return true;
       }
 

@@ -38,7 +38,7 @@ const DeleteMatingModal = ({ isOpen, onClose, matingId, matingDate }: DeleteMati
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="rounded-4xl sm:max-w-[425px]">
+      <DialogContent className="rounded-3xl sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>메이팅 삭제</DialogTitle>
         </DialogHeader>

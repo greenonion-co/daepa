@@ -45,7 +45,7 @@ const MatingDetailDialog = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="rounded-4xl p-15 flex w-full flex-col sm:max-w-[860px]">
+      <DialogContent className="p-15 flex w-full flex-col rounded-3xl sm:max-w-[860px]">
         <DialogTitle className="flex items-center gap-1 text-[32px]">
           {matingGroup.father?.petId ? (
             <Link

@@ -6,7 +6,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { Settings } from "lucide-react";
+import { MoreVertical } from "lucide-react";
 
 interface DropdownMenuIconProps {
   selectedId: string | number;
@@ -22,7 +22,7 @@ const DropdownMenuIcon = ({ selectedId, menuItems }: DropdownMenuIconProps) => {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="ml-1 h-8 w-8 rounded-lg p-1.5 hover:bg-gray-100">
           <span className="sr-only">Open menu</span>
-          <Settings className="h-4 w-4" />
+          <MoreVertical className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">

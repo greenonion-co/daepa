@@ -141,7 +141,7 @@ const RegisterPage = () => {
     <div className="m-2 flex min-h-screen w-full items-center justify-center bg-[#FAFAFA]">
       <div className="w-full max-w-md">
         {/* 메인 카드 */}
-        <Card className="rounded-4xl border-gray-100 bg-white/80 shadow-xl backdrop-blur-sm dark:bg-gray-800/80">
+        <Card className="rounded-3xl border-gray-100 bg-white/80 shadow-xl backdrop-blur-sm dark:bg-gray-800/80">
           <CardHeader className="pb-6 text-center">
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30">
               <User className="h-8 w-8 text-blue-400 dark:text-blue-400" />

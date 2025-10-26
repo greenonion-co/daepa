@@ -25,7 +25,7 @@ const SignInPage = () => {
     <div className="m-2 flex min-h-screen w-full items-center justify-center dark:bg-black">
       <div className="w-full max-w-md">
         {/* 메인 카드 */}
-        <Card className="rounded-4xl border-gray-100 bg-gray-50 shadow-xl backdrop-blur-sm dark:border dark:border-gray-700 dark:bg-gray-800/80">
+        <Card className="rounded-3xl border-gray-100 bg-gray-50 shadow-xl backdrop-blur-sm dark:border dark:border-gray-700 dark:bg-gray-800/80">
           <div className="pb-10 text-center">
             <CardTitle className="pb-2 text-2xl font-bold text-gray-900 dark:text-white">
               브리더스 룸

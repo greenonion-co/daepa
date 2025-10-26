@@ -100,7 +100,7 @@ const ParentSearchSelector = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="rounded-4xl max-h-[90vh] sm:max-w-[720px]">
+      <DialogContent className="max-h-[90vh] rounded-3xl sm:max-w-[720px]">
         <DialogTitle className="sr-only">부모 개체 선택</DialogTitle>
 
         <div className="flex h-full flex-col">

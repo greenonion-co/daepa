@@ -1,5 +1,5 @@
 "use client";
-import { format, parseISO } from "date-fns";
+import { format, isValid, parseISO } from "date-fns";
 import {
   EGG_STATUS_KOREAN_INFO,
   GENDER_KOREAN_INFO,
@@ -161,7 +161,10 @@ const HatchingPetCard = ({ date, pets, tab, isSelected }: PetCardProps) => {
                             pet.eggDetail?.status ?? PetDtoEggStatus.UNFERTILIZED
                           ]
                         : ""
-                      : format(parseISO(pet.hatchingDate ?? ""), "MM/dd 해칭", { locale: ko })}
+                      : (() => {
+                          const d = parseISO(pet.hatchingDate ?? "");
+                          return isValid(d) ? format(d, "MM/dd 해칭", { locale: ko }) : "";
+                        })()}
                   </div>
                 </div>
               </div>
