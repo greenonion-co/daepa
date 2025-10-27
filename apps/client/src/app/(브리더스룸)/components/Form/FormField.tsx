@@ -159,7 +159,7 @@ export const FormField = ({
 
               handleSelect({
                 type: name,
-                value: value as string,
+                value: value ?? "",
                 handleNext: handleChange,
               });
             }}

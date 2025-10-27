@@ -2,21 +2,17 @@
 
 import Link from "next/link";
 import { useUserStore } from "../store/user";
-import { UserCircle } from "lucide-react";
+import { Settings } from "lucide-react";
 
 const UserButton = () => {
   const { user } = useUserStore();
 
   return (
     <Link
-      className="flex items-center gap-3 bg-sky-50 p-2 pl-2 font-bold text-gray-900 hover:bg-sky-100 hover:font-bold hover:text-blue-900"
+      className="flex h-[32px] items-center rounded-lg bg-blue-600 px-2 text-[14px] font-bold text-gray-100 hover:font-bold dark:bg-black/80 dark:text-white dark:hover:font-bold"
       href={user ? "/settings" : "/sign-in"}
     >
-      <UserCircle className="size-6" />
-      <div className="flex flex-col">
-        {user ? user.name : "로그인"}
-        <span className="text-xs font-normal text-gray-500">{user ? user.email : ""}</span>
-      </div>
+      <div className="flex flex-col">{user ? <Settings className="size-4" /> : "로그인"}</div>
     </Link>
   );
 };

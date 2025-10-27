@@ -1,97 +1,42 @@
 "use client";
 
-import { Lock } from "lucide-react";
-import { Column, ColumnDef } from "@tanstack/react-table";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { BadgeCheck, MoreHorizontal } from "lucide-react";
+import { Lock, LockOpen } from "lucide-react";
+import { ColumnDef } from "@tanstack/react-table";
+import { BadgeCheck } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
-  FOOD_BADGE_COLORS,
-  FOOD_BADGE_TEXT_COLORS,
-  FOOD_LIST,
   GENDER_KOREAN_INFO,
   GROWTH_KOREAN_INFO,
   SALE_STATUS_KOREAN_INFO,
+  SPECIES_KOREAN_ALIAS_INFO,
   SPECIES_KOREAN_INFO,
   STATUS_MAP,
   TABLE_HEADER,
 } from "../../constants";
 import {
-  AdoptionDtoStatus,
   UpdateParentRequestDtoStatus,
   PetDto,
   PetDtoGrowth,
   PetDtoSpecies,
   PetParentDto,
   PetHiddenStatusDtoHiddenStatus,
+  AdoptionDto,
 } from "@repo/api-client";
 import LinkButton from "../../components/LinkButton";
-import { format } from "date-fns";
-import TableHeaderSelect from "../../components/TableHeaderSelect";
-import { useFilterStore } from "../../store/filter";
+import { format, isValid, parseISO } from "date-fns";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-
-const HeaderSelect = <TData,>({
-  column,
-  title,
-  items,
-  renderItem,
-}: {
-  column: Column<TData, unknown>;
-  title: string;
-  items: Array<string | number>;
-  renderItem?: (item: string | number) => string;
-}) => {
-  const { searchFilters, setSearchFilters } = useFilterStore();
-  return (
-    <TableHeaderSelect
-      column={column}
-      title={title}
-      items={items}
-      searchFilters={searchFilters}
-      setSearchFilters={setSearchFilters}
-      renderItem={renderItem}
-    />
-  );
-};
+import TooltipText from "../../components/TooltipText";
 
 export const columns: ColumnDef<PetDto>[] = [
   {
-    accessorKey: "species",
-    header: ({ column }) => {
-      const uniqueSpecies = Object.keys(SPECIES_KOREAN_INFO);
-
-      return (
-        <HeaderSelect
-          column={column}
-          title={TABLE_HEADER.species}
-          items={uniqueSpecies}
-          renderItem={(item) => SPECIES_KOREAN_INFO[item as PetDtoSpecies]}
-        />
-      );
-    },
-    cell: ({ row }) => {
-      const species = row.getValue("species") as PetDtoSpecies;
-      return <div className="capitalize">{SPECIES_KOREAN_INFO[species]}</div>;
-    },
-  },
-  {
     accessorKey: "isPublic",
-    header: ({ column }) => {
+    header: () => {
       return (
-        <HeaderSelect
-          column={column}
-          title={TABLE_HEADER.isPublic || ""}
-          items={[1, 0]}
-          renderItem={(item) => (item === 1 ? "공개" : "비공개")}
+        <TooltipText
+          text="공개"
+          title="공개 여부"
+          description="펫의 공개 여부를 나타냅니다."
+          content="비공개 펫은 다른 브리더에게 공개되지 않습니다."
         />
       );
     },
@@ -99,45 +44,75 @@ export const columns: ColumnDef<PetDto>[] = [
       const isPublic = cell.getValue();
       return (
         <div className="text-center">
-          <Badge variant={isPublic ? "default" : "outline"}>{isPublic ? "공개" : "비공개"}</Badge>
-          <span className="sr-only">{isPublic ? "공개" : "비공개"}</span>
+          {isPublic ? (
+            <LockOpen className="h-4 w-4 text-blue-600" />
+          ) : (
+            <Lock className="h-4 w-4 text-red-600" />
+          )}
         </div>
       );
     },
   },
   {
-    accessorKey: "adoption.status",
-    header: ({ column }) => {
+    accessorKey: "species",
+    header: TABLE_HEADER.species,
+    cell: ({ row }) => {
+      const species = row.getValue("species") as PetDtoSpecies;
       return (
-        <HeaderSelect
-          column={column}
-          title={TABLE_HEADER.adoption_status}
-          items={Object.values(AdoptionDtoStatus)}
-          renderItem={(item) =>
-            SALE_STATUS_KOREAN_INFO[item as keyof typeof SALE_STATUS_KOREAN_INFO] || "미정"
-          }
+        <TooltipText
+          title="종"
+          text={SPECIES_KOREAN_ALIAS_INFO[species]}
+          content={SPECIES_KOREAN_INFO[species]}
         />
       );
     },
+  },
+  {
+    accessorKey: "adoption",
+    header: TABLE_HEADER.adoption_status,
     cell: ({ cell }) => {
-      const status = cell.getValue();
+      const adoptionData = cell.getValue() as AdoptionDto;
+
+      if (!adoptionData?.status) return <span>미정</span>;
+
       return (
-        <div className="capitalize">
-          {SALE_STATUS_KOREAN_INFO[status as keyof typeof SALE_STATUS_KOREAN_INFO] || "미정"}
-        </div>
+        <TooltipText
+          title={
+            SALE_STATUS_KOREAN_INFO[adoptionData?.status as keyof typeof SALE_STATUS_KOREAN_INFO]
+          }
+          text={
+            SALE_STATUS_KOREAN_INFO[adoptionData?.status as keyof typeof SALE_STATUS_KOREAN_INFO] ||
+            "미정"
+          }
+          description={adoptionData?.memo ?? ""}
+          content={
+            <div className="capitalize">
+              <div>
+                가격・{adoptionData?.price ? `${adoptionData?.price?.toLocaleString()}원` : "미정"}
+              </div>
+              <div>
+                분양 날짜・
+                {adoptionData?.adoptionDate
+                  ? (() => {
+                      const raw = adoptionData.adoptionDate as string | Date;
+                      const d = typeof raw === "string" ? parseISO(raw) : raw;
+                      return isValid(d) ? format(d, "yyyy-MM-dd") : "미정";
+                    })()
+                  : "미정"}
+              </div>
+            </div>
+          }
+        />
       );
     },
   },
   {
     accessorKey: "name",
     header: TABLE_HEADER.name,
+
     cell: ({ row }) => {
-      const name = row.original.name;
-      return (
-        <div className="max-w-[150px] truncate font-semibold" title={name}>
-          {name}
-        </div>
-      );
+      const name = row.getValue("name") as string;
+      return <TooltipText title="이름" text={name} />;
     },
   },
   {
@@ -172,18 +147,7 @@ export const columns: ColumnDef<PetDto>[] = [
   },
   {
     accessorKey: "sex",
-    header: ({ column }) => {
-      const uniqueSexes = Object.keys(GENDER_KOREAN_INFO);
-
-      return (
-        <HeaderSelect
-          column={column}
-          title={TABLE_HEADER.sex}
-          items={uniqueSexes}
-          renderItem={(item) => GENDER_KOREAN_INFO[item as keyof typeof GENDER_KOREAN_INFO]}
-        />
-      );
-    },
+    header: TABLE_HEADER.sex,
     cell: ({ row }) => {
       const sex = row.getValue("sex") as string;
       return (
@@ -195,18 +159,7 @@ export const columns: ColumnDef<PetDto>[] = [
   },
   {
     accessorKey: "growth",
-    header: ({ column }) => {
-      const uniqueSizes = Object.keys(GROWTH_KOREAN_INFO);
-
-      return (
-        <HeaderSelect
-          column={column}
-          title={TABLE_HEADER.growth}
-          items={uniqueSizes}
-          renderItem={(item) => GROWTH_KOREAN_INFO[item as keyof typeof GROWTH_KOREAN_INFO]}
-        />
-      );
-    },
+    header: TABLE_HEADER.growth,
     cell: ({ row }) => {
       const growth = row.getValue("growth") as PetDtoGrowth;
       return <div>{GROWTH_KOREAN_INFO[growth]}</div>;
@@ -223,9 +176,13 @@ export const columns: ColumnDef<PetDto>[] = [
     accessorKey: "hatchingDate",
     header: TABLE_HEADER.hatchingDate,
     cell: ({ row }) => {
-      const hatchingDate = row.getValue("hatchingDate") as Date;
+      const hatchingDateRaw = row.getValue("hatchingDate") as Date | string | undefined;
+      const hatchingDate =
+        typeof hatchingDateRaw === "string" ? parseISO(hatchingDateRaw) : hatchingDateRaw;
       return (
-        <div className="capitalize">{hatchingDate ? format(hatchingDate, "yyyy-MM-dd") : "-"}</div>
+        <div className="capitalize">
+          {hatchingDate && isValid(hatchingDate) ? format(hatchingDate, "yyyy-MM-dd") : "-"}
+        </div>
       );
     },
   },
@@ -313,59 +270,7 @@ export const columns: ColumnDef<PetDto>[] = [
     header: TABLE_HEADER.desc,
     cell: ({ row }) => {
       const desc = row.getValue("desc") as string;
-      return (
-        <div className="capitalize">{desc?.length > 10 ? `${desc.slice(0, 10)}...` : desc}</div>
-      );
-    },
-  },
-  {
-    accessorKey: "foods",
-    header: ({ column }) => {
-      const uniqueFoods = FOOD_LIST;
-
-      return <HeaderSelect column={column} title={TABLE_HEADER.foods} items={uniqueFoods} />;
-    },
-    cell: ({ row }) => {
-      const foods = row.getValue("foods") as string[];
-
-      return (
-        <div className="flex flex-wrap gap-1">
-          {foods?.map((food) => (
-            <Badge
-              key={food}
-              className={`font-bold ${FOOD_BADGE_COLORS[food]} ${FOOD_BADGE_TEXT_COLORS[food]}`}
-            >
-              {food}
-            </Badge>
-          ))}
-        </div>
-      );
-    },
-  },
-  {
-    id: "actions",
-    enableHiding: false,
-    cell: ({ row }) => {
-      const pet = row.original;
-
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem onClick={() => navigator.clipboard.writeText(pet.petId.toString())}>
-              복사
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>예시</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
+      return <TooltipText title="설명" description="펫의 설명입니다." text={desc} />;
     },
   },
 ];

@@ -18,7 +18,6 @@ import ParentsSection from "./components/ParentsSection";
 import BreedingInfoSection from "./components/BreedingInfoSection";
 import CardBackActions from "./components/CardBackActions";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useUserStore } from "@/app/(브리더스룸)/store/user";
 import { isNil, orderBy, pick, pickBy } from "es-toolkit";
 import { useNameStore } from "@/app/(브리더스룸)/store/name";
 import { DUPLICATE_CHECK_STATUS } from "@/app/(브리더스룸)/register/types";
@@ -26,15 +25,14 @@ import { DUPLICATE_CHECK_STATUS } from "@/app/(브리더스룸)/register/types";
 interface CardBackProps {
   pet: PetDto;
   from: string | null;
+  isMyPet: boolean;
   isWideScreen: boolean;
 }
 
-const CardBack = memo(({ pet, from, isWideScreen }: CardBackProps) => {
+const CardBack = memo(({ pet, from, isMyPet, isWideScreen }: CardBackProps) => {
   const queryClient = useQueryClient();
   const { formData, setFormData, setPage } = usePetStore();
   const { duplicateCheckStatus } = useNameStore();
-  const { user } = useUserStore();
-  const isMyPet = !!user && user.userId === pet.owner.userId;
   const [isEditing, setIsEditing] = useState(from === "egg");
   const [isTooltipOpen, setIsTooltipOpen] = useState(false);
 

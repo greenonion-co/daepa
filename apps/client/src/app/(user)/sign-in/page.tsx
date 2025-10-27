@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/card";
 import Image from "next/image";
 import AppleLoginButton from "./AppleLoginButton";
 import { providerIconMap } from "../constants";
@@ -22,21 +22,21 @@ const SignInPage = () => {
   }, [router]);
 
   return (
-    <div className="m-2 flex min-h-screen w-full items-center justify-center bg-[#FAFAFA]">
+    <div className="m-2 flex min-h-screen w-full items-center justify-center dark:bg-black">
       <div className="w-full max-w-md">
         {/* 메인 카드 */}
-        <Card className="border-1 border-gray-100 bg-white/80 shadow-xl backdrop-blur-sm dark:bg-gray-800/80">
-          <CardHeader className="pb-10 text-center">
-            <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">
+        <Card className="border-1 border-gray-100 bg-gray-50 shadow-xl backdrop-blur-sm dark:border dark:border-gray-700 dark:bg-gray-800/80">
+          <div className="pb-10 text-center">
+            <CardTitle className="pb-2 text-2xl font-bold text-gray-900 dark:text-white">
               브리더스 룸
             </CardTitle>
-            <CardDescription className="text-gray-900 dark:text-gray-100">
+            <CardDescription className="text-gray-900 dark:text-gray-300">
               반려동물 브리더를 위한 전문 플랫폼입니다.
             </CardDescription>
             <div className="text-sm text-gray-600 dark:text-gray-400">
               서비스를 이용하기 위해 로그인해주세요.
             </div>
-          </CardHeader>
+          </div>
 
           <CardContent>
             <AppleLoginButton />
@@ -50,7 +50,7 @@ const SignInPage = () => {
                 width={36}
                 height={36}
               />
-              <span className="font-semibold">구글로 시작하기</span>
+              <span className="font-semibold dark:text-black">구글로 시작하기</span>
             </a>
 
             <a
@@ -63,7 +63,7 @@ const SignInPage = () => {
                 width={18}
                 height={18}
               />
-              <span className="font-semibold">카카오로 시작하기</span>
+              <span className="font-semibold dark:text-black">카카오로 시작하기</span>
             </a>
           </CardContent>
         </Card>

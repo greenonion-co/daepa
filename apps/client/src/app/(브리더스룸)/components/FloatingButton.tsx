@@ -1,4 +1,3 @@
-import { useSidebar } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 
 const FloatingButton = ({
@@ -10,15 +9,8 @@ const FloatingButton = ({
   onClick: () => void;
   disabled?: boolean;
 }) => {
-  const { state, isMobile } = useSidebar();
-
   return (
-    <div
-      className={cn(
-        "z-11 fixed bottom-0 left-0 right-0 bg-white p-4 shadow-[0_-4px_10px_rgba(0,0,0,0.1)] dark:bg-black",
-        !isMobile && state === "expanded" && "ml-[255px]",
-      )}
-    >
+    <div className="fixed bottom-0 left-0 right-0 z-10 bg-white p-4 shadow-[0_-4px_10px_rgba(0,0,0,0.1)] dark:bg-black">
       <div className="mx-auto max-w-[640px]">
         <button
           type="submit"

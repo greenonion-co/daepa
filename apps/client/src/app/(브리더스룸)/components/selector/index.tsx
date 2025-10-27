@@ -17,7 +17,7 @@ interface SelectorProps {
   onSelectAction: (value: string) => void;
   title?: string;
   currentValue?: string;
-  selectList: string[];
+  selectList: { key: string; value: string }[];
   type?: string;
   onExit: () => void;
 }
@@ -72,7 +72,7 @@ export default function Selector({
   onExit,
 }: SelectorProps) {
   const [selectedIndex, setSelectedIndex] = useState(
-    currentValue ? selectList.indexOf(currentValue) : 0,
+    currentValue ? selectList.findIndex((item) => item.key === currentValue) : 0,
   );
 
   useEffect(() => {
@@ -91,7 +91,7 @@ export default function Selector({
         case "Enter":
           e.preventDefault();
           if (selectList[selectedIndex]) {
-            onSelectAction(selectList[selectedIndex]);
+            onSelectAction(selectList[selectedIndex].key);
           }
           break;
       }
@@ -115,10 +115,10 @@ export default function Selector({
         <div className="flex max-h-[60vh] min-h-[200px] flex-col gap-1 overflow-y-auto">
           {selectList.map((item, index) => (
             <SelectButton
-              key={item}
-              item={item}
+              key={item.key}
+              item={item.value}
               isSelected={selectedIndex === index}
-              onClick={() => onSelectAction(item)}
+              onClick={() => onSelectAction(item.key)}
               type={type}
             />
           ))}

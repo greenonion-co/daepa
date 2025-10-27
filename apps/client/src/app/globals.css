@@ -270,3 +270,30 @@ body {
 .swiper-pagination-bullet-active {
   background: white;
 }
+
+/* Global scrollbar styles */
+* {
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: rgba(156, 163, 175, 0.7) transparent; /* thumb / track */
+}
+
+/* WebKit (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+  width: 4px; /* vertical thickness */
+  height: 4px; /* horizontal thickness */
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgba(156, 163, 175, 0.7); /* gray-400 ~ gray-500 */
+  border-radius: 9999px;
+  border: 2px solid transparent; /* creates padding around thumb */
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(107, 114, 128, 0.9); /* gray-600 on hover */
+}

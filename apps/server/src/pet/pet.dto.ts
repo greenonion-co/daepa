@@ -978,6 +978,32 @@ export class PetFilterDto extends PageOptionsDto {
     required: false,
   })
   @IsOptional()
+  @Transform(({ value }) => {
+    if (Array.isArray(value)) {
+      return value.filter(
+        (v): v is string => typeof v === 'string' && v.trim().length > 0,
+      );
+    }
+    if (typeof value === 'string') {
+      const trimmed = value.trim();
+      if (trimmed.length === 0) return undefined;
+      try {
+        const parsed: unknown = JSON.parse(trimmed);
+        if (Array.isArray(parsed)) {
+          return parsed.filter(
+            (v): v is string => typeof v === 'string' && v.trim().length > 0,
+          );
+        }
+      } catch {
+        // ignore parse error and fallback to comma-split
+      }
+      return trimmed
+        .split(',')
+        .map((v) => v.trim())
+        .filter((v) => v.length > 0);
+    }
+    return undefined;
+  })
   @IsArray()
   morphs?: string[]; // 모프 검색
 
@@ -987,6 +1013,32 @@ export class PetFilterDto extends PageOptionsDto {
     required: false,
   })
   @IsOptional()
+  @Transform(({ value }) => {
+    if (Array.isArray(value)) {
+      return value.filter(
+        (v): v is string => typeof v === 'string' && v.trim().length > 0,
+      );
+    }
+    if (typeof value === 'string') {
+      const trimmed = value.trim();
+      if (trimmed.length === 0) return undefined;
+      try {
+        const parsed: unknown = JSON.parse(trimmed);
+        if (Array.isArray(parsed)) {
+          return parsed.filter(
+            (v): v is string => typeof v === 'string' && v.trim().length > 0,
+          );
+        }
+      } catch {
+        // ignore parse error and fallback to comma-split
+      }
+      return trimmed
+        .split(',')
+        .map((v) => v.trim())
+        .filter((v) => v.length > 0);
+    }
+    return undefined;
+  })
   @IsArray()
   traits?: string[]; // 형질 검색
 
