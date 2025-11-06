@@ -19,10 +19,7 @@ function TabsList({ className, ...props }: React.ComponentProps<typeof TabsPrimi
   return (
     <TabsPrimitive.List
       data-slot="tabs-list"
-      className={cn(
-        "items-center justify-center border-b-[1.2px] px-[3px] text-zinc-600",
-        className,
-      )}
+      className={cn("items-center justify-center border-b px-[3px] text-zinc-600", className)}
       {...props}
     />
   );

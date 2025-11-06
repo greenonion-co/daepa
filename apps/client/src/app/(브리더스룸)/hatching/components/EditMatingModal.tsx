@@ -65,7 +65,7 @@ const EditMatingModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="rounded-4xl sm:max-w-[425px]">
+      <DialogContent className="rounded-3xl sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>메이팅 정보 수정</DialogTitle>
         </DialogHeader>

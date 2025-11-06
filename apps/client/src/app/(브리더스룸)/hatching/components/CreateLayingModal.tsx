@@ -147,7 +147,7 @@ const CreateLayingModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="rounded-4xl sm:max-w-[425px]">
+      <DialogContent className="rounded-3xl sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>산란 정보 추가</DialogTitle>
         </DialogHeader>
@@ -190,7 +190,7 @@ const CreateLayingModal = ({
                   if (!date) return;
                   setFormData((prev) => ({
                     ...prev,
-                    layingDate: format(date, "yyyy-MM-dd"),
+                    layingDate: date,
                   }));
                 }}
                 disabled={isDateDisabled}

@@ -1,6 +1,5 @@
 "use client";
 
-import { Table } from "@tanstack/react-table";
 import { MORPH_LIST_BY_SPECIES } from "../../constants";
 import { FilterStore } from "../../store/filter";
 import SelectFilter from "../../components/SelectFilter";
@@ -9,15 +8,14 @@ import MultiSelectFilter from "../../components/MultiSelectFilter";
 import { PetDtoSpecies } from "@repo/api-client";
 
 type AnyParams = Record<string, string | number | string[] | number[]>;
-interface FiltersProps<TData, TParams extends AnyParams = AnyParams> extends FilterStore<TParams> {
-  table: Table<TData>;
+interface FiltersProps<TParams extends AnyParams = AnyParams> extends FilterStore<TParams> {
   placeholder?: string;
 }
 
-export function Filters<TData, TParams extends AnyParams = AnyParams>({
+export function Filters<TParams extends AnyParams = AnyParams>({
   searchFilters,
   setSearchFilters,
-}: FiltersProps<TData, TParams>) {
+}: FiltersProps<TParams>) {
   const handleResetFilters = () => {
     setSearchFilters({});
   };
@@ -58,17 +56,25 @@ export function Filters<TData, TParams extends AnyParams = AnyParams>({
         type="species"
         initialItem={searchFilters.species}
         onSelect={(item) => {
-          if (!item) {
-            setSearchFilters({ ...searchFilters, morphs: undefined });
-          }
-          setSearchFilters({ ...searchFilters, species: item });
+          if (item === searchFilters.species) return;
+
+          setSearchFilters({
+            ...searchFilters,
+            species: item,
+            morphs: undefined,
+          });
         }}
       />
       {searchFilters.species && (
         <MultiSelectFilter
           type="morphs"
           title="모프"
-          selectList={MORPH_LIST_BY_SPECIES[searchFilters.species as PetDtoSpecies]}
+          selectList={
+            typeof searchFilters.species === "string" &&
+            searchFilters.species in MORPH_LIST_BY_SPECIES
+              ? MORPH_LIST_BY_SPECIES[searchFilters.species as PetDtoSpecies]
+              : []
+          }
         />
       )}
       <SelectFilter

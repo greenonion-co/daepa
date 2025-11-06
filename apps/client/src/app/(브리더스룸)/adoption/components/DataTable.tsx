@@ -95,7 +95,6 @@ export const DataTable = ({
     <div className="relative w-full">
       <div className="w-full">
         <Filters
-          table={table}
           searchFilters={searchFilters}
           setSearchFilters={setSearchFilters}
           columnFilters={columnFilters}

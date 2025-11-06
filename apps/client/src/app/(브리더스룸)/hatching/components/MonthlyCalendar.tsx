@@ -17,7 +17,7 @@ const MonthlyCalendar = memo(() => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const groupRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
-  const [tab, setTab] = useState<"all" | "hatched" | "egg">("all");
+  const [tab, setTab] = useState<"all" | PetDtoType>("all");
 
   // 월별 해칭된 펫 조회
   const { data: monthlyData, isPending: monthlyIsPending } = useQuery({
@@ -47,7 +47,7 @@ const MonthlyCalendar = memo(() => {
 
         acc[date] = {
           hatched,
-          egg, // 해칭된 펫만 조회하므로 0
+          egg,
           total: pets.length,
         };
         return acc;
@@ -108,19 +108,19 @@ const MonthlyCalendar = memo(() => {
               전체
             </button>
             <button
-              onClick={() => setTab("egg")}
+              onClick={() => setTab(PetDtoType.EGG)}
               className={cn(
                 "cursor-pointer rounded-lg px-2 py-1 text-sm font-semibold text-gray-800",
-                tab === "egg" ? "bg-white shadow-sm" : "text-gray-600",
+                tab === PetDtoType.EGG ? "bg-white shadow-sm" : "text-gray-600",
               )}
             >
               알
             </button>
             <button
-              onClick={() => setTab("hatched")}
+              onClick={() => setTab(PetDtoType.PET)}
               className={cn(
                 "cursor-pointer rounded-lg px-2 py-1 text-sm font-semibold text-gray-800",
-                tab === "hatched" ? "bg-white shadow-sm" : "text-gray-600",
+                tab === PetDtoType.PET ? "bg-white shadow-sm" : "text-gray-600",
               )}
             >
               해칭 완료
@@ -139,9 +139,9 @@ const MonthlyCalendar = memo(() => {
                   {group.items
                     .filter(([, pets]) => {
                       if (tab === "all") return pets.length > 0;
-                      if (tab === "hatched")
+                      if (tab === PetDtoType.PET)
                         return pets.filter((pet) => pet.type === PetDtoType.PET).length > 0;
-                      if (tab === "egg")
+                      if (tab === PetDtoType.EGG)
                         return pets.filter((pet) => pet.type === PetDtoType.EGG).length > 0;
                     })
                     .map(([date, pets]) => {
