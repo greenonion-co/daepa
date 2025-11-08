@@ -20,9 +20,9 @@ const DropdownMenuIcon = ({ selectedId, menuItems }: DropdownMenuIconProps) => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="h-4 w-4 p-0">
+        <Button variant="ghost" className="ml-1 h-8 w-8 rounded-lg p-1.5 hover:bg-gray-100">
           <span className="sr-only">Open menu</span>
-          <MoreVertical />
+          <MoreVertical className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">

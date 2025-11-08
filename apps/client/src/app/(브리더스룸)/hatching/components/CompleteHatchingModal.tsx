@@ -5,7 +5,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import CalendarInput from "./CalendarInput";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   brMatingControllerFindAll,
@@ -23,6 +22,7 @@ import NameInput from "../../components/NameInput";
 import { cn } from "@/lib/utils";
 import { useNameStore } from "../../store/name";
 import { DUPLICATE_CHECK_STATUS } from "../../register/types";
+import CalendarSelect from "./CalendarSelect";
 
 interface CompleteHatchingModalProps {
   isOpen: boolean;
@@ -80,7 +80,7 @@ const CompleteHatchingModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="rounded-3xl sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>해칭 완료</DialogTitle>
         </DialogHeader>
@@ -88,13 +88,18 @@ const CompleteHatchingModal = ({
           <div className="grid grid-cols-4 items-center gap-4">
             <Label>해칭일*</Label>
             <div className="col-span-3">
-              <CalendarInput
-                placeholder="해칭일을 선택하세요"
-                value={formData.hatchingDate}
-                onSelect={(date) => {
+              <CalendarSelect
+                type="edit"
+                triggerText={
+                  formData.hatchingDate
+                    ? format(new Date(formData.hatchingDate), "yyyy-MM-dd")
+                    : "해칭일"
+                }
+                onConfirm={(date) => {
                   if (!date) return;
                   setFormData((prev) => ({ ...prev, hatchingDate: format(date, "yyyy-MM-dd") }));
                 }}
+                initialDate={formData.hatchingDate}
                 disabled={(date) => isBefore(date, new Date(layingDate))}
               />
             </div>

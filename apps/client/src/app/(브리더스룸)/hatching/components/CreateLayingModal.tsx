@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -22,7 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { SPECIES_KOREAN_INFO } from "../../constants";
-import CalendarInput from "./CalendarInput";
+import CalendarSelect from "./CalendarSelect";
 
 interface CreateLayingModalProps {
   isOpen: boolean;
@@ -148,7 +147,7 @@ const CreateLayingModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="rounded-3xl sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>산란 정보 추가</DialogTitle>
         </DialogHeader>
@@ -178,17 +177,24 @@ const CreateLayingModal = ({
           <div className="grid grid-cols-4 items-center gap-4">
             <Label>산란일</Label>
             <div className="col-span-3">
-              <CalendarInput
-                placeholder="산란일을 선택하세요"
-                value={formData.layingDate}
-                onSelect={(date) => {
+              <CalendarSelect
+                type="edit"
+                triggerText={
+                  formData.layingDate
+                    ? format(new Date(formData.layingDate), "yyyy년 MM월 dd일")
+                    : "산란일"
+                }
+                confirmButtonText="선택 완료"
+                disabledDates={layingData?.map((laying) => laying.layingDate) ?? []}
+                onConfirm={(date) => {
                   if (!date) return;
                   setFormData((prev) => ({
                     ...prev,
-                    layingDate: format(date, "yyyy-MM-dd"),
+                    layingDate: date,
                   }));
                 }}
                 disabled={isDateDisabled}
+                initialDate={formData.layingDate}
               />
 
               {lastLayingDate && (
@@ -256,10 +262,18 @@ const CreateLayingModal = ({
           </div>
         </div>
         <div className="flex justify-end gap-2">
-          <Button variant="outline" onClick={onClose}>
+          <button
+            className="h-[32px] cursor-pointer rounded-lg bg-gray-100 px-3 text-sm font-semibold text-gray-600 hover:bg-gray-200"
+            onClick={onClose}
+          >
             취소
-          </Button>
-          <Button onClick={handleSubmit}>추가</Button>
+          </button>
+          <button
+            className="h-[32px] cursor-pointer rounded-lg bg-blue-500 px-3 text-sm font-semibold text-white hover:bg-blue-600"
+            onClick={handleSubmit}
+          >
+            추가
+          </button>
         </div>
       </DialogContent>
     </Dialog>

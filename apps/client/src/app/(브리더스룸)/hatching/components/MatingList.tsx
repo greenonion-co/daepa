@@ -2,47 +2,59 @@ import Loading from "@/components/common/Loading";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   brMatingControllerFindAll,
-  MatingByDateDto,
+  MatingByParentsDto,
   matingControllerCreateMating,
   PetDtoSpecies,
   PetSummaryLayingDto,
 } from "@repo/api-client";
 import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { ChevronUp, ChevronDown, ChevronsDown, Cake } from "lucide-react";
-import MatingItem from "./MatingItem";
+import { ChevronsDown, Cake, TriangleAlert } from "lucide-react";
 import { toast } from "sonner";
-import { memo, useCallback, useEffect, useState } from "react";
-import Link from "next/link";
-import CalendarSelect from "./CalendarSelect";
-import { Button } from "@/components/ui/button";
+import { memo, useEffect, useState } from "react";
 import CreateMatingForm from "./CreateMatingForm";
 import { AxiosError } from "axios";
 import { useInView } from "react-intersection-observer";
 import Filters from "./Filters";
 import { useMatingFilterStore } from "../../store/matingFilter";
 import { format } from "date-fns";
-import { compact, isNil, omitBy } from "es-toolkit";
+import { isNil, omitBy } from "es-toolkit";
 import { Card } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
+
+import MatingDetailDialog from "./MatingDetailDialog";
 
 const ParentInfo = ({ parent }: { parent: PetSummaryLayingDto | undefined }) => {
-  if (!parent) return "-";
+  if (!parent)
+    return (
+      <div className="flex flex-1 flex-col items-center justify-center gap-1 text-[12px] text-gray-500">
+        <TriangleAlert className="h-4 w-4" />
+        정보없음
+      </div>
+    );
 
   return (
-    <div className="flex w-full flex-col items-center justify-center">
-      <div>
-        <span>{parent.name}</span>
-        {parent.weight && <span className="text-xs text-gray-500">({parent.weight}g)</span>}
-      </div>
-      {(parent.morphs || parent.traits) && (
-        <div className="flex flex-col items-center justify-center">
-          {parent.morphs && (
-            <span className="text-xs text-gray-500">{parent.morphs.join(" | ")}</span>
-          )}
-          {parent.traits && (
-            <span className="text-xs text-gray-500">{parent.traits.join(" | ")}</span>
+    <div className="flex flex-1 gap-1">
+      <div className="flex flex-1 flex-col">
+        <div className="mb-1 font-[500]">
+          <span>{parent.name}</span>
+          {parent.weight && (
+            <span className="ml-1 text-[12px] text-blue-600">
+              | {Number(parent.weight).toLocaleString()}g
+            </span>
           )}
         </div>
-      )}
+
+        {(parent.morphs || parent.traits) && (
+          <div className="flex flex-col justify-center">
+            {parent.morphs && (
+              <span className="text-xs text-gray-500">{parent.morphs.join(" | ")}</span>
+            )}
+            {parent.traits && (
+              <span className="text-xs text-gray-500">{parent.traits.join(" | ")}</span>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
@@ -52,6 +64,8 @@ const MatingList = memo(() => {
   const queryClient = useQueryClient();
   const { species, father, mother, startDate, endDate, eggStatus } = useMatingFilterStore();
   const [isCreateFormOpen, setIsCreateFormOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [matingGroup, setMatingGroup] = useState<MatingByParentsDto | null>(null);
   const itemPerPage = 10;
 
   const hasFilter =
@@ -107,13 +121,6 @@ const MatingList = memo(() => {
   const { mutateAsync: createMating } = useMutation({
     mutationFn: matingControllerCreateMating,
   });
-
-  // 메이팅 날짜들을 추출하여 Calendar용 날짜 배열 생성
-  const getMatingDates = useCallback((matingDates: MatingByDateDto[]) => {
-    if (!matingDates) return [];
-
-    return compact(matingDates.map((mating) => mating.matingDate));
-  }, []);
 
   const { items, totalCount: totalPairsCount } = data ?? { items: [], totalCount: 0 };
 
@@ -195,81 +202,42 @@ const MatingList = memo(() => {
   return (
     <div className="flex flex-col">
       {/* 헤더 영역 */}
-      <div className="flex items-center justify-between px-2">
-        <h2 className="text-lg font-bold">메이팅 리스트</h2>
-
-        <Button
+      <div className={cn("flex w-fit items-center rounded-lg px-2 py-1 hover:bg-gray-100")}>
+        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-100 text-[14px] font-[500] text-blue-600">
+          +
+        </div>
+        <div
           onClick={() => setIsCreateFormOpen(!isCreateFormOpen)}
-          className="cursor-pointer gap-2 dark:bg-gray-800 dark:text-gray-200"
+          className="flex cursor-pointer items-center gap-1 px-2 py-1 text-[14px] font-[500] text-blue-600"
         >
-          새 메이팅 추가
-          {isCreateFormOpen ? (
-            <ChevronUp className="h-4 w-4" />
-          ) : (
-            <ChevronDown className="h-4 w-4" />
-          )}
-        </Button>
+          메이팅 추가하기
+        </div>
       </div>
       {/* 폴더블 폼 */}
       {isCreateFormOpen && <CreateMatingForm onClose={() => setIsCreateFormOpen(false)} />}
       {/* 필터 */}
       <Filters />
       <div className="m-2 text-sm text-gray-600 dark:text-gray-400">
-        총 {totalPairsCount}쌍의 페어가 존재합니다.
+        검색된 메이팅・ {totalPairsCount}쌍
       </div>
+
       <ScrollArea>
         <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
           {items.map((matingGroup, index) => (
             <div
               key={index}
-              className="flex flex-col gap-4 rounded-lg border-2 border-pink-100 px-2 py-4 shadow-md dark:border-gray-700"
+              onClick={() => {
+                setIsOpen(true);
+                setMatingGroup(matingGroup);
+              }}
+              className="flex cursor-pointer flex-col gap-4 rounded-2xl bg-gray-100 px-4 py-4 shadow-md hover:shadow-xl dark:border-gray-700"
             >
               <div>
                 <div className="flex flex-1 gap-2">
-                  {matingGroup.father && (
-                    <Link
-                      href={`/pet/${matingGroup.father.petId}`}
-                      className="flex flex-1 items-center rounded-md bg-blue-100 p-1 text-blue-800 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-200 dark:hover:bg-blue-800"
-                    >
-                      <ParentInfo parent={matingGroup.father} />
-                    </Link>
-                  )}
-                  {matingGroup.mother && (
-                    <Link
-                      href={`/pet/${matingGroup.mother.petId}`}
-                      className="flex flex-1 items-center justify-center rounded-md bg-pink-100 p-1 text-pink-800 hover:bg-pink-200 dark:bg-pink-900 dark:text-pink-200 dark:hover:bg-pink-800"
-                    >
-                      <ParentInfo parent={matingGroup.mother} />
-                    </Link>
-                  )}
+                  <ParentInfo parent={matingGroup.father} />
+                  x
+                  <ParentInfo parent={matingGroup.mother} />
                 </div>
-              </div>
-
-              <div className="flex flex-col gap-2 px-1">
-                <div className="flex w-full items-center justify-center gap-2 rounded-lg bg-yellow-100 p-2 text-sm font-semibold text-yellow-800 transition-colors hover:bg-yellow-200 dark:bg-yellow-900 dark:text-yellow-500 dark:hover:bg-yellow-800">
-                  <CalendarSelect
-                    triggerText="메이팅 날짜 추가"
-                    confirmButtonText="메이팅 추가"
-                    disabledDates={getMatingDates(matingGroup?.matingsByDate ?? [])}
-                    onConfirm={(matingDate) =>
-                      handleAddMatingClick({
-                        species: matingGroup.father?.species,
-                        fatherId: matingGroup.father?.petId,
-                        motherId: matingGroup.mother?.petId,
-                        matingDate,
-                      })
-                    }
-                  />
-                </div>
-                {matingGroup.matingsByDate.map((mating) => (
-                  <MatingItem
-                    key={mating.id}
-                    mating={mating}
-                    father={matingGroup.father}
-                    mother={matingGroup.mother}
-                    matingDates={getMatingDates(matingGroup?.matingsByDate ?? [])}
-                  />
-                ))}
               </div>
             </div>
           ))}
@@ -288,6 +256,24 @@ const MatingList = memo(() => {
         )}
         <div className="h-10" />
       </ScrollArea>
+
+      <MatingDetailDialog
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+        matingGroup={matingGroup}
+        onConfirmAdd={(matingDate) => {
+          if (!matingGroup?.father || !matingGroup?.mother) {
+            toast.error("부모 개체가 없습니다.");
+            return;
+          }
+          handleAddMatingClick({
+            species: matingGroup.father?.species,
+            fatherId: matingGroup.father?.petId,
+            motherId: matingGroup.mother?.petId,
+            matingDate,
+          }).then(() => setIsOpen(false));
+        }}
+      />
     </div>
   );
 });

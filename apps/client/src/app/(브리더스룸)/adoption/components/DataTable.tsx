@@ -43,8 +43,7 @@ export const DataTable = ({
   loaderRefAction,
 }: DataTableProps<AdoptionDto>) => {
   const queryClient = useQueryClient();
-  const { columnFilters, searchFilters, setSearchFilters, setColumnFilters } =
-    useAdoptionFilterStore();
+  const { searchFilters, setSearchFilters } = useAdoptionFilterStore();
   const { sorting, rowSelection, setSorting, setRowSelection } = useTableStore();
 
   const table = useReactTable({
@@ -57,7 +56,6 @@ export const DataTable = ({
     onRowSelectionChange: setRowSelection,
     state: {
       sorting,
-      columnVisibility: columnFilters,
       rowSelection,
     },
   });
@@ -94,13 +92,7 @@ export const DataTable = ({
   return (
     <div className="relative w-full">
       <div className="w-full">
-        <Filters
-          table={table}
-          searchFilters={searchFilters}
-          setSearchFilters={setSearchFilters}
-          columnFilters={columnFilters}
-          setColumnFilters={setColumnFilters}
-        />
+        <Filters searchFilters={searchFilters} setSearchFilters={setSearchFilters} />
 
         <div className="rounded-md border">
           <Table>

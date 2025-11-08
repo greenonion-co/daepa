@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 
@@ -66,7 +65,7 @@ const EditMatingModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="rounded-3xl sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>메이팅 정보 수정</DialogTitle>
         </DialogHeader>
@@ -102,12 +101,20 @@ const EditMatingModal = ({
           </div>
 
           <div className="flex justify-end space-x-2">
-            <Button type="button" variant="outline" onClick={onClose}>
+            <button
+              type="button"
+              className="h-[32px] cursor-pointer rounded-lg bg-gray-100 px-3 text-sm font-semibold text-gray-600 hover:bg-gray-200"
+              onClick={onClose}
+            >
               취소
-            </Button>
-            <Button type="submit" disabled={isPending}>
+            </button>
+            <button
+              type="submit"
+              className="h-[32px] cursor-pointer rounded-lg bg-blue-500 px-3 text-sm font-semibold text-white hover:bg-blue-600"
+              disabled={isPending}
+            >
               {isPending ? "수정 중..." : "수정"}
-            </Button>
+            </button>
           </div>
         </form>
       </DialogContent>

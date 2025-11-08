@@ -1,49 +1,55 @@
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { CalendarIcon } from "lucide-react";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { toast } from "sonner";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { Pencil } from "lucide-react";
 
 interface CalendarSelectProps {
-  disabledDates: string[];
+  type?: "create" | "edit";
+  disabledDates?: string[];
   triggerText?: string;
   confirmButtonText?: string;
+  initialDate?: string;
   disabled?: (date: Date) => boolean;
   onConfirm: (matingDate: string) => void;
 }
 
 const CalendarSelect = ({
-  disabledDates,
+  type = "create",
+  disabledDates = [],
   onConfirm,
   triggerText,
   confirmButtonText,
+  initialDate,
   disabled,
 }: CalendarSelectProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [matingDate, setMatingDate] = useState<string | undefined>(undefined);
-
-  useEffect(() => {
-    setMatingDate(undefined);
-  }, [isOpen]);
+  const [matingDate, setMatingDate] = useState<string | undefined>(initialDate);
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
-      <PopoverTrigger asChild>
+      <PopoverTrigger asChild onClick={(e) => e.stopPropagation()}>
         <button
           data-field-name="matingDate"
           className={cn(
-            "flex w-full cursor-pointer items-center justify-center gap-2 font-semibold",
+            "flex w-fit items-center justify-center gap-1 rounded-lg px-1 text-[14px] font-[500] text-blue-600 hover:bg-blue-50",
           )}
         >
-          {triggerText} <CalendarIcon className="h-4 w-4 opacity-50" />
+          {type === "create" && (
+            <div className="flex h-3 w-3 items-center justify-center rounded-full bg-blue-100 text-[12px] text-blue-600">
+              +
+            </div>
+          )}
+          <div className="flex cursor-pointer items-center gap-1 text-blue-600">{triggerText}</div>
+          {type === "edit" && <Pencil className="h-3 w-3 text-blue-600" />}
         </button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-0" align="start">
+      <PopoverContent className="w-fit p-0" align="start">
         <Calendar
           mode="single"
-          selected={matingDate ? new Date(matingDate) : undefined}
+          selected={matingDate ? parseISO(matingDate) : undefined}
           onSelect={(date) => {
             if (date) {
               const dateString = format(date, "yyyy-MM-dd");
@@ -62,7 +68,7 @@ const CalendarSelect = ({
           }}
           disabled={disabled}
           modifiers={{
-            hasMating: disabledDates.map((d) => new Date(d)),
+            hasMating: disabledDates.map((d) => parseISO(d)),
           }}
           modifiersStyles={{
             hasMating: {
@@ -83,9 +89,9 @@ const CalendarSelect = ({
             onConfirm(matingDate);
             setIsOpen(false);
           }}
-          className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-b-lg bg-black p-2 text-sm font-semibold text-white transition-colors hover:bg-black/80"
+          className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-b-2xl bg-gray-800 p-2 text-sm font-semibold text-white transition-colors hover:bg-black"
         >
-          {matingDate ? format(new Date(matingDate), "yyyy년 MM월 dd일") : ""} {confirmButtonText}
+          {matingDate ? format(parseISO(matingDate), "yyyy년 MM월 dd일") : ""} {confirmButtonText}
         </button>
       </PopoverContent>
     </Popover>

@@ -46,6 +46,10 @@ const MultiSelectFilter = ({ type, title, selectList }: MultiSelectFilterProps) 
     }
   }, [isOpen]);
 
+  useEffect(() => {
+    setSelectedItem(searchFilters[type]);
+  }, [searchFilters, type]);
+
   return (
     <div ref={containerRef} className="relative">
       <button

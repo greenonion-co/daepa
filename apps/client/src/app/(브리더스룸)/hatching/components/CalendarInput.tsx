@@ -2,7 +2,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { cn } from "@/lib/utils";
 import { format, isValid } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { DayModifiers, ModifiersStyles } from "react-day-picker";
 import { useState } from "react";
 
@@ -31,15 +31,23 @@ const CalendarInput = ({
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
-      <PopoverTrigger asChild>
-        <button
-          className={cn(
-            "flex w-full cursor-pointer items-center gap-1",
-            value && "text-black dark:text-gray-200",
-          )}
-        >
-          {value && isValid(new Date(value)) ? format(new Date(value), formatString) : placeholder}
-          <CalendarIcon className="h-4 w-4 opacity-50" />
+      <PopoverTrigger
+        asChild
+        className={cn(
+          "flex h-[32px] w-fit cursor-pointer items-center gap-1 rounded-lg px-2 py-1 text-[14px] font-[500]",
+          value ? "bg-blue-100 text-blue-600" : "bg-gray-100 text-gray-800",
+        )}
+      >
+        <button type="button">
+          {placeholder}
+          {value && isValid(new Date(value)) && `・${format(new Date(value), formatString)}`}
+          <ChevronDown
+            className={cn(
+              "h-4 w-4 transition-transform",
+              value ? "text-blue-600" : "text-gray-600",
+              isOpen && "rotate-180",
+            )}
+          />
         </button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">

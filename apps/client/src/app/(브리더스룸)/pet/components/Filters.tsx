@@ -1,23 +1,18 @@
 "use client";
 
-import { Table } from "@tanstack/react-table";
 import { MORPH_LIST_BY_SPECIES } from "../../constants";
-import { FilterStore } from "../../store/filter";
 import SelectFilter from "../../components/SelectFilter";
 import { cn } from "@/lib/utils";
 import MultiSelectFilter from "../../components/MultiSelectFilter";
-import { PetDtoSpecies } from "@repo/api-client";
+import { PetControllerFindAllParams, PetDtoSpecies } from "@repo/api-client";
 
-type AnyParams = Record<string, string | number | string[] | number[]>;
-interface FiltersProps<TData, TParams extends AnyParams = AnyParams> extends FilterStore<TParams> {
-  table: Table<TData>;
-  placeholder?: string;
-}
-
-export function Filters<TData, TParams extends AnyParams = AnyParams>({
+export function Filters({
   searchFilters,
   setSearchFilters,
-}: FiltersProps<TData, TParams>) {
+}: {
+  searchFilters: Partial<PetControllerFindAllParams>;
+  setSearchFilters: (filters: Partial<PetControllerFindAllParams>) => void;
+}) {
   const handleResetFilters = () => {
     setSearchFilters({});
   };
@@ -58,6 +53,8 @@ export function Filters<TData, TParams extends AnyParams = AnyParams>({
         type="species"
         initialItem={searchFilters.species}
         onSelect={(item) => {
+          if (item === searchFilters.species) return;
+
           setSearchFilters({
             ...searchFilters,
             species: item,
@@ -69,7 +66,12 @@ export function Filters<TData, TParams extends AnyParams = AnyParams>({
         <MultiSelectFilter
           type="morphs"
           title="모프"
-          selectList={MORPH_LIST_BY_SPECIES[searchFilters.species as PetDtoSpecies]}
+          selectList={
+            typeof searchFilters.species === "string" &&
+            searchFilters.species in MORPH_LIST_BY_SPECIES
+              ? MORPH_LIST_BY_SPECIES[searchFilters.species as PetDtoSpecies]
+              : []
+          }
         />
       )}
       <SelectFilter

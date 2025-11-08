@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { ChevronDown, X } from "lucide-react";
+import { X } from "lucide-react";
 
 interface FilterItemProps {
   value?: string;
@@ -21,8 +21,8 @@ const FilterItem = ({ value, placeholder, onClick, onClose }: FilterItemProps) =
       role="button"
       tabIndex={0}
       className={cn(
-        "flex shrink-0 cursor-pointer items-center gap-2 rounded-full border-2 border-[#1A56B3] pb-1 pl-3 pr-3 pt-1 text-[14px] font-semibold text-[#1A56B3]",
-        hasValue && "bg-[#1A56B3] text-white",
+        "flex h-[32px] cursor-pointer items-center gap-1 rounded-lg px-2 py-1 text-[14px] font-[500]",
+        hasValue ? "bg-blue-100 text-blue-600" : "bg-gray-100 text-gray-800",
       )}
       onClick={onClick}
       onKeyDown={(e) => {
@@ -34,7 +34,7 @@ const FilterItem = ({ value, placeholder, onClick, onClose }: FilterItemProps) =
     >
       {hasValue ? value : placeholder}
       <div>
-        {hasValue ? (
+        {hasValue && (
           <button
             type="button"
             aria-label="선택 해제"
@@ -43,8 +43,6 @@ const FilterItem = ({ value, placeholder, onClick, onClose }: FilterItemProps) =
           >
             <X className="h-4 w-4" />
           </button>
-        ) : (
-          <ChevronDown className="h-4 w-4" />
         )}
       </div>
     </div>

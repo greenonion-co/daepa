@@ -524,6 +524,10 @@ export const SELECTOR_CONFIGS: Record<
         key: "HATCHED",
         value: "해칭완료",
       },
+      {
+        key: "DEAD",
+        value: "중지",
+      },
     ],
   },
 };

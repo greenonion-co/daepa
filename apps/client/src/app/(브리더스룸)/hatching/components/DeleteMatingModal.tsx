@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { brMatingControllerFindAll, matingControllerDeleteMating } from "@repo/api-client";
@@ -39,7 +38,7 @@ const DeleteMatingModal = ({ isOpen, onClose, matingId, matingDate }: DeleteMati
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="rounded-3xl sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>메이팅 삭제</DialogTitle>
         </DialogHeader>
@@ -52,17 +51,21 @@ const DeleteMatingModal = ({ isOpen, onClose, matingId, matingDate }: DeleteMati
             연관된 알이 있는 경우 삭제할 수 없습니다.
           </p>
           <div className="flex justify-end space-x-2">
-            <Button type="button" variant="outline" onClick={onClose}>
-              취소
-            </Button>
-            <Button
+            <button
               type="button"
-              variant="destructive"
+              className="h-[32px] cursor-pointer rounded-lg bg-gray-100 px-3 text-sm font-semibold text-gray-600 hover:bg-gray-200"
+              onClick={onClose}
+            >
+              취소
+            </button>
+            <button
+              type="button"
+              className="h-[32px] cursor-pointer rounded-lg bg-red-500 px-3 text-sm font-semibold text-white hover:bg-red-600"
               onClick={handleDeleteMating}
               disabled={isPending}
             >
               {isPending ? "삭제 중..." : "삭제"}
-            </Button>
+            </button>
           </div>
         </div>
       </DialogContent>

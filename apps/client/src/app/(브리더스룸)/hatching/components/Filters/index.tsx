@@ -1,16 +1,14 @@
-import { useSelect } from "../../../register/hooks/useSelect";
 import { useMatingFilterStore } from "../../../store/matingFilter";
-import { EGG_STATUS_KOREAN_INFO, SPECIES_KOREAN_INFO } from "../../../constants";
-import { EggDetailDtoStatus, PetDtoSex, PetDtoSpecies } from "@repo/api-client";
+import { PetDtoSex } from "@repo/api-client";
 import CalendarInput from "../CalendarInput";
 import { overlay } from "overlay-kit";
 import ParentSearchSelector from "../../../components/selector/parentSearch";
 import FilterItem from "./FilterItem";
 import { format } from "date-fns";
-import { X } from "lucide-react";
+
+import SelectFilter from "@/app/(브리더스룸)/components/SelectFilter";
 
 const Filters = () => {
-  const { handleSelect } = useSelect();
   const {
     species,
     eggStatus,
@@ -49,21 +47,17 @@ const Filters = () => {
     ));
 
   return (
-    <div className="flex w-full items-center gap-2 overflow-x-auto overflow-y-hidden whitespace-nowrap p-2">
-      <FilterItem
-        value={species ? SPECIES_KOREAN_INFO[species] : undefined}
-        placeholder="종"
-        onClose={() => {
-          setSpecies(null);
-          setFather(null);
-          setMother(null);
-        }}
-        onClick={() => {
-          handleSelect({
-            type: "species",
-            value: species ?? "",
-            handleNext: ({ value }) => setSpecies(value as PetDtoSpecies),
-          });
+    <div className="mb-4 mt-2 flex flex-wrap items-center gap-2">
+      <SelectFilter
+        type="species"
+        initialItem={species}
+        onSelect={(item) => {
+          const changed = species !== item;
+          setSpecies(item);
+          if (!item || changed) {
+            setFather(null);
+            setMother(null);
+          }
         }}
       />
       {species && (
@@ -88,55 +82,40 @@ const Filters = () => {
               openParentSearchSelector(PetDtoSex.FEMALE);
             }}
           />
-          <FilterItem
-            value={eggStatus ? EGG_STATUS_KOREAN_INFO[eggStatus] : undefined}
-            placeholder="알 상태"
-            onClick={() => {
-              handleSelect({
-                type: "eggStatus",
-                value: eggStatus ?? "",
-                handleNext: ({ value }) => {
-                  setEggStatus(value as EggDetailDtoStatus);
-                },
-              });
-            }}
-            onClose={() => {
-              setEggStatus(null);
-            }}
+          <SelectFilter
+            type="eggStatus"
+            initialItem={eggStatus}
+            onSelect={(item) => setEggStatus(item)}
           />
         </>
       )}
 
-      <div className="flex shrink-0 cursor-pointer items-center gap-2 rounded-full border-2 border-[#1A56B3] pb-1 pl-3 pr-3 pt-1 text-[14px] font-semibold text-[#1A56B3]">
-        <CalendarInput
-          placeholder="시작일"
-          value={startDate}
-          onSelect={(date) => {
-            if (!date) return;
-            setStartDate(format(date, "yyyy-MM-dd"));
-          }}
-        />
-        {startDate && <X className="h-4 w-4" onClick={() => setStartDate(undefined)} />}
-      </div>
-      <div className="flex shrink-0 cursor-pointer items-center gap-2 rounded-full border-2 border-[#1A56B3] pb-1 pl-3 pr-3 pt-1 text-[14px] font-semibold text-[#1A56B3]">
-        <CalendarInput
-          placeholder="종료일"
-          value={endDate}
-          onSelect={(date) => {
-            if (!date) return;
-            setEndDate(format(date, "yyyy-MM-dd"));
-          }}
-        />
-        {endDate && <X className="h-4 w-4" onClick={() => setEndDate(undefined)} />}
-      </div>
+      <CalendarInput
+        placeholder="시작일"
+        value={startDate}
+        onSelect={(date) => {
+          if (!date) return;
+          setStartDate(format(date, "yyyy-MM-dd"));
+        }}
+      />
+
+      <CalendarInput
+        placeholder="종료일"
+        value={endDate}
+        onSelect={(date) => {
+          if (!date) return;
+          setEndDate(format(date, "yyyy-MM-dd"));
+        }}
+      />
 
       {(eggStatus || species || father || mother || startDate || endDate) && (
-        <div
-          className="flex shrink-0 cursor-pointer items-center gap-2 rounded-full border-2 border-red-500 bg-red-500/10 pb-1 pl-3 pr-3 pt-1 text-[14px] font-semibold text-red-500"
+        <button
+          type="button"
           onClick={reset}
+          className="h-[32px] cursor-pointer rounded-lg px-3 text-sm text-blue-700 underline hover:bg-blue-100"
         >
-          필터 초기화
-        </div>
+          필터 되돌리기
+        </button>
       )}
     </div>
   );

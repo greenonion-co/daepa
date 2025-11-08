@@ -59,7 +59,10 @@ export default function PetPage() {
   if (isLoading) return <Loading />;
 
   const isEmpty =
-    items && items.length === 0 && Object.keys(searchFilters).length === 0 && !searchKeyword;
+    items &&
+    items.length === 0 &&
+    Object.keys(searchFilters).length === 0 &&
+    !searchKeyword?.trim();
 
   return (
     <div className="space-y-4">
