@@ -136,7 +136,13 @@ const BreedingInfo = ({ petId }: { petId: string }) => {
             type="species"
             initialItem={formData.species}
             onSelect={(item) => {
-              setFormData({ ...formData, species: item });
+              // 종 수정 시 모프와 형질 초기화
+              setFormData({
+                ...formData,
+                species: item,
+                morphs: undefined,
+                traits: undefined,
+              });
             }}
           />
         }
