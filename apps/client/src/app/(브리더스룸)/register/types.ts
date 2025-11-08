@@ -21,7 +21,9 @@ export type FieldName =
   | "status"
   | "isPublic"
   | "eggStatus"
-  | "temperature";
+  | "temperature"
+  | "adoption"
+  | "adoption.price";
 
 export type PhotoItem = {
   fileName: string;

@@ -13,8 +13,8 @@ const UserItem = ({ item, isSelected, onSelect }: UserItemProps) => {
   return (
     <div
       className={cn(
-        "flex items-center rounded-lg p-2 pl-4 text-gray-800 hover:cursor-pointer hover:bg-gray-100 hover:font-semibold",
-        isSelected && "bg-gray-800 font-semibold text-white hover:bg-gray-800 hover:font-semibold",
+        "flex h-10 items-center rounded-lg p-2 pl-4 text-[14px] font-[500] text-gray-800 hover:cursor-pointer hover:bg-gray-100",
+        isSelected && "bg-gray-800 text-white hover:bg-gray-800",
       )}
       onClick={() => onSelect(item)}
     >

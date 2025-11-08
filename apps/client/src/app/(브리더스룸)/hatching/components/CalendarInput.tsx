@@ -42,16 +42,14 @@ const CalendarInput = ({
       <PopoverTrigger
         asChild
         className={cn(
-          "flex h-[32px] w-fit cursor-pointer items-center gap-1 rounded-lg px-2 py-1 text-[14px] font-[500]",
+          "flex min-h-[32px] w-fit cursor-pointer items-center gap-1 whitespace-nowrap rounded-lg px-2 py-1 text-[14px] font-[500]",
           value ? "bg-blue-100 text-blue-600" : "bg-gray-100 text-gray-800",
           !editable && "cursor-not-allowed",
         )}
       >
         <div aria-disabled={!editable}>
-          {placeholder}
-          {value &&
-            isValid(new Date(value)) &&
-            `${placeholder ? "・" : ""}${format(new Date(value), formatString)}`}
+          {!value && placeholder}
+          {value && isValid(new Date(value)) && `${format(new Date(value), formatString)}`}
           {editable && (
             <ChevronDown
               className={cn("h-4 w-4 text-gray-600", value ? "text-blue-600" : "text-gray-600")}

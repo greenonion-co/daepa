@@ -7,7 +7,6 @@ import { Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
 import UserItem from "./UserItem";
-import { Button } from "@/components/ui/button";
 
 interface UserListProps {
   selectedUserId?: string;
@@ -18,7 +17,6 @@ const UserList = ({ selectedUserId, onSelect }: UserListProps) => {
   const { ref, inView } = useInView();
   const itemPerPage = 10;
 
-  const [keyword, setKeyword] = useState("");
   const [userSearchQuery, setUserSearchQuery] = useState("");
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
@@ -43,23 +41,19 @@ const UserList = ({ selectedUserId, onSelect }: UserListProps) => {
 
   return (
     <div className="relative">
-      <div className="relative flex items-center gap-2">
-        <Search className="text-muted-foreground absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" />
-        <Input
-          placeholder="사용자 이름으로 검색"
-          value={keyword}
-          onChange={(e) => setKeyword(e.target.value)}
-          className="pl-10 placeholder:text-sm"
-        />
-        <Button
-          onClick={(e) => {
-            e.preventDefault();
-            setUserSearchQuery(keyword);
-          }}
-          className="h-10"
-        >
-          검색
-        </Button>
+      <div className="flex w-full items-center gap-2">
+        <div className="relative w-full">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+          <Input
+            placeholder="사용자 이름으로 검색하세요"
+            className="h-10 rounded-lg border-none bg-gray-100 pl-9 text-[14px]"
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                setUserSearchQuery(e.currentTarget.value);
+              }
+            }}
+          />
+        </div>
       </div>
 
       <ScrollArea className="h-[200px] py-2">

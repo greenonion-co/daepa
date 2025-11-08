@@ -23,6 +23,7 @@ import MultiSelect from "@/app/(브리더스룸)/components/MultiSelect";
 import CalendarInput from "@/app/(브리더스룸)/hatching/components/CalendarInput";
 import { format } from "date-fns";
 import NumberField from "@/app/(브리더스룸)/components/Form/NumberField";
+import FormItem from "./FormItem";
 
 const BreedingInfo = ({ petId }: { petId: string }) => {
   const [isEditMode, setIsEditMode] = useState(false);
@@ -110,6 +111,7 @@ const BreedingInfo = ({ petId }: { petId: string }) => {
           content={
             <CalendarInput
               editable={isEditMode}
+              placeholder="-"
               value={formData.hatchingDate}
               onSelect={(date) => {
                 if (!date) return;
@@ -302,12 +304,3 @@ const BreedingInfo = ({ petId }: { petId: string }) => {
 };
 
 export default BreedingInfo;
-
-const FormItem = ({ label, content }: { label: string; content: React.ReactNode }) => {
-  return (
-    <div className="flex gap-3 text-[14px]">
-      <div className="flex min-w-[60px] pt-[6px]">{label}</div>
-      <div className="flex flex-1">{content}</div>
-    </div>
-  );
-};

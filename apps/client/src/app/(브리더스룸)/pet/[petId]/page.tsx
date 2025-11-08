@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import BreedingInfo from "./components/사육정보";
 import Header from "./components/Header";
+import AdoptionInfo from "./components/분양정보";
 
 interface PetDetailPageProps {
   params: Promise<{
@@ -28,15 +29,15 @@ function PetDetailPage({ params }: PetDetailPageProps) {
     <div className="flex h-full flex-1 flex-col">
       <Header pet={pet} />
 
-      <div className="flex">
+      <div className="flex gap-3">
         {/* 사육정보 (개체 이름, 종, 성별, 크기, 모프, 형질, 먹이) */}
         <BreedingInfo petId={petId} />
+        {/* 분양 정보 */}
+        <AdoptionInfo adoptionId={pet.adoption?.adoptionId} petId={petId} />
 
         {/* 사진 */}
 
         {/* 혈통 정보 */}
-
-        {/* 분양 정보 */}
       </div>
     </div>
   );

@@ -9,6 +9,7 @@ interface NumberFieldProps {
   setValue: (value: { type: FieldName; value: string }) => void;
   disabled?: boolean;
   placeholder?: string;
+  stepAmount?: number;
 }
 
 const NumberField = ({
@@ -18,6 +19,7 @@ const NumberField = ({
   setValue,
   disabled = false,
   placeholder,
+  stepAmount = 1,
 }: NumberFieldProps) => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = e.target.value;
@@ -55,7 +57,7 @@ const NumberField = ({
           min="0"
           placeholder={placeholder}
         />
-        <p className="absolute bottom-2 right-2 text-[14px] text-gray-500">{field?.unit}</p>
+        <p className="absolute bottom-1.5 right-2 text-[14px] text-gray-500">{field?.unit}</p>
       </div>
 
       {!disabled && (
@@ -63,7 +65,8 @@ const NumberField = ({
           <div
             className="cursor-pointer rounded-md p-1 hover:bg-gray-200"
             onClick={() => {
-              setValue({ type: field.name, value: String(Number(value) - 1) });
+              if (Number(value) - stepAmount < 0) return;
+              setValue({ type: field.name, value: String(Number(value) - stepAmount) });
             }}
           >
             <Minus className="h-4 w-4" />
@@ -72,7 +75,7 @@ const NumberField = ({
           <div
             className="cursor-pointer rounded-md p-1 hover:bg-gray-200"
             onClick={() => {
-              setValue({ type: field.name, value: String(Number(value) + 1) });
+              setValue({ type: field.name, value: String(Number(value) + stepAmount) });
             }}
           >
             <Plus className="h-4 w-4" />

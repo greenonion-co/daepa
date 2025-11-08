@@ -6,7 +6,7 @@ import { SELECTOR_CONFIGS } from "../constants";
 import { Check, ChevronDown } from "lucide-react";
 
 interface SelectFilterProps {
-  type: "species" | "growth" | "sex" | "foods" | "eggStatus";
+  type: keyof typeof SELECTOR_CONFIGS;
   initialItem?: any;
   onSelect: (item: any) => void;
   disabled?: boolean;

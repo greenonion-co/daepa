@@ -371,7 +371,7 @@ export const EGG_STATUS_KOREAN_INFO: Record<EggDetailDtoStatus, string> = {
 };
 
 export const SELECTOR_CONFIGS: Record<
-  "species" | "growth" | "sex" | "foods" | "eggStatus" | "traits",
+  "species" | "growth" | "sex" | "foods" | "eggStatus" | "traits" | "adoptionStatus",
   { title: string; selectList: { key: string; value: string }[] }
 > = {
   species: {
@@ -527,6 +527,27 @@ export const SELECTOR_CONFIGS: Record<
       {
         key: "DEAD",
         value: "중지",
+      },
+    ],
+  },
+  adoptionStatus: {
+    title: "분양 상태",
+    selectList: [
+      {
+        key: "NFS",
+        value: "판매 안함",
+      },
+      {
+        key: "ON_SALE",
+        value: "판매 중",
+      },
+      {
+        key: "ON_RESERVATION",
+        value: "예약 중",
+      },
+      {
+        key: "SOLD",
+        value: "판매 완료",
       },
     ],
   },
