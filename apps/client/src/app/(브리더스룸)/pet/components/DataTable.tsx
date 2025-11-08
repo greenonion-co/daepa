@@ -51,7 +51,7 @@ export const DataTable = ({
   refetch,
 }: DataTableProps<PetDto>) => {
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const { columnFilters, searchFilters, setSearchFilters, setColumnFilters } = useFilterStore();
+  const { searchFilters, setSearchFilters } = useFilterStore();
   const { sorting, rowSelection, setSorting, setRowSelection } = useTableStore();
 
   const router = useRouter();
@@ -68,7 +68,6 @@ export const DataTable = ({
     state: {
       sorting,
       rowSelection,
-      columnVisibility: columnFilters,
     },
   });
 
@@ -95,14 +94,7 @@ export const DataTable = ({
   return (
     <div className="relative w-full">
       <div className="w-full">
-        {hasFilter && (
-          <Filters
-            columnFilters={columnFilters}
-            setColumnFilters={setColumnFilters}
-            searchFilters={searchFilters}
-            setSearchFilters={setSearchFilters}
-          />
-        )}
+        {hasFilter && <Filters searchFilters={searchFilters} setSearchFilters={setSearchFilters} />}
 
         <button
           type="button"

@@ -1,21 +1,18 @@
 "use client";
 
 import { MORPH_LIST_BY_SPECIES } from "../../constants";
-import { FilterStore } from "../../store/filter";
 import SelectFilter from "../../components/SelectFilter";
 import { cn } from "@/lib/utils";
 import MultiSelectFilter from "../../components/MultiSelectFilter";
-import { PetDtoSpecies } from "@repo/api-client";
+import { PetControllerFindAllParams, PetDtoSpecies } from "@repo/api-client";
 
-type AnyParams = Record<string, string | number | string[] | number[]>;
-interface FiltersProps<TParams extends AnyParams = AnyParams> extends FilterStore<TParams> {
-  placeholder?: string;
-}
-
-export function Filters<TParams extends AnyParams = AnyParams>({
+export function Filters({
   searchFilters,
   setSearchFilters,
-}: FiltersProps<TParams>) {
+}: {
+  searchFilters: Partial<PetControllerFindAllParams>;
+  setSearchFilters: (filters: Partial<PetControllerFindAllParams>) => void;
+}) {
   const handleResetFilters = () => {
     setSearchFilters({});
   };

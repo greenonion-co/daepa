@@ -7,16 +7,14 @@ import { Check, ChevronDown } from "lucide-react";
 
 interface SelectFilterProps {
   type: keyof typeof SELECTOR_CONFIGS;
-  initialItem?: string | number | string[] | number[] | undefined;
-  onSelect: (item: string | number | string[] | number[] | undefined) => void;
+  initialItem?: any;
+  onSelect: (item: any) => void;
   disabled?: boolean;
 }
 
 const SelectFilter = ({ type, initialItem, onSelect, disabled = false }: SelectFilterProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedItem, setSelectedItem] = useState<
-    string | number | string[] | number[] | undefined
-  >(initialItem);
+  const [selectedItem, setSelectedItem] = useState<any>(initialItem);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isEntering, setIsEntering] = useState(false);
 
