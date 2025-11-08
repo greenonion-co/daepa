@@ -190,6 +190,7 @@ const AdoptionInfo = ({ petId, adoptionId }: AdoptionInfoProps) => {
             label="날짜"
             content={
               <CalendarInput
+                placeholder="-"
                 editable={isEditMode}
                 value={adoptionData.adoptionDate ?? ""}
                 onSelect={(date) => {

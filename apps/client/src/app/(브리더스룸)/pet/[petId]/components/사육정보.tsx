@@ -111,6 +111,7 @@ const BreedingInfo = ({ petId }: { petId: string }) => {
           content={
             <CalendarInput
               editable={isEditMode}
+              placeholder="-"
               value={formData.hatchingDate}
               onSelect={(date) => {
                 if (!date) return;
