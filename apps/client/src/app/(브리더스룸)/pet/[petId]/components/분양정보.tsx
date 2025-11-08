@@ -9,7 +9,7 @@ import {
   petControllerFindPetByPetId,
   adoptionControllerGetAdoption,
 } from "@repo/api-client";
-import { FormItem } from "../page";
+import FormItem from "./FormItem";
 import SelectFilter from "@/app/(브리더스룸)/components/SelectFilter";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { usePetStore } from "@/app/(브리더스룸)/register/store/pet";

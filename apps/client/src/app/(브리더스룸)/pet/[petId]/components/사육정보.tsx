@@ -23,7 +23,7 @@ import MultiSelect from "@/app/(브리더스룸)/components/MultiSelect";
 import CalendarInput from "@/app/(브리더스룸)/hatching/components/CalendarInput";
 import { format } from "date-fns";
 import NumberField from "@/app/(브리더스룸)/components/Form/NumberField";
-import { FormItem } from "../page";
+import FormItem from "./FormItem";
 
 const BreedingInfo = ({ petId }: { petId: string }) => {
   const [isEditMode, setIsEditMode] = useState(false);
