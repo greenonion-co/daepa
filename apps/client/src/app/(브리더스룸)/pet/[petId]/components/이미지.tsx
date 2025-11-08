@@ -31,6 +31,7 @@ const Images = ({ pet }: { pet: PetDto }) => {
       const pickedData = pick(formData, ["photos"]);
       const updateData = pickBy(pickedData, (value) => !isNil(value));
       await mutateUpdatePet(updateData);
+      // TODO: 이미지 전용 api로 교체
       await queryClient.invalidateQueries({
         queryKey: [petControllerFindPetByPetId.name, pet.petId],
       });
