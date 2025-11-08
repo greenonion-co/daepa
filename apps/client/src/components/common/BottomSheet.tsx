@@ -23,10 +23,11 @@ export default function BottomSheet({
 }: BottomSheetProps) {
   const sheetRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    if (isOpen) sheetRef.current?.focus();
+    const sheetElement = sheetRef.current;
+    if (isOpen) sheetElement?.focus();
 
     return () => {
-      sheetRef.current?.blur();
+      sheetElement?.blur();
     };
   }, [isOpen]);
 
