@@ -9,7 +9,7 @@ import {
   UpdatePetDto,
   PetDtoType,
 } from "@repo/api-client";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { MORPH_LIST_BY_SPECIES } from "@/app/(브리더스룸)/constants";
 import { SELECTOR_CONFIGS } from "@/app/(브리더스룸)/constants";
 import { Button } from "@/components/ui/button";
@@ -18,7 +18,6 @@ import { toast } from "sonner";
 import { pick, pickBy } from "es-toolkit";
 import { isNil } from "es-toolkit";
 import { useNameStore } from "@/app/(브리더스룸)/store/name";
-import Loading from "@/components/common/Loading";
 import { DUPLICATE_CHECK_STATUS } from "@/app/(브리더스룸)/register/types";
 import MultiSelect from "@/app/(브리더스룸)/components/MultiSelect";
 import CalendarInput from "@/app/(브리더스룸)/hatching/components/CalendarInput";
@@ -26,13 +25,11 @@ import { format } from "date-fns";
 import NumberField from "@/app/(브리더스룸)/components/Form/NumberField";
 
 const BreedingInfo = ({ petId }: { petId: string }) => {
-  const queryClient = useQueryClient();
-  const [disabled, setDisabled] = useState(true);
+  const [isEditMode, setIsEditMode] = useState(false);
   const { formData, errors, setFormData } = usePetStore();
   const { duplicateCheckStatus } = useNameStore();
-  const [isEditing, setIsEditing] = useState(false);
 
-  const { data: pet } = useQuery({
+  const { data: pet, refetch } = useQuery({
     queryKey: [petControllerFindPetByPetId.name, petId],
     queryFn: () => petControllerFindPetByPetId(petId),
     select: (response) => response.data.data,
@@ -77,20 +74,14 @@ const BreedingInfo = ({ petId }: { petId: string }) => {
       ]);
       const updateData = pickBy(pickedData, (value) => !isNil(value));
       await mutateUpdatePet(updateData);
-      setIsEditing(false);
-
+      await refetch();
       toast.success("펫 정보 수정이 완료되었습니다.");
+      setIsEditMode(false);
     } catch (error) {
       console.error("Failed to update pet:", error);
       toast.error("펫 정보 수정에 실패했습니다.");
-    } finally {
-      queryClient.invalidateQueries({
-        queryKey: [petControllerFindPetByPetId.name, pet.petId],
-      });
-
-      setIsEditing(false);
     }
-  }, [formData, queryClient, mutateUpdatePet, pet, duplicateCheckStatus]);
+  }, [formData, mutateUpdatePet, pet, duplicateCheckStatus, refetch]);
 
   if (!pet) return null;
 
@@ -103,7 +94,7 @@ const BreedingInfo = ({ petId }: { petId: string }) => {
         content={
           <NameDuplicateCheckInput
             errorMessage={errors.name || ""}
-            disabled={disabled}
+            disabled={!isEditMode}
             value={String(formData.name || "")}
             placeholder="미정"
             onChange={(e) => {
@@ -118,7 +109,7 @@ const BreedingInfo = ({ petId }: { petId: string }) => {
           label="생년월일"
           content={
             <CalendarInput
-              editable={!disabled}
+              editable={isEditMode}
               value={formData.hatchingDate}
               onSelect={(date) => {
                 if (!date) return;
@@ -132,7 +123,7 @@ const BreedingInfo = ({ petId }: { petId: string }) => {
         label="종"
         content={
           <SelectFilter
-            disabled={disabled}
+            disabled={!isEditMode}
             type="species"
             initialItem={formData.species}
             onSelect={(item) => {
@@ -154,7 +145,7 @@ const BreedingInfo = ({ petId }: { petId: string }) => {
             label="성별"
             content={
               <SelectFilter
-                disabled={disabled}
+                disabled={!isEditMode}
                 type="sex"
                 initialItem={formData.sex}
                 onSelect={(item) => {
@@ -167,7 +158,7 @@ const BreedingInfo = ({ petId }: { petId: string }) => {
             label="크기"
             content={
               <SelectFilter
-                disabled={disabled}
+                disabled={!isEditMode}
                 type="growth"
                 initialItem={formData.growth}
                 onSelect={(item) => {
@@ -181,7 +172,7 @@ const BreedingInfo = ({ petId }: { petId: string }) => {
             label="몸무게"
             content={
               <NumberField
-                disabled={disabled}
+                disabled={!isEditMode}
                 field={{ name: "weight", type: "number", unit: "g" }}
                 value={String(formData.weight ?? "")}
                 setValue={(value) => {
@@ -190,7 +181,7 @@ const BreedingInfo = ({ petId }: { petId: string }) => {
                 placeholder="몸무게"
                 inputClassName={cn(
                   "h-[32px] w-full rounded-md border border-gray-200 p-2 placeholder:font-[500]",
-                  disabled && "border-none",
+                  !isEditMode && "border-none",
                 )}
               />
             }
@@ -199,7 +190,7 @@ const BreedingInfo = ({ petId }: { petId: string }) => {
             label="모프"
             content={
               <MultiSelect
-                disabled={disabled}
+                disabled={!isEditMode}
                 title="모프"
                 selectList={MORPH_LIST_BY_SPECIES[formData.species as PetDtoSpecies]}
                 initialItems={formData.morphs}
@@ -214,7 +205,7 @@ const BreedingInfo = ({ petId }: { petId: string }) => {
             label="형질"
             content={
               <MultiSelect
-                disabled={disabled}
+                disabled={!isEditMode}
                 title="형질"
                 selectList={SELECTOR_CONFIGS.traits.selectList.map((item) => item.value)}
                 initialItems={formData.traits}
@@ -229,7 +220,7 @@ const BreedingInfo = ({ petId }: { petId: string }) => {
             label="먹이"
             content={
               <MultiSelect
-                disabled={disabled}
+                disabled={!isEditMode}
                 title="먹이"
                 selectList={SELECTOR_CONFIGS.foods.selectList.map((item) => item.value)}
                 initialItems={formData.foods}
@@ -248,7 +239,7 @@ const BreedingInfo = ({ petId }: { petId: string }) => {
             label="알 상태"
             content={
               <SelectFilter
-                disabled={disabled}
+                disabled={!isEditMode}
                 type="eggStatus"
                 initialItem={formData.eggStatus}
                 onSelect={(item) => {
@@ -262,7 +253,7 @@ const BreedingInfo = ({ petId }: { petId: string }) => {
             label="해칭 온도"
             content={
               <NumberField
-                disabled={disabled}
+                disabled={!isEditMode}
                 field={{ name: "temperature", type: "number", unit: "°C" }}
                 value={String(formData.temperature ?? "")}
                 setValue={(value) => {
@@ -270,7 +261,7 @@ const BreedingInfo = ({ petId }: { petId: string }) => {
                 }}
                 inputClassName={cn(
                   "h-[32px] w-full rounded-md border border-gray-200 p-2 placeholder:font-[500]",
-                  disabled && "border-none",
+                  !isEditMode && "border-none",
                 )}
               />
             }
@@ -279,33 +270,31 @@ const BreedingInfo = ({ petId }: { petId: string }) => {
       )}
 
       <div className="mt-2 flex w-full flex-1 gap-2">
-        {!disabled && (
+        {isEditMode && (
           <Button
             className="h-10 flex-1 cursor-pointer rounded-lg font-bold"
             onClick={() => {
               setFormData(pet);
-              setDisabled(true);
+              setIsEditMode(false);
             }}
           >
             취소
           </Button>
         )}
         <Button
-          disabled={isEditing}
           className={cn(
             "flex-2 h-10 cursor-pointer rounded-lg font-bold",
-            !disabled && "bg-red-600 hover:bg-red-600/90",
-            isEditing && "bg-gray-300",
+            isEditMode && "bg-red-600 hover:bg-red-600/90",
           )}
           onClick={() => {
-            setDisabled((prev) => !prev);
-
-            if (!disabled) {
+            if (!isEditMode) {
+              setIsEditMode(true);
+            } else {
               handleSave();
             }
           }}
         >
-          {isEditing ? <Loading /> : disabled ? "수정하기" : "수정된 사항 저장하기"}
+          {!isEditMode ? "수정하기" : "수정된 사항 저장하기"}
         </Button>
       </div>
     </div>
