@@ -1,11 +1,9 @@
 import { create } from "zustand";
-import { ColumnFiltersState, SortingState, VisibilityState } from "@tanstack/react-table";
+import { SortingState } from "@tanstack/react-table";
 
 interface TableState<TData> {
   // 테이블 상태
   sorting: SortingState;
-  columnFilters: ColumnFiltersState;
-  columnVisibility: VisibilityState;
   rowSelection: Record<string, boolean>;
 
   // 데이터
@@ -13,12 +11,6 @@ interface TableState<TData> {
 
   // 액션
   setSorting: (updater: SortingState | ((prev: SortingState) => SortingState)) => void;
-  setColumnFilters: (
-    updater: ColumnFiltersState | ((prev: ColumnFiltersState) => ColumnFiltersState),
-  ) => void;
-  setColumnVisibility: (
-    updater: VisibilityState | ((prev: VisibilityState) => VisibilityState),
-  ) => void;
   setRowSelection: (
     updater: Record<string, boolean> | ((prev: Record<string, boolean>) => Record<string, boolean>),
   ) => void;
@@ -29,8 +21,6 @@ const createTableStore = <TData>() =>
   create<TableState<TData>>((set) => ({
     // 초기 상태
     sorting: [],
-    columnFilters: [],
-    columnVisibility: {},
     rowSelection: {},
     data: [],
 
@@ -38,14 +28,6 @@ const createTableStore = <TData>() =>
     setSorting: (updater) =>
       set((state) => ({
         sorting: typeof updater === "function" ? updater(state.sorting) : updater,
-      })),
-    setColumnFilters: (updater) =>
-      set((state) => ({
-        columnFilters: typeof updater === "function" ? updater(state.columnFilters) : updater,
-      })),
-    setColumnVisibility: (updater) =>
-      set((state) => ({
-        columnVisibility: typeof updater === "function" ? updater(state.columnVisibility) : updater,
       })),
     setRowSelection: (updater) =>
       set((state) => ({

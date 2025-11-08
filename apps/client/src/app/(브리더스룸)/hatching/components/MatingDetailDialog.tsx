@@ -45,21 +45,29 @@ const MatingDetailDialog = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="rounded-4xl p-15 border-1 flex w-full flex-col sm:max-w-[860px]">
-        <DialogTitle className="text-[32px]">
-          <Link
-            href={`/pet/${matingGroup.father?.petId}`}
-            className="text-blue-600 hover:underline"
-          >
-            {matingGroup.father?.name}
-          </Link>
+      <DialogContent className="p-15 flex w-full flex-col rounded-3xl sm:max-w-[860px]">
+        <DialogTitle className="flex items-center gap-1 text-[32px]">
+          {matingGroup.father?.petId ? (
+            <Link
+              href={`/pet/${matingGroup.father?.petId}`}
+              className="text-blue-600 hover:underline"
+            >
+              {matingGroup.father?.name}
+            </Link>
+          ) : (
+            <span className="text-[14px] font-[500] text-gray-500">정보없음</span>
+          )}
           x
-          <Link
-            href={`/pet/${matingGroup.mother?.petId}`}
-            className="text-blue-600 hover:underline"
-          >
-            {matingGroup.mother?.name}
-          </Link>
+          {matingGroup.mother?.petId ? (
+            <Link
+              href={`/pet/${matingGroup.mother?.petId}`}
+              className="text-blue-600 hover:underline"
+            >
+              {matingGroup.mother?.name}
+            </Link>
+          ) : (
+            <span className="text-[14px] font-[500] text-gray-500">정보없음</span>
+          )}
         </DialogTitle>
 
         <div className="flex flex-col gap-2 px-1">

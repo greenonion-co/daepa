@@ -4,11 +4,15 @@ import { useEffect, useRef, useState } from "react";
 import { useFilterStore } from "../store/filter";
 import { cn } from "@/lib/utils";
 import { Check, ChevronDown, X } from "lucide-react";
+import { PetControllerFindAllParams } from "@repo/api-client";
 
 interface MultiSelectFilterProps {
   type: "morphs" | "traits" | "foods";
   title: string;
-  selectList: string[];
+  selectList:
+    | PetControllerFindAllParams["morphs"]
+    | PetControllerFindAllParams["traits"]
+    | PetControllerFindAllParams["foods"];
   disabled?: boolean;
 }
 
@@ -20,9 +24,7 @@ const MultiSelectFilter = ({
 }: MultiSelectFilterProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const { searchFilters, setSearchFilters } = useFilterStore();
-  const [selectedItem, setSelectedItem] = useState<string[] | undefined>(
-    searchFilters[type] as string[],
-  );
+  const [selectedItem, setSelectedItem] = useState<string[] | undefined>(searchFilters[type]);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isEntering, setIsEntering] = useState(false);
 
@@ -54,15 +56,22 @@ const MultiSelectFilter = ({
     }
   }, [isOpen]);
 
+  useEffect(() => {
+    setSelectedItem(searchFilters[type]);
+  }, [searchFilters, type]);
+
   return (
     <div ref={containerRef} className="relative">
-      <div
+      <button
+        type="button"
         className={cn(
           "flex h-[32px] cursor-pointer items-center gap-1 rounded-lg px-2 py-1 text-[14px] font-[500]",
           searchFilters[type] && searchFilters[type].length > 0
             ? "bg-blue-100 text-blue-600"
             : "bg-gray-100 text-gray-800",
         )}
+        aria-expanded={isOpen}
+        aria-haspopup="listbox"
         onClick={() => {
           if (disabled) return;
           setIsOpen(!isOpen);
@@ -90,7 +99,7 @@ const MultiSelectFilter = ({
             />
           </>
         )}
-      </div>
+      </button>
 
       {isOpen && (
         <div
@@ -112,6 +121,7 @@ const MultiSelectFilter = ({
                 >
                   {item}
                   <button
+                    type="button"
                     className="cursor-pointer"
                     onClick={() => {
                       setSelectedItem((prev) => {
@@ -126,7 +136,7 @@ const MultiSelectFilter = ({
             })}
           </div>
           <div className="mb-4 max-h-[240px] overflow-y-auto">
-            {selectList.map((item) => {
+            {selectList?.map((item) => {
               return (
                 <div
                   key={item}
@@ -153,6 +163,7 @@ const MultiSelectFilter = ({
 
           <div className="flex justify-end gap-2">
             <button
+              type="button"
               onClick={() => {
                 setSelectedItem(undefined);
               }}
@@ -161,6 +172,7 @@ const MultiSelectFilter = ({
               초기화
             </button>
             <button
+              type="button"
               onClick={() => {
                 setSearchFilters({
                   ...searchFilters,

@@ -48,10 +48,8 @@ const CalendarInput = ({
         )}
       >
         <div aria-disabled={!editable}>
-          {placeholder}
-          {value &&
-            isValid(new Date(value)) &&
-            `${placeholder ? "・" : ""}${format(new Date(value), formatString)}`}
+          {!value && placeholder}
+          {value && isValid(new Date(value)) && `${format(new Date(value), formatString)}`}
           {editable && (
             <ChevronDown
               className={cn("h-4 w-4 text-gray-600", value ? "text-blue-600" : "text-gray-600")}

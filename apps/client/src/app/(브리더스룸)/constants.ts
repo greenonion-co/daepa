@@ -370,8 +370,6 @@ export const EGG_STATUS_KOREAN_INFO: Record<EggDetailDtoStatus, string> = {
   DEAD: "중지",
 };
 
-export const FOOD_LIST = ["판게아 인섹트", "귀뚜라미", "냉동귀뚜라미", "누에", "지렙 인섹트"];
-
 export const SELECTOR_CONFIGS: Record<
   "species" | "growth" | "sex" | "foods" | "eggStatus" | "traits" | "adoptionStatus",
   { title: string; selectList: { key: string; value: string }[] }
@@ -461,6 +459,10 @@ export const SELECTOR_CONFIGS: Record<
         value: "귀뚜라미",
       },
       {
+        key: "냉동귀뚜라미",
+        value: "냉동귀뚜라미",
+      },
+      {
         key: "누에",
         value: "누에",
       },
@@ -522,6 +524,10 @@ export const SELECTOR_CONFIGS: Record<
         key: "HATCHED",
         value: "해칭완료",
       },
+      {
+        key: "DEAD",
+        value: "중지",
+      },
     ],
   },
   adoptionStatus: {
@@ -579,20 +585,6 @@ export const SIDEBAR_ITEMS = [
   //   icon: Film,
   // },
 ];
-
-export const FOOD_BADGE_COLORS: Record<string, string> = {
-  "판게아 인섹트": "bg-indigo-300",
-  귀뚜라미: "bg-gray-300",
-  누에: "bg-yellow-300",
-  "지렙 인섹트": "bg-blue-100",
-};
-
-export const FOOD_BADGE_TEXT_COLORS: Record<string, string> = {
-  "판게아 인섹트": "text-indigo-900",
-  귀뚜라미: "text-gray-900",
-  누에: "text-yellow-900",
-  "지렙 인섹트": "text-blue-900",
-};
 
 export const NOTIFICATION_TYPE: Record<UserNotificationDtoType, { label: string; color: string }> =
   {

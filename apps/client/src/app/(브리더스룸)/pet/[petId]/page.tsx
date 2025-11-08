@@ -32,7 +32,7 @@ function PetDetailPage({ params }: PetDetailPageProps) {
 
       <div className="flex gap-3">
         {/* 사육정보 (개체 이름, 종, 성별, 크기, 모프, 형질, 먹이) */}
-        <BreedingInfo pet={pet} />
+        <BreedingInfo petId={petId} />
         {/* 분양 정보 */}
         <AdoptionInfo adoptionId={pet.adoption?.adoptionId} petId={petId} />
 
@@ -46,12 +46,3 @@ function PetDetailPage({ params }: PetDetailPageProps) {
 }
 
 export default PetDetailPage;
-
-export const FormItem = ({ label, content }: { label: string; content: React.ReactNode }) => {
-  return (
-    <div className="flex gap-3 text-[14px]">
-      <div className="flex min-w-[60px] pt-[6px]">{label}</div>
-      <div className="flex flex-1">{content}</div>
-    </div>
-  );
-};

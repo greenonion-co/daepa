@@ -143,7 +143,7 @@ const PetDetail = ({ pet, qrCodeDataUrl }: PetDetailProps) => {
           <div className="h-[700px] shrink-0">
             <CardFront pet={pet} qrCodeDataUrl={qrCodeDataUrl} />
           </div>
-          <div className="pt-6ㅠ h-[700px] shrink-0">
+          <div className="h-[700px] shrink-0 pt-6">
             <CardBack pet={pet} from={from} isMyPet={isMyPet} isWideScreen={isWideScreen} />
           </div>
         </div>

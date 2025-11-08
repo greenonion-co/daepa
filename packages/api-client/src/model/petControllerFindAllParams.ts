@@ -72,7 +72,7 @@ export type PetControllerFindAllParams = {
   /**
    * 펫 먹이
    */
-  foods?: string;
+  foods?: string[];
   /**
    * 판매 상태
    */

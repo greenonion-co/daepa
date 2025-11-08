@@ -13,7 +13,7 @@ import { overlay } from "overlay-kit";
 import CompleteHatchingModal from "./CompleteHatchingModal";
 import EditEggModal from "./EditEggModal";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { AxiosError } from "axios";
 import { toast } from "sonner";
 import {
@@ -180,7 +180,8 @@ const EggItem = ({ pet, layingDate }: EggItemProps) => {
         </div>
       ) : (
         <div className="text-[12px] text-gray-600 dark:text-green-200">
-          {format(new Date(pet.hatchingDate ?? ""), "MM월 dd일")}에 해칭 완료되었습니다.
+          {pet.hatchingDate ? format(parseISO(pet.hatchingDate), "MM월 dd일") : ""}에 해칭
+          완료되었습니다.
         </div>
       )}
     </div>
