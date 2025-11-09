@@ -110,9 +110,9 @@ const BreedingInfo = ({ petId }: { petId: string }) => {
               className={cn(
                 "h-full cursor-pointer rounded-md px-2 text-sm font-semibold text-gray-800",
                 formData.isPublic ? "bg-white shadow-sm" : "text-gray-600",
-                disabled && "cursor-not-allowed",
+                !isEditMode && "cursor-not-allowed",
               )}
-              disabled={disabled}
+              disabled={!isEditMode}
             >
               공개
             </button>
@@ -126,9 +126,9 @@ const BreedingInfo = ({ petId }: { petId: string }) => {
               className={cn(
                 "h-full cursor-pointer rounded-md px-2 text-sm font-semibold text-gray-800",
                 !formData.isPublic ? "bg-white shadow-sm" : "text-gray-600",
-                disabled && "cursor-not-allowed",
+                !isEditMode && "cursor-not-allowed",
               )}
-              disabled={disabled}
+              disabled={!isEditMode}
             >
               비공개
             </button>
