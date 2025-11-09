@@ -5,7 +5,7 @@ import {
 } from "@repo/api-client";
 import CalendarSelect from "./CalendarSelect";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { isAfter, isBefore } from "date-fns";
+import { isAfter, isBefore, parse } from "date-fns";
 import { toast } from "sonner";
 import { AxiosError } from "axios";
 import EggItem from "./EggItem";
@@ -16,11 +16,13 @@ import { cn } from "@/lib/utils";
 interface LayingItemProps {
   layingDates: string[];
   layingData: LayingByDateDto;
+  matingDate?: string;
   closeSignal?: number;
 }
 const LayingItem = ({
   layingDates,
   layingData: { layingDate, layings, layingId },
+  matingDate,
   closeSignal,
 }: LayingItemProps) => {
   const queryClient = useQueryClient();
@@ -39,12 +41,16 @@ const LayingItem = ({
   }, [closeSignal]);
 
   const getDisabledDates = (currentLayingDate: string) => {
-    const convertedLayingDates = layingDates.map((date) => new Date(date));
+    const toDate = (s: string) => {
+      if (/^\d{8}$/.test(s)) return parse(s, "yyyyMMdd", new Date());
+      if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return parse(s, "yyyy-MM-dd", new Date());
+      return new Date(s);
+    };
+    const convertedLayingDates = layingDates.map(toDate);
     const sortedLayingDates = [...convertedLayingDates].sort((a, b) => a.getTime() - b.getTime());
     const currentIndex = sortedLayingDates.findIndex(
-      (date) => new Date(date).getTime() === new Date(currentLayingDate).getTime(),
+      (date) => date.getTime() === toDate(currentLayingDate).getTime(),
     );
-
     let prevLayingDate: Date | null = null;
     let nextLayingDate: Date | null = null;
 
@@ -57,6 +63,11 @@ const LayingItem = ({
     }
 
     return (date: Date) => {
+      // 메이팅 날짜 이전은 비활성화
+      if (matingDate && isBefore(date, toDate(matingDate))) {
+        return true;
+      }
+
       // 이전 산란일이 있는 경우, 이전 산란일 이전 날짜들은 비활성화
       if (prevLayingDate && isBefore(date, prevLayingDate)) {
         return true;
@@ -68,7 +79,7 @@ const LayingItem = ({
       }
 
       // 현재 산란일 자체는 비활성화
-      if (date.getTime() === new Date(currentLayingDate).getTime()) {
+      if (date.getTime() === toDate(currentLayingDate).getTime()) {
         return true;
       }
 

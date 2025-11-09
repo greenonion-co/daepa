@@ -121,8 +121,9 @@ const ParentLink = ({
         </dt>
         <div className="flex flex-col items-center gap-2">
           <button
-            className="relative aspect-square w-full cursor-pointer overflow-hidden rounded-lg bg-gray-100 transition-colors hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-700"
+            className="relative aspect-square w-full overflow-hidden rounded-2xl bg-gray-100 transition-colors hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-700"
             onClick={handleSelect}
+            disabled={!editable}
           >
             {editable ? (
               <Search className="absolute left-1/2 top-1/2 h-6 w-6 -translate-x-1/2 -translate-y-1/2 text-gray-400" />
@@ -143,7 +144,7 @@ const ParentLink = ({
           {label}
         </dt>
         <div className="flex flex-col items-center gap-2">
-          <div className="relative aspect-square w-full overflow-hidden rounded-lg bg-gray-200/50 dark:bg-gray-700/50">
+          <div className="relative aspect-square w-full overflow-hidden rounded-2xl bg-gray-200/50 dark:bg-gray-700/50">
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
               <Lock className="h-6 w-6 text-gray-400 dark:text-gray-500" />
               <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
@@ -162,7 +163,7 @@ const ParentLink = ({
     <div className="flex-1">
       <dt className="mb-2 flex items-center gap-2 text-xs font-medium text-gray-500 dark:text-gray-400">
         {label}
-        {/* TODO!: isMyPet이 아닌 경우 해당 주인의 정보를 노출 */}
+        {/* TODO!: isMyPet이 아닌 경우 해당 주인의 정보를 노출 */}{" "}
         {parent?.status && <ParentStatusBadge status={parent.status} isMyPet={isMyPet} />}
       </dt>
 
@@ -171,7 +172,7 @@ const ParentLink = ({
           <Button
             variant="ghost"
             size="sm"
-            className="absolute right-1 top-1 z-10 h-6 w-6 rounded-full bg-black/50 p-0 hover:bg-black/70"
+            className="absolute right-2 top-2 z-10 h-6 w-6 rounded-full bg-black/50 p-0 hover:bg-black/70"
             onClick={(e) => handleUnlink(e, parent)}
           >
             <X className="h-4 w-4 text-white" />
@@ -191,12 +192,17 @@ const ParentLink = ({
 
           <span
             className={cn(
-              "relative font-bold after:absolute after:bottom-0 after:left-0 after:-z-10 after:h-[15px] after:w-full after:opacity-40",
+              "relative text-[14px] font-bold after:absolute after:bottom-0 after:left-0 after:-z-10 after:h-[15px] after:w-full after:opacity-40",
               label === "모" ? "after:bg-red-400" : "after:bg-[#247DFE]",
             )}
           >
             {parent.name || "-"}
           </span>
+
+          <div className="break-keep text-[14px] font-[500] text-gray-700">
+            {parent.morphs?.join(" | ")}
+            {parent.traits?.join(" | ")}
+          </div>
         </Link>
       </div>
     </div>

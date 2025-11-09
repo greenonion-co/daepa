@@ -62,8 +62,7 @@ function Calendar({
         ),
         day: cn(
           buttonVariants({ variant: "ghost" }),
-          eggCounts ? "w-11 h-20" : "size-11",
-          "p-0 size-9 font-normal aria-selected:opacity-100 hover:bg-gray-50",
+          "w-11 h-20 p-0 size-9 font-normal aria-selected:opacity-100 hover:bg-gray-50",
         ),
         day_range_start: "day-range-start aria-selected:bg-zinc-500 aria-selected:text-zinc-100",
         day_range_end: "day-range-end aria-selected:bg-zinc-500 aria-selected:text-zinc-100",

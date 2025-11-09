@@ -62,7 +62,7 @@ const ShortsBack = ({ pet, onFlip }: CardBackProps) => {
                 pet[field.name].length > 0 &&
                 pet[field.name].map((item: string) => (
                   <div
-                    className="border-1 mb-1 flex items-center gap-2 rounded-xl border-gray-200 bg-gray-100 px-3 py-1 text-[14px] text-black dark:bg-gray-600/50 dark:text-white"
+                    className="mb-1 flex items-center gap-2 rounded-xl border-gray-200 bg-gray-100 px-3 py-1 text-[14px] text-black dark:bg-gray-600/50 dark:text-white"
                     key={item}
                   >
                     <span>{item}</span>

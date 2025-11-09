@@ -1,6 +1,6 @@
 "use client";
 
-import * as React from "react";
+import React, { useEffect, useRef } from "react";
 import {
   ColumnDef,
   flexRender,
@@ -36,7 +36,7 @@ interface DataTableProps<TData> {
   loaderRefAction: (node?: Element | null) => void;
   hasFilter?: boolean;
   isClickable?: boolean;
-  refetch: () => void;
+  refetch: () => Promise<unknown> | void;
 }
 
 export const DataTable = ({
@@ -50,7 +50,8 @@ export const DataTable = ({
   isClickable = true,
   refetch,
 }: DataTableProps<PetDto>) => {
-  const { columnFilters, searchFilters, setSearchFilters, setColumnFilters } = useFilterStore();
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const { searchFilters, setSearchFilters } = useFilterStore();
   const { sorting, rowSelection, setSorting, setRowSelection } = useTableStore();
 
   const router = useRouter();
@@ -67,7 +68,6 @@ export const DataTable = ({
     state: {
       sorting,
       rowSelection,
-      columnVisibility: columnFilters,
     },
   });
 
@@ -83,37 +83,38 @@ export const DataTable = ({
     router.push(`/pet/${id}`);
   };
 
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
+
   return (
     <div className="relative w-full">
       <div className="w-full">
-        {hasFilter && (
-          <Filters
-            table={table}
-            columnFilters={columnFilters}
-            setColumnFilters={setColumnFilters}
-            searchFilters={searchFilters}
-            setSearchFilters={setSearchFilters}
-          />
-        )}
+        {hasFilter && <Filters searchFilters={searchFilters} setSearchFilters={setSearchFilters} />}
 
-        <div
+        <button
+          type="button"
+          aria-label="검색 결과 새로고침"
+          aria-busy={isRefreshing}
+          disabled={isRefreshing}
           onClick={async () => {
             if (isRefreshing) return;
             setIsRefreshing(true);
             try {
-              const maybe = refetch();
-              if ((maybe as unknown as Promise<unknown>)?.then) {
-                await (maybe as unknown as Promise<unknown>);
-              }
+              await refetch();
             } finally {
-              setTimeout(() => setIsRefreshing(false), 500);
+              timeoutRef.current = setTimeout(() => setIsRefreshing(false), 500);
             }
           }}
-          className="flex w-fit cursor-pointer items-center gap-1 rounded-lg px-2 py-1 text-[12px] text-gray-600 hover:bg-blue-100 hover:text-blue-700"
+          className="flex w-fit items-center gap-1 rounded-lg px-2 py-1 text-[12px] text-gray-600 hover:bg-blue-100 hover:text-blue-700"
         >
           검색된 펫・{totalCount}마리
           <RefreshCcw className={cn("h-3 w-3", isRefreshing && "animate-spin")} />
-        </div>
+        </button>
 
         <div className="rounded-md">
           <Table>

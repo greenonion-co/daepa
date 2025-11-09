@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { PetControllerFindAllFilterType } from "@repo/api-client";
 import { ChevronRight, Search } from "lucide-react";
 import { useState } from "react";
 
@@ -10,9 +11,19 @@ interface HeaderProps {
   selectedPetName?: string;
   className?: string;
   setSearchQuery: (searchQuery: string) => void;
+  searchType: PetControllerFindAllFilterType;
+  setSearchType: (petListType: PetControllerFindAllFilterType) => void;
 }
 
-const Header = ({ step, setStep, selectedPetName, setSearchQuery, className }: HeaderProps) => {
+const Header = ({
+  step,
+  setStep,
+  selectedPetName,
+  setSearchQuery,
+  searchType,
+  setSearchType,
+  className,
+}: HeaderProps) => {
   const [keyword, setKeyword] = useState("");
 
   return (
@@ -51,6 +62,31 @@ const Header = ({ step, setStep, selectedPetName, setSearchQuery, className }: H
           <Button className="h-8 rounded-lg text-[14px]" onClick={() => setSearchQuery(keyword)}>
             검색
           </Button>
+
+          <div className="flex h-[32px] w-fit items-center gap-2 rounded-lg bg-gray-100 px-1">
+            <button
+              onClick={() => setSearchType(PetControllerFindAllFilterType.MY)}
+              className={cn(
+                "cursor-pointer rounded-lg px-2 py-1 text-sm font-semibold text-gray-800",
+                searchType === PetControllerFindAllFilterType.MY
+                  ? "bg-white shadow-sm"
+                  : "text-gray-600",
+              )}
+            >
+              내 개체
+            </button>
+            <button
+              onClick={() => setSearchType(PetControllerFindAllFilterType.NOT_MY)}
+              className={cn(
+                "cursor-pointer rounded-lg px-2 py-1 text-sm font-semibold text-gray-800",
+                searchType === PetControllerFindAllFilterType.NOT_MY
+                  ? "bg-white shadow-sm"
+                  : "text-gray-600",
+              )}
+            >
+              타인의 개체
+            </button>
+          </div>
         </div>
       )}
     </div>

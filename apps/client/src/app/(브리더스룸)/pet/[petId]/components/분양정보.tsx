@@ -8,13 +8,12 @@ import {
   UpdateAdoptionDto,
   adoptionControllerGetAdoptionByPetId,
 } from "@repo/api-client";
-import { FormItem } from "../page";
+import FormItem from "./FormItem";
 import SelectFilter from "@/app/(브리더스룸)/components/SelectFilter";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { usePetStore } from "@/app/(브리더스룸)/register/store/pet";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import Loading from "@/components/common/Loading";
 import NumberField from "@/app/(브리더스룸)/components/Form/NumberField";
 import CalendarInput from "@/app/(브리더스룸)/hatching/components/CalendarInput";
 import { isNil, isUndefined, omitBy } from "es-toolkit";
@@ -23,15 +22,16 @@ import { overlay } from "overlay-kit";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import Loading from "@/components/common/Loading";
 
 interface AdoptionInfoProps {
   petId: string;
 }
 
 const AdoptionInfo = ({ petId }: AdoptionInfoProps) => {
-  const [disabled, setDisabled] = useState(true);
   const { formData, setFormData } = usePetStore();
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const { data: adoption, refetch } = useQuery({
     queryKey: [adoptionControllerGetAdoptionByPetId.name, petId],
@@ -97,25 +97,26 @@ const AdoptionInfo = ({ petId }: AdoptionInfoProps) => {
     );
 
     try {
+      setIsProcessing(true);
       if (adoptionId) {
         await updateAdoption({ adoptionId, data: newAdoptionDto });
       } else {
         await createAdoption({ ...newAdoptionDto, petId });
       }
 
+      await refetch();
+      setIsEditMode(false);
       toast.success("분양 정보가 성공적으로 생성되었습니다.");
     } catch (error) {
       console.error("분양 생성 실패:", error);
       toast.error("분양 생성에 실패했습니다. 다시 시도해주세요.");
     } finally {
-      setIsEditing(false);
-      setDisabled(true);
-      refetch();
+      setIsProcessing(false);
     }
-  }, [updateAdoption, createAdoption, adoptionData, petId, refetch]);
+  }, [updateAdoption, createAdoption, adoptionData, petId, refetch, setIsProcessing]);
 
   const handleSelectBuyer = useCallback(() => {
-    if (disabled) return;
+    if (!isEditMode) return;
 
     overlay.open(({ isOpen, close }) => (
       <Dialog open={isOpen} onOpenChange={close}>
@@ -134,14 +135,14 @@ const AdoptionInfo = ({ petId }: AdoptionInfoProps) => {
         </DialogContent>
       </Dialog>
     ));
-  }, [adoptionData.buyer?.userId, setFormData, disabled]);
+  }, [adoptionData.buyer?.userId, setFormData, isEditMode]);
 
   const showAdoptionInfo = useMemo(() => {
-    return !(isNil(adoption) && disabled);
-  }, [adoption, disabled]);
+    return !(isNil(adoption) && !isEditMode);
+  }, [adoption, isEditMode]);
 
   return (
-    <div className="shadow-xs flex h-full min-w-[300px] flex-col gap-2 rounded-2xl bg-white p-3">
+    <div className="shadow-xs flex min-h-[480px] min-w-[300px] flex-1 flex-col gap-2 rounded-2xl bg-white p-3">
       <div className="text-[14px] font-[600] text-gray-600">분양정보</div>
 
       {/* 분양 상태, 가격, 날짜, 입양자, 거래 방식, 메모 */}
@@ -149,9 +150,9 @@ const AdoptionInfo = ({ petId }: AdoptionInfoProps) => {
         label="분양 상태"
         content={
           <SelectFilter
-            disabled={disabled}
+            disabled={!isEditMode}
             type="adoptionStatus"
-            initialItem={disabled && isNil(adoption) ? undefined : adoptionData.status}
+            initialItem={!isEditMode && isNil(adoption) ? undefined : adoptionData.status}
             onSelect={(item) => {
               setFormData((prev) => ({ ...prev, adoption: { ...prev.adoption, status: item } }));
             }}
@@ -171,7 +172,7 @@ const AdoptionInfo = ({ petId }: AdoptionInfoProps) => {
             label="가격"
             content={
               <NumberField
-                disabled={disabled}
+                disabled={!isEditMode}
                 value={String(adoptionData.price ?? "")}
                 setValue={(value) => {
                   setFormData((prev) => ({
@@ -181,7 +182,7 @@ const AdoptionInfo = ({ petId }: AdoptionInfoProps) => {
                 }}
                 inputClassName={cn(
                   " h-[32px]  w-full rounded-md border border-gray-200  placeholder:font-[500] pl-2",
-                  disabled && "border-none",
+                  !isEditMode && "border-none",
                 )}
                 field={{ name: "adoption.price", unit: "원", type: "number" }}
                 stepAmount={10000}
@@ -193,7 +194,8 @@ const AdoptionInfo = ({ petId }: AdoptionInfoProps) => {
             label="날짜"
             content={
               <CalendarInput
-                editable={!disabled}
+                placeholder="-"
+                editable={isEditMode}
                 value={adoptionData.adoptionDate ?? ""}
                 onSelect={(date) => {
                   setFormData((prev) => ({
@@ -209,7 +211,7 @@ const AdoptionInfo = ({ petId }: AdoptionInfoProps) => {
             label="입양자"
             content={
               <>
-                {!(isNil(adoptionData.buyer?.userId) && !disabled) && (
+                {!(isNil(adoptionData.buyer?.userId) && isEditMode) && (
                   <div
                     className={cn(
                       "flex h-[32px] w-fit items-center gap-1 rounded-lg px-2 py-1 text-[14px] font-[500]",
@@ -226,7 +228,7 @@ const AdoptionInfo = ({ petId }: AdoptionInfoProps) => {
                   </div>
                 )}
 
-                {!disabled && (
+                {isEditMode && (
                   <Button
                     className="ml-1 h-8 cursor-pointer rounded-lg px-2 text-[12px] text-white"
                     onClick={handleSelectBuyer}
@@ -254,9 +256,9 @@ const AdoptionInfo = ({ petId }: AdoptionInfoProps) => {
                     adoptionData.location === PetAdoptionDtoLocation.OFFLINE
                       ? "bg-white shadow-sm"
                       : "text-gray-600",
-                    disabled && "cursor-not-allowed",
+                    !isEditMode && "cursor-not-allowed",
                   )}
-                  disabled={disabled}
+                  disabled={!isEditMode}
                 >
                   오프라인
                 </button>
@@ -272,9 +274,9 @@ const AdoptionInfo = ({ petId }: AdoptionInfoProps) => {
                     adoptionData.location === PetAdoptionDtoLocation.ONLINE
                       ? "bg-white shadow-sm"
                       : "text-gray-600",
-                    disabled && "cursor-not-allowed",
+                    !isEditMode && "cursor-not-allowed",
                   )}
-                  disabled={disabled}
+                  disabled={!isEditMode}
                 >
                   온라인
                 </button>
@@ -285,7 +287,7 @@ const AdoptionInfo = ({ petId }: AdoptionInfoProps) => {
           <FormItem
             label="메모"
             content={
-              <div className="relative pt-2">
+              <div className="relative w-full pt-2">
                 <textarea
                   className={`min-h-[100px] w-full rounded-xl bg-gray-100 p-3 text-left text-[14px] focus:outline-none focus:ring-0 dark:bg-gray-600/50 dark:text-white`}
                   value={String(adoptionData.memo || "")}
@@ -296,7 +298,7 @@ const AdoptionInfo = ({ petId }: AdoptionInfoProps) => {
                       adoption: { ...prev.adoption, memo: e.target.value },
                     }))
                   }
-                  disabled={disabled}
+                  disabled={!isEditMode}
                   style={{ height: "auto" }}
                   onInput={(e) => {
                     const target = e.target as HTMLTextAreaElement;
@@ -304,7 +306,7 @@ const AdoptionInfo = ({ petId }: AdoptionInfoProps) => {
                     target.style.height = `${target.scrollHeight}px`;
                   }}
                 />
-                {!disabled && (
+                {isEditMode && (
                   <div className="absolute bottom-4 right-4 text-[12px] text-gray-500">
                     {adoptionData.memo?.length ?? 0}/{500}
                   </div>
@@ -316,35 +318,36 @@ const AdoptionInfo = ({ petId }: AdoptionInfoProps) => {
       )}
 
       <div className="mt-2 flex w-full flex-1 items-end gap-2">
-        {!disabled && (
+        {isEditMode && (
           <Button
+            disabled={isProcessing}
             className="h-10 flex-1 cursor-pointer rounded-lg font-bold"
             onClick={() => {
               resetAdoption();
-              setDisabled(true);
+              setIsEditMode(false);
             }}
           >
             취소
           </Button>
         )}
         <Button
-          disabled={isEditing}
+          disabled={isProcessing}
           className={cn(
             "flex-2 h-10 cursor-pointer rounded-lg font-bold",
-            !disabled && "bg-red-600 hover:bg-red-600/90",
-            isEditing && "bg-gray-300",
+            isEditMode && "bg-red-600 hover:bg-red-600/90",
+            isProcessing && "bg-gray-300",
           )}
           onClick={() => {
-            if (!disabled) {
+            if (isEditMode) {
               handleSave();
             } else {
-              setDisabled(false);
+              setIsEditMode(true);
             }
           }}
         >
-          {isEditing ? (
+          {isProcessing ? (
             <Loading />
-          ) : disabled ? (
+          ) : !isEditMode ? (
             !showAdoptionInfo ? (
               "분양 정보 등록"
             ) : (

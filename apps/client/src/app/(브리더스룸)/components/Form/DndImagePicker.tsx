@@ -16,7 +16,7 @@ import { buildR2TransformedUrl, cn } from "@/lib/utils";
 import { X, Plus, Loader2, Info } from "lucide-react";
 import { toast } from "sonner";
 import { usePetStore } from "../../register/store/pet";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { isNil, range, remove } from "es-toolkit";
 import { ACCEPT_IMAGE_FORMATS } from "../../constants";
 import { tokenStorage } from "@/lib/tokenStorage";
@@ -32,6 +32,20 @@ export default function DndImagePicker({ max = 3, disabled }: DndImagePickerProp
   const [isLoading, setIsLoading] = useState(false);
   const photos: PhotoItem[] = formData.photos ?? [];
   const imageNamesInOrder = photos.map(({ fileName }) => fileName) ?? [];
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(photos.length > 0 ? 0 : null);
+
+  useEffect(() => {
+    if (photos.length === 0) {
+      setSelectedIndex(null);
+      return;
+    }
+    // 선택된 인덱스가 범위를 벗어나면 마지막 항목으로 보정
+    setSelectedIndex((prev) => {
+      if (prev === null) return 0;
+      if (prev >= photos.length) return photos.length - 1;
+      return prev;
+    });
+  }, [photos.length]);
 
   // 터치와 마우스 센서 설정
   const mouseSensor = useSensor(MouseSensor, {
@@ -209,6 +223,11 @@ export default function DndImagePicker({ max = 3, disabled }: DndImagePickerProp
                   disabled={disabled}
                   isLoading={isLoading}
                   onDelete={() => handleDelete(index)}
+                  selected={selectedIndex === index}
+                  onSelect={() => {
+                    if (isLoading) return;
+                    setSelectedIndex(index);
+                  }}
                 />
               ))}
               {!disabled &&
@@ -230,6 +249,22 @@ export default function DndImagePicker({ max = 3, disabled }: DndImagePickerProp
           </SortableContext>
         </DndContext>
       </div>
+
+      {/* 선택한 이미지 미리보기 */}
+      {selectedIndex !== null && photos[selectedIndex] && (
+        <div className="mt-3 overflow-hidden rounded-xl border border-gray-200">
+          <div className="relative aspect-[4/3] w-full">
+            <Image
+              src={buildR2TransformedUrl(photos[selectedIndex].url)}
+              alt={`preview_${photos[selectedIndex].fileName}`}
+              fill
+              className="object-cover"
+              draggable={false}
+              priority={false}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -240,12 +275,16 @@ function SortableThumb({
   disabled,
   isLoading,
   onDelete,
+  selected,
+  onSelect,
 }: {
   id: string;
   src: string;
   disabled?: boolean;
   isLoading?: boolean;
   onDelete: () => void;
+  selected?: boolean;
+  onSelect: () => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id,
@@ -274,11 +313,19 @@ function SortableThumb({
           "absolute inset-0 overflow-hidden rounded-xl border-2 transition-all duration-200",
           isDragging
             ? "cursor-grabbing border-blue-400"
-            : "cursor-grab border-gray-200 hover:border-gray-300",
+            : cn(
+                "cursor-grab border-gray-200 hover:border-gray-300",
+                selected && "border-blue-400 hover:border-blue-500",
+              ),
         )}
         // 터치 이벤트 최적화
         style={{
           touchAction: "none", // 브라우저의 기본 터치 동작 방지
+        }}
+        onClick={(e) => {
+          e.stopPropagation();
+          if (isLoading || isDragging) return;
+          onSelect();
         }}
       >
         {isLoading ? (

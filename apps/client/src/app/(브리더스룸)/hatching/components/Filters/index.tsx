@@ -52,8 +52,9 @@ const Filters = () => {
         type="species"
         initialItem={species}
         onSelect={(item) => {
+          const changed = species !== item;
           setSpecies(item);
-          if (!item) {
+          if (!item || changed) {
             setFather(null);
             setMother(null);
           }
@@ -109,6 +110,7 @@ const Filters = () => {
 
       {(eggStatus || species || father || mother || startDate || endDate) && (
         <button
+          type="button"
           onClick={reset}
           className="h-[32px] cursor-pointer rounded-lg px-3 text-sm text-blue-700 underline hover:bg-blue-100"
         >

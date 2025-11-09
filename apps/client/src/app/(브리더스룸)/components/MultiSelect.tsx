@@ -21,19 +21,28 @@ const MultiSelect = ({
 }: MultiSelectProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedItems, setSelectedItems] = useState<string[] | undefined>([]);
+  const [tempSelectedItems, setTempSelectedItems] = useState<string[] | undefined>(initialItems);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isEntering, setIsEntering] = useState(false);
 
   useEffect(() => {
     setSelectedItems(initialItems);
+    setTempSelectedItems(initialItems);
   }, [initialItems]);
 
   useEffect(() => {
+    if (isOpen) {
+      // 드롭다운이 열릴 때 현재 저장된 상태로 초기화
+      setSelectedItems(tempSelectedItems);
+    }
+
     if (!isOpen) return;
 
     const handlePointerDown = (event: MouseEvent | TouchEvent) => {
       const root = containerRef.current;
       if (root && !root.contains(event.target as Node)) {
+        // 외부 클릭 시 저장하지 않고 닫히면 원래 상태로 복원
+        setSelectedItems(tempSelectedItems);
         setIsOpen(false);
       }
     };
@@ -44,7 +53,7 @@ const MultiSelect = ({
       document.removeEventListener("mousedown", handlePointerDown);
       document.removeEventListener("touchstart", handlePointerDown);
     };
-  }, [isOpen]);
+  }, [isOpen, tempSelectedItems]);
 
   useEffect(() => {
     if (isOpen) {
@@ -68,6 +77,10 @@ const MultiSelect = ({
         )}
         onClick={() => {
           if (disabled) return;
+          if (isOpen) {
+            // 드롭다운을 닫을 때 저장하지 않았다면 원래 상태로 복원
+            setSelectedItems(tempSelectedItems);
+          }
           setIsOpen(!isOpen);
         }}
       >
@@ -165,6 +178,7 @@ const MultiSelect = ({
             </button>
             <button
               onClick={() => {
+                setTempSelectedItems(selectedItems);
                 onSelect(selectedItems);
                 setIsOpen(false);
               }}

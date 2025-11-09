@@ -34,12 +34,14 @@ const ParentInfo = ({ parent }: { parent: PetSummaryLayingDto | undefined }) => 
 
   return (
     <div className="flex flex-1 gap-1">
-      {/* <div className="flex h-10 w-10 rounded-2xl border border-gray-200 bg-white text-blue-800 shadow-md dark:bg-blue-900 dark:text-blue-200 dark:hover:bg-blue-800" /> */}
-
       <div className="flex flex-1 flex-col">
-        <div className="mb-1">
+        <div className="mb-1 font-[500]">
           <span>{parent.name}</span>
-          {parent.weight && <span className="text-xs text-gray-500">({parent.weight}g)</span>}
+          {parent.weight && (
+            <span className="ml-1 text-[12px] text-blue-600">
+              | {Number(parent.weight).toLocaleString()}g
+            </span>
+          )}
         </div>
 
         {(parent.morphs || parent.traits) && (
@@ -269,7 +271,7 @@ const MatingList = memo(() => {
             fatherId: matingGroup.father?.petId,
             motherId: matingGroup.mother?.petId,
             matingDate,
-          });
+          }).then(() => setIsOpen(false));
         }}
       />
     </div>

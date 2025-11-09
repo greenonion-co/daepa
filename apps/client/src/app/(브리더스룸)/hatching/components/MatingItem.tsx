@@ -71,28 +71,36 @@ const MatingItem = ({ mating, father, mother, matingDates }: MatingItemProps) =>
   };
 
   return (
-    <div key={mating.id} className="py-3ark:border-gray-700 flex flex-col">
+    <div key={mating.id} className="flex flex-col py-2 dark:border-gray-700">
       <div className="flex items-center justify-between gap-1 px-2">
         <div className="flex items-center gap-2">
           <div className="text-[14px] font-semibold text-gray-700 dark:text-gray-200">
-            {format(new Date(mating.matingDate ?? ""), "yyyy년 MM월 dd일")}
+            {mating.matingDate
+              ? format(new Date(mating.matingDate ?? ""), "yyyy년 MM월 dd일")
+              : "-"}
           </div>
-          <div
+          <button
+            type="button"
             onClick={handleAddLayingClick}
-            className="cursor-pointer rounded-lg bg-blue-100 px-2 py-1 text-[12px] font-semibold text-blue-600"
+            className="rounded-lg bg-blue-100 px-2 py-1 text-[12px] font-semibold text-blue-600"
           >
             + 산란 추가
-          </div>
+          </button>
         </div>
         <div className="flex items-center gap-1">
-          <div
-            className="cursor-pointer rounded-lg px-2 py-1 text-[12px] text-gray-500 hover:bg-gray-100"
+          <button
+            type="button"
+            className="rounded-lg px-2 py-1 text-[12px] text-gray-500 hover:bg-gray-100"
             onClick={handleCloseAllLayings}
           >
             모두 닫기
-          </div>
-          <NotebookPen className="h-4 w-4 text-blue-600" onClick={handleEditClick} />
-          <Trash2 onClick={handleDeleteClick} className="h-4 w-4 text-red-600" />
+          </button>
+          <button type="button" aria-label="교배 정보 수정" onClick={handleEditClick}>
+            <NotebookPen className="h-4 w-4 text-blue-600" />
+          </button>
+          <button type="button" aria-label="교배 정보 삭제" onClick={handleDeleteClick}>
+            <Trash2 className="h-4 w-4 text-red-600" />
+          </button>
         </div>
       </div>
 
@@ -103,6 +111,7 @@ const MatingItem = ({ mating, father, mother, matingDates }: MatingItemProps) =>
               key={layingData.layingId}
               layingDates={layingDates}
               layingData={layingData}
+              matingDate={mating.matingDate}
               closeSignal={closeAllTick}
             />
           ))

@@ -1,3 +1,4 @@
+"use client";
 import { SIDEBAR_ITEMS } from "../constants";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
@@ -15,9 +16,13 @@ const Menubar = () => {
   return (
     <div className="flex h-[52px] items-center justify-between">
       <div className="flex items-center">
-        <div className="mr-10 cursor-pointer font-bold" onClick={() => router.push("/pet")}>
+        <button
+          type="button"
+          className="mr-10 cursor-pointer font-bold"
+          onClick={() => router.push("/pet")}
+        >
           브리더스룸
-        </div>
+        </button>
         {SIDEBAR_ITEMS.map((item) => (
           <Link
             className={cn(

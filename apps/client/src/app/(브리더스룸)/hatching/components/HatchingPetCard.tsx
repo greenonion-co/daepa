@@ -1,5 +1,5 @@
 "use client";
-import { format } from "date-fns";
+import { format, isValid, parseISO } from "date-fns";
 import {
   EGG_STATUS_KOREAN_INFO,
   GENDER_KOREAN_INFO,
@@ -24,7 +24,7 @@ import { useEffect, useRef } from "react";
 interface PetCardProps {
   date: string;
   pets: PetDto[];
-  tab: "all" | "hatched" | "egg";
+  tab: "all" | PetDtoType;
   isSelected: boolean;
 }
 
@@ -64,8 +64,8 @@ const HatchingPetCard = ({ date, pets, tab, isSelected }: PetCardProps) => {
         {pets
           .filter((pet) => {
             if (tab === "all") return true;
-            if (tab === "hatched") return pet.type === PetDtoType.PET;
-            if (tab === "egg") return pet.type === PetDtoType.EGG;
+            if (tab === PetDtoType.PET) return pet.type === PetDtoType.PET;
+            if (tab === PetDtoType.EGG) return pet.type === PetDtoType.EGG;
           })
           .map((pet, index) => {
             const isEgg = pet.type === PetDtoType.EGG;
@@ -84,12 +84,12 @@ const HatchingPetCard = ({ date, pets, tab, isSelected }: PetCardProps) => {
                 >
                   <div className="flex">
                     <div className="flex w-[56px] items-center justify-center font-semibold text-gray-500">
-                      {index === 0 && format(new Date(date), "dd EE", { locale: ko })}
+                      {index === 0 && date ? format(parseISO(date), "dd EE", { locale: ko }) : ""}
                     </div>
 
                     <div className="flex flex-col px-1 py-1.5">
                       <div className="flex gap-1 font-semibold">
-                        {pet.type === "PET" ? (
+                        {pet.type === PetDtoType.PET ? (
                           <div className="flex items-center gap-1">
                             <div className="text-gray-800">{pet?.name}</div>
                             <div className="text-[12px] text-gray-500">
@@ -152,14 +152,19 @@ const HatchingPetCard = ({ date, pets, tab, isSelected }: PetCardProps) => {
                     </div>
                   </div>
 
-                  <div className={cn("text-gray-600", pet.type === "PET" && "text-blue-700")}>
-                    {pet.type === "EGG"
+                  <div
+                    className={cn("text-gray-600", pet.type === PetDtoType.PET && "text-blue-700")}
+                  >
+                    {pet.type === PetDtoType.EGG
                       ? pet.eggDetail?.status
                         ? EGG_STATUS_KOREAN_INFO[
                             pet.eggDetail?.status ?? PetDtoEggStatus.UNFERTILIZED
                           ]
                         : ""
-                      : format(new Date(pet.hatchingDate ?? ""), "MM/dd 해칭")}
+                      : (() => {
+                          const d = parseISO(pet.hatchingDate ?? "");
+                          return isValid(d) ? format(d, "MM/dd 해칭", { locale: ko }) : "";
+                        })()}
                   </div>
                 </div>
               </div>

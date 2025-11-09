@@ -23,7 +23,7 @@ import {
   AdoptionDto,
 } from "@repo/api-client";
 import LinkButton from "../../components/LinkButton";
-import { format } from "date-fns";
+import { format, isValid, parseISO } from "date-fns";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import TooltipText from "../../components/TooltipText";
 
@@ -93,7 +93,11 @@ export const columns: ColumnDef<PetDto>[] = [
               <div>
                 분양 날짜・
                 {adoptionData?.adoptionDate
-                  ? format(adoptionData.adoptionDate, "yyyy-MM-dd")
+                  ? (() => {
+                      const raw = adoptionData.adoptionDate as string | Date;
+                      const d = typeof raw === "string" ? parseISO(raw) : raw;
+                      return isValid(d) ? format(d, "yyyy-MM-dd") : "미정";
+                    })()
                   : "미정"}
               </div>
             </div>
@@ -172,9 +176,13 @@ export const columns: ColumnDef<PetDto>[] = [
     accessorKey: "hatchingDate",
     header: TABLE_HEADER.hatchingDate,
     cell: ({ row }) => {
-      const hatchingDate = row.getValue("hatchingDate") as Date;
+      const hatchingDateRaw = row.getValue("hatchingDate") as Date | string | undefined;
+      const hatchingDate =
+        typeof hatchingDateRaw === "string" ? parseISO(hatchingDateRaw) : hatchingDateRaw;
       return (
-        <div className="capitalize">{hatchingDate ? format(hatchingDate, "yyyy-MM-dd") : "-"}</div>
+        <div className="capitalize">
+          {hatchingDate && isValid(hatchingDate) ? format(hatchingDate, "yyyy-MM-dd") : "-"}
+        </div>
       );
     },
   },
@@ -265,50 +273,4 @@ export const columns: ColumnDef<PetDto>[] = [
       return <TooltipText title="설명" description="펫의 설명입니다." text={desc} />;
     },
   },
-  // {
-  //   accessorKey: "foods",
-  //   header: TABLE_HEADER.foods,
-  //   cell: ({ row }) => {
-  //     const foods = row.getValue("foods") as string[];
-
-  //     return (
-  //       <div className="flex flex-wrap gap-1">
-  //         {foods?.map((food) => (
-  //           <Badge
-  //             key={food}
-  //             className={`font-bold ${FOOD_BADGE_COLORS[food]} ${FOOD_BADGE_TEXT_COLORS[food]}`}
-  //           >
-  //             {food}
-  //           </Badge>
-  //         ))}
-  //       </div>
-  //     );
-  //   },
-  // },
-  // {
-  //   id: "actions",
-  //   enableHiding: false,
-  //   cell: ({ row }) => {
-  //     const pet = row.original;
-
-  //     return (
-  //       <DropdownMenu>
-  //         <DropdownMenuTrigger asChild>
-  //           <Button variant="ghost" className="h-8 w-8 p-0">
-  //             <span className="sr-only">Open menu</span>
-  //             <MoreHorizontal />
-  //           </Button>
-  //         </DropdownMenuTrigger>
-  //         <DropdownMenuContent align="end">
-  //           <DropdownMenuLabel>Actions</DropdownMenuLabel>
-  //           <DropdownMenuItem onClick={() => navigator.clipboard.writeText(pet.petId.toString())}>
-  //             복사
-  //           </DropdownMenuItem>
-  //           <DropdownMenuSeparator />
-  //           <DropdownMenuItem>예시</DropdownMenuItem>
-  //         </DropdownMenuContent>
-  //       </DropdownMenu>
-  //     );
-  //   },
-  // },
 ];

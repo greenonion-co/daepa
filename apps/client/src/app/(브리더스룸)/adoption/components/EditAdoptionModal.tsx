@@ -10,6 +10,7 @@ import {
   AdoptionDtoStatus,
   brPetControllerFindAll,
   BrPetControllerFindAllOrder,
+  PetControllerFindAllFilterType,
   PetDto,
 } from "@repo/api-client";
 import { useInfiniteQuery } from "@tanstack/react-query";
@@ -132,6 +133,8 @@ const EditAdoptionModal = ({
               setStep={setStep}
               selectedPetName={selectedPet?.name ?? ""}
               setSearchQuery={setKeyword}
+              searchType={PetControllerFindAllFilterType.ALL}
+              setSearchType={() => {}}
               className="py-0"
             />
           )}

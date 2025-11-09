@@ -4,7 +4,6 @@ import Loading from "@/components/common/Loading";
 import { PetParentDtoWithMessage } from "@/app/(브리더스룸)/pet/store/parentLink";
 import { useUserStore } from "@/app/(브리더스룸)/store/user";
 import { PetControllerFindAllFilterType as PetListType } from "@repo/api-client";
-import { cn } from "@/lib/utils";
 
 const SelectStep = ({
   pets,
@@ -13,7 +12,6 @@ const SelectStep = ({
   isFetchingMore,
   showTab,
   searchType,
-  setSearchType,
   loaderRefAction,
 }: {
   pets: PetParentDtoWithMessage[];
@@ -22,7 +20,6 @@ const SelectStep = ({
   isFetchingMore: boolean;
   showTab: boolean;
   searchType: PetListType;
-  setSearchType: (type: PetListType) => void;
   loaderRefAction: (node?: Element | null) => void;
 }) => {
   const { user } = useUserStore();
@@ -31,52 +28,31 @@ const SelectStep = ({
     <div className="h-full overflow-y-auto">
       <div>
         {showTab && (
-          <div className="flex h-[32px] w-fit items-center gap-2 rounded-lg bg-gray-100 px-1">
-            <button
-              onClick={() => setSearchType(PetListType.MY)}
-              className={cn(
-                "cursor-pointer rounded-lg px-2 py-1 text-sm font-semibold text-gray-800",
-                searchType === PetListType.MY ? "bg-white shadow-sm" : "text-gray-600",
-              )}
-            >
-              내 개체
-            </button>
-            <button
-              onClick={() => setSearchType(PetListType.NOT_MY)}
-              className={cn(
-                "cursor-pointer rounded-lg px-2 py-1 text-sm font-semibold text-gray-800",
-                searchType === PetListType.NOT_MY ? "bg-white shadow-sm" : "text-gray-600",
-              )}
-            >
-              타인의 개체
-            </button>
-          </div>
-        )}
-
-        <ScrollArea className="h-[calc(100vh-200px)]">
-          <div className="mb-10 grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7">
-            {pets
-              ?.filter((pet) =>
-                searchType === PetListType.MY
-                  ? pet.owner?.userId === user?.userId
-                  : pet.owner?.userId !== user?.userId,
-              )
-              .map((pet) => (
-                <PetItem key={pet.petId} item={pet} handlePetSelect={handlePetSelect} />
-              ))}
-          </div>
-          {hasMore && (
-            <div ref={loaderRefAction} className="h-20 text-center">
-              {isFetchingMore ? (
-                <div className="flex items-center justify-center">
-                  <div className="h-6 w-6 animate-spin rounded-full border-b-2 border-blue-500" />
-                </div>
-              ) : (
-                <Loading />
-              )}
+          <ScrollArea className="h-[calc(100vh-200px)]">
+            <div className="mb-10 grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7">
+              {pets
+                ?.filter((pet) =>
+                  searchType === PetListType.MY
+                    ? pet.owner?.userId === user?.userId
+                    : pet.owner?.userId !== user?.userId,
+                )
+                .map((pet) => (
+                  <PetItem key={pet.petId} item={pet} handlePetSelect={handlePetSelect} />
+                ))}
             </div>
-          )}
-        </ScrollArea>
+            {hasMore && (
+              <div ref={loaderRefAction} className="h-20 text-center">
+                {isFetchingMore ? (
+                  <div className="flex items-center justify-center">
+                    <div className="h-6 w-6 animate-spin rounded-full border-b-2 border-blue-500" />
+                  </div>
+                ) : (
+                  <Loading />
+                )}
+              </div>
+            )}
+          </ScrollArea>
+        )}
       </div>
     </div>
   );

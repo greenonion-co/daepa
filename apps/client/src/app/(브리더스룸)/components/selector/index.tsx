@@ -72,7 +72,12 @@ export default function Selector({
   onExit,
 }: SelectorProps) {
   const [selectedIndex, setSelectedIndex] = useState(
-    currentValue ? selectList.findIndex((item) => item.key === currentValue) : 0,
+    currentValue
+      ? Math.max(
+          selectList.findIndex((item) => item.key === currentValue),
+          0,
+        )
+      : 0,
   );
 
   useEffect(() => {

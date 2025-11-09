@@ -1,7 +1,7 @@
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { toast } from "sonner";
 import { useState } from "react";
 import { Pencil } from "lucide-react";
@@ -49,7 +49,7 @@ const CalendarSelect = ({
       <PopoverContent className="w-fit p-0" align="start">
         <Calendar
           mode="single"
-          selected={matingDate ? new Date(matingDate) : undefined}
+          selected={matingDate ? parseISO(matingDate) : undefined}
           onSelect={(date) => {
             if (date) {
               const dateString = format(date, "yyyy-MM-dd");
@@ -68,7 +68,7 @@ const CalendarSelect = ({
           }}
           disabled={disabled}
           modifiers={{
-            hasMating: disabledDates.map((d) => new Date(d)),
+            hasMating: disabledDates.map((d) => parseISO(d)),
           }}
           modifiersStyles={{
             hasMating: {
@@ -89,9 +89,9 @@ const CalendarSelect = ({
             onConfirm(matingDate);
             setIsOpen(false);
           }}
-          className="border-red flex w-full cursor-pointer items-center justify-center gap-2 rounded-b-2xl bg-gray-800 p-2 text-sm font-semibold text-white transition-colors hover:bg-black"
+          className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-b-2xl bg-gray-800 p-2 text-sm font-semibold text-white transition-colors hover:bg-black"
         >
-          {matingDate ? format(new Date(matingDate), "yyyy년 MM월 dd일") : ""} {confirmButtonText}
+          {matingDate ? format(parseISO(matingDate), "yyyy년 MM월 dd일") : ""} {confirmButtonText}
         </button>
       </PopoverContent>
     </Popover>

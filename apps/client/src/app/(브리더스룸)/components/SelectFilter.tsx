@@ -7,14 +7,14 @@ import { Check, ChevronDown } from "lucide-react";
 
 interface SelectFilterProps {
   type: keyof typeof SELECTOR_CONFIGS;
-  initialItem: any;
+  initialItem?: any;
   onSelect: (item: any) => void;
   disabled?: boolean;
 }
 
 const SelectFilter = ({ type, initialItem, onSelect, disabled = false }: SelectFilterProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedItem, setSelectedItem] = useState<string | undefined>(initialItem);
+  const [selectedItem, setSelectedItem] = useState<any>(initialItem);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isEntering, setIsEntering] = useState(false);
 
@@ -24,6 +24,7 @@ const SelectFilter = ({ type, initialItem, onSelect, disabled = false }: SelectF
     const handlePointerDown = (event: MouseEvent | TouchEvent) => {
       const root = containerRef.current;
       if (root && !root.contains(event.target as Node)) {
+        setSelectedItem(initialItem);
         setIsOpen(false);
       }
     };
@@ -34,7 +35,11 @@ const SelectFilter = ({ type, initialItem, onSelect, disabled = false }: SelectF
       document.removeEventListener("mousedown", handlePointerDown);
       document.removeEventListener("touchstart", handlePointerDown);
     };
-  }, [isOpen]);
+  }, [isOpen, initialItem]);
+
+  useEffect(() => {
+    setSelectedItem(initialItem);
+  }, [initialItem]);
 
   useEffect(() => {
     if (isOpen) {
@@ -48,7 +53,10 @@ const SelectFilter = ({ type, initialItem, onSelect, disabled = false }: SelectF
 
   return (
     <div ref={containerRef} className="relative">
-      <div
+      <button
+        type="button"
+        aria-expanded={isOpen}
+        aria-haspopup="listbox"
         className={cn(
           "flex h-[32px] w-fit cursor-pointer items-center gap-1 rounded-lg px-2 py-1 text-[14px] font-[500]",
           initialItem ? "bg-blue-100 text-blue-600" : "bg-gray-100 text-gray-800",
@@ -80,7 +88,7 @@ const SelectFilter = ({ type, initialItem, onSelect, disabled = false }: SelectF
             />
           </>
         )}
-      </div>
+      </button>
 
       {isOpen && (
         <div

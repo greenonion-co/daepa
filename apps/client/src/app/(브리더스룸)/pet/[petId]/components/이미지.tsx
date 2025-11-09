@@ -18,8 +18,8 @@ import { toast } from "sonner";
 const Images = ({ pet }: { pet: PetDto }) => {
   const queryClient = useQueryClient();
   const { formData, setFormData } = usePetStore();
-  const [disabled, setDisabled] = useState(true);
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const { mutateAsync: mutateUpdatePet } = useMutation({
     mutationFn: (updateData: UpdatePetDto) => petControllerUpdate(pet.petId, updateData),
@@ -27,65 +27,69 @@ const Images = ({ pet }: { pet: PetDto }) => {
 
   const handleSave = useCallback(async () => {
     try {
-      setIsEditing(true);
+      setIsProcessing(true);
       const pickedData = pick(formData, ["photos"]);
       const updateData = pickBy(pickedData, (value) => !isNil(value));
       await mutateUpdatePet(updateData);
+      // TODO: 이미지 전용 api로 교체
+      await queryClient.invalidateQueries({
+        queryKey: [petControllerFindPetByPetId.name, pet.petId],
+      });
       toast.success("이미지 수정이 완료되었습니다.");
-      setDisabled(true);
+      setIsEditMode(false);
     } catch (error) {
       console.error("이미지 수정 실패:", error);
       toast.error("이미지 수정에 실패했습니다.");
     } finally {
-      setIsEditing(false);
-      queryClient.invalidateQueries({ queryKey: [petControllerFindPetByPetId.name, pet.petId] });
+      setIsProcessing(false);
     }
   }, [mutateUpdatePet, formData, queryClient, pet.petId]);
 
   return (
-    <div className="shadow-xs flex h-full min-w-[340px] flex-col gap-2 rounded-2xl bg-white p-3">
+    <div className="shadow-xs flex min-h-[480px] min-w-[340px] flex-1 flex-col gap-2 rounded-2xl bg-white p-3">
       <div className="text-[14px] font-[600] text-gray-600">이미지</div>
 
-      {disabled && isNil(formData.photos) && (
+      {!isEditMode && isNil(formData.photos) && (
         <div className="flex h-full flex-col items-center justify-center">
           <ImageUp className="h-[20%] w-[20%] text-blue-500/70" />
         </div>
       )}
-      <DndImagePicker disabled={disabled} />
+      <DndImagePicker disabled={!isEditMode} />
 
       <div className="mt-2 flex w-full flex-1 items-end gap-2">
-        {!disabled && (
+        {isEditMode && (
           <Button
+            disabled={isProcessing}
             className="h-10 flex-1 cursor-pointer rounded-lg font-bold"
             onClick={() => {
               setFormData((prev) => ({
                 ...prev,
                 photos: pet.photos,
               }));
-              setDisabled(true);
+              setIsEditMode(false);
             }}
           >
             취소
           </Button>
         )}
         <Button
-          disabled={isEditing}
+          disabled={isProcessing}
           className={cn(
             "flex-2 h-10 cursor-pointer rounded-lg font-bold",
-            !disabled && "bg-red-600 hover:bg-red-600/90",
-            isEditing && "bg-gray-300",
+            isEditMode && "bg-red-600 hover:bg-red-600/90",
+            isProcessing && "bg-gray-300",
           )}
           onClick={() => {
-            if (!disabled) {
+            if (isEditMode) {
               handleSave();
             } else {
-              setDisabled(false);
+              setIsEditMode(true);
             }
           }}
         >
-          {isEditing ? (
+          {isProcessing ? (
             <Loading />
-          ) : disabled ? (
+          ) : !isEditMode ? (
             isNil(formData.photos) ? (
               "이미지 등록"
             ) : (

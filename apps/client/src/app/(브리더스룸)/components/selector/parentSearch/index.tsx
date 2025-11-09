@@ -64,8 +64,6 @@ const ParentSearchSelector = ({
       }
       return undefined;
     },
-    // TODO!: 이러면 새로 등록한 개체가 바로 조회되지 않음
-    staleTime: 5 * 60 * 1000, // 5분 동안 데이터를 'fresh'하게 유지
     select: (data) =>
       data.pages
         .flatMap((page) => page.data.data)
@@ -100,15 +98,17 @@ const ParentSearchSelector = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="rounded-4xl max-h-[800px] sm:max-w-[720px]">
-        <DialogTitle />
+      <DialogContent className="max-h-[90vh] rounded-3xl sm:max-w-[720px]">
+        <DialogTitle className="sr-only">부모 개체 선택</DialogTitle>
 
-        <div className="flex h-[90vh] flex-col">
+        <div className="flex h-full flex-col">
           <Header
             step={step}
+            searchType={petListType}
             setStep={setStep}
             selectedPetName={selectedPet?.name ?? ""}
             setSearchQuery={setSearchQuery}
+            setSearchType={setPetListType}
           />
           <div ref={contentRef} className="relative flex-1">
             {step === 1 ? (
@@ -120,7 +120,6 @@ const ParentSearchSelector = ({
                 loaderRefAction={ref}
                 showTab={showTab}
                 searchType={petListType}
-                setSearchType={setPetListType}
               />
             ) : (
               <LinkStep
