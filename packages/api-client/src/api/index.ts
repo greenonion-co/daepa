@@ -6,6 +6,7 @@
  * OpenAPI spec version: 1.0
  */
 import type {
+  AdoptionControllerGetAdoptionByPetIdParams,
   AdoptionControllerGetAllAdoptionsParams,
   AppleNativeLoginRequestDto,
   BrMatingControllerFindAllParams,
@@ -292,10 +293,14 @@ export const adoptionControllerGetAllAdoptions = (
   });
 };
 
-export const adoptionControllerGetAdoptionByPetId = (petId: string) => {
+export const adoptionControllerGetAdoptionByPetId = (
+  petId: string,
+  params?: AdoptionControllerGetAdoptionByPetIdParams,
+) => {
   return useCustomInstance<AdoptionDetailResponseDto>({
     url: `/api/v1/adoption/${petId}`,
     method: "GET",
+    params,
   });
 };
 

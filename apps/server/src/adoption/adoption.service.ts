@@ -237,6 +237,7 @@ export class AdoptionService {
       // 이미 분양 정보가 있는지 확인
       const existingAdoption = await entityManager.existsBy(AdoptionEntity, {
         petId: createAdoptionDto.petId,
+        isActive: true,
         isDeleted: false,
       });
 
@@ -262,6 +263,8 @@ export class AdoptionService {
         adoptionId,
         sellerId,
         buyerId: createAdoptionDto.buyerId,
+        isActive:
+          createAdoptionDto.status === ADOPTION_SALE_STATUS.SOLD ? false : true,
       });
 
       await entityManager.save(AdoptionEntity, adoptionEntity);
@@ -308,6 +311,9 @@ export class AdoptionService {
       Object.assign(newAdoptionEntity, {
         ...adoptionEntity,
         ...updateAdoptionDto,
+        buyerId: updateAdoptionDto.buyerId ?? null,
+        isActive:
+          updateAdoptionDto.status === ADOPTION_SALE_STATUS.SOLD ? false : true,
       });
 
       await entityManager.save(AdoptionEntity, newAdoptionEntity);

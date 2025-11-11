@@ -53,6 +53,11 @@ export class AdoptionEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 
+  // 데이터 자체를 삭제한 것과, 판매완료가 아닌 최신 데이터를 구분하기 위한 플래그
+  // 동일한 주인이 판매완료를 했다가, 추후에 다시 재입양을 하여 또다시 분양정보를 생성하는 케이스 대응 목적
+  @Column({ default: true })
+  isActive: boolean;
+
   @Column({ default: false })
   isDeleted: boolean;
 
