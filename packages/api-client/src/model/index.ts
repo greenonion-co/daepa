@@ -6,6 +6,7 @@
  * OpenAPI spec version: 1.0
  */
 
+export * from "./adoptionControllerGetAdoptionByPetIdParams";
 export * from "./adoptionControllerGetAllAdoptions200";
 export * from "./adoptionControllerGetAllAdoptionsOrder";
 export * from "./adoptionControllerGetAllAdoptionsParams";
@@ -180,4 +181,3 @@ export * from "./userSimpleDto";
 export * from "./verifyEmailDto";
 export * from "./verifyNameDto";
 export * from "./verifyPetNameDto";
-export * from "./adoptionControllerGetAdoptionByPetIdParams";

@@ -298,7 +298,7 @@ export const adoptionControllerGetAdoptionByPetId = (
   params?: AdoptionControllerGetAdoptionByPetIdParams,
 ) => {
   return useCustomInstance<AdoptionDetailResponseDto>({
-    url: `/api/v1/adoption/${petId}`,
+    url: `/api/v1/adoption/by-pet/${petId}`,
     method: "GET",
     params,
   });
@@ -4126,7 +4126,7 @@ export const getAdoptionControllerGetAdoptionByPetIdMockHandler = (
         info: Parameters<Parameters<typeof http.get>[1]>[0],
       ) => Promise<AdoptionDetailResponseDto> | AdoptionDetailResponseDto),
 ) => {
-  return http.get("*/api/v1/adoption/:petId", async (info) => {
+  return http.get("*/api/v1/adoption/by-pet/:petId", async (info) => {
     await delay(1000);
 
     return new HttpResponse(

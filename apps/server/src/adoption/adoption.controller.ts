@@ -74,7 +74,7 @@ export class AdoptionController {
     return this.adoptionService.findAll(pageOptionsDto, token.userId);
   }
 
-  @Get('/:petId')
+  @Get('/by-pet/:petId')
   @ApiQuery({
     name: 'includeInactive',
     required: false,
