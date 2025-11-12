@@ -7,15 +7,14 @@
  */
 
 /**
- * 펫 성장단계
+ * 알 상태
  */
-export type PetDetailDtoGrowth = (typeof PetDetailDtoGrowth)[keyof typeof PetDetailDtoGrowth];
+export type PetFullDtoEggStatus = (typeof PetFullDtoEggStatus)[keyof typeof PetFullDtoEggStatus];
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const PetDetailDtoGrowth = {
-  BABY: "BABY",
-  JUVENILE: "JUVENILE",
-  PRE_ADULT: "PRE_ADULT",
-  ADULT: "ADULT",
+export const PetFullDtoEggStatus = {
+  UNFERTILIZED: "UNFERTILIZED",
+  FERTILIZED: "FERTILIZED",
+  HATCHED: "HATCHED",
   DEAD: "DEAD",
 } as const;

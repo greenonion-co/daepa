@@ -6,7 +6,7 @@ import {
   PetAdoptionDtoLocation,
   PetAdoptionDtoStatus,
   UpdateAdoptionDto,
-  adoptionControllerGetAdoption,
+  adoptionControllerGetAdoptionByPetId,
 } from "@repo/api-client";
 import FormItem from "./FormItem";
 import SelectFilter from "@/app/(브리더스룸)/components/SelectFilter";
@@ -23,21 +23,23 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import Loading from "@/components/common/Loading";
+import { useRouter } from "next/navigation";
 
 interface AdoptionInfoProps {
-  adoptionId?: string;
   petId: string;
 }
 
-const AdoptionInfo = ({ petId, adoptionId }: AdoptionInfoProps) => {
+const AdoptionInfo = ({ petId }: AdoptionInfoProps) => {
+  const router = useRouter();
+
   const { formData, setFormData } = usePetStore();
   const [isEditMode, setIsEditMode] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
 
   const { data: adoption, refetch } = useQuery({
-    queryKey: [adoptionControllerGetAdoption.name, adoptionId],
-    queryFn: () => adoptionControllerGetAdoption(adoptionId ?? ""),
-    enabled: !!adoptionId,
+    queryKey: [adoptionControllerGetAdoptionByPetId.name, petId],
+    queryFn: () => adoptionControllerGetAdoptionByPetId(petId),
+    enabled: !!petId,
     select: (response) => response.data.data,
   });
 
@@ -105,16 +107,23 @@ const AdoptionInfo = ({ petId, adoptionId }: AdoptionInfoProps) => {
         await createAdoption({ ...newAdoptionDto, petId });
       }
 
-      await refetch();
       setIsEditMode(false);
-      toast.success("분양 정보가 성공적으로 생성되었습니다.");
+
+      // 판매완료인 경우, 더 이상 본인 펫이 아님
+      if (newAdoptionDto.status === PetAdoptionDtoStatus.SOLD) {
+        toast.success("분양 완료! 분양룸으로 이동합니다.");
+        void router.replace("/adoption");
+      } else {
+        await refetch();
+        toast.success("분양 정보가 성공적으로 생성되었습니다.");
+      }
     } catch (error) {
       console.error("분양 생성 실패:", error);
       toast.error("분양 생성에 실패했습니다. 다시 시도해주세요.");
     } finally {
       setIsProcessing(false);
     }
-  }, [updateAdoption, createAdoption, adoptionData, petId, refetch, setIsProcessing]);
+  }, [updateAdoption, createAdoption, adoptionData, petId, refetch, setIsProcessing, router]);
 
   const handleSelectBuyer = useCallback(() => {
     if (!isEditMode) return;
@@ -155,7 +164,21 @@ const AdoptionInfo = ({ petId, adoptionId }: AdoptionInfoProps) => {
             type="adoptionStatus"
             initialItem={!isEditMode && isNil(adoption) ? undefined : adoptionData.status}
             onSelect={(item) => {
-              setFormData((prev) => ({ ...prev, adoption: { ...prev.adoption, status: item } }));
+              setFormData((prev) => {
+                const nextStatus = item as PetAdoptionDtoStatus;
+                const shouldClearBuyer = !(
+                  nextStatus === PetAdoptionDtoStatus.ON_RESERVATION ||
+                  nextStatus === PetAdoptionDtoStatus.SOLD
+                );
+                return {
+                  ...prev,
+                  adoption: {
+                    ...prev.adoption,
+                    status: nextStatus,
+                    buyer: shouldClearBuyer ? undefined : prev.adoption?.buyer,
+                  },
+                };
+              });
             }}
           />
         }
@@ -222,21 +245,23 @@ const AdoptionInfo = ({ petId, adoptionId }: AdoptionInfoProps) => {
                     )}
                   >
                     {isNil(adoptionData.buyer?.userId) ? (
-                      "미정"
+                      "-"
                     ) : (
                       <div className="flex items-center gap-1">{adoptionData.buyer?.name}</div>
                     )}
                   </div>
                 )}
 
-                {isEditMode && (
-                  <Button
-                    className="ml-1 h-8 cursor-pointer rounded-lg px-2 text-[12px] text-white"
-                    onClick={handleSelectBuyer}
-                  >
-                    {isNil(adoptionData.buyer?.userId) ? "입양자 선택" : "변경"}
-                  </Button>
-                )}
+                {isEditMode &&
+                  (adoptionData.status === PetAdoptionDtoStatus.ON_RESERVATION ||
+                    adoptionData.status === PetAdoptionDtoStatus.SOLD) && (
+                    <Button
+                      className="ml-1 h-8 cursor-pointer rounded-lg px-2 text-[12px] text-white"
+                      onClick={handleSelectBuyer}
+                    >
+                      {isNil(adoptionData.buyer?.userId) ? "입양자 선택" : "변경"}
+                    </Button>
+                  )}
               </>
             }
           />

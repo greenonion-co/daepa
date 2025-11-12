@@ -35,7 +35,7 @@ function PetDetailPage({ params }: PetDetailPageProps) {
         {/* 사육정보 (개체 이름, 종, 성별, 크기, 모프, 형질, 먹이) */}
         <BreedingInfo petId={petId} />
         {/* 분양 정보 */}
-        <AdoptionInfo adoptionId={pet.adoption?.adoptionId} petId={petId} />
+        <AdoptionInfo petId={petId} />
 
         {/* 사진 */}
         <Images pet={pet} />

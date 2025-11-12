@@ -5,32 +5,31 @@
  * Project Daepa API description
  * OpenAPI spec version: 1.0
  */
-import type { PetDtoType } from "./petDtoType";
+import type { PetFullDtoType } from "./petFullDtoType";
 import type { UserProfilePublicDto } from "./userProfilePublicDto";
-import type { PetDtoSpecies } from "./petDtoSpecies";
+import type { PetFullDtoSpecies } from "./petFullDtoSpecies";
 import type { PetDetailBaseDto } from "./petDetailBaseDto";
 import type { EggDetailDto } from "./eggDetailDto";
 import type { LayingDto } from "./layingDto";
-import type { PetDtoGrowth } from "./petDtoGrowth";
-import type { PetDtoSex } from "./petDtoSex";
-import type { PetDtoEggStatus } from "./petDtoEggStatus";
-import type { PetDtoFather } from "./petDtoFather";
-import type { PetDtoMother } from "./petDtoMother";
-import type { PetAdoptionDto } from "./petAdoptionDto";
-import type { PetDtoStatus } from "./petDtoStatus";
+import type { PetFullDtoGrowth } from "./petFullDtoGrowth";
+import type { PetFullDtoSex } from "./petFullDtoSex";
+import type { PetFullDtoEggStatus } from "./petFullDtoEggStatus";
+import type { PetFullDtoFather } from "./petFullDtoFather";
+import type { PetFullDtoMother } from "./petFullDtoMother";
+import type { PetFullDtoStatus } from "./petFullDtoStatus";
 import type { PetImageItem } from "./petImageItem";
 
-export interface PetDto {
+export interface PetFullDto {
   /** 펫 아이디 */
   petId: string;
   /** 펫 타입(egg/pet) */
-  type?: PetDtoType;
+  type?: PetFullDtoType;
   /** 펫 주인 정보 */
   owner: UserProfilePublicDto;
   /** 펫 이름 */
   name?: string;
   /** 펫 종 */
-  species: PetDtoSpecies;
+  species: PetFullDtoSpecies;
   /** 펫 출생일 */
   hatchingDate?: string;
   /** 펫 이미지 목록 */
@@ -48,9 +47,9 @@ export interface PetDto {
   /** 산란 정보 */
   laying?: LayingDto;
   /** 펫 성장단계 */
-  growth?: PetDtoGrowth;
+  growth?: PetFullDtoGrowth;
   /** 펫 성별(수컷, 암컷, 미구분) */
-  sex?: PetDtoSex;
+  sex?: PetFullDtoSex;
   /** 펫 모프 */
   morphs?: string[];
   /** 펫 형질 */
@@ -62,15 +61,13 @@ export interface PetDto {
   /** 부화 온도 */
   temperature?: number;
   /** 알 상태 */
-  eggStatus?: PetDtoEggStatus;
+  eggStatus?: PetFullDtoEggStatus;
   /** 아빠 개체 정보 */
-  father?: PetDtoFather;
+  father?: PetFullDtoFather;
   /** 엄마 개체 정보 */
-  mother?: PetDtoMother;
-  /** 분양 정보 */
-  adoption?: PetAdoptionDto;
+  mother?: PetFullDtoMother;
   /** 부모 관계 상태 */
-  status: PetDtoStatus;
+  status: PetFullDtoStatus;
   /** 펫 이미지 목록 */
   photos?: PetImageItem[];
 }

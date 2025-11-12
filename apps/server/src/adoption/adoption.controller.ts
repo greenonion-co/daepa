@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import {
   ApiExtraModels,
+  ApiQuery,
   ApiResponse,
   ApiTags,
   getSchemaPath,
@@ -73,7 +74,14 @@ export class AdoptionController {
     return this.adoptionService.findAll(pageOptionsDto, token.userId);
   }
 
-  @Get('/:adoptionId')
+  @Get('/by-pet/:petId')
+  @ApiQuery({
+    name: 'includeInactive',
+    required: false,
+    description: '비활성 상태의 분양 정보도 포함할지 여부',
+    type: String,
+    example: 'true',
+  })
   @ApiResponse({
     status: 200,
     description: '펫별 분양 정보 조회 성공',
@@ -83,10 +91,13 @@ export class AdoptionController {
     status: 404,
     description: '분양 정보를 찾을 수 없음',
   })
-  async getAdoption(
-    @Param('adoptionId') adoptionId: string,
+  async getAdoptionByPetId(
+    @Param('petId') petId: string,
+    @Query('includeInactive') includeInactive?: string,
   ): Promise<AdoptionDetailResponseDto> {
-    const data = await this.adoptionService.findOne({ adoptionId });
+    const data = await this.adoptionService.findOne(
+      includeInactive === 'true' ? { petId } : { petId, isActive: true },
+    );
     return {
       success: true,
       message: '펫별 분양 정보 조회 성공',

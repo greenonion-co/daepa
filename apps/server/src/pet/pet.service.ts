@@ -22,6 +22,7 @@ import {
   CompleteHatchingDto,
   CreatePetDto,
   PetDto,
+  PetFullDto,
   PetParentDto,
 } from './pet.dto';
 import {
@@ -42,7 +43,6 @@ import { AdoptionEntity } from '../adoption/adoption.entity';
 import { format, startOfMonth, endOfMonth } from 'date-fns';
 import { LayingEntity } from 'src/laying/laying.entity';
 import { isMySQLError } from 'src/common/error';
-import { UserProfilePublicDto } from 'src/user/user.dto';
 import { ParentRequestEntity } from 'src/parent_request/parent_request.entity';
 import { PetImageService } from 'src/pet_image/pet_image.service';
 import { PetImageEntity } from 'src/pet_image/pet_image.entity';
@@ -172,7 +172,7 @@ export class PetService {
     });
   }
 
-  async findPetByPetId(petId: string, userId: string): Promise<PetDto> {
+  async findPetByPetId(petId: string, userId: string): Promise<PetFullDto> {
     return this.dataSource.transaction(async (entityManager: EntityManager) => {
       const pet = await entityManager.findOne(PetEntity, {
         where: { petId, isDeleted: false },
@@ -193,23 +193,6 @@ export class PetService {
         petDetail = await entityManager.findOne(PetDetailEntity, {
           where: { petId },
         });
-      }
-
-      // adoption 정보를 petId로 조회
-      const adoption = await entityManager.findOne(AdoptionEntity, {
-        where: { petId, isDeleted: false },
-      });
-
-      let buyer: UserProfilePublicDto | null = null;
-      if (adoption?.buyerId) {
-        try {
-          buyer = await this.userService.findOneProfile(
-            adoption.buyerId,
-            entityManager,
-          );
-        } catch {
-          buyer = null;
-        }
       }
 
       if (!pet.ownerId) {
@@ -234,13 +217,21 @@ export class PetService {
         );
 
       // father, mother pet이 isPublic이 아닌 경우, ownerId가 자신인 경우에만 펫 정보 반환
-      const fatherDisplayable = this.getParentPublicSafe(father, pet, userId);
-      const motherDisplayable = this.getParentPublicSafe(mother, pet, userId);
+      const fatherDisplayable = this.getParentPublicSafe(
+        father,
+        pet.ownerId,
+        userId,
+      );
+      const motherDisplayable = this.getParentPublicSafe(
+        mother,
+        pet.ownerId,
+        userId,
+      );
 
       const { growth, sex, morphs, traits, foods, weight } = petDetail ?? {};
       const { temperature, status: eggStatus } = eggDetail ?? {};
 
-      return plainToInstance(PetDto, {
+      return plainToInstance(PetFullDto, {
         ...pet,
         growth,
         sex,
@@ -255,12 +246,6 @@ export class PetService {
         father: fatherDisplayable,
         mother: motherDisplayable,
         photos: files,
-        adoption: adoption
-          ? {
-              ...adoption,
-              buyer,
-            }
-          : null,
       });
     });
   }
@@ -427,12 +412,12 @@ export class PetService {
           await this.parentRequestService.getParentsWithRequestStatus(petId);
         const fatherDisplayable = this.getParentPublicSafe(
           father,
-          petRaw,
+          petRaw.ownerId,
           userId,
         );
         const motherDisplayable = this.getParentPublicSafe(
           mother,
-          petRaw,
+          petRaw.ownerId,
           userId,
         );
 
@@ -533,12 +518,12 @@ export class PetService {
           await this.parentRequestService.getParentsWithRequestStatus(petId);
         const fatherDisplayable = this.getParentPublicSafe(
           father,
-          petRaw,
+          petRaw.ownerId,
           userId,
         );
         const motherDisplayable = this.getParentPublicSafe(
           mother,
-          petRaw,
+          petRaw.ownerId,
           userId,
         );
 
@@ -658,6 +643,17 @@ export class PetService {
         );
       }
     });
+  }
+
+  async getParentsByPetId(petId: string, userId: string) {
+    const { father, mother } =
+      await this.parentRequestService.getParentsWithRequestStatus(petId);
+    const fatherDisplayable = this.getParentPublicSafe(father, userId, userId);
+    const motherDisplayable = this.getParentPublicSafe(mother, userId, userId);
+    return {
+      father: fatherDisplayable ?? undefined,
+      mother: motherDisplayable ?? undefined,
+    };
   }
 
   async completeHatching(
@@ -829,8 +825,16 @@ export class PetService {
           await this.parentRequestService.getParentsWithRequestStatus(
             pet.petId,
           );
-        const fatherDisplayable = this.getParentPublicSafe(father, pet, userId);
-        const motherDisplayable = this.getParentPublicSafe(mother, pet, userId);
+        const fatherDisplayable = this.getParentPublicSafe(
+          father,
+          pet.ownerId,
+          userId,
+        );
+        const motherDisplayable = this.getParentPublicSafe(
+          mother,
+          pet.ownerId,
+          userId,
+        );
 
         return plainToInstance(PetDto, {
           ...pet,
@@ -1030,27 +1034,28 @@ export class PetService {
 
   private getParentPublicSafe(
     parent: PetParentDto | null,
-    child: PetEntity,
+    childOwnerId: string | null,
     userId: string,
   ) {
     if (!parent) return null;
 
+    // 본인 소유 펫
+    const isMyPet = childOwnerId === userId;
+    if (isMyPet) {
+      return parent;
+    }
+
+    // 부모 개체 삭제 처리
     if (parent.isDeleted) {
       return { hiddenStatus: PET_HIDDEN_STATUS.DELETED };
     }
-    // 타인 소유 부모개체 & 비공개
-    if (!parent.isPublic && parent.owner?.userId !== userId) {
+    // 비공개 처리
+    if (!parent.isPublic) {
       return { hiddenStatus: PET_HIDDEN_STATUS.SECRET };
     }
-    // 타인 소유 부모개체 & 본인 소유 펫 & 부모 요청중 (요청 중인 정보는 타인에게 미노출)
-    if (
-      parent.status === PARENT_STATUS.PENDING &&
-      parent.owner?.userId !== userId &&
-      child.ownerId !== userId
-    ) {
+    // 부모 요청중
+    if (parent.status === PARENT_STATUS.PENDING) {
       return { hiddenStatus: PET_HIDDEN_STATUS.PENDING };
     }
-
-    return parent;
   }
 }

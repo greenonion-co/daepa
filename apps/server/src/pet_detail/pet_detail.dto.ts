@@ -9,7 +9,7 @@ import {
 } from 'class-validator';
 import { PET_GROWTH, PET_SEX } from 'src/pet/pet.constants';
 
-export class PetDetailDto {
+export class PetDetailBaseDto {
   @ApiProperty({
     description: '펫 성장단계',
     example: 'JUNIOR',
@@ -86,7 +86,7 @@ export class PetDetailDto {
   declare isDeleted?: boolean;
 }
 
-export class PetDetailSummaryDto extends PickType(PetDetailDto, [
+export class PetDetailSummaryDto extends PickType(PetDetailBaseDto, [
   'sex',
   'morphs',
   'traits',

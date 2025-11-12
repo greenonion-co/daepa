@@ -17,6 +17,7 @@ import {
   VerifyPetNameDto,
   PetDto,
   PetFilterDto,
+  GetParentsByPetIdResponseDto,
 } from './pet.dto';
 import { PetService } from './pet.service';
 import {
@@ -228,5 +229,32 @@ export class PetController {
     } else {
       throw new ConflictException('이미 사용중인 닉네임입니다.');
     }
+  }
+
+  @Get('/parents/:petId')
+  @ApiParam({
+    name: 'petId',
+    description: '펫 아이디',
+    example: 'XXXXXXXX',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '펫 부모 정보 조회 성공',
+    type: GetParentsByPetIdResponseDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: '펫 부모 정보를 찾을 수 없습니다.',
+  })
+  async getParentsByPetId(
+    @Param('petId') petId: string,
+    @JwtUser() token: JwtUserPayload,
+  ): Promise<GetParentsByPetIdResponseDto> {
+    const data = await this.petService.getParentsByPetId(petId, token.userId);
+    return {
+      success: true,
+      message: '펫 정보 조회 성공',
+      data,
+    };
   }
 }

@@ -5,14 +5,14 @@
  * Project Daepa API description
  * OpenAPI spec version: 1.0
  */
-import type { PetDetailDtoGrowth } from "./petDetailDtoGrowth";
-import type { PetDetailDtoSex } from "./petDetailDtoSex";
+import type { PetDetailBaseDtoGrowth } from "./petDetailBaseDtoGrowth";
+import type { PetDetailBaseDtoSex } from "./petDetailBaseDtoSex";
 
-export interface PetDetailDto {
+export interface PetDetailBaseDto {
   /** 펫 성장단계 */
-  growth?: PetDetailDtoGrowth;
+  growth?: PetDetailBaseDtoGrowth;
   /** 펫 성별(수컷, 암컷, 미구분) */
-  sex?: PetDetailDtoSex;
+  sex?: PetDetailBaseDtoSex;
   /** 펫 모프 */
   morphs?: string[];
   /** 펫 형질 */

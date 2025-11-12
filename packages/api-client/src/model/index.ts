@@ -6,6 +6,7 @@
  * OpenAPI spec version: 1.0
  */
 
+export * from "./adoptionControllerGetAdoptionByPetIdParams";
 export * from "./adoptionControllerGetAllAdoptions200";
 export * from "./adoptionControllerGetAllAdoptionsOrder";
 export * from "./adoptionControllerGetAllAdoptionsParams";
@@ -57,6 +58,10 @@ export * from "./eggDetailDtoStatus";
 export * from "./filterPetListResponseDto";
 export * from "./filterPetListResponseDtoData";
 export * from "./findPetByPetIdResponseDto";
+export * from "./getParentsByPetIdResponseDto";
+export * from "./getParentsByPetIdResponseDtoData";
+export * from "./getParentsByPetIdResponseDtoDataFather";
+export * from "./getParentsByPetIdResponseDtoDataMother";
 export * from "./kakaoNativeLoginRequestDto";
 export * from "./layingByDateDto";
 export * from "./layingDto";
@@ -88,9 +93,9 @@ export * from "./petControllerFindAllParams";
 export * from "./petControllerFindAllSex";
 export * from "./petControllerFindAllSpecies";
 export * from "./petControllerFindAllStatus";
-export * from "./petDetailDto";
-export * from "./petDetailDtoGrowth";
-export * from "./petDetailDtoSex";
+export * from "./petDetailBaseDto";
+export * from "./petDetailBaseDtoGrowth";
+export * from "./petDetailBaseDtoSex";
 export * from "./petDto";
 export * from "./petDtoEggStatus";
 export * from "./petDtoFather";
@@ -100,6 +105,15 @@ export * from "./petDtoSex";
 export * from "./petDtoSpecies";
 export * from "./petDtoStatus";
 export * from "./petDtoType";
+export * from "./petFullDto";
+export * from "./petFullDtoEggStatus";
+export * from "./petFullDtoFather";
+export * from "./petFullDtoGrowth";
+export * from "./petFullDtoMother";
+export * from "./petFullDtoSex";
+export * from "./petFullDtoSpecies";
+export * from "./petFullDtoStatus";
+export * from "./petFullDtoType";
 export * from "./petHiddenStatusDto";
 export * from "./petHiddenStatusDtoHiddenStatus";
 export * from "./petImageItem";
