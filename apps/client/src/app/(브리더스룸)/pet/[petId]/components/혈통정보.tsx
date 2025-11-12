@@ -36,7 +36,7 @@ const PedigreeInfo = ({
     select: (response) => response.data.data,
   });
 
-  console.log(parents);
+  console.log(parents?.father);
 
   const { mutateAsync: mutateUnlinkParent } = useMutation({
     mutationFn: ({ role }: { role: UnlinkParentDtoRole }) =>
@@ -114,7 +114,6 @@ const PedigreeInfo = ({
 
       <div className="flex gap-3 max-[650px]:flex-col">
         <ParentLink
-          species={species}
           label="부"
           data={
             // 내 펫인 경우는 모든 상태를, 내 펫이 아닌 경우는 부모요청이 승인된 상태에만 정보를 노출

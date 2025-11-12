@@ -8,9 +8,6 @@ import { Button } from "@/components/ui/button";
 import Dialog from "../../components/Form/Dialog";
 import {
   PetControllerFindAllFilterType,
-  PetDtoFather,
-  PetDtoMother,
-  PetDtoSpecies,
   PetHiddenStatusDtoHiddenStatus,
   PetParentDto,
   PetParentDtoStatus,
@@ -24,9 +21,8 @@ import PetThumbnail from "../../components/PetThumbnail";
 import { useCallback } from "react";
 
 interface ParentLinkProps {
-  species?: PetDtoSpecies;
   label: "부" | "모";
-  data?: PetDtoFather | PetDtoMother;
+  data?: PetParentDto;
   editable?: boolean;
   petListType?: PetControllerFindAllFilterType;
   onSelect?: (item: PetParentDtoWithMessage) => void;
@@ -34,9 +30,8 @@ interface ParentLinkProps {
 }
 
 const ParentLink = ({
-  species,
   label,
-  data = {} as PetDtoFather | PetDtoMother,
+  data,
   editable = true,
   petListType = PetControllerFindAllFilterType.ALL,
   onSelect,
@@ -95,7 +90,7 @@ const ParentLink = ({
       <ParentSearchSelector
         isOpen={isOpen}
         onClose={close}
-        species={species}
+        species={data?.species}
         onSelect={(item) => {
           close();
           onSelect?.(item);
