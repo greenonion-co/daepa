@@ -9,10 +9,10 @@
 /**
  * 펫 성장단계
  */
-export type PetFullDtoGrowth = (typeof PetFullDtoGrowth)[keyof typeof PetFullDtoGrowth];
+export type PetSingleDtoGrowth = (typeof PetSingleDtoGrowth)[keyof typeof PetSingleDtoGrowth];
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const PetFullDtoGrowth = {
+export const PetSingleDtoGrowth = {
   BABY: "BABY",
   JUVENILE: "JUVENILE",
   PRE_ADULT: "PRE_ADULT",

@@ -7,13 +7,12 @@
  */
 
 /**
- * 펫 성별(수컷, 암컷, 미구분)
+ * 펫 타입(egg/pet)
  */
-export type PetFullDtoSex = (typeof PetFullDtoSex)[keyof typeof PetFullDtoSex];
+export type PetSingleDtoType = (typeof PetSingleDtoType)[keyof typeof PetSingleDtoType];
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const PetFullDtoSex = {
-  MALE: "M",
-  FEMALE: "F",
-  NON: "N",
+export const PetSingleDtoType = {
+  EGG: "EGG",
+  PET: "PET",
 } as const;

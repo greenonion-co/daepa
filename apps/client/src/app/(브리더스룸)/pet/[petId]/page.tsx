@@ -40,13 +40,7 @@ function PetDetailPage({ params }: PetDetailPageProps) {
         {/* 사진 */}
         <Images pet={pet} />
 
-        <PedigreeInfo
-          father={pet.father}
-          mother={pet.mother}
-          species={pet.species}
-          petId={petId}
-          userId={pet.owner.userId}
-        />
+        <PedigreeInfo species={pet.species} petId={petId} userId={pet.owner.userId} />
       </div>
     </div>
   );

@@ -1,15 +1,15 @@
 "use client";
 
-import { Search, X, Lock } from "lucide-react";
+import { Search, X, Lock, User } from "lucide-react";
 import Link from "next/link";
 import { overlay } from "overlay-kit";
 import ParentSearchSelector from "../../components/selector/parentSearch";
 import { Button } from "@/components/ui/button";
 import Dialog from "../../components/Form/Dialog";
 import {
+  GetParentsByPetIdResponseDtoDataFather,
+  GetParentsByPetIdResponseDtoDataMother,
   PetControllerFindAllFilterType,
-  PetDtoFather,
-  PetDtoMother,
   PetDtoSpecies,
   PetHiddenStatusDtoHiddenStatus,
   PetParentDto,
@@ -24,9 +24,9 @@ import PetThumbnail from "../../components/PetThumbnail";
 import { useCallback } from "react";
 
 interface ParentLinkProps {
-  species?: PetDtoSpecies;
+  species: PetDtoSpecies;
   label: "부" | "모";
-  data?: PetDtoFather | PetDtoMother;
+  data?: GetParentsByPetIdResponseDtoDataFather | GetParentsByPetIdResponseDtoDataMother;
   editable?: boolean;
   petListType?: PetControllerFindAllFilterType;
   onSelect?: (item: PetParentDtoWithMessage) => void;
@@ -36,7 +36,7 @@ interface ParentLinkProps {
 const ParentLink = ({
   species,
   label,
-  data = {} as PetDtoFather | PetDtoMother,
+  data,
   editable = true,
   petListType = PetControllerFindAllFilterType.ALL,
   onSelect,
@@ -163,8 +163,7 @@ const ParentLink = ({
     <div className="flex-1">
       <dt className="mb-2 flex items-center gap-2 text-xs font-medium text-gray-500 dark:text-gray-400">
         {label}
-        {/* TODO!: isMyPet이 아닌 경우 해당 주인의 정보를 노출 */}{" "}
-        {parent?.status && <ParentStatusBadge status={parent.status} isMyPet={isMyPet} />}
+        {parent?.status && <ParentStatusBadge status={parent.status} />}
       </dt>
 
       <div className="group relative block h-full w-full transition-opacity hover:opacity-95">
@@ -188,16 +187,30 @@ const ParentLink = ({
           }}
           className="flex flex-col items-center gap-2"
         >
-          <PetThumbnail imageUrl={parent.photos?.[0]?.url} />
-
-          <span
-            className={cn(
-              "relative text-[14px] font-bold after:absolute after:bottom-0 after:left-0 after:-z-10 after:h-[15px] after:w-full after:opacity-40",
-              label === "모" ? "after:bg-red-400" : "after:bg-[#247DFE]",
+          <div className="relative w-full">
+            <PetThumbnail imageUrl={parent.photos?.[0]?.url} />
+            {isMyPet ? (
+              <div className="absolute left-2 top-2 flex items-center gap-1.5 rounded-full bg-blue-100 px-2.5 py-1">
+                <span className="text-[11px] font-semibold text-blue-600">My Pet</span>
+              </div>
+            ) : (
+              <div className="absolute left-2 top-2 flex items-center gap-1.5 rounded-full bg-blue-100 px-2.5 py-1">
+                <User className="h-3 w-3 text-blue-600" />
+                <span className="text-[11px] font-semibold text-blue-600">{parent.owner.name}</span>
+              </div>
             )}
-          >
-            {parent.name || "-"}
-          </span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span
+              className={cn(
+                "relative text-[14px] font-bold after:absolute after:bottom-0 after:left-0 after:-z-10 after:h-[15px] after:w-full after:opacity-40",
+                label === "모" ? "after:bg-red-400" : "after:bg-[#247DFE]",
+              )}
+            >
+              {parent.name ?? "-"}
+            </span>
+          </div>
 
           <div className="break-keep text-[14px] font-[500] text-gray-700">
             {parent.morphs?.join(" | ")}

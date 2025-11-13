@@ -2,15 +2,13 @@ import {
   parentRequestControllerLinkParent,
   parentRequestControllerUnlinkParent,
   petControllerFindPetByPetId,
-  PetDtoFather,
-  PetDtoMother,
+  petControllerGetParentsByPetId,
   PetDtoSpecies,
   UnlinkParentDtoRole,
-  UpdateParentRequestDtoStatus,
 } from "@repo/api-client";
 import ParentLink from "../../components/ParentLink";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useCallback, useEffect, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useCallback } from "react";
 import { PetParentDtoWithMessage } from "../../store/parentLink";
 import { AxiosError } from "axios";
 import { toast } from "sonner";
@@ -18,28 +16,24 @@ import { useUserStore } from "@/app/(브리더스룸)/store/user";
 import { Info } from "lucide-react";
 
 const PedigreeInfo = ({
-  father = null,
-  mother = null,
   species,
   petId,
   userId,
 }: {
-  father?: PetDtoFather | null;
-  mother?: PetDtoMother | null;
   species: PetDtoSpecies;
   petId: string;
   userId?: string;
 }) => {
   const queryClient = useQueryClient();
   const { user } = useUserStore();
-  const [selectedParent, setSelectedParent] = useState<{
-    father: PetDtoFather | null;
-    mother: PetDtoMother | null;
-  }>({
-    father: father ?? null,
-    mother: mother ?? null,
-  });
+
   const isMyPet = userId === user?.userId;
+
+  const { data: parents } = useQuery({
+    queryKey: [petControllerGetParentsByPetId.name, petId],
+    queryFn: () => petControllerGetParentsByPetId(petId),
+    select: (response) => response.data.data,
+  });
 
   const { mutateAsync: mutateUnlinkParent } = useMutation({
     mutationFn: ({ role }: { role: UnlinkParentDtoRole }) =>
@@ -88,7 +82,7 @@ const PedigreeInfo = ({
 
   const handleUnlink = useCallback(
     async (label: UnlinkParentDtoRole) => {
-      const parent = selectedParent?.[label];
+      const parent = parents?.[label];
       if (!parent || !("petId" in parent) || !parent.petId)
         return toast.error("부모 연동 해제에 실패했습니다.");
       try {
@@ -103,15 +97,8 @@ const PedigreeInfo = ({
         }
       }
     },
-    [selectedParent, mutateUnlinkParent, queryClient, petId],
+    [parents, mutateUnlinkParent, queryClient, petId],
   );
-
-  useEffect(() => {
-    setSelectedParent({
-      father,
-      mother,
-    });
-  }, [father, mother, setSelectedParent]);
 
   return (
     <div className="shadow-xs flex h-fit w-full max-w-[650px] flex-col gap-2 rounded-2xl bg-white p-3">
@@ -126,16 +113,7 @@ const PedigreeInfo = ({
         <ParentLink
           species={species}
           label="부"
-          data={
-            // 내 펫인 경우는 모든 상태를, 내 펫이 아닌 경우는 부모요청이 승인된 상태에만 정보를 노출
-            isMyPet ||
-            (!isMyPet &&
-              selectedParent?.father &&
-              "status" in selectedParent.father &&
-              selectedParent.father?.status === UpdateParentRequestDtoStatus.APPROVED)
-              ? selectedParent.father!
-              : undefined
-          }
+          data={parents?.father}
           onSelect={(selectedPet) =>
             handleParentSelect(UnlinkParentDtoRole.FATHER, {
               ...selectedPet,
@@ -148,15 +126,7 @@ const PedigreeInfo = ({
         <ParentLink
           species={species}
           label="모"
-          data={
-            isMyPet ||
-            (!isMyPet &&
-              selectedParent?.mother &&
-              "status" in selectedParent.mother &&
-              selectedParent.mother?.status === UpdateParentRequestDtoStatus.APPROVED)
-              ? selectedParent.mother!
-              : undefined
-          }
+          data={parents?.mother}
           onSelect={(selectedPet) =>
             handleParentSelect(UnlinkParentDtoRole.MOTHER, {
               ...selectedPet,

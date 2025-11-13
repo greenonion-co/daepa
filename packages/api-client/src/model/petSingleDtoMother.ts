@@ -11,4 +11,4 @@ import type { PetHiddenStatusDto } from "./petHiddenStatusDto";
 /**
  * 엄마 개체 정보
  */
-export type PetFullDtoMother = PetParentDto | PetHiddenStatusDto;
+export type PetSingleDtoMother = PetParentDto | PetHiddenStatusDto;

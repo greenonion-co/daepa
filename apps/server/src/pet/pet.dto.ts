@@ -689,8 +689,9 @@ export class PetDto extends PetBaseDto {
   declare updatedAt?: Date;
 }
 
+// 부모정보 미포함
 @ApiExtraModels(PetParentDto, PetHiddenStatusDto)
-export class PetFullDto extends PetBaseDto {
+export class PetSingleDto extends PetBaseDto {
   @ApiProperty({
     description: '펫 성장단계',
     example: 'JUNIOR',
@@ -1311,9 +1312,9 @@ export class PetHatchingDateRangeDto {
 export class FindPetByPetIdResponseDto extends CommonResponseDto {
   @ApiProperty({
     description: '펫 정보',
-    type: PetFullDto,
+    type: PetSingleDto,
   })
-  data: PetFullDto;
+  data: PetSingleDto;
 }
 
 export class GetParentsByPetIdResponseDto extends CommonResponseDto {

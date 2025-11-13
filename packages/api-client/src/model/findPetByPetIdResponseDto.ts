@@ -5,7 +5,7 @@
  * Project Daepa API description
  * OpenAPI spec version: 1.0
  */
-import type { PetFullDto } from "./petFullDto";
+import type { PetSingleDto } from "./petSingleDto";
 
 export interface FindPetByPetIdResponseDto {
   /** 성공 여부 */
@@ -13,5 +13,5 @@ export interface FindPetByPetIdResponseDto {
   /** 메시지 */
   message: string;
   /** 펫 정보 */
-  data: PetFullDto;
+  data: PetSingleDto;
 }

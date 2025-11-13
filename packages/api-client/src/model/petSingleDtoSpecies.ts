@@ -9,10 +9,10 @@
 /**
  * 펫 종
  */
-export type PetFullDtoSpecies = (typeof PetFullDtoSpecies)[keyof typeof PetFullDtoSpecies];
+export type PetSingleDtoSpecies = (typeof PetSingleDtoSpecies)[keyof typeof PetSingleDtoSpecies];
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const PetFullDtoSpecies = {
+export const PetSingleDtoSpecies = {
   CRESTED: "CR",
   LEOPARD: "LE",
   FATTAIL: "FT",

@@ -22,7 +22,7 @@ import {
   CompleteHatchingDto,
   CreatePetDto,
   PetDto,
-  PetFullDto,
+  PetSingleDto,
   PetParentDto,
 } from './pet.dto';
 import {
@@ -172,7 +172,7 @@ export class PetService {
     });
   }
 
-  async findPetByPetId(petId: string, userId: string): Promise<PetFullDto> {
+  async findPetByPetId(petId: string): Promise<PetSingleDto> {
     return this.dataSource.transaction(async (entityManager: EntityManager) => {
       const pet = await entityManager.findOne(PetEntity, {
         where: { petId, isDeleted: false },
@@ -210,28 +210,10 @@ export class PetService {
         entityManager,
       );
 
-      const { father, mother } =
-        await this.parentRequestService.getParentsWithRequestStatus(
-          petId,
-          entityManager,
-        );
-
-      // father, mother pet이 isPublic이 아닌 경우, ownerId가 자신인 경우에만 펫 정보 반환
-      const fatherDisplayable = this.getParentPublicSafe(
-        father,
-        pet.ownerId,
-        userId,
-      );
-      const motherDisplayable = this.getParentPublicSafe(
-        mother,
-        pet.ownerId,
-        userId,
-      );
-
       const { growth, sex, morphs, traits, foods, weight } = petDetail ?? {};
       const { temperature, status: eggStatus } = eggDetail ?? {};
 
-      return plainToInstance(PetFullDto, {
+      return plainToInstance(PetSingleDto, {
         ...pet,
         growth,
         sex,
@@ -243,8 +225,6 @@ export class PetService {
         temperature,
         eggStatus,
         owner,
-        father: fatherDisplayable,
-        mother: motherDisplayable,
         photos: files,
       });
     });

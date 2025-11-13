@@ -9,10 +9,11 @@
 /**
  * 알 상태
  */
-export type PetFullDtoEggStatus = (typeof PetFullDtoEggStatus)[keyof typeof PetFullDtoEggStatus];
+export type PetSingleDtoEggStatus =
+  (typeof PetSingleDtoEggStatus)[keyof typeof PetSingleDtoEggStatus];
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const PetFullDtoEggStatus = {
+export const PetSingleDtoEggStatus = {
   UNFERTILIZED: "UNFERTILIZED",
   FERTILIZED: "FERTILIZED",
   HATCHED: "HATCHED",
