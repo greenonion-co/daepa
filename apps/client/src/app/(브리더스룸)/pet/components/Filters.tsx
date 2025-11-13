@@ -55,6 +55,7 @@ export function Filters({
         onSelect={(item) => {
           if (item === searchFilters.species) return;
 
+          // TODO!: 종 변경 시 부, 모 개체 초기화(해칭룸)
           setSearchFilters({
             ...searchFilters,
             species: item,
@@ -84,11 +85,11 @@ export function Filters({
         initialItem={searchFilters.sex}
         onSelect={(item) => setSearchFilters({ ...searchFilters, sex: item })}
       />
-      <SelectFilter
+      {/* <SelectFilter
         type="foods"
         initialItem={searchFilters.foods}
         onSelect={(item) => setSearchFilters({ ...searchFilters, foods: item })}
-      />
+      /> */}
 
       <button
         onClick={handleResetFilters}
