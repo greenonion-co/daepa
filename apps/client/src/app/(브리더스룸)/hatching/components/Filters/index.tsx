@@ -114,7 +114,7 @@ const Filters = () => {
           onClick={reset}
           className="h-[32px] cursor-pointer rounded-lg px-3 text-sm text-blue-700 underline hover:bg-blue-100"
         >
-          필터 되돌리기
+          필터 리셋
         </button>
       )}
     </div>
