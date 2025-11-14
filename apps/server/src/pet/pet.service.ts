@@ -973,10 +973,10 @@ export class PetService {
       });
     }
 
-    // 모프 필터링
+    // 모프 필터링 (OR 조건: 선택한 모프 중 하나라도 포함되면 매칭)
     if (pageOptionsDto.morphs && pageOptionsDto.morphs.length > 0) {
       const morphsJson = JSON.stringify(pageOptionsDto.morphs);
-      queryBuilder.andWhere(`JSON_CONTAINS(petDetail.morphs, :morphs)`, {
+      queryBuilder.andWhere(`JSON_OVERLAPS(petDetail.morphs, :morphs)`, {
         morphs: morphsJson,
       });
     }
