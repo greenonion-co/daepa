@@ -19,7 +19,7 @@ import { pick, pickBy } from "es-toolkit";
 import { isNil } from "es-toolkit";
 import { useNameStore } from "@/app/(브리더스룸)/store/name";
 import { DUPLICATE_CHECK_STATUS } from "@/app/(브리더스룸)/register/types";
-import MultiSelect from "@/app/(브리더스룸)/components/MultiSelect";
+import MultiSelectFormItem from "@/app/(브리더스룸)/components/Form/MultiSelectFormItem";
 import CalendarInput from "@/app/(브리더스룸)/hatching/components/CalendarInput";
 import { format } from "date-fns";
 import NumberField from "@/app/(브리더스룸)/components/Form/NumberField";
@@ -236,7 +236,7 @@ const BreedingInfo = ({ petId }: { petId: string }) => {
           <FormItem
             label="모프"
             content={
-              <MultiSelect
+              <MultiSelectFormItem
                 disabled={!isEditMode}
                 title="모프"
                 selectList={MORPH_LIST_BY_SPECIES[formData.species as PetDtoSpecies]}
@@ -251,7 +251,7 @@ const BreedingInfo = ({ petId }: { petId: string }) => {
           <FormItem
             label="형질"
             content={
-              <MultiSelect
+              <MultiSelectFormItem
                 disabled={!isEditMode}
                 title="형질"
                 selectList={SELECTOR_CONFIGS.traits.selectList.map((item) => item.value)}
@@ -266,7 +266,7 @@ const BreedingInfo = ({ petId }: { petId: string }) => {
           <FormItem
             label="먹이"
             content={
-              <MultiSelect
+              <MultiSelectFormItem
                 disabled={!isEditMode}
                 title="먹이"
                 selectList={SELECTOR_CONFIGS.foods.selectList.map((item) => item.value)}

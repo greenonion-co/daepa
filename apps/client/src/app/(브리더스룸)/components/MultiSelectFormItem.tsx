@@ -12,7 +12,7 @@ interface MultiSelectProps {
   onSelect: (items?: string[]) => void;
 }
 
-const MultiSelect = ({
+const MultiSelectFormItem = ({
   title,
   selectList,
   disabled = false,
@@ -193,4 +193,4 @@ const MultiSelect = ({
   );
 };
 
-export default MultiSelect;
+export default MultiSelectFormItem;
