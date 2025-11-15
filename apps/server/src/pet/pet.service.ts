@@ -435,7 +435,7 @@ export class PetService {
   ): Promise<PageDto<PetDto>> {
     // BR api는 자신의 펫 조회
     pageOptionsDto.filterType = PET_LIST_FILTER_TYPE.MY;
-    console.log('uo: ', pageOptionsDto);
+
     const queryBuilder = this.petRepository
       .createQueryBuilder('pets')
       .where(

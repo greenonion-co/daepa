@@ -4,7 +4,7 @@ import { GROWTH_KOREAN_INFO, MORPH_LIST_BY_SPECIES } from "../../constants";
 import SelectFilter from "../../components/SelectFilter";
 import { cn } from "@/lib/utils";
 import MultiSelectFilter from "../../components/MultiSelectFilter";
-import { PetControllerFindAllParams, PetDtoSpecies } from "@repo/api-client";
+import { PetControllerFindAllParams } from "@repo/api-client";
 
 export function Filters({
   searchFilters,
@@ -67,12 +67,7 @@ export function Filters({
         <MultiSelectFilter
           type="morphs"
           title="모프"
-          selectList={
-            typeof searchFilters.species === "string" &&
-            searchFilters.species in MORPH_LIST_BY_SPECIES
-              ? MORPH_LIST_BY_SPECIES[searchFilters.species as PetDtoSpecies]
-              : []
-          }
+          displayMap={MORPH_LIST_BY_SPECIES[searchFilters.species]}
         />
       )}
       <MultiSelectFilter type="growth" title="크기" displayMap={GROWTH_KOREAN_INFO} />
