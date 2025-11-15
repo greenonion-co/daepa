@@ -9,4 +9,5 @@ export const useAdoptionFilterStore = create<
 
   // Actions
   setSearchFilters: (filters) => set({ searchFilters: filters }),
+  resetFilters: () => set({ searchFilters: {} }),
 }));
