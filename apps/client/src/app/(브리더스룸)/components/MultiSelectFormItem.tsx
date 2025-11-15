@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Check, ChevronDown, X } from "lucide-react";
 
 interface MultiSelectProps {
   title: string;
-  selectList: string[];
+  displayMap: Record<string, string>;
   disabled?: boolean;
   initialItems: string[];
   onSelect: (items?: string[]) => void;
@@ -14,7 +14,7 @@ interface MultiSelectProps {
 
 const MultiSelectFormItem = ({
   title,
-  selectList,
+  displayMap,
   disabled = false,
   initialItems,
   onSelect,
@@ -24,6 +24,8 @@ const MultiSelectFormItem = ({
   const [tempSelectedItems, setTempSelectedItems] = useState<string[] | undefined>(initialItems);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isEntering, setIsEntering] = useState(false);
+
+  const selectList = useMemo(() => Object.keys(displayMap), [displayMap]);
 
   useEffect(() => {
     setSelectedItems(initialItems);

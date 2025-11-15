@@ -10,8 +10,11 @@ import {
   PetDtoType,
 } from "@repo/api-client";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { MORPH_LIST_BY_SPECIES } from "@/app/(브리더스룸)/constants";
-import { SELECTOR_CONFIGS } from "@/app/(브리더스룸)/constants";
+import {
+  FOOD_KOREAN_INFO,
+  MORPH_LIST_BY_SPECIES,
+  TRAIT_LIST_BY_SPECIES,
+} from "@/app/(브리더스룸)/constants";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -43,12 +46,6 @@ const BreedingInfo = ({ petId }: { petId: string }) => {
   const { mutateAsync: mutateUpdatePet } = useMutation({
     mutationFn: (updateData: UpdatePetDto) => petControllerUpdate(pet?.petId ?? "", updateData),
   });
-
-  useEffect(() => {
-    if (pet) {
-      setFormData(pet);
-    }
-  }, [pet, setFormData]);
 
   const handleSave = useCallback(async () => {
     if (!pet) return;
@@ -90,7 +87,13 @@ const BreedingInfo = ({ petId }: { petId: string }) => {
     }
   }, [formData, mutateUpdatePet, pet, duplicateCheckStatus, refetch, setIsProcessing]);
 
-  if (!pet) return null;
+  useEffect(() => {
+    if (pet) {
+      setFormData(pet);
+    }
+  }, [pet, setFormData]);
+
+  if (!pet || Object.keys(formData).length === 0) return null;
 
   return (
     <div className="shadow-xs flex h-fit flex-1 flex-col gap-2 rounded-2xl bg-white p-3">
@@ -239,7 +242,7 @@ const BreedingInfo = ({ petId }: { petId: string }) => {
               <MultiSelectFormItem
                 disabled={!isEditMode}
                 title="모프"
-                selectList={MORPH_LIST_BY_SPECIES[formData.species as PetDtoSpecies]}
+                displayMap={MORPH_LIST_BY_SPECIES[formData.species as PetDtoSpecies]}
                 initialItems={formData.morphs}
                 onSelect={(items) => {
                   setFormData({ ...formData, morphs: items });
@@ -254,7 +257,7 @@ const BreedingInfo = ({ petId }: { petId: string }) => {
               <MultiSelectFormItem
                 disabled={!isEditMode}
                 title="형질"
-                selectList={SELECTOR_CONFIGS.traits.selectList.map((item) => item.value)}
+                displayMap={TRAIT_LIST_BY_SPECIES[formData.species as PetDtoSpecies]}
                 initialItems={formData.traits}
                 onSelect={(items) => {
                   setFormData({ ...formData, traits: items });
@@ -269,7 +272,7 @@ const BreedingInfo = ({ petId }: { petId: string }) => {
               <MultiSelectFormItem
                 disabled={!isEditMode}
                 title="먹이"
-                selectList={SELECTOR_CONFIGS.foods.selectList.map((item) => item.value)}
+                displayMap={FOOD_KOREAN_INFO}
                 initialItems={formData.foods}
                 onSelect={(items) => {
                   setFormData({ ...formData, foods: items });

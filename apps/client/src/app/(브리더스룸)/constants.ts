@@ -336,6 +336,67 @@ export const MORPH_LIST_BY_SPECIES: Record<PetDtoSpecies, Record<string, string>
   },
 };
 
+export const TRAIT_LIST_BY_SPECIES: Record<PetDtoSpecies, Record<string, string>> = {
+  CR: {
+    트라이: "트라이",
+    익스트림할리퀸: "익스트림할리퀸",
+    풀핀: "풀핀",
+    쿼드: "쿼드",
+    크림: "크림",
+    크림시클: "크림시클",
+    레드: "레드",
+    챠콜: "챠콜",
+    엠티백: "엠티백",
+    솔리드백: "솔리드백",
+    슈퍼스트라이프: "슈퍼스트라이프",
+    브린들: "브린들",
+    달마시안: "달마시안",
+    드리피: "드리피",
+    화이트스팟: "화이트스팟",
+    탠저린: "탠저린",
+  },
+  LE: {
+    노멀: "노멀",
+    하리퀸: "하리퀸",
+    다크: "다크",
+    파이어: "파이어",
+    트라이컬러: "트라이컬러",
+    기타: "기타",
+  },
+  FT: {
+    노멀: "노멀",
+    하리퀸: "하리퀸",
+    다크: "다크",
+    파이어: "파이어",
+    트라이컬러: "트라이컬러",
+    기타: "기타",
+  },
+  KN: {
+    노멀: "노멀",
+    하리퀸: "하리퀸",
+    다크: "다크",
+    파이어: "파이어",
+    트라이컬러: "트라이컬러",
+    기타: "기타",
+  },
+  LC: {
+    노멀: "노멀",
+    하리퀸: "하리퀸",
+    다크: "다크",
+    파이어: "파이어",
+    트라이컬러: "트라이컬러",
+    기타: "기타",
+  },
+  GG: {
+    노멀: "노멀",
+    하리퀸: "하리퀸",
+    다크: "다크",
+    파이어: "파이어",
+    트라이컬러: "트라이컬러",
+    기타: "기타",
+  },
+};
+
 export const SALE_STATUS_KOREAN_INFO = {
   NFS: "판매 안함",
   ON_SALE: "판매 중",
@@ -406,6 +467,16 @@ export const EGG_STATUS_KOREAN_INFO: Record<EggDetailDtoStatus, string> = {
   FERTILIZED: "유정란",
   HATCHED: "해칭완료",
   DEAD: "중지",
+};
+
+export const FOOD_KOREAN_INFO: Record<string, string> = {
+  "판게아 인섹트": "판게아 인섹트",
+  "지렙 인섹트": "지렙 인섹트",
+  바이탈밀: "바이탈밀",
+  "리핀리치스 리조또": "리핀리치스 리조또",
+  귀뚜라미: "귀뚜라미",
+  냉동귀뚜라미: "냉동귀뚜라미",
+  누에: "누에",
 };
 
 export const SELECTOR_CONFIGS: Record<
