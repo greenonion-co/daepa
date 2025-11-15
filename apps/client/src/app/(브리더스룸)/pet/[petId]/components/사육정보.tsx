@@ -173,7 +173,7 @@ const BreedingInfo = ({ petId }: { petId: string }) => {
         label="종"
         content={
           <SingleSelect
-            disabled={!isEditMode}
+            disabled
             type="species"
             initialItem={formData.species}
             onSelect={(item) => {
