@@ -1,21 +1,13 @@
 "use client";
 
-import { MORPH_LIST_BY_SPECIES } from "../../constants";
-import SelectFilter from "../../components/SelectFilter";
+import { GENDER_KOREAN_INFO, GROWTH_KOREAN_INFO, MORPH_LIST_BY_SPECIES } from "../../constants";
+import SelectFilter from "../../components/SingleSelect";
 import { cn } from "@/lib/utils";
 import MultiSelectFilter from "../../components/MultiSelectFilter";
-import { PetControllerFindAllParams, PetDtoSpecies } from "@repo/api-client";
+import { useFilterStore } from "../../store/filter";
 
-export function Filters({
-  searchFilters,
-  setSearchFilters,
-}: {
-  searchFilters: Partial<PetControllerFindAllParams>;
-  setSearchFilters: (filters: Partial<PetControllerFindAllParams>) => void;
-}) {
-  const handleResetFilters = () => {
-    setSearchFilters({});
-  };
+export function Filters() {
+  const { searchFilters, setSearchFilters, resetFilters } = useFilterStore();
 
   return (
     <div className="mb-4 flex flex-wrap items-center gap-2">
@@ -50,11 +42,13 @@ export function Filters({
       </div>
 
       <SelectFilter
+        showTitle
         type="species"
         initialItem={searchFilters.species}
         onSelect={(item) => {
           if (item === searchFilters.species) return;
 
+          // TODO!: 종 변경 시 부, 모 개체 초기화(해칭룸)
           setSearchFilters({
             ...searchFilters,
             species: item,
@@ -66,35 +60,18 @@ export function Filters({
         <MultiSelectFilter
           type="morphs"
           title="모프"
-          selectList={
-            typeof searchFilters.species === "string" &&
-            searchFilters.species in MORPH_LIST_BY_SPECIES
-              ? MORPH_LIST_BY_SPECIES[searchFilters.species as PetDtoSpecies]
-              : []
-          }
+          displayMap={MORPH_LIST_BY_SPECIES[searchFilters.species]}
         />
       )}
-      <SelectFilter
-        type="growth"
-        initialItem={searchFilters.growth}
-        onSelect={(item) => setSearchFilters({ ...searchFilters, growth: item })}
-      />
-      <SelectFilter
-        type="sex"
-        initialItem={searchFilters.sex}
-        onSelect={(item) => setSearchFilters({ ...searchFilters, sex: item })}
-      />
-      <SelectFilter
-        type="foods"
-        initialItem={searchFilters.foods}
-        onSelect={(item) => setSearchFilters({ ...searchFilters, foods: item })}
-      />
+      <MultiSelectFilter type="growth" title="크기" displayMap={GROWTH_KOREAN_INFO} />
+      <MultiSelectFilter type="sex" title="성별" displayMap={GENDER_KOREAN_INFO} />
+      {/* TODO: 먹이 필터 추가 */}
 
       <button
-        onClick={handleResetFilters}
+        onClick={resetFilters}
         className="h-[32px] cursor-pointer rounded-lg px-3 text-sm text-blue-700 underline hover:bg-blue-100"
       >
-        필터 되돌리기
+        필터 리셋
       </button>
     </div>
   );

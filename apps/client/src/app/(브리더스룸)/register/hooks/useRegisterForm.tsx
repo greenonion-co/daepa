@@ -15,6 +15,7 @@ import { validateStep } from "@/lib/form";
 import { FormData } from "../store/pet";
 import { toast } from "sonner";
 import { useNameStore } from "../../store/name";
+import { PetDtoSpecies } from "@repo/api-client";
 
 type SELECTOR_TYPE = "species" | "growth" | "sex";
 
@@ -134,9 +135,9 @@ export const useRegisterForm = ({
     (type: FieldName) => {
       switch (type) {
         case "morphs": {
-          const list =
-            MORPH_LIST_BY_SPECIES[formData.species as keyof typeof MORPH_LIST_BY_SPECIES] ?? [];
-          return list.map((morph) => ({ key: morph, value: morph }));
+          return Object.entries(MORPH_LIST_BY_SPECIES[formData.species as PetDtoSpecies]).map(
+            ([key, value]) => ({ key, value }),
+          );
         }
         default:
           return SELECTOR_CONFIGS[type as SELECTOR_TYPE].selectList;

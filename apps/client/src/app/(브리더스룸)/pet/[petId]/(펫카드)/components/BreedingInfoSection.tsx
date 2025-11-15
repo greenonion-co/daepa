@@ -14,6 +14,7 @@ import { FormField } from "@/app/(브리더스룸)/components/Form/FormField";
 import { memo, useCallback, useMemo } from "react";
 import { overlay } from "overlay-kit";
 import MultipleSelector from "@/app/(브리더스룸)/components/selector/multiple";
+import { PetDtoSpecies } from "@repo/api-client";
 
 const PET_REQUIRED_FIELDS = ["name", "sex", "growth", "morphs", "species"];
 const EGG_REQUIRED_FIELDS = ["name", "species", "growth", "temperature", "eggStatus"];
@@ -51,9 +52,9 @@ const BreedingInfoSection = memo(
       (type: FieldName) => {
         switch (type) {
           case "morphs": {
-            const list =
-              MORPH_LIST_BY_SPECIES[formData.species as keyof typeof MORPH_LIST_BY_SPECIES] ?? [];
-            return list.map((morph) => ({ key: morph, value: morph }));
+            return Object.entries(MORPH_LIST_BY_SPECIES[formData.species as PetDtoSpecies]).map(
+              ([key, value]) => ({ key, value }),
+            );
           }
 
           default:

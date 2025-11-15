@@ -9,7 +9,7 @@ import {
   adoptionControllerGetAdoptionByPetId,
 } from "@repo/api-client";
 import FormItem from "./FormItem";
-import SelectFilter from "@/app/(브리더스룸)/components/SelectFilter";
+import SingleSelect from "@/app/(브리더스룸)/components/SingleSelect";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { usePetStore } from "@/app/(브리더스룸)/register/store/pet";
 import { cn } from "@/lib/utils";
@@ -159,7 +159,7 @@ const AdoptionInfo = ({ petId }: AdoptionInfoProps) => {
       <FormItem
         label="분양 상태"
         content={
-          <SelectFilter
+          <SingleSelect
             disabled={!isEditMode}
             type="adoptionStatus"
             initialItem={!isEditMode && isNil(adoption) ? undefined : adoptionData.status}

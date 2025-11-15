@@ -931,8 +931,8 @@ export class PetService {
     }
 
     // 성별 필터링
-    if (pageOptionsDto.sex) {
-      queryBuilder.andWhere('petDetail.sex = :sex', {
+    if (pageOptionsDto.sex && pageOptionsDto.sex.length > 0) {
+      queryBuilder.andWhere('petDetail.sex IN (:...sex)', {
         sex: pageOptionsDto.sex,
       });
     }
@@ -973,10 +973,10 @@ export class PetService {
       });
     }
 
-    // 모프 필터링
+    // 모프 필터링 (OR 조건: 선택한 모프 중 하나라도 포함되면 매칭)
     if (pageOptionsDto.morphs && pageOptionsDto.morphs.length > 0) {
       const morphsJson = JSON.stringify(pageOptionsDto.morphs);
-      queryBuilder.andWhere(`JSON_CONTAINS(petDetail.morphs, :morphs)`, {
+      queryBuilder.andWhere(`JSON_OVERLAPS(petDetail.morphs, :morphs)`, {
         morphs: morphsJson,
       });
     }
@@ -1005,8 +1005,8 @@ export class PetService {
     }
 
     // 성장단계 필터링
-    if (pageOptionsDto.growth) {
-      queryBuilder.andWhere('petDetail.growth = :growth', {
+    if (pageOptionsDto.growth && pageOptionsDto.growth.length > 0) {
+      queryBuilder.andWhere('petDetail.growth IN (:...growth)', {
         growth: pageOptionsDto.growth,
       });
     }

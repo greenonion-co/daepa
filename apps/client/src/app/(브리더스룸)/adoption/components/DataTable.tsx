@@ -25,7 +25,6 @@ import AdoptionDetailModal from "./AdoptionDetailModal";
 import useTableStore from "../../pet/store/table";
 import { useQueryClient } from "@tanstack/react-query";
 import { Filters } from "../../pet/components/Filters";
-import { useAdoptionFilterStore } from "../../store/adoptionFilter";
 
 interface DataTableProps<TData> {
   columns: ColumnDef<TData>[];
@@ -43,7 +42,6 @@ export const DataTable = ({
   loaderRefAction,
 }: DataTableProps<AdoptionDto>) => {
   const queryClient = useQueryClient();
-  const { searchFilters, setSearchFilters } = useAdoptionFilterStore();
   const { sorting, rowSelection, setSorting, setRowSelection } = useTableStore();
 
   const table = useReactTable({
@@ -92,7 +90,7 @@ export const DataTable = ({
   return (
     <div className="relative w-full">
       <div className="w-full">
-        <Filters searchFilters={searchFilters} setSearchFilters={setSearchFilters} />
+        <Filters />
 
         <div className="rounded-md border">
           <Table>
