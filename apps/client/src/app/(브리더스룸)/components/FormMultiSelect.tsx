@@ -94,11 +94,11 @@ const FormMultiSelect = ({
           )
         ) : (
           <>
-            <div>
-              {selectedItems &&
-                selectedItems.length > 0 &&
-                `${selectedItems[0]} ${selectedItems.length > 1 ? `외 ${selectedItems.length - 1}개` : ""}`}
-            </div>
+            {selectedItems && selectedItems.length > 0 ? (
+              <div>{selectedItems.join(" | ")}</div>
+            ) : (
+              <div className="text-gray-400">{title} 선택하기</div>
+            )}
             <ChevronDown
               className={cn(
                 "h-4 w-4 text-gray-600",
