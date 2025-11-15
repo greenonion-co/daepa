@@ -93,10 +93,9 @@ const MultiSelectFormItem = ({
         ) : (
           <>
             <div>
-              {title}
               {selectedItems &&
                 selectedItems.length > 0 &&
-                `・${selectedItems[0]} ${selectedItems.length > 1 ? `외 ${selectedItems.length - 1}개` : ""}`}
+                `${selectedItems[0]} ${selectedItems.length > 1 ? `외 ${selectedItems.length - 1}개` : ""}`}
             </div>
             <ChevronDown
               className={cn(

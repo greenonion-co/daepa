@@ -19,7 +19,7 @@ import { pick, pickBy } from "es-toolkit";
 import { isNil } from "es-toolkit";
 import { useNameStore } from "@/app/(브리더스룸)/store/name";
 import { DUPLICATE_CHECK_STATUS } from "@/app/(브리더스룸)/register/types";
-import MultiSelectFormItem from "@/app/(브리더스룸)/components/Form/MultiSelectFormItem";
+import MultiSelectFormItem from "@/app/(브리더스룸)/components/MultiSelectFormItem";
 import CalendarInput from "@/app/(브리더스룸)/hatching/components/CalendarInput";
 import { format } from "date-fns";
 import NumberField from "@/app/(브리더스룸)/components/Form/NumberField";
