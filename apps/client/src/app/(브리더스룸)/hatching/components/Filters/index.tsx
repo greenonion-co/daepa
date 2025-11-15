@@ -5,8 +5,7 @@ import { overlay } from "overlay-kit";
 import ParentSearchSelector from "../../../components/selector/parentSearch";
 import FilterItem from "./FilterItem";
 import { format } from "date-fns";
-
-import SelectFilter from "@/app/(브리더스룸)/components/SelectFilter";
+import SingleSelect from "@/app/(브리더스룸)/components/SingleSelect";
 
 const Filters = () => {
   const {
@@ -48,7 +47,7 @@ const Filters = () => {
 
   return (
     <div className="mb-4 mt-2 flex flex-wrap items-center gap-2">
-      <SelectFilter
+      <SingleSelect
         showTitle
         type="species"
         initialItem={species}
@@ -83,7 +82,7 @@ const Filters = () => {
               openParentSearchSelector(PetDtoSex.FEMALE);
             }}
           />
-          <SelectFilter
+          <SingleSelect
             showTitle
             type="eggStatus"
             initialItem={eggStatus}

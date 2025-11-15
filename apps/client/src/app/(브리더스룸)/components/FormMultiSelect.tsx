@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Check, ChevronDown, X } from "lucide-react";
 
-interface MultiSelectProps {
+interface FormMultiSelectProps {
   title: string;
   displayMap: Record<string, string>;
   disabled?: boolean;
@@ -12,13 +12,13 @@ interface MultiSelectProps {
   onSelect: (items?: string[]) => void;
 }
 
-const FormMultiSelector = ({
+const FormMultiSelect = ({
   title,
   displayMap,
   disabled = false,
   initialItems,
   onSelect,
-}: MultiSelectProps) => {
+}: FormMultiSelectProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedItems, setSelectedItems] = useState<string[] | undefined>([]);
   const [tempSelectedItems, setTempSelectedItems] = useState<string[] | undefined>(initialItems);
@@ -194,4 +194,4 @@ const FormMultiSelector = ({
   );
 };
 
-export default FormMultiSelector;
+export default FormMultiSelect;

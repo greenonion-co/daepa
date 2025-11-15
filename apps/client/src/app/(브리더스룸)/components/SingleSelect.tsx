@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import { SELECTOR_CONFIGS } from "../constants";
 import { Check, ChevronDown } from "lucide-react";
 
-interface SelectFilterProps {
+interface SingleSelectProps {
   type: keyof typeof SELECTOR_CONFIGS;
   initialItem?: any;
   onSelect: (item: any) => void;
@@ -13,13 +13,13 @@ interface SelectFilterProps {
   showTitle?: boolean;
 }
 
-const SelectFilter = ({
+const SingleSelect = ({
   type,
   initialItem,
   onSelect,
   disabled = false,
   showTitle = false,
-}: SelectFilterProps) => {
+}: SingleSelectProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<any>(initialItem);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -155,4 +155,4 @@ const SelectFilter = ({
   );
 };
 
-export default SelectFilter;
+export default SingleSelect;

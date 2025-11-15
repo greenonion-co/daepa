@@ -1,7 +1,7 @@
 "use client";
 
 import { GENDER_KOREAN_INFO, GROWTH_KOREAN_INFO, MORPH_LIST_BY_SPECIES } from "../../constants";
-import SelectFilter from "../../components/SelectFilter";
+import SelectFilter from "../../components/SingleSelect";
 import { cn } from "@/lib/utils";
 import MultiSelectFilter from "../../components/MultiSelectFilter";
 import { useFilterStore } from "../../store/filter";
