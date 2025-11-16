@@ -5,14 +5,21 @@ import { cn } from "@/lib/utils";
 import { SELECTOR_CONFIGS } from "../constants";
 import { Check, ChevronDown } from "lucide-react";
 
-interface SelectFilterProps {
+interface SingleSelectProps {
   type: keyof typeof SELECTOR_CONFIGS;
   initialItem?: any;
   onSelect: (item: any) => void;
   disabled?: boolean;
+  showTitle?: boolean;
 }
 
-const SelectFilter = ({ type, initialItem, onSelect, disabled = false }: SelectFilterProps) => {
+const SingleSelect = ({
+  type,
+  initialItem,
+  onSelect,
+  disabled = false,
+  showTitle = false,
+}: SingleSelectProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<any>(initialItem);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -76,9 +83,10 @@ const SelectFilter = ({ type, initialItem, onSelect, disabled = false }: SelectF
         ) : (
           <>
             <div>
-              {SELECTOR_CONFIGS[type].title}
+              {showTitle && SELECTOR_CONFIGS[type].title}
+              {showTitle && initialItem && "・"}
               {initialItem &&
-                `・${SELECTOR_CONFIGS[type].selectList.find((item) => item.key === initialItem)?.value}`}
+                `${SELECTOR_CONFIGS[type].selectList.find((item) => item.key === initialItem)?.value}`}
             </div>
             <ChevronDown
               className={cn(
@@ -147,4 +155,4 @@ const SelectFilter = ({ type, initialItem, onSelect, disabled = false }: SelectF
   );
 };
 
-export default SelectFilter;
+export default SingleSelect;

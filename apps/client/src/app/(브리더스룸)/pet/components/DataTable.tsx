@@ -24,7 +24,6 @@ import { useRouter } from "next/navigation";
 import { PetDto } from "@repo/api-client";
 import Loading from "@/components/common/Loading";
 import { cn } from "@/lib/utils";
-import { useFilterStore } from "../../store/filter";
 import { RefreshCcw } from "lucide-react";
 
 interface DataTableProps<TData> {
@@ -51,7 +50,6 @@ export const DataTable = ({
   refetch,
 }: DataTableProps<PetDto>) => {
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const { searchFilters, setSearchFilters } = useFilterStore();
   const { sorting, rowSelection, setSorting, setRowSelection } = useTableStore();
 
   const router = useRouter();
@@ -94,7 +92,7 @@ export const DataTable = ({
   return (
     <div className="relative w-full">
       <div className="w-full">
-        {hasFilter && <Filters searchFilters={searchFilters} setSearchFilters={setSearchFilters} />}
+        {hasFilter && <Filters />}
 
         <button
           type="button"

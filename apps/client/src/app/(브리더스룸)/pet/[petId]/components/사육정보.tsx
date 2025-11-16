@@ -1,5 +1,4 @@
 import NameDuplicateCheckInput from "@/app/(브리더스룸)/components/NameDuplicateCheckInput";
-import SelectFilter from "@/app/(브리더스룸)/components/SelectFilter";
 import { usePetStore } from "@/app/(브리더스룸)/register/store/pet";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -10,8 +9,11 @@ import {
   PetDtoType,
 } from "@repo/api-client";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { MORPH_LIST_BY_SPECIES } from "@/app/(브리더스룸)/constants";
-import { SELECTOR_CONFIGS } from "@/app/(브리더스룸)/constants";
+import {
+  FOOD_KOREAN_INFO,
+  MORPH_LIST_BY_SPECIES,
+  TRAIT_LIST_BY_SPECIES,
+} from "@/app/(브리더스룸)/constants";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -19,12 +21,13 @@ import { pick, pickBy } from "es-toolkit";
 import { isNil } from "es-toolkit";
 import { useNameStore } from "@/app/(브리더스룸)/store/name";
 import { DUPLICATE_CHECK_STATUS } from "@/app/(브리더스룸)/register/types";
-import MultiSelect from "@/app/(브리더스룸)/components/MultiSelect";
+import FormMultiSelect from "@/app/(브리더스룸)/components/FormMultiSelect";
 import CalendarInput from "@/app/(브리더스룸)/hatching/components/CalendarInput";
 import { format } from "date-fns";
 import NumberField from "@/app/(브리더스룸)/components/Form/NumberField";
 import FormItem from "./FormItem";
 import Loading from "@/components/common/Loading";
+import SingleSelect from "@/app/(브리더스룸)/components/SingleSelect";
 
 const BreedingInfo = ({ petId }: { petId: string }) => {
   const { formData, errors, setFormData } = usePetStore();
@@ -43,12 +46,6 @@ const BreedingInfo = ({ petId }: { petId: string }) => {
   const { mutateAsync: mutateUpdatePet } = useMutation({
     mutationFn: (updateData: UpdatePetDto) => petControllerUpdate(pet?.petId ?? "", updateData),
   });
-
-  useEffect(() => {
-    if (pet) {
-      setFormData(pet);
-    }
-  }, [pet, setFormData]);
 
   const handleSave = useCallback(async () => {
     if (!pet) return;
@@ -90,7 +87,13 @@ const BreedingInfo = ({ petId }: { petId: string }) => {
     }
   }, [formData, mutateUpdatePet, pet, duplicateCheckStatus, refetch, setIsProcessing]);
 
-  if (!pet) return null;
+  useEffect(() => {
+    if (pet && !isEditMode) {
+      setFormData(pet);
+    }
+  }, [pet, setFormData, isEditMode]);
+
+  if (!pet || Object.keys(formData).length === 0) return null;
 
   return (
     <div className="shadow-xs flex h-fit flex-1 flex-col gap-2 rounded-2xl bg-white p-3">
@@ -169,8 +172,8 @@ const BreedingInfo = ({ petId }: { petId: string }) => {
       <FormItem
         label="종"
         content={
-          <SelectFilter
-            disabled={!isEditMode}
+          <SingleSelect
+            disabled
             type="species"
             initialItem={formData.species}
             onSelect={(item) => {
@@ -191,7 +194,7 @@ const BreedingInfo = ({ petId }: { petId: string }) => {
           <FormItem
             label="성별"
             content={
-              <SelectFilter
+              <SingleSelect
                 disabled={!isEditMode}
                 type="sex"
                 initialItem={formData.sex}
@@ -204,7 +207,7 @@ const BreedingInfo = ({ petId }: { petId: string }) => {
           <FormItem
             label="크기"
             content={
-              <SelectFilter
+              <SingleSelect
                 disabled={!isEditMode}
                 type="growth"
                 initialItem={formData.growth}
@@ -236,10 +239,10 @@ const BreedingInfo = ({ petId }: { petId: string }) => {
           <FormItem
             label="모프"
             content={
-              <MultiSelect
+              <FormMultiSelect
                 disabled={!isEditMode}
                 title="모프"
-                selectList={MORPH_LIST_BY_SPECIES[formData.species as PetDtoSpecies]}
+                displayMap={MORPH_LIST_BY_SPECIES[formData.species as PetDtoSpecies]}
                 initialItems={formData.morphs}
                 onSelect={(items) => {
                   setFormData({ ...formData, morphs: items });
@@ -251,10 +254,10 @@ const BreedingInfo = ({ petId }: { petId: string }) => {
           <FormItem
             label="형질"
             content={
-              <MultiSelect
+              <FormMultiSelect
                 disabled={!isEditMode}
                 title="형질"
-                selectList={SELECTOR_CONFIGS.traits.selectList.map((item) => item.value)}
+                displayMap={TRAIT_LIST_BY_SPECIES[formData.species as PetDtoSpecies]}
                 initialItems={formData.traits}
                 onSelect={(items) => {
                   setFormData({ ...formData, traits: items });
@@ -266,10 +269,10 @@ const BreedingInfo = ({ petId }: { petId: string }) => {
           <FormItem
             label="먹이"
             content={
-              <MultiSelect
+              <FormMultiSelect
                 disabled={!isEditMode}
                 title="먹이"
-                selectList={SELECTOR_CONFIGS.foods.selectList.map((item) => item.value)}
+                displayMap={FOOD_KOREAN_INFO}
                 initialItems={formData.foods}
                 onSelect={(items) => {
                   setFormData({ ...formData, foods: items });
@@ -285,7 +288,7 @@ const BreedingInfo = ({ petId }: { petId: string }) => {
           <FormItem
             label="알 상태"
             content={
-              <SelectFilter
+              <SingleSelect
                 disabled={!isEditMode}
                 type="eggStatus"
                 initialItem={formData.eggStatus}

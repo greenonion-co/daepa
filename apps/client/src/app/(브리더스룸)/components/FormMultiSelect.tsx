@@ -1,29 +1,31 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Check, ChevronDown, X } from "lucide-react";
 
-interface MultiSelectProps {
+interface FormMultiSelectProps {
   title: string;
-  selectList: string[];
+  displayMap: Record<string, string>;
   disabled?: boolean;
   initialItems: string[];
   onSelect: (items?: string[]) => void;
 }
 
-const MultiSelect = ({
+const FormMultiSelect = ({
   title,
-  selectList,
+  displayMap,
   disabled = false,
   initialItems,
   onSelect,
-}: MultiSelectProps) => {
+}: FormMultiSelectProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedItems, setSelectedItems] = useState<string[] | undefined>([]);
   const [tempSelectedItems, setTempSelectedItems] = useState<string[] | undefined>(initialItems);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isEntering, setIsEntering] = useState(false);
+
+  const selectList = useMemo(() => Object.keys(displayMap), [displayMap]);
 
   useEffect(() => {
     setSelectedItems(initialItems);
@@ -92,12 +94,11 @@ const MultiSelect = ({
           )
         ) : (
           <>
-            <div>
-              {title}
-              {selectedItems &&
-                selectedItems.length > 0 &&
-                `・${selectedItems[0]} ${selectedItems.length > 1 ? `외 ${selectedItems.length - 1}개` : ""}`}
-            </div>
+            {selectedItems && selectedItems.length > 0 ? (
+              <div>{selectedItems.join(" | ")}</div>
+            ) : (
+              <div className="text-gray-400">{title} 선택하기</div>
+            )}
             <ChevronDown
               className={cn(
                 "h-4 w-4 text-gray-600",
@@ -193,4 +194,4 @@ const MultiSelect = ({
   );
 };
 
-export default MultiSelect;
+export default FormMultiSelect;

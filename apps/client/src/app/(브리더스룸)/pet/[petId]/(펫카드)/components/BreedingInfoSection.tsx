@@ -13,7 +13,8 @@ import InfoItem from "@/app/(브리더스룸)/components/Form/InfoItem";
 import { FormField } from "@/app/(브리더스룸)/components/Form/FormField";
 import { memo, useCallback, useMemo } from "react";
 import { overlay } from "overlay-kit";
-import MultipleSelector from "@/app/(브리더스룸)/components/selector/multiple";
+import MultiSelectList from "@/app/(브리더스룸)/components/selector/MultiSelectList";
+import { PetDtoSpecies } from "@repo/api-client";
 
 const PET_REQUIRED_FIELDS = ["name", "sex", "growth", "morphs", "species"];
 const EGG_REQUIRED_FIELDS = ["name", "species", "growth", "temperature", "eggStatus"];
@@ -47,17 +48,24 @@ const BreedingInfoSection = memo(
       [isEditing, setFormData],
     );
 
-    const getSelectList = useCallback(
-      (type: FieldName) => {
+    const getDisplayMap = useCallback(
+      (type: FieldName): Record<string, string> => {
         switch (type) {
           case "morphs": {
-            const list =
-              MORPH_LIST_BY_SPECIES[formData.species as keyof typeof MORPH_LIST_BY_SPECIES] ?? [];
-            return list.map((morph) => ({ key: morph, value: morph }));
+            return MORPH_LIST_BY_SPECIES[formData.species as PetDtoSpecies];
           }
 
-          default:
-            return SELECTOR_CONFIGS[type as keyof typeof SELECTOR_CONFIGS].selectList ?? [];
+          default: {
+            const config = SELECTOR_CONFIGS[type as keyof typeof SELECTOR_CONFIGS];
+            if (!config) return {};
+            return config.selectList.reduce(
+              (acc, { key, value }) => {
+                acc[key] = value;
+                return acc;
+              },
+              {} as Record<string, string>,
+            );
+          }
         }
       },
       [formData.species],
@@ -65,21 +73,25 @@ const BreedingInfoSection = memo(
 
     const handleMultipleSelect = useCallback(
       (type: FieldName) => {
+        const displayMap = getDisplayMap(type);
+        const title = SELECTOR_CONFIGS[type as keyof typeof SELECTOR_CONFIGS]?.title || "선택";
+
         overlay.open(({ isOpen, close, unmount }) => (
-          <MultipleSelector
+          <MultiSelectList
             isOpen={isOpen}
             onCloseAction={close}
             onSelectAction={(value) => {
               handleChange({ type, value });
               close();
             }}
-            selectList={getSelectList(type) || []}
+            displayMap={displayMap}
+            title={title}
             initialValue={formData[type]}
             onExit={unmount}
           />
         ));
       },
-      [getSelectList, formData, handleChange],
+      [getDisplayMap, formData, handleChange],
     );
 
     const renderFormField = useCallback(

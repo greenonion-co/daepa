@@ -1,27 +1,31 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import BottomSheet from "@/components/common/BottomSheet";
 import { toast } from "sonner";
 
-interface MultipleSelectorProps {
+interface MultiSelectListProps {
   isOpen: boolean;
   initialValue: string[];
-  selectList: { key: string; value: string }[];
+  displayMap: Record<string, string>;
+  title?: string;
   onCloseAction: () => void;
   onSelectAction: (selectedItems: string[]) => void;
   onExit: () => void;
 }
 
-export default function MultipleSelector({
+export default function MultiSelectList({
   isOpen,
   initialValue,
-  selectList,
+  displayMap,
+  title = "선택",
   onCloseAction,
   onSelectAction,
   onExit,
-}: MultipleSelectorProps) {
+}: MultiSelectListProps) {
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
+
+  const selectList = useMemo(() => Object.keys(displayMap), [displayMap]);
 
   useEffect(() => {
     if (!initialValue) return;
@@ -61,11 +65,11 @@ export default function MultipleSelector({
     >
       <div className="space-y-4" onKeyDown={handleKeyPress}>
         <div className="flex items-center gap-2">
-          <h2 className="pl-4 text-xl font-bold">모프 선택</h2>
+          <h2 className="pl-4 text-xl font-bold">{title}</h2>
           <span className="text-sm text-gray-500">{selectedItems.length}/5 선택됨</span>
         </div>
         <div className="max-h-[50vh] overflow-y-auto">
-          {selectList?.map(({ key, value }) => (
+          {selectList?.map((key) => (
             <button
               key={key}
               className={`mb-2 mr-2 rounded-full pb-1 pl-4 pr-3 pt-1 ${
@@ -73,7 +77,7 @@ export default function MultipleSelector({
               } dark:hover:bg-gray-800`}
               onClick={() => handleMultipleSelect(key)}
             >
-              {value}
+              {displayMap[key]}
             </button>
           ))}
         </div>

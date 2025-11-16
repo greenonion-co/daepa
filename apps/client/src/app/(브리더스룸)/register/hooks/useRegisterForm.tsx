@@ -8,13 +8,14 @@ import {
   TABLE_HEADER,
 } from "../../constants";
 import { overlay } from "overlay-kit";
-import MultipleSelector from "../../components/selector/multiple";
+import MultiSelectList from "../../components/selector/MultiSelectList";
 import Dialog from "../../components/Form/Dialog";
 
 import { validateStep } from "@/lib/form";
 import { FormData } from "../store/pet";
 import { toast } from "sonner";
 import { useNameStore } from "../../store/name";
+import { PetDtoSpecies } from "@repo/api-client";
 
 type SELECTOR_TYPE = "species" | "growth" | "sex";
 
@@ -129,17 +130,24 @@ export const useRegisterForm = ({
     [formData, setFormData, goNext, formStep, funnel, step],
   );
 
-  // 선택 리스트 조회
-  const getSelectList = useCallback(
-    (type: FieldName) => {
+  // displayMap 조회
+  const getDisplayMap = useCallback(
+    (type: FieldName): Record<string, string> => {
       switch (type) {
         case "morphs": {
-          const list =
-            MORPH_LIST_BY_SPECIES[formData.species as keyof typeof MORPH_LIST_BY_SPECIES] ?? [];
-          return list.map((morph) => ({ key: morph, value: morph }));
+          return MORPH_LIST_BY_SPECIES[formData.species as PetDtoSpecies];
         }
-        default:
-          return SELECTOR_CONFIGS[type as SELECTOR_TYPE].selectList;
+        default: {
+          const config = SELECTOR_CONFIGS[type as SELECTOR_TYPE];
+          if (!config) return {};
+          return config.selectList.reduce(
+            (acc, { key, value }) => {
+              acc[key] = value;
+              return acc;
+            },
+            {} as Record<string, string>,
+          );
+        }
       }
     },
     [formData.species],
@@ -148,21 +156,23 @@ export const useRegisterForm = ({
   // 다중 선택 리스트 오픈
   const handleMultipleSelect = useCallback(
     (type: FieldName) => {
+      const displayMap = getDisplayMap(type);
+
       overlay.open(({ isOpen, close, unmount }) => (
-        <MultipleSelector
+        <MultiSelectList
           isOpen={isOpen}
           onCloseAction={close}
           onSelectAction={(value) => {
             handleNext({ type, value });
             close();
           }}
-          selectList={getSelectList(type) || []}
+          displayMap={displayMap}
           initialValue={formData[type]}
           onExit={unmount}
         />
       ));
     },
-    [getSelectList, handleNext, formData],
+    [getDisplayMap, handleNext, formData],
   );
 
   return useMemo(
