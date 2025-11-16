@@ -90,7 +90,7 @@ export const DataTable = ({
   return (
     <div className="relative w-full">
       <div className="w-full">
-        <Filters />
+        <Filters showPublicFilter={false} />
 
         <div className="rounded-md border">
           <Table>
