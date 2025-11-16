@@ -39,7 +39,6 @@ const Filters = () => {
         }}
         sex={sex}
         onExit={unmount}
-        showTab={false}
         onlySelect
         species={species ?? undefined}
       />

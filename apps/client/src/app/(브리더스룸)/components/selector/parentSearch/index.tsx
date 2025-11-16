@@ -22,7 +22,6 @@ interface ParentSearchProps {
   species?: PetDtoSpecies;
   isOpen: boolean;
   onlySelect?: boolean;
-  showTab: boolean;
   onClose: () => void;
   onSelect: (item: PetDto) => void;
   onExit: () => void;
@@ -33,7 +32,6 @@ const ParentSearchSelector = ({
   species,
   isOpen,
   onlySelect = false,
-  showTab,
   onClose,
   onSelect,
   onExit,
@@ -118,7 +116,6 @@ const ParentSearchSelector = ({
                 hasMore={hasNextPage}
                 isFetchingMore={isFetchingNextPage}
                 loaderRefAction={ref}
-                showTab={showTab}
                 searchType={petListType}
               />
             ) : (
