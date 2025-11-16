@@ -21,6 +21,7 @@ const MultiSelectFilter = ({
   const [isOpen, setIsOpen] = useState(false);
   const { searchFilters, setSearchFilters } = useFilterStore();
   const [selectedItem, setSelectedItem] = useState<string[] | undefined>(searchFilters[type]);
+  console.log(selectedItem);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isEntering, setIsEntering] = useState(false);
 
@@ -77,7 +78,7 @@ const MultiSelectFilter = ({
       >
         {disabled ? (
           selectedItem && selectedItem.length > 0 ? (
-            <div>{selectedItem?.map((item) => displayMap[item]).join(" | ")}</div>
+            <div>{selectedItem.map((item) => displayMap[item] ?? item).join(" | ")}</div>
           ) : (
             <div>-</div>
           )
@@ -88,7 +89,7 @@ const MultiSelectFilter = ({
               {searchFilters[type] &&
                 searchFilters[type].length > 0 &&
                 searchFilters[type][0] &&
-                `・${displayMap[searchFilters[type][0]]} ${searchFilters[type].length > 1 ? `외 ${searchFilters[type].length - 1}개` : ""}`}
+                `・${displayMap[searchFilters[type][0]] ?? searchFilters[type][0]} ${searchFilters[type].length > 1 ? `외 ${searchFilters[type].length - 1}개` : ""}`}
             </div>
             <ChevronDown
               className={cn(
