@@ -21,7 +21,7 @@ const MultiSelectFilter = ({
   const [isOpen, setIsOpen] = useState(false);
   const { searchFilters, setSearchFilters } = useFilterStore();
   const [selectedItem, setSelectedItem] = useState<string[] | undefined>(searchFilters[type]);
-  console.log(selectedItem);
+
   const containerRef = useRef<HTMLDivElement>(null);
   const [isEntering, setIsEntering] = useState(false);
 
