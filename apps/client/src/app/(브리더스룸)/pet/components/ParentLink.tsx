@@ -9,7 +9,6 @@ import Dialog from "../../components/Form/Dialog";
 import {
   GetParentsByPetIdResponseDtoDataFather,
   GetParentsByPetIdResponseDtoDataMother,
-  PetControllerFindAllFilterType,
   PetDtoSpecies,
   PetHiddenStatusDtoHiddenStatus,
   PetParentDto,
@@ -28,7 +27,7 @@ interface ParentLinkProps {
   label: "부" | "모";
   data?: GetParentsByPetIdResponseDtoDataFather | GetParentsByPetIdResponseDtoDataMother;
   editable?: boolean;
-  petListType?: PetControllerFindAllFilterType;
+  allowMyPetOnly?: boolean;
   onSelect?: (item: PetParentDtoWithMessage) => void;
   onUnlink?: () => void;
 }
@@ -38,7 +37,7 @@ const ParentLink = ({
   label,
   data,
   editable = true,
-  petListType = PetControllerFindAllFilterType.ALL,
+  allowMyPetOnly = false,
   onSelect,
   onUnlink,
 }: ParentLinkProps) => {
@@ -102,7 +101,7 @@ const ParentLink = ({
         }}
         sex={label === "부" ? "M" : "F"}
         onExit={unmount}
-        showTab={petListType === PetControllerFindAllFilterType.ALL}
+        allowMyPetOnly={allowMyPetOnly}
       />
     ));
   };

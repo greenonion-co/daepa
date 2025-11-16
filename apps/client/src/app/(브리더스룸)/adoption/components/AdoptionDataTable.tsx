@@ -34,7 +34,7 @@ interface DataTableProps<TData> {
   loaderRefAction: (node?: Element | null) => void;
 }
 
-export const DataTable = ({
+export const AdoptionDataTable = ({
   columns,
   data = [],
   hasMore,
@@ -90,7 +90,7 @@ export const DataTable = ({
   return (
     <div className="relative w-full">
       <div className="w-full">
-        <Filters />
+        <Filters showPublicFilter={false} />
 
         <div className="rounded-md border">
           <Table>
@@ -156,4 +156,4 @@ export const DataTable = ({
   );
 };
 
-export default DataTable;
+export default AdoptionDataTable;

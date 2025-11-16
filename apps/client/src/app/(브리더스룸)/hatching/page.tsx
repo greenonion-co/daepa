@@ -1,7 +1,7 @@
 "use client";
 
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import MatingList from "./components/MatingList";
+import PairList from "./components/PairList";
 import Dashboard from "./components/Dashboard";
 import MonthlyCalendar from "./components/MonthlyCalendar";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -10,8 +10,8 @@ const HatchingPage = () => {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const current = searchParams.get("tab") ?? "mating";
-  const value = ["mating", "range", "dashboard"].includes(current) ? current : "mating";
+  const current = searchParams.get("tab") ?? "pair";
+  const value = ["pair", "range", "dashboard"].includes(current) ? current : "pair";
 
   return (
     <div>
@@ -25,13 +25,13 @@ const HatchingPage = () => {
         className="flex flex-col gap-4"
       >
         <TabsList>
-          <TabsTrigger value="mating">메이팅 리스트</TabsTrigger>
+          <TabsTrigger value="pair">페어 리스트</TabsTrigger>
           <TabsTrigger value="range">해칭 캘린더</TabsTrigger>
           <TabsTrigger value="dashboard">대시보드</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="mating">
-          <MatingList />
+        <TabsContent value="pair">
+          <PairList />
         </TabsContent>
         <TabsContent value="range">
           <MonthlyCalendar />

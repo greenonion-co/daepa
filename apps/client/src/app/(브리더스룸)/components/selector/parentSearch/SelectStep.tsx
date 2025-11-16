@@ -10,7 +10,6 @@ const SelectStep = ({
   handlePetSelect,
   hasMore,
   isFetchingMore,
-  showTab,
   searchType,
   loaderRefAction,
 }: {
@@ -18,7 +17,6 @@ const SelectStep = ({
   handlePetSelect: (pet: PetParentDtoWithMessage) => void;
   hasMore: boolean;
   isFetchingMore: boolean;
-  showTab: boolean;
   searchType: PetListType;
   loaderRefAction: (node?: Element | null) => void;
 }) => {
@@ -27,32 +25,30 @@ const SelectStep = ({
   return (
     <div className="h-full overflow-y-auto">
       <div>
-        {showTab && (
-          <ScrollArea className="h-[calc(100vh-200px)]">
-            <div className="mb-10 grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7">
-              {pets
-                ?.filter((pet) =>
-                  searchType === PetListType.MY
-                    ? pet.owner?.userId === user?.userId
-                    : pet.owner?.userId !== user?.userId,
-                )
-                .map((pet) => (
-                  <PetItem key={pet.petId} item={pet} handlePetSelect={handlePetSelect} />
-                ))}
+        <ScrollArea className="h-[calc(100vh-200px)]">
+          <div className="mb-10 grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7">
+            {pets
+              ?.filter((pet) =>
+                searchType === PetListType.MY
+                  ? pet.owner?.userId === user?.userId
+                  : pet.owner?.userId !== user?.userId,
+              )
+              .map((pet) => (
+                <PetItem key={pet.petId} item={pet} handlePetSelect={handlePetSelect} />
+              ))}
+          </div>
+          {hasMore && (
+            <div ref={loaderRefAction} className="h-20 text-center">
+              {isFetchingMore ? (
+                <div className="flex items-center justify-center">
+                  <div className="h-6 w-6 animate-spin rounded-full border-b-2 border-blue-500" />
+                </div>
+              ) : (
+                <Loading />
+              )}
             </div>
-            {hasMore && (
-              <div ref={loaderRefAction} className="h-20 text-center">
-                {isFetchingMore ? (
-                  <div className="flex items-center justify-center">
-                    <div className="h-6 w-6 animate-spin rounded-full border-b-2 border-blue-500" />
-                  </div>
-                ) : (
-                  <Loading />
-                )}
-              </div>
-            )}
-          </ScrollArea>
-        )}
+          )}
+        </ScrollArea>
       </div>
     </div>
   );

@@ -22,7 +22,7 @@ interface ParentSearchProps {
   species?: PetDtoSpecies;
   isOpen: boolean;
   onlySelect?: boolean;
-  showTab: boolean;
+  allowMyPetOnly?: boolean;
   onClose: () => void;
   onSelect: (item: PetDto) => void;
   onExit: () => void;
@@ -33,7 +33,7 @@ const ParentSearchSelector = ({
   species,
   isOpen,
   onlySelect = false,
-  showTab,
+  allowMyPetOnly = false,
   onClose,
   onSelect,
   onExit,
@@ -53,7 +53,7 @@ const ParentSearchSelector = ({
         page: pageParam,
         itemPerPage,
         order: "DESC",
-        filterType: petListType,
+        filterType: allowMyPetOnly ? PetListType.MY : PetListType.ALL,
         keyword: searchQuery ?? "",
         species: species ?? undefined,
       }),
@@ -109,6 +109,7 @@ const ParentSearchSelector = ({
             selectedPetName={selectedPet?.name ?? ""}
             setSearchQuery={setSearchQuery}
             setSearchType={setPetListType}
+            allowMyPetOnly={allowMyPetOnly}
           />
           <div ref={contentRef} className="relative flex-1">
             {step === 1 ? (
@@ -118,7 +119,6 @@ const ParentSearchSelector = ({
                 hasMore={hasNextPage}
                 isFetchingMore={isFetchingNextPage}
                 loaderRefAction={ref}
-                showTab={showTab}
                 searchType={petListType}
               />
             ) : (

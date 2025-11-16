@@ -13,6 +13,7 @@ interface HeaderProps {
   setSearchQuery: (searchQuery: string) => void;
   searchType: PetControllerFindAllFilterType;
   setSearchType: (petListType: PetControllerFindAllFilterType) => void;
+  allowMyPetOnly?: boolean;
 }
 
 const Header = ({
@@ -22,6 +23,7 @@ const Header = ({
   setSearchQuery,
   searchType,
   setSearchType,
+  allowMyPetOnly = false,
   className,
 }: HeaderProps) => {
   const [keyword, setKeyword] = useState("");
@@ -76,9 +78,10 @@ const Header = ({
               내 개체
             </button>
             <button
+              disabled={allowMyPetOnly}
               onClick={() => setSearchType(PetControllerFindAllFilterType.NOT_MY)}
               className={cn(
-                "cursor-pointer rounded-lg px-2 py-1 text-sm font-semibold text-gray-800",
+                "cursor-pointer rounded-lg px-2 py-1 text-sm font-semibold text-gray-800 disabled:cursor-not-allowed disabled:opacity-50",
                 searchType === PetControllerFindAllFilterType.NOT_MY
                   ? "bg-white shadow-sm"
                   : "text-gray-600",

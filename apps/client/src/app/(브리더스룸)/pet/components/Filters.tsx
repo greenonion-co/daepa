@@ -6,40 +6,46 @@ import { cn } from "@/lib/utils";
 import MultiSelectFilter from "../../components/MultiSelectFilter";
 import { useFilterStore } from "../../store/filter";
 
-export function Filters() {
+interface FiltersProps {
+  showPublicFilter?: boolean;
+}
+
+export function Filters({ showPublicFilter = true }: FiltersProps) {
   const { searchFilters, setSearchFilters, resetFilters } = useFilterStore();
 
   return (
     <div className="mb-4 flex flex-wrap items-center gap-2">
-      <div className="flex h-[32px] items-center gap-2 rounded-lg bg-gray-100 px-1">
-        <button
-          onClick={() => setSearchFilters({ ...searchFilters, isPublic: undefined })}
-          className={cn(
-            "cursor-pointer rounded-lg px-2 py-1 text-sm font-semibold text-gray-800",
-            searchFilters.isPublic === undefined ? "bg-white shadow-sm" : "text-gray-600",
-          )}
-        >
-          전체
-        </button>
-        <button
-          onClick={() => setSearchFilters({ ...searchFilters, isPublic: 1 })}
-          className={cn(
-            "cursor-pointer rounded-lg px-2 py-1 text-sm font-semibold text-gray-800",
-            searchFilters.isPublic === 1 ? "bg-white shadow-sm" : "text-gray-600",
-          )}
-        >
-          공개
-        </button>
-        <button
-          onClick={() => setSearchFilters({ ...searchFilters, isPublic: 0 })}
-          className={cn(
-            "cursor-pointer rounded-lg px-2 py-1 text-sm font-semibold text-gray-800",
-            searchFilters.isPublic === 0 ? "bg-white shadow-sm" : "text-gray-600",
-          )}
-        >
-          비공개
-        </button>
-      </div>
+      {showPublicFilter && (
+        <div className="flex h-[32px] items-center gap-2 rounded-lg bg-gray-100 px-1">
+          <button
+            onClick={() => setSearchFilters({ ...searchFilters, isPublic: undefined })}
+            className={cn(
+              "cursor-pointer rounded-lg px-2 py-1 text-sm font-semibold text-gray-800",
+              searchFilters.isPublic === undefined ? "bg-white shadow-sm" : "text-gray-600",
+            )}
+          >
+            전체
+          </button>
+          <button
+            onClick={() => setSearchFilters({ ...searchFilters, isPublic: 1 })}
+            className={cn(
+              "cursor-pointer rounded-lg px-2 py-1 text-sm font-semibold text-gray-800",
+              searchFilters.isPublic === 1 ? "bg-white shadow-sm" : "text-gray-600",
+            )}
+          >
+            공개
+          </button>
+          <button
+            onClick={() => setSearchFilters({ ...searchFilters, isPublic: 0 })}
+            className={cn(
+              "cursor-pointer rounded-lg px-2 py-1 text-sm font-semibold text-gray-800",
+              searchFilters.isPublic === 0 ? "bg-white shadow-sm" : "text-gray-600",
+            )}
+          >
+            비공개
+          </button>
+        </div>
+      )}
 
       <SelectFilter
         showTitle

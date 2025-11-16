@@ -4,7 +4,6 @@ import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import {
   brMatingControllerFindAll,
-  BrPetControllerFindAllFilterType,
   matingControllerCreateMating,
   UnlinkParentDtoRole,
   PetParentDto,
@@ -185,23 +184,23 @@ const CreateMatingForm = ({ onClose }: CreateMatingFormProps) => {
               <div className="space-y-2">
                 <Label className="text-sm text-gray-600">부 개체</Label>
                 <ParentLink
+                  allowMyPetOnly={true}
                   label="부"
                   species={formData.species}
                   data={formData.father}
                   onSelect={(item) => handleParentSelect(UnlinkParentDtoRole.FATHER, item)}
                   onUnlink={handleFatherUnlink}
-                  petListType={BrPetControllerFindAllFilterType.MY}
                 />
               </div>
               <div className="space-y-2">
                 <Label className="text-sm text-gray-600">모 개체</Label>
                 <ParentLink
+                  allowMyPetOnly={true}
                   label="모"
                   species={formData.species}
                   data={formData.mother}
                   onSelect={(item) => handleParentSelect(UnlinkParentDtoRole.MOTHER, item)}
                   onUnlink={handleMotherUnlink}
-                  petListType={BrPetControllerFindAllFilterType.MY}
                 />
               </div>
             </div>

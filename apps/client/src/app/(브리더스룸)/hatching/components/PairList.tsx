@@ -59,13 +59,13 @@ const ParentInfo = ({ parent }: { parent: PetSummaryLayingDto | undefined }) => 
   );
 };
 
-const MatingList = memo(() => {
+const PairList = memo(() => {
   const { ref, inView } = useInView();
   const queryClient = useQueryClient();
   const { species, father, mother, startDate, endDate, eggStatus } = useMatingFilterStore();
   const [isCreateFormOpen, setIsCreateFormOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const [matingGroup, setMatingGroup] = useState<MatingByParentsDto | null>(null);
+  const [pair, setPair] = useState<MatingByParentsDto | null>(null);
   const itemPerPage = 10;
 
   const hasFilter =
@@ -113,7 +113,7 @@ const MatingList = memo(() => {
     },
     select: (resp) => ({
       items: resp.pages.flatMap((p) => p.data.data),
-      totalCount: resp.pages[0]?.data.meta.totalCount ?? 0,
+      totalCount: resp.pages[0]?.data.meta.totalCount,
     }),
   });
 
@@ -121,8 +121,6 @@ const MatingList = memo(() => {
   const { mutateAsync: createMating } = useMutation({
     mutationFn: matingControllerCreateMating,
   });
-
-  const { items, totalCount: totalPairsCount } = data ?? { items: [], totalCount: 0 };
 
   // 무한 스크롤 처리
   useEffect(() => {
@@ -133,12 +131,12 @@ const MatingList = memo(() => {
 
   if (isLoading) return <Loading />;
 
-  if (items && items.length === 0 && !hasFilter) {
+  if (data?.items && data.items.length === 0 && !hasFilter) {
     return (
       <div className="flex flex-col items-center space-y-4">
         <span className="inline-flex animate-bounce items-center gap-2 rounded-full bg-blue-900/90 px-4 py-2 text-sm text-white">
           <ChevronsDown className="h-4 w-4" />
-          클릭해서 메이팅을 추가해보세요!
+          클릭해서 페어를 추가해보세요!
         </span>
         <Card
           className="flex w-full cursor-pointer flex-col items-center justify-center bg-blue-50 p-10 hover:bg-blue-100 dark:bg-gray-900 dark:text-gray-200"
@@ -146,8 +144,8 @@ const MatingList = memo(() => {
         >
           <Cake className="h-10 w-10 text-blue-500" />
           <div className="text-center text-gray-600 dark:text-gray-400">
-            메이팅을
-            <span className="text-blue-500">추가</span>하여
+            메이팅 시킬 페어를
+            <span className="text-blue-500">&nbsp;추가</span>하여
             <div className="font-semibold text-blue-500">편리하게 관리해보세요!</div>
           </div>
         </Card>
@@ -157,7 +155,7 @@ const MatingList = memo(() => {
     );
   }
 
-  const handleAddMatingClick = async ({
+  const handleAddPairClick = async ({
     species,
     fatherId,
     motherId,
@@ -186,13 +184,13 @@ const MatingList = memo(() => {
         motherId,
       });
 
-      toast.success("메이팅이 추가되었습니다.");
+      toast.success("페어 정보가 추가되었습니다.");
       queryClient.invalidateQueries({ queryKey: [brMatingControllerFindAll.name] });
     } catch (error) {
       if (error instanceof AxiosError) {
-        toast.error(error.response?.data?.message ?? "메이팅 추가에 실패했습니다.");
+        toast.error(error.response?.data?.message ?? "페어 정보 추가에 실패했습니다.");
       } else {
-        toast.error("메이팅 추가에 실패했습니다.");
+        toast.error("페어 정보 추가에 실패했습니다.");
       }
     } finally {
       setIsCreateFormOpen(false);
@@ -210,7 +208,7 @@ const MatingList = memo(() => {
           onClick={() => setIsCreateFormOpen(!isCreateFormOpen)}
           className="flex cursor-pointer items-center gap-1 px-2 py-1 text-[14px] font-[500] text-blue-600"
         >
-          메이팅 추가하기
+          페어 추가하기
         </div>
       </div>
       {/* 폴더블 폼 */}
@@ -218,25 +216,25 @@ const MatingList = memo(() => {
       {/* 필터 */}
       <Filters />
       <div className="m-2 text-sm text-gray-600 dark:text-gray-400">
-        검색된 메이팅・ {totalPairsCount}쌍
+        검색된 페어 {data?.totalCount ?? "?"}쌍
       </div>
 
       <ScrollArea>
         <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
-          {items.map((matingGroup, index) => (
+          {data?.items.map((pair, index) => (
             <div
               key={index}
               onClick={() => {
                 setIsOpen(true);
-                setMatingGroup(matingGroup);
+                setPair(pair);
               }}
               className="flex cursor-pointer flex-col gap-4 rounded-2xl bg-gray-100 px-4 py-4 shadow-md hover:shadow-xl dark:border-gray-700"
             >
               <div>
                 <div className="flex flex-1 gap-2">
-                  <ParentInfo parent={matingGroup.father} />
+                  <ParentInfo parent={pair.father} />
                   x
-                  <ParentInfo parent={matingGroup.mother} />
+                  <ParentInfo parent={pair.mother} />
                 </div>
               </div>
             </div>
@@ -260,16 +258,16 @@ const MatingList = memo(() => {
       <MatingDetailDialog
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
-        matingGroup={matingGroup}
+        matingGroup={pair}
         onConfirmAdd={(matingDate) => {
-          if (!matingGroup?.father || !matingGroup?.mother) {
+          if (!pair?.father || !pair?.mother) {
             toast.error("부모 개체가 없습니다.");
             return;
           }
-          handleAddMatingClick({
-            species: matingGroup.father?.species,
-            fatherId: matingGroup.father?.petId,
-            motherId: matingGroup.mother?.petId,
+          handleAddPairClick({
+            species: pair.father?.species,
+            fatherId: pair.father?.petId,
+            motherId: pair.mother?.petId,
             matingDate,
           }).then(() => setIsOpen(false));
         }}
@@ -278,6 +276,6 @@ const MatingList = memo(() => {
   );
 });
 
-MatingList.displayName = "MatingList";
+PairList.displayName = "PairList";
 
-export default MatingList;
+export default PairList;

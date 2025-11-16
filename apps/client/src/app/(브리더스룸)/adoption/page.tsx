@@ -14,7 +14,7 @@ import { overlay } from "overlay-kit";
 import EditAdoptionModal from "./components/EditAdoptionModal";
 import AdoptionDashboard from "./components/AdoptionDashboard";
 import { columns } from "./components/columns";
-import DataTable from "./components/DataTable";
+import AdoptionDataTable from "./components/AdoptionDataTable";
 import { useAdoptionFilterStore } from "../store/adoptionFilter";
 import { Card } from "@/components/ui/card";
 
@@ -76,7 +76,7 @@ const AdoptionPage = () => {
           <PackageSearch className="h-10 w-10 text-blue-500" />
           <div className="text-center text-gray-600">
             분양 정보를
-            <span className="text-blue-500">추가</span>하여
+            <span className="text-blue-500">&nbsp;추가</span>하여
             <div className="font-semibold text-blue-500">간편한 관리를 시작해보세요!</div>
           </div>
         </Card>
@@ -106,7 +106,7 @@ const AdoptionPage = () => {
       {showDashboard ? (
         <AdoptionDashboard data={data} />
       ) : (
-        <DataTable
+        <AdoptionDataTable
           columns={columns}
           data={data}
           hasMore={hasNextPage}
