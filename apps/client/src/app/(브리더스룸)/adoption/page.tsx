@@ -14,7 +14,7 @@ import { overlay } from "overlay-kit";
 import EditAdoptionModal from "./components/EditAdoptionModal";
 import AdoptionDashboard from "./components/AdoptionDashboard";
 import { columns } from "./components/columns";
-import DataTable from "./components/DataTable";
+import AdoptionDataTable from "./components/AdoptionDataTable";
 import { useAdoptionFilterStore } from "../store/adoptionFilter";
 import { Card } from "@/components/ui/card";
 
@@ -106,7 +106,7 @@ const AdoptionPage = () => {
       {showDashboard ? (
         <AdoptionDashboard data={data} />
       ) : (
-        <DataTable
+        <AdoptionDataTable
           columns={columns}
           data={data}
           hasMore={hasNextPage}

@@ -34,7 +34,7 @@ interface DataTableProps<TData> {
   loaderRefAction: (node?: Element | null) => void;
 }
 
-export const DataTable = ({
+export const AdoptionDataTable = ({
   columns,
   data = [],
   hasMore,
@@ -156,4 +156,4 @@ export const DataTable = ({
   );
 };
 
-export default DataTable;
+export default AdoptionDataTable;
