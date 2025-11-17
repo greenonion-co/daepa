@@ -80,23 +80,27 @@ const EditAdoptionForm = ({ adoptionData, onSubmit, onCancel }: EditAdoptionForm
     name: "status",
   });
 
-  const isBuyerFieldEnabled =
+  const isAdoptionReservedOrSold =
     currentStatus === AdoptionDtoStatus.ON_RESERVATION || currentStatus === AdoptionDtoStatus.SOLD;
 
-  // 상태가 변경될 때 buyer 필드 초기화
+  // 상태가 변경될 때 buyer 필드와 adoptionDate 필드 초기화
   const handleStatusChange = (newStatus: AdoptionDtoStatus | "UNDEFINED") => {
     const previousStatus = form.getValues("status");
 
-    // 이전 상태가 ON_RESERVATION 또는 SOLD였고, 새로운 상태가 그게 아닌 경우 buyer 초기화
+    // 이전 상태가 ON_RESERVATION 또는 SOLD였고, 새로운 상태가 그게 아닌 경우 buyer와 adoptionDate 초기화
     if (
       (previousStatus === AdoptionDtoStatus.ON_RESERVATION ||
         previousStatus === AdoptionDtoStatus.SOLD) &&
       newStatus !== AdoptionDtoStatus.ON_RESERVATION &&
-      newStatus !== AdoptionDtoStatus.SOLD &&
-      form.getValues("buyer")?.userId
+      newStatus !== AdoptionDtoStatus.SOLD
     ) {
-      form.setValue("buyer", {});
-      setShowUserSelector(false);
+      if (form.getValues("buyer")?.userId) {
+        form.setValue("buyer", {});
+        setShowUserSelector(false);
+      }
+      if (form.getValues("adoptionDate")) {
+        form.setValue("adoptionDate", undefined);
+      }
     }
 
     form.setValue("status", newStatus);
@@ -200,15 +204,25 @@ const EditAdoptionForm = ({ adoptionData, onSubmit, onCancel }: EditAdoptionForm
             name="adoptionDate"
             render={({ field }) => (
               <FormItem className="flex flex-col">
-                <FormLabel>분양 날짜</FormLabel>
+                <FormLabel>
+                  분양 날짜
+                  {!isAdoptionReservedOrSold && (
+                    <span className="text-xs text-neutral-500">
+                      (예약 중 / 분양 완료 시 선택 가능)
+                    </span>
+                  )}
+                </FormLabel>
                 <Popover>
                   <PopoverTrigger asChild>
                     <FormControl>
                       <Button
+                        type="button"
                         variant={"outline"}
+                        disabled={!isAdoptionReservedOrSold}
                         className={cn(
                           "h-10 w-full pl-3 text-left font-normal",
                           !field.value && "text-muted-foreground",
+                          !isAdoptionReservedOrSold && "cursor-not-allowed opacity-50",
                         )}
                       >
                         {field.value ? (
@@ -248,7 +262,7 @@ const EditAdoptionForm = ({ adoptionData, onSubmit, onCancel }: EditAdoptionForm
               <FormItem>
                 <FormLabel>
                   입양자 선택
-                  {!isBuyerFieldEnabled && (
+                  {!isAdoptionReservedOrSold && (
                     <span className="text-xs text-neutral-500">
                       (예약 중 / 분양 완료 시 선택 가능)
                     </span>
@@ -260,14 +274,14 @@ const EditAdoptionForm = ({ adoptionData, onSubmit, onCancel }: EditAdoptionForm
                       type="button"
                       variant="outline"
                       onClick={() => {
-                        if (isBuyerFieldEnabled) {
+                        if (isAdoptionReservedOrSold) {
                           setShowUserSelector(!showUserSelector);
                         }
                       }}
-                      disabled={!isBuyerFieldEnabled}
+                      disabled={!isAdoptionReservedOrSold}
                       className={cn(
                         "flex h-10 w-full items-center justify-between bg-gray-800 text-white",
-                        !isBuyerFieldEnabled && "cursor-not-allowed opacity-50",
+                        !isAdoptionReservedOrSold && "cursor-not-allowed opacity-50",
                       )}
                     >
                       <div className="flex items-center">
@@ -281,7 +295,7 @@ const EditAdoptionForm = ({ adoptionData, onSubmit, onCancel }: EditAdoptionForm
                       )}
                     </Button>
 
-                    {showUserSelector && isBuyerFieldEnabled && (
+                    {showUserSelector && isAdoptionReservedOrSold && (
                       <div className="rounded-lg border p-2">
                         <UserList
                           selectedUserId={field.value?.userId}
