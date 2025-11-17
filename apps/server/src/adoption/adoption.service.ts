@@ -246,6 +246,18 @@ export class AdoptionService {
       }
 
       if (createAdoptionDto.buyerId) {
+        if (
+          createAdoptionDto.status &&
+          ![
+            ADOPTION_SALE_STATUS.ON_RESERVATION,
+            ADOPTION_SALE_STATUS.SOLD,
+          ].includes(createAdoptionDto.status)
+        ) {
+          throw new BadRequestException(
+            '예약중, 판매 완료 상태일 때만 입양자 정보를 입력할 수 있습니다.',
+          );
+        }
+
         const buyer = await entityManager.findOne(UserEntity, {
           where: { userId: createAdoptionDto.buyerId },
         });

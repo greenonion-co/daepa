@@ -138,9 +138,6 @@ const EditAdoptionForm = ({ adoptionData, handleClose, handleCancel }: EditAdopt
                       <SelectValue placeholder="분양 상태를 선택하세요" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="UNDEFINED" disabled>
-                        미정
-                      </SelectItem>
                       {Object.values(AdoptionDtoStatus).map((status) => (
                         <SelectItem key={status} value={status}>
                           {SALE_STATUS_KOREAN_INFO[status]}
