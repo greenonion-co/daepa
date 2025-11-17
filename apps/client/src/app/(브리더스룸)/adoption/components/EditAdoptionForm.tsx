@@ -300,7 +300,12 @@ const EditAdoptionForm = ({ adoptionData, onSubmit, onCancel }: EditAdoptionForm
                         <UserList
                           selectedUserId={field.value?.userId}
                           onSelect={(buyer) => {
-                            field.onChange(buyer);
+                            // 현재 선택된 사용자와 동일한 사용자를 클릭하면 빈값으로 초기화
+                            if (field.value?.userId === buyer.userId) {
+                              field.onChange({});
+                            } else {
+                              field.onChange(buyer);
+                            }
                             setShowUserSelector(false);
                           }}
                         />
