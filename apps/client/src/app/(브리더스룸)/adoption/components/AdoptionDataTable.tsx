@@ -58,21 +58,7 @@ export const AdoptionDataTable = ({
     },
   });
 
-  const handleRowClick = ({
-    e,
-    petId,
-  }: {
-    e: React.MouseEvent<HTMLTableRowElement>;
-    petId: string;
-  }) => {
-    // checkbox나 버튼 클릭 시에는 detail 모달을 열지 않음
-    if (
-      (e.target as HTMLElement).closest("button") ||
-      (e.target as HTMLElement).closest('[role="checkbox"]')
-    ) {
-      return;
-    }
-
+  const handleRowClick = (petId: string) => {
     overlay.open(({ isOpen, close }) => (
       <AdoptionDetailModal
         isOpen={isOpen}
@@ -117,7 +103,7 @@ export const AdoptionDataTable = ({
                       key={row.id}
                       data-state={row.getIsSelected() && "selected"}
                       className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
-                      onClick={(e) => handleRowClick({ e, petId: row.original.petId })}
+                      onClick={() => handleRowClick(row.original.petId)}
                     >
                       {row.getVisibleCells().map((cell) => (
                         <TableCell key={cell.id}>
