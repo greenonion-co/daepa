@@ -208,7 +208,7 @@ const EditAdoptionForm = ({ adoptionData, onSubmit, onCancel }: EditAdoptionForm
                   분양 날짜
                   {!isAdoptionReservedOrSold && (
                     <span className="text-xs text-neutral-500">
-                      (예약 중 / 분양 완료 시 선택 가능)
+                      (예약 중・분양 완료 시 선택 가능)
                     </span>
                   )}
                 </FormLabel>
@@ -258,7 +258,7 @@ const EditAdoptionForm = ({ adoptionData, onSubmit, onCancel }: EditAdoptionForm
                   입양자 선택
                   {!isAdoptionReservedOrSold && (
                     <span className="text-xs text-neutral-500">
-                      (예약 중 / 분양 완료 시 선택 가능)
+                      (예약 중・분양 완료 시 선택 가능)
                     </span>
                   )}
                 </FormLabel>
