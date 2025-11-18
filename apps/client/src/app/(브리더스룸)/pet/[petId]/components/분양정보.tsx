@@ -16,7 +16,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import NumberField from "@/app/(브리더스룸)/components/Form/NumberField";
 import CalendarInput from "@/app/(브리더스룸)/hatching/components/CalendarInput";
-import { isNil, isUndefined, omitBy } from "es-toolkit";
+import { isNil, isNotNil, isUndefined, omitBy } from "es-toolkit";
 import UserList from "@/app/(브리더스룸)/components/UserList";
 import { overlay } from "overlay-kit";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
@@ -208,7 +208,9 @@ const AdoptionInfo = ({ petId }: AdoptionInfoProps) => {
             content={
               <NumberField
                 disabled={!isEditMode}
-                value={adoptionData.price ? String(adoptionData.price) : isEditMode ? "" : "-"}
+                value={
+                  isNotNil(adoptionData.price) ? String(adoptionData.price) : isEditMode ? "" : "-"
+                }
                 setValue={(value) => {
                   setFormData((prev) => ({
                     ...prev,
