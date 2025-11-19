@@ -1,25 +1,25 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useFilterStore } from "../store/filter";
+import { useAdoptionFilterStore } from "../../store/adoptionFilter";
 import { cn } from "@/lib/utils";
 import { Check, ChevronDown, X } from "lucide-react";
 
-interface MultiSelectFilterProps {
-  type: "morphs" | "traits" | "foods" | "growth" | "sex";
+interface AdoptionMultiSelectFilterProps {
+  type: "morphs" | "traits" | "growth" | "sex";
   title: string;
   disabled?: boolean;
   displayMap: Record<string, string>; // key -> display label 매핑 (UI 표시용, 있으면 내부적으로 Object.keys(displayMap)을 selectList로 사용)
 }
 
-const MultiSelectFilter = ({
+const AdoptionMultiSelectFilter = ({
   type,
   title,
   disabled = false,
   displayMap,
-}: MultiSelectFilterProps) => {
+}: AdoptionMultiSelectFilterProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const { searchFilters, setSearchFilters } = useFilterStore();
+  const { searchFilters, setSearchFilters } = useAdoptionFilterStore();
   const [selectedItem, setSelectedItem] = useState<string[] | undefined>(searchFilters[type]);
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -56,7 +56,7 @@ const MultiSelectFilter = ({
   }, [isOpen]);
 
   useEffect(() => {
-    setSelectedItem(searchFilters[type]);
+    setSelectedItem((searchFilters as Record<string, string[] | undefined>)[type]);
   }, [searchFilters, type]);
 
   const currentFilterValue = useMemo(() => searchFilters[type], [searchFilters, type]);
@@ -193,4 +193,4 @@ const MultiSelectFilter = ({
   );
 };
 
-export default MultiSelectFilter;
+export default AdoptionMultiSelectFilter;

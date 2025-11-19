@@ -29,6 +29,7 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { PackageSearch } from "lucide-react";
 import { columns } from "./columns";
+import { AdoptionFilters } from "./AdoptionFilters";
 
 const AdoptionTable = () => {
   const { ref, inView } = useInView();
@@ -157,8 +158,7 @@ const AdoptionTable = () => {
           <RefreshCcw className={cn("h-3 w-3", isRefreshing && "animate-spin")} />
         </button>
 
-        {/* 분양룸 필터만들기 */}
-        {/* <Filters /> */}
+        <AdoptionFilters />
 
         <div className="rounded-md">
           <Table>

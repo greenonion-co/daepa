@@ -9,6 +9,7 @@ import {
   EntityManager,
   DataSource,
   Repository,
+  SelectQueryBuilder,
 } from 'typeorm';
 import { AdoptionEntity } from './adoption.entity';
 import {
@@ -185,23 +186,7 @@ export class AdoptionService {
       },
     );
 
-    if (pageOptionsDto.keyword) {
-      qb.andWhere('pets.name LIKE :keyword', {
-        keyword: `%${pageOptionsDto.keyword}%`,
-      });
-    }
-
-    if (pageOptionsDto.species) {
-      qb.andWhere('pets.species = :species', {
-        species: pageOptionsDto.species,
-      });
-    }
-
-    if (pageOptionsDto.status) {
-      qb.andWhere('adoptions.status = :status', {
-        status: pageOptionsDto.status,
-      });
-    }
+    this.buildAdoptionFilterQuery(qb, pageOptionsDto);
 
     qb.orderBy('adoptions.createdAt', pageOptionsDto.order)
       .skip(pageOptionsDto.skip)
@@ -215,6 +200,97 @@ export class AdoptionService {
 
     const pageMetaDto = new PageMetaDto({ totalCount, pageOptionsDto });
     return new PageDto(adoptionDtos, pageMetaDto);
+  }
+
+  private buildAdoptionFilterQuery(
+    queryBuilder: SelectQueryBuilder<AdoptionEntity>,
+    pageOptionsDto: AdoptionFilterDto,
+  ) {
+    // 키워드 검색
+    if (pageOptionsDto.keyword) {
+      queryBuilder.andWhere('pets.name LIKE :keyword', {
+        keyword: `%${pageOptionsDto.keyword}%`,
+      });
+    }
+
+    // 종 필터링
+    if (pageOptionsDto.species) {
+      queryBuilder.andWhere('pets.species = :species', {
+        species: pageOptionsDto.species,
+      });
+    }
+
+    // 모프 필터링 (OR 조건: 선택한 모프 중 하나라도 포함되면 매칭)
+    if (pageOptionsDto.morphs && pageOptionsDto.morphs.length > 0) {
+      const morphsJson = JSON.stringify(pageOptionsDto.morphs);
+      queryBuilder.andWhere(`JSON_OVERLAPS(pet_details.morphs, :morphs)`, {
+        morphs: morphsJson,
+      });
+    }
+
+    // 형질 필터링
+    if (pageOptionsDto.traits && pageOptionsDto.traits.length > 0) {
+      const traitsJson = JSON.stringify(pageOptionsDto.traits);
+      queryBuilder.andWhere(`JSON_OVERLAPS(pet_details.traits, :traits)`, {
+        traits: traitsJson,
+      });
+    }
+
+    // 성별 필터링
+    if (pageOptionsDto.sex && pageOptionsDto.sex.length > 0) {
+      queryBuilder.andWhere('pet_details.sex IN (:...sex)', {
+        sex: pageOptionsDto.sex,
+      });
+    }
+
+    // 성장단계 필터링
+    if (pageOptionsDto.growth && pageOptionsDto.growth.length > 0) {
+      queryBuilder.andWhere('pet_details.growth IN (:...growth)', {
+        growth: pageOptionsDto.growth,
+      });
+    }
+
+    // 판매 상태 필터링
+    if (pageOptionsDto.status) {
+      queryBuilder.andWhere('adoptions.status = :status', {
+        status: pageOptionsDto.status,
+      });
+    }
+
+    // 분양 방식 필터링
+    if (pageOptionsDto.method) {
+      queryBuilder.andWhere('adoptions.method = :method', {
+        method: pageOptionsDto.method,
+      });
+    }
+
+    // 최소 분양 가격 필터링
+    if (pageOptionsDto.minPrice !== undefined) {
+      queryBuilder.andWhere('adoptions.price >= :minPrice', {
+        minPrice: pageOptionsDto.minPrice,
+      });
+    }
+
+    // 최대 분양 가격 필터링
+    if (pageOptionsDto.maxPrice !== undefined) {
+      queryBuilder.andWhere('adoptions.price <= :maxPrice', {
+        maxPrice: pageOptionsDto.maxPrice,
+      });
+    }
+
+    // 최소 분양 날짜 필터링
+    if (pageOptionsDto.startDate) {
+      queryBuilder.andWhere('adoptions.adoptionDate >= :startDate', {
+        startDate: pageOptionsDto.startDate,
+      });
+    }
+
+    // 최대 분양 날짜 필터링
+    if (pageOptionsDto.endDate) {
+      queryBuilder.andWhere('adoptions.adoptionDate <= :endDate', {
+        endDate: pageOptionsDto.endDate,
+      });
+    }
   }
 
   async createAdoption(
