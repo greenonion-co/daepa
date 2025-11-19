@@ -30,7 +30,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { SALE_STATUS_KOREAN_INFO } from "../../constants";
+import { ADOPTION_METHOD_KOREAN_INFO, SALE_STATUS_KOREAN_INFO } from "../../constants";
 import { isUndefined, omitBy } from "es-toolkit";
 import { AdoptionEditFormDto } from "../types";
 import UserList from "../../components/UserList";
@@ -323,7 +323,7 @@ const EditAdoptionForm = ({ adoptionData, onSubmit, onCancel }: EditAdoptionForm
                       }}
                       className="h-10 flex-1"
                     >
-                      직접 거래
+                      {ADOPTION_METHOD_KOREAN_INFO[PetAdoptionDtoMethod.PICKUP]}
                     </Button>
                     <Button
                       type="button"
@@ -339,7 +339,7 @@ const EditAdoptionForm = ({ adoptionData, onSubmit, onCancel }: EditAdoptionForm
                       }}
                       className="h-10 flex-1"
                     >
-                      배송
+                      {ADOPTION_METHOD_KOREAN_INFO[PetAdoptionDtoMethod.DELIVERY]}
                     </Button>
                     <Button
                       type="button"
@@ -355,7 +355,7 @@ const EditAdoptionForm = ({ adoptionData, onSubmit, onCancel }: EditAdoptionForm
                       }}
                       className="h-10 flex-1"
                     >
-                      도매
+                      {ADOPTION_METHOD_KOREAN_INFO[PetAdoptionDtoMethod.WHOLESALE]}
                     </Button>
                   </div>
                 </FormControl>

@@ -24,6 +24,7 @@ import { toast } from "sonner";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import Loading from "@/components/common/Loading";
 import { useRouter } from "next/navigation";
+import { ADOPTION_METHOD_KOREAN_INFO } from "@/app/(브리더스룸)/constants";
 
 interface AdoptionInfoProps {
   petId: string;
@@ -317,7 +318,7 @@ const AdoptionInfo = ({ petId }: AdoptionInfoProps) => {
                   )}
                   disabled={!isEditMode}
                 >
-                  직접 거래
+                  {ADOPTION_METHOD_KOREAN_INFO[PetAdoptionDtoMethod.PICKUP]}
                 </button>
                 <button
                   onClick={() =>
@@ -341,7 +342,7 @@ const AdoptionInfo = ({ petId }: AdoptionInfoProps) => {
                   )}
                   disabled={!isEditMode}
                 >
-                  배송
+                  {ADOPTION_METHOD_KOREAN_INFO[PetAdoptionDtoMethod.DELIVERY]}
                 </button>
                 <button
                   onClick={() =>
@@ -365,7 +366,7 @@ const AdoptionInfo = ({ petId }: AdoptionInfoProps) => {
                   )}
                   disabled={!isEditMode}
                 >
-                  도매
+                  {ADOPTION_METHOD_KOREAN_INFO[PetAdoptionDtoMethod.WHOLESALE]}
                 </button>
               </div>
             }

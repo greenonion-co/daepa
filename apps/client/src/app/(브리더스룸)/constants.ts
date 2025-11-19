@@ -1,6 +1,7 @@
 import { Bubbles, DollarSign, Home } from "lucide-react";
 import { FormStep } from "./register/types";
 import {
+  AdoptionDtoMethod,
   EggDetailDtoStatus,
   PetDtoGrowth,
   PetDtoSex,
@@ -477,6 +478,12 @@ export const FOOD_KOREAN_INFO: Record<string, string> = {
   귀뚜라미: "귀뚜라미",
   냉동귀뚜라미: "냉동귀뚜라미",
   누에: "누에",
+};
+
+export const ADOPTION_METHOD_KOREAN_INFO: Record<AdoptionDtoMethod, string> = {
+  PICKUP: "직접 거래",
+  DELIVERY: "배송",
+  WHOLESALE: "도매",
 };
 
 export const SELECTOR_CONFIGS: Record<

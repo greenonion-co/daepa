@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { AdoptionDto } from "@repo/api-client";
 import { getStatusBadge } from "@/lib/utils";
 import {
+  ADOPTION_METHOD_KOREAN_INFO,
   GENDER_KOREAN_INFO,
   GROWTH_KOREAN_INFO,
   SPECIES_KOREAN_ALIAS_INFO,
@@ -75,6 +76,14 @@ export const columns: ColumnDef<AdoptionDto>[] = [
     cell: ({ row }) => {
       const growth = row.original.pet.growth;
       return <div className="capitalize">{growth ? GROWTH_KOREAN_INFO[growth] : "-"}</div>;
+    },
+  },
+  {
+    accessorKey: "method",
+    header: "분양 방식",
+    cell: ({ row }) => {
+      const method = row.original.method;
+      return <div className="capitalize">{method ? ADOPTION_METHOD_KOREAN_INFO[method] : "-"}</div>;
     },
   },
   {
