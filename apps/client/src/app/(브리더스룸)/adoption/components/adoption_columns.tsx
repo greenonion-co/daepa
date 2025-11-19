@@ -12,6 +12,7 @@ import {
   SPECIES_KOREAN_ALIAS_INFO,
   TABLE_HEADER,
 } from "../../constants";
+import { isNotNil } from "es-toolkit";
 
 export const columns: ColumnDef<AdoptionDto>[] = [
   {
@@ -93,7 +94,7 @@ export const columns: ColumnDef<AdoptionDto>[] = [
       const price = row.original.price;
       return (
         <div className="font-semibold text-blue-600">
-          {price ? `${price.toLocaleString()}원` : "-"}
+          {isNotNil(price) ? `${price.toLocaleString()}원` : "-"}
         </div>
       );
     },
