@@ -28,8 +28,8 @@ import { useAdoptionFilterStore } from "../../store/adoptionFilter";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { PackageSearch } from "lucide-react";
-import { columns } from "./columns";
 import { AdoptionFilters } from "./AdoptionFilters";
+import { columns } from "./adoption_columns";
 
 const AdoptionTable = () => {
   const { ref, inView } = useInView();
