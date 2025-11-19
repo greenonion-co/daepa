@@ -5,7 +5,13 @@ import { Column, ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
 import { AdoptionDto, AdoptionDtoStatus, PetDtoSpecies } from "@repo/api-client";
 import { getStatusBadge } from "@/lib/utils";
-import { SALE_STATUS_KOREAN_INFO, SPECIES_KOREAN_INFO, TABLE_HEADER } from "../../constants";
+import {
+  GENDER_KOREAN_INFO,
+  GROWTH_KOREAN_INFO,
+  SALE_STATUS_KOREAN_INFO,
+  SPECIES_KOREAN_INFO,
+  TABLE_HEADER,
+} from "../../constants";
 import TableHeaderSelect from "../../components/TableHeaderSelect";
 import { useAdoptionFilterStore } from "../../store/adoptionFilter";
 
@@ -34,6 +40,25 @@ const HeaderSelect = ({
 };
 
 export const columns: ColumnDef<AdoptionDto>[] = [
+  {
+    accessorKey: "status",
+    header: ({ column }) => {
+      return (
+        <HeaderSelect
+          column={column}
+          title={TABLE_HEADER.adoption_status}
+          items={Object.values(AdoptionDtoStatus)}
+          renderItem={(item) =>
+            SALE_STATUS_KOREAN_INFO[item as keyof typeof SALE_STATUS_KOREAN_INFO] || "미정"
+          }
+        />
+      );
+    },
+    cell: ({ row }) => {
+      const status = row.original.status;
+      return <div className="flex justify-center">{getStatusBadge(status)}</div>;
+    },
+  },
   {
     accessorKey: "pet.name",
     header: TABLE_HEADER.name,
@@ -74,38 +99,43 @@ export const columns: ColumnDef<AdoptionDto>[] = [
     },
   },
   {
-    accessorKey: "pet.hatchingDate",
-    header: "출생일",
+    accessorKey: "pet.traits",
+    header: "형질",
     cell: ({ row }) => {
-      const hatchingDate = row.original.pet.hatchingDate;
-      return <div className="capitalize">{hatchingDate ?? "-"}</div>;
-    },
-  },
-  {
-    accessorKey: "status",
-    header: ({ column }) => {
+      const traits = row.original.pet.traits;
       return (
-        <HeaderSelect
-          column={column}
-          title={TABLE_HEADER.adoption_status}
-          items={Object.values(AdoptionDtoStatus)}
-          renderItem={(item) =>
-            SALE_STATUS_KOREAN_INFO[item as keyof typeof SALE_STATUS_KOREAN_INFO] || "미정"
-          }
-        />
+        <div className="flex flex-wrap gap-1">
+          {traits?.map((trait) => <Badge key={trait}>{trait}</Badge>)}
+        </div>
       );
     },
+  },
+  {
+    accessorKey: "pet.sex",
+    header: "성별",
     cell: ({ row }) => {
-      const status = row.original.status;
-      return <div className="flex justify-center">{getStatusBadge(status)}</div>;
+      const sex = row.original.pet.sex;
+      return <div className="capitalize">{sex ? GENDER_KOREAN_INFO[sex] : "-"}</div>;
     },
   },
   {
-    accessorKey: "buyer.name",
-    header: "입양자",
+    accessorKey: "pet.growth",
+    header: "크기",
     cell: ({ row }) => {
-      const buyer = row.original?.buyer;
-      return <div className="text-sm">{buyer ? buyer.name : "입양자 정보 없음"}</div>;
+      const growth = row.original.pet.growth;
+      return <div className="capitalize">{growth ? GROWTH_KOREAN_INFO[growth] : "-"}</div>;
+    },
+  },
+  {
+    accessorKey: "price",
+    header: "분양 가격",
+    cell: ({ row }) => {
+      const price = row.original.price;
+      return (
+        <div className="font-semibold text-blue-600">
+          {price ? `${price.toLocaleString()}원` : "-"}
+        </div>
+      );
     },
   },
   {
@@ -121,15 +151,11 @@ export const columns: ColumnDef<AdoptionDto>[] = [
     },
   },
   {
-    accessorKey: "price",
-    header: "분양 가격",
+    accessorKey: "buyer.name",
+    header: "입양자",
     cell: ({ row }) => {
-      const price = row.original.price;
-      return (
-        <div className="font-semibold text-blue-600">
-          {price ? `${price.toLocaleString()}원` : "미정"}
-        </div>
-      );
+      const buyer = row.original?.buyer;
+      return <div className="text-sm">{buyer ? buyer.name : "입양자 정보 없음"}</div>;
     },
   },
   {

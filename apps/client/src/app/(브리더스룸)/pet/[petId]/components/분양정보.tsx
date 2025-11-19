@@ -124,7 +124,7 @@ const AdoptionInfo = ({ petId }: AdoptionInfoProps) => {
       setIsProcessing(false);
     }
   }, [updateAdoption, createAdoption, adoptionData, petId, refetch, setIsProcessing, router]);
-
+  console.log(999, adoptionData.status);
   const handleSelectBuyer = useCallback(() => {
     if (!isEditMode) return;
 

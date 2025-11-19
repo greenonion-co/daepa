@@ -59,6 +59,7 @@ export class AdoptionService {
             sex: petDetail?.sex ?? undefined,
             morphs: petDetail?.morphs ?? undefined,
             traits: petDetail?.traits ?? undefined,
+            growth: petDetail?.growth ?? undefined,
           },
           isNil,
         ),
@@ -140,6 +141,7 @@ export class AdoptionService {
         'pet_details.sex',
         'pet_details.morphs',
         'pet_details.traits',
+        'pet_details.growth',
         'seller.userId',
         'seller.name',
         'seller.role',
@@ -399,8 +401,10 @@ export class AdoptionService {
       Object.assign(newAdoptionEntity, {
         ...adoptionEntity,
         ...updateAdoptionDto,
+        status: updateAdoptionDto.status ?? null,
         price: updateAdoptionDto.price ?? null,
         adoptionDate: updateAdoptionDto.adoptionDate ?? null,
+        method: updateAdoptionDto.method ?? null,
         buyerId: updateAdoptionDto.buyerId ?? null,
         isActive:
           updateAdoptionDto.status === ADOPTION_SALE_STATUS.SOLD ? false : true,

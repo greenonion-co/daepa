@@ -2873,6 +2873,10 @@ export const getAdoptionControllerGetAllAdoptionsResponseMock = (
           ),
           undefined,
         ]),
+        growth: faker.helpers.arrayElement([
+          faker.helpers.arrayElement(["BABY", "JUVENILE", "PRE_ADULT", "ADULT", "DEAD"] as const),
+          undefined,
+        ]),
         photos: faker.helpers.arrayElement([
           Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
             () => ({
@@ -2987,6 +2991,10 @@ export const getAdoptionControllerGetAdoptionByPetIdResponseMock = (
             Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
               faker.string.alpha(20),
             ),
+            undefined,
+          ]),
+          growth: faker.helpers.arrayElement([
+            faker.helpers.arrayElement(["BABY", "JUVENILE", "PRE_ADULT", "ADULT", "DEAD"] as const),
             undefined,
           ]),
           photos: faker.helpers.arrayElement([

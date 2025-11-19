@@ -47,7 +47,6 @@ const adoptionSchema = z.object({
       AdoptionDtoStatus.ON_SALE,
       AdoptionDtoStatus.ON_RESERVATION,
       AdoptionDtoStatus.SOLD,
-      "UNDEFINED",
     ])
     .optional(),
 });
@@ -68,10 +67,10 @@ const EditAdoptionForm = ({ adoptionData, onSubmit, onCancel }: EditAdoptionForm
     defaultValues: {
       price: adoptionData?.price ? adoptionData.price.toString() : "",
       memo: adoptionData?.memo ?? "",
-      method: adoptionData?.method,
+      method: adoptionData?.method ?? undefined,
       buyer: adoptionData?.buyer ?? {},
       adoptionDate: adoptionData?.adoptionDate ? new Date(adoptionData.adoptionDate) : undefined,
-      status: adoptionData?.status ?? "UNDEFINED",
+      status: adoptionData?.status ?? undefined,
     },
   });
 
@@ -84,7 +83,7 @@ const EditAdoptionForm = ({ adoptionData, onSubmit, onCancel }: EditAdoptionForm
     currentStatus === AdoptionDtoStatus.ON_RESERVATION || currentStatus === AdoptionDtoStatus.SOLD;
 
   // 상태가 변경될 때 buyer 필드와 adoptionDate 필드 초기화
-  const handleStatusChange = (newStatus: AdoptionDtoStatus | "UNDEFINED") => {
+  const handleStatusChange = (newStatus: AdoptionDtoStatus) => {
     const previousStatus = form.getValues("status");
 
     // 이전 상태가 ON_RESERVATION 또는 SOLD였고, 새로운 상태가 그게 아닌 경우 buyer와 adoptionDate 초기화
@@ -130,9 +129,9 @@ const EditAdoptionForm = ({ adoptionData, onSubmit, onCancel }: EditAdoptionForm
         price: data.price ? Number(data.price) : undefined,
         adoptionDate: data.adoptionDate?.toISOString(),
         memo: data.memo,
-        method: data.method,
+        method: data.method ?? undefined,
         buyerId: data.buyer?.userId,
-        status: data.status === "UNDEFINED" ? undefined : data.status,
+        status: data.status ?? undefined,
       },
       isUndefined,
     );

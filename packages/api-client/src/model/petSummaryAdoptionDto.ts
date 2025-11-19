@@ -8,6 +8,7 @@
 import type { PetSummaryAdoptionDtoType } from "./petSummaryAdoptionDtoType";
 import type { PetSummaryAdoptionDtoSpecies } from "./petSummaryAdoptionDtoSpecies";
 import type { PetSummaryAdoptionDtoSex } from "./petSummaryAdoptionDtoSex";
+import type { PetSummaryAdoptionDtoGrowth } from "./petSummaryAdoptionDtoGrowth";
 import type { PetImageItem } from "./petImageItem";
 
 export interface PetSummaryAdoptionDto {
@@ -27,6 +28,8 @@ export interface PetSummaryAdoptionDto {
   morphs?: string[];
   /** 펫 형질 */
   traits?: string[];
+  /** 펫 성장단계 */
+  growth?: PetSummaryAdoptionDtoGrowth;
   /** 펫 이미지 목록 */
   photos?: PetImageItem[];
 }

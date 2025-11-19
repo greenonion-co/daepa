@@ -218,6 +218,17 @@ export class PetSummaryDto extends PickType(PetBaseDto, [
   traits?: string[];
 
   @ApiProperty({
+    description: '펫 성장단계',
+    example: 'BABY',
+    required: false,
+    enum: PET_GROWTH,
+    'x-enumNames': Object.keys(PET_GROWTH),
+  })
+  @IsOptional()
+  @IsEnum(PET_GROWTH)
+  growth?: PET_GROWTH;
+
+  @ApiProperty({
     description: '펫 몸무게(g)',
     example: 10,
     required: false,
@@ -262,6 +273,7 @@ export class PetSummaryAdoptionDto extends PickType(PetSummaryDto, [
   'name',
   'species',
   'sex',
+  'growth',
   'morphs',
   'traits',
   'hatchingDate',
