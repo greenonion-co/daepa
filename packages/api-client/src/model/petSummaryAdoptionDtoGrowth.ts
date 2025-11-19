@@ -6,11 +6,14 @@
  * OpenAPI spec version: 1.0
  */
 
-export type PetControllerFindAllGrowth =
-  (typeof PetControllerFindAllGrowth)[keyof typeof PetControllerFindAllGrowth];
+/**
+ * 펫 성장단계
+ */
+export type PetSummaryAdoptionDtoGrowth =
+  (typeof PetSummaryAdoptionDtoGrowth)[keyof typeof PetSummaryAdoptionDtoGrowth];
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const PetControllerFindAllGrowth = {
+export const PetSummaryAdoptionDtoGrowth = {
   BABY: "BABY",
   JUVENILE: "JUVENILE",
   PRE_ADULT: "PRE_ADULT",

@@ -7,7 +7,10 @@
  */
 import type { AdoptionControllerGetAllAdoptionsOrder } from "./adoptionControllerGetAllAdoptionsOrder";
 import type { AdoptionControllerGetAllAdoptionsSpecies } from "./adoptionControllerGetAllAdoptionsSpecies";
+import type { AdoptionControllerGetAllAdoptionsSexItem } from "./adoptionControllerGetAllAdoptionsSexItem";
+import type { AdoptionControllerGetAllAdoptionsGrowthItem } from "./adoptionControllerGetAllAdoptionsGrowthItem";
 import type { AdoptionControllerGetAllAdoptionsStatus } from "./adoptionControllerGetAllAdoptionsStatus";
+import type { AdoptionControllerGetAllAdoptionsMethod } from "./adoptionControllerGetAllAdoptionsMethod";
 
 export type AdoptionControllerGetAllAdoptionsParams = {
   /**
@@ -31,7 +34,43 @@ export type AdoptionControllerGetAllAdoptionsParams = {
    */
   species?: AdoptionControllerGetAllAdoptionsSpecies;
   /**
+   * 펫 모프
+   */
+  morphs?: string[];
+  /**
+   * 펫 형질
+   */
+  traits?: string[];
+  /**
+   * 펫 성별
+   */
+  sex?: AdoptionControllerGetAllAdoptionsSexItem[];
+  /**
+   * 펫 성장단계
+   */
+  growth?: AdoptionControllerGetAllAdoptionsGrowthItem[];
+  /**
    * 펫 판매 상태
    */
   status?: AdoptionControllerGetAllAdoptionsStatus;
+  /**
+   * 분양 방식
+   */
+  method?: AdoptionControllerGetAllAdoptionsMethod;
+  /**
+   * 최소 분양 가격
+   */
+  minPrice?: number;
+  /**
+   * 최대 분양 가격
+   */
+  maxPrice?: number;
+  /**
+   * 최소 분양 날짜
+   */
+  startDate?: string;
+  /**
+   * 최대 분양 날짜
+   */
+  endDate?: string;
 };

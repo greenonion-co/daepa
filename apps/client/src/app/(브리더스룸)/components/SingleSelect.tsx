@@ -78,7 +78,7 @@ const SingleSelect = ({
           <div>
             {initialItem
               ? SELECTOR_CONFIGS[type].selectList.find((item) => item.key === initialItem)?.value
-              : "미정"}
+              : "-"}
           </div>
         ) : (
           <>

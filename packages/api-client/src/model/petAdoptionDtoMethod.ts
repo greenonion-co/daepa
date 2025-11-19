@@ -7,13 +7,13 @@
  */
 
 /**
- * 분양 위치
+ * 분양 방식
  */
-export type UpdateAdoptionDtoLocation =
-  (typeof UpdateAdoptionDtoLocation)[keyof typeof UpdateAdoptionDtoLocation];
+export type PetAdoptionDtoMethod = (typeof PetAdoptionDtoMethod)[keyof typeof PetAdoptionDtoMethod];
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const UpdateAdoptionDtoLocation = {
-  ONLINE: "ONLINE",
-  OFFLINE: "OFFLINE",
+export const PetAdoptionDtoMethod = {
+  PICKUP: "PICKUP",
+  DELIVERY: "DELIVERY",
+  WHOLESALE: "WHOLESALE",
 } as const;

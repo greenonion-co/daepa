@@ -6,11 +6,11 @@
  * OpenAPI spec version: 1.0
  */
 
-export type BrPetControllerFindAllGrowth =
-  (typeof BrPetControllerFindAllGrowth)[keyof typeof BrPetControllerFindAllGrowth];
+export type AdoptionControllerGetAllAdoptionsGrowthItem =
+  (typeof AdoptionControllerGetAllAdoptionsGrowthItem)[keyof typeof AdoptionControllerGetAllAdoptionsGrowthItem];
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const BrPetControllerFindAllGrowth = {
+export const AdoptionControllerGetAllAdoptionsGrowthItem = {
   BABY: "BABY",
   JUVENILE: "JUVENILE",
   PRE_ADULT: "PRE_ADULT",

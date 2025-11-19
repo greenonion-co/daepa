@@ -1,8 +1,7 @@
-import { SALE_STATUS_KOREAN_INFO } from "@/app/(브리더스룸)/constants";
+import { ADOPTION_METHOD_KOREAN_INFO, SALE_STATUS_KOREAN_INFO } from "@/app/(브리더스룸)/constants";
 import {
   AdoptionDto,
   PetAdoptionDto,
-  PetAdoptionDtoLocation,
   PetAdoptionDtoStatus,
   petControllerFindPetByPetId,
 } from "@repo/api-client";
@@ -36,10 +35,6 @@ const AdoptionReceipt = memo(({ adoption, isEditable = true }: AdoptionReceiptPr
       ? SALE_STATUS_KOREAN_INFO[adoption.status as keyof typeof SALE_STATUS_KOREAN_INFO]
       : "미정";
   }, [adoption?.status]);
-
-  const priceText = useMemo(() => {
-    return adoption?.price ? `${adoption.price.toLocaleString()}원` : "미정";
-  }, [adoption?.price]);
 
   const adoptionDateText = useMemo(() => {
     return adoption?.adoptionDate
@@ -142,7 +137,9 @@ const AdoptionReceipt = memo(({ adoption, isEditable = true }: AdoptionReceiptPr
             style={{ animationDelay: "0.8s" }}
           >
             <span className="text-sm text-gray-600 dark:text-gray-400">분양 가격</span>
-            <span className="text-sm font-bold text-gray-800 dark:text-gray-200">{priceText}</span>
+            <span className="text-sm font-bold text-gray-800 dark:text-gray-200">
+              {adoption?.price ? `${adoption.price.toLocaleString()}원` : "-"}
+            </span>
           </div>
 
           <div
@@ -159,11 +156,7 @@ const AdoptionReceipt = memo(({ adoption, isEditable = true }: AdoptionReceiptPr
           >
             <span className="text-sm text-gray-600 dark:text-gray-400">거래 방식</span>
             <span className="text-sm text-gray-800 dark:text-gray-200">
-              {adoption?.location
-                ? adoption.location === PetAdoptionDtoLocation.ONLINE
-                  ? "온라인"
-                  : "오프라인"
-                : "미정"}
+              {adoption?.method ? ADOPTION_METHOD_KOREAN_INFO[adoption.method] : "-"}
             </span>
           </div>
 
@@ -173,7 +166,8 @@ const AdoptionReceipt = memo(({ adoption, isEditable = true }: AdoptionReceiptPr
           >
             <span className="text-sm text-gray-600 dark:text-gray-400">구매자 </span>
             <span className="text-sm text-gray-800 dark:text-gray-200">
-              {adoption?.buyer?.name ?? "미정"}
+              {/* TODO!: 법안을 고려하여 판매완료 정보는 사용자 정보가 삭제되더라도 기록으로 남겨놔야 할듯. */}
+              {adoption?.buyer?.name ?? "-"}
             </span>
           </div>
         </div>

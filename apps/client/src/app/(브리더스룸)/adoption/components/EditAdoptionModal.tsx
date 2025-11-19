@@ -237,8 +237,8 @@ const EditAdoptionModal = ({
 
             <EditAdoptionForm
               adoptionData={getAdoptionData()}
-              handleClose={onSuccess}
-              handleCancel={handleClose}
+              onSubmit={onSuccess}
+              onCancel={handleClose}
             />
           </div>
         ) : (

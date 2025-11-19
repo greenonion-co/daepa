@@ -12,7 +12,7 @@ import {
   ValidateIf,
 } from 'class-validator';
 import {
-  PET_ADOPTION_LOCATION,
+  PET_ADOPTION_METHOD,
   ADOPTION_SALE_STATUS,
   PET_SEX,
   PET_SPECIES,
@@ -218,6 +218,17 @@ export class PetSummaryDto extends PickType(PetBaseDto, [
   traits?: string[];
 
   @ApiProperty({
+    description: '펫 성장단계',
+    example: 'BABY',
+    required: false,
+    enum: PET_GROWTH,
+    'x-enumNames': Object.keys(PET_GROWTH),
+  })
+  @IsOptional()
+  @IsEnum(PET_GROWTH)
+  growth?: PET_GROWTH;
+
+  @ApiProperty({
     description: '펫 몸무게(g)',
     example: 10,
     required: false,
@@ -262,6 +273,7 @@ export class PetSummaryAdoptionDto extends PickType(PetSummaryDto, [
   'name',
   'species',
   'sex',
+  'growth',
   'morphs',
   'traits',
   'hatchingDate',
@@ -511,15 +523,15 @@ export class PetAdoptionDto {
   memo?: string;
 
   @ApiProperty({
-    description: '분양 위치',
-    example: 'ONLINE',
-    enum: PET_ADOPTION_LOCATION,
-    'x-enumNames': Object.keys(PET_ADOPTION_LOCATION),
+    description: '분양 방식',
+    example: 'DELIVERY',
+    enum: PET_ADOPTION_METHOD,
+    'x-enumNames': Object.keys(PET_ADOPTION_METHOD),
     required: false,
   })
   @IsOptional()
-  @IsEnum(PET_ADOPTION_LOCATION)
-  location?: PET_ADOPTION_LOCATION;
+  @IsEnum(PET_ADOPTION_METHOD)
+  method?: PET_ADOPTION_METHOD;
 
   @ApiProperty({
     description: '분양 구매자',

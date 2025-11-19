@@ -6,12 +6,14 @@
  * OpenAPI spec version: 1.0
  */
 
-export type BrPetControllerFindAllSex =
-  (typeof BrPetControllerFindAllSex)[keyof typeof BrPetControllerFindAllSex];
+/**
+ * 분양 방식
+ */
+export type AdoptionDtoMethod = (typeof AdoptionDtoMethod)[keyof typeof AdoptionDtoMethod];
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const BrPetControllerFindAllSex = {
-  M: "M",
-  F: "F",
-  N: "N",
+export const AdoptionDtoMethod = {
+  PICKUP: "PICKUP",
+  DELIVERY: "DELIVERY",
+  WHOLESALE: "WHOLESALE",
 } as const;

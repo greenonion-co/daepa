@@ -1,9 +1,9 @@
-import { UserProfilePublicDto, AdoptionDtoStatus, PetAdoptionDtoLocation } from "@repo/api-client";
+import { UserProfilePublicDto, AdoptionDtoStatus, PetAdoptionDtoMethod } from "@repo/api-client";
 
 export interface AdoptionEditFormDto {
   price?: number;
   memo?: string;
-  location?: PetAdoptionDtoLocation;
+  method?: PetAdoptionDtoMethod;
   adoptionDate?: string;
   status?: AdoptionDtoStatus;
   petId: string;

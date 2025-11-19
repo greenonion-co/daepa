@@ -25,9 +25,10 @@ export enum ADOPTION_SALE_STATUS {
   SOLD = 'SOLD', // 판매 완료
 }
 
-export enum PET_ADOPTION_LOCATION {
-  ONLINE = 'ONLINE',
-  OFFLINE = 'OFFLINE',
+export enum PET_ADOPTION_METHOD {
+  PICKUP = 'PICKUP',
+  DELIVERY = 'DELIVERY',
+  WHOLESALE = 'WHOLESALE',
 }
 
 export enum PET_GROWTH {

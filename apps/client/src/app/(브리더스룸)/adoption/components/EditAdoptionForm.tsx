@@ -9,10 +9,10 @@ import {
   adoptionControllerUpdate,
   AdoptionDtoStatus,
   CreateAdoptionDto,
-  PetAdoptionDtoLocation,
+  PetAdoptionDtoMethod,
   UpdateAdoptionDto,
 } from "@repo/api-client";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { ko } from "date-fns/locale";
@@ -30,16 +30,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { SALE_STATUS_KOREAN_INFO } from "../../constants";
+import { ADOPTION_METHOD_KOREAN_INFO, SALE_STATUS_KOREAN_INFO } from "../../constants";
 import { isUndefined, omitBy } from "es-toolkit";
 import { AdoptionEditFormDto } from "../types";
 import UserList from "../../components/UserList";
 
 const adoptionSchema = z.object({
   price: z.string().optional(),
-  adoptionDate: z.date().optional(),
+  adoptionDate: z.date().optional().nullable(),
   memo: z.string().optional(),
-  location: z.enum(["ONLINE", "OFFLINE"]).default("OFFLINE"),
+  method: z.enum(["PICKUP", "DELIVERY", "WHOLESALE"]).optional(),
   buyer: z.object({ userId: z.string().optional(), name: z.string().optional() }).optional(),
   status: z
     .enum([
@@ -47,7 +47,6 @@ const adoptionSchema = z.object({
       AdoptionDtoStatus.ON_SALE,
       AdoptionDtoStatus.ON_RESERVATION,
       AdoptionDtoStatus.SOLD,
-      "UNDEFINED",
     ])
     .optional(),
 });
@@ -56,11 +55,11 @@ type AdoptionFormData = z.infer<typeof adoptionSchema>;
 
 interface EditAdoptionFormProps {
   adoptionData?: AdoptionEditFormDto | null;
-  handleClose: () => void;
-  handleCancel: () => void;
+  onSubmit: () => void;
+  onCancel: () => void;
 }
 
-const EditAdoptionForm = ({ adoptionData, handleClose, handleCancel }: EditAdoptionFormProps) => {
+const EditAdoptionForm = ({ adoptionData, onSubmit, onCancel }: EditAdoptionFormProps) => {
   const [showUserSelector, setShowUserSelector] = useState(false);
 
   const form = useForm({
@@ -68,12 +67,43 @@ const EditAdoptionForm = ({ adoptionData, handleClose, handleCancel }: EditAdopt
     defaultValues: {
       price: adoptionData?.price ? adoptionData.price.toString() : "",
       memo: adoptionData?.memo ?? "",
-      location: adoptionData?.location ?? PetAdoptionDtoLocation.OFFLINE,
+      method: adoptionData?.method ?? undefined,
       buyer: adoptionData?.buyer ?? {},
       adoptionDate: adoptionData?.adoptionDate ? new Date(adoptionData.adoptionDate) : undefined,
-      status: adoptionData?.status ?? "UNDEFINED",
+      status: adoptionData?.status ?? undefined,
     },
   });
+
+  const currentStatus = useWatch({
+    control: form.control,
+    name: "status",
+  });
+
+  const isAdoptionReservedOrSold =
+    currentStatus === AdoptionDtoStatus.ON_RESERVATION || currentStatus === AdoptionDtoStatus.SOLD;
+
+  // 상태가 변경될 때 buyer 필드와 adoptionDate 필드 초기화
+  const handleStatusChange = (newStatus: AdoptionDtoStatus) => {
+    const previousStatus = form.getValues("status");
+
+    // 이전 상태가 ON_RESERVATION 또는 SOLD였고, 새로운 상태가 그게 아닌 경우 buyer와 adoptionDate 초기화
+    if (
+      (previousStatus === AdoptionDtoStatus.ON_RESERVATION ||
+        previousStatus === AdoptionDtoStatus.SOLD) &&
+      newStatus !== AdoptionDtoStatus.ON_RESERVATION &&
+      newStatus !== AdoptionDtoStatus.SOLD
+    ) {
+      if (form.getValues("buyer")?.userId) {
+        form.setValue("buyer", {});
+        setShowUserSelector(false);
+      }
+      if (form.getValues("adoptionDate")) {
+        form.setValue("adoptionDate", undefined);
+      }
+    }
+
+    form.setValue("status", newStatus);
+  };
 
   const { mutateAsync: updateAdoption, isPending: isUpdatingAdoption } = useMutation({
     mutationFn: ({ adoptionId, data }: { adoptionId: string; data: UpdateAdoptionDto }) =>
@@ -84,7 +114,7 @@ const EditAdoptionForm = ({ adoptionData, handleClose, handleCancel }: EditAdopt
     mutationFn: (data: CreateAdoptionDto) => adoptionControllerCreateAdoption(data),
   });
 
-  const onSubmit = async (data: AdoptionFormData) => {
+  const handleFormSubmit = async (data: AdoptionFormData) => {
     if (!adoptionData?.petId) {
       toast.error("펫 정보를 찾을 수 없습니다. 다시 선택해주세요.");
       return;
@@ -99,9 +129,9 @@ const EditAdoptionForm = ({ adoptionData, handleClose, handleCancel }: EditAdopt
         price: data.price ? Number(data.price) : undefined,
         adoptionDate: data.adoptionDate?.toISOString(),
         memo: data.memo,
-        location: data.location,
+        method: data.method ?? undefined,
         buyerId: data.buyer?.userId,
-        status: data.status === "UNDEFINED" ? undefined : data.status,
+        status: data.status ?? undefined,
       },
       isUndefined,
     );
@@ -114,7 +144,7 @@ const EditAdoptionForm = ({ adoptionData, handleClose, handleCancel }: EditAdopt
       }
 
       toast.success("분양 정보가 성공적으로 생성되었습니다.");
-      handleClose();
+      onSubmit();
     } catch (error) {
       console.error("분양 생성 실패:", error);
       toast.error("분양 생성에 실패했습니다. 다시 시도해주세요.");
@@ -124,23 +154,23 @@ const EditAdoptionForm = ({ adoptionData, handleClose, handleCancel }: EditAdopt
   return (
     <div>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4">
           {/* status */}
           <FormField
             control={form.control}
             name="status"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>분양 상태 (필수)</FormLabel>
+                <FormLabel className="flex items-center gap-1">
+                  분양 상태
+                  <span className="text-xs text-red-500">*</span>
+                </FormLabel>
                 <FormControl>
-                  <Select onValueChange={field.onChange} value={field.value}>
+                  <Select onValueChange={handleStatusChange} value={field.value}>
                     <SelectTrigger>
                       <SelectValue placeholder="분양 상태를 선택하세요" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="UNDEFINED" disabled>
-                        미정
-                      </SelectItem>
                       {Object.values(AdoptionDtoStatus).map((status) => (
                         <SelectItem key={status} value={status}>
                           {SALE_STATUS_KOREAN_INFO[status]}
@@ -178,16 +208,23 @@ const EditAdoptionForm = ({ adoptionData, handleClose, handleCancel }: EditAdopt
                   <PopoverTrigger asChild>
                     <FormControl>
                       <Button
+                        type="button"
                         variant={"outline"}
+                        disabled={!isAdoptionReservedOrSold}
                         className={cn(
                           "h-10 w-full pl-3 text-left font-normal",
                           !field.value && "text-muted-foreground",
+                          !isAdoptionReservedOrSold && "cursor-not-allowed opacity-50",
                         )}
                       >
                         {field.value ? (
                           format(field.value, "PPP", { locale: ko })
                         ) : (
-                          <span>날짜를 선택하세요</span>
+                          <span>
+                            {isAdoptionReservedOrSold
+                              ? "날짜를 선택하세요"
+                              : "예약 중・분양 완료 시 선택 가능"}
+                          </span>
                         )}
                         <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                       </Button>
@@ -196,14 +233,8 @@ const EditAdoptionForm = ({ adoptionData, handleClose, handleCancel }: EditAdopt
                   <PopoverContent className="w-auto p-0" align="start">
                     <Calendar
                       mode="single"
-                      selected={field.value}
-                      onSelect={field.onChange}
-                      defaultMonth={
-                        field.value ||
-                        (adoptionData?.adoptionDate
-                          ? new Date(adoptionData.adoptionDate)
-                          : undefined)
-                      }
+                      selected={field.value ?? undefined}
+                      onSelect={(date) => field.onChange(date ?? null)}
                       disabled={(date) => date < new Date("1900-01-01")}
                       initialFocus
                     />
@@ -225,12 +256,22 @@ const EditAdoptionForm = ({ adoptionData, handleClose, handleCancel }: EditAdopt
                     <Button
                       type="button"
                       variant="outline"
-                      onClick={() => setShowUserSelector(!showUserSelector)}
-                      className="flex h-10 w-full items-center justify-between bg-gray-800 text-white"
+                      onClick={() => {
+                        if (isAdoptionReservedOrSold) {
+                          setShowUserSelector(!showUserSelector);
+                        }
+                      }}
+                      disabled={!isAdoptionReservedOrSold}
+                      className={cn(
+                        "flex h-10 w-full items-center justify-between bg-gray-800 text-white",
+                        !isAdoptionReservedOrSold && "cursor-not-allowed text-gray-300 opacity-50",
+                      )}
                     >
                       <div className="flex items-center">
                         <UserCircle className="mr-1 h-4 w-4" />
-                        {field.value?.name ?? "사용자 선택하기"}
+                        {isAdoptionReservedOrSold
+                          ? (field.value?.name ?? "사용자 선택하기")
+                          : "예약 중・분양 완료 시 선택 가능"}
                       </div>
                       {showUserSelector ? (
                         <ChevronUp className="ml-1 h-4 w-4" />
@@ -239,9 +280,20 @@ const EditAdoptionForm = ({ adoptionData, handleClose, handleCancel }: EditAdopt
                       )}
                     </Button>
 
-                    {showUserSelector && (
+                    {showUserSelector && isAdoptionReservedOrSold && (
                       <div className="rounded-lg border p-2">
-                        <UserList selectedUserId={field.value?.userId} onSelect={field.onChange} />
+                        <UserList
+                          selectedUserId={field.value?.userId}
+                          onSelect={(buyer) => {
+                            // 현재 선택된 사용자와 동일한 사용자를 클릭하면 빈값으로 초기화
+                            if (field.value?.userId === buyer.userId) {
+                              field.onChange({});
+                            } else {
+                              field.onChange(buyer);
+                            }
+                            setShowUserSelector(false);
+                          }}
+                        />
                       </div>
                     )}
                   </div>
@@ -253,7 +305,7 @@ const EditAdoptionForm = ({ adoptionData, handleClose, handleCancel }: EditAdopt
 
           <FormField
             control={form.control}
-            name="location"
+            name="method"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>거래 방식</FormLabel>
@@ -261,23 +313,49 @@ const EditAdoptionForm = ({ adoptionData, handleClose, handleCancel }: EditAdopt
                   <div className="flex gap-2">
                     <Button
                       type="button"
-                      variant={
-                        field.value === PetAdoptionDtoLocation.OFFLINE ? "default" : "outline"
-                      }
-                      onClick={() => field.onChange(PetAdoptionDtoLocation.OFFLINE)}
+                      variant={field.value === PetAdoptionDtoMethod.PICKUP ? "default" : "outline"}
+                      onClick={() => {
+                        if (field.value === PetAdoptionDtoMethod.PICKUP) {
+                          field.onChange(undefined);
+                        } else {
+                          field.onChange(PetAdoptionDtoMethod.PICKUP);
+                        }
+                      }}
                       className="h-10 flex-1"
                     >
-                      오프라인
+                      {ADOPTION_METHOD_KOREAN_INFO[PetAdoptionDtoMethod.PICKUP]}
                     </Button>
                     <Button
                       type="button"
                       variant={
-                        field.value === PetAdoptionDtoLocation.ONLINE ? "default" : "outline"
+                        field.value === PetAdoptionDtoMethod.DELIVERY ? "default" : "outline"
                       }
-                      onClick={() => field.onChange(PetAdoptionDtoLocation.ONLINE)}
+                      onClick={() => {
+                        if (field.value === PetAdoptionDtoMethod.DELIVERY) {
+                          field.onChange(undefined);
+                        } else {
+                          field.onChange(PetAdoptionDtoMethod.DELIVERY);
+                        }
+                      }}
                       className="h-10 flex-1"
                     >
-                      온라인
+                      {ADOPTION_METHOD_KOREAN_INFO[PetAdoptionDtoMethod.DELIVERY]}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant={
+                        field.value === PetAdoptionDtoMethod.WHOLESALE ? "default" : "outline"
+                      }
+                      onClick={() => {
+                        if (field.value === PetAdoptionDtoMethod.WHOLESALE) {
+                          field.onChange(undefined);
+                        } else {
+                          field.onChange(PetAdoptionDtoMethod.WHOLESALE);
+                        }
+                      }}
+                      className="h-10 flex-1"
+                    >
+                      {ADOPTION_METHOD_KOREAN_INFO[PetAdoptionDtoMethod.WHOLESALE]}
                     </Button>
                   </div>
                 </FormControl>
@@ -309,7 +387,7 @@ const EditAdoptionForm = ({ adoptionData, handleClose, handleCancel }: EditAdopt
             <Button type="submit" disabled={isUpdatingAdoption || isCreatingAdoption}>
               {isUpdatingAdoption || isCreatingAdoption ? "저장 중..." : "저장"}
             </Button>
-            <Button type="button" variant="outline" onClick={handleCancel}>
+            <Button type="button" variant="outline" onClick={onCancel}>
               취소
             </Button>
           </div>

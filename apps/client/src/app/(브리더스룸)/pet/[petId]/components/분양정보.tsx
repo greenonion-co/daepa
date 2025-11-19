@@ -3,10 +3,10 @@ import {
   adoptionControllerCreateAdoption,
   CreateAdoptionDto,
   PetAdoptionDto,
-  PetAdoptionDtoLocation,
   PetAdoptionDtoStatus,
   UpdateAdoptionDto,
   adoptionControllerGetAdoptionByPetId,
+  PetAdoptionDtoMethod,
 } from "@repo/api-client";
 import FormItem from "./FormItem";
 import SingleSelect from "@/app/(브리더스룸)/components/SingleSelect";
@@ -16,7 +16,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import NumberField from "@/app/(브리더스룸)/components/Form/NumberField";
 import CalendarInput from "@/app/(브리더스룸)/hatching/components/CalendarInput";
-import { isNil, isUndefined, omitBy } from "es-toolkit";
+import { isNil, isNotNil, isUndefined, omitBy } from "es-toolkit";
 import UserList from "@/app/(브리더스룸)/components/UserList";
 import { overlay } from "overlay-kit";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
@@ -24,6 +24,7 @@ import { toast } from "sonner";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import Loading from "@/components/common/Loading";
 import { useRouter } from "next/navigation";
+import { ADOPTION_METHOD_KOREAN_INFO } from "@/app/(브리더스룸)/constants";
 
 interface AdoptionInfoProps {
   petId: string;
@@ -63,7 +64,7 @@ const AdoptionInfo = ({ petId }: AdoptionInfoProps) => {
         ...prev,
         adoption: {
           status: PetAdoptionDtoStatus.ON_SALE,
-          location: PetAdoptionDtoLocation.OFFLINE,
+          method: PetAdoptionDtoMethod.PICKUP,
           price: 0,
           adoptionDate: new Date().toISOString(),
           memo: "",
@@ -92,7 +93,7 @@ const AdoptionInfo = ({ petId }: AdoptionInfoProps) => {
         price: adoptionData.price ? Number(adoptionData.price) : undefined,
         adoptionDate: adoptionData.adoptionDate,
         memo: adoptionData.memo,
-        location: adoptionData.location,
+        method: adoptionData.method,
         buyerId: adoptionData.buyer?.userId,
         status: adoptionData.status,
       },
@@ -131,7 +132,9 @@ const AdoptionInfo = ({ petId }: AdoptionInfoProps) => {
     overlay.open(({ isOpen, close }) => (
       <Dialog open={isOpen} onOpenChange={close}>
         <DialogContent className="rounded-3xl p-4">
-          <DialogTitle className="h-4" />
+          <DialogTitle className="h-4 text-base font-semibold text-gray-800">
+            입양자를 선택해주세요.
+          </DialogTitle>
           <UserList
             selectedUserId={adoptionData.buyer?.userId}
             onSelect={(user) => {
@@ -151,6 +154,13 @@ const AdoptionInfo = ({ petId }: AdoptionInfoProps) => {
     return !(isNil(adoption) && !isEditMode);
   }, [adoption, isEditMode]);
 
+  const isAdoptionReservedOrSold = useMemo(() => {
+    return (
+      adoptionData.status === PetAdoptionDtoStatus.ON_RESERVATION ||
+      adoptionData.status === PetAdoptionDtoStatus.SOLD
+    );
+  }, [adoptionData.status]);
+
   return (
     <div className="shadow-xs flex min-h-[480px] min-w-[300px] flex-1 flex-col gap-2 rounded-2xl bg-white p-3">
       <div className="text-[14px] font-[600] text-gray-600">분양정보</div>
@@ -166,16 +176,18 @@ const AdoptionInfo = ({ petId }: AdoptionInfoProps) => {
             onSelect={(item) => {
               setFormData((prev) => {
                 const nextStatus = item as PetAdoptionDtoStatus;
-                const shouldClearBuyer = !(
+                const isNextStatusReservedOrSold =
                   nextStatus === PetAdoptionDtoStatus.ON_RESERVATION ||
-                  nextStatus === PetAdoptionDtoStatus.SOLD
-                );
+                  nextStatus === PetAdoptionDtoStatus.SOLD;
                 return {
                   ...prev,
                   adoption: {
                     ...prev.adoption,
                     status: nextStatus,
-                    buyer: shouldClearBuyer ? undefined : prev.adoption?.buyer,
+                    buyer: isNextStatusReservedOrSold ? prev.adoption?.buyer : undefined,
+                    adoptionDate: isNextStatusReservedOrSold
+                      ? prev.adoption?.adoptionDate
+                      : undefined,
                   },
                 };
               });
@@ -197,7 +209,9 @@ const AdoptionInfo = ({ petId }: AdoptionInfoProps) => {
             content={
               <NumberField
                 disabled={!isEditMode}
-                value={String(adoptionData.price ?? "")}
+                value={
+                  isNotNil(adoptionData.price) ? String(adoptionData.price) : isEditMode ? "" : "-"
+                }
                 setValue={(value) => {
                   setFormData((prev) => ({
                     ...prev,
@@ -215,19 +229,27 @@ const AdoptionInfo = ({ petId }: AdoptionInfoProps) => {
           />
 
           <FormItem
-            label="날짜"
+            label="분양 날짜"
             content={
-              <CalendarInput
-                placeholder="-"
-                editable={isEditMode}
-                value={adoptionData.adoptionDate ?? ""}
-                onSelect={(date) => {
-                  setFormData((prev) => ({
-                    ...prev,
-                    adoption: { ...prev.adoption, adoptionDate: date?.toISOString() ?? "" },
-                  }));
-                }}
-              />
+              !isEditMode || isAdoptionReservedOrSold ? (
+                <CalendarInput
+                  placeholder="-"
+                  editable={isEditMode && isAdoptionReservedOrSold}
+                  value={adoptionData.adoptionDate}
+                  onSelect={(date) => {
+                    setFormData((prev) => ({
+                      ...prev,
+                      adoption: { ...prev.adoption, adoptionDate: date?.toISOString() },
+                    }));
+                  }}
+                />
+              ) : (
+                isEditMode && (
+                  <div className="flex h-[32px] w-fit items-center gap-1 rounded-lg bg-gray-100 px-2 py-1 text-[12px] font-[500] text-gray-400">
+                    예약중・분양 완료 시 선택 가능
+                  </div>
+                )
+              )
             }
           />
 
@@ -254,14 +276,18 @@ const AdoptionInfo = ({ petId }: AdoptionInfoProps) => {
 
                 {isEditMode &&
                   (adoptionData.status === PetAdoptionDtoStatus.ON_RESERVATION ||
-                    adoptionData.status === PetAdoptionDtoStatus.SOLD) && (
+                  adoptionData.status === PetAdoptionDtoStatus.SOLD ? (
                     <Button
                       className="ml-1 h-8 cursor-pointer rounded-lg px-2 text-[12px] text-white"
                       onClick={handleSelectBuyer}
                     >
                       {isNil(adoptionData.buyer?.userId) ? "입양자 선택" : "변경"}
                     </Button>
-                  )}
+                  ) : (
+                    <div className="flex h-[32px] w-fit items-center gap-1 rounded-lg bg-gray-100 px-2 py-1 text-[12px] font-[500] text-gray-400">
+                      예약중・분양 완료 시 선택 가능
+                    </div>
+                  ))}
               </>
             }
           />
@@ -274,37 +300,73 @@ const AdoptionInfo = ({ petId }: AdoptionInfoProps) => {
                   onClick={() =>
                     setFormData((prev) => ({
                       ...prev,
-                      adoption: { ...prev.adoption, location: PetAdoptionDtoLocation.OFFLINE },
+                      adoption: {
+                        ...prev.adoption,
+                        method:
+                          prev.adoption?.method === PetAdoptionDtoMethod.PICKUP
+                            ? undefined
+                            : PetAdoptionDtoMethod.PICKUP,
+                      },
                     }))
                   }
                   className={cn(
                     "h-full cursor-pointer rounded-md px-2 text-sm font-semibold text-gray-800",
-                    adoptionData.location === PetAdoptionDtoLocation.OFFLINE
-                      ? "bg-white shadow-sm"
+                    adoptionData.method === PetAdoptionDtoMethod.PICKUP
+                      ? "bg-blue-100 text-blue-600 shadow-sm"
                       : "text-gray-600",
                     !isEditMode && "cursor-not-allowed",
                   )}
                   disabled={!isEditMode}
                 >
-                  오프라인
+                  {ADOPTION_METHOD_KOREAN_INFO[PetAdoptionDtoMethod.PICKUP]}
                 </button>
                 <button
                   onClick={() =>
                     setFormData((prev) => ({
                       ...prev,
-                      adoption: { ...prev.adoption, location: PetAdoptionDtoLocation.ONLINE },
+                      adoption: {
+                        ...prev.adoption,
+                        method:
+                          prev.adoption?.method === PetAdoptionDtoMethod.DELIVERY
+                            ? undefined
+                            : PetAdoptionDtoMethod.DELIVERY,
+                      },
                     }))
                   }
                   className={cn(
                     "h-full cursor-pointer rounded-md px-2 text-sm font-semibold text-gray-800",
-                    adoptionData.location === PetAdoptionDtoLocation.ONLINE
-                      ? "bg-white shadow-sm"
+                    adoptionData.method === PetAdoptionDtoMethod.DELIVERY
+                      ? "bg-blue-100 text-blue-600 shadow-sm"
                       : "text-gray-600",
                     !isEditMode && "cursor-not-allowed",
                   )}
                   disabled={!isEditMode}
                 >
-                  온라인
+                  {ADOPTION_METHOD_KOREAN_INFO[PetAdoptionDtoMethod.DELIVERY]}
+                </button>
+                <button
+                  onClick={() =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      adoption: {
+                        ...prev.adoption,
+                        method:
+                          prev.adoption?.method === PetAdoptionDtoMethod.WHOLESALE
+                            ? undefined
+                            : PetAdoptionDtoMethod.WHOLESALE,
+                      },
+                    }))
+                  }
+                  className={cn(
+                    "h-full cursor-pointer rounded-md px-2 text-sm font-semibold text-gray-800",
+                    adoptionData.method === PetAdoptionDtoMethod.WHOLESALE
+                      ? "bg-blue-100 text-blue-600 shadow-sm"
+                      : "text-gray-600",
+                    !isEditMode && "cursor-not-allowed",
+                  )}
+                  disabled={!isEditMode}
+                >
+                  {ADOPTION_METHOD_KOREAN_INFO[PetAdoptionDtoMethod.WHOLESALE]}
                 </button>
               </div>
             }

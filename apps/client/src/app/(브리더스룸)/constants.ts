@@ -1,6 +1,7 @@
 import { Bubbles, DollarSign, Home } from "lucide-react";
 import { FormStep } from "./register/types";
 import {
+  AdoptionDtoMethod,
   EggDetailDtoStatus,
   PetDtoGrowth,
   PetDtoSex,
@@ -398,10 +399,10 @@ export const TRAIT_LIST_BY_SPECIES: Record<PetDtoSpecies, Record<string, string>
 };
 
 export const SALE_STATUS_KOREAN_INFO = {
-  NFS: "판매 안함",
-  ON_SALE: "판매 중",
+  NFS: "분양 안함(NFS)",
+  ON_SALE: "분양 가능",
   ON_RESERVATION: "예약 중",
-  SOLD: "판매 완료",
+  SOLD: "분양 완료",
 };
 
 export const TABLE_HEADER = {
@@ -432,7 +433,7 @@ export const TABLE_HEADER = {
 
 export const SPECIES_KOREAN_ALIAS_INFO: Record<PetDtoSpecies, string> = {
   CR: "크레",
-  LE: "레오파드",
+  LE: "레게",
   FT: "펫테일",
   KN: "납테일",
   LC: "리키",
@@ -477,6 +478,12 @@ export const FOOD_KOREAN_INFO: Record<string, string> = {
   귀뚜라미: "귀뚜라미",
   냉동귀뚜라미: "냉동귀뚜라미",
   누에: "누에",
+};
+
+export const ADOPTION_METHOD_KOREAN_INFO: Record<AdoptionDtoMethod, string> = {
+  PICKUP: "직접 거래",
+  DELIVERY: "배송",
+  WHOLESALE: "도매",
 };
 
 export const SELECTOR_CONFIGS: Record<
@@ -644,11 +651,11 @@ export const SELECTOR_CONFIGS: Record<
     selectList: [
       {
         key: "NFS",
-        value: "판매 안함",
+        value: "분양 안함(NFS)",
       },
       {
         key: "ON_SALE",
-        value: "판매 중",
+        value: "분양 가능",
       },
       {
         key: "ON_RESERVATION",
@@ -656,7 +663,7 @@ export const SELECTOR_CONFIGS: Record<
       },
       {
         key: "SOLD",
-        value: "판매 완료",
+        value: "분양 완료",
       },
     ],
   },
