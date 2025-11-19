@@ -450,6 +450,7 @@ export class AdoptionFilterDto extends PageOptionsDto {
     required: false,
   })
   @IsOptional()
+  @Type(() => Date)
   @IsDate()
   startDate?: Date; // 최소 분양 날짜
 
@@ -459,6 +460,7 @@ export class AdoptionFilterDto extends PageOptionsDto {
     required: false,
   })
   @IsOptional()
+  @Type(() => Date)
   @IsDate()
   endDate?: Date; // 최대 분양 날짜
 }
