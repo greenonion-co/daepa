@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useAdoptionFilterStore } from "../../store/adoptionFilter";
 import { cn } from "@/lib/utils";
 import { ChevronDown } from "lucide-react";
+import { isNotNil } from "es-toolkit";
 
 const AdoptionPriceRangeFilter = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -55,7 +56,7 @@ const AdoptionPriceRangeFilter = () => {
   };
 
   const displayText = () => {
-    if (searchFilters.minPrice && searchFilters.maxPrice) {
+    if (isNotNil(searchFilters.minPrice) && isNotNil(searchFilters.maxPrice)) {
       return `분양 가격・${formatPrice(searchFilters.minPrice)}원 ~ ${formatPrice(searchFilters.maxPrice)}원`;
     }
     if (searchFilters.minPrice) {
