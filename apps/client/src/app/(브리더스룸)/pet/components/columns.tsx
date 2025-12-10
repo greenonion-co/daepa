@@ -210,6 +210,18 @@ export const columns: ColumnDef<PetDto>[] = [
 
       const father = row.original.father as PetParentDto;
       const status = father?.status ?? "approved";
+      const isDeleted = father.isDeleted;
+
+      if (isDeleted) {
+        return (
+          <div className="cursor-not-allowed">
+            <span className="cursor-not-allowed line-through decoration-red-500">
+              {father.name}
+            </span>
+            <span className="text-[12px] text-red-500">[삭제됨]</span>
+          </div>
+        );
+      }
 
       return (
         <LinkButton
@@ -250,7 +262,18 @@ export const columns: ColumnDef<PetDto>[] = [
 
       const mother = row.original.mother as PetParentDto;
       const status = mother?.status ?? "approved";
+      const isDeleted = mother.isDeleted;
 
+      if (isDeleted) {
+        return (
+          <div className="cursor-not-allowed">
+            <span className="cursor-not-allowed line-through decoration-red-500">
+              {mother.name}
+            </span>
+            <span className="text-[12px] text-red-500">[삭제됨]</span>
+          </div>
+        );
+      }
       return (
         <LinkButton
           href={`/pet/${mother.petId}`}
