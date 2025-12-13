@@ -18,12 +18,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { adoptionControllerGetAllAdoptions, AdoptionDto } from "@repo/api-client";
+import { AdoptionDto } from "@repo/api-client";
 import Loading from "@/components/common/Loading";
 import { overlay } from "overlay-kit";
 import AdoptionDetailModal from "./AdoptionDetailModal";
 import useTableStore from "../../pet/store/table";
-import { useQueryClient } from "@tanstack/react-query";
 import { Filters } from "../../pet/components/Filters";
 
 interface DataTableProps<TData> {
@@ -41,7 +40,6 @@ export const AdoptionDataTable = ({
   isFetchingMore,
   loaderRefAction,
 }: DataTableProps<AdoptionDto>) => {
-  const queryClient = useQueryClient();
   const { sorting, rowSelection, setSorting, setRowSelection } = useTableStore();
 
   const table = useReactTable({
@@ -60,16 +58,7 @@ export const AdoptionDataTable = ({
 
   const handleRowClick = (petId: string) => {
     overlay.open(({ isOpen, close }) => (
-      <AdoptionDetailModal
-        isOpen={isOpen}
-        onClose={close}
-        petId={petId}
-        onUpdate={() => {
-          queryClient.invalidateQueries({
-            queryKey: [adoptionControllerGetAllAdoptions.name],
-          });
-        }}
-      />
+      <AdoptionDetailModal isOpen={isOpen} onClose={close} petId={petId} />
     ));
   };
 

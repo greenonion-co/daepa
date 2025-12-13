@@ -55,7 +55,7 @@ const AdoptionReceipt = memo(({ adoption, isEditable = true }: AdoptionReceiptPr
         isOpen={isOpen}
         onClose={close}
         petId={adoption.petId}
-        onUpdate={() => {
+        onUpdateSuccess={() => {
           queryClient.invalidateQueries({
             queryKey: [petControllerFindPetByPetId.name, adoption.petId],
           });
