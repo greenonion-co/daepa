@@ -51,6 +51,7 @@ import { EggDetailEntity } from 'src/egg_detail/egg_detail.entity';
 import { PetDetailEntity } from 'src/pet_detail/pet_detail.entity';
 import { isUndefined } from 'es-toolkit';
 import { PairEntity } from 'src/pair/pair.entity';
+import { DateTime } from 'luxon';
 
 @Injectable()
 export class PetService {
@@ -220,7 +221,6 @@ export class PetService {
       if (pet.isDeleted) {
         return plainToInstance(PetSingleDto, {
           petId: pet.petId,
-          owner,
           species: pet.species,
           name: pet.name,
           isDeleted: pet.isDeleted,
@@ -594,7 +594,7 @@ export class PetService {
       }
 
       try {
-        const now = new Date();
+        const now = DateTime.now().setZone('Asia/Seoul').toJSDate();
 
         // 펫 soft delete
         await entityManager.update(
@@ -619,19 +619,6 @@ export class PetService {
           await entityManager.update(
             EggDetailEntity,
             { petId },
-            { isDeleted: true },
-          );
-        }
-
-        // 분양 정보가 있으면 soft delete (판매 전 분양 정보)
-        const adoptionExists = await entityManager.exists(AdoptionEntity, {
-          where: { petId, isDeleted: false },
-        });
-
-        if (adoptionExists) {
-          await entityManager.update(
-            AdoptionEntity,
-            { petId, isDeleted: false },
             { isDeleted: true },
           );
         }
@@ -693,19 +680,6 @@ export class PetService {
           await entityManager.update(
             EggDetailEntity,
             { petId },
-            { isDeleted: false },
-          );
-        }
-
-        // 분양 정보 복구
-        const adoptionExists = await entityManager.exists(AdoptionEntity, {
-          where: { petId, isDeleted: true },
-        });
-
-        if (adoptionExists) {
-          await entityManager.update(
-            AdoptionEntity,
-            { petId, isDeleted: true },
             { isDeleted: false },
           );
         }

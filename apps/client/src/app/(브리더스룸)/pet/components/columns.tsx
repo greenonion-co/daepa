@@ -274,6 +274,17 @@ export const columns: ColumnDef<PetDto>[] = [
           </div>
         );
       }
+
+      if (isDeleted) {
+        return (
+          <div className="cursor-not-allowed">
+            <span className="cursor-not-allowed line-through decoration-red-500">
+              {mother.name}
+            </span>
+            <span className="text-[12px] text-red-500">[삭제됨]</span>
+          </div>
+        );
+      }
       return (
         <LinkButton
           href={`/pet/${mother.petId}`}

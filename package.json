@@ -13,6 +13,7 @@
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
     "@types/cookie-parser": "^1.4.9",
+    "@types/luxon": "^3.7.1",
     "@types/passport-google-oauth20": "^2.0.16",
     "@types/passport-jwt": "^4.0.1",
     "@types/passport-kakao": "^1.0.3",
@@ -33,6 +34,7 @@
     "cookie-parser": "^1.4.7",
     "es-toolkit": "^1.39.7",
     "jose": "^5.9.6",
+    "luxon": "^3.7.2",
     "nanoid": "3",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
