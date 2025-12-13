@@ -118,6 +118,7 @@ const RegisterPage = () => {
 
       if (response.data.success) {
         toast.success(response.data.message);
+
         const redirectUrl = localStorage.getItem("redirectUrl");
         if (redirectUrl) {
           localStorage.removeItem("redirectUrl");
@@ -125,8 +126,6 @@ const RegisterPage = () => {
         } else {
           router.replace("/pet");
         }
-
-        toast.success("로그인에 성공했습니다.");
       }
     } catch (error) {
       console.error("회원정보 등록 실패:", error);
