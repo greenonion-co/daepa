@@ -3,17 +3,10 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 
 import { useMemo, useState } from "react";
-import {
-  brMatingControllerFindAll,
-  LayingByDateDto,
-  layingControllerCreate,
-  PetDtoSpecies,
-} from "@repo/api-client";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { LayingByDateDto, PetDtoSpecies } from "@repo/api-client";
 import { Info } from "lucide-react";
-import { format } from "date-fns";
+import { format, addDays } from "date-fns";
 import { toast } from "sonner";
-import { AxiosError } from "axios";
 import {
   Select,
   SelectContent,
@@ -23,17 +16,63 @@ import {
 } from "@/components/ui/select";
 import { SPECIES_KOREAN_INFO } from "../../constants";
 import CalendarSelect from "./CalendarSelect";
+import { useCreateLaying } from "../hooks/useCreateLaying";
 
+/**
+ * 산란 생성 모달 Props
+ */
 interface CreateLayingModalProps {
+  /** 모달 열림 상태 */
   isOpen: boolean;
+  /** 닫기 콜백 */
   onClose: () => void;
+  /** 메이팅 ID */
   matingId: number;
+  /** 메이팅 날짜 (산란일 선택 범위 제한용) */
   matingDate?: string;
+  /** 아버지 ID */
   fatherId?: string;
+  /** 어머니 ID */
   motherId?: string;
+  /** 기존 산란 데이터 (차수 및 날짜 제한용) */
   layingData?: LayingByDateDto[];
+  /** 생성 성공 시 콜백 (선택) */
+  onCreateSuccess?: () => void;
 }
 
+/**
+ * YYYYMMDD 형식의 날짜 문자열을 Date 객체로 변환
+ * @param dateString - YYYYMMDD 형식의 날짜 문자열 (예: "20240101")
+ * @returns Date 객체
+ */
+const parseLayingDate = (dateString: string | number): Date => {
+  const str = dateString.toString();
+  const formatted = str.replace(/(\d{4})(\d{2})(\d{2})/, "$1-$2-$3");
+  return new Date(formatted);
+};
+
+/**
+ * 산란 생성 모달
+ *
+ * @description
+ * - Single Responsibility: UI 렌더링 + 폼 상태 관리만
+ * - Open/Closed: onCreateSuccess로 확장 가능
+ * - Dependency Inversion: 비즈니스 로직은 useCreateLaying에 위임
+ *
+ * @example
+ * ```tsx
+ * <CreateLayingModal
+ *   isOpen={true}
+ *   onClose={() => {}}
+ *   matingId={1}
+ *   matingDate="20240101"
+ *   fatherId="father-id"
+ *   motherId="mother-id"
+ *   layingData={[]}
+ *   onCreateSuccess={() => console.log('생성 완료')}
+ * />
+ * ```
+ */
 const CreateLayingModal = ({
   isOpen,
   onClose,
@@ -42,40 +81,35 @@ const CreateLayingModal = ({
   layingData,
   fatherId,
   motherId,
+  onCreateSuccess,
 }: CreateLayingModalProps) => {
-  const queryClient = useQueryClient();
+  // 마지막 산란일 계산
   const lastLayingDate = useMemo(
     () => layingData?.[layingData.length - 1]?.layingDate,
     [layingData],
   );
 
+  // 최대 차수 계산
   const maxClutch = useMemo(() => {
     if (!layingData || layingData.length === 0) return 0;
-    // layingData의 각 항목에서 clutch 값을 추출하여 최대값 찾기
     const clutches = layingData
-      .map((laying) => {
-        // LayingByDateDto 내의 layings 배열에서 첫 번째 항목의 clutch를 가져옴
-        return laying.layings?.[0]?.clutch as number | undefined;
-      })
+      .map((laying) => laying.layings?.[0]?.clutch as number | undefined)
       .filter((clutch): clutch is number => clutch !== undefined && clutch !== null);
     return clutches.length > 0 ? Math.max(...clutches) : 0;
   }, [layingData]);
 
-  const { mutateAsync: createLaying } = useMutation({
-    mutationFn: layingControllerCreate,
-  });
-
+  // 기본 산란일 계산 (마지막 산란일 + 1일 or 오늘)
   const defaultLayingDate = useMemo(() => {
-    return lastLayingDate
-      ? new Date(
-          new Date(
-            lastLayingDate.toString().replace(/(\d{4})(\d{2})(\d{2})/, "$1-$2-$3"),
-          ).getTime() +
-            24 * 60 * 60 * 1000,
-        ).toISOString()
-      : new Date().toISOString();
+    if (!lastLayingDate) {
+      return new Date().toISOString();
+    }
+
+    // 마지막 산란일에서 1일 추가
+    const lastDate = parseLayingDate(lastLayingDate);
+    return addDays(lastDate, 1).toISOString();
   }, [lastLayingDate]);
 
+  // 폼 상태 관리
   const [formData, setFormData] = useState<{
     species: PetDtoSpecies;
     layingDate: string;
@@ -90,7 +124,19 @@ const CreateLayingModal = ({
     clutch: layingData?.length ? (layingData.length + 1).toString() : "1",
   });
 
+  // 비즈니스 로직은 커스텀 훅에 위임
+  const { createLaying, isPending } = useCreateLaying({
+    onSuccess: () => {
+      onClose();
+      onCreateSuccess?.();
+    },
+  });
+
+  /**
+   * 폼 제출 핸들러 (검증 + 호출만)
+   */
   const handleSubmit = async () => {
+    // 클라이언트 검증
     if (!formData.species) {
       toast.error("종은 필수 입력 항목입니다.");
       return;
@@ -106,48 +152,39 @@ const CreateLayingModal = ({
       return;
     }
 
+    // 비즈니스 로직 실행
     try {
       await createLaying({
         matingId,
         layingDate: format(new Date(formData.layingDate), "yyyy-MM-dd"),
-        temperature: formData.temperature ? parseFloat(formData.temperature) : undefined,
         species: formData.species,
         clutchCount: parseInt(formData.clutchCount, 10),
+        temperature: formData.temperature ? parseFloat(formData.temperature) : undefined,
         clutch: formData.clutch ? parseInt(formData.clutch, 10) : undefined,
         motherId,
         fatherId,
       });
-      toast.success("산란이 추가되었습니다.");
-      await queryClient.invalidateQueries({ queryKey: [brMatingControllerFindAll.name] });
-      onClose();
-    } catch (error) {
-      if (error instanceof AxiosError) {
-        toast.error(error.response?.data?.message ?? "산란 추가에 실패했습니다.");
-      } else {
-        toast.error("산란 추가에 실패했습니다.");
-      }
+    } catch {
+      // 에러는 useCreateLaying에서 처리됨
     }
   };
 
-  // 날짜 제한 함수
+  /**
+   * 날짜 선택 제한 함수
+   * - matingDate보다 이전 날짜는 선택 불가
+   * - lastLayingDate와 같거나 이전 날짜는 선택 불가
+   */
   const isDateDisabled = (date: Date) => {
     const selectedDate = new Date(format(date, "yyyy-MM-dd"));
 
     // matingDate 이후 조건
-    if (matingDate) {
-      const matingDateString = matingDate.toString();
-      const matingDateObj = new Date(matingDateString.replace(/(\d{4})(\d{2})(\d{2})/, "$1-$2-$3"));
-      if (selectedDate < matingDateObj) {
-        return true;
-      }
+    if (matingDate && selectedDate < parseLayingDate(matingDate)) {
+      return true;
     }
 
     // lastLayingDate 이후 조건
-    if (lastLayingDate) {
-      const lastLayingDateObj = new Date(lastLayingDate);
-      if (selectedDate <= lastLayingDateObj) {
-        return true;
-      }
+    if (lastLayingDate && selectedDate <= parseLayingDate(lastLayingDate)) {
+      return true;
     }
 
     return false;
@@ -211,13 +248,7 @@ const CreateLayingModal = ({
                     <Info className="h-4 w-4" /> 이전 산란일 이후 날짜만 선택 가능합니다.
                   </div>
                   <div className="font-semibold text-blue-500">
-                    마지막 산란일:{" "}
-                    {format(
-                      new Date(
-                        lastLayingDate.toString().replace(/(\d{4})(\d{2})(\d{2})/, "$1-$2-$3"),
-                      ),
-                      "yyyy년 MM월 dd일",
-                    )}
+                    마지막 산란일: {format(parseLayingDate(lastLayingDate), "yyyy년 MM월 dd일")}
                   </div>
                 </div>
               )}
@@ -273,16 +304,18 @@ const CreateLayingModal = ({
         </div>
         <div className="flex justify-end gap-2">
           <button
-            className="h-[32px] cursor-pointer rounded-lg bg-gray-100 px-3 text-sm font-semibold text-gray-600 hover:bg-gray-200"
+            className="h-[32px] cursor-pointer rounded-lg bg-gray-100 px-3 text-sm font-semibold text-gray-600 hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-50"
             onClick={onClose}
+            disabled={isPending}
           >
             취소
           </button>
           <button
-            className="h-[32px] cursor-pointer rounded-lg bg-blue-500 px-3 text-sm font-semibold text-white hover:bg-blue-600"
+            className="h-[32px] cursor-pointer rounded-lg bg-blue-500 px-3 text-sm font-semibold text-white hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
             onClick={handleSubmit}
+            disabled={isPending}
           >
-            추가
+            {isPending ? "처리 중..." : "추가"}
           </button>
         </div>
       </DialogContent>

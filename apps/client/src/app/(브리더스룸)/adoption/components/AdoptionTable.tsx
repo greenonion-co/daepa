@@ -194,7 +194,7 @@ const AdoptionTable = () => {
                             isOpen={isOpen}
                             onClose={close}
                             petId={row.original.petId}
-                            onUpdate={refetch}
+                            onUpdateSuccess={refetch}
                           />
                         ));
                       }}

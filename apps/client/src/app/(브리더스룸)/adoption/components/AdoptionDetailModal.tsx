@@ -1,44 +1,80 @@
 "use client";
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-
-import { useQuery } from "@tanstack/react-query";
-import { adoptionControllerGetAdoptionByPetId, PetAdoptionDtoStatus } from "@repo/api-client";
-import { GENDER_KOREAN_INFO, SPECIES_KOREAN_INFO } from "../../constants";
-import { cn, getStatusBadge } from "@/lib/utils";
+import { getStatusBadge } from "@/lib/utils";
 import Loading from "@/components/common/Loading";
-import { Card } from "@/components/ui/card";
-import EditAdoptionForm from "./EditAdoptionForm";
-import AdoptionReceipt from "../../pet/[petId]/(펫카드)/components/AdoptionReceipt";
-import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
+import { useQueryClient } from "@tanstack/react-query";
+import { adoptionControllerGetAllAdoptions } from "@repo/api-client";
+import { useAdoptionDetail } from "../hooks/useAdoptionDetail";
+import { AdoptionDetailContent } from "./AdoptionDetailContent";
 
-interface AdoptionDetailModalProps {
+/**
+ * 분양 상세 정보 모달 Props
+ */
+export interface AdoptionDetailModalProps {
+  /** 모달 열림 상태 */
   isOpen: boolean;
+  /** 조회할 펫 ID */
   petId: string;
+  /** 모달 닫기 콜백 */
   onClose: () => void;
-  onUpdate: () => void;
+  /** 업데이트 성공 시 콜백 (선택) - 커스텀 갱신 로직이 필요한 경우 */
+  onUpdateSuccess?: () => void;
 }
 
-const AdoptionDetailModal = ({ isOpen, petId, onClose, onUpdate }: AdoptionDetailModalProps) => {
-  const {
-    data: adoptionData,
-    isLoading,
-    refetch,
-    error,
-  } = useQuery({
-    queryKey: [adoptionControllerGetAdoptionByPetId.name, petId],
-    queryFn: () => adoptionControllerGetAdoptionByPetId(petId, { includeInactive: "true" }),
-    enabled: !!petId,
-    select: (data) => data.data?.data,
-  });
+/**
+ * 분양 상세 정보 모달
+ *
+ * @description
+ * - Single Responsibility: 모달 UI + 자체 데이터 관리만 담당
+ * - Open/Closed: onUpdateSuccess로 확장 가능
+ * - Dependency Inversion: 기본 갱신 로직 제공, 필요시 주입 가능
+ *
+ * @example
+ * ```tsx
+ * // 기본 사용 (자동 갱신)
+ * <AdoptionDetailModal
+ *   isOpen={true}
+ *   petId="123"
+ *   onClose={() => {}}
+ * />
+ *
+ * // 커스텀 갱신
+ * <AdoptionDetailModal
+ *   isOpen={true}
+ *   petId="123"
+ *   onClose={() => {}}
+ *   onUpdateSuccess={() => {
+ *     // 커스텀 갱신 로직
+ *   }}
+ * />
+ * ```
+ */
+const AdoptionDetailModal = ({
+  isOpen,
+  petId,
+  onClose,
+  onUpdateSuccess,
+}: AdoptionDetailModalProps) => {
+  const queryClient = useQueryClient();
+  const { data: adoptionData, isLoading, error } = useAdoptionDetail(petId, isOpen);
 
-  const petSummary = adoptionData?.pet;
-  if (!petSummary) return null;
-
-  const { status } = adoptionData;
-  const isSold = status === PetAdoptionDtoStatus.SOLD;
-  const { name, species, hatchingDate, sex, morphs, traits } = petSummary;
+  /**
+   * 분양 정보 업데이트 성공 핸들러
+   * - 기본: 분양 목록 캐시 무효화
+   * - 커스텀: onUpdateSuccess 콜백 실행
+   */
+  const handleUpdateSuccess = () => {
+    if (onUpdateSuccess) {
+      // 상위에서 제공한 커스텀 갱신 로직 실행
+      onUpdateSuccess();
+    } else {
+      // 기본 동작: 분양 목록 캐시 무효화
+      queryClient.invalidateQueries({
+        queryKey: [adoptionControllerGetAllAdoptions.name],
+      });
+    }
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -47,7 +83,7 @@ const AdoptionDetailModal = ({ isOpen, petId, onClose, onUpdate }: AdoptionDetai
           <DialogTitle className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               분양 상세 정보
-              {getStatusBadge(status)}
+              {adoptionData?.status && getStatusBadge(adoptionData.status)}
             </div>
           </DialogTitle>
         </DialogHeader>
@@ -55,63 +91,13 @@ const AdoptionDetailModal = ({ isOpen, petId, onClose, onUpdate }: AdoptionDetai
         {isLoading && <Loading />}
         {error && <div>Error: {error.message}</div>}
 
-        <div className="space-y-4">
-          {/* 펫 정보 */}
-          {/* TODO!: 추후에는 판매완료된 펫 정보 클릭 시 해당 펫 상세 페이지로 이동하도록 수정 */}
-          <Link
-            href={isSold ? "#" : `/pet/${petId}`}
-            onClick={() => !isSold && onClose()}
-            className={cn(isSold ? "cursor-not-allowed" : "cursor-pointer")}
-          >
-            <Card className="bg-muted mb-4 flex gap-0 border-2 p-4 hover:shadow-md">
-              <div className="mb-2 flex items-center gap-2 font-semibold">
-                {name}
-
-                <div className="text-muted-foreground text-sm font-normal">
-                  / {SPECIES_KOREAN_INFO[species] || "미분류"}
-                </div>
-                {sex && (
-                  <p className="text-sm font-normal text-blue-500">/ {GENDER_KOREAN_INFO[sex]}</p>
-                )}
-              </div>
-              <div className="flex flex-col gap-2 text-sm text-gray-600">
-                {morphs && morphs.length > 0 && (
-                  <div className="flex flex-wrap gap-2">
-                    {morphs.map((morph) => (
-                      <Badge key={morph}>{morph}</Badge>
-                    ))}
-                  </div>
-                )}
-                {traits && traits.length > 0 && (
-                  <div className="flex flex-wrap gap-2">
-                    {traits.map((trait: string) => `#${trait}`).join(" ")}
-                  </div>
-                )}
-                {hatchingDate && <p className="text-blue-600">{hatchingDate}</p>}
-              </div>
-            </Card>
-          </Link>
-
-          <div className="space-y-3">
-            {isSold ? (
-              // 판매완료 영수증
-              <AdoptionReceipt adoption={adoptionData} isEditable={false} />
-            ) : (
-              // 분양 정보 수정폼
-              <EditAdoptionForm
-                adoptionData={adoptionData}
-                onSubmit={(updated: boolean = true) => {
-                  if (updated) {
-                    onUpdate();
-                    refetch();
-                  }
-                  onClose();
-                }}
-                onCancel={onClose}
-              />
-            )}
-          </div>
-        </div>
+        {adoptionData && (
+          <AdoptionDetailContent
+            adoptionData={adoptionData}
+            onUpdateSuccess={handleUpdateSuccess}
+            onClose={onClose}
+          />
+        )}
       </DialogContent>
     </Dialog>
   );
