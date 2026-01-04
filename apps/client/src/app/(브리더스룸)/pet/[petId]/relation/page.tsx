@@ -1,6 +1,11 @@
 "use client";
 
-import { petControllerGetSiblingsByPetId, SiblingPetDetailDto } from "@repo/api-client";
+import {
+  petControllerGetChildrenByPetId,
+  petControllerGetParentsByPetId,
+  petControllerGetSiblingsByPetId,
+  SiblingPetDetailDto,
+} from "@repo/api-client";
 import { useQuery } from "@tanstack/react-query";
 import { use, useMemo } from "react";
 import SiblingPetCard from "./components/SiblingPetCard";
@@ -25,14 +30,37 @@ function SiblingsPage({ params }: PetDetailPageProps) {
   const isMobile = useIsMobile();
 
   const {
+    data: parentsData,
+    isLoading: isParentsLoading,
+    isError: isParentsError,
+  } = useQuery({
+    queryKey: [petControllerGetParentsByPetId.name, petId],
+    queryFn: () => petControllerGetParentsByPetId(petId),
+    select: (response) => response.data.data,
+  });
+
+  const {
     data: siblingsData,
-    isLoading,
-    isError,
+    isLoading: isSiblingsLoading,
+    isError: isSiblingsError,
   } = useQuery({
     queryKey: [petControllerGetSiblingsByPetId.name, petId],
     queryFn: () => petControllerGetSiblingsByPetId(petId),
     select: (response) => response.data.data,
   });
+
+  const {
+    data: childrenData,
+    isLoading: isChildrenLoading,
+    isError: isChildrenError,
+  } = useQuery({
+    queryKey: [petControllerGetChildrenByPetId.name, petId],
+    queryFn: () => petControllerGetChildrenByPetId(petId),
+    select: (response) => response.data.data,
+  });
+
+  const isLoading = isSiblingsLoading || isParentsLoading || isChildrenLoading;
+  const isError = isSiblingsError || isParentsError || isChildrenError;
 
   const { myProfile, sameClutchSiblings, otherClutchSiblings } = useMemo(() => {
     if (!siblingsData?.siblings) {
@@ -98,20 +126,20 @@ function SiblingsPage({ params }: PetDetailPageProps) {
   return (
     <div className={cn("flex flex-col gap-6 p-4", isMobile && "p-2")}>
       {/* 1. 부모 프로필 */}
-      {(siblingsData.father || siblingsData.mother) && (
+      {(parentsData?.father || parentsData?.mother) && (
         <section>
           <h2 className="mb-3 text-[16px] font-bold text-gray-900">부모</h2>
           <HorizontalScrollSection>
-            {siblingsData.father && (
+            {parentsData.father && (
               <div className="flex flex-col gap-1">
                 <span className="text-[12px] font-medium text-blue-600">부</span>
-                <SiblingPetCard pet={siblingsData.father} />
+                <SiblingPetCard pet={parentsData.father} />
               </div>
             )}
-            {siblingsData.mother && (
+            {parentsData.mother && (
               <div className="flex flex-col gap-1">
                 <span className="text-[12px] font-medium text-red-600">모</span>
-                <SiblingPetCard pet={siblingsData.mother} />
+                <SiblingPetCard pet={parentsData.mother} />
               </div>
             )}
           </HorizontalScrollSection>
