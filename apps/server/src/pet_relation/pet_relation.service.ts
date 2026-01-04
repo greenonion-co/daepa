@@ -6,7 +6,10 @@ import {
 } from '@nestjs/common';
 import { DataSource, EntityManager } from 'typeorm';
 import { PetRelationEntity } from './pet_relation.entity';
-import { PARENT_ROLE } from '../parent_request/parent_request.constants';
+import {
+  PARENT_ROLE,
+  PARENT_STATUS,
+} from '../parent_request/parent_request.constants';
 import {
   RawSiblingQueryResult,
   RawChildQueryResult,
@@ -278,9 +281,13 @@ export class PetRelationService {
     manager?: EntityManager,
   ): Promise<GetSiblingsPageResponseDto> {
     const run = async (em: EntityManager) => {
-      // Step 1: 대상 펫의 부모 정보 조회 (형제 찾기용)
+      // Step 1: 대상 펫의 승인된 부모 정보 조회 (형제 찾기용)
       const { father: rawFather, mother: rawMother } =
-        await this.parentRequestService.getParentsWithRequestStatus(petId, em);
+        await this.parentRequestService.getParentsWithRequestStatus(
+          petId,
+          { statuses: [PARENT_STATUS.APPROVED] },
+          em,
+        );
 
       // pet 조회
       const pet = await em.findOne(PetEntity, { where: { petId } });
