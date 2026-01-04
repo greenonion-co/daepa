@@ -7,8 +7,8 @@ import {
   IsOptional,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { CommonResponseDto } from 'src/common/response.dto';
 import { PetSummaryDto, PetHiddenStatusDto } from 'src/pet/pet.dto';
+import { PageMetaDto } from 'src/common/page.dto';
 
 /**
  * Raw query result interface for getSiblingsWithDetails (내부 변환용)
@@ -176,10 +176,10 @@ export class SiblingPetDetailDto extends PetSummaryDto {
 }
 
 /**
- * 형제 펫 조회 응답 데이터
+ * 형제 펫 조회 응답 (페이지네이션)
  */
-@ApiExtraModels(SiblingPetDetailDto, PetHiddenStatusDto)
-export class GetSiblingsWithDetailsDataDto {
+@ApiExtraModels(SiblingPetDetailDto, PetHiddenStatusDto, PageMetaDto)
+export class GetSiblingsPageResponseDto {
   @ApiProperty({
     description: '형제 펫 목록 (비공개인 경우 hiddenStatus만 포함)',
     type: 'array',
@@ -191,25 +191,21 @@ export class GetSiblingsWithDetailsDataDto {
     },
   })
   @IsArray()
-  siblings: (SiblingPetDetailDto | PetHiddenStatusDto)[];
-}
+  data: (SiblingPetDetailDto | PetHiddenStatusDto)[];
 
-/**
- * 형제 펫 조회 응답
- */
-export class GetSiblingsWithDetailsResponseDto extends CommonResponseDto {
   @ApiProperty({
-    description: '형제 펫 정보',
-    type: GetSiblingsWithDetailsDataDto,
+    description: '페이지 메타 정보',
+    type: PageMetaDto,
   })
-  data: GetSiblingsWithDetailsDataDto;
+  @IsObject()
+  meta: PageMetaDto;
 }
 
 /**
- * 자식 펫 조회 응답 데이터
+ * 자식 펫 조회 응답 (페이지네이션)
  */
-@ApiExtraModels(ChildPetDetailDto, PetHiddenStatusDto)
-export class GetChildrenWithDetailsDataDto {
+@ApiExtraModels(ChildPetDetailDto, PetHiddenStatusDto, PageMetaDto)
+export class GetChildrenPageResponseDto {
   @ApiProperty({
     description: '자식 펫 목록 (비공개인 경우 hiddenStatus만 포함)',
     type: 'array',
@@ -221,16 +217,12 @@ export class GetChildrenWithDetailsDataDto {
     },
   })
   @IsArray()
-  children: (ChildPetDetailDto | PetHiddenStatusDto)[];
-}
+  data: (ChildPetDetailDto | PetHiddenStatusDto)[];
 
-/**
- * 자식 펫 조회 응답
- */
-export class GetChildrenWithDetailsResponseDto extends CommonResponseDto {
   @ApiProperty({
-    description: '자식 펫 정보',
-    type: GetChildrenWithDetailsDataDto,
+    description: '페이지 메타 정보',
+    type: PageMetaDto,
   })
-  data: GetChildrenWithDetailsDataDto;
+  @IsObject()
+  meta: PageMetaDto;
 }

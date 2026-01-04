@@ -25,7 +25,9 @@ import type {
   KakaoNativeLoginRequestDto,
   PairControllerGetPairListParams,
   PetControllerFindAllParams,
+  PetControllerGetChildrenByPetIdParams,
   PetControllerGetDeletedPetsParams,
+  PetControllerGetSiblingsByPetIdParams,
   SaveFilesDto,
   StatisticsControllerGetAdoptionStatisticsParams,
   StatisticsControllerGetPairStatisticsParams,
@@ -60,9 +62,9 @@ import type {
   DetailJson,
   FilterPetListResponseDto,
   FindPetByPetIdResponseDto,
-  GetChildrenWithDetailsResponseDto,
+  GetChildrenPageResponseDto,
   GetParentsByPetIdResponseDto,
-  GetSiblingsWithDetailsResponseDto,
+  GetSiblingsPageResponseDto,
   PairDetailDto,
   PairDto,
   ParentLinkDetailJson,
@@ -120,17 +122,25 @@ export const petControllerGetParentsByPetId = (petId: string) => {
   });
 };
 
-export const petControllerGetSiblingsByPetId = (petId: string) => {
-  return useCustomInstance<GetSiblingsWithDetailsResponseDto>({
+export const petControllerGetSiblingsByPetId = (
+  petId: string,
+  params?: PetControllerGetSiblingsByPetIdParams,
+) => {
+  return useCustomInstance<GetSiblingsPageResponseDto>({
     url: `/api/v1/pet/siblings/${petId}`,
     method: "GET",
+    params,
   });
 };
 
-export const petControllerGetChildrenByPetId = (petId: string) => {
-  return useCustomInstance<GetChildrenWithDetailsResponseDto>({
+export const petControllerGetChildrenByPetId = (
+  petId: string,
+  params?: PetControllerGetChildrenByPetIdParams,
+) => {
+  return useCustomInstance<GetChildrenPageResponseDto>({
     url: `/api/v1/pet/children/${petId}`,
     method: "GET",
+    params,
   });
 };
 
@@ -1261,19 +1271,22 @@ export const getPetControllerGetSiblingsByPetIdResponsePetHiddenStatusDtoMock = 
 });
 
 export const getPetControllerGetSiblingsByPetIdResponseMock = (
-  overrideResponse: Partial<GetSiblingsWithDetailsResponseDto> = {},
-): GetSiblingsWithDetailsResponseDto => ({
-  success: faker.datatype.boolean(),
-  message: faker.string.alpha(20),
-  data: {
+  overrideResponse: Partial<GetSiblingsPageResponseDto> = {},
+): GetSiblingsPageResponseDto => ({
+  data: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+    faker.helpers.arrayElement([
+      { ...getPetControllerGetSiblingsByPetIdResponseSiblingPetDetailDtoMock() },
+      { ...getPetControllerGetSiblingsByPetIdResponsePetHiddenStatusDtoMock() },
+    ]),
+  ),
+  meta: {
     ...{
-      siblings: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-        () =>
-          faker.helpers.arrayElement([
-            { ...getPetControllerGetSiblingsByPetIdResponseSiblingPetDetailDtoMock() },
-            { ...getPetControllerGetSiblingsByPetIdResponsePetHiddenStatusDtoMock() },
-          ]),
-      ),
+      page: faker.number.int({ min: undefined, max: undefined }),
+      itemPerPage: faker.number.int({ min: undefined, max: undefined }),
+      totalCount: faker.number.int({ min: undefined, max: undefined }),
+      totalPage: faker.number.int({ min: undefined, max: undefined }),
+      hasPreviousPage: faker.datatype.boolean(),
+      hasNextPage: faker.datatype.boolean(),
     },
   },
   ...overrideResponse,
@@ -1353,19 +1366,22 @@ export const getPetControllerGetChildrenByPetIdResponsePetHiddenStatusDtoMock = 
 });
 
 export const getPetControllerGetChildrenByPetIdResponseMock = (
-  overrideResponse: Partial<GetChildrenWithDetailsResponseDto> = {},
-): GetChildrenWithDetailsResponseDto => ({
-  success: faker.datatype.boolean(),
-  message: faker.string.alpha(20),
-  data: {
+  overrideResponse: Partial<GetChildrenPageResponseDto> = {},
+): GetChildrenPageResponseDto => ({
+  data: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+    faker.helpers.arrayElement([
+      { ...getPetControllerGetChildrenByPetIdResponseChildPetDetailDtoMock() },
+      { ...getPetControllerGetChildrenByPetIdResponsePetHiddenStatusDtoMock() },
+    ]),
+  ),
+  meta: {
     ...{
-      children: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-        () =>
-          faker.helpers.arrayElement([
-            { ...getPetControllerGetChildrenByPetIdResponseChildPetDetailDtoMock() },
-            { ...getPetControllerGetChildrenByPetIdResponsePetHiddenStatusDtoMock() },
-          ]),
-      ),
+      page: faker.number.int({ min: undefined, max: undefined }),
+      itemPerPage: faker.number.int({ min: undefined, max: undefined }),
+      totalCount: faker.number.int({ min: undefined, max: undefined }),
+      totalPage: faker.number.int({ min: undefined, max: undefined }),
+      hasPreviousPage: faker.datatype.boolean(),
+      hasNextPage: faker.datatype.boolean(),
     },
   },
   ...overrideResponse,
@@ -4488,10 +4504,10 @@ export const getPetControllerGetParentsByPetIdMockHandler = (
 
 export const getPetControllerGetSiblingsByPetIdMockHandler = (
   overrideResponse?:
-    | GetSiblingsWithDetailsResponseDto
+    | GetSiblingsPageResponseDto
     | ((
         info: Parameters<Parameters<typeof http.get>[1]>[0],
-      ) => Promise<GetSiblingsWithDetailsResponseDto> | GetSiblingsWithDetailsResponseDto),
+      ) => Promise<GetSiblingsPageResponseDto> | GetSiblingsPageResponseDto),
 ) => {
   return http.get("*/api/v1/pet/siblings/:petId", async (info) => {
     await delay(1000);
@@ -4511,10 +4527,10 @@ export const getPetControllerGetSiblingsByPetIdMockHandler = (
 
 export const getPetControllerGetChildrenByPetIdMockHandler = (
   overrideResponse?:
-    | GetChildrenWithDetailsResponseDto
+    | GetChildrenPageResponseDto
     | ((
         info: Parameters<Parameters<typeof http.get>[1]>[0],
-      ) => Promise<GetChildrenWithDetailsResponseDto> | GetChildrenWithDetailsResponseDto),
+      ) => Promise<GetChildrenPageResponseDto> | GetChildrenPageResponseDto),
 ) => {
   return http.get("*/api/v1/pet/children/:petId", async (info) => {
     await delay(1000);

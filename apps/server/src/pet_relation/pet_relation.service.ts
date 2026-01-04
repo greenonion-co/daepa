@@ -10,14 +10,15 @@ import { PARENT_ROLE } from '../parent_request/parent_request.constants';
 import {
   RawSiblingQueryResult,
   RawChildQueryResult,
-  GetSiblingsWithDetailsDataDto,
-  GetChildrenWithDetailsDataDto,
   SiblingPetDetailDto,
   ChildPetDetailDto,
+  GetChildrenPageResponseDto,
+  GetSiblingsPageResponseDto,
 } from './pet_relation.dto';
 import { ParentRequestService } from '../parent_request/parent_request.service';
 import { PetEntity } from '../pet/pet.entity';
 import { replaceSiblingPublicSafe } from '../common/utils/pet-parent.helper';
+import { PageOptionsDto, PageMetaDto } from '../common/page.dto';
 
 @Injectable()
 export class PetRelationService {
@@ -154,17 +155,19 @@ export class PetRelationService {
   }
 
   /**
-   * 특정 펫의 자식 펫들을 모든 관련 정보와 함께 조회
+   * 특정 펫의 자식 펫들을 모든 관련 정보와 함께 조회 (페이지네이션)
    * @param petId - 부모 펫 ID
    * @param userId - 요청 사용자 ID
+   * @param pageOptionsDto - 페이지네이션 옵션
    * @param manager - 선택적 EntityManager
-   * @returns 자식 펫들의 상세 정보
+   * @returns 자식 펫들의 상세 정보 (페이지네이션)
    */
   async getChildrenWithDetails(
     petId: string,
     userId: string,
+    pageOptionsDto: PageOptionsDto,
     manager?: EntityManager,
-  ): Promise<GetChildrenWithDetailsDataDto> {
+  ): Promise<GetChildrenPageResponseDto> {
     const run = async (em: EntityManager) => {
       // 부모 펫 조회
       const parentPet = await em.findOne(PetEntity, { where: { petId } });
@@ -207,8 +210,17 @@ export class PetRelationService {
           petId,
         });
 
-      const rawChildren: RawChildQueryResult[] =
-        await queryBuilder.getRawMany();
+      // 정렬: hatchingDate 내림차순
+      queryBuilder.orderBy('p.hatching_date', pageOptionsDto.order);
+
+      // 총 개수 조회
+      const totalCount = await queryBuilder.getCount();
+
+      // 페이지네이션 적용
+      const rawChildren: RawChildQueryResult[] = await queryBuilder
+        .skip(pageOptionsDto.skip)
+        .take(pageOptionsDto.itemPerPage)
+        .getRawMany();
 
       // 데이터 변환 및 비공개 펫 마스킹
       const children = rawChildren.map((raw) => {
@@ -237,7 +249,9 @@ export class PetRelationService {
         return replaceSiblingPublicSafe(child, userId);
       });
 
-      return { children };
+      const meta = new PageMetaDto({ pageOptionsDto, totalCount });
+
+      return { data: children, meta };
     };
 
     if (manager) {
@@ -250,17 +264,19 @@ export class PetRelationService {
   }
 
   /**
-   * 특정 펫의 형제 펫들을 모든 관련 정보와 함께 조회
+   * 특정 펫의 형제 펫들을 모든 관련 정보와 함께 조회 (페이지네이션)
    * @param petId - 대상 펫 ID
    * @param userId - 요청 사용자 ID
+   * @param pageOptionsDto - 페이지네이션 옵션
    * @param manager - 선택적 EntityManager
-   * @returns 형제 펫들의 상세 정보
+   * @returns 형제 펫들의 상세 정보 (페이지네이션)
    */
   async getSiblingsWithDetails(
     petId: string,
     userId: string,
+    pageOptionsDto: PageOptionsDto,
     manager?: EntityManager,
-  ): Promise<GetSiblingsWithDetailsDataDto> {
+  ): Promise<GetSiblingsPageResponseDto> {
     const run = async (em: EntityManager) => {
       // Step 1: 대상 펫의 부모 정보 조회 (형제 찾기용)
       const { father: rawFather, mother: rawMother } =
@@ -273,7 +289,8 @@ export class PetRelationService {
       }
 
       if (!rawFather && !rawMother) {
-        return { siblings: [] };
+        const emptyMeta = new PageMetaDto({ pageOptionsDto, totalCount: 0 });
+        return { data: [], meta: emptyMeta };
       }
 
       // Step 2: 모든 형제 펫 정보를 한 번에 조회 (JOIN 사용)
@@ -338,8 +355,17 @@ export class PetRelationService {
         queryBuilder.andWhere('pr.mother_id IS NULL');
       }
 
-      const rawSiblings: RawSiblingQueryResult[] =
-        await queryBuilder.getRawMany();
+      // 정렬: hatchingDate 내림차순
+      queryBuilder.orderBy('p.hatching_date', pageOptionsDto.order);
+
+      // 총 개수 조회
+      const totalCount = await queryBuilder.getCount();
+
+      // 페이지네이션 적용
+      const rawSiblings: RawSiblingQueryResult[] = await queryBuilder
+        .skip(pageOptionsDto.skip)
+        .take(pageOptionsDto.itemPerPage)
+        .getRawMany();
 
       // Step 3: 데이터 변환 및 비공개 펫 마스킹
       const siblings = rawSiblings.map((raw) => {
@@ -383,7 +409,9 @@ export class PetRelationService {
         return replaceSiblingPublicSafe(sibling, userId);
       });
 
-      return { siblings };
+      const meta = new PageMetaDto({ pageOptionsDto, totalCount });
+
+      return { data: siblings, meta };
     };
 
     if (manager) {
