@@ -5,7 +5,7 @@
  * Project Daepa API description
  * OpenAPI spec version: 1.0
  */
-import type { SiblingPetDetailDto } from "./siblingPetDetailDto";
+import type { ChildPetDetailDto } from "./childPetDetailDto";
 import type { PetHiddenStatusDto } from "./petHiddenStatusDto";
 
-export type GetChildrenWithDetailsDataDtoChildrenItem = SiblingPetDetailDto | PetHiddenStatusDto;
+export type GetChildrenWithDetailsDataDtoChildrenItem = ChildPetDetailDto | PetHiddenStatusDto;

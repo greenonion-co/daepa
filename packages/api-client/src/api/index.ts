@@ -55,6 +55,7 @@ import type {
   BrMatingControllerFindAll200,
   BrPetControllerFindAll200,
   BrPetControllerGetPetsByYear200,
+  ChildPetDetailDto,
   CommonResponseDto,
   DetailJson,
   FilterPetListResponseDto,
@@ -1150,74 +1151,6 @@ export const getPetControllerGetParentsByPetIdResponseMock = (
   ...overrideResponse,
 });
 
-export const getPetControllerGetSiblingsByPetIdResponsePetParentDtoMock = (
-  overrideResponse: Partial<PetParentDto> = {},
-): PetParentDto => ({
-  ...{
-    petId: faker.string.alpha(20),
-    owner: {
-      ...{
-        status: faker.helpers.arrayElement([
-          "pending",
-          "active",
-          "inactive",
-          "suspended",
-          "deleted",
-        ] as const),
-        userId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
-        name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
-        role: faker.helpers.arrayElement([
-          faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
-          undefined,
-        ]),
-        isBiz: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
-      },
-    },
-    name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
-    species: faker.helpers.arrayElement(["CR", "LE", "FT", "KN", "LC", "GG"] as const),
-    hatchingDate: faker.helpers.arrayElement([
-      faker.date.past().toISOString().split("T")[0],
-      undefined,
-    ]),
-    isPublic: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
-    isDeleted: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
-    status: faker.helpers.arrayElement([
-      "pending",
-      "approved",
-      "rejected",
-      "deleted",
-      "cancelled",
-    ] as const),
-    sex: faker.helpers.arrayElement([
-      faker.helpers.arrayElement(["M", "F", "N"] as const),
-      undefined,
-    ]),
-    morphs: faker.helpers.arrayElement([
-      Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.string.alpha(20),
-      ),
-      undefined,
-    ]),
-    traits: faker.helpers.arrayElement([
-      Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.string.alpha(20),
-      ),
-      undefined,
-    ]),
-  },
-  ...overrideResponse,
-});
-
-export const getPetControllerGetSiblingsByPetIdResponsePetHiddenStatusDtoMock = (
-  overrideResponse: Partial<PetHiddenStatusDto> = {},
-): PetHiddenStatusDto => ({
-  ...{
-    petId: faker.string.alpha(20),
-    hiddenStatus: faker.helpers.arrayElement(["SECRET", "PENDING", "DELETED"] as const),
-  },
-  ...overrideResponse,
-});
-
 export const getPetControllerGetSiblingsByPetIdResponseSiblingPetDetailDtoMock = (
   overrideResponse: Partial<SiblingPetDetailDto> = {},
 ): SiblingPetDetailDto => ({
@@ -1317,6 +1250,16 @@ export const getPetControllerGetSiblingsByPetIdResponseSiblingPetDetailDtoMock =
   ...overrideResponse,
 });
 
+export const getPetControllerGetSiblingsByPetIdResponsePetHiddenStatusDtoMock = (
+  overrideResponse: Partial<PetHiddenStatusDto> = {},
+): PetHiddenStatusDto => ({
+  ...{
+    petId: faker.string.alpha(20),
+    hiddenStatus: faker.helpers.arrayElement(["SECRET", "PENDING", "DELETED"] as const),
+  },
+  ...overrideResponse,
+});
+
 export const getPetControllerGetSiblingsByPetIdResponseMock = (
   overrideResponse: Partial<GetSiblingsWithDetailsResponseDto> = {},
 ): GetSiblingsWithDetailsResponseDto => ({
@@ -1324,20 +1267,6 @@ export const getPetControllerGetSiblingsByPetIdResponseMock = (
   message: faker.string.alpha(20),
   data: {
     ...{
-      father: faker.helpers.arrayElement([
-        faker.helpers.arrayElement([
-          { ...getPetControllerGetSiblingsByPetIdResponsePetParentDtoMock() },
-          { ...getPetControllerGetSiblingsByPetIdResponsePetHiddenStatusDtoMock() },
-        ]),
-        undefined,
-      ]),
-      mother: faker.helpers.arrayElement([
-        faker.helpers.arrayElement([
-          { ...getPetControllerGetSiblingsByPetIdResponsePetParentDtoMock() },
-          { ...getPetControllerGetSiblingsByPetIdResponsePetHiddenStatusDtoMock() },
-        ]),
-        undefined,
-      ]),
       siblings: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
         () =>
           faker.helpers.arrayElement([
@@ -1350,9 +1279,9 @@ export const getPetControllerGetSiblingsByPetIdResponseMock = (
   ...overrideResponse,
 });
 
-export const getPetControllerGetChildrenByPetIdResponseSiblingPetDetailDtoMock = (
-  overrideResponse: Partial<SiblingPetDetailDto> = {},
-): SiblingPetDetailDto => ({
+export const getPetControllerGetChildrenByPetIdResponseChildPetDetailDtoMock = (
+  overrideResponse: Partial<ChildPetDetailDto> = {},
+): ChildPetDetailDto => ({
   ...{
     petId: faker.string.alpha(20),
     type: faker.helpers.arrayElement([
@@ -1409,42 +1338,6 @@ export const getPetControllerGetChildrenByPetIdResponseSiblingPetDetailDtoMock =
       faker.number.int({ min: undefined, max: undefined }),
       undefined,
     ]),
-    laying: faker.helpers.arrayElement([
-      {
-        ...{
-          id: faker.number.int({ min: undefined, max: undefined }),
-          matingId: faker.helpers.arrayElement([
-            faker.number.int({ min: undefined, max: undefined }),
-            undefined,
-          ]),
-          layingDate: faker.helpers.arrayElement([
-            `${faker.date.past().toISOString().split(".")[0]}Z`,
-            undefined,
-          ]),
-          clutch: faker.helpers.arrayElement([
-            faker.number.int({ min: undefined, max: undefined }),
-            undefined,
-          ]),
-        },
-      },
-      undefined,
-    ]),
-    mating: faker.helpers.arrayElement([
-      {
-        ...{
-          id: faker.number.int({ min: undefined, max: undefined }),
-          pairId: faker.helpers.arrayElement([
-            faker.number.int({ min: undefined, max: undefined }),
-            undefined,
-          ]),
-          matingDate: faker.helpers.arrayElement([
-            `${faker.date.past().toISOString().split(".")[0]}Z`,
-            undefined,
-          ]),
-        },
-      },
-      undefined,
-    ]),
   },
   ...overrideResponse,
 });
@@ -1469,7 +1362,7 @@ export const getPetControllerGetChildrenByPetIdResponseMock = (
       children: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
         () =>
           faker.helpers.arrayElement([
-            { ...getPetControllerGetChildrenByPetIdResponseSiblingPetDetailDtoMock() },
+            { ...getPetControllerGetChildrenByPetIdResponseChildPetDetailDtoMock() },
             { ...getPetControllerGetChildrenByPetIdResponsePetHiddenStatusDtoMock() },
           ]),
       ),

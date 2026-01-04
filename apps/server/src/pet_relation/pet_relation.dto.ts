@@ -118,6 +118,39 @@ export class SiblingMatingInfoDto {
 }
 
 /**
+ * 자식 펫 상세 정보 (PetSummaryDto 확장, laying/mating 제외)
+ */
+export class ChildPetDetailDto extends PetSummaryDto {}
+
+/**
+ * Raw query result interface for getChildrenWithDetails (내부 변환용)
+ */
+export interface RawChildQueryResult {
+  // pet_relations
+  petId: string;
+  // pets
+  name: string | null;
+  species: string;
+  hatchingDate: Date | null;
+  type: string;
+  ownerId: string | null;
+  isPublic: boolean;
+  isDeleted: boolean;
+  // pet_details
+  sex: string | null;
+  morphs: string[] | null;
+  traits: string[] | null;
+  weight: number | null;
+  growth: string | null;
+  // users (owner)
+  owner_userId: string | null;
+  owner_name: string | null;
+  owner_role: string | null;
+  owner_isBiz: boolean | null;
+  owner_status: string | null;
+}
+
+/**
  * 형제 펫 상세 정보 (PetSummaryDto 확장)
  */
 export class SiblingPetDetailDto extends PetSummaryDto {
@@ -175,20 +208,20 @@ export class GetSiblingsWithDetailsResponseDto extends CommonResponseDto {
 /**
  * 자식 펫 조회 응답 데이터
  */
-@ApiExtraModels(SiblingPetDetailDto, PetHiddenStatusDto)
+@ApiExtraModels(ChildPetDetailDto, PetHiddenStatusDto)
 export class GetChildrenWithDetailsDataDto {
   @ApiProperty({
     description: '자식 펫 목록 (비공개인 경우 hiddenStatus만 포함)',
     type: 'array',
     items: {
       oneOf: [
-        { $ref: getSchemaPath(SiblingPetDetailDto) },
+        { $ref: getSchemaPath(ChildPetDetailDto) },
         { $ref: getSchemaPath(PetHiddenStatusDto) },
       ],
     },
   })
   @IsArray()
-  children: (SiblingPetDetailDto | PetHiddenStatusDto)[];
+  children: (ChildPetDetailDto | PetHiddenStatusDto)[];
 }
 
 /**
