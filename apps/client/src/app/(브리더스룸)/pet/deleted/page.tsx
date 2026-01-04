@@ -56,13 +56,19 @@ export default function DeletedPetsPage() {
     <div className="space-y-4 px-2">
       <div className="flex flex-col gap-3">
         <div className="flex items-center gap-2">
-          <h1 className="text-[16px] text-gray-800">삭제된 펫 목록</h1>
+          <h1 className="text-[16px] text-gray-900 dark:text-blue-200">삭제된 펫 목록</h1>
         </div>
 
-        <Alert variant="destructive">
+        <Alert
+          className="text-blue-700 dark:text-blue-500"
+          style={{
+            background:
+              "linear-gradient(90deg, rgba(182, 210, 247, .25), rgba(245, 223, 255, .25))",
+          }}
+        >
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>펫 복구 안내</AlertTitle>
-          <AlertDescription>
+          <AlertDescription className="text-blue-700 dark:text-blue-500">
             삭제된 펫을 복구하시려면 운영자에게 문의해주세요.
             <br />
             삭제된 펫 정보는 보관되며, 운영자 승인 후 복구가 가능합니다.
@@ -71,7 +77,7 @@ export default function DeletedPetsPage() {
       </div>
 
       {isEmpty ? (
-        <div className="mt-6 text-center text-gray-600">
+        <div className="mt-6 text-center text-gray-600 dark:text-gray-400">
           <div className="font-semibold">삭제된 펫이 없습니다</div>
           <div className="mt-1 text-sm">삭제한 펫이 있으면 여기에 표시됩니다</div>
         </div>

@@ -20,20 +20,22 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
   return (
     <div
       className={cn(
-        "flex h-[52px] items-center justify-between px-2",
+        "dark:bg-background flex h-[52px] items-center justify-between px-2",
         isMobile && !isPetDetail && "bg-background sticky left-0 top-0 z-50 w-full",
       )}
     >
       <div className="flex items-center">
         {!isMobile && (
-          <Link href="/pet" className="mr-10 font-bold">
-            <Image src="/assets/logo.png" alt="브리더스룸 로고" width={100} height={40} />
+          <Link href="/pet" className="mr-5 font-bold">
+            <Image src="/assets/logo.png" alt="브리더스룸 로고" width={60} height={60} />
           </Link>
         )}
         {SIDEBAR_ITEMS.map((item) => (
           <Link
             className={cn(
-              item.url === pathname ? "font-bold text-black" : "font-semibold text-gray-500",
+              item.url === pathname
+                ? "font-bold text-black dark:text-white"
+                : "font-semibold text-gray-500 dark:text-gray-400",
               isMobile ? "px-1.5" : "px-3 py-1.5",
             )}
             key={item.title}
@@ -44,11 +46,15 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
         ))}
         {!pathname.includes("/register/") && (
           <Link href="/register/1">
-            <div className={cn("flex w-fit items-center rounded-lg px-2 py-1 hover:bg-gray-100")}>
-              <div className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-100 text-blue-600">
+            <div
+              className={cn(
+                "flex w-fit items-center rounded-lg px-2 py-1 hover:bg-gray-100 dark:hover:bg-gray-800",
+              )}
+            >
+              <div className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/50 dark:text-blue-400">
                 <Plus className="h-3 w-3" />
               </div>
-              <div className="flex items-center gap-1 px-2 py-1 text-[14px] font-[500] text-blue-600">
+              <div className="flex items-center gap-1 px-2 py-1 text-[14px] font-[500] text-blue-600 dark:text-blue-400">
                 펫 추가하기
               </div>
             </div>

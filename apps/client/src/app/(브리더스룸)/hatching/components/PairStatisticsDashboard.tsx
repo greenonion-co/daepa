@@ -248,13 +248,7 @@ const PairStatisticsDashboard = memo(() => {
       ) : statistics && statistics.egg.total > 0 ? (
         <div>
           {/* 메타 정보 */}
-          <div
-            className="my-4 grid grid-cols-2 rounded-2xl p-4 sm:grid-cols-3 lg:grid-cols-5"
-            style={{
-              background:
-                "linear-gradient(90deg, rgba(182, 210, 247, .25), rgba(245, 223, 255, .25))",
-            }}
-          >
+          <div className="my-4 grid grid-cols-2 rounded-2xl bg-gradient-to-r from-blue-200/25 to-purple-200/25 p-4 sm:grid-cols-3 lg:grid-cols-5 dark:from-blue-900/30 dark:to-purple-900/30">
             <StatCard label="산란된 알" value={statistics.egg.total} />
             <StatCard
               label="인큐베이팅 중"
@@ -298,7 +292,7 @@ const PairStatisticsDashboard = memo(() => {
               <ChartCard
                 title="성별 분포"
                 footer={
-                  <div className="mt-2 text-center text-sm font-[600] text-gray-700">
+                  <div className="mt-2 text-center text-sm font-[600] text-gray-700 dark:text-gray-300">
                     수컷 {statistics.sex.maleRate.toFixed(1)}% / 암컷{" "}
                     {statistics.sex.femaleRate.toFixed(1)}%
                   </div>
@@ -325,8 +319,8 @@ const PairStatisticsDashboard = memo(() => {
         </div>
       ) : (
         <div className="text-muted-foreground mt-6 flex flex-col items-center text-sm">
-          <Image src="/assets/lizard.png" alt="통계 데이터 없음" width={100} height={100} />
-          선택한 기간에 해당하는 데이터가 없습니다.
+          <Image src="/assets/lizard.png" alt="통계 데이터 없음" width={200} height={200} />
+          조회된 해칭 내역이 없습니다.
         </div>
       )}
     </div>

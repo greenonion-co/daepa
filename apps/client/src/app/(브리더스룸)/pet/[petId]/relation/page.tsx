@@ -164,24 +164,31 @@ function SiblingsPage({ params }: PetDetailPageProps) {
   return (
     <div className={cn("flex flex-col gap-6 p-4", isMobile && "p-2")}>
       {/* 1. 부모 프로필 */}
-      {(parentsData?.father || parentsData?.mother) && (
+      {parentsData?.father || parentsData?.mother ? (
         <section>
-          <h2 className="mb-3 text-[16px] font-bold text-gray-900">부모</h2>
+          <h2 className="mb-3 text-[16px] font-bold text-gray-900 dark:text-gray-300">부모</h2>
           <HorizontalScrollSection>
             {parentsData.father && (
               <div className="flex flex-col gap-1">
-                <span className="text-[12px] font-medium text-blue-600">부</span>
+                <span className="text-[12px] font-medium text-blue-600 dark:text-blue-800">부</span>
                 <SiblingPetCard pet={parentsData.father} />
               </div>
             )}
             {parentsData.mother && (
               <div className="flex flex-col gap-1">
-                <span className="text-[12px] font-medium text-red-600">모</span>
+                <span className="text-[12px] font-medium text-red-600 dark:text-red-800">모</span>
                 <SiblingPetCard pet={parentsData.mother} />
               </div>
             )}
           </HorizontalScrollSection>
         </section>
+      ) : (
+        <div className="flex h-full w-full flex-col items-center justify-center py-5 text-center text-[14px] text-gray-700">
+          <Image src="/assets/lizard.png" alt="통계 데이터 없음" width={200} height={200} />
+          등록된 부/모 정보가 없습니다.
+          <br />
+          부/모를 등록해 펫의 관계도를 확인해보세요!
+        </div>
       )}
       <div className="flex gap-4">
         {/* 2. 내 프로필 */}
@@ -246,11 +253,6 @@ function SiblingsPage({ params }: PetDetailPageProps) {
           <div className="text-xs text-gray-500">자식 펫이 없습니다.</div>
         )}
       </section>
-
-      {/* 형제가 없는 경우 */}
-      {sameClutchSiblings.length === 0 && otherClutchSiblings.length === 0 && (
-        <div className="flex h-32 items-center justify-center text-gray-500">형제가 없습니다.</div>
-      )}
     </div>
   );
 }

@@ -50,7 +50,7 @@ const EggItem = ({
     <div
       key={pet.petId}
       className={cn(
-        "flex w-full items-center justify-between p-1 pl-0 text-[14px] hover:rounded-xl hover:bg-gray-100",
+        "flex w-full items-center justify-between p-1 pl-0 text-[14px] hover:rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800",
         isHatched && "cursor-pointer",
       )}
       onClick={() => {
@@ -62,28 +62,28 @@ const EggItem = ({
       <div className="flex">
         <div
           className={cn(
-            "flex w-[56px] items-center justify-center font-semibold text-gray-500",
+            "flex w-[56px] items-center justify-center font-semibold text-gray-500 dark:text-gray-400",
             isMobile && "w-[30px]",
           )}
         />
 
         <div className="flex flex-col px-1 py-1.5">
           <div className="flex items-center gap-1 font-semibold">
-            <div className="text-gray-800">
+            <div className="text-gray-800 dark:text-gray-200">
               {pet?.name ?? `${pet.clutch ?? "@"}차-${pet.clutchOrder ?? "@"}`}
             </div>
             {pet.temperature && (
-              <span className="text-[12px] font-[500] text-gray-600">| {pet.temperature}℃</span>
+              <span className="text-[12px] font-[500] text-gray-600 dark:text-gray-400">| {pet.temperature}℃</span>
             )}
 
             {pet.sex && (
-              <span className="text-[12px] font-[500] text-gray-600">
+              <span className="text-[12px] font-[500] text-gray-600 dark:text-gray-400">
                 | {GENDER_KOREAN_INFO[pet.sex]}
               </span>
             )}
           </div>
           {!isHatched && pet.eggStatus === PetSummaryLayingDtoEggStatus.FERTILIZED && (
-            <div className="text-xs font-[500] text-blue-600">
+            <div className="text-xs font-[500] text-blue-600 dark:text-blue-400">
               <span className="font-[400]">예상 해칭일: </span>
               {getExpectedDate(pet.temperature)}
             </div>
@@ -100,9 +100,9 @@ const EggItem = ({
             triggerClassName={
               pet.eggStatus === "FERTILIZED"
                 ? "bg-yellow-700/80 text-yellow-100 border-none font-[600]"
-                : "font-[600] text-gray-700"
+                : "font-[600] text-gray-700 dark:text-gray-300"
             }
-            iconClassName={pet.eggStatus === "FERTILIZED" ? "text-white" : "text-black"}
+            iconClassName={pet.eggStatus === "FERTILIZED" ? "text-white" : "text-black dark:text-white"}
           />
 
           {/* 수정/삭제 드롭다운 */}
@@ -128,7 +128,7 @@ const EggItem = ({
           />
         </div>
       ) : (
-        <div className="font-[600] text-blue-700">
+        <div className="font-[600] text-blue-700 dark:text-blue-400">
           {pet.hatchingDate ? DateTime.fromISO(pet.hatchingDate).toFormat("M/d 해칭") : "해칭 완료"}
         </div>
       )}

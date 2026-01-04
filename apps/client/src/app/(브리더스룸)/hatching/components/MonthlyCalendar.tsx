@@ -142,7 +142,7 @@ const MonthlyCalendar = memo(() => {
             className={cn(
               "shrink-0 transition-all duration-300",
               isScrolled &&
-                "sticky top-0 z-20 w-full origin-top-left scale-75 bg-white [margin-bottom:-20%]",
+                "dark:bg-background sticky top-0 z-20 w-full origin-top-left scale-75 bg-white [margin-bottom:-20%]",
             )}
           >
             <Calendar
@@ -159,15 +159,17 @@ const MonthlyCalendar = memo(() => {
         )}
 
         <div className="w-full">
-          <div className="flex h-[32px] w-fit items-center gap-2 rounded-lg bg-gray-100 px-1">
+          <div className="flex h-[32px] w-fit items-center gap-2 rounded-lg bg-gray-100 px-1 dark:bg-gray-800">
             {tabs.map(({ key, label }) => {
               return (
                 <button
                   key={key}
                   onClick={() => setTab(key)}
                   className={cn(
-                    "cursor-pointer rounded-lg px-2 py-1 text-sm font-semibold text-gray-800",
-                    tab === key ? "bg-white shadow-sm" : "text-gray-600",
+                    "cursor-pointer rounded-lg px-2 py-1 text-sm font-semibold text-gray-800 dark:text-gray-200",
+                    tab === key
+                      ? "bg-white shadow-sm dark:bg-gray-700"
+                      : "text-gray-600 dark:text-gray-400",
                   )}
                 >
                   {label}
@@ -190,19 +192,22 @@ const MonthlyCalendar = memo(() => {
             {monthlyIsPending || todayIsFetching ? (
               <Loading />
             ) : weeklyGroups.length === 0 ? (
-              <div className="flex flex-col items-center justify-center pt-10 text-gray-700">
+              <div className="flex flex-col items-center justify-center pt-10 text-[14px] text-gray-700 dark:text-gray-300">
                 <Image
                   src="/assets/lizard.png"
                   alt="해칭 캘린더 도마뱀 이미지"
-                  width={100}
-                  height={100}
+                  width={200}
+                  height={200}
                 />
+                <span className="font-semibold text-black dark:text-gray-100">
+                  {currentMonth.getFullYear()}년 {currentMonth.getMonth() + 1}월
+                </span>
                 조회된 해칭 내역이 없습니다.
               </div>
             ) : (
               weeklyGroups.map((group) => (
                 <div key={group.weekKey} ref={(el) => void (groupRefs.current[group.weekKey] = el)}>
-                  <div className="sticky top-0 bg-white/70 px-1 py-2 text-[15px] font-semibold supports-[backdrop-filter]:bg-white/60">
+                  <div className="dark:supports-[backdrop-filter]:bg-background/60 sticky top-0 bg-white/70 px-1 py-2 text-[15px] font-semibold supports-[backdrop-filter]:bg-white/60 dark:text-gray-100">
                     {group.label}
                   </div>
                   {group.items

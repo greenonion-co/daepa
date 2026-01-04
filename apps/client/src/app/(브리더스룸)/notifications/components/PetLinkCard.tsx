@@ -55,11 +55,9 @@ const PetLinkCard = ({ detailData }: PetLinkCardProps) => {
       </div>
 
       {/* 안내 문구 */}
-      <div className="flex gap-1">
-        <Info size={14} color="blue" />
-        <span className="text-xs text-blue-700">
-          개체 사진 및 이름을 클릭하면 상세 페이지로 이동합니다.
-        </span>
+      <div className="flex gap-1 text-blue-700 dark:text-blue-500">
+        <Info size={14} />
+        <span className="text-xs">개체 사진 및 이름을 클릭하면 상세 페이지로 이동합니다.</span>
       </div>
     </>
   );

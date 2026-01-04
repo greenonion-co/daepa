@@ -74,30 +74,39 @@ const AdoptionPriceRangeFilter = () => {
         type="button"
         className={cn(
           "flex h-[32px] cursor-pointer items-center gap-1 rounded-lg px-2 py-1 text-[14px] font-[500]",
-          hasFilter ? "bg-blue-100 text-blue-600" : "bg-gray-100 text-gray-800",
+          hasFilter
+            ? "bg-blue-100 text-blue-600 dark:bg-blue-900/50 dark:text-blue-400"
+            : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200",
         )}
         aria-expanded={isOpen}
         aria-haspopup="listbox"
         onClick={() => setIsOpen(!isOpen)}
       >
         <div>{displayText()}</div>
-        <ChevronDown className={cn("h-4 w-4", hasFilter ? "text-blue-600" : "text-gray-600")} />
+        <ChevronDown
+          className={cn(
+            "h-4 w-4",
+            hasFilter ? "text-blue-600 dark:text-blue-400" : "text-gray-600 dark:text-gray-400",
+          )}
+        />
       </button>
 
       {isOpen && (
         <div
           className={cn(
-            "absolute left-0 top-[40px] z-50 w-[320px] rounded-2xl border-[1.8px] border-gray-200 bg-white p-5 shadow-lg",
+            "absolute left-0 top-[40px] z-50 w-[320px] rounded-2xl border-[1.8px] border-gray-200 bg-white p-5 shadow-lg dark:border-gray-700 dark:bg-gray-800",
             "origin-top transform transition-all duration-200 ease-out",
             isEntering
               ? "translate-y-0 scale-100 opacity-100"
               : "-translate-y-1 scale-95 opacity-0",
           )}
         >
-          <div className="mb-4 font-[500]">분양 가격</div>
+          <div className="mb-4 font-[500] dark:text-gray-100">분양 가격</div>
           <div className="mb-4 flex items-center gap-2">
             <div className="flex-1">
-              <label className="mb-1 block text-sm text-gray-600">최소 가격</label>
+              <label className="mb-1 block text-sm text-gray-600 dark:text-gray-400">
+                최소 가격
+              </label>
               <div className="relative">
                 <input
                   type="number"
@@ -109,16 +118,18 @@ const AdoptionPriceRangeFilter = () => {
                     }
                   }}
                   placeholder="0"
-                  className="h-[32px] w-full rounded-lg border border-gray-200 px-2 text-sm focus:border-blue-500 focus:outline-none"
+                  className="h-[32px] w-full appearance-none rounded-lg border border-gray-200 bg-white pl-2 pr-7 text-sm focus:border-blue-500 focus:outline-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:placeholder:text-gray-500"
                 />
-                <span className="absolute right-2 top-1/2 -translate-y-1/2 text-sm text-gray-500">
+                <span className="absolute right-2 top-1/2 -translate-y-1/2 text-sm text-gray-500 dark:text-gray-400">
                   원
                 </span>
               </div>
             </div>
-            <div className="mt-6 text-gray-400">~</div>
+            <div className="mt-6 text-gray-400 dark:text-gray-500">~</div>
             <div className="flex-1">
-              <label className="mb-1 block text-sm text-gray-600">최대 가격</label>
+              <label className="mb-1 block text-sm text-gray-600 dark:text-gray-400">
+                최대 가격
+              </label>
               <div className="relative">
                 <input
                   type="number"
@@ -130,9 +141,9 @@ const AdoptionPriceRangeFilter = () => {
                     }
                   }}
                   placeholder="무제한"
-                  className="h-[32px] w-full rounded-lg border border-gray-200 px-2 text-sm focus:border-blue-500 focus:outline-none"
+                  className="h-[32px] w-full appearance-none rounded-lg border border-gray-200 bg-white pl-2 pr-7 text-sm focus:border-blue-500 focus:outline-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:placeholder:text-gray-500"
                 />
-                <span className="absolute right-2 top-1/2 -translate-y-1/2 text-sm text-gray-500">
+                <span className="absolute right-2 top-1/2 -translate-y-1/2 text-sm text-gray-500 dark:text-gray-400">
                   원
                 </span>
               </div>
@@ -151,7 +162,7 @@ const AdoptionPriceRangeFilter = () => {
                   maxPrice: undefined,
                 });
               }}
-              className="h-[32px] cursor-pointer rounded-lg bg-gray-100 px-3 text-sm font-semibold text-gray-600 hover:bg-gray-200"
+              className="h-[32px] cursor-pointer rounded-lg bg-gray-100 px-3 text-sm font-semibold text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
             >
               초기화
             </button>

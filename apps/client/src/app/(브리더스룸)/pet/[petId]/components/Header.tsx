@@ -41,7 +41,7 @@ const Header = ({ pet, tabs, activeTab, onTabClick }: HeaderProps) => {
   return (
     <div
       className={cn(
-        "sticky top-0 z-10 flex flex-col gap-2 bg-gray-100 px-2 transition-all transition-shadow duration-200",
+        "dark:bg-background sticky top-0 z-20 flex flex-col gap-2 bg-gray-100 px-2 transition-all transition-shadow duration-200",
         isScrolled ? "pt-2 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1)]" : "",
       )}
     >
@@ -97,7 +97,7 @@ const Header = ({ pet, tabs, activeTab, onTabClick }: HeaderProps) => {
             )}
             <div
               className={cn(
-                "flex-1 text-gray-500 transition-all max-[480px]:text-xs",
+                "flex-1 text-gray-500 transition-all max-[480px]:text-xs dark:text-gray-400",
                 isScrolled ? "text-xs" : "text-sm",
               )}
             >
@@ -140,7 +140,7 @@ const Header = ({ pet, tabs, activeTab, onTabClick }: HeaderProps) => {
         <Link
           href={`/pet/${pet.petId}/relation`}
           className={cn(
-            "flex items-center gap-0.5 rounded-lg bg-blue-100 px-2 font-[700] text-white transition-colors hover:bg-blue-200",
+            "flex items-center gap-0.5 rounded-lg bg-blue-100 px-2 font-[700] text-white transition-colors hover:bg-blue-200 dark:bg-blue-900/40 dark:hover:bg-blue-800/40",
             isScrolled ? "h-8 text-xs" : "h-8 text-sm",
           )}
         >
@@ -158,7 +158,7 @@ const Header = ({ pet, tabs, activeTab, onTabClick }: HeaderProps) => {
       </div>
 
       {/* Tab Navigation - Only visible on screens 580px or smaller */}
-      <div className="hidden overflow-x-auto border-b border-gray-200 max-[580px]:flex">
+      <div className="hidden overflow-x-auto border-b border-gray-200 max-[580px]:flex dark:border-gray-700">
         {tabs.map((tab) => (
           <button
             key={tab.id}
@@ -166,8 +166,8 @@ const Header = ({ pet, tabs, activeTab, onTabClick }: HeaderProps) => {
             className={cn(
               "whitespace-nowrap px-4 py-2 text-sm transition-colors",
               activeTab === tab.id
-                ? "border-b-2 border-neutral-800 font-[600]"
-                : "text-neutral-600 hover:bg-gray-200",
+                ? "border-b-2 border-neutral-800 font-[600] dark:border-white"
+                : "text-neutral-600 hover:bg-gray-200 dark:text-gray-400 dark:hover:bg-gray-800",
             )}
           >
             {tab.label}

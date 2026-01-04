@@ -43,7 +43,7 @@ const NotificationExpandedContent = ({
   return (
     <div
       className={cn(
-        "grid max-w-[500px] overflow-hidden bg-gray-100 transition-all duration-300 ease-in-out",
+        "grid max-w-[500px] overflow-hidden bg-gray-100 transition-all duration-300 ease-in-out dark:bg-neutral-900",
         isOpen ? "grid-rows-[1fr] p-2 opacity-100" : "grid-rows-[0fr] opacity-0",
         className,
       )}

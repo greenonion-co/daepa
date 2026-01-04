@@ -50,7 +50,7 @@ function Calendar({
         table: "w-full border-collapse",
         head_row: "flex",
         head_cell: "text-muted-foreground rounded-md w-9 font-normal text-[0.75rem]",
-        row: "flex [&:has([aria-selected])]:bg-gray-100 [&:has([aria-selected])]:rounded-xl",
+        row: "flex [&:has([aria-selected])]:bg-gray-100 dark:[&:has([aria-selected])]:bg-gray-700 [&:has([aria-selected])]:rounded-xl",
         cell: cn(
           "relative text-center focus-within:relative focus-within:z-20 [&:has([aria-selected])]:bg-accent [&:has([aria-selected])]:rounded-xl",
         ),

@@ -69,17 +69,17 @@ const MonthlyStatsChart = ({ data }: MonthlyStatsChartProps) => {
     >
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={chartData} layout="vertical" margin={{ right: 15, left: 15 }} barSize={16}>
-          <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+          <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="hsl(var(--border))" />
           <XAxis
             type="number"
-            tick={{ fontSize: 12, fontWeight: 600 }}
+            tick={{ fontSize: 12, fontWeight: 600, fill: "hsl(var(--foreground))" }}
             tickLine={false}
             axisLine={false}
           />
           <YAxis
             type="category"
             dataKey="name"
-            tick={{ fontSize: 12, fontWeight: 600 }}
+            tick={{ fontSize: 12, fontWeight: 600, fill: "hsl(var(--foreground))" }}
             tickLine={false}
             axisLine={false}
             width={15}

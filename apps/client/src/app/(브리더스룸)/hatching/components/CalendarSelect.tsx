@@ -38,7 +38,7 @@ const CalendarSelect = ({
           tabIndex={0}
           data-field-name="matingDate"
           className={cn(
-            "flex w-fit items-center justify-center gap-1 rounded-lg px-1 text-[14px] font-semibold text-blue-500 hover:bg-blue-50 cursor-pointer",
+            "flex w-fit items-center justify-center gap-1 rounded-lg px-1 text-[14px] font-semibold text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30 cursor-pointer",
           )}
           onKeyDown={(e) => {
             if (e.key === "Enter" || e.key === " ") {
@@ -48,14 +48,14 @@ const CalendarSelect = ({
           }}
         >
           {type === "create" && (
-            <div className="flex h-3 w-3 items-center justify-center rounded-full bg-blue-100 text-[12px] text-blue-600">
+            <div className="flex h-3 w-3 items-center justify-center rounded-full bg-blue-100 text-[12px] text-blue-600 dark:bg-blue-900/50 dark:text-blue-400">
               <Plus className="h-2 w-2" />
             </div>
           )}
           <div className={cn("flex items-center gap-1", triggerTextClassName)}>
             {triggerText}
           </div>
-          {type === "edit" && <Pencil className="h-3 w-3 text-blue-600" />}
+          {type === "edit" && <Pencil className="h-3 w-3 text-blue-600 dark:text-blue-400" />}
         </div>
       </PopoverTrigger>
       <PopoverContent className="w-fit p-0" align="start">
@@ -101,7 +101,7 @@ const CalendarSelect = ({
             onConfirm(matingDate);
             setIsOpen(false);
           }}
-          className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-b-2xl bg-gray-800 p-2 text-sm font-semibold text-white transition-colors hover:bg-black"
+          className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-b-2xl bg-gray-800 p-2 text-sm font-semibold text-white transition-colors hover:bg-black dark:bg-blue-700 dark:hover:bg-blue-600"
         >
           {matingDate ? DateTime.fromISO(matingDate).toFormat("yyyy년 MM월 dd일") : ""}{" "}
           {confirmButtonText}

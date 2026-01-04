@@ -8,12 +8,10 @@ import {
   PetDto,
 } from "@repo/api-client";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
-import { cn, getChangedFields } from "@/lib/utils";
+import { getChangedFields } from "@/lib/utils";
 import { toast } from "sonner";
 import { useNameStore } from "@/app/(브리더스룸)/store/name";
 import { DUPLICATE_CHECK_STATUS } from "@/app/(브리더스룸)/constants";
-import Loading from "@/components/common/Loading";
 import { AxiosError } from "axios";
 import { useIsMyPet } from "@/hooks/useIsMyPet";
 import { useBreedingInfoStore } from "../../store/breedingInfo";
@@ -22,6 +20,7 @@ import { PublicToggle } from "./펫정보/PublicToggle";
 import { PetBasicInfo } from "./펫정보/PetBasicInfo";
 import { PetDetailInfo } from "./펫정보/PetDetailInfo";
 import { EggInfo } from "./펫정보/EggInfo";
+import EditActionButtons from "./EditActionButtons";
 
 const BreedingInfo = ({ petId, ownerId }: { petId: string; ownerId: string }) => {
   const { formData, errors, setFormData } = usePetStore();
@@ -148,8 +147,8 @@ const BreedingInfo = ({ petId, ownerId }: { petId: string; ownerId: string }) =>
   if (!pet || Object.keys(formData).length === 0) return null;
 
   return (
-    <div className="shadow-xs flex flex-1 flex-col gap-2 rounded-2xl bg-white p-3">
-      <div className="text-[14px] font-[600] text-gray-600">펫정보</div>
+    <div className="shadow-xs flex flex-1 flex-col gap-2 rounded-2xl bg-white p-3 dark:bg-neutral-900">
+      <div className="text-[14px] font-[600] text-gray-600 dark:text-gray-300">펫정보</div>
 
       {/* 공개 여부 */}
       <PublicToggle
@@ -177,35 +176,13 @@ const BreedingInfo = ({ petId, ownerId }: { petId: string; ownerId: string }) =>
       {isEgg && <EggInfo formData={formData} isEditMode={isEditMode} onFieldChange={updateField} />}
 
       {/* 액션 버튼 */}
-      {isViewingMyPet && (
-        <div className="mt-2 flex w-full flex-1 items-end gap-2">
-          {isEditMode && (
-            <Button
-              disabled={isProcessing}
-              className="h-10 flex-1 cursor-pointer rounded-lg font-bold"
-              onClick={handleCancel}
-            >
-              취소
-            </Button>
-          )}
-          <Button
-            className={cn(
-              "h-10 flex-[2] cursor-pointer rounded-lg font-bold",
-              isEditMode && "bg-red-600 hover:bg-red-600/90",
-              isProcessing && "bg-gray-300",
-            )}
-            onClick={() => {
-              if (!isEditMode) {
-                setIsEditMode(true);
-              } else {
-                handleSave();
-              }
-            }}
-          >
-            {isProcessing ? <Loading /> : !isEditMode ? "수정하기" : "수정된 사항 저장하기"}
-          </Button>
-        </div>
-      )}
+      <EditActionButtons
+        isVisible={isViewingMyPet}
+        isEditMode={isEditMode}
+        isProcessing={isProcessing}
+        onCancel={handleCancel}
+        onSubmit={() => (isEditMode ? handleSave() : setIsEditMode(true))}
+      />
     </div>
   );
 };

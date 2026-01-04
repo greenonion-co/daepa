@@ -23,14 +23,14 @@ const CustomerAnalysisCard = ({ data }: CustomerAnalysisCardProps) => {
   return (
     <ChartCard title="고객 분석">
       <div className="flex flex-col justify-between gap-4 p-2">
-        <div className="mt-2 flex flex-wrap justify-center gap-x-6 gap-y-2 text-[15px] text-gray-600">
+        <div className="mt-2 flex flex-wrap justify-center gap-x-6 gap-y-2 text-[15px] text-gray-600 dark:text-gray-300">
           <span>
             평균 구매 횟수:{" "}
-            <span className="font-bold text-gray-800">{data.averagePurchaseCount}회</span>
+            <span className="font-bold text-gray-800 dark:text-gray-100">{data.averagePurchaseCount}회</span>
           </span>
           <span>
             고객당 평균 지출:{" "}
-            <span className="font-bold text-gray-800">
+            <span className="font-bold text-gray-800 dark:text-gray-100">
               {formatPrice(data.averageCustomerSpending)}
             </span>
           </span>
@@ -75,14 +75,9 @@ export default CustomerAnalysisCard;
 
 const AnalysisItem = ({ label, value }: { label: string; value: string }) => {
   return (
-    <div
-      style={{
-        background: "linear-gradient(90deg, rgba(182, 210, 247, .25), rgba(245, 223, 255, .25))",
-      }}
-      className="rounded-lg bg-gray-50 p-3 text-center"
-    >
-      <div className="text-xl font-bold text-gray-900">{value}</div>
-      <div className="text-sm font-[600] text-gray-500">{label}</div>
+    <div className="rounded-lg bg-gradient-to-r from-blue-200/25 to-purple-200/25 p-3 text-center dark:from-blue-900/30 dark:to-purple-900/30">
+      <div className="text-xl font-bold text-gray-900 dark:text-gray-100">{value}</div>
+      <div className="text-sm font-[600] text-gray-500 dark:text-gray-400">{label}</div>
     </div>
   );
 };
@@ -105,17 +100,17 @@ const CustomerSection = ({
   showRank,
 }: CustomerSectionProps) => {
   return (
-    <div className="overflow-hidden rounded-xl border-2 border-gray-100 bg-white">
+    <div className="overflow-hidden rounded-xl border-2 border-gray-100 bg-white dark:border-gray-700 dark:bg-gray-900">
       <button
         onClick={onToggle}
-        className="flex w-full items-center justify-between px-3 py-2 text-left transition-colors hover:bg-gray-50"
+        className="flex w-full items-center justify-between px-3 py-2 text-left transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
       >
         <div className="flex items-center gap-2 font-semibold">
           {icon}
-          <span className="text-[15px] text-gray-800">{title}</span>
+          <span className="text-[15px] text-gray-800 dark:text-gray-100">{title}</span>
         </div>
         <ChevronDown
-          className={`h-4 w-4 text-gray-500 transition-transform duration-300 ease-in-out ${
+          className={`h-4 w-4 text-gray-500 transition-transform duration-300 ease-in-out dark:text-gray-400 ${
             isExpanded ? "rotate-180" : "rotate-0"
           }`}
         />
@@ -146,21 +141,21 @@ const CustomerSection = ({
                       <span
                         className={`flex h-5 w-5 items-center justify-center rounded-full text-xs font-bold ${
                           index === 0
-                            ? "bg-yellow-100 text-yellow-700"
+                            ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/50 dark:text-yellow-400"
                             : index === 1
-                              ? "bg-gray-200 text-gray-700"
+                              ? "bg-gray-200 text-gray-700 dark:bg-gray-600 dark:text-gray-200"
                               : index === 2
-                                ? "bg-orange-100 text-orange-700"
-                                : "bg-gray-100 text-gray-500"
+                                ? "bg-orange-100 text-orange-700 dark:bg-orange-900/50 dark:text-orange-400"
+                                : "bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400"
                         }`}
                       >
                         {index + 1}
                       </span>
                     )}
-                    <span className="font-[500] text-gray-800">{customer.name}</span>
+                    <span className="font-[500] text-gray-800 dark:text-gray-100">{customer.name}</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm">
-                    <span className="text-gray-500">{customer.purchaseCount}회</span>
+                    <span className="text-gray-500 dark:text-gray-400">{customer.purchaseCount}회</span>
                     <span className="font-semibold text-green-600">
                       {formatPrice(customer.totalSpending)}
                     </span>

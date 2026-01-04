@@ -64,7 +64,7 @@ const AdoptionReceipt = memo(({ adoption, isEditable = true }: AdoptionReceiptPr
   return (
     <div className="pb-4 pt-4">
       <div
-        className={`group relative rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 p-4 transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-lg hover:shadow-gray-400/50 dark:border-gray-600 dark:bg-gray-800 dark:hover:shadow-gray-600/50 ${
+        className={`group relative rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 p-4 transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-lg hover:shadow-gray-400/50 dark:border-gray-600 dark:bg-neutral-900 dark:hover:shadow-gray-600/50 ${
           isReceiptVisible ? "animate-print-receipt" : ""
         }`}
         onMouseEnter={handleReceiptHover}

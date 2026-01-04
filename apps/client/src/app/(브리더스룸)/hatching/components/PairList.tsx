@@ -17,13 +17,14 @@ import Filters from "./Filters";
 import { useMatingFilterStore } from "../../store/matingFilter";
 import { DateTime } from "luxon";
 import { isNil, omitBy } from "es-toolkit";
-import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import MatingDetailDialog from "./MatingDetailDialog";
 import PairCard from "./PairCard";
 import { overlay } from "overlay-kit";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import UpdatePairModal from "./UpdatePairModal";
+import Image from "next/image";
+import { isArray } from "es-toolkit/compat";
 
 export interface updatePairProps extends UpdatePairDto {
   pairId: number;
@@ -34,10 +35,10 @@ const PairList = memo(() => {
   const { species, father, mother, startDate, endDate, eggStatus } = useMatingFilterStore();
   const [isOpen, setIsOpen] = useState(false);
   const [selectedPairIndex, setSelectedPairIndex] = useState<number | null>(null);
+  const [initialMatingId, setInitialMatingId] = useState<number | null>(null);
   const itemPerPage = 10;
 
-  const hasFilter =
-    !!species || !!father?.petId || !!mother?.petId || !!startDate || !!endDate || !!eggStatus;
+  const hasFilter = !!father?.petId || !!mother?.petId || !!startDate || !!endDate || !!eggStatus;
 
   // 메이팅 조회 (무한 스크롤)
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, refetch } =
@@ -144,24 +145,18 @@ const PairList = memo(() => {
 
   if (data?.items && data.items.length === 0 && !hasFilter) {
     return (
-      <div className="flex flex-col items-center space-y-4 px-2">
-        <Card
-          className="flex w-full cursor-pointer flex-col items-center justify-center bg-blue-50 p-10 hover:bg-blue-100 dark:bg-gray-900 dark:text-gray-200"
+      <div className="flex items-center justify-center py-5 text-center">
+        <div
+          className="group flex cursor-pointer flex-col items-center rounded-3xl bg-gradient-to-b from-[#e5cf94] to-[#fffcf2] p-10 pt-5 transition-all hover:scale-105 hover:shadow-xl dark:from-[#5a4a2a] dark:to-[#2a2a20]"
           onClick={handleOpenCreateForm}
         >
-          <div
-            className={cn(
-              "flex w-fit cursor-pointer flex-col items-center gap-2 rounded-lg px-2 py-1 hover:bg-gray-100",
-            )}
-          >
-            <div className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-100 text-[14px] font-[500] text-blue-600">
-              <Plus className="h-3 w-3" />
-            </div>
-            <div className="flex items-center gap-1 px-2 py-1 text-[14px] font-[500] text-blue-600">
-              페어 추가하기
-            </div>
+          <Image src="/assets/lizard.png" alt="브리더스룸 로그인 로고" width={200} height={200} />
+          <div className="text-gray-600 dark:text-gray-300">개체를 추가해 관리를 시작해보세요!</div>
+          <div className="mt-3 flex items-center gap-1.5 rounded-full bg-[#c4a86a] px-4 py-2 text-sm font-semibold text-white transition-all group-hover:bg-[#a8904f] dark:bg-[#8a7a4a] dark:group-hover:bg-[#6a5a3a]">
+            <Plus className="h-4 w-4" />
+            페어 추가하기
           </div>
-        </Card>
+        </div>
       </div>
     );
   }
@@ -222,14 +217,14 @@ const PairList = memo(() => {
       {/* 헤더 영역 */}
       <div
         className={cn(
-          "flex w-fit cursor-pointer items-center rounded-lg px-2 py-1 hover:bg-gray-100",
+          "flex w-fit cursor-pointer items-center rounded-lg px-2 py-1 hover:bg-gray-100 dark:hover:bg-gray-800",
         )}
         onClick={handleOpenCreateForm}
       >
-        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-100 text-[14px] font-[500] text-blue-600">
+        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-100 text-[14px] font-[500] text-blue-600 dark:bg-blue-900/50 dark:text-blue-400">
           <Plus className="h-3 w-3" />
         </div>
-        <div className="flex items-center gap-1 px-2 py-1 text-[14px] font-[500] text-blue-600">
+        <div className="flex items-center gap-1 px-2 py-1 text-[14px] font-[500] text-blue-600 dark:text-blue-400">
           페어 추가하기
         </div>
       </div>
@@ -237,6 +232,11 @@ const PairList = memo(() => {
       <Filters />
       <div className="m-2 text-sm text-gray-600 dark:text-gray-400">
         검색된 페어 {data?.totalCount ?? "?"}쌍
+        {isArray(data?.items) && data.items.length > 0 && (
+          <div className="text-[12px] text-red-600 dark:text-red-400">
+            날짜를 선택하면 상세 정보 확인이 가능합니다.
+          </div>
+        )}
       </div>
 
       <ScrollArea>
@@ -249,6 +249,10 @@ const PairList = memo(() => {
               onClick={() => {
                 setIsOpen(true);
                 setSelectedPairIndex(index);
+                setInitialMatingId(null);
+              }}
+              onDateClick={(matingId) => {
+                setInitialMatingId(matingId);
               }}
             />
           ))}
@@ -264,8 +268,12 @@ const PairList = memo(() => {
 
       <MatingDetailDialog
         isOpen={isOpen}
-        onClose={() => setIsOpen(false)}
+        onClose={() => {
+          setIsOpen(false);
+          setInitialMatingId(null);
+        }}
         matingGroup={pair}
+        initialMatingId={initialMatingId}
         onConfirmAdd={async (matingDate) => {
           if (!pair?.father || !pair?.mother) {
             toast.error("부모 개체가 없습니다.");

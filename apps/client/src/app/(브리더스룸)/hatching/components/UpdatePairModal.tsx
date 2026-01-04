@@ -52,13 +52,13 @@ const UpdatePairModal = ({
       onSecondButtonClick={close}
       buttonDisabled={!hasChanges}
     >
-      <div className="px-1 text-[16px] font-[600]">메모 수정</div>
+      <div className="px-1 text-[16px] font-[500]">메모 수정</div>
 
       <div>
         <div className="relative pt-2">
           <textarea
             placeholder="메모를 추가해 보세요"
-            className={`min-h-30 w-full rounded-xl bg-gray-100 p-2 pb-10 text-left text-[12px] focus:outline-none focus:ring-0 dark:bg-gray-600/50 dark:text-white`}
+            className={`min-h-30 w-full rounded-xl bg-gray-100 p-2 pb-10 text-left text-[14px] focus:outline-none focus:ring-0 dark:bg-gray-600/50 dark:text-white`}
             value={desc}
             maxLength={maxLength}
             onChange={(e) => setDesc(e.target.value)}

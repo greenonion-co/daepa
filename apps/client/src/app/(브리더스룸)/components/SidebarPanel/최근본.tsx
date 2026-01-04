@@ -103,7 +103,10 @@ const RecentlyViewedList = () => {
                         {SPECIES_KOREAN_INFO[item.species]}
                       </span>
                     )}
-                    <BadgeList items={item.morphs} />
+                    <BadgeList
+                      items={item.morphs}
+                      badgeClassName="dark:bg-gray-700 dark:text-gray-200"
+                    />
                   </div>
                 </div>
               </Link>

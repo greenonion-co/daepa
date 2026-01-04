@@ -5,6 +5,7 @@ import {
   TextInput,
   TextInputProps,
   View,
+  useColorScheme,
 } from 'react-native';
 import { InfoIcon } from 'lucide-react-native';
 
@@ -27,14 +28,26 @@ const InputBox = ({
   buttonDisabled,
   ...props
 }: InputBoxProps) => {
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>{label}</Text>
+      <Text style={[styles.label, isDark && styles.labelDark]}>{label}</Text>
       <View style={styles.inputContainer}>
-        <TextInput style={styles.input} {...props} />
+        <TextInput
+          style={[styles.input, isDark && styles.inputDark]}
+          placeholderTextColor={isDark ? '#9CA3AF' : '#9E9E9E'}
+          {...props}
+        />
         {buttonLabel && (
           <Pressable
-            style={[styles.button, buttonDisabled && styles.buttonDisabled]}
+            style={[
+              styles.button,
+              isDark && styles.buttonDark,
+              buttonDisabled &&
+                (isDark ? styles.buttonDisabledDark : styles.buttonDisabled),
+            ]}
             onPress={handlePress}
             disabled={buttonDisabled}
           >
@@ -44,13 +57,13 @@ const InputBox = ({
       </View>
       {errorMessage && (
         <View style={styles.messageContainer}>
-          <InfoIcon size={16} color="red" />
+          <InfoIcon size={16} color="#EF4444" />
           <Text style={styles.errorMessage}>{errorMessage}</Text>
         </View>
       )}
       {successMessage && (
         <View style={styles.messageContainer}>
-          <InfoIcon size={16} color="green" />
+          <InfoIcon size={16} color="#22C55E" />
           <Text style={styles.successMessage}>{successMessage}</Text>
         </View>
       )}
@@ -69,6 +82,10 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     marginBottom: 6,
+    color: '#000',
+  },
+  labelDark: {
+    color: '#F3F4F6',
   },
   inputContainer: {
     flexDirection: 'row',
@@ -85,6 +102,12 @@ const styles = StyleSheet.create({
     borderColor: '#E0E0E0',
     borderRadius: 12,
     backgroundColor: '#F5F5F5',
+    color: '#000',
+  },
+  inputDark: {
+    backgroundColor: '#374151',
+    borderColor: '#4B5563',
+    color: '#F3F4F6',
   },
   messageContainer: {
     flexDirection: 'row',
@@ -92,10 +115,10 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   errorMessage: {
-    color: 'red',
+    color: '#EF4444',
   },
   successMessage: {
-    color: 'green',
+    color: '#22C55E',
   },
   button: {
     justifyContent: 'center',
@@ -105,8 +128,14 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     backgroundColor: '#000',
   },
+  buttonDark: {
+    backgroundColor: '#3B82F6',
+  },
   buttonDisabled: {
     backgroundColor: '#E0E0E0',
+  },
+  buttonDisabledDark: {
+    backgroundColor: '#4B5563',
   },
   buttonText: {
     color: '#fff',

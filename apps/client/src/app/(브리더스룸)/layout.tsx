@@ -32,7 +32,7 @@ export default function BrLayout({
 
   return (
     <main
-      className={`relative mx-auto flex min-h-screen w-full ${isPetDetail ? "bg-gray-100" : ""}`}
+      className={`relative mx-auto flex min-h-screen w-full ${isPetDetail ? "dark:bg-background bg-gray-100" : ""}`}
     >
       <div className={cn("w-full", !isMobile && "max-w-[calc(100%-55px)]")}>
         <Menubar unreadCount={unreadCount} />

@@ -1,7 +1,5 @@
 import DndImagePicker from "@/app/(브리더스룸)/components/Form/DndImagePicker";
-import Loading from "@/components/common/Loading";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import EditActionButtons from "./EditActionButtons";
 import {
   petImageControllerFindOne,
   PetImageItem,
@@ -110,8 +108,8 @@ const Images = ({ pet }: { pet: PetDto }) => {
   }, [pet, isSuccess, photos]);
 
   return (
-    <div className="shadow-xs flex flex-1 flex-col gap-2 rounded-2xl bg-white p-3">
-      <div className="text-[14px] font-[600] text-gray-600">이미지</div>
+    <div className="shadow-xs flex flex-1 flex-col gap-2 rounded-2xl bg-white p-3 dark:bg-neutral-900">
+      <div className="text-[14px] font-[600] text-gray-600 dark:text-gray-300">이미지</div>
 
       {!isEditMode && photos.length === 0 && (
         <div className="flex h-full flex-col items-center justify-center">
@@ -120,50 +118,24 @@ const Images = ({ pet }: { pet: PetDto }) => {
       )}
       <DndImagePicker disabled={!isEditMode} images={displayImages} onChange={setEditingImages} />
 
-      {isViewingMyPet && (
-        <div className="mt-2 flex w-full flex-1 items-end gap-2">
-          {isEditMode && (
-            <Button
-              disabled={isProcessing}
-              className="h-10 flex-1 cursor-pointer rounded-lg font-bold"
-              onClick={() => {
-                setEditingImages(null);
-                setIsEditMode(false);
-              }}
-            >
-              취소
-            </Button>
-          )}
-          <Button
-            disabled={isProcessing}
-            className={cn(
-              "h-10 flex-[2] cursor-pointer rounded-lg font-bold",
-              isEditMode && "bg-red-600 hover:bg-red-600/90",
-              isProcessing && "bg-gray-300",
-            )}
-            onClick={async () => {
-              if (isEditMode) {
-                await handleSave();
-              } else {
-                setEditingImages([...photos]);
-                setIsEditMode(true);
-              }
-            }}
-          >
-            {isProcessing ? (
-              <Loading />
-            ) : !isEditMode ? (
-              photos.length === 0 ? (
-                "이미지 등록"
-              ) : (
-                "이미지 수정"
-              )
-            ) : (
-              "수정된 사항 저장하기"
-            )}
-          </Button>
-        </div>
-      )}
+      <EditActionButtons
+        isVisible={isViewingMyPet}
+        isEditMode={isEditMode}
+        isProcessing={isProcessing}
+        onCancel={() => {
+          setEditingImages(null);
+          setIsEditMode(false);
+        }}
+        onSubmit={async () => {
+          if (isEditMode) {
+            await handleSave();
+          } else {
+            setEditingImages([...photos]);
+            setIsEditMode(true);
+          }
+        }}
+        defaultLabel={photos.length === 0 ? "이미지 등록" : "이미지 수정"}
+      />
     </div>
   );
 };

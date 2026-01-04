@@ -59,8 +59,8 @@ export const FormField = ({
   const error = errors?.[name];
 
   const inputClassName = cn(
-    `text-[16px] w-full h-9 pr-1 text-left focus:outline-none focus:ring-0 text-gray-400 dark:text-gray-400
-    transition-all duration-300 ease-in-out placeholder:text-gray-400 flex items-center `,
+    `text-[16px] w-full h-9 pr-1 text-left focus:outline-none focus:ring-0 text-gray-400 dark:text-gray-200
+    transition-all duration-300 ease-in-out placeholder:text-gray-400 flex items-center`,
     !disabled && "border-b-[1.2px] border-b-gray-200 focus:border-b-[1.8px] focus:border-[#1A56B3]",
     error && "border-b-red-500 focus:border-b-red-500",
   );
@@ -238,7 +238,9 @@ export const FormField = ({
                   value && "text-black",
                 )}
               >
-                {value ? DateTime.fromJSDate(new Date(value)).toFormat("yyyy년 MM월 dd일") : placeholder}
+                {value
+                  ? DateTime.fromJSDate(new Date(value)).toFormat("yyyy년 MM월 dd일")
+                  : placeholder}
                 {!disabled && <CalendarIcon className="h-4 w-4 opacity-50" />}
               </button>
             </PopoverTrigger>

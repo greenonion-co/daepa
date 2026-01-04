@@ -149,10 +149,10 @@ function PetDetailPage({ params }: PetDetailPageProps) {
     return (
       <div className="flex h-[calc(100vh-52px)] flex-1 flex-col items-center justify-center gap-2">
         <Image src="/assets/lizard.png" alt="Error" width={150} height={150} />
-        <p className="text-lg font-semibold text-gray-700">
+        <p className="text-lg font-semibold text-gray-700 dark:text-gray-200">
           {status === 404 ? "펫을 찾을 수 없습니다" : "펫 정보를 불러오는 중 오류가 발생했습니다"}
         </p>
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-gray-500 dark:text-gray-400">
           {status === 404 ? "존재하지 않거나 삭제된 펫입니다" : "잠시 후 다시 시도해주세요"}
         </p>
       </div>
@@ -169,8 +169,8 @@ function PetDetailPage({ params }: PetDetailPageProps) {
           <Image src="/assets/lizard.png" alt="Error" width={150} height={150} />
 
           <div>
-            <h1 className="text-[16px] font-[500] text-gray-900">삭제된 펫입니다</h1>
-            <p className="text-[14px] text-gray-500">
+            <h1 className="text-[16px] font-[500] text-gray-900 dark:text-gray-100">삭제된 펫입니다</h1>
+            <p className="text-[14px] text-gray-500 dark:text-gray-400">
               <span className="font-semibold">{pet.name}</span>은(는) 삭제되어 더 이상 조회할 수
               없습니다.
             </p>

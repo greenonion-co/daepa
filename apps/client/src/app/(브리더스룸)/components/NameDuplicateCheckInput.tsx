@@ -117,7 +117,7 @@ const NameDuplicateCheckInput = ({
             type="button"
             onClick={handleDuplicateCheck}
             disabled={isDuplicateCheckDisabled}
-            className="h-[32px] bg-blue-600 px-2 text-[12px] hover:bg-blue-700 disabled:bg-gray-300 disabled:text-gray-500"
+            className="h-[32px] bg-blue-600 px-2 text-[12px] hover:bg-blue-700 disabled:bg-gray-300 disabled:text-gray-500 dark:bg-blue-800 dark:text-blue-100"
           >
             {isVerifyPending ? (
               <div className="flex items-center gap-1">
@@ -141,7 +141,7 @@ const NameDuplicateCheckInput = ({
           )}
 
           {errorMessage && (
-            <div className="flex items-center gap-1 text-sm text-red-500">
+            <div className="flex items-center gap-1 text-[12px] text-red-500">
               <Info className="h-4 w-4" />
               {errorMessage}
             </div>
@@ -149,21 +149,21 @@ const NameDuplicateCheckInput = ({
 
           {/* 중복확인 결과 표시 */}
           {duplicateCheckStatus === DUPLICATE_CHECK_STATUS.AVAILABLE && (
-            <div className="flex items-center gap-1 text-sm text-green-600">
+            <div className="flex items-center gap-1 text-[12px] text-green-600">
               <CheckCircle2 className="h-4 w-4" />
               사용 가능한 이름입니다
             </div>
           )}
 
           {duplicateCheckStatus === DUPLICATE_CHECK_STATUS.DUPLICATE && (
-            <div className="flex items-center gap-1 text-sm text-red-500">
+            <div className="flex items-center gap-1 text-[12px] text-red-500 dark:text-red-600">
               <CircleX className="h-4 w-4" />
               이미 사용중인 이름입니다
             </div>
           )}
 
           {duplicateCheckStatus === DUPLICATE_CHECK_STATUS.CHECKING && (
-            <div className="flex items-center gap-1 text-sm text-blue-500">
+            <div className="flex items-center gap-1 text-[12px] text-blue-500">
               <div className="h-4 w-4 animate-spin rounded-full border-2 border-blue-500 border-t-transparent"></div>
               중복확인 중...
             </div>

@@ -24,7 +24,9 @@ const FloatingButton = ({ leftButton, rightButton, className }: FloatingButtonPr
         {leftButton && (
           <button
             type="button"
-            className={cn("h-12 flex-1 rounded-xl bg-gray-200 text-lg font-[700] text-gray-700")}
+            className={cn(
+              "h-12 flex-1 rounded-xl bg-gray-200 text-lg font-[700] text-gray-700 dark:bg-gray-700 dark:text-gray-200",
+            )}
             onClick={leftButton.onClick}
           >
             {leftButton.title}
@@ -33,7 +35,9 @@ const FloatingButton = ({ leftButton, rightButton, className }: FloatingButtonPr
         {rightButton && (
           <button
             type="button"
-            className={cn("h-12 flex-[2] rounded-xl bg-black text-lg font-[700] text-white")}
+            className={cn(
+              "h-12 flex-[2] rounded-xl bg-black text-lg font-[700] text-white dark:bg-blue-700",
+            )}
             onClick={rightButton.onClick}
           >
             {rightButton.title}

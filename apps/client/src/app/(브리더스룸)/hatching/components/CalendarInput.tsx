@@ -43,7 +43,7 @@ const CalendarInput = ({
       <PopoverTrigger
         asChild
         className={cn(
-          "flex min-h-[32px] w-fit cursor-pointer items-center gap-1 whitespace-nowrap rounded-lg px-2 py-1 text-[14px] font-[500]",
+          "flex min-h-[32px] w-fit cursor-pointer items-center gap-1 whitespace-nowrap rounded-lg px-2 py-1 text-[14px] font-[500] dark:bg-gray-800",
           editable ? "bg-blue-100 text-blue-600" : "cursor-not-allowed",
         )}
       >

@@ -45,12 +45,12 @@ const LinkStep = ({ selectedPet, onSelect, onClose }: LinkStepProps) => {
             <div className="flex-1">
               <div className="mb-1">
                 <div className="flex items-center gap-2">
-                  <span className="text-[16px] font-bold">{selectedPet.name}</span>
-                  <Badge variant="outline" className="bg-blue-50 text-black">
+                  <span className="text-[16px] font-bold dark:text-gray-100">{selectedPet.name}</span>
+                  <Badge variant="outline" className="bg-blue-50 text-black dark:bg-blue-900/50 dark:text-blue-300">
                     {selectedPet.sex?.toString() === PetDtoSex.MALE ? "수컷" : "암컷"}
                   </Badge>
                 </div>
-                <p className="text-[14px] font-[500] text-gray-800">
+                <p className="text-[14px] font-[500] text-gray-800 dark:text-gray-200">
                   소유자:{" "}
                   <span className="decoration-1px font-[700] text-blue-500 underline decoration-gray-400">
                     {selectedPet.owner?.name}
@@ -60,18 +60,18 @@ const LinkStep = ({ selectedPet, onSelect, onClose }: LinkStepProps) => {
 
               <div className="space-y-1">
                 <div>
-                  <h4 className="mb-1.5 text-[12px] font-medium text-gray-500">모프</h4>
+                  <h4 className="mb-1.5 text-[12px] font-medium text-gray-500 dark:text-gray-400">모프</h4>
                   <BadgeList items={selectedPet.morphs} />
                 </div>
 
                 <div>
-                  <h4 className="mb-1.5 text-[12px] font-medium text-gray-500">특성</h4>
+                  <h4 className="mb-1.5 text-[12px] font-medium text-gray-500 dark:text-gray-400">특성</h4>
                   <div className="flex flex-wrap gap-1">
                     {selectedPet.traits?.map((trait) => (
                       <Badge
                         variant="outline"
                         key={trait}
-                        className="bg-white text-black dark:bg-blue-100"
+                        className="bg-white text-black dark:bg-gray-700 dark:text-gray-200"
                       >
                         {trait}
                       </Badge>
@@ -89,10 +89,10 @@ const LinkStep = ({ selectedPet, onSelect, onClose }: LinkStepProps) => {
             <div className="space-y-2 rounded-xl">
               <div>
                 <div className="flex items-center gap-1">
-                  <h4 className="text-[14px] font-[600]">부모 개체 연결 요청</h4>
+                  <h4 className="text-[14px] font-[600] dark:text-gray-100">부모 개체 연결 요청</h4>
                   <Send className="h-3 w-3" />
                 </div>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-gray-500 dark:text-gray-400">
                   <span className="decoration-1px font-[700] text-blue-500 underline decoration-gray-400">
                     {selectedPet.owner?.name}
                   </span>{" "}

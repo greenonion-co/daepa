@@ -46,9 +46,9 @@ export const columns: ColumnDef<PetDto>[] = [
       return (
         <div className="text-center">
           {isPublic ? (
-            <LockOpen className="h-4 w-4 text-neutral-800" />
+            <LockOpen className="h-4 w-4 text-neutral-800 dark:text-neutral-200" />
           ) : (
-            <Lock className="h-4 w-4 text-yellow-500" />
+            <Lock className="h-4 w-4 text-yellow-500 dark:text-yellow-400" />
           )}
         </div>
       );
@@ -80,7 +80,7 @@ export const columns: ColumnDef<PetDto>[] = [
         return <div className="w-fit rounded-md bg-pink-500 px-2 text-white">NFS</div>;
 
       if (adoptionData?.status === PetAdoptionDtoStatus.NONE)
-        return <span className="text-gray-500">미정</span>;
+        return <span className="text-gray-500 dark:text-gray-400">미정</span>;
       return (
         <TooltipText
           title={SALE_STATUS_KOREAN_INFO[adoptionData?.status]}
@@ -127,7 +127,7 @@ export const columns: ColumnDef<PetDto>[] = [
       <BadgeList
         items={row.original.traits}
         variant="outline"
-        badgeClassName="bg-white text-black"
+        badgeClassName="bg-white text-black dark:bg-gray-700 dark:text-gray-200"
       />
     ),
   },

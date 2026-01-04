@@ -76,6 +76,7 @@ export default function RegisterPage({ params }: { params: Promise<{ funnel: str
   const { handleSelect } = useSelect();
   const { formData, step, setStep, setFormData, errors, setErrors, resetForm } =
     useRegisterPetStore();
+
   const resolvedParams = use(params);
   const funnel = Number(resolvedParams.funnel);
   const visibleSteps = FORM_STEPS.slice(-step - 1);
@@ -216,6 +217,13 @@ export default function RegisterPage({ params }: { params: Promise<{ funnel: str
           <>
             {OPTION_STEPS.map((step) => {
               const isNameField = step.field.name === "name";
+              const NameFieldClassName = isNameField
+                ? "mt-8 border-gray-700 rounded-2xl border-[1.5px] p-6 dark:border-gray-300"
+                : "";
+
+              const nameLabelClassName = isNameField
+                ? "font-semibold text-gray-800 dark:text-gray-300"
+                : "";
 
               return (
                 <div
@@ -223,8 +231,7 @@ export default function RegisterPage({ params }: { params: Promise<{ funnel: str
                   ref={isNameField ? nameFieldRef : null}
                   className={cn(
                     "mb-6 space-y-2",
-                    isNameField &&
-                      "mt-8 rounded-2xl border-2 border-red-600/80 bg-red-50 p-6 dark:bg-red-900/20",
+                    NameFieldClassName,
                     shouldShake && isNameField && "animate-shake",
                   )}
                 >
@@ -236,7 +243,7 @@ export default function RegisterPage({ params }: { params: Promise<{ funnel: str
                       errors={errors}
                       label={
                         isNameField ? (
-                          <span className="font-semibold text-red-600/80">{step.title} *</span>
+                          <span className={nameLabelClassName}>{step.title} *</span>
                         ) : (
                           step.title
                         )

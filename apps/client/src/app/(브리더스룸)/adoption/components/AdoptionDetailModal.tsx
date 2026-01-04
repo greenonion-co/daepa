@@ -47,19 +47,16 @@ const PetInfoCard = ({
   const cardContent = (
     <div
       className={cn(
-        "mb-4 flex gap-0 rounded-2xl p-4",
+        "mb-4 flex gap-0 rounded-2xl bg-gradient-to-r from-blue-200/25 to-purple-200/25 p-4 dark:from-blue-900/30 dark:to-purple-900/30",
         isDeleted ? "cursor-not-allowed" : "hover:shadow-md",
       )}
-      style={{
-        background: "linear-gradient(90deg, rgba(182, 210, 247, .25), rgba(245, 223, 255, .25))",
-      }}
     >
       <div className={"flex items-center gap-2.5"}>
         <div className={"w-16"}>
           <PetThumbnail petId={petId} maxSize={70} />
         </div>
         <div>
-          <div className="mb-2 flex items-center gap-2 font-semibold">
+          <div className="mb-2 flex items-center gap-2 font-semibold dark:text-gray-100">
             {isDeleted ? (
               <div>
                 <span className="cursor-not-allowed line-through decoration-red-500">{name}</span>
@@ -78,9 +75,9 @@ const PetInfoCard = ({
               </p>
             )}
           </div>
-          <div className="flex flex-col gap-2 text-sm text-gray-600">
+          <div className="flex flex-col gap-2 text-sm text-gray-600 dark:text-gray-300">
             <BadgeList items={morphs} />
-            <BadgeList items={traits} variant="outline" badgeClassName="bg-white text-black" />
+            <BadgeList items={traits} variant="outline" badgeClassName="bg-white text-black dark:bg-gray-700 dark:text-gray-200" />
             {hatchingDate && (
               <p className="font-[600] text-blue-600">
                 {DateTime.fromFormat(hatchingDate, "yyyy-MM-dd").toFormat("yy.M.d")}

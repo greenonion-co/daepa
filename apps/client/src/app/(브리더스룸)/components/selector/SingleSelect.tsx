@@ -90,8 +90,11 @@ const SingleSelect = ({
         aria-haspopup="listbox"
         className={cn(
           "flex h-[32px] w-fit cursor-pointer items-center gap-1 rounded-lg px-2 py-1 text-[14px] font-[500]",
-          initialItem ? "bg-blue-100 text-blue-600" : "bg-gray-100 text-gray-800",
-          disabled && "cursor-not-allowed bg-white text-black",
+          initialItem
+            ? "bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400"
+            : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200",
+          disabled &&
+            "cursor-not-allowed bg-white text-black dark:bg-neutral-900 dark:text-gray-200",
         )}
         onClick={() => {
           if (disabled) return;
@@ -114,8 +117,10 @@ const SingleSelect = ({
             </div>
             <ChevronDown
               className={cn(
-                "h-4 w-4 text-gray-600",
-                initialItem ? "text-blue-600" : "text-gray-600",
+                "h-4 w-4 text-gray-600 dark:text-gray-400",
+                initialItem
+                  ? "text-blue-600 dark:text-blue-400"
+                  : "text-gray-600 dark:text-gray-400",
               )}
             />
           </>
@@ -126,7 +131,7 @@ const SingleSelect = ({
         <div
           ref={dropdownRef}
           className={cn(
-            "absolute top-10 z-50 w-[320px] rounded-2xl border-[1.8px] border-gray-200 bg-white p-5 shadow-lg",
+            "absolute top-10 z-50 w-[320px] rounded-2xl border-[1.8px] border-gray-200 bg-white p-5 shadow-lg dark:border-gray-600 dark:bg-gray-800",
             "transform transition-all duration-200 ease-out",
             // 수평 위치
             dropdownPosition === "left" ? "left-0" : "right-0",
@@ -137,7 +142,7 @@ const SingleSelect = ({
             isMobile && "w-48",
           )}
         >
-          <div className="mb-2 font-[500]">{SELECTOR_CONFIGS[type].title}</div>
+          <div className="mb-2 font-[500] dark:text-gray-200">{SELECTOR_CONFIGS[type].title}</div>
           <div className="mb-2">
             {showSelectAll && (
               <SelectItem
@@ -176,7 +181,7 @@ const SingleSelect = ({
                 onClick={() => {
                   setSelectedItem(undefined);
                 }}
-                className="h-[32px] cursor-pointer rounded-lg bg-gray-100 px-3 text-sm font-semibold text-gray-600 hover:bg-gray-200"
+                className="h-[32px] cursor-pointer rounded-lg bg-gray-100 px-3 text-sm font-semibold text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
               >
                 초기화
               </button>
@@ -185,7 +190,7 @@ const SingleSelect = ({
                   onSelect?.(selectedItem);
                   setIsOpen(false);
                 }}
-                className="h-[32px] cursor-pointer rounded-lg bg-blue-500 px-3 text-sm font-semibold text-white hover:bg-blue-600"
+                className="h-[32px] cursor-pointer rounded-lg bg-blue-500 px-3 text-sm font-semibold text-white hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700"
               >
                 저장
               </button>

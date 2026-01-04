@@ -66,16 +66,16 @@ const AdoptionMonthlyChart = ({ data }: AdoptionMonthlyChartProps) => {
     >
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={chartData} margin={{ left: -20 }}>
-          <CartesianGrid strokeDasharray="3 3" />
+          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
           <XAxis
             dataKey="name"
-            tick={{ fontSize: 12, fontWeight: 600 }}
+            tick={{ fontSize: 12, fontWeight: 600, fill: "hsl(var(--foreground))" }}
             tickLine={false}
             axisLine={false}
           />
           <YAxis
             yAxisId="left"
-            tick={{ fontSize: 12, fontWeight: 600 }}
+            tick={{ fontSize: 12, fontWeight: 600, fill: "hsl(var(--foreground))" }}
             tickLine={false}
             axisLine={false}
             allowDecimals={false}
@@ -84,7 +84,7 @@ const AdoptionMonthlyChart = ({ data }: AdoptionMonthlyChartProps) => {
           <YAxis
             yAxisId="right"
             orientation="right"
-            tick={{ fontSize: 12, fontWeight: 600 }}
+            tick={{ fontSize: 12, fontWeight: 600, fill: "hsl(var(--foreground))" }}
             tickLine={false}
             axisLine={false}
             tickFormatter={formatRevenue}

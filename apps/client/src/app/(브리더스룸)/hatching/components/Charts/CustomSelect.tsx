@@ -91,7 +91,9 @@ const CustomSelect = ({
         disabled={disabled}
         className={cn(
           "flex h-[32px] w-fit cursor-pointer items-center gap-1 rounded-lg px-2 py-1 text-[14px] font-[500]",
-          !isDefault ? "bg-blue-100 text-blue-600" : "bg-gray-100 text-gray-800",
+          !isDefault
+            ? "bg-blue-100 text-blue-600 dark:bg-blue-900/50 dark:text-blue-400"
+            : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200",
           disabled && "cursor-not-allowed opacity-50",
         )}
         onClick={() => {
@@ -99,14 +101,19 @@ const CustomSelect = ({
         }}
       >
         <div>{selectedOption?.value ?? title}</div>
-        <ChevronDown className={cn("h-4 w-4", !isDefault ? "text-blue-600" : "text-gray-600")} />
+        <ChevronDown
+          className={cn(
+            "h-4 w-4",
+            !isDefault ? "text-blue-600 dark:text-blue-400" : "text-gray-600 dark:text-gray-400",
+          )}
+        />
       </button>
 
       {isOpen && (
         <div
           ref={dropdownRef}
           className={cn(
-            "absolute top-10 z-50 rounded-2xl border-[1.8px] border-gray-200 bg-white p-5 shadow-lg",
+            "absolute top-10 z-50 rounded-2xl border-[1.8px] border-gray-200 bg-white p-5 shadow-lg dark:border-gray-700 dark:bg-gray-800",
             "transform transition-all duration-200 ease-out",
             dropdownWidth,
             dropdownPosition === "left" ? "left-0" : "right-0",
@@ -116,7 +123,7 @@ const CustomSelect = ({
             isMobile && "w-48",
           )}
         >
-          <div className="mb-2 font-[500]">{title}</div>
+          <div className="mb-2 font-[500] dark:text-gray-100">{title}</div>
           <div className="mb-2">
             {options.map((option) => (
               <SelectItem

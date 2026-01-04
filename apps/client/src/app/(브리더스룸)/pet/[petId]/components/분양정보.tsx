@@ -22,8 +22,8 @@ import { overlay } from "overlay-kit";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import Loading from "@/components/common/Loading";
 import { useIsMyPet } from "@/hooks/useIsMyPet";
+import EditActionButtons from "./EditActionButtons";
 import { useRouter } from "next/navigation";
 
 interface AdoptionInfoProps {
@@ -151,9 +151,9 @@ const AdoptionInfo = ({ petId, ownerId }: AdoptionInfoProps) => {
                 close();
               }}
             >
-              <DialogContent className="rounded-3xl p-6">
+              <DialogContent className="rounded-3xl p-6 dark:bg-neutral-900">
                 <DialogTitle className="text-sm font-semibold text-red-500">주의!</DialogTitle>
-                <div className="flex flex-col py-2 text-gray-600">
+                <div className="flex flex-col py-2 text-gray-600 dark:text-gray-400">
                   <span className={"font-semibold"}>정말 분양완료 처리하시겠습니까?</span>
                   <span className={"text-sm"}>
                     - 분양완료 후에는 개체의 소유권이 완전히 이전됩니다.
@@ -229,8 +229,8 @@ const AdoptionInfo = ({ petId, ownerId }: AdoptionInfoProps) => {
 
     overlay.open(({ isOpen, close }) => (
       <Dialog open={isOpen} onOpenChange={close}>
-        <DialogContent className="rounded-3xl p-4">
-          <DialogTitle className="h-4 text-base font-semibold text-gray-800">
+        <DialogContent className="rounded-3xl p-4 dark:bg-neutral-900">
+          <DialogTitle className="h-4 text-base font-semibold text-gray-800 dark:text-gray-200">
             입양자를 선택해주세요.
           </DialogTitle>
           <UserList
@@ -262,11 +262,11 @@ const AdoptionInfo = ({ petId, ownerId }: AdoptionInfoProps) => {
   if (!adoption?.adoptionId) return null;
 
   return (
-    <div className="shadow-xs flex flex-1 flex-col gap-2 rounded-2xl bg-white p-3">
-      <div className="text-[14px] font-[600] text-gray-600">분양정보</div>
+    <div className="shadow-xs flex flex-1 flex-col gap-2 rounded-2xl bg-white p-3 dark:bg-neutral-900">
+      <div className="text-[14px] font-[600] text-gray-600 dark:text-gray-300">분양정보</div>
 
       {!showAdoptionInfo && (
-        <div className="flex h-full items-center justify-center text-[14px] text-gray-600">
+        <div className="flex h-full items-center justify-center text-[14px] text-gray-600 dark:text-gray-400">
           분양 정보를 등록해 관리를 시작해보세요!
         </div>
       )}
@@ -323,7 +323,7 @@ const AdoptionInfo = ({ petId, ownerId }: AdoptionInfoProps) => {
                   }));
                 }}
                 inputClassName={cn(
-                  " h-[32px] font-[600] w-full rounded-md border border-gray-200  placeholder:font-[500] pl-2",
+                  " h-[32px] font-[600] w-full rounded-md border border-gray-200 dark:border-gray-700 placeholder:font-[500] pl-2",
                   !isEditMode && "border-none",
                 )}
                 field={{ name: "adoption.price", unit: "원", type: "number" }}
@@ -349,7 +349,7 @@ const AdoptionInfo = ({ petId, ownerId }: AdoptionInfoProps) => {
                 />
               ) : (
                 isEditMode && (
-                  <div className="flex h-[32px] w-fit items-center gap-1 rounded-lg bg-gray-100 px-2 py-1 text-[12px] font-[500] text-gray-400">
+                  <div className="flex h-[32px] w-fit items-center gap-1 rounded-lg bg-gray-100 px-2 py-1 text-[12px] font-[500] text-gray-400 dark:bg-gray-800 dark:text-gray-500">
                     예약중・분양 완료 시 선택 가능
                   </div>
                 )
@@ -364,8 +364,10 @@ const AdoptionInfo = ({ petId, ownerId }: AdoptionInfoProps) => {
                 {!(isNil(adoptionData.buyer?.userId) && isEditMode) && (
                   <div
                     className={cn(
-                      "flex h-[32px] w-fit items-center gap-1 rounded-lg px-2 py-1 text-[14px] font-[500]",
-                      adoptionData.buyer?.userId ? "bg-blue-100 text-blue-600" : "",
+                      "mr-1 flex h-[32px] w-fit items-center gap-1 rounded-lg px-2 py-1 text-[14px] font-[500]",
+                      adoptionData.buyer?.userId
+                        ? "bg-blue-100 text-blue-600 dark:bg-blue-900/50 dark:text-blue-400"
+                        : "",
                     )}
                   >
                     {isNil(adoptionData.buyer?.userId) ? (
@@ -380,13 +382,13 @@ const AdoptionInfo = ({ petId, ownerId }: AdoptionInfoProps) => {
                   (adoptionData.status === PetAdoptionDtoStatus.ON_RESERVATION ||
                   adoptionData.status === PetAdoptionDtoStatus.SOLD ? (
                     <Button
-                      className="h-8 cursor-pointer rounded-lg px-2 text-[12px] font-[600] text-white"
+                      className="h-8 cursor-pointer rounded-lg px-2 text-[12px] font-[600] text-white dark:bg-neutral-800/70"
                       onClick={handleSelectBuyer}
                     >
                       {isNil(adoptionData.buyer?.userId) ? "입양자 선택" : "변경"}
                     </Button>
                   ) : (
-                    <div className="flex h-[32px] w-fit items-center gap-1 rounded-lg bg-gray-100 px-2 py-1 text-[12px] font-[500] text-gray-400">
+                    <div className="flex h-[32px] w-fit items-center gap-1 rounded-lg bg-gray-100 px-2 py-1 text-[12px] font-[500] text-gray-400 dark:bg-gray-800 dark:text-gray-500">
                       예약중・분양 완료 시 선택 가능
                     </div>
                   ))}
@@ -419,7 +421,10 @@ const AdoptionInfo = ({ petId, ownerId }: AdoptionInfoProps) => {
             content={
               <div className="relative w-full pt-2">
                 <textarea
-                  className={`min-h-[100px] w-full rounded-xl bg-gray-100 p-3 text-left text-[14px] focus:outline-none focus:ring-0 dark:bg-gray-600/50 dark:text-white`}
+                  className={cn(
+                    `min-h-[100px] w-full rounded-xl bg-gray-100 p-3 text-left text-[14px] focus:outline-none focus:ring-0 dark:bg-neutral-800 dark:text-white`,
+                    !isEditMode && "dark:bg-neutral-900",
+                  )}
                   value={String(adoptionData.memo || "")}
                   maxLength={500}
                   onChange={(e) =>
@@ -437,7 +442,7 @@ const AdoptionInfo = ({ petId, ownerId }: AdoptionInfoProps) => {
                   }}
                 />
                 {isEditMode && (
-                  <div className="absolute bottom-4 right-4 text-[12px] text-gray-500">
+                  <div className="absolute bottom-4 right-4 text-[12px] text-gray-500 dark:text-gray-400">
                     {adoptionData.memo?.length ?? 0}/{500}
                   </div>
                 )}
@@ -447,49 +452,17 @@ const AdoptionInfo = ({ petId, ownerId }: AdoptionInfoProps) => {
         </>
       )}
 
-      {isViewingMyPet && (
-        <div className="mt-2 flex w-full flex-1 items-end gap-2">
-          {isEditMode && (
-            <Button
-              disabled={isProcessing}
-              className="h-10 flex-1 cursor-pointer rounded-lg font-bold"
-              onClick={() => {
-                resetAdoption();
-                setIsEditMode(false);
-              }}
-            >
-              취소
-            </Button>
-          )}
-          <Button
-            disabled={isProcessing}
-            className={cn(
-              "h-10 flex-[2] cursor-pointer rounded-lg font-bold",
-              isEditMode && "bg-red-600 hover:bg-red-600/90",
-              isProcessing && "bg-gray-300",
-            )}
-            onClick={() => {
-              if (isEditMode) {
-                handleSave();
-              } else {
-                setIsEditMode(true);
-              }
-            }}
-          >
-            {isProcessing ? (
-              <Loading />
-            ) : !isEditMode ? (
-              !showAdoptionInfo ? (
-                "분양 정보 등록"
-              ) : (
-                "수정하기"
-              )
-            ) : (
-              "수정된 사항 저장하기"
-            )}
-          </Button>
-        </div>
-      )}
+      <EditActionButtons
+        isVisible={isViewingMyPet}
+        isEditMode={isEditMode}
+        isProcessing={isProcessing}
+        onCancel={() => {
+          resetAdoption();
+          setIsEditMode(false);
+        }}
+        onSubmit={() => (isEditMode ? handleSave() : setIsEditMode(true))}
+        defaultLabel={!showAdoptionInfo ? "분양 정보 등록" : "수정하기"}
+      />
     </div>
   );
 };

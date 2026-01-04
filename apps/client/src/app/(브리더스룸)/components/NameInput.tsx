@@ -96,7 +96,9 @@ const NameInput = ({
           <input
             id="name"
             type="text"
-            className={cn("h-12 pr-16")}
+            className={cn(
+              "h-12 pr-16 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-500",
+            )}
             maxLength={NAME_MAX_LENGTH}
             value={value}
             onChange={handleChange}
@@ -105,7 +107,7 @@ const NameInput = ({
             {...props}
           />
           {value && typeof value === "string" && (
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 dark:text-gray-500">
               {value.length}/{NAME_MAX_LENGTH}
             </div>
           )}
@@ -116,7 +118,7 @@ const NameInput = ({
             onClick={handleDuplicateCheck}
             disabled={isDuplicateCheckDisabled}
             className={cn(
-              "bg-black/90 px-4 text-sm font-medium hover:bg-black disabled:bg-gray-300 disabled:text-gray-500",
+              "bg-black/90 px-4 text-sm font-medium hover:bg-black disabled:bg-gray-300 disabled:text-gray-500 dark:bg-blue-700 dark:text-gray-100 dark:hover:bg-blue-600 dark:disabled:bg-gray-700 dark:disabled:text-gray-500",
               buttonClassName,
             )}
           >
@@ -135,7 +137,7 @@ const NameInput = ({
       {!disabled && (
         <>
           {!errorMessage && duplicateCheckStatus === DUPLICATE_CHECK_STATUS.NONE && (
-            <div className="flex items-center gap-1 text-sm text-gray-500">
+            <div className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400">
               <Info className="h-4 w-4" />
               이름은 {NAME_MIN_LENGTH}자 이상 {NAME_MAX_LENGTH}자 이하여야 합니다
             </div>

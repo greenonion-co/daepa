@@ -106,8 +106,8 @@ const MultiSelectFilter = ({
         className={cn(
           "flex h-[32px] cursor-pointer items-center gap-1 rounded-lg px-2 py-1 text-[14px] font-[500]",
           currentFilterValue && currentFilterValue.length > 0
-            ? "bg-blue-100 text-blue-600"
-            : "bg-gray-100 text-gray-800",
+            ? "bg-blue-100 text-blue-600 dark:bg-blue-900/50 dark:text-blue-400"
+            : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200",
         )}
         aria-expanded={isOpen}
         aria-haspopup="listbox"
@@ -133,8 +133,10 @@ const MultiSelectFilter = ({
             </div>
             <ChevronDown
               className={cn(
-                "h-4 w-4 text-gray-600",
-                currentFilterValue ? "text-blue-600" : "text-gray-600",
+                "h-4 w-4 text-gray-600 dark:text-gray-400",
+                currentFilterValue
+                  ? "text-blue-600 dark:text-blue-400"
+                  : "text-gray-600 dark:text-gray-400",
               )}
             />
           </>
@@ -145,7 +147,7 @@ const MultiSelectFilter = ({
         <div
           ref={dropdownRef}
           className={cn(
-            "absolute top-10 z-50 w-[320px] rounded-2xl border-[1.8px] border-gray-200 bg-white p-5 shadow-lg",
+            "absolute top-10 z-50 w-[320px] rounded-2xl border-[1.8px] border-gray-200 bg-white p-5 shadow-lg dark:border-gray-600 dark:bg-gray-800",
             "transform transition-all duration-200 ease-out",
             // 수평 위치
             dropdownPosition === "left" ? "left-0" : "right-0",
@@ -156,13 +158,13 @@ const MultiSelectFilter = ({
             isMobile && "w-48",
           )}
         >
-          <div className="mb-2 font-[500]">{title}</div>
+          <div className="mb-2 font-[500] dark:text-gray-200">{title}</div>
           {selectedItem && selectedItem.length > 0 && (
             <div className={"flex flex-nowrap gap-1 overflow-x-auto overflow-y-hidden pb-2"}>
               {selectedItem.map((item) => {
                 return (
                   <div
-                    className="flex shrink-0 items-center whitespace-nowrap rounded-full bg-blue-100 px-2 py-0.5 text-[12px] text-blue-600"
+                    className="flex shrink-0 items-center whitespace-nowrap rounded-full bg-blue-100 px-2 py-0.5 text-[12px] text-blue-600 dark:bg-blue-900/50 dark:text-blue-400"
                     key={item}
                   >
                     {displayMap[item]}
@@ -214,8 +216,8 @@ const MultiSelectFilter = ({
               className={cn(
                 "h-[32px] rounded-lg px-3 text-sm font-semibold",
                 hasChanges
-                  ? "cursor-pointer bg-gray-100 text-gray-600 hover:bg-gray-200"
-                  : "cursor-not-allowed bg-gray-50 text-gray-400",
+                  ? "cursor-pointer bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                  : "cursor-not-allowed bg-gray-50 text-gray-400 dark:bg-gray-700/50 dark:text-gray-500",
               )}
             >
               초기화
@@ -233,8 +235,8 @@ const MultiSelectFilter = ({
               className={cn(
                 "h-[32px] rounded-lg px-3 text-sm font-semibold",
                 hasChanges
-                  ? "cursor-pointer bg-blue-500 text-white hover:bg-blue-600"
-                  : "cursor-not-allowed bg-gray-200 text-gray-400",
+                  ? "cursor-pointer bg-blue-500 text-white hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700"
+                  : "cursor-not-allowed bg-gray-200 text-gray-400 dark:bg-gray-700 dark:text-gray-500",
               )}
             >
               저장

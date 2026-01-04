@@ -28,7 +28,7 @@ export const columns: ColumnDef<DeletedPetDto>[] = [
     cell: ({ row }) => {
       const name = row.getValue("name") as string;
 
-      return <div className="text-gray-700">{name}</div>;
+      return <div className="text-gray-700 dark:text-gray-300">{name}</div>;
     },
   },
   {
@@ -53,7 +53,7 @@ export const columns: ColumnDef<DeletedPetDto>[] = [
       const raw = deletedAt as string | Date;
       const d = typeof raw === "string" ? DateTime.fromISO(raw) : DateTime.fromJSDate(raw);
       return (
-        <div className="text-center text-sm text-gray-500">
+        <div className="text-center text-sm text-gray-500 dark:text-gray-300">
           {d.isValid ? d.toFormat("yyyy-MM-dd HH:mm") : "-"}
         </div>
       );

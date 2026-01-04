@@ -5,15 +5,12 @@ import { columns } from "./components/columns";
 import DataTable from "./components/DataTable";
 import { brPetControllerFindAll } from "@repo/api-client";
 import { useInView } from "react-intersection-observer";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 
-import Link from "next/link";
 import { useFilterStore } from "../store/filter";
 import { useSearchKeywordStore } from "../store/searchKeyword";
 
 import Loading from "@/components/common/Loading";
-import { Card } from "@/components/ui/card";
-import { ScanFace } from "lucide-react";
 
 export default function PetPage() {
   const { ref, inView } = useInView();
@@ -48,6 +45,21 @@ export default function PetPage() {
 
   const { items, totalCount } = data ?? {};
 
+  const isEmpty = useMemo(
+    () =>
+      items?.length === 0 &&
+      Object.keys(searchFilters).filter((key) => {
+        if (key === "species") return false;
+        const value = searchFilters[key as keyof typeof searchFilters];
+        // 배열: 길이 확인, 숫자: undefined/null 체크, 문자열: trim 후 체크
+        if (Array.isArray(value)) return value.length > 0;
+        if (typeof value === "number") return value !== undefined && value !== null;
+        return !!value?.toString?.().trim?.();
+      }).length === 0 &&
+      !searchKeyword?.trim(),
+    [items?.length, searchFilters, searchKeyword],
+  );
+
   // 무한 스크롤 처리
   useEffect(() => {
     if (inView && hasNextPage && !isFetchingNextPage) {
@@ -57,36 +69,18 @@ export default function PetPage() {
 
   if (isLoading) return <Loading />;
 
-  const isEmpty =
-    items &&
-    items.length === 0 &&
-    Object.keys(searchFilters).length === 0 &&
-    !searchKeyword?.trim();
-
   return (
     <div className="space-y-4">
-      {isEmpty ? (
-        <Link href="/register/1">
-          <Card className="flex cursor-pointer flex-col items-center justify-center bg-blue-50 p-10 hover:bg-blue-100">
-            <ScanFace className="h-10 w-10 text-blue-500" />
-            <div className="text-center text-gray-600">
-              나의 펫을
-              <span className="text-blue-500">&nbsp;등록</span>하여
-              <div className="font-semibold text-blue-500">브리더스룸을 시작해보세요!</div>
-            </div>
-          </Card>
-        </Link>
-      ) : (
-        <DataTable
-          columns={columns}
-          data={items ?? []}
-          totalCount={totalCount}
-          hasMore={hasNextPage}
-          isFetchingMore={isFetchingNextPage}
-          loaderRefAction={ref}
-          refetch={refetch}
-        />
-      )}
+      <DataTable
+        columns={columns}
+        data={items ?? []}
+        totalCount={totalCount}
+        hasMore={hasNextPage}
+        isFetchingMore={isFetchingNextPage}
+        loaderRefAction={ref}
+        refetch={refetch}
+        isEmpty={isEmpty}
+      />
     </div>
   );
 }

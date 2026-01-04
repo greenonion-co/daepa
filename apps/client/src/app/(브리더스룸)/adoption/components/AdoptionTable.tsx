@@ -15,21 +15,23 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { Plus, RefreshCcw } from "lucide-react";
+import { RefreshCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { overlay } from "overlay-kit";
 import Loading from "@/components/common/Loading";
-import EditAdoptionModal from "./EditAdoptionModal";
-import { toast } from "sonner";
+// import EditAdoptionModal from "./EditAdoptionModal";
+// import { toast } from "sonner";
 import AdoptionDetailModal from "./AdoptionDetailModal";
 import { useInView } from "react-intersection-observer";
 import { useAdoptionFilterStore } from "../../store/adoptionFilter";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { Card } from "@/components/ui/card";
-import { PackageSearch } from "lucide-react";
+// import { Card } from "@/components/ui/card";
+// import { PackageSearch } from "lucide-react";
 import { AdoptionFilters } from "./AdoptionFilters";
 import { columns } from "./adoption_columns";
 import { brAdoptionControllerGetAllAdoptions } from "@repo/api-client";
+import Image from "next/image";
+// import ParentSearchSelector from "../../components/selector/parentSearch";
 
 const AdoptionTable = () => {
   const { ref, inView } = useInView();
@@ -80,20 +82,20 @@ const AdoptionTable = () => {
     },
   });
 
-  const handleCreateAdoption = () => {
-    overlay.open(({ isOpen, close }) => (
-      <EditAdoptionModal
-        isOpen={isOpen}
-        onClose={close}
-        adoptionData={data}
-        onSuccess={() => {
-          close();
-          refetch();
-          toast.success("분양이 성공적으로 생성되었습니다.");
-        }}
-      />
-    ));
-  };
+  // const handleCreateAdoption = () => {
+  //   overlay.open(({ isOpen, close }) => (
+  //     <EditAdoptionModal
+  //       isOpen={isOpen}
+  //       onClose={close}
+  //       adoptionData={data}
+  //       onSuccess={() => {
+  //         close();
+  //         refetch();
+  //         toast.success("분양이 성공적으로 생성되었습니다.");
+  //       }}
+  //     />
+  //   ));
+  // };
 
   useEffect(() => {
     return () => {
@@ -105,28 +107,28 @@ const AdoptionTable = () => {
 
   if (isLoading) return <Loading />;
 
-  if (!data?.length && Object.keys(searchFilters).length === 0)
-    return (
-      <div className="container mx-auto p-6">
-        <Card
-          onClick={handleCreateAdoption}
-          className="flex cursor-pointer flex-col items-center justify-center bg-blue-50 p-10 hover:bg-blue-100"
-        >
-          <PackageSearch className="h-10 w-10 text-blue-500" />
-          <div className="text-center text-gray-600">
-            분양 정보를
-            <span className="text-blue-500">&nbsp;추가</span>하여
-            <div className="font-semibold text-blue-500">간편한 관리를 시작해보세요!</div>
-          </div>
-        </Card>
-      </div>
-    );
+  // if (!data?.length && Object.keys(searchFilters).length === 0)
+  //   return (
+  //     <div className="container mx-auto p-6">
+  //       <Card
+  //         onClick={handleCreateAdoption}
+  //         className="flex cursor-pointer flex-col items-center justify-center bg-blue-50 p-10 hover:bg-blue-100"
+  //       >
+  //         <PackageSearch className="h-10 w-10 text-blue-500" />
+  //         <div className="text-center text-gray-600">
+  //           분양 정보를
+  //           <span className="text-blue-500">&nbsp;추가</span>하여
+  //           <div className="font-semibold text-blue-500">간편한 관리를 시작해보세요!</div>
+  //         </div>
+  //       </Card>
+  //     </div>
+  //   );
 
   return (
     <div className="relative w-full">
       {/* 헤더 영역 */}
 
-      <div className={cn("flex w-fit items-center rounded-lg px-2 py-1 hover:bg-gray-100")}>
+      {/* <div className={cn("flex w-fit items-center rounded-lg px-2 py-1 hover:bg-gray-100")}>
         <div className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-100 text-[14px] font-[500] text-blue-600">
           <Plus className="h-3 w-3" />
         </div>
@@ -136,27 +138,30 @@ const AdoptionTable = () => {
         >
           분양 정보 추가하기
         </div>
-      </div>
+      </div> */}
 
-      <button
-        type="button"
-        aria-label="검색 결과 새로고침"
-        aria-busy={isRefreshing}
-        disabled={isRefreshing}
-        onClick={async () => {
-          if (isRefreshing) return;
-          setIsRefreshing(true);
-          try {
-            await refetch();
-          } finally {
-            timeoutRef.current = setTimeout(() => setIsRefreshing(false), 500);
-          }
-        }}
-        className="flex w-fit items-center gap-1 rounded-lg px-2 py-1 text-[12px] text-gray-600 hover:bg-blue-100 hover:text-blue-700"
-      >
-        분양 정보 ・{data?.length ?? "?"}개
-        <RefreshCcw className={cn("h-3 w-3", isRefreshing && "animate-spin")} />
-      </button>
+      <div className="flex items-center gap-2 pb-1 pl-2">
+        <button
+          type="button"
+          aria-label="검색 결과 새로고침"
+          aria-busy={isRefreshing}
+          disabled={isRefreshing}
+          onClick={async () => {
+            if (isRefreshing) return;
+            setIsRefreshing(true);
+            try {
+              await refetch();
+            } finally {
+              timeoutRef.current = setTimeout(() => setIsRefreshing(false), 500);
+            }
+          }}
+          className="flex w-fit items-center gap-1 rounded-lg px-2 py-1 text-[12px] text-gray-600 hover:bg-blue-100 hover:text-blue-700"
+        >
+          분양 정보 ・{data?.length ?? "?"}개
+          <RefreshCcw className={cn("h-3 w-3", isRefreshing && "animate-spin")} />
+        </button>
+        <span className="text-[11px] text-blue-600">분양 완료된 펫만 표시됩니다</span>
+      </div>
 
       <AdoptionFilters />
 
@@ -186,7 +191,7 @@ const AdoptionTable = () => {
                     data-state={row.getIsSelected() && "selected"}
                     className={cn(
                       "cursor-pointer",
-                      "bg-purple-50 hover:bg-purple-100 dark:bg-gray-800 dark:hover:bg-purple-800/20",
+                      "bg-purple-50 hover:bg-purple-100 dark:bg-purple-900/10 dark:hover:bg-purple-900/30",
                     )}
                     onClick={() => {
                       overlay.open(({ isOpen, close }) => (
@@ -217,8 +222,16 @@ const AdoptionTable = () => {
               </>
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
-                  분양 정보가 없습니다.
+                <TableCell colSpan={columns.length}>
+                  <div className="flex h-full w-full flex-col items-center justify-center py-5 text-center text-gray-700">
+                    <Image
+                      src="/assets/lizard.png"
+                      alt="분양 테이블 정보 없음"
+                      width={200}
+                      height={200}
+                    />
+                    분양 정보가 없습니다.
+                  </div>
                 </TableCell>
               </TableRow>
             )}

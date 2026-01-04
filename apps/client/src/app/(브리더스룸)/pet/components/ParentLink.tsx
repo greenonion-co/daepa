@@ -1,7 +1,6 @@
 "use client";
 
 import { Search, X, Lock, Ban } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 import { overlay } from "overlay-kit";
 import ParentSearchSelector from "../../components/selector/parentSearch";
@@ -212,27 +211,30 @@ const ParentLink = ({
           )}
         >
           <div className="relative w-full">
-            {isMyPet ? (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="rounded-2xl ring-2 ring-green-700/80 ring-offset-2">
+            <>
+              {isMyPet ? (
+                <div
+                  className="rounded-2xl p-[1.5px]"
+                  style={{
+                    background: "linear-gradient(90deg, #60a5fa, #c084fc)",
+                  }}
+                >
+                  <div className="rounded-2xl bg-white">
                     <PetThumbnail petId={parent.petId} maxSize={220} />
                   </div>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p className="text-sm">나의 펫</p>
-                </TooltipContent>
-              </Tooltip>
-            ) : (
-              <>
+                </div>
+              ) : (
                 <div className="rounded-2xl">
                   <PetThumbnail petId={parent.petId} maxSize={220} />
                 </div>
+              )}
+              {!isMyPet && (
                 <div className="flex items-center justify-center">
                   <span className="text-[12px] font-bold text-gray-500">@ {parent.owner.name}</span>
                 </div>
-              </>
-            )}
+              )}
+            </>
+
             {isDeleted && (
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 rounded-2xl bg-white/70">
                 <Ban className="h-6 w-6 text-red-600" />
@@ -250,12 +252,12 @@ const ParentLink = ({
             {parent.name ?? "-"}
           </span>
 
-          <div className="mt-2">
-            <BadgeList items={parent.morphs} />
+          <div className="mt-2 flex flex-col gap-1">
+            <BadgeList items={parent.morphs} badgeClassName="dark:bg-gray-800 dark:text-gray-200" />
             <BadgeList
               items={parent.traits}
               variant="outline"
-              badgeClassName="bg-white text-black"
+              badgeClassName="bg-white text-black dark:bg-gray-700 dark:text-gray-200"
             />
           </div>
         </div>

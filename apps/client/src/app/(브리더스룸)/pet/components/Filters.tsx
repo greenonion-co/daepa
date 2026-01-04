@@ -22,12 +22,14 @@ export function Filters({ showPublicFilter = true }: FiltersProps) {
   return (
     <div className="mb-4 flex flex-wrap items-center gap-2">
       {showPublicFilter && (
-        <div className="flex h-[32px] items-center gap-2 rounded-lg bg-gray-100 px-1">
+        <div className="flex h-[32px] items-center gap-2 rounded-lg bg-gray-100 px-1 dark:bg-gray-800">
           <button
             onClick={() => setSearchFilters({ ...searchFilters, isPublic: undefined })}
             className={cn(
-              "cursor-pointer rounded-lg px-2 py-1 text-sm font-semibold text-gray-800",
-              searchFilters.isPublic === undefined ? "bg-white shadow-sm" : "text-gray-600",
+              "cursor-pointer rounded-lg px-2 py-1 text-sm font-semibold text-gray-800 dark:text-gray-200",
+              searchFilters.isPublic === undefined
+                ? "bg-white shadow-sm dark:bg-gray-700"
+                : "text-gray-600 dark:text-gray-400",
             )}
           >
             전체
@@ -35,8 +37,10 @@ export function Filters({ showPublicFilter = true }: FiltersProps) {
           <button
             onClick={() => setSearchFilters({ ...searchFilters, isPublic: 1 })}
             className={cn(
-              "cursor-pointer rounded-lg px-2 py-1 text-sm font-semibold text-gray-800",
-              searchFilters.isPublic === 1 ? "bg-white shadow-sm" : "text-gray-600",
+              "cursor-pointer rounded-lg px-2 py-1 text-sm font-semibold text-gray-800 dark:text-gray-200",
+              searchFilters.isPublic === 1
+                ? "bg-white shadow-sm dark:bg-gray-700"
+                : "text-gray-600 dark:text-gray-400",
             )}
           >
             공개
@@ -44,8 +48,10 @@ export function Filters({ showPublicFilter = true }: FiltersProps) {
           <button
             onClick={() => setSearchFilters({ ...searchFilters, isPublic: 0 })}
             className={cn(
-              "cursor-pointer rounded-lg px-2 py-1 text-sm font-semibold text-gray-800",
-              searchFilters.isPublic === 0 ? "bg-white shadow-sm" : "text-gray-600",
+              "cursor-pointer rounded-lg px-2 py-1 text-sm font-semibold text-gray-800 dark:text-gray-200",
+              searchFilters.isPublic === 0
+                ? "bg-white shadow-sm dark:bg-gray-700"
+                : "text-gray-600 dark:text-gray-400",
             )}
           >
             비공개
@@ -91,7 +97,7 @@ export function Filters({ showPublicFilter = true }: FiltersProps) {
 
       <button
         onClick={resetFilters}
-        className="h-[32px] cursor-pointer rounded-lg px-3 text-sm text-blue-700 underline hover:bg-blue-100"
+        className="h-[32px] cursor-pointer rounded-lg px-3 text-sm text-blue-700 underline hover:bg-blue-100 dark:text-blue-400 dark:hover:bg-blue-900/30"
       >
         필터 리셋
       </button>

@@ -86,7 +86,9 @@ const AdoptionDateRangeFilter = () => {
         type="button"
         className={cn(
           "flex h-[32px] cursor-pointer items-center gap-1 rounded-lg px-2 py-1 text-[14px] font-[500]",
-          hasFilter ? "bg-blue-100 text-blue-600" : "bg-gray-100 text-gray-800",
+          hasFilter
+            ? "bg-blue-100 text-blue-600 dark:bg-blue-900/50 dark:text-blue-400"
+            : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200",
         )}
         aria-expanded={isOpen}
         aria-haspopup="listbox"
@@ -100,40 +102,45 @@ const AdoptionDateRangeFilter = () => {
         }}
       >
         <div>{displayText()}</div>
-        <ChevronDown className={cn("h-4 w-4", hasFilter ? "text-blue-600" : "text-gray-600")} />
+        <ChevronDown
+          className={cn(
+            "h-4 w-4",
+            hasFilter ? "text-blue-600 dark:text-blue-400" : "text-gray-600 dark:text-gray-400",
+          )}
+        />
       </button>
 
       {isOpen && (
         <div
           className={cn(
-            "absolute left-0 top-[40px] z-50 w-[320px] rounded-2xl border-[1.8px] border-gray-200 bg-white p-5 shadow-lg",
+            "absolute left-0 top-[40px] z-50 w-[320px] rounded-2xl border-[1.8px] border-gray-200 bg-white p-5 shadow-lg dark:border-gray-700 dark:bg-gray-800",
             "origin-top transform transition-all duration-200 ease-out",
             isEntering
               ? "translate-y-0 scale-100 opacity-100"
               : "-translate-y-1 scale-95 opacity-0",
           )}
         >
-          <div className="mb-4 font-[500]">분양 날짜</div>
+          <div className="mb-4 font-[500] dark:text-gray-100">분양 날짜</div>
           <div className="mb-4 flex items-center gap-1">
             <div className="min-w-0 flex-1">
-              <label className="mb-1 block text-xs text-gray-600">시작</label>
+              <label className="mb-1 block text-xs text-gray-600 dark:text-gray-400">시작</label>
               <input
                 type="date"
                 value={tempStartDate}
                 max={tempEndDate || undefined}
                 onChange={(e) => setTempStartDate(e.target.value)}
-                className="h-[32px] w-full rounded-lg border border-gray-200 px-1.5 text-sm focus:border-blue-500 focus:outline-none"
+                className="h-[32px] w-full rounded-lg border border-gray-200 bg-white px-1.5 text-sm focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
               />
             </div>
-            <div className="mt-5 text-gray-400">~</div>
+            <div className="mt-5 text-gray-400 dark:text-gray-500">~</div>
             <div className="min-w-0 flex-1">
-              <label className="mb-1 block text-xs text-gray-600">종료</label>
+              <label className="mb-1 block text-xs text-gray-600 dark:text-gray-400">종료</label>
               <input
                 type="date"
                 value={tempEndDate}
                 min={tempStartDate || undefined}
                 onChange={(e) => setTempEndDate(e.target.value)}
-                className="h-[32px] w-full rounded-lg border border-gray-200 px-1.5 text-sm focus:border-blue-500 focus:outline-none"
+                className="h-[32px] w-full rounded-lg border border-gray-200 bg-white px-1.5 text-sm focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
               />
             </div>
           </div>
@@ -150,7 +157,7 @@ const AdoptionDateRangeFilter = () => {
                   endDate: undefined,
                 });
               }}
-              className="h-[32px] cursor-pointer rounded-lg bg-gray-100 px-3 text-sm font-semibold text-gray-600 hover:bg-gray-200"
+              className="h-[32px] cursor-pointer rounded-lg bg-gray-100 px-3 text-sm font-semibold text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
             >
               초기화
             </button>

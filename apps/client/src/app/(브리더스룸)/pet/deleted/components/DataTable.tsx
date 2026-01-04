@@ -76,20 +76,20 @@ export default function DataTable({
               timeoutRef.current = setTimeout(() => setIsRefreshing(false), 500);
             }
           }}
-          className="mb-2 flex w-fit items-center gap-1 rounded-lg px-2 py-1 text-[12px] text-gray-600 hover:bg-blue-100 hover:text-blue-700"
+          className="mb-2 flex w-fit items-center gap-1 rounded-lg px-2 py-1 text-[12px] text-gray-600 hover:bg-blue-100 hover:text-blue-700 dark:text-gray-400 dark:hover:bg-blue-900/30 dark:hover:text-blue-400"
         >
           삭제된 펫・{totalCount}마리
           <RefreshCcw className={cn("h-3 w-3", isRefreshing && "animate-spin")} />
         </button>
 
-        <div className="rounded-md border">
+        <div className="rounded-md border dark:border-gray-700">
           <Table>
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
                   {headerGroup.headers.map((header) => {
                     return (
-                      <TableHead className="font-[400] text-gray-600" key={header.id}>
+                      <TableHead className="font-[400] text-gray-600 dark:text-gray-400" key={header.id}>
                         {header.isPlaceholder
                           ? null
                           : flexRender(header.column.columnDef.header, header.getContext())}
@@ -105,7 +105,7 @@ export default function DataTable({
                   {table.getRowModel().rows.map((row) => (
                     <TableRow
                       key={row.id}
-                      className="bg-gray-50 opacity-70 hover:bg-gray-100 hover:opacity-100"
+                      className="bg-gray-50 opacity-70 hover:bg-gray-100 hover:opacity-100 dark:bg-gray-800/50 dark:hover:bg-gray-700"
                     >
                       {row.getVisibleCells().map((cell) => (
                         <TableCell key={cell.id}>

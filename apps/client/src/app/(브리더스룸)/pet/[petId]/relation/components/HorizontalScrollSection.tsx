@@ -13,6 +13,7 @@ interface HorizontalScrollSectionProps {
   hasMore?: boolean;
   isLoading?: boolean;
   onReachEnd?: () => void;
+  darkGradientColor?: string;
 }
 
 export default function HorizontalScrollSection({
@@ -22,6 +23,7 @@ export default function HorizontalScrollSection({
   hasMore = false,
   isLoading = false,
   onReachEnd,
+  darkGradientColor = "dark:from-gray-900",
 }: HorizontalScrollSectionProps) {
   const isMobile = useIsMobile();
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -38,7 +40,6 @@ export default function HorizontalScrollSection({
 
     // 오른쪽 끝에 도달했을 때 무한 스크롤 트리거
     const isNearEnd = scrollLeft + clientWidth >= scrollWidth - 100;
-    console.log("🚀 ~ HorizontalScrollSection ~ onReachEnd:", isNearEnd, hasMore, isLoading);
     if (isNearEnd && hasMore && !isLoading && onReachEnd) {
       onReachEnd();
     }
@@ -83,6 +84,7 @@ export default function HorizontalScrollSection({
             className={cn(
               "pointer-events-none absolute left-0 top-0 z-[5] h-full w-20 bg-gradient-to-r to-transparent",
               gradientColor,
+              darkGradientColor,
             )}
           />
           {!isMobile && (
@@ -90,9 +92,9 @@ export default function HorizontalScrollSection({
               type="button"
               aria-label="왼쪽으로 스크롤"
               onClick={() => scroll("left")}
-              className="absolute left-2 top-1/2 z-10 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-white shadow-md transition-all hover:bg-gray-50 hover:shadow-lg"
+              className="absolute left-0 top-1/2 z-10 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-white shadow-md transition-all hover:bg-gray-50 hover:shadow-lg dark:bg-gray-800 dark:hover:bg-gray-700"
             >
-              <ChevronLeft className="h-5 w-5 text-gray-600" />
+              <ChevronLeft className="h-5 w-5 text-gray-600 dark:text-gray-300" />
             </button>
           )}
         </>
@@ -120,6 +122,7 @@ export default function HorizontalScrollSection({
             className={cn(
               "pointer-events-none absolute right-0 top-0 z-[5] h-full w-20 bg-gradient-to-l to-transparent",
               gradientColor,
+              darkGradientColor,
             )}
           />
           {!isMobile && (
@@ -127,9 +130,9 @@ export default function HorizontalScrollSection({
               type="button"
               aria-label="오른쪽으로 스크롤"
               onClick={() => scroll("right")}
-              className="absolute right-2 top-1/2 z-10 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-white shadow-md transition-all hover:bg-gray-50 hover:shadow-lg"
+              className="absolute right-0 top-1/2 z-10 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-white shadow-md transition-all hover:bg-gray-50 hover:shadow-lg dark:bg-gray-800 dark:hover:bg-gray-700"
             >
-              <ChevronRight className="h-5 w-5 text-gray-600" />
+              <ChevronRight className="h-5 w-5 text-gray-600 dark:text-gray-300" />
             </button>
           )}
         </>
