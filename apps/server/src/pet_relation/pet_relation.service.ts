@@ -213,7 +213,7 @@ export class PetRelationService {
           petId,
         });
 
-      // 정렬: hatchingDate 내림차순
+      // 정렬: hatchingDate
       queryBuilder.orderBy('p.hatching_date', pageOptionsDto.order);
 
       // 총 개수 조회
@@ -362,7 +362,7 @@ export class PetRelationService {
         queryBuilder.andWhere('pr.mother_id IS NULL');
       }
 
-      // 정렬: hatchingDate 내림차순
+      // 정렬: hatchingDate
       queryBuilder.orderBy('p.hatching_date', pageOptionsDto.order);
 
       // 총 개수 조회
