@@ -1,34 +1,48 @@
 "use client";
 
-import { useRef, useState, useEffect, ReactNode } from "react";
+import { useRef, useState, useEffect, ReactNode, useCallback } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/useMobile";
+import Loading from "@/components/common/Loading";
 
 interface HorizontalScrollSectionProps {
   children: ReactNode;
   className?: string;
   gradientColor?: string;
+  hasMore?: boolean;
+  isLoading?: boolean;
+  onReachEnd?: () => void;
 }
 
 export default function HorizontalScrollSection({
   children,
   className,
   gradientColor = "from-gray-100",
+  hasMore = false,
+  isLoading = false,
+  onReachEnd,
 }: HorizontalScrollSectionProps) {
   const isMobile = useIsMobile();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
 
-  const checkScroll = () => {
+  const checkScroll = useCallback(() => {
     const el = scrollRef.current;
     if (!el) return;
 
     const { scrollLeft, scrollWidth, clientWidth } = el;
     setCanScrollLeft(scrollLeft > 0);
     setCanScrollRight(scrollLeft + clientWidth < scrollWidth - 1);
-  };
+
+    // 오른쪽 끝에 도달했을 때 무한 스크롤 트리거
+    const isNearEnd = scrollLeft + clientWidth >= scrollWidth - 100;
+    console.log("🚀 ~ HorizontalScrollSection ~ onReachEnd:", isNearEnd, hasMore, isLoading);
+    if (isNearEnd && hasMore && !isLoading && onReachEnd) {
+      onReachEnd();
+    }
+  }, [hasMore, isLoading, onReachEnd]);
 
   useEffect(() => {
     const el = scrollRef.current;
@@ -47,7 +61,7 @@ export default function HorizontalScrollSection({
       window.removeEventListener("resize", checkScroll);
       resizeObserver.disconnect();
     };
-  }, []);
+  }, [checkScroll]);
 
   const scroll = (direction: "left" | "right") => {
     const el = scrollRef.current;
@@ -76,7 +90,7 @@ export default function HorizontalScrollSection({
               type="button"
               aria-label="왼쪽으로 스크롤"
               onClick={() => scroll("left")}
-              className="absolute -left-4 top-1/2 z-10 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-white shadow-md transition-all hover:bg-gray-50 hover:shadow-lg"
+              className="absolute left-2 top-1/2 z-10 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-white shadow-md transition-all hover:bg-gray-50 hover:shadow-lg"
             >
               <ChevronLeft className="h-5 w-5 text-gray-600" />
             </button>
@@ -91,6 +105,12 @@ export default function HorizontalScrollSection({
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
         {children}
+        {/* 로딩 인디케이터 */}
+        {isLoading && (
+          <div className="flex h-full min-w-[60px] items-center justify-center">
+            <Loading />
+          </div>
+        )}
       </div>
 
       {/* 오른쪽 그라데이션 + 화살표 */}
@@ -107,7 +127,7 @@ export default function HorizontalScrollSection({
               type="button"
               aria-label="오른쪽으로 스크롤"
               onClick={() => scroll("right")}
-              className="absolute -right-4 top-1/2 z-10 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-white shadow-md transition-all hover:bg-gray-50 hover:shadow-lg"
+              className="absolute right-2 top-1/2 z-10 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-white shadow-md transition-all hover:bg-gray-50 hover:shadow-lg"
             >
               <ChevronRight className="h-5 w-5 text-gray-600" />
             </button>
