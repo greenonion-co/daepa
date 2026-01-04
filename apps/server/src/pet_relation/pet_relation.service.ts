@@ -15,10 +15,7 @@ import {
 } from './pet_relation.dto';
 import { ParentRequestService } from '../parent_request/parent_request.service';
 import { PetEntity } from '../pet/pet.entity';
-import {
-  replaceParentPublicSafe,
-  replaceSiblingPublicSafe,
-} from '../common/utils/pet-parent.helper';
+import { replaceSiblingPublicSafe } from '../common/utils/pet-parent.helper';
 
 @Injectable()
 export class PetRelationService {
@@ -282,7 +279,7 @@ export class PetRelationService {
    * @param petId - 대상 펫 ID
    * @param userId - 요청 사용자 ID
    * @param manager - 선택적 EntityManager
-   * @returns 부모 정보와 형제 펫들의 상세 정보
+   * @returns 형제 펫들의 상세 정보
    */
   async getSiblingsWithDetails(
     petId: string,
@@ -290,22 +287,18 @@ export class PetRelationService {
     manager?: EntityManager,
   ): Promise<GetSiblingsWithDetailsDataDto> {
     const run = async (em: EntityManager) => {
-      // Step 1: 대상 펫의 부모 정보 조회
+      // Step 1: 대상 펫의 부모 정보 조회 (형제 찾기용)
       const { father: rawFather, mother: rawMother } =
         await this.parentRequestService.getParentsWithRequestStatus(petId, em);
 
-      // pet 조회로 ownerId 획득
+      // pet 조회
       const pet = await em.findOne(PetEntity, { where: { petId } });
       if (!pet) {
         throw new NotFoundException('펫을 찾을 수 없습니다.');
       }
 
       if (!rawFather && !rawMother) {
-        return {
-          father: undefined,
-          mother: undefined,
-          siblings: [],
-        };
+        return { siblings: [] };
       }
 
       // Step 2: 모든 형제 펫 정보를 한 번에 조회 (JOIN 사용)
@@ -374,8 +367,6 @@ export class PetRelationService {
         await queryBuilder.getRawMany();
 
       // Step 3: 데이터 변환 및 비공개 펫 마스킹
-      const father = replaceParentPublicSafe(rawFather, pet.ownerId, userId);
-      const mother = replaceParentPublicSafe(rawMother, pet.ownerId, userId);
       const siblings = rawSiblings.map((raw) => {
         const sibling = {
           petId: raw.petId,
@@ -417,11 +408,7 @@ export class PetRelationService {
         return replaceSiblingPublicSafe(sibling, userId);
       });
 
-      return {
-        father: father ?? undefined,
-        mother: mother ?? undefined,
-        siblings,
-      };
+      return { siblings };
     };
 
     if (manager) {
