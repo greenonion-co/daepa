@@ -199,3 +199,33 @@ export class GetSiblingsWithDetailsResponseDto extends CommonResponseDto {
   })
   data: GetSiblingsWithDetailsDataDto;
 }
+
+/**
+ * 자식 펫 조회 응답 데이터
+ */
+@ApiExtraModels(SiblingPetDetailDto, PetHiddenStatusDto)
+export class GetChildrenWithDetailsDataDto {
+  @ApiProperty({
+    description: '자식 펫 목록 (비공개인 경우 hiddenStatus만 포함)',
+    type: 'array',
+    items: {
+      oneOf: [
+        { $ref: getSchemaPath(SiblingPetDetailDto) },
+        { $ref: getSchemaPath(PetHiddenStatusDto) },
+      ],
+    },
+  })
+  @IsArray()
+  children: (SiblingPetDetailDto | PetHiddenStatusDto)[];
+}
+
+/**
+ * 자식 펫 조회 응답
+ */
+export class GetChildrenWithDetailsResponseDto extends CommonResponseDto {
+  @ApiProperty({
+    description: '자식 펫 정보',
+    type: GetChildrenWithDetailsDataDto,
+  })
+  data: GetChildrenWithDetailsDataDto;
+}
