@@ -154,6 +154,8 @@ export * from "./petControllerGetDeletedPetsSexItem";
 export * from "./petControllerGetDeletedPetsSpecies";
 export * from "./petControllerGetDeletedPetsStatus";
 export * from "./petControllerGetDeletedPetsStatusItem";
+export * from "./petControllerGetParentsByPetIdParams";
+export * from "./petControllerGetParentsByPetIdStatusesItem";
 export * from "./petControllerGetSiblingsByPetIdOrder";
 export * from "./petControllerGetSiblingsByPetIdParams";
 export * from "./petDetailBaseDto";

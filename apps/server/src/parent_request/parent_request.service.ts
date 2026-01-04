@@ -500,11 +500,17 @@ export class ParentRequestService {
 
   async getParentsWithRequestStatus(
     petId: string,
+    options?: { statuses?: PARENT_STATUS[] },
     manager?: EntityManager,
   ): Promise<{
     father: PetParentDto | null;
     mother: PetParentDto | null;
   }> {
+    const statuses = options?.statuses ?? [
+      PARENT_STATUS.PENDING,
+      PARENT_STATUS.APPROVED,
+    ];
+
     const run = async (em: EntityManager) => {
       const parentData = await em
         .createQueryBuilder(ParentRequestEntity, 'pr')
@@ -529,9 +535,7 @@ export class ParentRequestService {
           'user.status',
         ])
         .where('pr.childPetId = :petId', { petId })
-        .andWhere('pr.status IN (:...statuses)', {
-          statuses: [PARENT_STATUS.PENDING, PARENT_STATUS.APPROVED],
-        })
+        .andWhere('pr.status IN (:...statuses)', { statuses })
         .getRawMany<ParentRawData>();
 
       if (parentData.length === 0) {

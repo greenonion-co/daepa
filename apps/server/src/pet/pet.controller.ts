@@ -17,6 +17,7 @@ import {
   VerifyPetNameDto,
   PetDto,
   PetFilterDto,
+  GetParentsByPetIdQueryDto,
   GetParentsByPetIdResponseDto,
   DeletePetDto,
   DeletedPetDto,
@@ -155,9 +156,15 @@ export class PetController {
   })
   async getParentsByPetId(
     @Param('petId') petId: string,
+    @Query() queryDto: GetParentsByPetIdQueryDto,
     @JwtUser() token: JwtUserPayload,
   ): Promise<GetParentsByPetIdResponseDto> {
-    const data = await this.petService.getParentsByPetId(petId, token.userId);
+    const { statuses } = queryDto;
+    const data = await this.petService.getParentsByPetId(
+      petId,
+      token.userId,
+      statuses ? { statuses } : undefined,
+    );
     return {
       success: true,
       message: '펫 정보 조회 성공',

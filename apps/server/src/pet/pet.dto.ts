@@ -1580,6 +1580,34 @@ export class FindPetByPetIdResponseDto extends CommonResponseDto {
   data: PetSingleDto;
 }
 
+export class GetParentsByPetIdQueryDto {
+  @ApiProperty({
+    description: '부모 요청 상태 필터 (기본: PENDING, APPROVED)',
+    example: [PARENT_STATUS.APPROVED],
+    enum: PARENT_STATUS,
+    'x-enumNames': Object.keys(PARENT_STATUS),
+    isArray: true,
+    required: false,
+  })
+  @IsOptional()
+  @IsArray()
+  @IsEnum(PARENT_STATUS, { each: true })
+  @Transform(({ value }: { value: string | string[] | undefined }) => {
+    if (!value) return undefined;
+    // JSON 문자열로 전달된 경우 파싱
+    if (typeof value === 'string' && value.startsWith('[')) {
+      try {
+        return JSON.parse(value) as PARENT_STATUS[];
+      } catch {
+        return [value as PARENT_STATUS];
+      }
+    }
+    const arr = Array.isArray(value) ? value : [value];
+    return arr as PARENT_STATUS[];
+  })
+  statuses?: PARENT_STATUS[];
+}
+
 export class GetParentsByPetIdResponseDto extends CommonResponseDto {
   @ApiProperty({
     description: '펫 부모 정보',

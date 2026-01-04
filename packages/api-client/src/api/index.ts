@@ -27,6 +27,7 @@ import type {
   PetControllerFindAllParams,
   PetControllerGetChildrenByPetIdParams,
   PetControllerGetDeletedPetsParams,
+  PetControllerGetParentsByPetIdParams,
   PetControllerGetSiblingsByPetIdParams,
   SaveFilesDto,
   StatisticsControllerGetAdoptionStatisticsParams,
@@ -115,10 +116,14 @@ export const petControllerVerifyName = (verifyPetNameDto: VerifyPetNameDto) => {
   });
 };
 
-export const petControllerGetParentsByPetId = (petId: string) => {
+export const petControllerGetParentsByPetId = (
+  petId: string,
+  params?: PetControllerGetParentsByPetIdParams,
+) => {
   return useCustomInstance<GetParentsByPetIdResponseDto>({
     url: `/api/v1/pet/parents/${petId}`,
     method: "GET",
+    params,
   });
 };
 
