@@ -5,8 +5,10 @@ import { useAdoptionFilterStore } from "../../store/adoptionFilter";
 import { cn } from "@/lib/utils";
 import { ChevronDown } from "lucide-react";
 import { isNotNil } from "es-toolkit";
+import { useIsMobile } from "@/hooks/useMobile";
 
 const AdoptionDateRangeFilter = () => {
+  const isMobile = useIsMobile();
   const [isOpen, setIsOpen] = useState(false);
   const { searchFilters, setSearchFilters } = useAdoptionFilterStore();
 
@@ -113,34 +115,61 @@ const AdoptionDateRangeFilter = () => {
       {isOpen && (
         <div
           className={cn(
-            "absolute left-0 top-[40px] z-50 w-[320px] rounded-2xl border-[1.8px] border-gray-200 bg-white p-5 shadow-lg dark:border-gray-700 dark:bg-gray-800",
+            "absolute left-0 top-[40px] z-50 rounded-2xl border-[1.8px] border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800",
             "origin-top transform transition-all duration-200 ease-out",
             isEntering
               ? "translate-y-0 scale-100 opacity-100"
               : "-translate-y-1 scale-95 opacity-0",
+            isMobile ? "w-[200px] p-3" : "w-[320px] p-5",
           )}
         >
-          <div className="mb-4 font-[500] dark:text-gray-100">분양 날짜</div>
-          <div className="mb-4 flex items-center gap-1">
+          <div
+            className={cn("font-[500] dark:text-gray-100", isMobile ? "mb-2 text-[13px]" : "mb-4")}
+          >
+            분양 날짜
+          </div>
+          <div className={cn("flex items-center gap-1", isMobile ? "mb-2" : "mb-4")}>
             <div className="min-w-0 flex-1">
-              <label className="mb-1 block text-xs text-gray-600 dark:text-gray-400">시작</label>
+              <label
+                className={cn(
+                  "mb-1 block text-gray-600 dark:text-gray-400",
+                  isMobile ? "text-[12px]" : "text-xs",
+                )}
+              >
+                시작
+              </label>
               <input
                 type="date"
                 value={tempStartDate}
                 max={tempEndDate || undefined}
                 onChange={(e) => setTempStartDate(e.target.value)}
-                className="h-[32px] w-full rounded-lg border border-gray-200 bg-white px-1.5 text-sm focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
+                className={cn(
+                  "w-full rounded-lg border border-gray-200 bg-white px-1.5 focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200",
+                  isMobile ? "h-[28px] text-[12px]" : "h-[32px] text-sm",
+                )}
               />
             </div>
-            <div className="mt-5 text-gray-400 dark:text-gray-500">~</div>
+            <div className={cn("text-gray-400 dark:text-gray-500", isMobile ? "mt-4" : "mt-5")}>
+              ~
+            </div>
             <div className="min-w-0 flex-1">
-              <label className="mb-1 block text-xs text-gray-600 dark:text-gray-400">종료</label>
+              <label
+                className={cn(
+                  "mb-1 block text-gray-600 dark:text-gray-400",
+                  isMobile ? "text-[12px]" : "text-xs",
+                )}
+              >
+                종료
+              </label>
               <input
                 type="date"
                 value={tempEndDate}
                 min={tempStartDate || undefined}
                 onChange={(e) => setTempEndDate(e.target.value)}
-                className="h-[32px] w-full rounded-lg border border-gray-200 bg-white px-1.5 text-sm focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
+                className={cn(
+                  "w-full rounded-lg border border-gray-200 bg-white px-1.5 focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200",
+                  isMobile ? "h-[28px] text-[12px]" : "h-[32px] text-sm",
+                )}
               />
             </div>
           </div>
@@ -157,7 +186,10 @@ const AdoptionDateRangeFilter = () => {
                   endDate: undefined,
                 });
               }}
-              className="h-[32px] cursor-pointer rounded-lg bg-gray-100 px-3 text-sm font-semibold text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+              className={cn(
+                "cursor-pointer rounded-lg bg-gray-100 font-semibold text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600",
+                isMobile ? "h-[28px] px-2 text-[12px]" : "h-[32px] px-3 text-sm",
+              )}
             >
               초기화
             </button>
@@ -171,7 +203,10 @@ const AdoptionDateRangeFilter = () => {
                 });
                 setIsOpen(false);
               }}
-              className="h-[32px] cursor-pointer rounded-lg bg-blue-500 px-3 text-sm font-semibold text-white hover:bg-blue-600"
+              className={cn(
+                "cursor-pointer rounded-lg bg-blue-500 font-semibold text-white hover:bg-blue-600",
+                isMobile ? "h-[28px] px-2 text-[12px]" : "h-[32px] px-3 text-sm",
+              )}
             >
               확인
             </button>

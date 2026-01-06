@@ -5,8 +5,10 @@ import { useAdoptionFilterStore } from "../../store/adoptionFilter";
 import { cn } from "@/lib/utils";
 import { ChevronDown } from "lucide-react";
 import { isNotNil } from "es-toolkit";
+import { useIsMobile } from "@/hooks/useMobile";
 
 const AdoptionPriceRangeFilter = () => {
+  const isMobile = useIsMobile();
   const [isOpen, setIsOpen] = useState(false);
   const { searchFilters, setSearchFilters } = useAdoptionFilterStore();
   const [minPrice, setMinPrice] = useState<string>(searchFilters.minPrice?.toString() || "");
@@ -94,17 +96,27 @@ const AdoptionPriceRangeFilter = () => {
       {isOpen && (
         <div
           className={cn(
-            "absolute left-0 top-[40px] z-50 w-[320px] rounded-2xl border-[1.8px] border-gray-200 bg-white p-5 shadow-lg dark:border-gray-700 dark:bg-gray-800",
+            "absolute left-0 top-[40px] z-50 rounded-2xl border-[1.8px] border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800",
             "origin-top transform transition-all duration-200 ease-out",
             isEntering
               ? "translate-y-0 scale-100 opacity-100"
               : "-translate-y-1 scale-95 opacity-0",
+            isMobile ? "w-[200px] p-3" : "w-[320px] p-5",
           )}
         >
-          <div className="mb-4 font-[500] dark:text-gray-100">분양 가격</div>
-          <div className="mb-4 flex items-center gap-2">
+          <div
+            className={cn("font-[500] dark:text-gray-100", isMobile ? "mb-2 text-[13px]" : "mb-4")}
+          >
+            분양 가격
+          </div>
+          <div className={cn("flex items-center gap-2", isMobile ? "mb-2" : "mb-4")}>
             <div className="flex-1">
-              <label className="mb-1 block text-sm text-gray-600 dark:text-gray-400">
+              <label
+                className={cn(
+                  "mb-1 block text-gray-600 dark:text-gray-400",
+                  isMobile ? "text-[12px]" : "text-sm",
+                )}
+              >
                 최소 가격
               </label>
               <div className="relative">
@@ -118,16 +130,31 @@ const AdoptionPriceRangeFilter = () => {
                     }
                   }}
                   placeholder="0"
-                  className="h-[32px] w-full appearance-none rounded-lg border border-gray-200 bg-white pl-2 pr-7 text-sm focus:border-blue-500 focus:outline-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:placeholder:text-gray-500"
+                  className={cn(
+                    "w-full appearance-none rounded-lg border border-gray-200 bg-white pl-2 focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:placeholder:text-gray-500 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none",
+                    isMobile ? "h-[28px] pr-5 text-[12px]" : "h-[32px] pr-7 text-sm",
+                  )}
                 />
-                <span className="absolute right-2 top-1/2 -translate-y-1/2 text-sm text-gray-500 dark:text-gray-400">
+                <span
+                  className={cn(
+                    "absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400",
+                    isMobile ? "text-[12px]" : "text-sm",
+                  )}
+                >
                   원
                 </span>
               </div>
             </div>
-            <div className="mt-6 text-gray-400 dark:text-gray-500">~</div>
+            <div className={cn("text-gray-400 dark:text-gray-500", isMobile ? "mt-4" : "mt-6")}>
+              ~
+            </div>
             <div className="flex-1">
-              <label className="mb-1 block text-sm text-gray-600 dark:text-gray-400">
+              <label
+                className={cn(
+                  "mb-1 block text-gray-600 dark:text-gray-400",
+                  isMobile ? "text-[12px]" : "text-sm",
+                )}
+              >
                 최대 가격
               </label>
               <div className="relative">
@@ -141,9 +168,17 @@ const AdoptionPriceRangeFilter = () => {
                     }
                   }}
                   placeholder="무제한"
-                  className="h-[32px] w-full appearance-none rounded-lg border border-gray-200 bg-white pl-2 pr-7 text-sm focus:border-blue-500 focus:outline-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:placeholder:text-gray-500"
+                  className={cn(
+                    "w-full appearance-none rounded-lg border border-gray-200 bg-white pl-2 focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:placeholder:text-gray-500 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none",
+                    isMobile ? "h-[28px] pr-5 text-[12px]" : "h-[32px] pr-7 text-sm",
+                  )}
                 />
-                <span className="absolute right-2 top-1/2 -translate-y-1/2 text-sm text-gray-500 dark:text-gray-400">
+                <span
+                  className={cn(
+                    "absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400",
+                    isMobile ? "text-[12px]" : "text-sm",
+                  )}
+                >
                   원
                 </span>
               </div>
@@ -162,7 +197,10 @@ const AdoptionPriceRangeFilter = () => {
                   maxPrice: undefined,
                 });
               }}
-              className="h-[32px] cursor-pointer rounded-lg bg-gray-100 px-3 text-sm font-semibold text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+              className={cn(
+                "cursor-pointer rounded-lg bg-gray-100 font-semibold text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600",
+                isMobile ? "h-[28px] px-2 text-[12px]" : "h-[32px] px-3 text-sm",
+              )}
             >
               초기화
             </button>
@@ -176,7 +214,10 @@ const AdoptionPriceRangeFilter = () => {
                 });
                 setIsOpen(false);
               }}
-              className="h-[32px] cursor-pointer rounded-lg bg-blue-500 px-3 text-sm font-semibold text-white hover:bg-blue-600"
+              className={cn(
+                "cursor-pointer rounded-lg bg-blue-500 font-semibold text-white hover:bg-blue-600",
+                isMobile ? "h-[28px] px-2 text-[12px]" : "h-[32px] px-3 text-sm",
+              )}
             >
               저장
             </button>

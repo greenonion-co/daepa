@@ -1,6 +1,5 @@
 import { ChartConfig, ChartContainer } from "@/components/ui/chart";
 import { ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { formatPrice } from "@/lib/utils";
 import { PieChart, Pie, Cell } from "recharts";
 
 interface PieChartDataItem {
@@ -12,10 +11,16 @@ interface PieChartDataItem {
 interface StatsPieChartProps {
   data: PieChartDataItem[];
   config: ChartConfig;
+  format?: (value: any) => string;
   height?: string;
 }
 
-const StatsPieChart = ({ data, config, height = "h-[250px] w-full" }: StatsPieChartProps) => {
+const StatsPieChart = ({
+  data,
+  config,
+  format,
+  height = "h-[250px] w-full",
+}: StatsPieChartProps) => {
   if (data.length === 0) return null;
 
   return (
@@ -42,7 +47,7 @@ const StatsPieChart = ({ data, config, height = "h-[250px] w-full" }: StatsPieCh
                 dominantBaseline="central"
                 style={{ fontSize: 12, fontWeight: 500, fill }}
               >
-                {`${name}: ${formatPrice(value)}`}
+                {`${name}: ${format ? format(value) : value}`}
               </text>
             );
           }}

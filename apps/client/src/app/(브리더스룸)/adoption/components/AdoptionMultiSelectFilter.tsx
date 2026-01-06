@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useAdoptionFilterStore } from "../../store/adoptionFilter";
 import { cn } from "@/lib/utils";
 import { Check, ChevronDown, X } from "lucide-react";
+import { useIsMobile } from "@/hooks/useMobile";
 
 interface AdoptionMultiSelectFilterProps {
   type: "morphs" | "traits" | "growth" | "sex";
@@ -18,12 +19,15 @@ const AdoptionMultiSelectFilter = ({
   disabled = false,
   displayMap,
 }: AdoptionMultiSelectFilterProps) => {
+  const isMobile = useIsMobile();
   const [isOpen, setIsOpen] = useState(false);
   const { searchFilters, setSearchFilters } = useAdoptionFilterStore();
   const [selectedItem, setSelectedItem] = useState<string[] | undefined>(searchFilters[type]);
 
   const containerRef = useRef<HTMLDivElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const [isEntering, setIsEntering] = useState(false);
+  const [dropdownPosition, setDropdownPosition] = useState<"left" | "right">("right");
 
   const selectList = useMemo(() => Object.keys(displayMap), [displayMap]);
 
@@ -52,6 +56,21 @@ const AdoptionMultiSelectFilter = ({
       return () => cancelAnimationFrame(raf);
     } else {
       setIsEntering(false);
+    }
+  }, [isOpen]);
+
+  // 드롭다운 위치 조정
+  useEffect(() => {
+    if (isOpen && containerRef.current && dropdownRef.current) {
+      const containerRect = containerRef.current.getBoundingClientRect();
+      const dropdownRect = dropdownRef.current.getBoundingClientRect();
+      const viewportWidth = window.innerWidth;
+
+      // 수평 위치 결정
+      const wouldOverflowRight = containerRect.left + dropdownRect.width > viewportWidth - 16;
+      const horizontal = wouldOverflowRight ? "right" : "left";
+
+      setDropdownPosition(horizontal);
     }
   }, [isOpen]);
 
@@ -96,7 +115,9 @@ const AdoptionMultiSelectFilter = ({
             <ChevronDown
               className={cn(
                 "h-4 w-4 text-gray-600 dark:text-gray-400",
-                currentFilterValue ? "text-blue-600 dark:text-blue-400" : "text-gray-600 dark:text-gray-400",
+                currentFilterValue
+                  ? "text-blue-600 dark:text-blue-400"
+                  : "text-gray-600 dark:text-gray-400",
               )}
             />
           </>
@@ -105,12 +126,17 @@ const AdoptionMultiSelectFilter = ({
 
       {isOpen && (
         <div
+          ref={dropdownRef}
           className={cn(
-            "absolute left-0 top-[40px] z-50 w-[320px] rounded-2xl border-[1.8px] border-gray-200 bg-white p-5 shadow-lg dark:border-gray-700 dark:bg-gray-800",
-            "origin-top transform transition-all duration-200 ease-out",
+            "absolute top-10 z-50 w-[320px] rounded-2xl border-[1.8px] border-gray-200 bg-white p-5 shadow-lg dark:border-gray-600 dark:bg-gray-800",
+            "transform transition-all duration-200 ease-out",
+            // 수평 위치
+            dropdownPosition === "left" ? "left-0" : "right-0",
+            // 애니메이션 상태
             isEntering
               ? "translate-y-0 scale-100 opacity-100"
               : "-translate-y-1 scale-95 opacity-0",
+            isMobile && "w-48",
           )}
         >
           <div className="mb-2 font-[500] dark:text-gray-100">{title}</div>
@@ -157,7 +183,9 @@ const AdoptionMultiSelectFilter = ({
                 >
                   {displayMap[item]}
 
-                  {selectedItem?.includes(item) && <Check className="h-4 w-4 text-blue-600 dark:text-blue-400" />}
+                  {selectedItem?.includes(item) && (
+                    <Check className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                  )}
                 </div>
               );
             })}

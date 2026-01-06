@@ -530,20 +530,21 @@ export const SELECTOR_CONFIGS: Record<
     title: "크기",
     selectList: [
       {
-        key: "BABY",
-        value: "베이비",
-      },
-      {
-        key: "JUVENILE",
-        value: "아성체",
+        key: "ADULT",
+        value: "성체",
       },
       {
         key: "PRE_ADULT",
         value: "준성체",
       },
       {
-        key: "ADULT",
-        value: "성체",
+        key: "JUVENILE",
+        value: "아성체",
+      },
+
+      {
+        key: "BABY",
+        value: "베이비",
       },
     ],
   },

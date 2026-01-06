@@ -464,7 +464,7 @@ const AdoptionDashboard = memo(() => {
                   </div>
                 }
               >
-                <StatsPieChart data={sexChartData} config={sexChartConfig} />
+                <StatsPieChart data={sexChartData} config={sexChartConfig} format={formatPrice} />
               </ChartCard>
             )}
 
@@ -492,7 +492,11 @@ const AdoptionDashboard = memo(() => {
                   </div>
                 }
               >
-                <StatsPieChart data={methodChartData} config={methodChartConfig} />
+                <StatsPieChart
+                  data={methodChartData}
+                  config={methodChartConfig}
+                  format={formatPrice}
+                />
               </ChartCard>
             )}
 

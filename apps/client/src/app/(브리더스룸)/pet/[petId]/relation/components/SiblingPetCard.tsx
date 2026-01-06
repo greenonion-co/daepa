@@ -146,13 +146,13 @@ export default function SiblingPetCard({
 
       <div className="flex flex-col gap-0.5 px-1">
         <div className="flex items-center gap-1">
-          <span className="truncate text-[13px] font-[600] text-gray-600 dark:text-gray-200">
+          <span className="min-w-0 truncate text-[13px] font-[600] text-gray-600 dark:text-gray-200">
             {pet.name ?? "이름 없음"}
           </span>
           {sexLabel && (
             <span
               className={cn(
-                "text-[13px] font-bold",
+                "shrink-0 text-[13px] font-bold",
                 isMale(pet.sex) ? "text-blue-600" : "text-red-600",
               )}
             >
@@ -204,13 +204,13 @@ export default function SiblingPetCard({
 
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1.5">
-          <span className="truncate text-[14px] font-semibold text-gray-800 dark:text-gray-100">
+          <span className="min-w-0 truncate text-[14px] font-semibold text-gray-800 dark:text-gray-100">
             {pet.name ?? "이름 없음"}
           </span>
           {sexLabel && (
             <span
               className={cn(
-                "text-[13px] font-bold",
+                "shrink-0 text-[13px] font-bold",
                 isMale(pet.sex) ? "text-blue-500" : "text-red-500",
               )}
             >

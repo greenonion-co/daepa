@@ -182,7 +182,7 @@ const SettingsPage = () => {
   };
 
   return (
-    <div className="container mx-auto max-w-4xl space-y-6 py-2">
+    <div className="container mx-auto max-w-4xl space-y-6 px-2 py-2">
       {/* 헤더 */}
       <div className="mb-8 flex items-center gap-3">
         <Settings className="h-8 w-8" />

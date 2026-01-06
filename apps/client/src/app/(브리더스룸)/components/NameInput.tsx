@@ -103,7 +103,6 @@ const NameInput = ({
             value={value}
             onChange={handleChange}
             disabled={disabled}
-            autoFocus
             {...props}
           />
           {value && typeof value === "string" && (

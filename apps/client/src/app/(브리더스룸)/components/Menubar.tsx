@@ -3,7 +3,7 @@ import { SIDEBAR_ITEMS } from "../constants";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Mail, Plus } from "lucide-react";
+import { Mail, Plus, Settings } from "lucide-react";
 import { useSearchKeywordStore } from "../store/searchKeyword";
 import UserButton from "./UserButton";
 import { useIsMobile } from "@/hooks/useMobile";
@@ -71,15 +71,21 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
         )}
 
         {isMobile && (
-          <Link href="/notifications" className="relative">
-            <Mail className="text-gray-500 dark:text-neutral-400" />
-            {unreadCount > 0 && (
-              <div className="absolute -right-2 -top-2 flex h-[18px] w-[18px] items-center justify-center rounded-full bg-red-500 text-[12px] font-medium text-white">
-                {unreadCount > 9 ? "9+" : unreadCount}
-              </div>
-            )}
-          </Link>
+          <>
+            <Link href="/notifications" className="relative">
+              <Mail className="text-gray-500 dark:text-neutral-400" />
+              {unreadCount > 0 && (
+                <div className="absolute -right-2 -top-2 flex h-[18px] w-[18px] items-center justify-center rounded-full bg-red-500 text-[12px] font-medium text-white">
+                  {unreadCount > 9 ? "9+" : unreadCount}
+                </div>
+              )}
+            </Link>
+            <Link href="/settings">
+              <Settings className="text-gray-500 dark:text-neutral-400" />
+            </Link>
+          </>
         )}
+
         <UserButton />
       </div>
     </div>

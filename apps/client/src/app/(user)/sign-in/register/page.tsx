@@ -120,7 +120,7 @@ const RegisterPage = () => {
           </div>
         </div>
 
-        <div className="rounded-3xl bg-gradient-to-b from-white to-gray-50 p-5 backdrop-blur-sm dark:border dark:border-gray-700 dark:bg-gray-800/80">
+        <div className="rounded-3xl bg-gradient-to-b from-white to-gray-50 p-5 dark:border dark:border-gray-700 dark:bg-gray-800/80">
           <div
             className={cn(
               "flex h-full w-full items-center justify-center py-5",

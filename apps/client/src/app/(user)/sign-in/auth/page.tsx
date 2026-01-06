@@ -2,7 +2,7 @@
 
 import LoadingScreen from "@/app/loading";
 import { tokenStorage } from "@/lib/tokenStorage";
-import { authControllerGetToken, UserDtoStatus } from "@repo/api-client";
+import { UserDtoStatus, AXIOS_INSTANCE } from "@repo/api-client";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
@@ -12,11 +12,18 @@ const AuthPage = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const userStatus = searchParams.get("status");
+  const urlToken = searchParams.get("token"); // URL에서 전달받은 refreshToken
 
   const { data } = useQuery({
-    queryKey: [authControllerGetToken.name],
-    queryFn: () => authControllerGetToken(),
-    select: (response) => response.data,
+    queryKey: ["authControllerGetToken", urlToken],
+    queryFn: async () => {
+      // URL 파라미터로 토큰이 있으면 쿼리 파라미터로 전달 (모바일 cross-site 쿠키 차단 대응)
+      const url = urlToken
+        ? `/api/auth/token?token=${encodeURIComponent(urlToken)}`
+        : `/api/auth/token`;
+      const response = await AXIOS_INSTANCE.get<{ token: string }>(url);
+      return response.data;
+    },
   });
 
   useEffect(() => {

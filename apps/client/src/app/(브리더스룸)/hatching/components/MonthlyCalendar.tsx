@@ -102,7 +102,7 @@ const MonthlyCalendar = memo(() => {
     const handleScroll = (e: Event) => {
       const target = e.target as HTMLElement;
       const scrollTop = target.scrollTop;
-      setIsScrolled(scrollTop > 50);
+      setIsScrolled(scrollTop > 5);
     };
 
     // ScrollArea의 실제 스크롤 가능한 요소 찾기
@@ -122,7 +122,12 @@ const MonthlyCalendar = memo(() => {
   ];
 
   return (
-    <div className="flex">
+    <div
+      className={cn(
+        "flex",
+        isMobile && "h-[calc(100dvh-92px)] overflow-hidden pb-[env(safe-area-inset-bottom)]",
+      )}
+    >
       {!isMobile && (
         <Calendar
           mode="single"
@@ -140,9 +145,9 @@ const MonthlyCalendar = memo(() => {
         {isMobile && (
           <div
             className={cn(
-              "shrink-0 transition-all duration-300",
+              "shrink-0 touch-none transition-all duration-300",
               isScrolled &&
-                "dark:bg-background sticky top-0 z-20 w-full origin-top-left scale-75 bg-white [margin-bottom:-20%]",
+                "dark:bg-background sticky top-0 z-20 w-full origin-top-left scale-75 bg-white [margin-bottom:-24%]",
             )}
           >
             <Calendar
@@ -158,8 +163,8 @@ const MonthlyCalendar = memo(() => {
           </div>
         )}
 
-        <div className="w-full">
-          <div className="flex h-[32px] w-fit items-center gap-2 rounded-lg bg-gray-100 px-1 dark:bg-gray-800">
+        <div className={cn("w-full", isMobile && "flex min-h-0 flex-1 flex-col")}>
+          <div className="flex h-[32px] w-fit shrink-0 items-center gap-2 rounded-lg bg-gray-100 px-1 dark:bg-gray-800">
             {tabs.map(({ key, label }) => {
               return (
                 <button
@@ -181,12 +186,8 @@ const MonthlyCalendar = memo(() => {
           <ScrollArea
             ref={scrollAreaRef}
             className={cn(
-              "relative",
-              isMobile
-                ? isScrolled
-                  ? "h-[calc(100vh-320px)]"
-                  : "h-[calc(100vh-390px)]"
-                : "h-[calc(100vh-150px)]",
+              "relative [&>[data-radix-scroll-area-viewport]]:overscroll-contain",
+              isMobile ? "min-h-0 flex-1" : "h-[calc(100vh-150px)]",
             )}
           >
             {monthlyIsPending || todayIsFetching ? (
@@ -196,8 +197,8 @@ const MonthlyCalendar = memo(() => {
                 <Image
                   src="/assets/lizard.png"
                   alt="해칭 캘린더 도마뱀 이미지"
-                  width={200}
-                  height={200}
+                  width={150}
+                  height={150}
                 />
                 <span className="font-semibold text-black dark:text-gray-100">
                   {currentMonth.getFullYear()}년 {currentMonth.getMonth() + 1}월
@@ -205,39 +206,44 @@ const MonthlyCalendar = memo(() => {
                 조회된 해칭 내역이 없습니다.
               </div>
             ) : (
-              weeklyGroups.map((group) => (
-                <div key={group.weekKey} ref={(el) => void (groupRefs.current[group.weekKey] = el)}>
-                  <div className="dark:supports-[backdrop-filter]:bg-background/60 sticky top-0 bg-white/70 px-1 py-2 text-[15px] font-semibold supports-[backdrop-filter]:bg-white/60 dark:text-gray-100">
-                    {group.label}
-                  </div>
-                  {group.items
-                    .filter(([, pets]) => {
-                      if (tab === "all") return pets.length > 0;
-                      if (tab === PetDtoType.PET)
-                        return pets.filter((pet) => pet.type === PetDtoType.PET).length > 0;
-                      if (tab === PetDtoType.EGG)
-                        return pets.filter((pet) => pet.type === PetDtoType.EGG).length > 0;
-                    })
-                    .map(([date, pets]) => {
-                      const isSelected = selectedDate
-                        ? DateTime.fromJSDate(selectedDate).hasSame(
-                            DateTime.fromFormat(date, "yyyy-MM-dd"),
-                            "day",
-                          )
-                        : false;
+              <>
+                {weeklyGroups.map((group) => (
+                  <div
+                    key={group.weekKey}
+                    ref={(el) => void (groupRefs.current[group.weekKey] = el)}
+                  >
+                    <div className="dark:supports-[backdrop-filter]:bg-background/60 sticky top-0 bg-white/70 px-1 py-2 text-[15px] font-semibold supports-[backdrop-filter]:bg-white/60 dark:text-gray-100">
+                      {group.label}
+                    </div>
+                    {group.items
+                      .filter(([, pets]) => {
+                        if (tab === "all") return pets.length > 0;
+                        if (tab === PetDtoType.PET)
+                          return pets.filter((pet) => pet.type === PetDtoType.PET).length > 0;
+                        if (tab === PetDtoType.EGG)
+                          return pets.filter((pet) => pet.type === PetDtoType.EGG).length > 0;
+                      })
+                      .map(([date, pets]) => {
+                        const isSelected = selectedDate
+                          ? DateTime.fromJSDate(selectedDate).hasSame(
+                              DateTime.fromFormat(date, "yyyy-MM-dd"),
+                              "day",
+                            )
+                          : false;
 
-                      return (
-                        <HatchingPetCard
-                          key={date}
-                          isSelected={isSelected}
-                          date={date}
-                          pets={pets}
-                          tab={tab}
-                        />
-                      );
-                    })}
-                </div>
-              ))
+                        return (
+                          <HatchingPetCard
+                            key={date}
+                            isSelected={isSelected}
+                            date={date}
+                            pets={pets}
+                            tab={tab}
+                          />
+                        );
+                      })}
+                  </div>
+                ))}
+              </>
             )}
           </ScrollArea>
         </div>

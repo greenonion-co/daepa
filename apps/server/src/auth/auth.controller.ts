@@ -163,17 +163,19 @@ export class AuthController {
       validatedUser.userId,
     );
 
+    // 쿠키 설정 (PC 브라우저용 - 호환성 유지)
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
-      secure: true, // sameSite: 'none' 을 사용하기 위해서는 secure 옵션을 true 로 설정해야함
+      secure: true,
       sameSite: 'none',
       maxAge: 180 * 24 * 60 * 60 * 1000, // 180일
     });
 
+    // URL 파라미터로도 토큰 전달 (모바일 브라우저 cross-site 쿠키 차단 대응)
     const clientBaseUrl =
       this.configService.getOrThrow<string>('CLIENT_BASE_URL');
     return res.redirect(
-      `${clientBaseUrl}/sign-in/auth?status=${validatedUser.userStatus}`,
+      `${clientBaseUrl}/sign-in/auth?status=${validatedUser.userStatus}&token=${encodeURIComponent(refreshToken)}`,
     );
   }
 
@@ -197,6 +199,7 @@ export class AuthController {
       validatedUser.userId,
     );
 
+    // 쿠키 설정 (PC 브라우저용 - 호환성 유지)
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: true,
@@ -204,10 +207,11 @@ export class AuthController {
       maxAge: 180 * 24 * 60 * 60 * 1000, // 180일
     });
 
+    // URL 파라미터로도 토큰 전달 (모바일 브라우저 cross-site 쿠키 차단 대응)
     const clientBaseUrl =
       this.configService.getOrThrow<string>('CLIENT_BASE_URL');
     return res.redirect(
-      `${clientBaseUrl}/sign-in/auth?status=${validatedUser.userStatus}`,
+      `${clientBaseUrl}/sign-in/auth?status=${validatedUser.userStatus}&token=${encodeURIComponent(refreshToken)}`,
     );
   }
 
@@ -219,10 +223,11 @@ export class AuthController {
     type: TokenResponseDto,
   })
   async getToken(
-    @Req() req: RequestWithCookies,
+    @Req() req: RequestWithCookies & { query: { token?: string } },
     @Res({ passthrough: true }) res: Response,
   ) {
-    const refreshToken = req.cookies.refreshToken;
+    // 쿠키 또는 쿼리 파라미터에서 refreshToken 가져오기 (모바일 cross-site 쿠키 차단 대응)
+    const refreshToken = req.cookies.refreshToken || req.query.token;
 
     if (!refreshToken || typeof refreshToken !== 'string') {
       throw new UnauthorizedException('Refresh token이 유효하지 않습니다.');
@@ -235,7 +240,7 @@ export class AuthController {
       res.cookie('refreshToken', newRefreshToken, {
         httpOnly: true,
         secure: true,
-        sameSite: 'lax',
+        sameSite: 'none',
         maxAge: 180 * 24 * 60 * 60 * 1000, // 180일
       });
     }

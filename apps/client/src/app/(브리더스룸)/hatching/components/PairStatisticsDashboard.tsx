@@ -283,7 +283,11 @@ const PairStatisticsDashboard = memo(() => {
             {/* 알 통계 파이 차트 */}
             {eggChartData.length > 0 && (
               <ChartCard title="알 상태 분포">
-                <StatsPieChart data={eggChartData} config={eggChartConfig} />
+                <StatsPieChart
+                  data={eggChartData}
+                  config={eggChartConfig}
+                  format={(value) => `${value}개`}
+                />
               </ChartCard>
             )}
 
@@ -298,7 +302,11 @@ const PairStatisticsDashboard = memo(() => {
                   </div>
                 }
               >
-                <StatsPieChart data={sexChartData} config={sexChartConfig} />
+                <StatsPieChart
+                  data={sexChartData}
+                  config={sexChartConfig}
+                  format={(value) => `${value}개`}
+                />
               </ChartCard>
             )}
 
