@@ -210,52 +210,48 @@ function SiblingsPage({ params }: PetDetailPageProps) {
         {/* 3. 클러치 메이트 */}
         <section className="min-w-0 overflow-hidden">
           <h2 className="mb-3 text-[16px] font-bold text-gray-900">클러치 메이트</h2>
-          {clutchMates.length > 0 ? (
-            <HorizontalScrollSection>
-              {clutchMates.map((mate) => (
-                <SiblingPetCard key={mate.petId} pet={mate} />
-              ))}
-            </HorizontalScrollSection>
-          ) : (
-            <div className="text-xs text-gray-500">클러치 메이트가 없습니다.</div>
-          )}
+          <HorizontalScrollSection>
+            {clutchMates.length > 0 ? (
+              clutchMates.map((mate) => <SiblingPetCard key={mate.petId} pet={mate} />)
+            ) : (
+              <div className="text-xs text-gray-500">클러치 메이트가 없습니다.</div>
+            )}
+          </HorizontalScrollSection>
         </section>
       </div>
 
       {/* 4. 부모가 같은 펫 */}
       <section className="min-w-0 overflow-hidden">
         <h2 className="mb-3 text-[16px] font-bold text-gray-900">부모가 같은 펫</h2>
-        {otherClutchSiblings.length > 0 ? (
-          <HorizontalScrollSection
-            hasMore={hasNextSiblings}
-            isLoading={isFetchingNextSiblings}
-            onReachEnd={fetchNextSiblings}
-          >
-            {otherClutchSiblings.map((sibling) => {
+        <HorizontalScrollSection
+          hasMore={hasNextSiblings}
+          isLoading={isFetchingNextSiblings}
+          onReachEnd={fetchNextSiblings}
+        >
+          {otherClutchSiblings.length > 0 ? (
+            otherClutchSiblings.map((sibling) => {
               return <SiblingPetCard key={sibling.petId} pet={sibling} />;
-            })}
-          </HorizontalScrollSection>
-        ) : (
-          <div className="text-xs text-gray-500">부모가 같은 펫이 없습니다.</div>
-        )}
+            })
+          ) : (
+            <div className="text-xs text-gray-500">부모가 같은 펫이 없습니다.</div>
+          )}
+        </HorizontalScrollSection>
       </section>
 
       {/* 5. 자식 펫 */}
       <section className="min-w-0 overflow-hidden">
         <h2 className="mb-3 text-[16px] font-bold text-gray-900">자식</h2>
-        {childrenData?.children && childrenData.children.length > 0 ? (
-          <HorizontalScrollSection
-            hasMore={hasNextChildren}
-            isLoading={isFetchingNextChildren}
-            onReachEnd={fetchNextChildren}
-          >
-            {childrenData.children.map((child) => (
-              <SiblingPetCard key={child.petId} pet={child} />
-            ))}
-          </HorizontalScrollSection>
-        ) : (
-          <div className="text-xs text-gray-500">자식 펫이 없습니다.</div>
-        )}
+        <HorizontalScrollSection
+          hasMore={hasNextChildren}
+          isLoading={isFetchingNextChildren}
+          onReachEnd={fetchNextChildren}
+        >
+          {childrenData?.children && childrenData.children.length > 0 ? (
+            childrenData.children.map((child) => <SiblingPetCard key={child.petId} pet={child} />)
+          ) : (
+            <div className="text-xs text-gray-500">자식 펫이 없습니다.</div>
+          )}
+        </HorizontalScrollSection>
       </section>
     </div>
   );
