@@ -6,6 +6,7 @@
  * OpenAPI spec version: 1.0
  */
 import type { PetControllerGetSiblingsByPetIdOrder } from "./petControllerGetSiblingsByPetIdOrder";
+import type { PetControllerGetSiblingsByPetIdType } from "./petControllerGetSiblingsByPetIdType";
 
 export type PetControllerGetSiblingsByPetIdParams = {
   /**
@@ -20,4 +21,8 @@ export type PetControllerGetSiblingsByPetIdParams = {
    * 페이지당 항목 수
    */
   itemPerPage?: number;
+  /**
+   * 펫 타입 필터 (EGG, PET)
+   */
+  type?: PetControllerGetSiblingsByPetIdType;
 };

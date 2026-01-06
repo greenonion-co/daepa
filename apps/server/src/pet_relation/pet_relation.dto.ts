@@ -2,13 +2,15 @@ import { ApiExtraModels, ApiProperty, getSchemaPath } from '@nestjs/swagger';
 import {
   IsArray,
   IsDate,
+  IsEnum,
   IsNumber,
   IsObject,
   IsOptional,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { PetSummaryDto, PetHiddenStatusDto } from 'src/pet/pet.dto';
-import { PageMetaDto } from 'src/common/page.dto';
+import { PageMetaDto, PageOptionsDto } from 'src/common/page.dto';
+import { PET_TYPE } from 'src/pet/pet.constants';
 
 /**
  * Raw query result interface for getSiblingsWithDetails (내부 변환용)
@@ -225,4 +227,51 @@ export class GetChildrenPageResponseDto {
   })
   @IsObject()
   meta: PageMetaDto;
+}
+
+/**
+ * 클러치 메이트 (같은 layingId 또는 부모가 같고 layingDate/hatchingDate가 같은 형제) 조회 응답
+ */
+@ApiExtraModels(SiblingPetDetailDto, PetHiddenStatusDto)
+export class GetClutchMatesResponseDto {
+  @ApiProperty({
+    description: '클러치 메이트 목록 (비공개인 경우 hiddenStatus만 포함)',
+    type: 'array',
+    items: {
+      oneOf: [
+        { $ref: getSchemaPath(SiblingPetDetailDto) },
+        { $ref: getSchemaPath(PetHiddenStatusDto) },
+      ],
+    },
+  })
+  @IsArray()
+  data: (SiblingPetDetailDto | PetHiddenStatusDto)[];
+}
+
+/**
+ * 형제 펫 조회 쿼리 파라미터 (페이지네이션 + type 필터)
+ */
+export class GetSiblingsQueryDto extends PageOptionsDto {
+  @ApiProperty({
+    description: '펫 타입 필터 (EGG, PET)',
+    enum: PET_TYPE,
+    required: false,
+  })
+  @IsOptional()
+  @IsEnum(PET_TYPE)
+  readonly type?: PET_TYPE;
+}
+
+/**
+ * 클러치 메이트 조회 쿼리 파라미터 (type 필터만)
+ */
+export class GetClutchMatesQueryDto {
+  @ApiProperty({
+    description: '펫 타입 필터 (EGG, PET)',
+    enum: PET_TYPE,
+    required: false,
+  })
+  @IsOptional()
+  @IsEnum(PET_TYPE)
+  readonly type?: PET_TYPE;
 }

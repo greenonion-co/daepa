@@ -39,6 +39,9 @@ import {
   ChildPetDetailDto,
   GetSiblingsPageResponseDto,
   GetChildrenPageResponseDto,
+  GetClutchMatesResponseDto,
+  GetSiblingsQueryDto,
+  GetClutchMatesQueryDto,
 } from 'src/pet_relation/pet_relation.dto';
 import { PetHiddenStatusDto } from './pet.dto';
 
@@ -190,13 +193,13 @@ export class PetController {
   })
   async getSiblingsByPetId(
     @Param('petId') petId: string,
-    @Query() pageOptionsDto: PageOptionsDto,
+    @Query() queryDto: GetSiblingsQueryDto,
     @JwtUser() token: JwtUserPayload,
   ): Promise<GetSiblingsPageResponseDto> {
     return this.petRelationService.getSiblingsWithDetails(
       petId,
       token.userId,
-      pageOptionsDto,
+      queryDto,
     );
   }
 
@@ -225,6 +228,48 @@ export class PetController {
       petId,
       token.userId,
       pageOptionsDto,
+    );
+  }
+
+  @Get('/clutch-mates/:petId')
+  @ApiParam({
+    name: 'petId',
+    description: '펫 아이디',
+    example: 'XXXXXXXX',
+  })
+  @ApiExtraModels(SiblingPetDetailDto, PetHiddenStatusDto)
+  @ApiResponse({
+    status: 200,
+    description: '클러치 메이트 조회 성공',
+    schema: {
+      type: 'object',
+      required: ['data'],
+      properties: {
+        data: {
+          type: 'array',
+          items: {
+            oneOf: [
+              { $ref: getSchemaPath(SiblingPetDetailDto) },
+              { $ref: getSchemaPath(PetHiddenStatusDto) },
+            ],
+          },
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: '펫을 찾을 수 없습니다.',
+  })
+  async getClutchMatesByPetId(
+    @Param('petId') petId: string,
+    @Query() queryDto: GetClutchMatesQueryDto,
+    @JwtUser() token: JwtUserPayload,
+  ): Promise<GetClutchMatesResponseDto> {
+    return this.petRelationService.getClutchMatesByPetId(
+      petId,
+      token.userId,
+      queryDto,
     );
   }
 

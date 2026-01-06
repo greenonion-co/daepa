@@ -1,7 +1,9 @@
 "use client";
 
 import {
+  petControllerFindPetByPetId,
   petControllerGetChildrenByPetId,
+  petControllerGetClutchMatesByPetId,
   petControllerGetParentsByPetId,
   petControllerGetSiblingsByPetId,
   SiblingPetDetailDto,
@@ -41,7 +43,24 @@ function SiblingsPage({ params }: PetDetailPageProps) {
     select: (response) => response.data.data,
   });
 
-  // 형제 무한 스크롤
+  const { data: myProfile } = useQuery({
+    queryKey: [petControllerFindPetByPetId.name, petId],
+    queryFn: () => petControllerFindPetByPetId(petId),
+    select: (response) => response.data.data,
+  });
+
+  // 클러치 메이트 조회 (페이지네이션 없음, type: PET만)
+  const {
+    data: clutchMatesData,
+    isLoading: isClutchMatesLoading,
+    isError: isClutchMatesError,
+  } = useQuery({
+    queryKey: [petControllerGetClutchMatesByPetId.name, petId],
+    queryFn: () => petControllerGetClutchMatesByPetId(petId, { type: "PET" }),
+    select: (response) => response.data.data,
+  });
+
+  // 형제 무한 스크롤 (type: PET만)
   const {
     data: siblingsData,
     isLoading: isSiblingsLoading,
@@ -55,6 +74,7 @@ function SiblingsPage({ params }: PetDetailPageProps) {
       petControllerGetSiblingsByPetId(petId, {
         page: pageParam,
         itemPerPage: ITEM_PER_PAGE,
+        type: "PET",
       }),
     initialPageParam: 1,
     getNextPageParam: (lastPage) => {
@@ -95,43 +115,39 @@ function SiblingsPage({ params }: PetDetailPageProps) {
     }),
   });
 
-  const isLoading = isSiblingsLoading || isParentsLoading || isChildrenLoading;
-  const isError = isSiblingsError || isParentsError || isChildrenError;
+  const isLoading =
+    isSiblingsLoading || isParentsLoading || isChildrenLoading || isClutchMatesLoading;
+  const isError = isSiblingsError || isParentsError || isChildrenError || isClutchMatesError;
 
-  const { myProfile, sameClutchSiblings, otherClutchSiblings } = useMemo(() => {
+  // 클러치 메이트 필터링 (visible한 펫만, type 필터는 백엔드에서 처리)
+  const clutchMates = useMemo(() => {
+    if (!clutchMatesData) return [];
+    return clutchMatesData.filter(isVisiblePet);
+  }, [clutchMatesData]);
+
+  // 클러치 메이트 petId Set (중복 제거용)
+  const clutchMateIds = useMemo(() => {
+    return new Set(clutchMates.map((mate) => mate.petId));
+  }, [clutchMates]);
+
+  // 내 프로필 및 부모가 같은 펫 (클러치 메이트 제외)
+  const { otherClutchSiblings } = useMemo(() => {
     if (!siblingsData?.siblings) {
-      return { myProfile: null, sameClutchSiblings: [], otherClutchSiblings: [] };
+      return { otherClutchSiblings: [] };
     }
 
-    // 자기 자신 찾기
-    const me = siblingsData.siblings.find(
-      (sibling) => isVisiblePet(sibling) && sibling.petId === petId,
-    ) as SiblingPetDetailDto | undefined;
-
-    // 자기 자신의 layingDate
-    const myLayingDate = me?.laying?.layingDate;
-
-    // siblings 분류 (자기 자신 제외)
-    const others = siblingsData.siblings.filter((sibling) => sibling.petId !== petId);
-
-    const sameClutch = others.filter((sibling) => {
+    // siblings 분류 (자기 자신 및 클러치 메이트 제외, type 필터는 백엔드에서 처리)
+    const otherClutch = siblingsData.siblings.filter((sibling) => {
       if (!isVisiblePet(sibling)) return false;
-      if (!myLayingDate || !sibling.laying?.layingDate) return false;
-      return sibling.laying.layingDate === myLayingDate;
-    });
-
-    const otherClutch = others.filter((sibling) => {
-      if (!isVisiblePet(sibling)) return false;
-      if (!myLayingDate || !sibling.laying?.layingDate) return true;
-      return sibling.laying.layingDate !== myLayingDate;
+      if (sibling.petId === petId) return false; // 자기 자신 제외
+      if (clutchMateIds.has(sibling.petId)) return false; // 클러치 메이트 제외
+      return true;
     });
 
     return {
-      myProfile: me ?? null,
-      sameClutchSiblings: sameClutch,
-      otherClutchSiblings: [...otherClutch],
+      otherClutchSiblings: otherClutch,
     };
-  }, [siblingsData, petId]);
+  }, [siblingsData, petId, clutchMateIds]);
 
   if (isLoading) {
     return (
@@ -202,14 +218,10 @@ function SiblingsPage({ params }: PetDetailPageProps) {
         {/* 3. 클러치 메이트 */}
         <section className="min-w-0 overflow-hidden">
           <h2 className="mb-3 text-[16px] font-bold text-gray-900">클러치 메이트</h2>
-          {sameClutchSiblings.length > 0 ? (
-            <HorizontalScrollSection
-              hasMore={hasNextSiblings}
-              isLoading={isFetchingNextSiblings}
-              onReachEnd={fetchNextSiblings}
-            >
-              {sameClutchSiblings.map((sibling) => (
-                <SiblingPetCard key={sibling.petId} pet={sibling} />
+          {clutchMates.length > 0 ? (
+            <HorizontalScrollSection>
+              {clutchMates.map((mate) => (
+                <SiblingPetCard key={mate.petId} pet={mate} />
               ))}
             </HorizontalScrollSection>
           ) : (
@@ -227,9 +239,9 @@ function SiblingsPage({ params }: PetDetailPageProps) {
             isLoading={isFetchingNextSiblings}
             onReachEnd={fetchNextSiblings}
           >
-            {otherClutchSiblings.map((sibling) => (
-              <SiblingPetCard key={sibling.petId} pet={sibling} />
-            ))}
+            {otherClutchSiblings.map((sibling) => {
+              return <SiblingPetCard key={sibling.petId} pet={sibling} />;
+            })}
           </HorizontalScrollSection>
         ) : (
           <div className="text-xs text-gray-500">부모가 같은 펫이 없습니다.</div>

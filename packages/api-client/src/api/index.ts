@@ -26,6 +26,7 @@ import type {
   PairControllerGetPairListParams,
   PetControllerFindAllParams,
   PetControllerGetChildrenByPetIdParams,
+  PetControllerGetClutchMatesByPetIdParams,
   PetControllerGetDeletedPetsParams,
   PetControllerGetParentsByPetIdParams,
   PetControllerGetSiblingsByPetIdParams,
@@ -71,6 +72,7 @@ import type {
   ParentLinkDetailJson,
   ParentStatisticsDto,
   PetControllerFindAll200,
+  PetControllerGetClutchMatesByPetId200,
   PetControllerGetDeletedPets200,
   PetHiddenStatusDto,
   PetImageItem,
@@ -144,6 +146,17 @@ export const petControllerGetChildrenByPetId = (
 ) => {
   return useCustomInstance<GetChildrenPageResponseDto>({
     url: `/api/v1/pet/children/${petId}`,
+    method: "GET",
+    params,
+  });
+};
+
+export const petControllerGetClutchMatesByPetId = (
+  petId: string,
+  params?: PetControllerGetClutchMatesByPetIdParams,
+) => {
+  return useCustomInstance<PetControllerGetClutchMatesByPetId200>({
+    url: `/api/v1/pet/clutch-mates/${petId}`,
     method: "GET",
     params,
   });
@@ -584,6 +597,9 @@ export type PetControllerGetSiblingsByPetIdResult = NonNullable<
 >;
 export type PetControllerGetChildrenByPetIdResult = NonNullable<
   Awaited<ReturnType<typeof petControllerGetChildrenByPetId>>
+>;
+export type PetControllerGetClutchMatesByPetIdResult = NonNullable<
+  Awaited<ReturnType<typeof petControllerGetClutchMatesByPetId>>
 >;
 export type PetControllerFindPetByPetIdResult = NonNullable<
   Awaited<ReturnType<typeof petControllerFindPetByPetId>>
@@ -1389,6 +1405,127 @@ export const getPetControllerGetChildrenByPetIdResponseMock = (
       hasNextPage: faker.datatype.boolean(),
     },
   },
+  ...overrideResponse,
+});
+
+export const getPetControllerGetClutchMatesByPetIdResponseSiblingPetDetailDtoMock = (
+  overrideResponse: Partial<SiblingPetDetailDto> = {},
+): SiblingPetDetailDto => ({
+  ...{
+    petId: faker.string.alpha(20),
+    type: faker.helpers.arrayElement([
+      faker.helpers.arrayElement(["EGG", "PET"] as const),
+      undefined,
+    ]),
+    owner: {
+      ...{
+        status: faker.helpers.arrayElement([
+          "pending",
+          "active",
+          "inactive",
+          "suspended",
+          "deleted",
+        ] as const),
+        userId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+        name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+        role: faker.helpers.arrayElement([
+          faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
+          undefined,
+        ]),
+        isBiz: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+      },
+    },
+    name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+    species: faker.helpers.arrayElement(["CR", "LE", "FT", "KN", "LC", "GG"] as const),
+    hatchingDate: faker.helpers.arrayElement([
+      faker.date.past().toISOString().split("T")[0],
+      undefined,
+    ]),
+    isPublic: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+    isDeleted: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+    sex: faker.helpers.arrayElement([
+      faker.helpers.arrayElement(["M", "F", "N"] as const),
+      undefined,
+    ]),
+    morphs: faker.helpers.arrayElement([
+      Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+        faker.string.alpha(20),
+      ),
+      undefined,
+    ]),
+    traits: faker.helpers.arrayElement([
+      Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+        faker.string.alpha(20),
+      ),
+      undefined,
+    ]),
+    growth: faker.helpers.arrayElement([
+      faker.helpers.arrayElement(["BABY", "JUVENILE", "PRE_ADULT", "ADULT", "DEAD"] as const),
+      undefined,
+    ]),
+    weight: faker.helpers.arrayElement([
+      faker.number.int({ min: undefined, max: undefined }),
+      undefined,
+    ]),
+    laying: faker.helpers.arrayElement([
+      {
+        ...{
+          id: faker.number.int({ min: undefined, max: undefined }),
+          matingId: faker.helpers.arrayElement([
+            faker.number.int({ min: undefined, max: undefined }),
+            undefined,
+          ]),
+          layingDate: faker.helpers.arrayElement([
+            `${faker.date.past().toISOString().split(".")[0]}Z`,
+            undefined,
+          ]),
+          clutch: faker.helpers.arrayElement([
+            faker.number.int({ min: undefined, max: undefined }),
+            undefined,
+          ]),
+        },
+      },
+      undefined,
+    ]),
+    mating: faker.helpers.arrayElement([
+      {
+        ...{
+          id: faker.number.int({ min: undefined, max: undefined }),
+          pairId: faker.helpers.arrayElement([
+            faker.number.int({ min: undefined, max: undefined }),
+            undefined,
+          ]),
+          matingDate: faker.helpers.arrayElement([
+            `${faker.date.past().toISOString().split(".")[0]}Z`,
+            undefined,
+          ]),
+        },
+      },
+      undefined,
+    ]),
+  },
+  ...overrideResponse,
+});
+
+export const getPetControllerGetClutchMatesByPetIdResponsePetHiddenStatusDtoMock = (
+  overrideResponse: Partial<PetHiddenStatusDto> = {},
+): PetHiddenStatusDto => ({
+  ...{
+    petId: faker.string.alpha(20),
+    hiddenStatus: faker.helpers.arrayElement(["SECRET", "PENDING", "DELETED"] as const),
+  },
+  ...overrideResponse,
+});
+
+export const getPetControllerGetClutchMatesByPetIdResponseMock = (
+  overrideResponse: Partial<PetControllerGetClutchMatesByPetId200> = {},
+): PetControllerGetClutchMatesByPetId200 => ({
+  data: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+    faker.helpers.arrayElement([
+      { ...getPetControllerGetClutchMatesByPetIdResponseSiblingPetDetailDtoMock() },
+      { ...getPetControllerGetClutchMatesByPetIdResponsePetHiddenStatusDtoMock() },
+    ]),
+  ),
   ...overrideResponse,
 });
 
@@ -4553,6 +4690,29 @@ export const getPetControllerGetChildrenByPetIdMockHandler = (
   });
 };
 
+export const getPetControllerGetClutchMatesByPetIdMockHandler = (
+  overrideResponse?:
+    | PetControllerGetClutchMatesByPetId200
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<PetControllerGetClutchMatesByPetId200> | PetControllerGetClutchMatesByPetId200),
+) => {
+  return http.get("*/api/v1/pet/clutch-mates/:petId", async (info) => {
+    await delay(1000);
+
+    return new HttpResponse(
+      JSON.stringify(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getPetControllerGetClutchMatesByPetIdResponseMock(),
+      ),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+  });
+};
+
 export const getPetControllerFindPetByPetIdMockHandler = (
   overrideResponse?:
     | FindPetByPetIdResponseDto
@@ -5644,6 +5804,7 @@ export const getProjectDaepaAPIMock = () => [
   getPetControllerGetParentsByPetIdMockHandler(),
   getPetControllerGetSiblingsByPetIdMockHandler(),
   getPetControllerGetChildrenByPetIdMockHandler(),
+  getPetControllerGetClutchMatesByPetIdMockHandler(),
   getPetControllerFindPetByPetIdMockHandler(),
   getPetControllerUpdateMockHandler(),
   getPetControllerDeletePetMockHandler(),
