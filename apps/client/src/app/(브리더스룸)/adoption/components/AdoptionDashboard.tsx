@@ -330,17 +330,13 @@ const AdoptionDashboard = memo(() => {
               )}
             >
               <div className="overflow-hidden">
-                <div className="flex flex-wrap justify-center gap-3 pt-2">
+                <div className="flex flex-wrap items-stretch justify-center gap-3 pt-2">
                   {father && (
-                    <div className="mb-2 flex flex-col gap-1">
-                      <SiblingPetCard pet={father} width={140} />
-                    </div>
+                    <SiblingPetCard pet={father} width={140} />
                   )}
 
                   {mother && (
-                    <div className="mb-2 flex flex-col gap-1">
-                      <SiblingPetCard pet={mother} width={140} />
-                    </div>
+                    <SiblingPetCard pet={mother} width={140} />
                   )}
                 </div>
               </div>

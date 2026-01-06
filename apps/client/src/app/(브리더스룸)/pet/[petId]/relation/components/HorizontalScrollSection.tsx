@@ -103,7 +103,7 @@ export default function HorizontalScrollSection({
       {/* 스크롤 컨테이너 */}
       <div
         ref={scrollRef}
-        className="scrollbar-hide flex gap-3 overflow-x-auto pb-3"
+        className="scrollbar-hide flex items-stretch gap-3 overflow-x-auto pb-3"
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
         {children}
