@@ -6,11 +6,11 @@
  * OpenAPI spec version: 1.0
  */
 
-export type AdoptionControllerGetAllAdoptionsOrder =
-  (typeof AdoptionControllerGetAllAdoptionsOrder)[keyof typeof AdoptionControllerGetAllAdoptionsOrder];
+export type PairControllerGetPairListOrder =
+  (typeof PairControllerGetPairListOrder)[keyof typeof PairControllerGetPairListOrder];
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const AdoptionControllerGetAllAdoptionsOrder = {
+export const PairControllerGetPairListOrder = {
   ASC: "ASC",
   DESC: "DESC",
 } as const;

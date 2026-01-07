@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/dialog";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
-  brMatingControllerFindAll,
+  pairControllerGetPairList,
   CompleteHatchingDto,
   petControllerCompleteHatching,
 } from "@repo/api-client";
@@ -89,7 +89,7 @@ const CompleteHatchingModal = ({
 
       if (data?.success) {
         toast.success("해칭 완료");
-        queryClient.invalidateQueries({ queryKey: [brMatingControllerFindAll.name] });
+        queryClient.invalidateQueries({ queryKey: [pairControllerGetPairList.name] });
         onClose();
       }
     } catch (error) {

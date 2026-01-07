@@ -7,12 +7,8 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { PageOptionsDto } from 'src/common/page.dto';
-import { CommonResponseDto } from 'src/common/response.dto';
-import { LayingByDateDto } from 'src/laying/laying.dto';
-import { PetSummaryLayingDto } from 'src/pet/pet.dto';
+
 import { PET_SPECIES } from 'src/pet/pet.constants';
-import { EGG_STATUS } from 'src/egg_detail/egg_detail.constants';
 
 export class MatingBaseDto {
   @ApiProperty({
@@ -65,13 +61,6 @@ export class MatingBaseDto {
   updatedAt: Date;
 }
 
-export class MatingDto extends PickType(MatingBaseDto, [
-  'id',
-  'fatherId',
-  'motherId',
-  'matingDate',
-]) {}
-
 export class CreateMatingDto extends PickType(MatingBaseDto, [
   'fatherId',
   'motherId',
@@ -100,136 +89,4 @@ export class UpdateMatingDto extends PickType(MatingBaseDto, [
   @IsOptional()
   @IsString()
   desc?: string;
-}
-
-class MatingByDateDto {
-  @ApiProperty({
-    description: '메이팅 ID',
-    example: 1,
-  })
-  id: number;
-
-  @ApiProperty({
-    description: '메이팅 날짜',
-    example: '2025-01-01',
-    required: false,
-  })
-  @IsDate()
-  @IsOptional()
-  matingDate?: Date;
-
-  @ApiProperty({
-    description: '산란 정보',
-    required: false,
-    isArray: true,
-    type: LayingByDateDto,
-  })
-  layingsByDate?: LayingByDateDto[];
-}
-
-export class MatingByParentsDto {
-  @ApiProperty({
-    description: '아빠 펫 정보',
-    type: PetSummaryLayingDto,
-    required: false,
-  })
-  father?: PetSummaryLayingDto;
-
-  @ApiProperty({
-    description: '엄마 펫 정보',
-    type: PetSummaryLayingDto,
-    required: false,
-  })
-  mother?: PetSummaryLayingDto;
-
-  @ApiProperty({
-    description: '메이팅 정보',
-    type: MatingByDateDto,
-    isArray: true,
-  })
-  matingsByDate: MatingByDateDto[];
-
-  @ApiProperty({
-    description: '페어 메모',
-    example: '이 페어에 대한 메모입니다.',
-    required: false,
-  })
-  @IsOptional()
-  @IsString()
-  desc?: string;
-
-  @ApiProperty({
-    description: '펫 쌍 ID',
-    example: 'PAIR_XXXXXXXX',
-  })
-  @IsString()
-  pairId: number;
-}
-
-export class MatingDetailResponseDto extends CommonResponseDto {
-  @ApiProperty({
-    description: '메이팅 정보',
-    type: [MatingByParentsDto],
-  })
-  data: MatingByParentsDto[];
-}
-
-export class MatingFilterDto extends PageOptionsDto {
-  @ApiProperty({
-    description: '펫 종',
-    example: '크레스티드게코',
-    enum: PET_SPECIES,
-    'x-enumNames': Object.keys(PET_SPECIES),
-    required: false,
-  })
-  @IsOptional()
-  @IsEnum(PET_SPECIES)
-  species?: PET_SPECIES; // 종별 필터
-
-  @ApiProperty({
-    description: '펫 최소 생년월일',
-    example: '2024-01-01',
-    required: false,
-  })
-  @IsOptional()
-  @IsDateString()
-  startYmd?: string; // 최소 생년월일
-
-  @ApiProperty({
-    description: '펫 최대 생년월일',
-    example: '2024-01-01',
-    required: false,
-  })
-  @IsOptional()
-  @IsDateString()
-  endYmd?: string; // 최대 생년월일
-
-  @ApiProperty({
-    description: '아빠 펫 ID',
-    example: 'PET_XXXXXXXX',
-    required: false,
-  })
-  @IsOptional()
-  @IsString()
-  fatherId?: string;
-
-  @ApiProperty({
-    description: '엄마 펫 ID',
-    example: 'PET_XXXXXXXX',
-    required: false,
-  })
-  @IsOptional()
-  @IsString()
-  motherId?: string;
-
-  @ApiProperty({
-    description: '알 상태',
-    example: 'UNFERTILIZED',
-    enum: EGG_STATUS,
-    'x-enumNames': Object.keys(EGG_STATUS),
-    required: false,
-  })
-  @IsOptional()
-  @IsEnum(EGG_STATUS)
-  eggStatus?: EGG_STATUS;
 }

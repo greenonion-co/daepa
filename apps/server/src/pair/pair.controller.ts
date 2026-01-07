@@ -9,11 +9,12 @@ import {
 } from '@nestjs/common';
 import { BrAccessOnly } from 'src/common/decorators/roles.decorator';
 import {
+  MatingByParentsDto,
   PairDetailDto,
-  PairDto,
   PairFilterDto,
   UpdatePairDto,
 } from './pair.dto';
+import { PageDto, PageMetaDto } from 'src/common/page.dto';
 import { ApiExtraModels, ApiResponse, getSchemaPath } from '@nestjs/swagger';
 import { JwtUser } from 'src/auth/auth.decorator';
 import { JwtUserPayload } from 'src/auth/strategies/jwt.strategy';
@@ -26,20 +27,27 @@ export class PairController {
   constructor(private readonly pairService: PairService) {}
 
   @Get()
-  @ApiExtraModels(PairDto)
+  @ApiExtraModels(MatingByParentsDto, PageMetaDto)
   @ApiResponse({
     status: 200,
     description: '페어 목록 조회 성공',
     schema: {
-      type: 'array',
-      items: { $ref: getSchemaPath(PairDto) },
+      type: 'object',
+      required: ['data', 'meta'],
+      properties: {
+        data: {
+          type: 'array',
+          items: { $ref: getSchemaPath(MatingByParentsDto) },
+        },
+        meta: { $ref: getSchemaPath(PageMetaDto) },
+      },
     },
   })
   async getPairList(
-    @Query() query: PairFilterDto,
+    @Query() pageOptionsDto: PairFilterDto,
     @JwtUser() token: JwtUserPayload,
-  ) {
-    return this.pairService.getPairList(token.userId, query.species);
+  ): Promise<PageDto<MatingByParentsDto>> {
+    return this.pairService.getPairList(pageOptionsDto, token.userId);
   }
 
   @Get(':pairId')

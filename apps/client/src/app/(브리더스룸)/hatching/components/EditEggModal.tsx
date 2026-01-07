@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  brMatingControllerFindAll,
+  pairControllerGetPairList,
   petControllerUpdate,
   PetSummaryLayingDto,
   UpdatePetDto,
@@ -42,7 +42,7 @@ const EditEggModal = ({
     try {
       const { data } = await updateEgg({ temperature: temp });
       toast.success(data.message ?? "알 수정 완료");
-      queryClient.invalidateQueries({ queryKey: [brMatingControllerFindAll.name] });
+      queryClient.invalidateQueries({ queryKey: [pairControllerGetPairList.name] });
     } catch (error) {
       if (error instanceof AxiosError) {
         toast.error(error.response?.data?.message ?? "알 수정 실패");

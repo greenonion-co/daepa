@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import {
-  brMatingControllerFindAll,
+  pairControllerGetPairList,
   matingControllerCreateMating,
   UnlinkParentDtoRole,
   PetParentDto,
@@ -81,7 +81,7 @@ const CreateMatingForm = ({ onClose }: CreateMatingFormProps) => {
       });
 
       toast.success("메이팅이 추가되었습니다.");
-      await queryClient.invalidateQueries({ queryKey: [brMatingControllerFindAll.name] });
+      await queryClient.invalidateQueries({ queryKey: [pairControllerGetPairList.name] });
       onClose();
       setFormData(getInitialFormData());
     } catch (error) {

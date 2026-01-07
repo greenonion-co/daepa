@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Label } from "@/components/ui/label";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { brMatingControllerFindAll, matingControllerUpdateMating } from "@repo/api-client";
+import { pairControllerGetPairList, matingControllerUpdateMating } from "@repo/api-client";
 import { toast } from "sonner";
 import { AxiosError } from "axios";
 import { UpdateMatingDto } from "@repo/api-client";
@@ -51,7 +51,7 @@ const EditMatingModal = ({
       });
 
       toast.success("메이팅 정보가 수정되었습니다.");
-      queryClient.invalidateQueries({ queryKey: [brMatingControllerFindAll.name] });
+      queryClient.invalidateQueries({ queryKey: [pairControllerGetPairList.name] });
     } catch (error) {
       if (error instanceof AxiosError) {
         toast.error(error.response?.data?.message ?? "메이팅 수정에 실패했습니다.");

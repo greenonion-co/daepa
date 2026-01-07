@@ -1,16 +1,17 @@
 import Loading from "@/components/common/Loading";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
-  brMatingControllerFindAll,
   matingControllerCreateMating,
+  pairControllerGetPairList,
   PetDtoSpecies,
   UpdatePairDto,
 } from "@repo/api-client";
 import { useInfiniteQuery, useMutation } from "@tanstack/react-query";
-import { Plus } from "lucide-react";
+import { HelpCircle, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { memo, useEffect, useState } from "react";
 import CreateMatingForm from "./CreateMatingForm";
+import CreateLayingModal from "./CreateLayingModal";
 import { AxiosError } from "axios";
 import { useInView } from "react-intersection-observer";
 import Filters from "./Filters";
@@ -24,7 +25,8 @@ import { overlay } from "overlay-kit";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import UpdatePairModal from "./UpdatePairModal";
 import Image from "next/image";
-import { isArray } from "es-toolkit/compat";
+import { CalendarEventDetail, EGG_STATUS } from "./PairMiniCalendar";
+import { usePairCardTutorial } from "./PairCardTutorial";
 
 export interface updatePairProps extends UpdatePairDto {
   pairId: number;
@@ -36,6 +38,8 @@ const PairList = memo(() => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedPairIndex, setSelectedPairIndex] = useState<number | null>(null);
   const [initialMatingId, setInitialMatingId] = useState<number | null>(null);
+  const [initialLayingId, setInitialLayingId] = useState<number | null>(null);
+  const { showTutorial, openTutorial, closeTutorial } = usePairCardTutorial();
   const itemPerPage = 10;
 
   const hasFilter = !!father?.petId || !!mother?.petId || !!startDate || !!endDate || !!eggStatus;
@@ -44,7 +48,7 @@ const PairList = memo(() => {
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, refetch } =
     useInfiniteQuery({
       queryKey: [
-        brMatingControllerFindAll.name,
+        pairControllerGetPairList.name,
         species,
         father?.petId,
         mother?.petId,
@@ -74,7 +78,7 @@ const PairList = memo(() => {
           isNil,
         );
 
-        return brMatingControllerFindAll({
+        return pairControllerGetPairList({
           page: pageParam,
           itemPerPage,
           order: "DESC",
@@ -90,7 +94,7 @@ const PairList = memo(() => {
       },
       select: (resp) => ({
         items: resp.pages.flatMap((p) => p.data.data),
-        totalCount: resp.pages[0]?.data.meta.totalCount,
+        totalCount: resp.pages[0]?.data.meta.totalCount ?? 0,
       }),
     });
 
@@ -212,6 +216,8 @@ const PairList = memo(() => {
     }
   };
 
+  if (!data) return null;
+
   return (
     <div className="flex flex-col px-2">
       {/* 헤더 영역 */}
@@ -230,12 +236,19 @@ const PairList = memo(() => {
       </div>
       {/* 필터 */}
       <Filters />
-      <div className="m-2 text-sm text-gray-600 dark:text-gray-400">
-        검색된 페어 {data?.totalCount ?? "?"}쌍
-        {isArray(data?.items) && data.items.length > 0 && (
-          <div className="text-[12px] text-red-600 dark:text-red-400">
-            날짜를 선택하면 상세 정보 확인이 가능합니다.
-          </div>
+      <div className="flex items-center">
+        <div className="m-2 text-sm text-gray-600 dark:text-gray-400">
+          검색된 페어 {data.totalCount}쌍
+        </div>
+        {data.totalCount > 0 && (
+          <button
+            type="button"
+            onClick={openTutorial}
+            className="flex h-6 items-center gap-0.5 rounded-lg px-1 text-[13px] text-green-600 hover:bg-green-100 dark:text-green-300 dark:hover:bg-green-700/50"
+          >
+            <HelpCircle className="h-4 w-4" />
+            <span>사용법</span>
+          </button>
         )}
       </div>
 
@@ -251,9 +264,43 @@ const PairList = memo(() => {
                 setSelectedPairIndex(index);
                 setInitialMatingId(null);
               }}
-              onDateClick={(matingId) => {
-                setInitialMatingId(matingId);
+              onDateClick={(eventData: CalendarEventDetail) => {
+                setIsOpen(true);
+                setSelectedPairIndex(index);
+                setInitialMatingId(eventData.matingId);
+
+                // 이벤트 타입에 따라 포커스 대상 설정
+                if (eventData.eventType === EGG_STATUS.MATING) {
+                  // 메이팅 탭으로 포커스 (matingId만 설정)
+                  setInitialLayingId(null);
+                } else {
+                  // 산란으로 포커스
+                  setInitialLayingId(eventData.layingId ?? null);
+                }
               }}
+              onAddMating={(date) => {
+                handleAddPairClick({
+                  species: pair.father?.species,
+                  fatherId: pair.father?.petId,
+                  motherId: pair.mother?.petId,
+                  matingDate: date,
+                });
+              }}
+              onAddLaying={(date) => {
+                overlay.open(({ isOpen, close }) => (
+                  <CreateLayingModal
+                    isOpen={isOpen}
+                    onClose={close}
+                    fatherId={pair.father?.petId}
+                    motherId={pair.mother?.petId}
+                    initialLayingDate={date}
+                    isLayingDateEditable={false}
+                    matingsByDate={pair.matingsByDate}
+                  />
+                ));
+              }}
+              showTutorial={index === 0 && showTutorial}
+              onCloseTutorial={closeTutorial}
             />
           ))}
         </div>
@@ -271,9 +318,11 @@ const PairList = memo(() => {
         onClose={() => {
           setIsOpen(false);
           setInitialMatingId(null);
+          setInitialLayingId(null);
         }}
         matingGroup={pair}
         initialMatingId={initialMatingId}
+        initialLayingId={initialLayingId}
         onConfirmAdd={async (matingDate) => {
           if (!pair?.father || !pair?.mother) {
             toast.error("부모 개체가 없습니다.");

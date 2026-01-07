@@ -9,7 +9,6 @@ import type {
   AdoptionControllerGetAdoptionByPetIdParams,
   AppleNativeLoginRequestDto,
   BrAdoptionControllerGetAllAdoptionsParams,
-  BrMatingControllerFindAllParams,
   BrPetControllerFindAllParams,
   BrPetControllerGetPetsByDateRangeParams,
   BrPetControllerGetPetsByMonthParams,
@@ -56,7 +55,6 @@ import type {
   AdoptionDetailResponseDto,
   AdoptionStatisticsDto,
   BrAdoptionControllerGetAllAdoptions200,
-  BrMatingControllerFindAll200,
   BrPetControllerFindAll200,
   BrPetControllerGetPetsByYear200,
   ChildPetDetailDto,
@@ -67,8 +65,8 @@ import type {
   GetChildrenPageResponseDto,
   GetParentsByPetIdResponseDto,
   GetSiblingsPageResponseDto,
+  PairControllerGetPairList200,
   PairDetailDto,
-  PairDto,
   ParentLinkDetailJson,
   ParentStatisticsDto,
   PetControllerFindAll200,
@@ -436,14 +434,6 @@ export const matingControllerDeleteMating = (matingId: number) => {
   });
 };
 
-export const brMatingControllerFindAll = (params?: BrMatingControllerFindAllParams) => {
-  return useCustomInstance<BrMatingControllerFindAll200>({
-    url: `/api/v1/br/mating`,
-    method: "GET",
-    params,
-  });
-};
-
 export const parentRequestControllerLinkParent = (
   petId: string,
   createParentDto: CreateParentDto,
@@ -502,8 +492,12 @@ export const layingControllerDelete = (id: number) => {
   return useCustomInstance<CommonResponseDto>({ url: `/api/v1/layings/${id}`, method: "DELETE" });
 };
 
-export const pairControllerGetPairList = (params: PairControllerGetPairListParams) => {
-  return useCustomInstance<PairDto[]>({ url: `/api/v1/pairs`, method: "GET", params });
+export const pairControllerGetPairList = (params?: PairControllerGetPairListParams) => {
+  return useCustomInstance<PairControllerGetPairList200>({
+    url: `/api/v1/pairs`,
+    method: "GET",
+    params,
+  });
 };
 
 export const pairControllerGetPairDetail = (pairId: string) => {
@@ -699,9 +693,6 @@ export type MatingControllerUpdateMatingResult = NonNullable<
 >;
 export type MatingControllerDeleteMatingResult = NonNullable<
   Awaited<ReturnType<typeof matingControllerDeleteMating>>
->;
-export type BrMatingControllerFindAllResult = NonNullable<
-  Awaited<ReturnType<typeof brMatingControllerFindAll>>
 >;
 export type ParentRequestControllerLinkParentResult = NonNullable<
   Awaited<ReturnType<typeof parentRequestControllerLinkParent>>
@@ -3841,9 +3832,57 @@ export const getMatingControllerDeleteMatingResponseMock = (
   ...overrideResponse,
 });
 
-export const getBrMatingControllerFindAllResponseMock = (
-  overrideResponse: Partial<BrMatingControllerFindAll200> = {},
-): BrMatingControllerFindAll200 => ({
+export const getParentRequestControllerLinkParentResponseMock = (
+  overrideResponse: Partial<CommonResponseDto> = {},
+): CommonResponseDto => ({
+  success: faker.datatype.boolean(),
+  message: faker.string.alpha(20),
+  ...overrideResponse,
+});
+
+export const getParentRequestControllerUnlinkParentResponseMock = (
+  overrideResponse: Partial<CommonResponseDto> = {},
+): CommonResponseDto => ({
+  success: faker.datatype.boolean(),
+  message: faker.string.alpha(20),
+  ...overrideResponse,
+});
+
+export const getParentRequestControllerUpdateStatusResponseMock = (
+  overrideResponse: Partial<CommonResponseDto> = {},
+): CommonResponseDto => ({
+  success: faker.datatype.boolean(),
+  message: faker.string.alpha(20),
+  ...overrideResponse,
+});
+
+export const getLayingControllerCreateResponseMock = (
+  overrideResponse: Partial<CommonResponseDto> = {},
+): CommonResponseDto => ({
+  success: faker.datatype.boolean(),
+  message: faker.string.alpha(20),
+  ...overrideResponse,
+});
+
+export const getLayingControllerUpdateResponseMock = (
+  overrideResponse: Partial<CommonResponseDto> = {},
+): CommonResponseDto => ({
+  success: faker.datatype.boolean(),
+  message: faker.string.alpha(20),
+  ...overrideResponse,
+});
+
+export const getLayingControllerDeleteResponseMock = (
+  overrideResponse: Partial<CommonResponseDto> = {},
+): CommonResponseDto => ({
+  success: faker.datatype.boolean(),
+  message: faker.string.alpha(20),
+  ...overrideResponse,
+});
+
+export const getPairControllerGetPairListResponseMock = (
+  overrideResponse: Partial<PairControllerGetPairList200> = {},
+): PairControllerGetPairList200 => ({
   data: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
     father: faker.helpers.arrayElement([
       {
@@ -3972,10 +4011,7 @@ export const getBrMatingControllerFindAllResponseMock = (
       (_, i) => i + 1,
     ).map(() => ({
       id: faker.number.int({ min: undefined, max: undefined }),
-      matingDate: faker.helpers.arrayElement([
-        `${faker.date.past().toISOString().split(".")[0]}Z`,
-        undefined,
-      ]),
+      matingDate: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
       layingsByDate: faker.helpers.arrayElement([
         Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
           layingId: faker.number.int({ min: undefined, max: undefined }),
@@ -4056,148 +4092,6 @@ export const getBrMatingControllerFindAllResponseMock = (
   },
   ...overrideResponse,
 });
-
-export const getParentRequestControllerLinkParentResponseMock = (
-  overrideResponse: Partial<CommonResponseDto> = {},
-): CommonResponseDto => ({
-  success: faker.datatype.boolean(),
-  message: faker.string.alpha(20),
-  ...overrideResponse,
-});
-
-export const getParentRequestControllerUnlinkParentResponseMock = (
-  overrideResponse: Partial<CommonResponseDto> = {},
-): CommonResponseDto => ({
-  success: faker.datatype.boolean(),
-  message: faker.string.alpha(20),
-  ...overrideResponse,
-});
-
-export const getParentRequestControllerUpdateStatusResponseMock = (
-  overrideResponse: Partial<CommonResponseDto> = {},
-): CommonResponseDto => ({
-  success: faker.datatype.boolean(),
-  message: faker.string.alpha(20),
-  ...overrideResponse,
-});
-
-export const getLayingControllerCreateResponseMock = (
-  overrideResponse: Partial<CommonResponseDto> = {},
-): CommonResponseDto => ({
-  success: faker.datatype.boolean(),
-  message: faker.string.alpha(20),
-  ...overrideResponse,
-});
-
-export const getLayingControllerUpdateResponseMock = (
-  overrideResponse: Partial<CommonResponseDto> = {},
-): CommonResponseDto => ({
-  success: faker.datatype.boolean(),
-  message: faker.string.alpha(20),
-  ...overrideResponse,
-});
-
-export const getLayingControllerDeleteResponseMock = (
-  overrideResponse: Partial<CommonResponseDto> = {},
-): CommonResponseDto => ({
-  success: faker.datatype.boolean(),
-  message: faker.string.alpha(20),
-  ...overrideResponse,
-});
-
-export const getPairControllerGetPairListResponseMock = (): PairDto[] =>
-  Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-    id: faker.number.int({ min: undefined, max: undefined }),
-    species: faker.helpers.arrayElement(["CR", "LE", "FT", "KN", "LC", "GG"] as const),
-    father: faker.helpers.arrayElement([
-      {
-        ...{
-          petId: faker.string.alpha(20),
-          name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
-          growth: faker.helpers.arrayElement([
-            faker.helpers.arrayElement(["BABY", "JUVENILE", "PRE_ADULT", "ADULT", "DEAD"] as const),
-            undefined,
-          ]),
-          sex: faker.helpers.arrayElement([
-            faker.helpers.arrayElement(["M", "F", "N"] as const),
-            undefined,
-          ]),
-          morphs: faker.helpers.arrayElement([
-            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-            undefined,
-          ]),
-          traits: faker.helpers.arrayElement([
-            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-            undefined,
-          ]),
-          weight: faker.helpers.arrayElement([
-            faker.number.int({ min: undefined, max: undefined }),
-            undefined,
-          ]),
-          thumbnail: faker.helpers.arrayElement([
-            {
-              ...{
-                fileName: faker.string.alpha(20),
-                url: faker.string.alpha(20),
-                mimeType: faker.string.alpha(20),
-                size: faker.number.int({ min: undefined, max: undefined }),
-              },
-            },
-            undefined,
-          ]),
-        },
-      },
-      undefined,
-    ]),
-    mother: faker.helpers.arrayElement([
-      {
-        ...{
-          petId: faker.string.alpha(20),
-          name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
-          growth: faker.helpers.arrayElement([
-            faker.helpers.arrayElement(["BABY", "JUVENILE", "PRE_ADULT", "ADULT", "DEAD"] as const),
-            undefined,
-          ]),
-          sex: faker.helpers.arrayElement([
-            faker.helpers.arrayElement(["M", "F", "N"] as const),
-            undefined,
-          ]),
-          morphs: faker.helpers.arrayElement([
-            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-            undefined,
-          ]),
-          traits: faker.helpers.arrayElement([
-            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.string.alpha(20),
-            ),
-            undefined,
-          ]),
-          weight: faker.helpers.arrayElement([
-            faker.number.int({ min: undefined, max: undefined }),
-            undefined,
-          ]),
-          thumbnail: faker.helpers.arrayElement([
-            {
-              ...{
-                fileName: faker.string.alpha(20),
-                url: faker.string.alpha(20),
-                mimeType: faker.string.alpha(20),
-                size: faker.number.int({ min: undefined, max: undefined }),
-              },
-            },
-            undefined,
-          ]),
-        },
-      },
-      undefined,
-    ]),
-  }));
 
 export const getPairControllerGetPairDetailResponseMock = (
   overrideResponse: Partial<PairDetailDto> = {},
@@ -5454,29 +5348,6 @@ export const getMatingControllerDeleteMatingMockHandler = (
   });
 };
 
-export const getBrMatingControllerFindAllMockHandler = (
-  overrideResponse?:
-    | BrMatingControllerFindAll200
-    | ((
-        info: Parameters<Parameters<typeof http.get>[1]>[0],
-      ) => Promise<BrMatingControllerFindAll200> | BrMatingControllerFindAll200),
-) => {
-  return http.get("*/api/v1/br/mating", async (info) => {
-    await delay(1000);
-
-    return new HttpResponse(
-      JSON.stringify(
-        overrideResponse !== undefined
-          ? typeof overrideResponse === "function"
-            ? await overrideResponse(info)
-            : overrideResponse
-          : getBrMatingControllerFindAllResponseMock(),
-      ),
-      { status: 200, headers: { "Content-Type": "application/json" } },
-    );
-  });
-};
-
 export const getParentRequestControllerLinkParentMockHandler = (
   overrideResponse?:
     | CommonResponseDto
@@ -5617,8 +5488,10 @@ export const getLayingControllerDeleteMockHandler = (
 
 export const getPairControllerGetPairListMockHandler = (
   overrideResponse?:
-    | PairDto[]
-    | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<PairDto[]> | PairDto[]),
+    | PairControllerGetPairList200
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<PairControllerGetPairList200> | PairControllerGetPairList200),
 ) => {
   return http.get("*/api/v1/pairs", async (info) => {
     await delay(1000);
@@ -5838,7 +5711,6 @@ export const getProjectDaepaAPIMock = () => [
   getMatingControllerCreateMatingMockHandler(),
   getMatingControllerUpdateMatingMockHandler(),
   getMatingControllerDeleteMatingMockHandler(),
-  getBrMatingControllerFindAllMockHandler(),
   getParentRequestControllerLinkParentMockHandler(),
   getParentRequestControllerUnlinkParentMockHandler(),
   getParentRequestControllerUpdateStatusMockHandler(),

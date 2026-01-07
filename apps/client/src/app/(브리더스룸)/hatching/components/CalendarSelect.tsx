@@ -38,7 +38,7 @@ const CalendarSelect = ({
           tabIndex={0}
           data-field-name="matingDate"
           className={cn(
-            "flex w-fit items-center justify-center gap-1 rounded-lg px-1 text-[14px] font-semibold text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30 cursor-pointer",
+            "flex w-fit cursor-pointer items-center justify-center gap-1 rounded-lg px-1 text-[14px] font-semibold text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30",
           )}
           onKeyDown={(e) => {
             if (e.key === "Enter" || e.key === " ") {
@@ -52,9 +52,7 @@ const CalendarSelect = ({
               <Plus className="h-2 w-2" />
             </div>
           )}
-          <div className={cn("flex items-center gap-1", triggerTextClassName)}>
-            {triggerText}
-          </div>
+          <div className={cn("flex items-center gap-1", triggerTextClassName)}>{triggerText}</div>
           {type === "edit" && <Pencil className="h-3 w-3 text-blue-600 dark:text-blue-400" />}
         </div>
       </PopoverTrigger>

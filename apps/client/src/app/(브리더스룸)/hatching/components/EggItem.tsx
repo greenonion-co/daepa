@@ -14,6 +14,7 @@ import { GENDER_KOREAN_INFO } from "../../constants";
 import { useRouter } from "next/navigation";
 import Select from "./Select";
 import { useIsMobile } from "@/hooks/useMobile";
+import { TUTORIAL_TARGETS } from "./MatingDetailDialogTutorial";
 
 interface EggItemProps {
   pet: PetSummaryLayingDto;
@@ -22,6 +23,7 @@ interface EggItemProps {
   handleDeleteEggClick: (e: React.MouseEvent) => void;
   handleEditEggClick: (e: React.MouseEvent) => void;
   handleUpdate: (value: UpdatePetDtoEggStatus) => Promise<void>;
+  showTutorial?: boolean;
 }
 
 const EggItem = ({
@@ -31,6 +33,7 @@ const EggItem = ({
   handleDeleteEggClick,
   handleEditEggClick,
   handleUpdate,
+  showTutorial,
 }: EggItemProps) => {
   const router = useRouter();
   const isMobile = useIsMobile();
@@ -106,26 +109,29 @@ const EggItem = ({
           />
 
           {/* 수정/삭제 드롭다운 */}
-          <DropdownMenuIcon
-            selectedId={pet.petId}
-            menuItems={[
-              {
-                icon: <Edit className="h-4 w-4 text-blue-600" />,
-                label: "해칭 완료",
-                onClick: handleHatching,
-              },
-              {
-                icon: <Edit className="h-4 w-4 text-blue-600" />,
-                label: "수정",
-                onClick: handleEditEggClick,
-              },
-              {
-                icon: <Trash2 className="h-4 w-4 text-red-600" />,
-                label: "삭제",
-                onClick: handleDeleteEggClick,
-              },
-            ]}
-          />
+          <div data-tutorial={showTutorial ? TUTORIAL_TARGETS.EGG_MENU : undefined}>
+            <DropdownMenuIcon
+              selectedId={pet.petId}
+              menuItems={[
+                {
+                  icon: <Edit className="h-4 w-4 text-blue-600" />,
+                  label: "해칭 완료",
+                  onClick: handleHatching,
+                },
+                {
+                  icon: <Edit className="h-4 w-4 text-blue-600" />,
+                  label: "수정",
+                  onClick: handleEditEggClick,
+                },
+                {
+                  icon: <Trash2 className="h-4 w-4 text-red-600" />,
+                  label: "삭제",
+                  onClick: handleDeleteEggClick,
+                },
+              ]}
+              forceOpen={showTutorial}
+            />
+          </div>
         </div>
       ) : (
         <div className="font-[600] text-blue-700 dark:text-blue-400">

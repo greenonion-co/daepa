@@ -33,7 +33,6 @@ import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import { MatingController } from './mating/mating.controller';
 import { MatingService } from './mating/mating.service';
 import { MatingEntity } from './mating/mating.entity';
-import { BrMatingController } from './mating/br/br.mating.controller';
 import { ParentRequestEntity } from './parent_request/parent_request.entity';
 import { ParentRequestService } from './parent_request/parent_request.service';
 import { ParentRequestController } from './parent_request/parent_request.controller';
@@ -109,7 +108,6 @@ const ENTITIES = [
     AdoptionController,
     BrAdoptionController,
     MatingController,
-    BrMatingController,
     ParentRequestController,
     LayingController,
     PairController,

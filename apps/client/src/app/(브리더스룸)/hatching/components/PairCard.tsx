@@ -1,19 +1,36 @@
 import { MatingByParentsDto, PetDtoEggStatus } from "@repo/api-client";
 import { StickyNote } from "lucide-react";
+import { useRef } from "react";
 
 import { updatePairProps } from "./PairList";
 import ParentCard from "./ParentCard";
 import TooltipText from "../../components/TooltipText";
-import PairMiniCalendar from "./PairMiniCalendar";
+import PairMiniCalendar, { CalendarEventDetail } from "./PairMiniCalendar";
+import { PairCardTutorialOverlay, PAIR_CARD_TUTORIAL_TARGETS } from "./PairCardTutorial";
 
 interface PairCardProps {
   pair: MatingByParentsDto;
   onClickUpdateDesc: (data: updatePairProps) => void;
   onClick: () => void;
-  onDateClick?: (matingId: number) => void;
+  onDateClick?: (eventData: CalendarEventDetail) => void;
+  onAddMating?: (date: string) => void;
+  onAddLaying?: (date: string) => void;
+  showTutorial?: boolean;
+  onCloseTutorial?: () => void;
 }
 
-const PairCard = ({ pair, onClick, onClickUpdateDesc, onDateClick }: PairCardProps) => {
+const PairCard = ({
+  pair,
+  onClick,
+  onClickUpdateDesc,
+  onDateClick,
+  onAddMating,
+  onAddLaying,
+  showTutorial,
+  onCloseTutorial,
+}: PairCardProps) => {
+  const cardRef = useRef<HTMLDivElement>(null);
+
   // 총 유정란 개수 계산 (eggStatus가 'FERTILIZED'인 경우만)
   const totalEggs =
     pair.matingsByDate?.reduce((acc, mating) => {
@@ -50,24 +67,42 @@ const PairCard = ({ pair, onClick, onClickUpdateDesc, onDateClick }: PairCardPro
     }, 0) ?? 0;
 
   return (
-    <div className="group relative flex flex-col rounded-2xl border border-gray-200/50 bg-white p-2 shadow-lg transition-all hover:border-gray-300 hover:bg-gray-100/20 hover:shadow-xl dark:border-gray-700 dark:bg-neutral-800">
+    <div
+      ref={cardRef}
+      className="group relative flex flex-col rounded-2xl border border-gray-200/50 bg-white p-2 shadow-lg transition-all hover:border-gray-300 hover:bg-gray-100/20 hover:shadow-xl dark:border-gray-700 dark:bg-neutral-800"
+    >
+      {/* 튜토리얼 오버레이 */}
+      {showTutorial && onCloseTutorial && (
+        <PairCardTutorialOverlay onClose={onCloseTutorial} containerRef={cardRef} />
+      )}
+
       {/* 부모 정보 */}
-      <div className="flex flex-1 items-center gap-2">
+      <div
+        data-tutorial={PAIR_CARD_TUTORIAL_TARGETS.PARENT_CARDS}
+        className="flex flex-1 items-center gap-2"
+      >
         <ParentCard parent={pair.father} />
         <ParentCard parent={pair.mother} />
       </div>
 
       {/* 미니 캘린더 */}
-      <PairMiniCalendar
-        matingsByDate={pair.matingsByDate ?? []}
-        onDateClick={(matingId) => {
-          onClick();
-          onDateClick?.(matingId);
-        }}
-      />
+      <div data-tutorial={PAIR_CARD_TUTORIAL_TARGETS.MINI_CALENDAR}>
+        <PairMiniCalendar
+          matingsByDate={pair.matingsByDate ?? []}
+          onDateClick={(eventData) => {
+            onClick();
+            onDateClick?.(eventData);
+          }}
+          onAddMating={onAddMating}
+          onAddLaying={onAddLaying}
+        />
+      </div>
 
       {/* 요약 정보 */}
-      <div className="flex flex-wrap items-center justify-center gap-3 text-xs text-gray-600 dark:text-gray-400">
+      <div
+        data-tutorial={PAIR_CARD_TUTORIAL_TARGETS.SUMMARY_INFO}
+        className="flex flex-wrap items-center justify-center gap-3 text-xs text-gray-600 dark:text-gray-400"
+      >
         <div className="flex items-center gap-1">
           <span>유정란/전체</span>
 
@@ -86,6 +121,7 @@ const PairCard = ({ pair, onClick, onClickUpdateDesc, onDateClick }: PairCardPro
 
       {/* 메모 영역 */}
       <div
+        data-tutorial={PAIR_CARD_TUTORIAL_TARGETS.MEMO_AREA}
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();

@@ -1,8 +1,8 @@
 import { create } from "zustand";
-import { AdoptionControllerGetAllAdoptionsParams, PetDto } from "@repo/api-client";
+import { BrAdoptionControllerGetAllAdoptionsParams, PetDto } from "@repo/api-client";
 import { FilterStore } from "./filter";
 
-interface AdoptionFilterState extends FilterStore<AdoptionControllerGetAllAdoptionsParams> {
+interface AdoptionFilterState extends FilterStore<BrAdoptionControllerGetAllAdoptionsParams> {
   father: PetDto | null;
   mother: PetDto | null;
   setFather: (father: PetDto | null) => void;

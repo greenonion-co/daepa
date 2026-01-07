@@ -8,7 +8,7 @@
 import type { MatingByParentsDto } from "./matingByParentsDto";
 import type { PageMetaDto } from "./pageMetaDto";
 
-export type BrMatingControllerFindAll200 = {
+export type PairControllerGetPairList200 = {
   data: MatingByParentsDto[];
   meta: PageMetaDto;
 };

@@ -6,11 +6,11 @@
  * OpenAPI spec version: 1.0
  */
 
-export type BrMatingControllerFindAllEggStatus =
-  (typeof BrMatingControllerFindAllEggStatus)[keyof typeof BrMatingControllerFindAllEggStatus];
+export type PairControllerGetPairListEggStatus =
+  (typeof PairControllerGetPairListEggStatus)[keyof typeof PairControllerGetPairListEggStatus];
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const BrMatingControllerFindAllEggStatus = {
+export const PairControllerGetPairListEggStatus = {
   UNFERTILIZED: "UNFERTILIZED",
   FERTILIZED: "FERTILIZED",
   HATCHED: "HATCHED",

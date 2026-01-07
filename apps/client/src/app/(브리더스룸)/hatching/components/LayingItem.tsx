@@ -1,7 +1,7 @@
 "use client";
 
 import {
-  brMatingControllerFindAll,
+  pairControllerGetPairList,
   LayingByDateDto,
   PetSummaryLayingDto,
   UpdatePetDto,
@@ -25,9 +25,10 @@ interface LayingItemProps {
   layingData: LayingByDateDto;
   father?: PetSummaryLayingDto;
   mother?: PetSummaryLayingDto;
+  showTutorial?: boolean;
 }
 
-const LayingItem = ({ layingData: { layingDate, layings }, father, mother }: LayingItemProps) => {
+const LayingItem = ({ layingData: { layingDate, layings }, father, mother, showTutorial }: LayingItemProps) => {
   const queryClient = useQueryClient();
 
   const { mutateAsync: updateEggStatus } = useMutation({
@@ -53,7 +54,7 @@ const LayingItem = ({ layingData: { layingDate, layings }, father, mother }: Lay
       });
       toast.success("상태가 변경되었습니다.");
       await queryClient.invalidateQueries({
-        queryKey: [brMatingControllerFindAll.name],
+        queryKey: [pairControllerGetPairList.name],
       });
     } catch (error) {
       if (error instanceof AxiosError) {
@@ -67,7 +68,7 @@ const LayingItem = ({ layingData: { layingDate, layings }, father, mother }: Lay
   const handleDeleteEgg = async (eggId: string, onClose: () => void) => {
     try {
       await deleteEgg(eggId);
-      await queryClient.invalidateQueries({ queryKey: [brMatingControllerFindAll.name] });
+      await queryClient.invalidateQueries({ queryKey: [pairControllerGetPairList.name] });
       toast.success("삭제되었습니다.");
       onClose();
     } catch (error) {
@@ -121,7 +122,7 @@ const LayingItem = ({ layingData: { layingDate, layings }, father, mother }: Lay
 
   return (
     <div className="flex flex-col">
-      {layings.map((pet) => (
+      {layings.map((pet, index) => (
         <EggItem
           key={pet.petId}
           pet={pet}
@@ -135,6 +136,7 @@ const LayingItem = ({ layingData: { layingDate, layings }, father, mother }: Lay
               value,
             })
           }
+          showTutorial={index === 0 && showTutorial}
         />
       ))}
     </div>

@@ -5,11 +5,45 @@
  * Project Daepa API description
  * OpenAPI spec version: 1.0
  */
+import type { PairControllerGetPairListOrder } from "./pairControllerGetPairListOrder";
 import type { PairControllerGetPairListSpecies } from "./pairControllerGetPairListSpecies";
+import type { PairControllerGetPairListEggStatus } from "./pairControllerGetPairListEggStatus";
 
 export type PairControllerGetPairListParams = {
   /**
+   * 정렬 순서
+   */
+  order?: PairControllerGetPairListOrder;
+  /**
+   * 페이지 번호
+   */
+  page?: number;
+  /**
+   * 페이지당 항목 수
+   */
+  itemPerPage?: number;
+  /**
    * 펫 종
    */
-  species: PairControllerGetPairListSpecies;
+  species?: PairControllerGetPairListSpecies;
+  /**
+   * 메이팅 최소 날짜
+   */
+  startYmd?: string;
+  /**
+   * 메이팅 최대 날짜
+   */
+  endYmd?: string;
+  /**
+   * 아빠 펫 ID
+   */
+  fatherId?: string;
+  /**
+   * 엄마 펫 ID
+   */
+  motherId?: string;
+  /**
+   * 알 상태
+   */
+  eggStatus?: PairControllerGetPairListEggStatus;
 };
