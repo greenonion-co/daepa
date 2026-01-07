@@ -4,7 +4,8 @@ import {
   Inject,
   forwardRef,
 } from '@nestjs/common';
-import { DataSource, EntityManager } from 'typeorm';
+import { DataSource, EntityManager, Brackets } from 'typeorm';
+import { plainToInstance } from 'class-transformer';
 import { PetRelationEntity } from './pet_relation.entity';
 import {
   PARENT_ROLE,
@@ -13,7 +14,6 @@ import {
 import {
   RawSiblingQueryResult,
   RawChildQueryResult,
-  SiblingPetDetailDto,
   ChildPetDetailDto,
   GetChildrenPageResponseDto,
   GetSiblingsPageResponseDto,
@@ -25,6 +25,7 @@ import { ParentRequestService } from '../parent_request/parent_request.service';
 import { PetEntity } from '../pet/pet.entity';
 import { replaceSiblingPublicSafe } from '../common/utils/pet-parent.helper';
 import { PageOptionsDto, PageMetaDto } from '../common/page.dto';
+import { PetSummaryDto } from 'src/pet/pet.dto';
 
 @Injectable()
 export class PetRelationService {
@@ -314,7 +315,6 @@ export class PetRelationService {
         .leftJoin('pet_details', 'pd', 'pd.pet_id = pr.pet_id')
         .leftJoin('users', 'u', 'u.user_id = p.owner_id')
         .leftJoin('layings', 'l', 'l.id = p.laying_id')
-        .leftJoin('matings', 'm', 'm.id = l.mating_id')
         .select([
           // pet_relations
           'pr.pet_id as petId',
@@ -341,13 +341,7 @@ export class PetRelationService {
           'u.status as owner_status',
           // layings
           'l.id as laying_id',
-          'l.mating_id as laying_matingId',
           'l.laying_date as laying_layingDate',
-          'l.clutch as laying_clutch',
-          // matings
-          'm.id as mating_id',
-          'm.pair_id as mating_pairId',
-          'm.mating_date as mating_matingDate',
         ])
         .andWhere('p.is_deleted = :isDeleted', { isDeleted: false });
 
@@ -409,22 +403,7 @@ export class PetRelationService {
           traits: raw.traits ?? undefined,
           weight: raw.weight ?? undefined,
           growth: raw.growth ?? undefined,
-          laying: raw.laying_id
-            ? {
-                id: raw.laying_id,
-                matingId: raw.laying_matingId,
-                layingDate: raw.laying_layingDate,
-                clutch: raw.laying_clutch,
-              }
-            : null,
-          mating: raw.mating_id
-            ? {
-                id: raw.mating_id,
-                pairId: raw.mating_pairId,
-                matingDate: raw.mating_matingDate,
-              }
-            : null,
-        } as SiblingPetDetailDto;
+        } as PetSummaryDto;
 
         return replaceSiblingPublicSafe(sibling, userId);
       });
@@ -448,9 +427,7 @@ export class PetRelationService {
 
   /**
    * 특정 펫의 클러치 메이트를 조회합니다 (페이지네이션 없음)
-   * 클러치 메이트 조건:
-   * 1. layingId가 같은 펫
-   * 2. OR 부모가 같고 layingDate 또는 hatchingDate가 같은 펫
+   * 클러치 메이트 조건: 같은 부모(father_id, mother_id)를 가진 펫들
    * @param petId - 대상 펫 ID
    * @param userId - 요청 사용자 ID
    * @param queryDto - 쿼리 옵션 (type 필터)
@@ -464,135 +441,78 @@ export class PetRelationService {
     manager?: EntityManager,
   ): Promise<GetClutchMatesResponseDto> {
     const run = async (em: EntityManager) => {
-      // Step 1: 대상 펫 정보 조회
-      const pet = await em
+      // CTE: 대상 펫의 부모 및 클러치 정보
+      const targetPetCte = em
         .createQueryBuilder(PetEntity, 'p')
-        .leftJoin('layings', 'l', 'l.id = p.laying_id')
         .leftJoin('pet_relations', 'pr', 'pr.pet_id = p.pet_id')
-        .select([
-          'p.pet_id as petId',
-          'p.laying_id as layingId',
-          'p.hatching_date as hatchingDate',
-          'l.laying_date as layingDate',
-          'pr.father_id as fatherId',
-          'pr.mother_id as motherId',
-        ])
-        .where('p.pet_id = :petId', { petId })
-        .getRawOne<{
-          petId: string;
-          layingId: number | null;
-          hatchingDate: Date | null;
-          layingDate: Date | null;
-          fatherId: string | null;
-          motherId: string | null;
-        }>();
+        .leftJoin('layings', 'l', 'l.id = p.laying_id')
+        .select('pr.father_id', 'father_id')
+        .addSelect('pr.mother_id', 'mother_id')
+        .addSelect('p.laying_id', 'laying_id')
+        .addSelect('p.hatching_date', 'hatching_date')
+        .addSelect('l.laying_date', 'laying_date')
+        .where('p.pet_id = :petId', { petId });
 
-      if (!pet) {
-        throw new NotFoundException('펫을 찾을 수 없습니다.');
-      }
-
-      const { layingId, hatchingDate, layingDate, fatherId, motherId } = pet;
-
-      // 클러치 메이트 조건이 없는 경우 빈 배열 반환
-      if (!layingId && !hatchingDate && !layingDate) {
-        return { data: [] };
-      }
-
-      // Step 2: 클러치 메이트 조회 쿼리 생성
+      // 단일 쿼리: CTE를 사용하여 클러치 메이트 조회
       const queryBuilder = em
-        .createQueryBuilder(PetEntity, 'p')
+        .createQueryBuilder()
+        .addCommonTableExpression(targetPetCte, 'target_pet')
+        .from('target_pet', 'tp')
+        // 클러치 메이트 정보
+        .select('p.pet_id', 'petId')
+        .addSelect('p.name', 'name')
+        .addSelect('p.species', 'species')
+        .addSelect('p.hatching_date', 'hatchingDate')
+        .addSelect('p.type', 'type')
+        .addSelect('p.is_public', 'isPublic')
+        .addSelect('p.is_deleted', 'isDeleted')
+        .addSelect('pd.sex', 'sex')
+        .addSelect('pd.morphs', 'morphs')
+        .addSelect('pd.traits', 'traits')
+        .addSelect('pd.weight', 'weight')
+        .addSelect('pd.growth', 'growth')
+        .addSelect('u.user_id', 'owner_userId')
+        .addSelect('u.name', 'owner_name')
+        .addSelect('u.role', 'owner_role')
+        .addSelect('u.is_biz', 'owner_isBiz')
+        .addSelect('u.status', 'owner_status')
+        // JOIN
+        .innerJoin(
+          'pet_relations',
+          'pr',
+          'pr.father_id = tp.father_id AND pr.mother_id = tp.mother_id AND pr.pet_id != :petId',
+          { petId },
+        )
+        .innerJoin('pets', 'p', 'p.pet_id = pr.pet_id AND p.is_deleted = false')
         .leftJoin('pet_details', 'pd', 'pd.pet_id = p.pet_id')
         .leftJoin('users', 'u', 'u.user_id = p.owner_id')
         .leftJoin('layings', 'l', 'l.id = p.laying_id')
-        .leftJoin('matings', 'm', 'm.id = l.mating_id')
-        .leftJoin('pet_relations', 'pr', 'pr.pet_id = p.pet_id')
-        .select([
-          // pets
-          'p.pet_id as petId',
-          'p.name as name',
-          'p.species as species',
-          'p.hatching_date as hatchingDate',
-          'p.laying_id as layingId',
-          'p.type as type',
-          'p.owner_id as ownerId',
-          'p.is_public as isPublic',
-          'p.is_deleted as isDeleted',
-          // pet_details
-          'pd.sex as sex',
-          'pd.morphs as morphs',
-          'pd.traits as traits',
-          'pd.weight as weight',
-          'pd.growth as growth',
-          // users (owner)
-          'u.user_id as owner_userId',
-          'u.name as owner_name',
-          'u.role as owner_role',
-          'u.is_biz as owner_isBiz',
-          'u.status as owner_status',
-          // layings
-          'l.id as laying_id',
-          'l.mating_id as laying_matingId',
-          'l.laying_date as laying_layingDate',
-          'l.clutch as laying_clutch',
-          // matings
-          'm.id as mating_id',
-          'm.pair_id as mating_pairId',
-          'm.mating_date as mating_matingDate',
-        ])
-        .where('p.is_deleted = :isDeleted', { isDeleted: false })
-        .andWhere('p.pet_id != :petId', { petId }); // 자기 자신 제외
+        // 클러치 조건:  layingId, hatchingDate 중 하나가 같아야 함
+        .where(
+          new Brackets((qb) => {
+            qb.where(
+              'tp.laying_id IS NOT NULL AND p.laying_id = tp.laying_id',
+            ).orWhere(
+              'tp.hatching_date IS NOT NULL AND p.hatching_date = tp.hatching_date',
+            );
+          }),
+        )
+        // 부모 정보가 있는 경우만
+        .andWhere('tp.father_id IS NOT NULL')
+        .andWhere('tp.mother_id IS NOT NULL')
+        .orderBy('p.hatching_date', 'DESC');
 
-      // type 조건 (옵션)
+      // type 필터 (옵션)
       if (queryDto?.type) {
         queryBuilder.andWhere('p.type = :type', { type: queryDto.type });
       }
 
-      // 클러치 메이트 조건 (OR 조건)
-      const conditions: string[] = [];
-      const params: Record<string, unknown> = {};
-
-      // 조건 1: layingId가 같은 펫
-      if (layingId) {
-        conditions.push('p.laying_id = :layingId');
-        params.layingId = layingId;
-      }
-
-      // 조건 2: 부모가 같고 layingDate 또는 hatchingDate가 같은 펫
-      if (fatherId && motherId) {
-        if (layingDate) {
-          conditions.push(
-            '(pr.father_id = :fatherId AND pr.mother_id = :motherId AND l.laying_date = :layingDate)',
-          );
-          params.fatherId = fatherId;
-          params.motherId = motherId;
-          params.layingDate = layingDate;
-        }
-        if (hatchingDate) {
-          conditions.push(
-            '(pr.father_id = :fatherId AND pr.mother_id = :motherId AND p.hatching_date = :hatchingDate)',
-          );
-          params.fatherId = fatherId;
-          params.motherId = motherId;
-          params.hatchingDate = hatchingDate;
-        }
-      }
-
-      if (conditions.length === 0) {
-        return { data: [] };
-      }
-
-      queryBuilder.andWhere(`(${conditions.join(' OR ')})`, params);
-
-      // 정렬
-      queryBuilder.orderBy('p.hatching_date', 'DESC');
-
-      // 데이터 조회
-      const rawClutchMates: RawSiblingQueryResult[] =
+      const rawResults: RawSiblingQueryResult[] =
         await queryBuilder.getRawMany();
 
-      // Step 3: 데이터 변환 및 비공개 펫 마스킹
-      const clutchMates = rawClutchMates.map((raw) => {
-        const mate = {
+      // 데이터 변환 및 비공개 펫 마스킹
+      const clutchMates = rawResults.map((raw) => {
+        const mate = plainToInstance(PetSummaryDto, {
           petId: raw.petId,
           type: raw.type,
           name: raw.name ?? undefined,
@@ -600,34 +520,21 @@ export class PetRelationService {
           hatchingDate: raw.hatchingDate ?? undefined,
           isPublic: raw.isPublic,
           isDeleted: raw.isDeleted,
-          owner: {
-            userId: raw.owner_userId ?? undefined,
-            name: raw.owner_name ?? undefined,
-            role: raw.owner_role ?? undefined,
-            isBiz: raw.owner_isBiz ?? undefined,
-            status: raw.owner_status ?? undefined,
-          },
+          owner: raw.owner_userId
+            ? {
+                userId: raw.owner_userId,
+                name: raw.owner_name ?? undefined,
+                role: raw.owner_role ?? undefined,
+                isBiz: raw.owner_isBiz ?? undefined,
+                status: raw.owner_status ?? undefined,
+              }
+            : undefined,
           sex: raw.sex ?? undefined,
           morphs: raw.morphs ?? undefined,
           traits: raw.traits ?? undefined,
           weight: raw.weight ?? undefined,
           growth: raw.growth ?? undefined,
-          laying: raw.laying_id
-            ? {
-                id: raw.laying_id,
-                matingId: raw.laying_matingId,
-                layingDate: raw.laying_layingDate,
-                clutch: raw.laying_clutch,
-              }
-            : null,
-          mating: raw.mating_id
-            ? {
-                id: raw.mating_id,
-                pairId: raw.mating_pairId,
-                matingDate: raw.mating_matingDate,
-              }
-            : null,
-        } as SiblingPetDetailDto;
+        });
 
         return replaceSiblingPublicSafe(mate, userId);
       });

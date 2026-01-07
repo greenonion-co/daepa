@@ -21,6 +21,7 @@ import {
   GetParentsByPetIdResponseDto,
   DeletePetDto,
   DeletedPetDto,
+  PetSummaryDto,
 } from './pet.dto';
 import { PetService } from './pet.service';
 import {
@@ -35,7 +36,6 @@ import { JwtUserPayload } from 'src/auth/strategies/jwt.strategy';
 import { PageDto, PageMetaDto, PageOptionsDto } from 'src/common/page.dto';
 import { PetRelationService } from 'src/pet_relation/pet_relation.service';
 import {
-  SiblingPetDetailDto,
   ChildPetDetailDto,
   GetSiblingsPageResponseDto,
   GetChildrenPageResponseDto,
@@ -181,7 +181,7 @@ export class PetController {
     description: '펫 아이디',
     example: 'XXXXXXXX',
   })
-  @ApiExtraModels(SiblingPetDetailDto, PetHiddenStatusDto, PageMetaDto)
+  @ApiExtraModels(PetSummaryDto, PetHiddenStatusDto, PageMetaDto)
   @ApiResponse({
     status: 200,
     description: '펫 형제 정보 조회 성공',
@@ -237,7 +237,7 @@ export class PetController {
     description: '펫 아이디',
     example: 'XXXXXXXX',
   })
-  @ApiExtraModels(SiblingPetDetailDto, PetHiddenStatusDto)
+  @ApiExtraModels(PetSummaryDto, PetHiddenStatusDto)
   @ApiResponse({
     status: 200,
     description: '클러치 메이트 조회 성공',
@@ -249,7 +249,7 @@ export class PetController {
           type: 'array',
           items: {
             oneOf: [
-              { $ref: getSchemaPath(SiblingPetDetailDto) },
+              { $ref: getSchemaPath(PetSummaryDto) },
               { $ref: getSchemaPath(PetHiddenStatusDto) },
             ],
           },
