@@ -1,32 +1,19 @@
 "use client";
 
-import Lottie from "lottie-react";
-import Link from "next/link";
-import { useEffect, useState } from "react";
+import Image from "next/image";
 
 export default function NotFound() {
-  const [animationData, setAnimationData] = useState(null);
-
-  useEffect(() => {
-    fetch("/assets/animations/not-found.json")
-      .then((response) => response.json())
-      .then((data) => setAnimationData(data));
-  }, []);
-
-  if (!animationData) return null;
-
   return (
     <div className="flex h-[calc(100vh-4rem)] flex-col items-center justify-center gap-4">
-      <div className="w-full max-w-[500px]">
-        <Lottie animationData={animationData} loop={true} />
+      <div className="flex flex-col items-center gap-2 text-center">
+        <Image src="/assets/lizard.png" alt="Error" width={150} height={150} />
+
+        <div>
+          <h1 className="text-[16px] font-[500] text-gray-700 dark:text-gray-100">
+            존재하지 않는 펫입니다
+          </h1>
+        </div>
       </div>
-      <h2 className="text-2xl font-bold">존재하지 않는 개체입니다</h2>
-      <Link
-        href="/pet"
-        className="rounded-lg bg-[#1A56B3] px-4 py-2 text-white hover:bg-[#1A56B3]/90"
-      >
-        목록으로 돌아가기
-      </Link>
     </div>
   );
 }

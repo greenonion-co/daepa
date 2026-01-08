@@ -21,7 +21,6 @@ import { usePathname } from "next/navigation";
 import { PetParentDtoWithMessage } from "../store/parentLink";
 import { useUserStore } from "../../store/user";
 import { useCallback } from "react";
-import { usePetPreviewModal } from "../store/petPreviewModal";
 import PetThumbnail from "@/components/common/PetThumbnail";
 import BadgeList from "../../components/BadgeList";
 import Link from "next/link";
@@ -48,7 +47,6 @@ const ParentLink = ({
   const { user } = useUserStore();
   const pathname = usePathname();
   const isClickDisabled = pathname.includes("register") || pathname.includes("hatching");
-  const { openByPetId } = usePetPreviewModal();
 
   const deleteParent = useCallback(
     (parentPetId?: string) => {
@@ -182,19 +180,13 @@ const ParentLink = ({
   const parent = data as PetParentDto;
   const isMyPet = parent.owner.userId === user?.userId;
   const isDeleted = parent.isDeleted;
-  const isLoggedIn = !!user?.userId;
 
   const handleParentClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (isClickDisabled || isDeleted) {
       e.preventDefault();
-      return;
     }
-    if (isLoggedIn) {
-      e.preventDefault();
-      openByPetId(parent.petId);
-    }
-    // 비로그인 시 Link 기본 동작 (페이지 이동)
+    // Link will handle navigation (intercepting route will show modal)
   };
 
   return (

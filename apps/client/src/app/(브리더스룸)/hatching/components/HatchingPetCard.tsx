@@ -19,7 +19,7 @@ import { cn, getEggDDayText } from "@/lib/utils";
 import TooltipText from "../../components/TooltipText";
 import { useEffect, useRef } from "react";
 import BadgeList from "../../components/BadgeList";
-import { usePetPreviewModal } from "../../pet/store/petPreviewModal";
+import Link from "next/link";
 
 interface PetCardProps {
   date: string;
@@ -44,7 +44,6 @@ const getParentInfo = (parent: PetDtoFather | PetDtoMother | undefined) => {
 
 const HatchingPetCard = ({ date, pets, tab, isSelected }: PetCardProps) => {
   const ref = useRef<HTMLDivElement>(null);
-  const { openByPetId } = usePetPreviewModal();
 
   useEffect(() => {
     if (isSelected) {
@@ -99,12 +98,9 @@ const HatchingPetCard = ({ date, pets, tab, isSelected }: PetCardProps) => {
                       ) : (
                         <div className="flex gap-1">
                           {pet.father && !("hiddenStatus" in pet.father) && (
-                            <div
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                if (!pet.father || "hiddenStatus" in pet.father) return;
-                                openByPetId(pet.father.petId);
-                              }}
+                            <Link
+                              href={`/pet/${pet.father.petId}`}
+                              onClick={(e) => e.stopPropagation()}
                             >
                               <TooltipText
                                 text={getParentInfo(pet.father) || "@"}
@@ -115,16 +111,13 @@ const HatchingPetCard = ({ date, pets, tab, isSelected }: PetCardProps) => {
                                 }
                                 className="cursor-pointer text-blue-700 underline dark:text-blue-400"
                               />
-                            </div>
+                            </Link>
                           )}
                           x
                           {pet.mother && !("hiddenStatus" in pet.mother) && (
-                            <div
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                if (!pet.mother || "hiddenStatus" in pet.mother) return;
-                                openByPetId(pet.mother.petId);
-                              }}
+                            <Link
+                              href={`/pet/${pet.mother.petId}`}
+                              onClick={(e) => e.stopPropagation()}
                             >
                               <TooltipText
                                 text={getParentInfo(pet.mother) || "@"}
@@ -135,7 +128,7 @@ const HatchingPetCard = ({ date, pets, tab, isSelected }: PetCardProps) => {
                                 }
                                 className="cursor-pointer text-blue-700 underline dark:text-blue-400"
                               />
-                            </div>
+                            </Link>
                           )}
                           {/* {isEgg && `${pet.clutch ?? "@"}-${pet.clutchOrder ?? "@"}`} */}
                           {isEgg && pet.temperature ? (
@@ -214,13 +207,13 @@ const HatchingPetCard = ({ date, pets, tab, isSelected }: PetCardProps) => {
                 {cardContent}
               </div>
             ) : (
-              <div
+              <Link
                 key={pet.petId}
+                href={`/pet/${pet.petId}`}
                 className="w-full cursor-pointer"
-                onClick={() => openByPetId(pet.petId)}
               >
                 {cardContent}
-              </div>
+              </Link>
             );
           })}
       </div>

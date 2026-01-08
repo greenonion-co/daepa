@@ -4,7 +4,6 @@ import { PetAdoptionDtoStatus, PetDto } from "@repo/api-client";
 import { SPECIES_KOREAN_ALIAS_INFO } from "@/app/(브리더스룸)/constants";
 import Link from "next/link";
 import { DeletePetDialog } from "./DeletePetDialog";
-import { usePetPreviewModal } from "@/app/(브리더스룸)/pet/store/petPreviewModal";
 import { useAdoptionStore } from "@/app/(브리더스룸)/pet/store/adoption";
 import { useBreedingInfoStore } from "../../store/breedingInfo";
 import { useEffect, useState } from "react";
@@ -36,7 +35,6 @@ const Header = ({
   const isLoggedIn = !!user?.userId;
   const [isScrolled, setIsScrolled] = useState(size === "small");
   const [isPromoSheetOpen, setIsPromoSheetOpen] = useState(false);
-  const { openByPetId, close: closePreviewModal } = usePetPreviewModal();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -89,23 +87,23 @@ const Header = ({
                 )}
               >
                 {pet.father && "petId" in pet.father && "name" in pet.father ? (
-                  <span
-                    onClick={() => openByPetId(pet.father!.petId as string)}
+                  <Link
+                    href={`/pet/${pet.father.petId}`}
                     className="cursor-pointer text-blue-600 hover:underline"
                   >
                     {pet.father?.name}
-                  </span>
+                  </Link>
                 ) : (
                   "-"
                 )}
                 x
                 {pet.mother && "petId" in pet.mother && "name" in pet.mother ? (
-                  <span
-                    onClick={() => openByPetId(pet.mother!.petId as string)}
+                  <Link
+                    href={`/pet/${pet.mother.petId}`}
                     className="cursor-pointer text-blue-600 hover:underline"
                   >
                     {pet.mother?.name}
-                  </span>
+                  </Link>
                 ) : (
                   "-"
                 )}
@@ -159,8 +157,6 @@ const Header = ({
             if (!isLoggedIn) {
               e.preventDefault();
               setIsPromoSheetOpen(true);
-            } else {
-              closePreviewModal();
             }
           }}
           className={cn(

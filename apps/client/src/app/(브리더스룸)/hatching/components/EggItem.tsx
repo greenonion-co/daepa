@@ -11,10 +11,10 @@ import { DateTime } from "luxon";
 import { memo } from "react";
 import { cn } from "@/lib/utils";
 import { GENDER_KOREAN_INFO } from "../../constants";
-import { usePetPreviewModal } from "../../pet/store/petPreviewModal";
 import Select from "./Select";
 import { useIsMobile } from "@/hooks/useMobile";
 import { TUTORIAL_TARGETS } from "./MatingDetailDialogTutorial";
+import Link from "next/link";
 
 interface EggItemProps {
   pet: PetSummaryLayingDto;
@@ -35,7 +35,6 @@ const EggItem = ({
   handleUpdate,
   showTutorial,
 }: EggItemProps) => {
-  const { openByPetId } = usePetPreviewModal();
   const isMobile = useIsMobile();
   const isHatched = !!pet.hatchingDate;
 
@@ -49,19 +48,8 @@ const EggItem = ({
     return expectedDate.setLocale("ko").toFormat("M월 d일(ccc)");
   };
 
-  return (
-    <div
-      key={pet.petId}
-      className={cn(
-        "flex w-full items-center justify-between p-1 pl-0 text-[14px] hover:rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800",
-        isHatched && "cursor-pointer",
-      )}
-      onClick={() => {
-        if (isHatched) {
-          openByPetId(pet.petId);
-        }
-      }}
-    >
+  const content = (
+    <>
       <div className="flex">
         <div
           className={cn(
@@ -138,6 +126,25 @@ const EggItem = ({
           {pet.hatchingDate ? DateTime.fromISO(pet.hatchingDate).toFormat("M/d 해칭") : "해칭 완료"}
         </div>
       )}
+    </>
+  );
+
+  const wrapperClassName = cn(
+    "flex w-full items-center justify-between p-1 pl-0 text-[14px] hover:rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800",
+    isHatched && "cursor-pointer",
+  );
+
+  if (isHatched) {
+    return (
+      <Link key={pet.petId} href={`/pet/${pet.petId}`} className={wrapperClassName}>
+        {content}
+      </Link>
+    );
+  }
+
+  return (
+    <div key={pet.petId} className={wrapperClassName}>
+      {content}
     </div>
   );
 };

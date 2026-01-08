@@ -4,6 +4,7 @@ import {
   petControllerGetParentsByPetId,
   PetDtoSpecies,
   UnlinkParentDtoRole,
+  GetParentsByPetIdResponseDtoData,
 } from "@repo/api-client";
 import ParentLink from "../../components/ParentLink";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -15,24 +16,27 @@ import { useUserStore } from "@/app/(브리더스룸)/store/user";
 import { Info } from "lucide-react";
 import { useIsMyPet } from "@/hooks/useIsMyPet";
 
-const PedigreeInfo = ({
-  species,
-  petId,
-  userId,
-}: {
+interface PedigreeInfoProps {
   species: PetDtoSpecies;
   petId: string;
   userId: string;
-}) => {
+  initialParents?: GetParentsByPetIdResponseDtoData | null;
+}
+
+const PedigreeInfo = ({ species, petId, userId, initialParents }: PedigreeInfoProps) => {
   const { user } = useUserStore();
 
   const isMyPet = useIsMyPet(userId);
 
-  const { data: parents, refetch } = useQuery({
+  const { data: queryParents, refetch } = useQuery({
     queryKey: [petControllerGetParentsByPetId.name, petId],
     queryFn: () => petControllerGetParentsByPetId(petId),
     select: (response) => response.data.data,
+    enabled: !initialParents,
   });
+
+  // 서버에서 받은 초기 데이터 또는 React Query 데이터 사용
+  const parents = queryParents ?? initialParents;
 
   const { mutateAsync: mutateUnlinkParent } = useMutation({
     mutationFn: ({ role }: { role: UnlinkParentDtoRole }) =>

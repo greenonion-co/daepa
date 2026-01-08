@@ -22,7 +22,13 @@ import { PetDetailInfo } from "./펫정보/PetDetailInfo";
 import { EggInfo } from "./펫정보/EggInfo";
 import EditActionButtons from "./EditActionButtons";
 
-const BreedingInfo = ({ petId, ownerId }: { petId: string; ownerId: string }) => {
+interface BreedingInfoProps {
+  petId: string;
+  ownerId: string;
+  initialPet?: PetDto;
+}
+
+const BreedingInfo = ({ petId, ownerId, initialPet }: BreedingInfoProps) => {
   const { formData, errors, setFormData } = usePetStore();
   const { duplicateCheckStatus } = useNameStore();
   const { setBreedingInfo } = useBreedingInfoStore();
@@ -32,12 +38,16 @@ const BreedingInfo = ({ petId, ownerId }: { petId: string; ownerId: string }) =>
 
   const isViewingMyPet = useIsMyPet(ownerId);
 
-  // 펫 데이터 조회
-  const { data: pet, refetch } = useQuery({
+  // 펫 데이터 조회 (초기 데이터가 있으면 자동 fetch 하지 않음)
+  const { data: queryPet, refetch } = useQuery({
     queryKey: [petControllerFindPetByPetId.name, petId],
     queryFn: () => petControllerFindPetByPetId(petId),
     select: (response) => response.data.data,
+    enabled: !initialPet,
   });
+
+  // 서버에서 받은 초기 데이터 또는 React Query 데이터 사용
+  const pet = queryPet ?? initialPet;
 
   const isEgg = useMemo(() => pet?.type === PetDtoType.EGG, [pet?.type]);
 

@@ -6,8 +6,8 @@ import { cn } from "@/lib/utils";
 import { compact } from "es-toolkit";
 import MatingItem from "./MatingItem";
 import { useIsMobile } from "@/hooks/useMobile";
-import { usePetPreviewModal } from "../../pet/store/petPreviewModal";
 import { DateTime } from "luxon";
+import Link from "next/link";
 import {
   Select,
   SelectContent,
@@ -43,7 +43,6 @@ const MatingDetailDialog = ({
   initialLayingId,
 }: MatingDetailDialogProps) => {
   const isMobile = useIsMobile();
-  const { openByPetId } = usePetPreviewModal();
   const isEditable = !matingGroup?.father?.isDeleted && !matingGroup?.mother?.isDeleted;
   const { showTutorial, openTutorial, closeTutorial } = useMatingDetailDialogTutorial(isOpen);
   const dialogContentRef = useRef<HTMLDivElement>(null);
@@ -194,12 +193,12 @@ const MatingDetailDialog = ({
                     <span className="text-[12px] text-red-500">[삭제됨]</span>
                   </>
                 ) : (
-                  <span
-                    onClick={() => openByPetId(matingGroup.father!.petId)}
+                  <Link
+                    href={`/pet/${matingGroup.father.petId}`}
                     className="cursor-pointer text-blue-600 underline dark:text-blue-400"
                   >
                     {matingGroup.father?.name}
-                  </span>
+                  </Link>
                 )
               ) : (
                 <span className="text-[14px] font-[500] text-gray-500 dark:text-gray-400">
@@ -216,12 +215,12 @@ const MatingDetailDialog = ({
                     <span className="text-[12px] text-red-500">[삭제됨]</span>
                   </>
                 ) : (
-                  <span
-                    onClick={() => openByPetId(matingGroup.mother!.petId)}
+                  <Link
+                    href={`/pet/${matingGroup.mother.petId}`}
                     className="cursor-pointer text-blue-600 underline dark:text-blue-400"
                   >
                     {matingGroup.mother?.name}
-                  </span>
+                  </Link>
                 )
               ) : (
                 <span className="text-[14px] font-[500] text-gray-500 dark:text-gray-400">

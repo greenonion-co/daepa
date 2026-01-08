@@ -1,8 +1,6 @@
-"use client";
-
 import { ParentLinkDetailJson } from "@repo/api-client";
 import { ArrowRight, Info } from "lucide-react";
-import { usePetPreviewModal } from "../../pet/store/petPreviewModal";
+import Link from "next/link";
 import TooltipText from "../../components/TooltipText";
 import PetThumbnail from "@/components/common/PetThumbnail";
 import { useIsMobile } from "@/hooks/useMobile";
@@ -13,7 +11,6 @@ interface PetLinkCardProps {
 
 const PetLinkCard = ({ detailData }: PetLinkCardProps) => {
   const isMobile = useIsMobile();
-  const { openByPetId } = usePetPreviewModal();
 
   if (!detailData) return null;
 
@@ -23,8 +20,8 @@ const PetLinkCard = ({ detailData }: PetLinkCardProps) => {
     <>
       <div className="flex items-center gap-1">
         {detailData.childPet?.id && (
-          <div
-            onClick={() => openByPetId(detailData.childPet!.id)}
+          <Link
+            href={`/pet/${detailData.childPet.id}`}
             className="group flex flex-1 cursor-pointer flex-col items-center gap-2 transition-all dark:hover:bg-gray-800"
           >
             <PetThumbnail
@@ -33,7 +30,7 @@ const PetLinkCard = ({ detailData }: PetLinkCardProps) => {
               maxSize={isMobile ? 220 : 128}
             />
             <TooltipText text={detailData.childPet.name ?? ""} />
-          </div>
+          </Link>
         )}
 
         {detailData?.childPet?.id && detailData?.parentPet?.id && (
@@ -41,8 +38,8 @@ const PetLinkCard = ({ detailData }: PetLinkCardProps) => {
         )}
 
         {detailData.parentPet?.id && (
-          <div
-            onClick={() => openByPetId(detailData.parentPet!.id)}
+          <Link
+            href={`/pet/${detailData.parentPet.id}`}
             className="group flex flex-1 cursor-pointer flex-col items-center gap-2 transition-all dark:hover:bg-gray-800"
           >
             <PetThumbnail
@@ -51,7 +48,7 @@ const PetLinkCard = ({ detailData }: PetLinkCardProps) => {
               maxSize={28}
             />
             <TooltipText text={detailData.parentPet.name ?? ""} />
-          </div>
+          </Link>
         )}
       </div>
 

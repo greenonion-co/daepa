@@ -29,9 +29,10 @@ import { useRouter } from "next/navigation";
 interface AdoptionInfoProps {
   petId: string;
   ownerId: string;
+  initialAdoption?: PetAdoptionDto | null;
 }
 
-const AdoptionInfo = ({ petId, ownerId }: AdoptionInfoProps) => {
+const AdoptionInfo = ({ petId, ownerId, initialAdoption }: AdoptionInfoProps) => {
   const router = useRouter();
   const { setAdoption } = useAdoptionStore();
   const [isEditMode, setIsEditMode] = useState(false);
@@ -40,12 +41,15 @@ const AdoptionInfo = ({ petId, ownerId }: AdoptionInfoProps) => {
 
   const isViewingMyPet = useIsMyPet(ownerId);
 
-  const { data: adoption, refetch } = useQuery({
+  const { data: queryAdoption, refetch } = useQuery({
     queryKey: [adoptionControllerGetAdoptionByPetId.name, petId],
     queryFn: () => adoptionControllerGetAdoptionByPetId(petId),
-    enabled: !!petId,
+    enabled: !!petId && !initialAdoption,
     select: (response) => response.data.data,
   });
+
+  // 서버에서 받은 초기 데이터 또는 React Query 데이터 사용
+  const adoption = queryAdoption ?? initialAdoption;
 
   useEffect(() => {
     if (adoption) {

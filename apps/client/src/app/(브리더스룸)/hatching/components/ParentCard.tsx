@@ -1,15 +1,12 @@
-"use client";
-
 import { useIsMobile } from "@/hooks/useMobile";
 import { PetSummaryLayingDto } from "@repo/api-client";
 import { Ban } from "lucide-react";
 import { cn } from "@/lib/utils";
 import PetThumbnail from "@/components/common/PetThumbnail";
-import { usePetPreviewModal } from "../../pet/store/petPreviewModal";
+import Link from "next/link";
 
 const ParentCard = ({ parent }: { parent?: PetSummaryLayingDto }) => {
   const isMobile = useIsMobile();
-  const { openByPetId } = usePetPreviewModal();
 
   if (!parent) {
     return (
@@ -21,8 +18,8 @@ const ParentCard = ({ parent }: { parent?: PetSummaryLayingDto }) => {
   }
 
   return (
-    <div
-      onClick={() => openByPetId(parent.petId)}
+    <Link
+      href={`/pet/${parent.petId}`}
       className="flex h-full flex-1 cursor-pointer flex-col items-center gap-2 rounded-2xl p-[2px] transition-all hover:bg-gradient-to-r hover:from-[#60a5fa] hover:to-[#c084fc]"
     >
       <div className="flex h-full w-full flex-col items-center gap-1 rounded-2xl bg-white dark:bg-neutral-800">
@@ -57,7 +54,7 @@ const ParentCard = ({ parent }: { parent?: PetSummaryLayingDto }) => {
           )}
         </div>
       </div>
-    </div>
+    </Link>
   );
 };
 

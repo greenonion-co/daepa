@@ -30,7 +30,6 @@ import SearchInput from "../../components/SearchInput";
 import { useIsMobile } from "@/hooks/useMobile";
 import { useSearchKeywordStore } from "../../store/searchKeyword";
 import Image from "next/image";
-import { usePetPreviewModal } from "../store/petPreviewModal";
 
 interface DataTableProps<TData> {
   columns: ColumnDef<TData>[];
@@ -60,7 +59,6 @@ export const DataTable = ({
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const { sorting, rowSelection, setSorting, setRowSelection } = useTableStore();
   const { setSearchKeyword } = useSearchKeywordStore();
-  const { open: openPetPreviewModal } = usePetPreviewModal();
 
   const isMobile = useIsMobile();
 
@@ -91,9 +89,9 @@ export const DataTable = ({
       ) {
         return;
       }
-      openPetPreviewModal(pet);
+      router.push(`/pet/${pet.petId}`);
     },
-    [isClickable, openPetPreviewModal],
+    [isClickable, router],
   );
 
   useEffect(() => {

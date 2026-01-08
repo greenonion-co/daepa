@@ -12,7 +12,12 @@ import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useIsMyPet } from "@/hooks/useIsMyPet";
 
-const Images = ({ pet }: { pet: PetDto }) => {
+interface ImagesProps {
+  pet: PetDto;
+  initialImages?: PetImageItem[];
+}
+
+const Images = ({ pet, initialImages }: ImagesProps) => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   // 편집 중일 때만 임시 상태 사용 (null이면 photos 사용)
@@ -22,14 +27,18 @@ const Images = ({ pet }: { pet: PetDto }) => {
   const isViewingMyPet = useIsMyPet(ownerId);
 
   const {
-    data: photos = [],
+    data: queryPhotos,
     isSuccess,
     refetch,
   } = useQuery({
     queryKey: [petImageControllerFindOne.name, pet.petId],
     queryFn: () => petImageControllerFindOne(pet.petId),
     select: (response) => response.data,
+    enabled: !initialImages || initialImages.length === 0,
   });
+
+  // 서버에서 받은 초기 데이터 또는 React Query 데이터 사용
+  const photos = queryPhotos ?? initialImages ?? [];
 
   // 현재 표시할 이미지 (편집 중이면 editingImages, 아니면 photos)
   const displayImages = editingImages ?? photos;
