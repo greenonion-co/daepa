@@ -11,7 +11,7 @@ import { DateTime } from "luxon";
 import { memo } from "react";
 import { cn } from "@/lib/utils";
 import { GENDER_KOREAN_INFO } from "../../constants";
-import { useRouter } from "next/navigation";
+import { usePetPreviewModal } from "../../pet/store/petPreviewModal";
 import Select from "./Select";
 import { useIsMobile } from "@/hooks/useMobile";
 import { TUTORIAL_TARGETS } from "./MatingDetailDialogTutorial";
@@ -35,7 +35,7 @@ const EggItem = ({
   handleUpdate,
   showTutorial,
 }: EggItemProps) => {
-  const router = useRouter();
+  const { openByPetId } = usePetPreviewModal();
   const isMobile = useIsMobile();
   const isHatched = !!pet.hatchingDate;
 
@@ -58,7 +58,7 @@ const EggItem = ({
       )}
       onClick={() => {
         if (isHatched) {
-          router.push(`/pet/${pet.petId}`);
+          openByPetId(pet.petId);
         }
       }}
     >

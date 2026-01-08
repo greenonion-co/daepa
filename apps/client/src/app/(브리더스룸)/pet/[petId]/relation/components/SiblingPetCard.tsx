@@ -9,8 +9,8 @@ import {
 import { DateTime } from "luxon";
 import { EyeOff, Lock, ScanFace } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
 import { useUserStore } from "@/app/(브리더스룸)/store/user";
+import { usePetPreviewModal } from "@/app/(브리더스룸)/pet/store/petPreviewModal";
 import { cn, formatPrice } from "@/lib/utils";
 import BadgeList from "@/app/(브리더스룸)/components/BadgeList";
 
@@ -79,6 +79,7 @@ export default function SiblingPetCard({
   width = 160,
 }: SiblingPetCardProps) {
   const { user } = useUserStore();
+  const { openByPetId } = usePetPreviewModal();
 
   // Hidden pet 처리
   if (isHiddenPet(pet)) {
@@ -269,8 +270,11 @@ export default function SiblingPetCard({
     );
 
   return (
-    <Link href={`/pet/${pet.petId}`} className={cn(isDeleted && "pointer-events-none")}>
+    <div
+      onClick={() => !isDeleted && openByPetId(pet.petId)}
+      className={cn("cursor-pointer", isDeleted && "pointer-events-none")}
+    >
       {wrappedContent}
-    </Link>
+    </div>
   );
 }

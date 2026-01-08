@@ -21,8 +21,10 @@ import { usePathname } from "next/navigation";
 import { PetParentDtoWithMessage } from "../store/parentLink";
 import { useUserStore } from "../../store/user";
 import { useCallback } from "react";
+import { usePetPreviewModal } from "../store/petPreviewModal";
 import PetThumbnail from "@/components/common/PetThumbnail";
 import BadgeList from "../../components/BadgeList";
+import Link from "next/link";
 
 interface ParentLinkProps {
   species: PetDtoSpecies;
@@ -46,6 +48,7 @@ const ParentLink = ({
   const { user } = useUserStore();
   const pathname = usePathname();
   const isClickDisabled = pathname.includes("register") || pathname.includes("hatching");
+  const { openByPetId } = usePetPreviewModal();
 
   const deleteParent = useCallback(
     (parentPetId?: string) => {
@@ -179,6 +182,20 @@ const ParentLink = ({
   const parent = data as PetParentDto;
   const isMyPet = parent.owner.userId === user?.userId;
   const isDeleted = parent.isDeleted;
+  const isLoggedIn = !!user?.userId;
+
+  const handleParentClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (isClickDisabled || isDeleted) {
+      e.preventDefault();
+      return;
+    }
+    if (isLoggedIn) {
+      e.preventDefault();
+      openByPetId(parent.petId);
+    }
+    // 비로그인 시 Link 기본 동작 (페이지 이동)
+  };
 
   return (
     <div className="flex-1">
@@ -199,12 +216,9 @@ const ParentLink = ({
           </Button>
         )}
 
-        <div
-          onClick={(e) => {
-            e.stopPropagation();
-            if (isClickDisabled) e.preventDefault();
-            else if (!isDeleted) window.location.href = `/pet/${parent.petId}`;
-          }}
+        <Link
+          href={`/pet/${parent.petId}`}
+          onClick={handleParentClick}
           className={cn(
             "flex cursor-pointer flex-col items-center",
             isDeleted && "cursor-not-allowed opacity-70",
@@ -260,7 +274,7 @@ const ParentLink = ({
               badgeClassName="bg-white text-black dark:bg-gray-700 dark:text-gray-200"
             />
           </div>
-        </div>
+        </Link>
       </div>
     </div>
   );

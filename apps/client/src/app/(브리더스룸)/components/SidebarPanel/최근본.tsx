@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import Link from "next/link";
 
 import { SPECIES_KOREAN_INFO } from "../../constants";
 import { PetDtoSpecies } from "@repo/api-client";
@@ -12,6 +11,7 @@ import { Cookie, Info } from "lucide-react";
 import Image from "next/image";
 import PetThumbnail from "@/components/common/PetThumbnail";
 import BadgeList from "../BadgeList";
+import { usePetPreviewModal } from "../../pet/store/petPreviewModal";
 
 interface RecentlyViewedPet {
   petId: string;
@@ -28,6 +28,7 @@ const MAX_ITEMS = 20;
 const RecentlyViewedList = () => {
   const { petId } = useParams();
   const [items, setItems] = useState<RecentlyViewedPet[]>([]);
+  const { openByPetId } = usePetPreviewModal();
 
   useEffect(() => {
     const loadRecentlyViewed = () => {
@@ -76,11 +77,11 @@ const RecentlyViewedList = () => {
         {items && items.length > 0 ? (
           <div className="flex flex-col p-2">
             {items.map((item) => (
-              <Link
+              <div
                 key={item.petId}
-                href={`/pet/${item.petId}`}
+                onClick={() => openByPetId(item.petId)}
                 className={cn(
-                  "group flex items-center gap-3 rounded-xl p-2 hover:bg-gray-50 hover:shadow-lg dark:hover:bg-neutral-800",
+                  "group flex cursor-pointer items-center gap-3 rounded-xl p-2 hover:bg-gray-50 hover:shadow-lg dark:hover:bg-neutral-800",
                   item.petId === petId && "bg-gray-50 shadow-lg dark:bg-neutral-800",
                 )}
               >
@@ -109,7 +110,7 @@ const RecentlyViewedList = () => {
                     />
                   </div>
                 </div>
-              </Link>
+              </div>
             ))}
           </div>
         ) : (

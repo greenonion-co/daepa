@@ -8,7 +8,6 @@ import {
 } from "@repo/api-client";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { isEqual } from "es-toolkit";
-import { ImageUp } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useIsMyPet } from "@/hooks/useIsMyPet";
@@ -112,8 +111,8 @@ const Images = ({ pet }: { pet: PetDto }) => {
       <div className="text-[14px] font-[600] text-gray-600 dark:text-gray-300">이미지</div>
 
       {!isEditMode && photos.length === 0 && (
-        <div className="flex h-full flex-col items-center justify-center">
-          <ImageUp className="h-[10%] w-[10%] text-blue-500/70" />
+        <div className="flex h-full flex-col items-center justify-center text-[14px] text-gray-500">
+          등록된 이미지가 없습니다.
         </div>
       )}
       <DndImagePicker disabled={!isEditMode} images={displayImages} onChange={setEditingImages} />

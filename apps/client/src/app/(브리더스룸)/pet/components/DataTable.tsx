@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useRef, useState, useCallback, useEffect } from "react";
 import {
   ColumnDef,
   flexRender,
@@ -30,6 +30,7 @@ import SearchInput from "../../components/SearchInput";
 import { useIsMobile } from "@/hooks/useMobile";
 import { useSearchKeywordStore } from "../../store/searchKeyword";
 import Image from "next/image";
+import { usePetPreviewModal } from "../store/petPreviewModal";
 
 interface DataTableProps<TData> {
   columns: ColumnDef<TData>[];
@@ -59,11 +60,12 @@ export const DataTable = ({
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const { sorting, rowSelection, setSorting, setRowSelection } = useTableStore();
   const { setSearchKeyword } = useSearchKeywordStore();
+  const { open: openPetPreviewModal } = usePetPreviewModal();
 
   const isMobile = useIsMobile();
 
   const router = useRouter();
-  const [isRefreshing, setIsRefreshing] = React.useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const table = useReactTable({
     data,
@@ -79,17 +81,20 @@ export const DataTable = ({
     },
   });
 
-  const handleRowClick = ({ e, id }: { e: React.MouseEvent<HTMLTableRowElement>; id: string }) => {
-    // checkbox나 버튼 클릭 시에는 detail 페이지로 이동하지 않음
-    if (
-      !isClickable ||
-      (e.target as HTMLElement).closest("button") ||
-      (e.target as HTMLElement).closest('[role="checkbox"]')
-    ) {
-      return;
-    }
-    router.push(`/pet/${id}`);
-  };
+  const handleRowClick = useCallback(
+    ({ e, pet }: { e: React.MouseEvent<HTMLTableRowElement>; pet: PetDto }) => {
+      // checkbox나 버튼 클릭 시에는 모달을 열지 않음
+      if (
+        !isClickable ||
+        (e.target as HTMLElement).closest("button") ||
+        (e.target as HTMLElement).closest('[role="checkbox"]')
+      ) {
+        return;
+      }
+      openPetPreviewModal(pet);
+    },
+    [isClickable, openPetPreviewModal],
+  );
 
   useEffect(() => {
     return () => {
@@ -175,7 +180,7 @@ export const DataTable = ({
                         ? "bg-blue-100 hover:bg-blue-200 dark:bg-gray-800 dark:hover:bg-blue-800/20"
                         : "opacity-80 hover:opacity-100 dark:opacity-40 dark:hover:opacity-100",
                     )}
-                    onClick={(e) => handleRowClick({ e, id: row.original.petId })}
+                    onClick={(e) => handleRowClick({ e, pet: row.original })}
                   >
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id}>

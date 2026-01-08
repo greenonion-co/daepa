@@ -9,13 +9,14 @@ import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/useMobile";
 import { useQuery } from "@tanstack/react-query";
 import { userNotificationControllerGetUnreadCount } from "@repo/api-client";
+import PetPreviewModal from "./pet/components/PetPreviewModal";
 
 export default function BrLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const { initialize } = useUserStore();
+  const { initialize, user } = useUserStore();
   const pathname = usePathname();
   const isPetDetail = pathname?.startsWith("/pet/") ?? false;
   const isMobile = useIsMobile();
@@ -24,6 +25,7 @@ export default function BrLayout({
     queryKey: [userNotificationControllerGetUnreadCount.name],
     queryFn: () => userNotificationControllerGetUnreadCount(),
     select: (response) => response.data.count,
+    enabled: !!user,
   });
 
   useEffect(() => {
@@ -39,6 +41,7 @@ export default function BrLayout({
         {children}
       </div>
       {!isMobile && <Sidebar unreadCount={unreadCount} />}
+      <PetPreviewModal />
     </main>
   );
 }

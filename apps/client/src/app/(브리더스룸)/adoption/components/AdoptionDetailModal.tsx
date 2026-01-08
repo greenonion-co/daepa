@@ -9,8 +9,8 @@ import { cn, getStatusBadge } from "@/lib/utils";
 import Loading from "@/components/common/Loading";
 import EditAdoptionForm from "./EditAdoptionForm";
 import AdoptionReceipt from "../../pet/[petId]/(펫카드)/components/AdoptionReceipt";
-import Link from "next/link";
 import PetThumbnail from "@/components/common/PetThumbnail";
+import { usePetPreviewModal } from "../../pet/store/petPreviewModal";
 import BadgeList from "../../components/BadgeList";
 import { DateTime } from "luxon";
 
@@ -31,6 +31,7 @@ interface PetInfoCardProps {
   isDeleted?: boolean;
   petId: string;
   onClose: () => void;
+  openByPetId: (petId: string) => void;
 }
 
 const PetInfoCard = ({
@@ -43,6 +44,7 @@ const PetInfoCard = ({
   isDeleted,
   petId,
   onClose,
+  openByPetId,
 }: PetInfoCardProps) => {
   const cardContent = (
     <div
@@ -94,13 +96,20 @@ const PetInfoCard = ({
   }
 
   return (
-    <Link href={`/pet/${petId}`} onClick={onClose} className="cursor-pointer">
+    <div
+      onClick={() => {
+        openByPetId(petId);
+        onClose();
+      }}
+      className="cursor-pointer"
+    >
       {cardContent}
-    </Link>
+    </div>
   );
 };
 
 const AdoptionDetailModal = ({ isOpen, petId, onClose, onUpdate }: AdoptionDetailModalProps) => {
+  const { openByPetId } = usePetPreviewModal();
   const {
     data: adoptionData,
     isLoading,
@@ -147,6 +156,7 @@ const AdoptionDetailModal = ({ isOpen, petId, onClose, onUpdate }: AdoptionDetai
             isDeleted={isDeleted}
             petId={petId}
             onClose={onClose}
+            openByPetId={openByPetId}
           />
 
           <div className="space-y-3">

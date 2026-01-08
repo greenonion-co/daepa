@@ -14,8 +14,14 @@ import {
   AdoptionDetailResponseDto,
   CreateAdoptionDto,
 } from './adoption.dto';
-import { JwtUser } from '../auth/auth.decorator';
+import {
+  JwtUser,
+  OptionalJwtUser,
+  Public,
+  OptionalJwtAuthGuard,
+} from '../auth/auth.decorator';
 import { JwtUserPayload } from '../auth/strategies/jwt.strategy';
+import { UseGuards } from '@nestjs/common';
 import { CommonResponseDto } from 'src/common/response.dto';
 
 @ApiTags('분양')
@@ -41,6 +47,8 @@ export class AdoptionController {
   }
 
   @Get('/by-pet/:petId')
+  @Public()
+  @UseGuards(OptionalJwtAuthGuard)
   @ApiQuery({
     name: 'includeInactive',
     required: false,
@@ -55,12 +63,12 @@ export class AdoptionController {
   })
   async getAdoptionByPetId(
     @Param('petId') petId: string,
-    @JwtUser() token: JwtUserPayload,
+    @OptionalJwtUser() token: JwtUserPayload | null,
     @Query('includeInactive') includeInactive?: string,
   ): Promise<AdoptionDetailResponseDto> {
     const data = await this.adoptionService.findOne(
       includeInactive === 'true' ? { petId } : { petId, isActive: true },
-      token.userId,
+      token?.userId,
     );
     return {
       success: true,

@@ -3,7 +3,7 @@ import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { PetImageService } from './pet_image.service';
 import { PetImageItem, SaveFilesDto } from './pet_image.dto';
 import { CommonResponseDto } from 'src/common/response.dto';
-import { JwtUser } from '../auth/auth.decorator';
+import { JwtUser, Public } from '../auth/auth.decorator';
 import { JwtUserPayload } from '../auth/strategies/jwt.strategy';
 
 @ApiTags('pet-image')
@@ -12,6 +12,7 @@ export class PetImageController {
   constructor(private readonly petImageService: PetImageService) {}
 
   @Get('/thumbnail/:petId')
+  @Public()
   @ApiOperation({
     summary: '펫 대표이미지(썸네일) 조회',
     description:
@@ -35,6 +36,7 @@ export class PetImageController {
   }
 
   @Get(':petId')
+  @Public()
   @ApiOperation({
     summary: '펫 이미지 조회',
     description:

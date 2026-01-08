@@ -4,23 +4,39 @@ import { PetAdoptionDtoStatus, PetDto } from "@repo/api-client";
 import { SPECIES_KOREAN_ALIAS_INFO } from "@/app/(브리더스룸)/constants";
 import Link from "next/link";
 import { DeletePetDialog } from "./DeletePetDialog";
+import { usePetPreviewModal } from "@/app/(브리더스룸)/pet/store/petPreviewModal";
 import { useAdoptionStore } from "@/app/(브리더스룸)/pet/store/adoption";
 import { useBreedingInfoStore } from "../../store/breedingInfo";
 import { useEffect, useState } from "react";
 import TooltipText from "@/app/(브리더스룸)/components/TooltipText";
 import PetThumbnail from "@/components/common/PetThumbnail";
+import { useUserStore } from "@/app/(브리더스룸)/store/user";
+import { useIsMyPet } from "@/hooks/useIsMyPet";
+import LoginPromoSheet from "@/app/(브리더스룸)/components/LoginPromoSheet";
 
 type TabType = "breeding" | "adoption" | "images" | "pedigree";
 
 interface HeaderProps {
   pet: PetDto;
-  tabs: { id: TabType; label: string; ref: React.RefObject<HTMLDivElement | null> }[];
-  activeTab: TabType;
-  onTabClick: (tabId: TabType, ref: React.RefObject<HTMLDivElement | null>) => void;
+  size?: "medium" | "small";
+  tabs?: { id: TabType; label: string; ref: React.RefObject<HTMLDivElement | null> }[];
+  activeTab?: TabType;
+  onTabClick?: (tabId: TabType, ref: React.RefObject<HTMLDivElement | null>) => void;
 }
 
-const Header = ({ pet, tabs, activeTab, onTabClick }: HeaderProps) => {
-  const [isScrolled, setIsScrolled] = useState(false);
+const Header = ({
+  pet,
+  size = "medium",
+  tabs = [],
+  activeTab,
+  onTabClick = () => {},
+}: HeaderProps) => {
+  const isMyPet = useIsMyPet(pet.owner.userId);
+  const { user } = useUserStore();
+  const isLoggedIn = !!user?.userId;
+  const [isScrolled, setIsScrolled] = useState(size === "small");
+  const [isPromoSheetOpen, setIsPromoSheetOpen] = useState(false);
+  const { openByPetId, close: closePreviewModal } = usePetPreviewModal();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -73,23 +89,23 @@ const Header = ({ pet, tabs, activeTab, onTabClick }: HeaderProps) => {
                 )}
               >
                 {pet.father && "petId" in pet.father && "name" in pet.father ? (
-                  <Link
-                    href={`/pet/${pet.father?.petId}`}
-                    className="text-blue-600 hover:underline"
+                  <span
+                    onClick={() => openByPetId(pet.father!.petId as string)}
+                    className="cursor-pointer text-blue-600 hover:underline"
                   >
                     {pet.father?.name}
-                  </Link>
+                  </span>
                 ) : (
                   "-"
                 )}
                 x
                 {pet.mother && "petId" in pet.mother && "name" in pet.mother ? (
-                  <Link
-                    href={`/pet/${pet.mother?.petId}`}
-                    className="text-blue-600 hover:underline"
+                  <span
+                    onClick={() => openByPetId(pet.mother!.petId as string)}
+                    className="cursor-pointer text-blue-600 hover:underline"
                   >
                     {pet.mother?.name}
-                  </Link>
+                  </span>
                 ) : (
                   "-"
                 )}
@@ -139,6 +155,14 @@ const Header = ({ pet, tabs, activeTab, onTabClick }: HeaderProps) => {
 
         <Link
           href={`/pet/${pet.petId}/relation`}
+          onClick={(e) => {
+            if (!isLoggedIn) {
+              e.preventDefault();
+              setIsPromoSheetOpen(true);
+            } else {
+              closePreviewModal();
+            }
+          }}
           className={cn(
             "flex items-center gap-0.5 rounded-lg bg-blue-100 px-2 font-[700] text-white transition-colors hover:bg-blue-200 dark:bg-blue-900/40 dark:hover:bg-blue-800/40",
             isScrolled ? "h-8 text-xs" : "h-8 text-sm",
@@ -151,9 +175,24 @@ const Header = ({ pet, tabs, activeTab, onTabClick }: HeaderProps) => {
             content="혈통 관계가 있는 펫들을 확인합니다."
           />
         </Link>
+
+        <LoginPromoSheet
+          isOpen={isPromoSheetOpen}
+          onOpenChange={setIsPromoSheetOpen}
+          title="펫의 가족 관계를 한눈에"
+          description={
+            <>
+              <span className="font-semibold text-blue-700">부모, 형제, 자녀</span>까지
+              <br />
+              <span className="font-semibold text-gray-800">펫 관계도</span> 로 혈통을 쉽게 확인할
+              수 있어요
+            </>
+          }
+        />
+
         <div className="flex items-center gap-1">
           <QRCode petId={pet.petId} isScrolled={isScrolled} />
-          <DeletePetDialog petId={pet.petId} petName={pet.name} />
+          {isLoggedIn && isMyPet && <DeletePetDialog petId={pet.petId} petName={pet.name} />}
         </div>
       </div>
 

@@ -177,7 +177,10 @@ export class PetService {
     });
   }
 
-  async findPetByPetId(petId: string, viewerId: string): Promise<PetSingleDto> {
+  async findPetByPetId(
+    petId: string,
+    viewerId?: string,
+  ): Promise<PetSingleDto> {
     return this.dataSource.transaction(async (entityManager: EntityManager) => {
       const pet = await entityManager.findOne(PetEntity, {
         where: { petId },
@@ -777,7 +780,7 @@ export class PetService {
     return new PageDto(petDtos, pageMetaDto);
   }
 
-  async getParentsByPetId(petId: string, userId: string) {
+  async getParentsByPetId(petId: string, userId?: string) {
     const { father, mother } =
       await this.parentRequestService.getParentsWithRequestStatus(petId);
     // petId로 owner 정보

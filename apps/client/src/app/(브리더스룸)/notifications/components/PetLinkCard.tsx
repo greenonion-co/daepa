@@ -1,6 +1,8 @@
+"use client";
+
 import { ParentLinkDetailJson } from "@repo/api-client";
-import Link from "next/link";
 import { ArrowRight, Info } from "lucide-react";
+import { usePetPreviewModal } from "../../pet/store/petPreviewModal";
 import TooltipText from "../../components/TooltipText";
 import PetThumbnail from "@/components/common/PetThumbnail";
 import { useIsMobile } from "@/hooks/useMobile";
@@ -11,6 +13,7 @@ interface PetLinkCardProps {
 
 const PetLinkCard = ({ detailData }: PetLinkCardProps) => {
   const isMobile = useIsMobile();
+  const { openByPetId } = usePetPreviewModal();
 
   if (!detailData) return null;
 
@@ -20,19 +23,17 @@ const PetLinkCard = ({ detailData }: PetLinkCardProps) => {
     <>
       <div className="flex items-center gap-1">
         {detailData.childPet?.id && (
-          <Link
-            href={`/pet/${detailData.childPet.id}`}
-            className="group flex flex-1 flex-col items-center gap-2 transition-all dark:hover:bg-gray-800"
+          <div
+            onClick={() => openByPetId(detailData.childPet!.id)}
+            className="group flex flex-1 cursor-pointer flex-col items-center gap-2 transition-all dark:hover:bg-gray-800"
           >
-            {
-              <PetThumbnail
-                petId={detailData.childPet.id}
-                alt={detailData.childPet.name}
-                maxSize={isMobile ? 220 : 128}
-              />
-            }
+            <PetThumbnail
+              petId={detailData.childPet.id}
+              alt={detailData.childPet.name}
+              maxSize={isMobile ? 220 : 128}
+            />
             <TooltipText text={detailData.childPet.name ?? ""} />
-          </Link>
+          </div>
         )}
 
         {detailData?.childPet?.id && detailData?.parentPet?.id && (
@@ -40,9 +41,9 @@ const PetLinkCard = ({ detailData }: PetLinkCardProps) => {
         )}
 
         {detailData.parentPet?.id && (
-          <Link
-            href={`/pet/${detailData.parentPet.id}`}
-            className="group flex flex-1 flex-col items-center gap-2 transition-all dark:hover:bg-gray-800"
+          <div
+            onClick={() => openByPetId(detailData.parentPet!.id)}
+            className="group flex flex-1 cursor-pointer flex-col items-center gap-2 transition-all dark:hover:bg-gray-800"
           >
             <PetThumbnail
               petId={detailData?.parentPet?.id}
@@ -50,14 +51,14 @@ const PetLinkCard = ({ detailData }: PetLinkCardProps) => {
               maxSize={28}
             />
             <TooltipText text={detailData.parentPet.name ?? ""} />
-          </Link>
+          </div>
         )}
       </div>
 
       {/* 안내 문구 */}
       <div className="flex gap-1 text-blue-700 dark:text-blue-500">
         <Info size={14} />
-        <span className="text-xs">개체 사진 및 이름을 클릭하면 상세 페이지로 이동합니다.</span>
+        <span className="text-xs">개체 사진 및 이름을 클릭하면 미리보기가 열립니다.</span>
       </div>
     </>
   );

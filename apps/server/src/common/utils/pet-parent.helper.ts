@@ -14,7 +14,7 @@ import { SiblingPetDetailDto } from '../../pet_relation/pet_relation.dto';
 export function replaceParentPublicSafe(
   parentPet: PetParentDto | null,
   childPetOwnerId: string | null,
-  viewerId: string,
+  viewerId?: string,
 ) {
   // 부모 펫이 없으면 null 반환
   if (!parentPet) return null;
@@ -57,7 +57,7 @@ export function replaceParentPublicSafe(
  */
 export function replaceSiblingPublicSafe(
   sibling: SiblingPetDetailDto,
-  viewerId: string,
+  viewerId?: string,
 ) {
   const isOwner = sibling.owner?.userId === viewerId;
 

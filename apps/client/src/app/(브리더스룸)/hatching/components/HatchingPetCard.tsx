@@ -16,11 +16,10 @@ import {
 } from "@repo/api-client";
 
 import { cn, getEggDDayText } from "@/lib/utils";
-import { useRouter } from "next/navigation";
 import TooltipText from "../../components/TooltipText";
 import { useEffect, useRef } from "react";
-import Link from "next/link";
 import BadgeList from "../../components/BadgeList";
+import { usePetPreviewModal } from "../../pet/store/petPreviewModal";
 
 interface PetCardProps {
   date: string;
@@ -44,8 +43,8 @@ const getParentInfo = (parent: PetDtoFather | PetDtoMother | undefined) => {
 };
 
 const HatchingPetCard = ({ date, pets, tab, isSelected }: PetCardProps) => {
-  const router = useRouter();
   const ref = useRef<HTMLDivElement>(null);
+  const { openByPetId } = usePetPreviewModal();
 
   useEffect(() => {
     if (isSelected) {
@@ -104,7 +103,7 @@ const HatchingPetCard = ({ date, pets, tab, isSelected }: PetCardProps) => {
                               onClick={(e) => {
                                 e.stopPropagation();
                                 if (!pet.father || "hiddenStatus" in pet.father) return;
-                                router.push(`/pet/${pet.father.petId}`);
+                                openByPetId(pet.father.petId);
                               }}
                             >
                               <TooltipText
@@ -124,7 +123,7 @@ const HatchingPetCard = ({ date, pets, tab, isSelected }: PetCardProps) => {
                               onClick={(e) => {
                                 e.stopPropagation();
                                 if (!pet.mother || "hiddenStatus" in pet.mother) return;
-                                router.push(`/pet/${pet.mother.petId}`);
+                                openByPetId(pet.mother.petId);
                               }}
                             >
                               <TooltipText
@@ -215,9 +214,13 @@ const HatchingPetCard = ({ date, pets, tab, isSelected }: PetCardProps) => {
                 {cardContent}
               </div>
             ) : (
-              <Link href={`/pet/${pet.petId}`} key={pet.petId} className="w-full">
+              <div
+                key={pet.petId}
+                className="w-full cursor-pointer"
+                onClick={() => openByPetId(pet.petId)}
+              >
                 {cardContent}
-              </Link>
+              </div>
             );
           })}
       </div>

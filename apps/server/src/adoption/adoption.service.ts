@@ -45,7 +45,7 @@ export class AdoptionService {
 
   private async toAdoptionDtoOptimized(
     entity: AdoptionEntity,
-    userId: string,
+    userId?: string,
   ): Promise<AdoptionDto> {
     if (!entity.pet) {
       throw new Error('Pet information is required for adoption');
@@ -192,7 +192,7 @@ export class AdoptionService {
 
   async findOne(
     where: FindOptionsWhere<AdoptionEntity>,
-    userId: string,
+    userId?: string,
   ): Promise<AdoptionDto | null> {
     const qb = this.createAdoptionQueryBuilder().where(
       'adoptions.isDeleted = :isDeleted',
