@@ -16,7 +16,7 @@ export const buildTransformedUrl = (
 ) => {
   if (!raw) return '';
   const cdnBase =
-    process.env.NEXT_PUBLIC_CDN_URL ?? 'https://daepa.store/cdn-cgi/image';
+    process.env.NEXT_PUBLIC_CDN_URL ?? 'https://media.breedy.kr/cdn-cgi/image';
 
   return `${cdnBase}/${transform}${raw}`;
 };
