@@ -17,9 +17,11 @@ import {
   VerifyPetNameDto,
   PetDto,
   PetFilterDto,
+  GetParentsByPetIdQueryDto,
   GetParentsByPetIdResponseDto,
   DeletePetDto,
   DeletedPetDto,
+  PetSummaryDto,
 } from './pet.dto';
 import { PetService } from './pet.service';
 import {
@@ -31,9 +33,17 @@ import {
 import { CommonResponseDto } from 'src/common/response.dto';
 import { JwtUser } from 'src/auth/auth.decorator';
 import { JwtUserPayload } from 'src/auth/strategies/jwt.strategy';
-import { PageDto, PageMetaDto } from 'src/common/page.dto';
+import { PageDto, PageMetaDto, PageOptionsDto } from 'src/common/page.dto';
 import { PetRelationService } from 'src/pet_relation/pet_relation.service';
-import { GetSiblingsWithDetailsResponseDto } from 'src/pet_relation/pet_relation.dto';
+import {
+  ChildPetDetailDto,
+  GetSiblingsPageResponseDto,
+  GetChildrenPageResponseDto,
+  GetClutchMatesResponseDto,
+  GetSiblingsQueryDto,
+  GetClutchMatesQueryDto,
+} from 'src/pet_relation/pet_relation.dto';
+import { PetHiddenStatusDto } from './pet.dto';
 
 @Controller('/v1/pet')
 export class PetController {
@@ -149,9 +159,15 @@ export class PetController {
   })
   async getParentsByPetId(
     @Param('petId') petId: string,
+    @Query() queryDto: GetParentsByPetIdQueryDto,
     @JwtUser() token: JwtUserPayload,
   ): Promise<GetParentsByPetIdResponseDto> {
-    const data = await this.petService.getParentsByPetId(petId, token.userId);
+    const { statuses } = queryDto;
+    const data = await this.petService.getParentsByPetId(
+      petId,
+      token.userId,
+      statuses ? { statuses } : undefined,
+    );
     return {
       success: true,
       message: '펫 정보 조회 성공',
@@ -165,10 +181,11 @@ export class PetController {
     description: '펫 아이디',
     example: 'XXXXXXXX',
   })
+  @ApiExtraModels(PetSummaryDto, PetHiddenStatusDto, PageMetaDto)
   @ApiResponse({
     status: 200,
     description: '펫 형제 정보 조회 성공',
-    type: GetSiblingsWithDetailsResponseDto,
+    type: GetSiblingsPageResponseDto,
   })
   @ApiResponse({
     status: 404,
@@ -176,17 +193,84 @@ export class PetController {
   })
   async getSiblingsByPetId(
     @Param('petId') petId: string,
+    @Query() queryDto: GetSiblingsQueryDto,
     @JwtUser() token: JwtUserPayload,
-  ): Promise<GetSiblingsWithDetailsResponseDto> {
-    const data = await this.petRelationService.getSiblingsWithDetails(
+  ): Promise<GetSiblingsPageResponseDto> {
+    return this.petRelationService.getSiblingsWithDetails(
       petId,
       token.userId,
+      queryDto,
     );
-    return {
-      success: true,
-      message: '펫 형제 정보 조회 성공',
-      data,
-    };
+  }
+
+  @Get('/children/:petId')
+  @ApiParam({
+    name: 'petId',
+    description: '펫 아이디',
+    example: 'XXXXXXXX',
+  })
+  @ApiExtraModels(ChildPetDetailDto, PetHiddenStatusDto, PageMetaDto)
+  @ApiResponse({
+    status: 200,
+    description: '펫 자식 정보 조회 성공',
+    type: GetChildrenPageResponseDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: '펫을 찾을 수 없습니다.',
+  })
+  async getChildrenByPetId(
+    @Param('petId') petId: string,
+    @Query() pageOptionsDto: PageOptionsDto,
+    @JwtUser() token: JwtUserPayload,
+  ): Promise<GetChildrenPageResponseDto> {
+    return this.petRelationService.getChildrenWithDetails(
+      petId,
+      token.userId,
+      pageOptionsDto,
+    );
+  }
+
+  @Get('/clutch-mates/:petId')
+  @ApiParam({
+    name: 'petId',
+    description: '펫 아이디',
+    example: 'XXXXXXXX',
+  })
+  @ApiExtraModels(PetSummaryDto, PetHiddenStatusDto)
+  @ApiResponse({
+    status: 200,
+    description: '클러치 메이트 조회 성공',
+    schema: {
+      type: 'object',
+      required: ['data'],
+      properties: {
+        data: {
+          type: 'array',
+          items: {
+            oneOf: [
+              { $ref: getSchemaPath(PetSummaryDto) },
+              { $ref: getSchemaPath(PetHiddenStatusDto) },
+            ],
+          },
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: '펫을 찾을 수 없습니다.',
+  })
+  async getClutchMatesByPetId(
+    @Param('petId') petId: string,
+    @Query() queryDto: GetClutchMatesQueryDto,
+    @JwtUser() token: JwtUserPayload,
+  ): Promise<GetClutchMatesResponseDto> {
+    return this.petRelationService.getClutchMatesByPetId(
+      petId,
+      token.userId,
+      queryDto,
+    );
   }
 
   @Get(':petId')

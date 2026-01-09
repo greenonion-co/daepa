@@ -1,9 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { useInView } from "react-intersection-observer";
 import {
   brAdoptionControllerGetAllAdoptions,
   PriceRangeItemDto,
@@ -31,8 +29,6 @@ const PriceRangePetsModal = ({
   priceRange,
   species,
 }: PriceRangePetsModalProps) => {
-  const { ref, inView } = useInView();
-
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
     queryKey: ["priceRangeAdoptions", priceRange?.minPrice, priceRange?.maxPrice, species],
     queryFn: ({ pageParam = 1 }) =>
@@ -55,12 +51,6 @@ const PriceRangePetsModal = ({
     select: (data) => data.pages.flatMap((page) => page.data.data),
     enabled: isOpen && !!priceRange,
   });
-
-  useEffect(() => {
-    if (inView && hasNextPage && !isFetchingNextPage) {
-      fetchNextPage();
-    }
-  }, [inView, fetchNextPage, hasNextPage, isFetchingNextPage]);
 
   if (!priceRange) return null;
 
@@ -97,7 +87,13 @@ const PriceRangePetsModal = ({
           <Loading />
         ) : data && data.length > 0 ? (
           <section className="min-w-0 overflow-hidden">
-            <HorizontalScrollSection className="mx-4" gradientColor="from-white" darkGradientColor="dark:from-gray-950">
+            <HorizontalScrollSection
+              className="mx-4"
+              gradientColor="from-white"
+              hasMore={hasNextPage}
+              isLoading={isFetchingNextPage}
+              onReachEnd={fetchNextPage}
+            >
               {data.map((adoption) => (
                 <SiblingPetCard
                   key={adoption.petId}
@@ -106,35 +102,10 @@ const PriceRangePetsModal = ({
                   adoptionDate={adoption.adoptionDate}
                 />
               ))}
-
-              {hasNextPage && (
-                <div ref={ref} className="py-4 text-center">
-                  {isFetchingNextPage && <Loading />}
-                </div>
-              )}
             </HorizontalScrollSection>
           </section>
         ) : (
-          // <ScrollArea className="h-[calc(100vh-400px)]">
-          //   <div className="flex flex-wrap gap-3 p-1">
-          //     {data.map((adoption) => (
-          //       <SiblingPetCard
-          //         key={adoption.petId}
-          //         pet={adoption.pet}
-          //         price={adoption.price}
-          //         adoptionDate={adoption.adoptionDate}
-          //       />
-          //     ))}
-          //   </div>
-
-          //   {/* 무한 스크롤 트리거 */}
-          //   {hasNextPage && (
-          //     <div ref={ref} className="py-4 text-center">
-          //       {isFetchingNextPage && <Loading />}
-          //     </div>
-          //   )}
-          // </ScrollArea>
-          <div className="py-8 text-center text-gray-500 dark:text-gray-400">해당 가격대의 분양 기록이 없습니다.</div>
+          <div className="py-8 text-center text-gray-500">해당 가격대의 분양 기록이 없습니다.</div>
         )}
       </DialogContent>
     </Dialog>

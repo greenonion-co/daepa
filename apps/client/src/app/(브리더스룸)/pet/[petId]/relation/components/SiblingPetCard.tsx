@@ -117,7 +117,7 @@ export default function SiblingPetCard({
   const verticalCardContent = (
     <div
       className={cn(
-        "flex shrink-0 flex-col gap-1 rounded-xl bg-white p-2 shadow-sm transition-shadow hover:shadow-md dark:bg-gray-900",
+        "flex h-full shrink-0 flex-col gap-1 rounded-xl bg-white p-2 shadow-sm transition-shadow hover:shadow-md dark:bg-gray-900",
         isDeleted && "cursor-not-allowed bg-red-100/50 dark:bg-red-900/30",
       )}
       style={{ width }}
@@ -257,7 +257,7 @@ export default function SiblingPetCard({
   const wrappedContent =
     isMyPet && variant === "vertical" ? (
       <div
-        className="rounded-xl p-[1.5px]"
+        className="h-full rounded-xl p-[1.5px]"
         style={{
           background: "linear-gradient(90deg, #60a5fa, #c084fc)",
         }}

@@ -30,7 +30,7 @@ const PedigreeInfo = ({
 
   const { data: parents, refetch } = useQuery({
     queryKey: [petControllerGetParentsByPetId.name, petId],
-    queryFn: () => petControllerGetParentsByPetId(petId),
+    queryFn: () => petControllerGetParentsByPetId(petId, { statuses: ["approved", "pending"] }),
     select: (response) => response.data.data,
   });
 

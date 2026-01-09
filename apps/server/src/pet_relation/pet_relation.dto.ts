@@ -2,17 +2,14 @@ import { ApiExtraModels, ApiProperty, getSchemaPath } from '@nestjs/swagger';
 import {
   IsArray,
   IsDate,
+  IsEnum,
   IsNumber,
   IsObject,
   IsOptional,
 } from 'class-validator';
-import { Type } from 'class-transformer';
-import { CommonResponseDto } from 'src/common/response.dto';
-import {
-  PetSummaryDto,
-  PetParentDto,
-  PetHiddenStatusDto,
-} from 'src/pet/pet.dto';
+import { PetSummaryDto, PetHiddenStatusDto } from 'src/pet/pet.dto';
+import { PageMetaDto, PageOptionsDto } from 'src/common/page.dto';
+import { PET_TYPE } from 'src/pet/pet.constants';
 
 /**
  * Raw query result interface for getSiblingsWithDetails (내부 변환용)
@@ -122,80 +119,133 @@ export class SiblingMatingInfoDto {
 }
 
 /**
- * 형제 펫 상세 정보 (PetSummaryDto 확장)
+ * 자식 펫 상세 정보 (PetSummaryDto 확장, laying/mating 제외)
  */
-export class SiblingPetDetailDto extends PetSummaryDto {
-  @ApiProperty({
-    description: '산란 정보',
-    type: SiblingLayingInfoDto,
-    required: false,
-  })
-  @IsOptional()
-  @IsObject()
-  @Type(() => SiblingLayingInfoDto)
-  laying: SiblingLayingInfoDto | null;
+export class ChildPetDetailDto extends PetSummaryDto {}
 
-  @ApiProperty({
-    description: '메이팅 정보',
-    type: SiblingMatingInfoDto,
-    required: false,
-  })
-  @IsOptional()
-  @IsObject()
-  @Type(() => SiblingMatingInfoDto)
-  mating: SiblingMatingInfoDto | null;
+/**
+ * Raw query result interface for getChildrenWithDetails (내부 변환용)
+ */
+export interface RawChildQueryResult {
+  // pet_relations
+  petId: string;
+  // pets
+  name: string | null;
+  species: string;
+  hatchingDate: Date | null;
+  type: string;
+  ownerId: string | null;
+  isPublic: boolean;
+  isDeleted: boolean;
+  // pet_details
+  sex: string | null;
+  morphs: string[] | null;
+  traits: string[] | null;
+  weight: number | null;
+  growth: string | null;
+  // users (owner)
+  owner_userId: string | null;
+  owner_name: string | null;
+  owner_role: string | null;
+  owner_isBiz: boolean | null;
+  owner_status: string | null;
 }
 
 /**
- * 형제 펫 조회 응답 데이터
+ * 형제 펫 조회 응답 (페이지네이션)
  */
-@ApiExtraModels(PetParentDto, PetHiddenStatusDto, SiblingPetDetailDto)
-export class GetSiblingsWithDetailsDataDto {
-  @ApiProperty({
-    description: '아빠 펫 정보 (비공개인 경우 hiddenStatus만 포함)',
-    required: false,
-    oneOf: [
-      { $ref: getSchemaPath(PetParentDto) },
-      { $ref: getSchemaPath(PetHiddenStatusDto) },
-    ],
-  })
-  @IsOptional()
-  @IsObject()
-  father?: PetParentDto | PetHiddenStatusDto;
-
-  @ApiProperty({
-    description: '엄마 펫 정보 (비공개인 경우 hiddenStatus만 포함)',
-    required: false,
-    oneOf: [
-      { $ref: getSchemaPath(PetParentDto) },
-      { $ref: getSchemaPath(PetHiddenStatusDto) },
-    ],
-  })
-  @IsOptional()
-  @IsObject()
-  mother?: PetParentDto | PetHiddenStatusDto;
-
+@ApiExtraModels(PetSummaryDto, PetHiddenStatusDto, PageMetaDto)
+export class GetSiblingsPageResponseDto {
   @ApiProperty({
     description: '형제 펫 목록 (비공개인 경우 hiddenStatus만 포함)',
     type: 'array',
     items: {
       oneOf: [
-        { $ref: getSchemaPath(SiblingPetDetailDto) },
+        { $ref: getSchemaPath(PetSummaryDto) },
         { $ref: getSchemaPath(PetHiddenStatusDto) },
       ],
     },
   })
   @IsArray()
-  siblings: (SiblingPetDetailDto | PetHiddenStatusDto)[];
+  data: (PetSummaryDto | PetHiddenStatusDto)[];
+
+  @ApiProperty({
+    description: '페이지 메타 정보',
+    type: PageMetaDto,
+  })
+  @IsObject()
+  meta: PageMetaDto;
 }
 
 /**
- * 형제 펫 조회 응답
+ * 자식 펫 조회 응답 (페이지네이션)
  */
-export class GetSiblingsWithDetailsResponseDto extends CommonResponseDto {
+@ApiExtraModels(ChildPetDetailDto, PetHiddenStatusDto, PageMetaDto)
+export class GetChildrenPageResponseDto {
   @ApiProperty({
-    description: '형제 펫 정보',
-    type: GetSiblingsWithDetailsDataDto,
+    description: '자식 펫 목록 (비공개인 경우 hiddenStatus만 포함)',
+    type: 'array',
+    items: {
+      oneOf: [
+        { $ref: getSchemaPath(ChildPetDetailDto) },
+        { $ref: getSchemaPath(PetHiddenStatusDto) },
+      ],
+    },
   })
-  data: GetSiblingsWithDetailsDataDto;
+  @IsArray()
+  data: (ChildPetDetailDto | PetHiddenStatusDto)[];
+
+  @ApiProperty({
+    description: '페이지 메타 정보',
+    type: PageMetaDto,
+  })
+  @IsObject()
+  meta: PageMetaDto;
+}
+
+/**
+ * 클러치 메이트 (같은 layingId 또는 부모가 같고 layingDate/hatchingDate가 같은 형제) 조회 응답
+ */
+@ApiExtraModels(PetSummaryDto, PetHiddenStatusDto)
+export class GetClutchMatesResponseDto {
+  @ApiProperty({
+    description: '클러치 메이트 목록 (비공개인 경우 hiddenStatus만 포함)',
+    type: 'array',
+    items: {
+      oneOf: [
+        { $ref: getSchemaPath(PetSummaryDto) },
+        { $ref: getSchemaPath(PetHiddenStatusDto) },
+      ],
+    },
+  })
+  @IsArray()
+  data: (PetSummaryDto | PetHiddenStatusDto)[];
+}
+
+/**
+ * 형제 펫 조회 쿼리 파라미터 (페이지네이션 + type 필터)
+ */
+export class GetSiblingsQueryDto extends PageOptionsDto {
+  @ApiProperty({
+    description: '펫 타입 필터 (EGG, PET)',
+    enum: PET_TYPE,
+    required: false,
+  })
+  @IsOptional()
+  @IsEnum(PET_TYPE)
+  readonly type?: PET_TYPE;
+}
+
+/**
+ * 클러치 메이트 조회 쿼리 파라미터 (type 필터만)
+ */
+export class GetClutchMatesQueryDto {
+  @ApiProperty({
+    description: '펫 타입 필터 (EGG, PET)',
+    enum: PET_TYPE,
+    required: false,
+  })
+  @IsOptional()
+  @IsEnum(PET_TYPE)
+  readonly type?: PET_TYPE;
 }
