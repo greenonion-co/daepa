@@ -17,7 +17,7 @@ import CalendarSelect from "./CalendarSelect";
 import CustomSelect from "./Charts/CustomSelect";
 import { SPECIES_KOREAN_INFO } from "../../constants";
 import NumberField from "../../components/Form/NumberField";
-import FormItem from "../../pet/[petId]/detail/components/FormItem";
+import FormItem from "../../pet/[petId]/components/FormItem";
 
 interface CreateLayingModalProps {
   isOpen: boolean;
