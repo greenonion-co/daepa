@@ -191,13 +191,7 @@ export const DataTable = ({
                 {hasMore && (
                   <TableRow ref={loaderRefAction}>
                     <TableCell colSpan={columns.length} className="h-20 text-center">
-                      {isFetchingMore ? (
-                        <div className="flex items-center justify-center">
-                          <div className="h-6 w-6 animate-spin rounded-full border-b-2 border-blue-500" />
-                        </div>
-                      ) : (
-                        <Loading />
-                      )}
+                      {isFetchingMore ? <Loading /> : null}
                     </TableCell>
                   </TableRow>
                 )}

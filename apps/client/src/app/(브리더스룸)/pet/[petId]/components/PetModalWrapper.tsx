@@ -11,29 +11,30 @@ import {
 
 import "swiper/css";
 import "swiper/css/pagination";
-import Header from "@/app/(브리더스룸)/pet/[petId]/components/Header";
-import ImagesContent from "@/app/(브리더스룸)/pet/[petId]/components/ImagesContent";
-import BreedingInfoContent from "@/app/(브리더스룸)/pet/[petId]/components/BreedingInfoContent";
-import PedigreeInfoContent from "@/app/(브리더스룸)/pet/[petId]/components/PedigreeInfoContent";
-import AdoptionInfoContent from "@/app/(브리더스룸)/pet/[petId]/components/AdoptionInfoContent";
+import Header from "./Header";
+import ImagesContent from "./ImagesContent";
+import BreedingInfoContent from "./BreedingInfoContent";
+import PedigreeInfoContent from "./PedigreeInfoContent";
+import AdoptionInfoContent from "./AdoptionInfoContent";
 
-interface PetModalContentProps {
+interface PetModalWrapperProps {
   pet: PetDto;
   initialImages: PetImageItem[];
   initialParents: GetParentsByPetIdResponseDtoData | null;
   initialAdoption: PetAdoptionDto | null;
 }
 
-export default function PetModalContent({
+export default function PetModalWrapper({
   pet,
   initialImages,
   initialParents,
   initialAdoption,
-}: PetModalContentProps) {
+}: PetModalWrapperProps) {
   const router = useRouter();
 
   const handleClose = () => {
-    router.back();
+    // 새로고침으로 접근한 경우 /pet으로 이동
+    router.push("/pet");
   };
 
   return (

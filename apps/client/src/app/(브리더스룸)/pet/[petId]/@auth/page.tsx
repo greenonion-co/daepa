@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import {
   PetDto,
@@ -6,9 +6,10 @@ import {
   PetImageItem,
   GetParentsByPetIdResponseDtoData,
 } from "@repo/api-client";
-import PetModalContent from "./PetModalContent";
+import PetList from "../../components/PetList";
+import PetModalWrapper from "../components/PetModalWrapper";
 
-interface PetModalPageProps {
+interface AuthPageProps {
   params: Promise<{
     petId: string;
   }>;
@@ -83,7 +84,7 @@ async function getAdoption(petId: string): Promise<PetAdoptionDto | null> {
   }
 }
 
-export default async function PetModalPage({ params }: PetModalPageProps) {
+export default async function AuthPage({ params }: AuthPageProps) {
   const { petId } = await params;
 
   // 모든 데이터를 병렬로 fetch
@@ -95,15 +96,18 @@ export default async function PetModalPage({ params }: PetModalPageProps) {
   ]);
 
   if (!pet) {
-    notFound();
+    redirect("/pet?error=pet-not-found");
   }
 
   return (
-    <PetModalContent
-      pet={pet}
-      initialImages={images}
-      initialParents={parents}
-      initialAdoption={adoption}
-    />
+    <>
+      <PetList />
+      <PetModalWrapper
+        pet={pet}
+        initialImages={images}
+        initialParents={parents}
+        initialAdoption={adoption}
+      />
+    </>
   );
 }

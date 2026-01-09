@@ -1,34 +1,26 @@
 "use client";
 
-import { RefObject, useEffect, useRef, useState } from "react";
-
-import BreedingInfo from "./펫정보";
+import { ReactNode, RefObject, useEffect, useRef, useState } from "react";
+import { PetDto } from "@repo/api-client";
 import Header from "./Header";
-import AdoptionInfo from "./분양정보";
-import Images from "./이미지";
-import PedigreeInfo from "./혈통정보";
-import {
-  PetDto,
-  PetAdoptionDto,
-  PetImageItem,
-  GetParentsByPetIdResponseDtoData,
-} from "@repo/api-client";
 
 type TabType = "breeding" | "adoption" | "images" | "pedigree";
 
-interface PetDetailContentProps {
+interface PetDetailPublicLayoutProps {
   pet: PetDto;
-  initialAdoption: PetAdoptionDto | null;
-  initialImages: PetImageItem[];
-  initialParents: GetParentsByPetIdResponseDtoData | null;
+  breedingSlot: ReactNode;
+  imagesSlot: ReactNode;
+  pedigreeSlot: ReactNode;
+  adoptionSlot: ReactNode;
 }
 
-function PetDetailContent({
+export default function PetDetailPublicLayout({
   pet,
-  initialAdoption,
-  initialImages,
-  initialParents,
-}: PetDetailContentProps) {
+  breedingSlot,
+  imagesSlot,
+  pedigreeSlot,
+  adoptionSlot,
+}: PetDetailPublicLayoutProps) {
   const [activeTab, setActiveTab] = useState<TabType>("images");
   const isScrollingRef = useRef<boolean>(false);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -142,13 +134,13 @@ function PetDetailContent({
       <Header pet={pet} tabs={tabs} activeTab={activeTab} onTabClick={handleTabClick} />
 
       <div className="flex flex-wrap gap-3 px-2">
-        {/* 펫정보 (개체 이름, 종, 성별, 크기, 모프, 형질, 먹이) */}
+        {/* 펫정보 */}
         <div
           ref={breedingRef}
           data-section="breeding"
           className="flex min-w-[300px] max-w-[440px] flex-1 max-[580px]:order-2 max-[580px]:max-w-none"
         >
-          <BreedingInfo petId={pet.petId} ownerId={pet.owner.userId ?? ""} initialPet={pet} />
+          {breedingSlot}
         </div>
 
         {/* 사진 */}
@@ -157,7 +149,7 @@ function PetDetailContent({
           data-section="images"
           className="flex min-h-[480px] min-w-[300px] max-w-[440px] flex-1 max-[580px]:order-1 max-[580px]:max-w-none"
         >
-          <Images pet={pet} initialImages={initialImages} />
+          {imagesSlot}
         </div>
 
         {/* 혈통 정보 */}
@@ -166,12 +158,7 @@ function PetDetailContent({
           data-section="pedigree"
           className="flex min-w-[300px] max-w-[440px] flex-1 max-[580px]:order-4 max-[580px]:max-w-none"
         >
-          <PedigreeInfo
-            species={pet.species}
-            petId={pet.petId}
-            userId={pet.owner.userId ?? ""}
-            initialParents={initialParents}
-          />
+          {pedigreeSlot}
         </div>
 
         {/* 분양 정보 */}
@@ -180,15 +167,9 @@ function PetDetailContent({
           data-section="adoption"
           className="flex min-h-[480px] min-w-[300px] max-w-[440px] flex-1 max-[580px]:order-3 max-[580px]:max-w-none"
         >
-          <AdoptionInfo
-            petId={pet.petId}
-            ownerId={pet.owner.userId ?? ""}
-            initialAdoption={initialAdoption}
-          />
+          {adoptionSlot}
         </div>
       </div>
     </div>
   );
 }
-
-export default PetDetailContent;

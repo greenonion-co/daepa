@@ -1,3 +1,5 @@
+"use client";
+
 import QRCode from "./QR코드";
 import { cn } from "@/lib/utils";
 import { PetAdoptionDtoStatus, PetDto } from "@repo/api-client";
@@ -5,13 +7,13 @@ import { SPECIES_KOREAN_ALIAS_INFO } from "@/app/(브리더스룸)/constants";
 import Link from "next/link";
 import { DeletePetDialog } from "./DeletePetDialog";
 import { useAdoptionStore } from "@/app/(브리더스룸)/pet/store/adoption";
-import { useBreedingInfoStore } from "../../store/breedingInfo";
 import { useEffect, useState } from "react";
 import TooltipText from "@/app/(브리더스룸)/components/TooltipText";
 import PetThumbnail from "@/components/common/PetThumbnail";
 import { useUserStore } from "@/app/(브리더스룸)/store/user";
 import { useIsMyPet } from "@/hooks/useIsMyPet";
 import LoginPromoSheet from "@/app/(브리더스룸)/components/LoginPromoSheet";
+import { useBreedingInfoStore } from "../../store/breedingInfo";
 
 type TabType = "breeding" | "adoption" | "images" | "pedigree";
 

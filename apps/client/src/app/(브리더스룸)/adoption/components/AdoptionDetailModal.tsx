@@ -75,7 +75,11 @@ const PetInfoCard = ({
           </div>
           <div className="flex flex-col gap-2 text-sm text-gray-600 dark:text-gray-300">
             <BadgeList items={morphs} />
-            <BadgeList items={traits} variant="outline" badgeClassName="bg-white text-black dark:bg-gray-700 dark:text-gray-200" />
+            <BadgeList
+              items={traits}
+              variant="outline"
+              badgeClassName="bg-white text-black dark:bg-gray-700 dark:text-gray-200"
+            />
             {hatchingDate && (
               <p className="font-[600] text-blue-600">
                 {DateTime.fromFormat(hatchingDate, "yyyy-MM-dd").toFormat("yy.M.d")}

@@ -1,15 +1,27 @@
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import { Metadata } from "next";
 import { cookies } from "next/headers";
-import {
-  PetDto,
-  PetAdoptionDto,
-  PetImageItem,
-  GetParentsByPetIdResponseDtoData,
-} from "@repo/api-client";
-import PetDetailContent from "./components/PetDetailContent";
-import { SPECIES_KOREAN_INFO } from "../../constants";
+import { PetDto } from "@repo/api-client";
+
+import { SPECIES_KOREAN_INFO } from "../../../constants";
+import BreedingInfo from "../components/펫정보";
+import Images from "../components/이미지";
+import PedigreeInfo from "../components/혈통정보";
+import AdoptionInfo from "../components/분양정보";
+import PetDetailLayout from "../components/PetDetailPublicLayout";
+
+// 섹션 로딩 스켈레톤
+function SectionSkeleton() {
+  return (
+    <div className="flex flex-1 animate-pulse flex-col gap-2 rounded-2xl bg-white p-3 dark:bg-neutral-900">
+      <div className="w-15 h-4 rounded bg-gray-200 dark:bg-gray-700" />
+      <div className="h-6 w-40 rounded bg-gray-200 dark:bg-gray-700" />
+      <div className="h-[200px] rounded-xl bg-gray-200 dark:bg-gray-700" />
+    </div>
+  );
+}
 
 interface PetDetailPageProps {
   params: Promise<{
@@ -52,51 +64,6 @@ async function getPet(petId: string): Promise<PetDto | null> {
   }
 }
 
-// 분양 정보 fetch
-async function getAdoption(petId: string): Promise<PetAdoptionDto | null> {
-  const url = `${process.env.NEXT_PUBLIC_SERVER_BASE_URL}/api/v1/adoption/by-pet/${petId}`;
-  const headers = await getAuthHeaders();
-
-  try {
-    const res = await fetch(url, { cache: "no-store", headers });
-    if (!res.ok) return null;
-    const data = await res.json();
-    return data.data;
-  } catch {
-    return null;
-  }
-}
-
-// 이미지 fetch
-async function getImages(petId: string): Promise<PetImageItem[]> {
-  const url = `${process.env.NEXT_PUBLIC_SERVER_BASE_URL}/api/v1/pet-image/${petId}`;
-  const headers = await getAuthHeaders();
-
-  try {
-    const res = await fetch(url, { cache: "no-store", headers });
-    if (!res.ok) return [];
-    const data = await res.json();
-    return data;
-  } catch {
-    return [];
-  }
-}
-
-// 부모 정보 fetch
-async function getParents(petId: string): Promise<GetParentsByPetIdResponseDtoData | null> {
-  const url = `${process.env.NEXT_PUBLIC_SERVER_BASE_URL}/api/v1/pet/parents/${petId}`;
-  const headers = await getAuthHeaders();
-
-  try {
-    const res = await fetch(url, { cache: "no-store", headers });
-    if (!res.ok) return null;
-    const data = await res.json();
-    return data.data;
-  } catch {
-    return null;
-  }
-}
-
 // 동적 메타데이터 생성 (SEO)
 export async function generateMetadata({ params }: PetDetailPageProps): Promise<Metadata> {
   const { petId } = await params;
@@ -125,13 +92,8 @@ export async function generateMetadata({ params }: PetDetailPageProps): Promise<
 async function PetDetailPage({ params }: PetDetailPageProps) {
   const { petId } = await params;
 
-  // 모든 데이터를 병렬로 fetch
-  const [pet, adoption, images, parents] = await Promise.all([
-    getPet(petId),
-    getAdoption(petId),
-    getImages(petId),
-    getParents(petId),
-  ]);
+  // 데이터 fetch
+  const pet = await getPet(petId);
 
   if (!pet) {
     notFound();
@@ -170,11 +132,28 @@ async function PetDetailPage({ params }: PetDetailPageProps) {
   }
 
   return (
-    <PetDetailContent
+    <PetDetailLayout
       pet={pet}
-      initialAdoption={adoption}
-      initialImages={images}
-      initialParents={parents}
+      breedingSlot={
+        <Suspense fallback={<SectionSkeleton />}>
+          <BreedingInfo petId={pet.petId} ownerId={pet.owner.userId ?? ""} />
+        </Suspense>
+      }
+      imagesSlot={
+        <Suspense fallback={<SectionSkeleton />}>
+          <Images pet={pet} />
+        </Suspense>
+      }
+      pedigreeSlot={
+        <Suspense fallback={<SectionSkeleton />}>
+          <PedigreeInfo species={pet.species} petId={pet.petId} userId={pet.owner.userId ?? ""} />
+        </Suspense>
+      }
+      adoptionSlot={
+        <Suspense fallback={<SectionSkeleton />}>
+          <AdoptionInfo petId={pet.petId} ownerId={pet.owner.userId ?? ""} />
+        </Suspense>
+      }
     />
   );
 }
