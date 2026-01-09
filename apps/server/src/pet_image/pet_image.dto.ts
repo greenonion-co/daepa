@@ -19,7 +19,7 @@ export class PetImageItem {
 
   @ApiProperty({
     description: '펫 이미지 원본 url',
-    example: 'https://daepa.store/XXXXXXXX/bDbKDMjCVBtwRDSqvJvzH',
+    example: 'https://media.breedy.kr/XXXXXXXX/bDbKDMjCVBtwRDSqvJvzH',
   })
   @IsUrl()
   url: string;
@@ -56,7 +56,7 @@ export class PetImageBaseDto {
 
   @ApiProperty({
     description: '펫 이미지 원본 url',
-    example: 'https://daepa.store/XXXXXXXX/bDbKDMjCVBtwRDSqvJvzH',
+    example: 'https://media.breedy.kr/XXXXXXXX/bDbKDMjCVBtwRDSqvJvzH',
   })
   @IsString()
   url: string;

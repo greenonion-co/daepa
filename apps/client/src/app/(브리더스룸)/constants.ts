@@ -265,6 +265,7 @@ export const MORPH_LIST_BY_SPECIES: Record<PetDtoSpecies, Record<string, string>
     릴리세이블: "릴리세이블",
     초초: "초초",
     릴리초초: "릴리초초",
+    팬텀: "팬텀",
     하이포: "하이포",
     파이드: "파이드",
     마블링: "마블링",
@@ -331,7 +332,6 @@ export const TRAIT_LIST_BY_SPECIES: Record<PetDtoSpecies, Record<string, string>
   CR: {
     트익할: "트익할",
     차콜: "차콜",
-    팬텀: "팬텀",
     풀핀: "풀핀",
     쿼드: "쿼드",
     핀스트라이프: "핀스트라이프",

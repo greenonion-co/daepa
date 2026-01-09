@@ -7,13 +7,13 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "daepa.store",
+        hostname: "breedy.kr",
         port: "",
         pathname: "/**",
       },
       {
         protocol: "https",
-        hostname: "*.daepa.store",
+        hostname: "*.breedy.kr",
         port: "",
         pathname: "/**",
       },
