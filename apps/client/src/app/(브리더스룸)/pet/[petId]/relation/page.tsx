@@ -1,7 +1,14 @@
 "use client";
 
-import { petControllerGetSiblingsByPetId, SiblingPetDetailDto } from "@repo/api-client";
-import { useQuery } from "@tanstack/react-query";
+import {
+  petControllerFindPetByPetId,
+  petControllerGetChildrenByPetId,
+  petControllerGetClutchMatesByPetId,
+  petControllerGetParentsByPetId,
+  petControllerGetSiblingsByPetId,
+  SiblingPetDetailDto,
+} from "@repo/api-client";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { use, useMemo } from "react";
 import SiblingPetCard from "./components/SiblingPetCard";
 import HorizontalScrollSection from "./components/HorizontalScrollSection";
@@ -20,52 +27,127 @@ function isVisiblePet(pet: unknown): pet is SiblingPetDetailDto {
   return typeof pet === "object" && pet !== null && !("hiddenStatus" in pet);
 }
 
+const ITEM_PER_PAGE = 10;
+
 function SiblingsPage({ params }: PetDetailPageProps) {
   const { petId } = use(params);
   const isMobile = useIsMobile();
 
   const {
-    data: siblingsData,
-    isLoading,
-    isError,
+    data: parentsData,
+    isLoading: isParentsLoading,
+    isError: isParentsError,
   } = useQuery({
-    queryKey: [petControllerGetSiblingsByPetId.name, petId],
-    queryFn: () => petControllerGetSiblingsByPetId(petId),
+    queryKey: [petControllerGetParentsByPetId.name, petId],
+    queryFn: () => petControllerGetParentsByPetId(petId, { statuses: ["approved"] }),
     select: (response) => response.data.data,
   });
 
-  const { myProfile, sameClutchSiblings, otherClutchSiblings } = useMemo(() => {
+  const { data: myProfile } = useQuery({
+    queryKey: [petControllerFindPetByPetId.name, petId],
+    queryFn: () => petControllerFindPetByPetId(petId),
+    select: (response) => response.data.data,
+  });
+
+  // 클러치 메이트 조회 (페이지네이션 없음, type: PET만)
+  const {
+    data: clutchMatesData,
+    isLoading: isClutchMatesLoading,
+    isError: isClutchMatesError,
+  } = useQuery({
+    queryKey: [petControllerGetClutchMatesByPetId.name, petId],
+    queryFn: () => petControllerGetClutchMatesByPetId(petId, { type: "PET" }),
+    select: (response) => response.data.data,
+  });
+
+  // 형제 무한 스크롤 (type: PET만)
+  const {
+    data: siblingsData,
+    isLoading: isSiblingsLoading,
+    isError: isSiblingsError,
+    fetchNextPage: fetchNextSiblings,
+    hasNextPage: hasNextSiblings,
+    isFetchingNextPage: isFetchingNextSiblings,
+  } = useInfiniteQuery({
+    queryKey: [petControllerGetSiblingsByPetId.name, petId],
+    queryFn: ({ pageParam = 1 }) =>
+      petControllerGetSiblingsByPetId(petId, {
+        page: pageParam,
+        itemPerPage: ITEM_PER_PAGE,
+        type: "PET",
+      }),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => {
+      if (lastPage.data.meta.hasNextPage) {
+        return lastPage.data.meta.page + 1;
+      }
+      return undefined;
+    },
+    select: (resp) => ({
+      siblings: resp.pages.flatMap((p) => p.data.data ?? []),
+    }),
+  });
+
+  // 자식 무한 스크롤
+  const {
+    data: childrenData,
+    isLoading: isChildrenLoading,
+    isError: isChildrenError,
+    fetchNextPage: fetchNextChildren,
+    hasNextPage: hasNextChildren,
+    isFetchingNextPage: isFetchingNextChildren,
+  } = useInfiniteQuery({
+    queryKey: [petControllerGetChildrenByPetId.name, petId],
+    queryFn: ({ pageParam = 1 }) =>
+      petControllerGetChildrenByPetId(petId, {
+        page: pageParam,
+        itemPerPage: ITEM_PER_PAGE,
+      }),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => {
+      if (lastPage.data.meta.hasNextPage) {
+        return lastPage.data.meta.page + 1;
+      }
+      return undefined;
+    },
+    select: (resp) => ({
+      children: resp.pages.flatMap((p) => p.data.data ?? []),
+    }),
+  });
+
+  const isLoading =
+    isSiblingsLoading || isParentsLoading || isChildrenLoading || isClutchMatesLoading;
+  const isError = isSiblingsError || isParentsError || isChildrenError || isClutchMatesError;
+
+  // 클러치 메이트 필터링 (visible한 펫만, type 필터는 백엔드에서 처리)
+  const clutchMates = useMemo(() => {
+    if (!clutchMatesData) return [];
+    return clutchMatesData.filter(isVisiblePet);
+  }, [clutchMatesData]);
+
+  // 클러치 메이트 petId Set (중복 제거용)
+  const clutchMateIds = useMemo(() => {
+    return new Set(clutchMates.map((mate) => mate.petId));
+  }, [clutchMates]);
+
+  // 내 프로필 및 부모가 같은 펫 (클러치 메이트 제외)
+  const { otherClutchSiblings } = useMemo(() => {
     if (!siblingsData?.siblings) {
-      return { myProfile: null, sameClutchSiblings: [], otherClutchSiblings: [] };
+      return { otherClutchSiblings: [] };
     }
 
-    // 자기 자신 찾기
-    const me = siblingsData.siblings.find(
-      (sibling) => isVisiblePet(sibling) && sibling.petId === petId,
-    ) as SiblingPetDetailDto | undefined;
-
-    // 자기 자신의 layingDate
-    const myLayingDate = me?.laying?.layingDate;
-
-    // siblings 분류 (자기 자신 제외)
-    const others = siblingsData.siblings.filter((sibling) => sibling.petId !== petId);
-
-    const sameClutch = others.filter((sibling) => {
+    // siblings 분류 (자기 자신 및 클러치 메이트 제외, type 필터는 백엔드에서 처리)
+    const otherClutch = siblingsData.siblings.filter((sibling) => {
       if (!isVisiblePet(sibling)) return false;
-      return sibling.laying?.layingDate === myLayingDate;
-    });
-
-    const otherClutch = others.filter((sibling) => {
-      if (!isVisiblePet(sibling)) return false;
-      return sibling.laying?.layingDate !== myLayingDate;
+      if (sibling.petId === petId) return false; // 자기 자신 제외
+      if (clutchMateIds.has(sibling.petId)) return false; // 클러치 메이트 제외
+      return true;
     });
 
     return {
-      myProfile: me ?? null,
-      sameClutchSiblings: sameClutch,
-      otherClutchSiblings: [...otherClutch],
+      otherClutchSiblings: otherClutch,
     };
-  }, [siblingsData, petId]);
+  }, [siblingsData, petId, clutchMateIds]);
 
   if (isLoading) {
     return (
@@ -98,22 +180,12 @@ function SiblingsPage({ params }: PetDetailPageProps) {
   return (
     <div className={cn("flex flex-col gap-6 p-4", isMobile && "p-2")}>
       {/* 1. 부모 프로필 */}
-      {siblingsData.father || siblingsData.mother ? (
+      {parentsData?.father || parentsData?.mother ? (
         <section>
           <h2 className="mb-3 text-[16px] font-bold text-gray-900 dark:text-gray-300">부모</h2>
           <HorizontalScrollSection>
-            {siblingsData.father && (
-              <div className="flex flex-col gap-1">
-                <span className="text-[12px] font-medium text-blue-600 dark:text-blue-800">부</span>
-                <SiblingPetCard pet={siblingsData.father} />
-              </div>
-            )}
-            {siblingsData.mother && (
-              <div className="flex flex-col gap-1">
-                <span className="text-[12px] font-medium text-red-600 dark:text-red-800">모</span>
-                <SiblingPetCard pet={siblingsData.mother} />
-              </div>
-            )}
+            {parentsData.father && <SiblingPetCard pet={parentsData.father} />}
+            {parentsData.mother && <SiblingPetCard pet={parentsData.mother} />}
           </HorizontalScrollSection>
         </section>
       ) : (
@@ -129,43 +201,58 @@ function SiblingsPage({ params }: PetDetailPageProps) {
         {myProfile && (
           <section>
             <h2 className="mb-3 text-[16px] font-bold text-gray-900">내 프로필</h2>
-            <SiblingPetCard pet={myProfile} />
+            <HorizontalScrollSection>
+              <SiblingPetCard pet={myProfile} />
+            </HorizontalScrollSection>
           </section>
         )}
 
         {/* 3. 클러치 메이트 */}
-        {sameClutchSiblings.length > 0 && (
-          <section className="min-w-0 overflow-hidden">
-            <h2 className="mb-3 text-[16px] font-bold text-gray-900">클러치 메이트</h2>
-            <HorizontalScrollSection>
-              {sameClutchSiblings.map((sibling) => (
-                <SiblingPetCard key={sibling.petId} pet={sibling} />
-              ))}
-            </HorizontalScrollSection>
-          </section>
-        )}
+        <section className="min-w-0 overflow-hidden">
+          <h2 className="mb-3 text-[16px] font-bold text-gray-900">클러치 메이트</h2>
+          <HorizontalScrollSection>
+            {clutchMates.length > 0 ? (
+              clutchMates.map((mate) => <SiblingPetCard key={mate.petId} pet={mate} />)
+            ) : (
+              <div className="text-xs text-gray-500">클러치 메이트가 없습니다.</div>
+            )}
+          </HorizontalScrollSection>
+        </section>
       </div>
 
       {/* 4. 부모가 같은 펫 */}
-      {otherClutchSiblings.length > 0 && (
-        <section className="min-w-0 overflow-hidden">
-          <h2 className="mb-3 text-[16px] font-bold text-gray-900">부모가 같은 펫</h2>
-          <HorizontalScrollSection>
-            {otherClutchSiblings.map((sibling) => (
-              <SiblingPetCard key={sibling.petId} pet={sibling} />
-            ))}
-          </HorizontalScrollSection>
-        </section>
-      )}
+      <section className="min-w-0 overflow-hidden">
+        <h2 className="mb-3 text-[16px] font-bold text-gray-900">부모가 같은 펫</h2>
+        <HorizontalScrollSection
+          hasMore={hasNextSiblings}
+          isLoading={isFetchingNextSiblings}
+          onReachEnd={fetchNextSiblings}
+        >
+          {otherClutchSiblings.length > 0 ? (
+            otherClutchSiblings.map((sibling) => {
+              return <SiblingPetCard key={sibling.petId} pet={sibling} />;
+            })
+          ) : (
+            <div className="text-xs text-gray-500">부모가 같은 펫이 없습니다.</div>
+          )}
+        </HorizontalScrollSection>
+      </section>
 
-      {/* 형제가 없는 경우 */}
-      {(siblingsData.father || siblingsData.mother) &&
-        sameClutchSiblings.length === 0 &&
-        otherClutchSiblings.length === 0 && (
-          <div className="flex h-32 items-center justify-center text-[14px] text-gray-500">
-            등록된 형제가 없습니다.
-          </div>
-        )}
+      {/* 5. 자식 펫 */}
+      <section className="min-w-0 overflow-hidden">
+        <h2 className="mb-3 text-[16px] font-bold text-gray-900">자식</h2>
+        <HorizontalScrollSection
+          hasMore={hasNextChildren}
+          isLoading={isFetchingNextChildren}
+          onReachEnd={fetchNextChildren}
+        >
+          {childrenData?.children && childrenData.children.length > 0 ? (
+            childrenData.children.map((child) => <SiblingPetCard key={child.petId} pet={child} />)
+          ) : (
+            <div className="text-xs text-gray-500">자식 펫이 없습니다.</div>
+          )}
+        </HorizontalScrollSection>
+      </section>
     </div>
   );
 }

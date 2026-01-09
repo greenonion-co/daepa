@@ -780,9 +780,16 @@ export class PetService {
     return new PageDto(petDtos, pageMetaDto);
   }
 
-  async getParentsByPetId(petId: string, userId?: string) {
+  async getParentsByPetId(
+    petId: string,
+    userId?: string,
+    options?: { statuses?: PARENT_STATUS[] },
+  ) {
     const { father, mother } =
-      await this.parentRequestService.getParentsWithRequestStatus(petId);
+      await this.parentRequestService.getParentsWithRequestStatus(
+        petId,
+        options,
+      );
     // petId로 owner 정보
     const pet = await this.petRepository.findOne({
       where: { petId },

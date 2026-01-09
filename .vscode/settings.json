@@ -9,12 +9,7 @@
       "mode": "auto"
     }
   ],
-  "eslint.validate": [
-    "javascript",
-    "javascriptreact",
-    "typescript",
-    "typescriptreact"
-  ],
+  "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"],
   "todo-tree.general.tags": [
     "BUG",
     "HACK",
