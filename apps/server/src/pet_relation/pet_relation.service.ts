@@ -26,6 +26,7 @@ import { PetEntity } from '../pet/pet.entity';
 import { replaceSiblingPublicSafe } from '../common/utils/pet-parent.helper';
 import { PageOptionsDto, PageMetaDto } from '../common/page.dto';
 import { PetSummaryDto } from 'src/pet/pet.dto';
+import { PET_TYPE } from '../pet/pet.constants';
 
 @Injectable()
 export class PetRelationService {
@@ -212,7 +213,10 @@ export class PetRelationService {
           'u.is_biz as owner_isBiz',
           'u.status as owner_status',
         ])
-        .andWhere('p.is_deleted = :isDeleted', { isDeleted: false })
+        .andWhere('p.type = :type AND p.is_deleted = :isDeleted', {
+          type: PET_TYPE.PET,
+          isDeleted: false,
+        })
         .andWhere('(pr.father_id = :petId OR pr.mother_id = :petId)', {
           petId,
         });
