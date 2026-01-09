@@ -5,15 +5,9 @@
  * Project Daepa API description
  * OpenAPI spec version: 1.0
  */
-import type { GetSiblingsWithDetailsDataDtoFather } from "./getSiblingsWithDetailsDataDtoFather";
-import type { GetSiblingsWithDetailsDataDtoMother } from "./getSiblingsWithDetailsDataDtoMother";
 import type { GetSiblingsWithDetailsDataDtoSiblingsItem } from "./getSiblingsWithDetailsDataDtoSiblingsItem";
 
 export interface GetSiblingsWithDetailsDataDto {
-  /** 아빠 펫 정보 (비공개인 경우 hiddenStatus만 포함) */
-  father?: GetSiblingsWithDetailsDataDtoFather;
-  /** 엄마 펫 정보 (비공개인 경우 hiddenStatus만 포함) */
-  mother?: GetSiblingsWithDetailsDataDtoMother;
   /** 형제 펫 목록 (비공개인 경우 hiddenStatus만 포함) */
   siblings: GetSiblingsWithDetailsDataDtoSiblingsItem[];
 }
