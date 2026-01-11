@@ -4,6 +4,7 @@ import Image from "next/image";
 import { Metadata } from "next";
 import { cookies } from "next/headers";
 import { PetDto } from "@repo/api-client";
+import { DateTime } from "luxon";
 
 import { SPECIES_KOREAN_INFO } from "../../../constants";
 import BreedingInfo from "../components/펫정보";
@@ -130,11 +131,7 @@ async function PetDetailPage({ params }: PetDetailPageProps) {
           {pet.deletedAt && (
             <div className="text-xs font-[600] text-red-400">
               삭제 일시:{" "}
-              {new Date(pet.deletedAt).toLocaleDateString("ko-KR", {
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-              })}
+              {DateTime.fromISO(pet.deletedAt).setLocale("ko").toFormat("yyyy년 M월 d일")}
             </div>
           )}
         </div>
