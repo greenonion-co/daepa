@@ -1,5 +1,5 @@
-import { cookies } from "next/headers";
 import { PetDto } from "@repo/api-client";
+import { getServerRequestHeaders } from "@/lib/server/auth";
 import BreedingInfoContent from "./BreedingInfoContent";
 
 interface BreedingInfoProps {
@@ -7,18 +7,9 @@ interface BreedingInfoProps {
   ownerId: string;
 }
 
-async function getAuthHeaders(): Promise<Record<string, string>> {
-  const cookieStore = await cookies();
-  const accessToken = cookieStore.get("accessToken")?.value;
-  if (accessToken) {
-    return { Authorization: `Bearer ${accessToken}` };
-  }
-  return {};
-}
-
 async function getPet(petId: string): Promise<PetDto | null> {
   const url = `${process.env.NEXT_PUBLIC_SERVER_BASE_URL}/api/v1/pet/${petId}`;
-  const headers = await getAuthHeaders();
+  const headers = await getServerRequestHeaders();
 
   try {
     const res = await fetch(url, { cache: "no-store", headers });

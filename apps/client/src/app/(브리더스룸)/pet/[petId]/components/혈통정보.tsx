@@ -1,5 +1,5 @@
-import { cookies } from "next/headers";
 import { GetParentsByPetIdResponseDtoData, PetDtoSpecies } from "@repo/api-client";
+import { getServerRequestHeaders } from "@/lib/server/auth";
 import PedigreeInfoContent from "./PedigreeInfoContent";
 
 interface PedigreeInfoProps {
@@ -8,18 +8,9 @@ interface PedigreeInfoProps {
   userId: string;
 }
 
-async function getAuthHeaders(): Promise<Record<string, string>> {
-  const cookieStore = await cookies();
-  const accessToken = cookieStore.get("accessToken")?.value;
-  if (accessToken) {
-    return { Authorization: `Bearer ${accessToken}` };
-  }
-  return {};
-}
-
 async function getParents(petId: string): Promise<GetParentsByPetIdResponseDtoData | null> {
   const url = `${process.env.NEXT_PUBLIC_SERVER_BASE_URL}/api/v1/pet/parents/${petId}`;
-  const headers = await getAuthHeaders();
+  const headers = await getServerRequestHeaders();
 
   try {
     const res = await fetch(url, { cache: "no-store", headers });

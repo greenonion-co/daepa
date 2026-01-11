@@ -1,11 +1,11 @@
 import { notFound } from "next/navigation";
-import { cookies } from "next/headers";
 import {
   PetDto,
   PetAdoptionDto,
   PetImageItem,
   GetParentsByPetIdResponseDtoData,
 } from "@repo/api-client";
+import { getServerRequestHeaders } from "@/lib/server/auth";
 import PetModalContent from "./PetModalContent";
 
 interface PetModalPageProps {
@@ -14,20 +14,10 @@ interface PetModalPageProps {
   }>;
 }
 
-// 서버에서 API 호출을 위한 헤더 생성
-async function getAuthHeaders(): Promise<Record<string, string>> {
-  const cookieStore = await cookies();
-  const accessToken = cookieStore.get("accessToken")?.value;
-  if (accessToken) {
-    return { Authorization: `Bearer ${accessToken}` };
-  }
-  return {};
-}
-
 // 펫 데이터 fetch 함수
 async function getPet(petId: string): Promise<PetDto | null> {
   const url = `${process.env.NEXT_PUBLIC_SERVER_BASE_URL}/api/v1/pet/${petId}`;
-  const headers = await getAuthHeaders();
+  const headers = await getServerRequestHeaders();
 
   try {
     const res = await fetch(url, { cache: "no-store", headers });
@@ -42,7 +32,7 @@ async function getPet(petId: string): Promise<PetDto | null> {
 // 이미지 fetch
 async function getImages(petId: string): Promise<PetImageItem[]> {
   const url = `${process.env.NEXT_PUBLIC_SERVER_BASE_URL}/api/v1/pet-image/${petId}`;
-  const headers = await getAuthHeaders();
+  const headers = await getServerRequestHeaders();
 
   try {
     const res = await fetch(url, { cache: "no-store", headers });
@@ -56,7 +46,7 @@ async function getImages(petId: string): Promise<PetImageItem[]> {
 // 부모 정보 fetch
 async function getParents(petId: string): Promise<GetParentsByPetIdResponseDtoData | null> {
   const url = `${process.env.NEXT_PUBLIC_SERVER_BASE_URL}/api/v1/pet/parents/${petId}`;
-  const headers = await getAuthHeaders();
+  const headers = await getServerRequestHeaders();
 
   try {
     const res = await fetch(url, { cache: "no-store", headers });
@@ -71,7 +61,7 @@ async function getParents(petId: string): Promise<GetParentsByPetIdResponseDtoDa
 // 분양 정보 fetch
 async function getAdoption(petId: string): Promise<PetAdoptionDto | null> {
   const url = `${process.env.NEXT_PUBLIC_SERVER_BASE_URL}/api/v1/adoption/by-pet/${petId}`;
-  const headers = await getAuthHeaders();
+  const headers = await getServerRequestHeaders();
 
   try {
     const res = await fetch(url, { cache: "no-store", headers });

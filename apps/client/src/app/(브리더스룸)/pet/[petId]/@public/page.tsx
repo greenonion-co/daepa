@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import Image from "next/image";
-import { cookies } from "next/headers";
 import { PetDto } from "@repo/api-client";
+import { getServerRequestHeaders } from "@/lib/server/auth";
 import BreedingInfo from "../components/펫정보";
 import Images from "../components/이미지";
 import PedigreeInfo from "../components/혈통정보";
@@ -25,20 +25,10 @@ interface PublicPageProps {
   }>;
 }
 
-// 서버에서 API 호출을 위한 헤더 생성
-async function getAuthHeaders(): Promise<Record<string, string>> {
-  const cookieStore = await cookies();
-  const accessToken = cookieStore.get("accessToken")?.value;
-  if (accessToken) {
-    return { Authorization: `Bearer ${accessToken}` };
-  }
-  return {};
-}
-
 // 펫 데이터 fetch 함수
 async function getPet(petId: string): Promise<PetDto | null> {
   const url = `${process.env.NEXT_PUBLIC_SERVER_BASE_URL}/api/v1/pet/${petId}`;
-  const headers = await getAuthHeaders();
+  const headers = await getServerRequestHeaders();
 
   try {
     const res = await fetch(url, {
