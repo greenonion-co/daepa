@@ -44,6 +44,7 @@ import { EGG_STATUS } from 'src/egg_detail/egg_detail.constants';
 import { PetDetailBaseDto } from 'src/pet_detail/pet_detail.dto';
 import { EggDetailDto } from 'src/egg_detail/egg_detail.dto';
 import { LayingDto } from 'src/laying/laying.dto';
+import { extractOriginalPetName } from 'src/common/utils/pet-name.helper';
 
 export class PetHiddenStatusDto {
   @ApiProperty({
@@ -97,14 +98,7 @@ export class PetBaseDto {
   @Matches(/^(?!DELETED_).*$/, {
     message: '펫 이름은 "DELETED_"로 시작할 수 없습니다.',
   })
-  @Transform(({ value }): string | undefined => {
-    if (typeof value === 'string' && value.startsWith('DELETED_')) {
-      // DELETED_${name}_${timestamp} 형태에서 원래 이름만 추출
-      const match = value.match(/^DELETED_(.+)_\d+$/);
-      return match ? match[1] : value;
-    }
-    return value as string | undefined;
-  })
+  @Transform(({ value }) => extractOriginalPetName(value))
   name?: string;
 
   @ApiProperty({
@@ -216,14 +210,7 @@ export class DeletedPetDto {
   })
   @IsOptional()
   @IsString()
-  @Transform(({ value }): string | undefined => {
-    if (typeof value === 'string' && value.startsWith('DELETED_')) {
-      // DELETED_${name}_${timestamp} 형태에서 원래 이름만 추출
-      const match = value.match(/^DELETED_(.+)_\d+$/);
-      return match ? match[1] : value;
-    }
-    return value as string | undefined;
-  })
+  @Transform(({ value }) => extractOriginalPetName(value))
   declare name?: string;
 
   @ApiProperty({
@@ -296,14 +283,7 @@ export class PetSummaryDto extends PickType(PetBaseDto, [
   })
   @IsOptional()
   @IsString()
-  @Transform(({ value }): string | undefined => {
-    if (typeof value === 'string' && value.startsWith('DELETED_')) {
-      // DELETED_${name}_${timestamp} 형태에서 원래 이름만 추출
-      const match = value.match(/^DELETED_(.+)_\d+$/);
-      return match ? match[1] : value;
-    }
-    return value as string | undefined;
-  })
+  @Transform(({ value }) => extractOriginalPetName(value))
   declare name?: string;
 
   @ApiProperty({
@@ -438,14 +418,7 @@ export class PetSummaryLayingDto extends PickType(PetSummaryDto, [
   })
   @IsOptional()
   @IsString()
-  @Transform(({ value }): string | undefined => {
-    if (typeof value === 'string' && value.startsWith('DELETED_')) {
-      // DELETED_${name}_${timestamp} 형태에서 원래 이름만 추출
-      const match = value.match(/^DELETED_(.+)_\d+$/);
-      return match ? match[1] : value;
-    }
-    return value as string | undefined;
-  })
+  @Transform(({ value }) => extractOriginalPetName(value))
   declare name?: string;
 
   @ApiProperty({
@@ -528,14 +501,7 @@ export class PetParentDto extends PickType(PetSummaryDto, [
   })
   @IsOptional()
   @IsString()
-  @Transform(({ value }): string | undefined => {
-    if (typeof value === 'string' && value.startsWith('DELETED_')) {
-      // DELETED_${name}_${timestamp} 형태에서 원래 이름만 추출
-      const match = value.match(/^DELETED_(.+)_\d+$/);
-      return match ? match[1] : value;
-    }
-    return value as string | undefined;
-  })
+  @Transform(({ value }) => extractOriginalPetName(value))
   declare name?: string;
 
   @ApiProperty({

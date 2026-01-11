@@ -51,6 +51,7 @@ import { PairEntity } from 'src/pair/pair.entity';
 import { DateTime } from 'luxon';
 import { AdoptionService } from 'src/adoption/adoption.service';
 import { replaceParentPublicSafe } from '../common/utils/pet-parent.helper';
+import { extractOriginalPetName } from '../common/utils/pet-name.helper';
 import { LayingEntity } from 'src/laying/laying.entity';
 
 @Injectable()
@@ -668,11 +669,7 @@ export class PetService {
       }
 
       try {
-        // 원래 이름 복구 (DELETED_ 접두사 제거)
-        const originalName = existingPet.name?.replace(
-          /^DELETED_(.+)_\d+$/,
-          '$1',
-        );
+        const originalName = extractOriginalPetName(existingPet.name);
 
         // 펫 복구
         await entityManager.update(

@@ -29,6 +29,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { USER_STATUS } from 'src/user/user.constant';
 import { ParentRequestService } from '../parent_request/parent_request.service';
 import { replaceParentPublicSafe } from '../common/utils/pet-parent.helper';
+import { extractOriginalPetName } from '../common/utils/pet-name.helper';
 
 @Injectable()
 export class AdoptionService {
@@ -67,9 +68,8 @@ export class AdoptionService {
       userId,
     );
 
-    // 삭제된 펫의 경우 이름에서 실제 이름 추출
     const petName = pet.isDeleted
-      ? pet.name?.match(/^DELETED_(.+)_\d+$/)?.[1]
+      ? extractOriginalPetName(pet.name)
       : pet.name;
 
     return {
