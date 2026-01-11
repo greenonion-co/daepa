@@ -54,11 +54,6 @@ export function replaceParentPublicSafe(
  * @param viewerId - 현재 조회자 ID
  * @returns 조회 권한에 따라 펫 정보 또는 숨김 상태 반환
  */
-// export function replaceSiblingPublicSafe(
-//   sibling: SiblingPetDetailDto,
-//   viewerId?: string,
-// ) {
-//   const isOwner = sibling.owner?.userId === viewerId;
 export function replaceSiblingPublicSafe<T extends PetSummaryDto>(
   pet: T,
   viewerId: string,
