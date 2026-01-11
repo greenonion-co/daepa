@@ -75,6 +75,17 @@ export async function generateMetadata({ params }: PetDetailPageProps): Promise<
     };
   }
 
+  // 비공개 펫은 검색엔진 인덱싱 방지
+  if (!pet.isPublic) {
+    return {
+      title: "비공개 펫",
+      robots: {
+        index: false,
+        follow: false,
+      },
+    };
+  }
+
   const speciesKorean = SPECIES_KOREAN_INFO[pet.species] || pet.species;
   const morphsText = pet.morphs?.join(", ") || "";
   const description = `${speciesKorean} ${pet.name || ""}${morphsText ? ` - ${morphsText}` : ""}`;
