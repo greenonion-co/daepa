@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { View, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import Navigation from './src/navigation';
@@ -35,17 +36,24 @@ function App() {
     <SafeAreaProvider>
       <QueryClientProvider client={queryClient}>
         {hydrated ? (
-          <NavigationContainer>
+          <View style={styles.container}>
+            <NavigationContainer>
+              <Navigation />
+            </NavigationContainer>
             <Toast ref={Toast.setRef} />
             <Loading ref={Loading.setRef} />
             <Popup ref={Popup.setRef} />
-
-            <Navigation />
-          </NavigationContainer>
+          </View>
         ) : null}
       </QueryClientProvider>
     </SafeAreaProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+});
 
 export default App;

@@ -1,18 +1,28 @@
 import { useNavigation } from '@react-navigation/native';
+import { ChevronLeft } from 'lucide-react-native';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useThemeStore, themeColors } from '@/store/theme';
 
 interface TopBarProps {
   title?: string;
   textButtonLabel?: string;
   textButtonPressed?: () => void;
+  showBackButton?: boolean;
+  leftComponent?: React.ReactNode;
+  rightComponent?: React.ReactNode;
 }
 
 const TopBar = ({
   title = '',
   textButtonLabel = '',
   textButtonPressed = () => {},
+  showBackButton = true,
+  leftComponent,
+  rightComponent,
 }: TopBarProps) => {
   const navigation = useNavigation();
+  const theme = useThemeStore(state => state.theme);
+  const colors = themeColors[theme];
 
   const onLeftButtonPress = () => {
     if (navigation.canGoBack()) {
@@ -21,23 +31,41 @@ const TopBar = ({
   };
 
   return (
-    <View style={styles.container}>
+    <View
+      style={[
+        styles.container,
+        {
+          backgroundColor: colors.background,
+          borderBottomColor: colors.tabBarBorder,
+        },
+      ]}
+    >
       <View style={styles.leftButtonContainer}>
-        <View style={styles.leftButtonContainer}>
+        {leftComponent ? (
+          leftComponent
+        ) : showBackButton && navigation.canGoBack() ? (
           <Pressable onPress={onLeftButtonPress}>
-            <Text>뒤로</Text>
+            <ChevronLeft color={colors.tabBarActive} />
           </Pressable>
-        </View>
+        ) : null}
       </View>
 
-      {!!title && <Text>{title}</Text>}
+      <View style={styles.titleContainer}>
+        {!!title && (
+          <Text style={[styles.titleText, { color: colors.tabBarActive }]}>
+            {title}
+          </Text>
+        )}
+      </View>
 
       <View style={styles.rightButtonContainer}>
-        {!!textButtonLabel && (
+        {rightComponent ? (
+          rightComponent
+        ) : textButtonLabel ? (
           <Pressable onPress={textButtonPressed}>
-            <Text>{textButtonLabel}</Text>
+            <Text style={styles.buttonText}>{textButtonLabel}</Text>
           </Pressable>
-        )}
+        ) : null}
       </View>
     </View>
   );
@@ -49,20 +77,29 @@ const styles = StyleSheet.create({
   container: {
     width: '100%',
     height: 56,
-    backgroundColor: 'white',
     justifyContent: 'space-between',
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 16,
   },
-  leftIcon: {
-    width: 24,
-    height: 24,
-  },
   leftButtonContainer: {
-    width: 40,
+    width: 60,
+    alignItems: 'flex-start',
+  },
+  titleContainer: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  titleText: {
+    fontSize: 18,
+    fontWeight: '600',
   },
   rightButtonContainer: {
-    width: 40,
+    width: 60,
+    alignItems: 'flex-end',
+  },
+  buttonText: {
+    fontSize: 16,
+    color: '#007AFF',
   },
 });

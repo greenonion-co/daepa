@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
-<dict>
+<!-- ios device 에서 테스트를 위해 잠시 제거 -->
+<!-- <dict>
 	<key>com.apple.developer.applesignin</key>
 	<array>
 		<string>Default</string>
-	</array>
+	</array> -->
 </dict>
 </plist>

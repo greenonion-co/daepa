@@ -126,10 +126,21 @@ AXIOS_INSTANCE.interceptors.response.use(
           // 로그아웃 처리
           if (tokenProvider) {
             await tokenProvider.removeToken();
-            if (typeof window !== "undefined" && window?.location?.pathname) {
-              const currentPath = window.location.pathname + window.location.search;
-              localStorage.setItem("redirectUrl", currentPath);
-              window.location.href = "/sign-in";
+            if (typeof window !== "undefined") {
+              // WebView 환경이면 모바일 앱에 알림
+              const win = window as any;
+              if (win.isNativeApp || win.ReactNativeWebView) {
+                try {
+                  const message = JSON.stringify({ type: "TOKEN_REFRESH_FAILED" });
+                  win.ReactNativeWebView?.postMessage(message);
+                } catch (e) {
+                  console.error("Failed to notify native app:", e);
+                }
+              } else if (window?.location?.pathname) {
+                // 일반 웹 환경
+                const currentPath = window.location.pathname + window.location.search;
+                localStorage.setItem("redirectUrl", currentPath);
+              }
             }
           }
 
@@ -142,10 +153,19 @@ AXIOS_INSTANCE.interceptors.response.use(
       // ACCESS_TOKEN_INVALID가 아닌 다른 401 에러
       if (tokenProvider) {
         tokenProvider.removeToken();
-        if (typeof window !== "undefined" && window?.location?.pathname) {
-          const currentPath = window.location.pathname + window.location.search;
-          localStorage.setItem("redirectUrl", currentPath);
-          window.location.href = "/sign-in";
+        if (typeof window !== "undefined") {
+          const win = window as any;
+          if (win.isNativeApp || win.ReactNativeWebView) {
+            try {
+              const message = JSON.stringify({ type: "TOKEN_REFRESH_FAILED" });
+              win.ReactNativeWebView?.postMessage(message);
+            } catch (e) {
+              console.error("Failed to notify native app:", e);
+            }
+          } else if (window?.location?.pathname) {
+            const currentPath = window.location.pathname + window.location.search;
+            localStorage.setItem("redirectUrl", currentPath);
+          }
         }
       }
     }
