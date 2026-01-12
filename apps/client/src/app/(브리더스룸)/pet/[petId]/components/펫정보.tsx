@@ -1,28 +1,13 @@
-import { PetDto } from "@repo/api-client";
-import { getServerRequestHeaders } from "@/lib/server/auth";
 import BreedingInfoContent from "./BreedingInfoContent";
+import { fetchPet } from "@/app/(브리더스룸)/pet/[petId]/page";
 
 interface BreedingInfoProps {
   petId: string;
   ownerId: string;
 }
 
-async function getPet(petId: string): Promise<PetDto | null> {
-  const url = `${process.env.NEXT_PUBLIC_SERVER_BASE_URL}/api/v1/pet/${petId}`;
-  const headers = await getServerRequestHeaders();
-
-  try {
-    const res = await fetch(url, { cache: "no-store", headers });
-    if (!res.ok) return null;
-    const data = await res.json();
-    return data.data;
-  } catch {
-    return null;
-  }
-}
-
 export default async function BreedingInfo({ petId, ownerId }: BreedingInfoProps) {
-  const pet = await getPet(petId);
+  const pet = await fetchPet(petId);
 
   return <BreedingInfoContent petId={petId} ownerId={ownerId} initialPet={pet} />;
 }
