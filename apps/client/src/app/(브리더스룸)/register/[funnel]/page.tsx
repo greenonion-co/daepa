@@ -9,9 +9,8 @@ import { FormField } from "../../components/Form/FormField";
 import { useSelect } from "../hooks/useSelect";
 import { useMutation } from "@tanstack/react-query";
 import { CreateParentDtoRole, CreatePetDto, petControllerCreate } from "@repo/api-client";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { AxiosError } from "axios";
-import { useRouter } from "next/navigation";
 import Loading from "@/components/common/Loading";
 import { isNil, pick, pickBy } from "es-toolkit";
 import { BaseFormData } from "../../pet/store/base";
@@ -21,6 +20,8 @@ import Dialog from "../../components/Form/Dialog";
 import { cn } from "@/lib/utils";
 import FloatingButton from "../../components/FloatingButton";
 import { useIsMobile } from "@/hooks/useMobile";
+import { useAppRouter } from "@/hooks/useAppRouter";
+import { isNativeApp, requestPopToRoot } from "@/lib/native-bridge";
 
 const formatFormData = (formData: BaseFormData): CreatePetDto | undefined => {
   const data = { ...formData };
@@ -71,7 +72,7 @@ const formatFormData = (formData: BaseFormData): CreatePetDto | undefined => {
 };
 
 export default function RegisterPage({ params }: { params: Promise<{ funnel: string }> }) {
-  const router = useRouter();
+  const router = useAppRouter();
   const isMobile = useIsMobile();
   const { handleSelect } = useSelect();
   const { formData, step, setStep, setFormData, errors, setErrors, resetForm } =
@@ -128,8 +129,12 @@ export default function RegisterPage({ params }: { params: Promise<{ funnel: str
 
   const handleSuccess = () => {
     toast.success("개체 등록이 완료되었습니다.");
-    router.push(`/pet`);
     resetForm();
+    if (isNativeApp()) {
+      requestPopToRoot();
+    } else {
+      router.push(`/pet`);
+    }
   };
 
   const createPet = async (formData: BaseFormData) => {
