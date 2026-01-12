@@ -81,7 +81,7 @@ function GeneralTabs() {
         tabBarInactiveTintColor: colors.tabBarInactive,
         tabBarLabelStyle: {
           fontSize: 12,
-          fontWeight: '500',
+          fontWeight: '700',
         },
         tabBarIconStyle: {
           marginBottom: 5,
@@ -94,7 +94,8 @@ function GeneralTabs() {
           borderBottomWidth: 0,
           borderColor: colors.tabBarBorder,
         },
-      }}>
+      }}
+    >
       <GeneralTab.Screen
         name="Home"
         component={HomeWebView}
@@ -141,7 +142,8 @@ function AdminTabs() {
           borderBottomWidth: 0,
           borderColor: colors.tabBarBorder,
         },
-      }}>
+      }}
+    >
       <AdminTab.Screen
         name="Home"
         component={AdminHomeWebView}

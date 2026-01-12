@@ -52,7 +52,7 @@ export default function FloatingModeButton({
       {
         translateY: animation.interpolate({
           inputRange: [0, 1],
-          outputRange: [0, -100],
+          outputRange: [0, -80],
         }),
       },
       {
@@ -70,7 +70,7 @@ export default function FloatingModeButton({
       {
         translateY: animation.interpolate({
           inputRange: [0, 1],
-          outputRange: [0, -52],
+          outputRange: [0, -40],
         }),
       },
       {
@@ -237,8 +237,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   menuButton: {
-    width: 60,
-    height: 35,
+    width: 55,
+    height: 30,
     borderRadius: 20,
     backgroundColor: '#c2c2c2ff',
     justifyContent: 'center',
@@ -261,13 +261,13 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
   mainButton: {
-    width: 48,
-    height: 48,
+    width: 40,
+    height: 40,
     borderRadius: 28,
-    backgroundColor: '#000',
+    backgroundColor: '#111827',
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
+    shadowColor: '#111827',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 6,
@@ -275,12 +275,14 @@ const styles = StyleSheet.create({
   },
   mainButtonText: {
     fontSize: 28,
+    lineHeight: 28,
     color: '#fff',
     fontWeight: '300',
+    textAlign: 'center',
   },
   currentModeLabel: {
     position: 'absolute',
-    top: 55,
+    top: 45,
     backgroundColor: '#0b22b3ff',
     paddingHorizontal: 8,
     paddingVertical: 4,
