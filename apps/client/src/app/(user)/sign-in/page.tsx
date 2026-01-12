@@ -6,7 +6,7 @@ import { providerIconMap } from "../constants";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { tokenStorage } from "@/lib/tokenStorage";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { UserProfileDtoProviderItem } from "@repo/api-client";
 
 const SignInPage = () => {
@@ -16,7 +16,7 @@ const SignInPage = () => {
     const token = tokenStorage.getToken();
     if (token) {
       toast.error("이미 로그인된 사용자입니다.");
-      router.replace("/pet");
+      router.replace("/");
     }
   }, [router]);
 

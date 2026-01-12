@@ -8,7 +8,7 @@ import {
 } from "@repo/api-client";
 import { useInfiniteQuery, useMutation } from "@tanstack/react-query";
 import { HelpCircle, Plus } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { memo, useEffect, useState } from "react";
 import CreateMatingForm from "./CreateMatingForm";
 import CreateLayingModal from "./CreateLayingModal";

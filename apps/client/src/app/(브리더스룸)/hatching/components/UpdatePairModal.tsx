@@ -2,7 +2,7 @@ import BottomSheet from "@/components/common/BottomSheet";
 import { pairControllerUpdatePair, UpdatePairDto } from "@repo/api-client";
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { AxiosError } from "axios";
 import { updatePairProps } from "./PairList";
 
@@ -52,13 +52,13 @@ const UpdatePairModal = ({
       onSecondButtonClick={close}
       buttonDisabled={!hasChanges}
     >
-      <div className="px-1 text-[16px] font-[500]">메모 수정</div>
+      <div className="px-1 text-[16px] font-[700]">메모 수정</div>
 
       <div>
         <div className="relative pt-2">
           <textarea
             placeholder="메모를 추가해 보세요"
-            className={`min-h-30 w-full rounded-xl bg-gray-100 p-2 pb-10 text-left text-[14px] focus:outline-none focus:ring-0 dark:bg-gray-600/50 dark:text-white`}
+            className={`min-h-30 w-full rounded-xl bg-gray-100 p-3 pb-10 text-left text-[16px] focus:ring-0 focus:outline-none dark:bg-gray-600/50 dark:text-white`}
             value={desc}
             maxLength={maxLength}
             onChange={(e) => setDesc(e.target.value)}
@@ -67,7 +67,7 @@ const UpdatePairModal = ({
             }}
             style={{ height: "auto" }}
           />
-          <div className="absolute bottom-3 right-3 text-xs text-gray-500">
+          <div className="absolute right-3 bottom-3 text-xs text-gray-500">
             {currentLength}/{maxLength}
           </div>
         </div>

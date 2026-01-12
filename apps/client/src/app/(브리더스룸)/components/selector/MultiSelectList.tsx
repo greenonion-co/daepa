@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import BottomSheet from "@/components/common/BottomSheet";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 
 interface MultiSelectListProps {
   isOpen: boolean;
@@ -69,14 +69,16 @@ export default function MultiSelectList({
         <div className="flex items-center gap-2">
           <h2 className="pl-4 text-xl font-bold">{title}</h2>
           <span className="text-sm text-gray-500">
-            {maxSelection ? `${selectedItems.length}/${maxSelection} 선택됨` : `${selectedItems.length}개 선택됨`}
+            {maxSelection
+              ? `${selectedItems.length}/${maxSelection} 선택됨`
+              : `${selectedItems.length}개 선택됨`}
           </span>
         </div>
         <div className="max-h-[50vh] overflow-y-auto">
           {selectList?.map((key) => (
             <button
               key={key}
-              className={`mb-2 mr-2 rounded-full pb-1 pl-4 pr-3 pt-1 ${
+              className={`mr-2 mb-2 rounded-full pt-1 pr-3 pb-1 pl-4 ${
                 selectedItems.includes(key) ? "bg-[#1A56B3] text-[#D9E1EC]" : "hover:bg-gray-100"
               } dark:hover:bg-gray-800`}
               onClick={() => handleMultipleSelect(key)}

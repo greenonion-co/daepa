@@ -1,5 +1,5 @@
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { tokenStorage } from "@/lib/tokenStorage";
 import { AxiosError } from "axios";
 import { useMutation } from "@tanstack/react-query";

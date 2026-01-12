@@ -4,7 +4,7 @@ import { Label } from "@/components/ui/label";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { pairControllerGetPairList, matingControllerUpdateMating } from "@repo/api-client";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { AxiosError } from "axios";
 import { UpdateMatingDto } from "@repo/api-client";
 import CalendarInput from "./CalendarInput";

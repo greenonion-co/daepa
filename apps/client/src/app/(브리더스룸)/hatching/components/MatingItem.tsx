@@ -14,7 +14,7 @@ import LayingItem from "./LayingItem";
 import { DateTime } from "luxon";
 import CalendarSelect from "./CalendarSelect";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { AxiosError } from "axios";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
@@ -269,7 +269,9 @@ const MatingItem = ({ mating, father, mother, initialLayingId, showTutorial }: M
                   layingData={layingData}
                   father={father}
                   mother={mother}
-                  showTutorial={sortedLayingsByDate[0]?.layingId === layingData.layingId && showTutorial}
+                  showTutorial={
+                    sortedLayingsByDate[0]?.layingId === layingData.layingId && showTutorial
+                  }
                 />
               </div>
             </div>

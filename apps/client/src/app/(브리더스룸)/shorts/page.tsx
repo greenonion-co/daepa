@@ -6,7 +6,7 @@ import { petControllerFindAll } from "@repo/api-client";
 import { useEffect } from "react";
 import Loading from "@/components/common/Loading";
 import ShortsCard from "../pet/[petId]/(펫카드)/Shorts";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 
 export default function ShortsPage() {
   const { ref, inView } = useInView();

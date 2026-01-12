@@ -10,7 +10,7 @@ import {
   UpdatePetDtoEggStatus,
 } from "@repo/api-client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { AxiosError } from "axios";
 import React from "react";
 
@@ -28,7 +28,12 @@ interface LayingItemProps {
   showTutorial?: boolean;
 }
 
-const LayingItem = ({ layingData: { layingDate, layings }, father, mother, showTutorial }: LayingItemProps) => {
+const LayingItem = ({
+  layingData: { layingDate, layings },
+  father,
+  mother,
+  showTutorial,
+}: LayingItemProps) => {
   const queryClient = useQueryClient();
 
   const { mutateAsync: updateEggStatus } = useMutation({

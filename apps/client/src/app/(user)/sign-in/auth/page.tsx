@@ -6,7 +6,7 @@ import { UserDtoStatus, AXIOS_INSTANCE } from "@repo/api-client";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 
 const AuthPage = () => {
   const router = useRouter();

@@ -14,7 +14,7 @@ import { useDropzone } from "react-dropzone";
 import Image from "next/image";
 import { buildR2TransformedUrl, cn } from "@/lib/utils";
 import { X, Plus, Loader2, Info } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { useCallback, useEffect, useState } from "react";
 import { isNil, range, remove } from "es-toolkit";
 import { ACCEPT_IMAGE_FORMATS } from "../../constants";
@@ -309,7 +309,7 @@ function SortableThumb({
       style={style}
       className={cn(
         "relative h-24 w-full select-none",
-        isDragging && "z-50 rotate-3 scale-105 shadow-xl", // 드래그 중 스타일
+        isDragging && "z-50 scale-105 rotate-3 shadow-xl", // 드래그 중 스타일
       )}
     >
       <div
@@ -355,7 +355,7 @@ function SortableThumb({
           type="button"
           onClick={onDelete}
           className={cn(
-            "absolute right-1 top-1 z-10 inline-flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-red-500 text-white shadow-sm transition-all duration-200",
+            "absolute top-1 right-1 z-10 inline-flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-red-500 text-white shadow-sm transition-all duration-200",
             "hover:bg-red-600 active:scale-95",
             isDragging && "opacity-0", // 드래그 중에는 삭제 버튼 숨김
           )}
