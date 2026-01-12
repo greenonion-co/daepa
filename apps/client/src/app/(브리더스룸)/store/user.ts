@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { userControllerGetUserProfile, UserProfileDto } from "@repo/api-client";
 import { tokenStorage } from "@/lib/tokenStorage";
+import { isNativeApp, syncUserToNative } from "@/lib/native-bridge";
 
 interface UserState {
   user: UserProfileDto | null;
@@ -38,9 +39,16 @@ export const useUserStore = create<UserStore>()((set) => ({
         throw new Error("사용자 정보를 가져오는데 실패했습니다.");
       }
 
+      const userData = data.data;
+
       set({
-        user: data.data,
+        user: userData,
       });
+
+      // 네이티브 앱인 경우 유저 데이터 동기화
+      if (isNativeApp() && userData) {
+        syncUserToNative(userData);
+      }
     } catch (error) {
       console.error(error);
     }
