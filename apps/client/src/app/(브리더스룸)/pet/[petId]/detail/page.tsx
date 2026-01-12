@@ -11,7 +11,7 @@ import BreedingInfo from "../components/펫정보";
 import Images from "../components/이미지";
 import PedigreeInfo from "../components/혈통정보";
 import AdoptionInfo from "../components/분양정보";
-import PetDetailPublicLayout from "../components/PetDetailPublicLayout";
+import PetDetailLayout from "../components/PetDetailLayout";
 
 // 섹션 로딩 스켈레톤
 function SectionSkeleton() {
@@ -130,7 +130,7 @@ async function PetDetailPage({ params }: PetDetailPageProps) {
   }
 
   return (
-    <PetDetailPublicLayout
+    <PetDetailLayout
       pet={pet}
       breedingSlot={
         <Suspense fallback={<SectionSkeleton />}>

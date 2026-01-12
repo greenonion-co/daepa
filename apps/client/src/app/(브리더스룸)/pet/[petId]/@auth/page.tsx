@@ -1,13 +1,15 @@
+import { Suspense } from "react";
 import { redirect } from "next/navigation";
-import {
-  PetDto,
-  PetAdoptionDto,
-  PetImageItem,
-  GetParentsByPetIdResponseDtoData,
-} from "@repo/api-client";
+import { PetDto } from "@repo/api-client";
 import { getServerRequestHeaders } from "@/lib/server/auth";
 import PetList from "../../components/PetList";
-import PetModalWrapper from "../components/PetModalWrapper";
+import PetDetailLayout from "@/app/(브리더스룸)/pet/[petId]/components/PetDetailLayout";
+import { PetDetailModalPush } from "@/app/(브리더스룸)/pet/[petId]/components/PetDetailModal";
+import BreedingInfo from "@/app/(브리더스룸)/pet/[petId]/components/펫정보";
+import Images from "@/app/(브리더스룸)/pet/[petId]/components/이미지";
+import PedigreeInfo from "@/app/(브리더스룸)/pet/[petId]/components/혈통정보";
+import AdoptionInfo from "@/app/(브리더스룸)/pet/[petId]/components/분양정보";
+import { SectionSkeleton } from "../@public/page";
 
 interface AuthPageProps {
   params: Promise<{
@@ -30,60 +32,10 @@ async function getPet(petId: string): Promise<PetDto | null> {
   }
 }
 
-// 이미지 fetch
-async function getImages(petId: string): Promise<PetImageItem[]> {
-  const url = `${process.env.NEXT_PUBLIC_SERVER_BASE_URL}/api/v1/pet-image/${petId}`;
-  const headers = await getServerRequestHeaders();
-
-  try {
-    const res = await fetch(url, { cache: "no-store", headers });
-    if (!res.ok) return [];
-    return await res.json();
-  } catch {
-    return [];
-  }
-}
-
-// 부모 정보 fetch
-async function getParents(petId: string): Promise<GetParentsByPetIdResponseDtoData | null> {
-  const url = `${process.env.NEXT_PUBLIC_SERVER_BASE_URL}/api/v1/pet/parents/${petId}`;
-  const headers = await getServerRequestHeaders();
-
-  try {
-    const res = await fetch(url, { cache: "no-store", headers });
-    if (!res.ok) return null;
-    const data = await res.json();
-    return data.data;
-  } catch {
-    return null;
-  }
-}
-
-// 분양 정보 fetch
-async function getAdoption(petId: string): Promise<PetAdoptionDto | null> {
-  const url = `${process.env.NEXT_PUBLIC_SERVER_BASE_URL}/api/v1/adoption/by-pet/${petId}`;
-  const headers = await getServerRequestHeaders();
-
-  try {
-    const res = await fetch(url, { cache: "no-store", headers });
-    if (!res.ok) return null;
-    const data = await res.json();
-    return data.data;
-  } catch {
-    return null;
-  }
-}
-
 export default async function AuthPage({ params }: AuthPageProps) {
   const { petId } = await params;
 
-  // 모든 데이터를 병렬로 fetch
-  const [pet, images, parents, adoption] = await Promise.all([
-    getPet(petId),
-    getImages(petId),
-    getParents(petId),
-    getAdoption(petId),
-  ]);
+  const pet = await getPet(petId);
 
   if (!pet) {
     redirect("/pet?error=pet-not-found");
@@ -92,12 +44,32 @@ export default async function AuthPage({ params }: AuthPageProps) {
   return (
     <>
       <PetList />
-      <PetModalWrapper
-        pet={pet}
-        initialImages={images}
-        initialParents={parents}
-        initialAdoption={adoption}
-      />
+      <PetDetailModalPush>
+        <PetDetailLayout
+          pet={pet}
+          variant="modal"
+          breedingSlot={
+            <Suspense fallback={<SectionSkeleton />}>
+              <BreedingInfo petId={pet.petId} ownerId={pet.owner.userId ?? ""} />
+            </Suspense>
+          }
+          imagesSlot={
+            <Suspense fallback={<SectionSkeleton />}>
+              <Images pet={pet} />
+            </Suspense>
+          }
+          pedigreeSlot={
+            <Suspense fallback={<SectionSkeleton />}>
+              <PedigreeInfo species={pet.species} petId={pet.petId} userId={pet.owner.userId ?? ""} />
+            </Suspense>
+          }
+          adoptionSlot={
+            <Suspense fallback={<SectionSkeleton />}>
+              <AdoptionInfo petId={pet.petId} ownerId={pet.owner.userId ?? ""} />
+            </Suspense>
+          }
+        />
+      </PetDetailModalPush>
     </>
   );
 }
