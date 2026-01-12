@@ -2,11 +2,10 @@ import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import { Metadata } from "next";
-import { PetDto } from "@repo/api-client";
 import { DateTime } from "luxon";
-import { getServerRequestHeaders } from "@/lib/server/auth";
 import { SPECIES_KOREAN_INFO } from "../../constants";
-import BreedingInfo from "./components/펫정보";
+import { fetchPet, preloadPetData } from "./data";
+import BreedingInfoContent from "./components/BreedingInfoContent";
 import Images from "./components/이미지";
 import PedigreeInfo from "./components/혈통정보";
 import AdoptionInfo from "./components/분양정보";
@@ -27,31 +26,6 @@ interface PetPageProps {
   params: Promise<{
     petId: string;
   }>;
-}
-
-// 펫 데이터 fetch 함수
-export async function fetchPet(petId: string): Promise<PetDto | null> {
-  const url = `${process.env.NEXT_PUBLIC_SERVER_BASE_URL}/api/v1/pet/${petId}`;
-  const headers = await getServerRequestHeaders();
-
-  try {
-    const res = await fetch(url, {
-      cache: "no-store",
-      headers,
-    });
-
-    if (!res.ok) {
-      if (res.status === 404) {
-        return null;
-      }
-      throw new Error("Failed to fetch pet");
-    }
-
-    const data = await res.json();
-    return data.data;
-  } catch {
-    return null;
-  }
 }
 
 // 동적 메타데이터 생성 (SEO)
@@ -93,7 +67,10 @@ export async function generateMetadata({ params }: PetPageProps): Promise<Metada
 export default async function PetPage({ params }: PetPageProps) {
   const { petId } = await params;
 
-  // 데이터 fetch
+  // 모든 데이터 fetch 병렬 시작 (await 없이)
+  preloadPetData(petId);
+
+  // pet 데이터는 notFound 체크에 필요하므로 await
   const pet = await fetchPet(petId);
 
   // 펫을 찾을 수 없는 경우
@@ -129,13 +106,20 @@ export default async function PetPage({ params }: PetPageProps) {
     );
   }
 
+  /*
+   * BreedingInfoContent는 다른 슬롯과 달리 Suspense 없이 직접 사용합니다.
+   * 이유: 추가 데이터 fetch가 없고, pet 데이터만 전달하므로 async 작업이 불필요합니다.
+   * 다른 슬롯(Images, PedigreeInfo, AdoptionInfo)은 각각 별도 API를 호출하므로 Suspense가 필요합니다.
+   */
   return (
     <PetDetailLayout
       pet={pet}
       breedingSlot={
-        <Suspense fallback={<SectionSkeleton />}>
-          <BreedingInfo petId={pet.petId} ownerId={pet.owner.userId ?? ""} />
-        </Suspense>
+        <BreedingInfoContent
+          petId={pet.petId}
+          ownerId={pet.owner.userId ?? ""}
+          initialPet={pet}
+        />
       }
       imagesSlot={
         <Suspense fallback={<SectionSkeleton />}>
@@ -144,12 +128,12 @@ export default async function PetPage({ params }: PetPageProps) {
       }
       pedigreeSlot={
         <Suspense fallback={<SectionSkeleton />}>
-          <PedigreeInfo species={pet.species} petId={pet.petId} userId={pet.owner.userId ?? ""} />
+          <PedigreeInfo pet={pet} />
         </Suspense>
       }
       adoptionSlot={
         <Suspense fallback={<SectionSkeleton />}>
-          <AdoptionInfo petId={pet.petId} ownerId={pet.owner.userId ?? ""} />
+          <AdoptionInfo pet={pet} />
         </Suspense>
       }
     />

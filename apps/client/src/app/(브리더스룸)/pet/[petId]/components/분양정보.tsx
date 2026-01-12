@@ -1,28 +1,19 @@
-import { PetAdoptionDto } from "@repo/api-client";
-import { getServerRequestHeaders } from "@/lib/server/auth";
+import { PetDto } from "@repo/api-client";
+import { fetchAdoption } from "../data";
 import AdoptionInfoContent from "./AdoptionInfoContent";
 
 interface AdoptionInfoProps {
-  petId: string;
-  ownerId: string;
+  pet: PetDto;
 }
 
-async function getAdoption(petId: string): Promise<PetAdoptionDto | null> {
-  const url = `${process.env.NEXT_PUBLIC_SERVER_BASE_URL}/api/v1/adoption/by-pet/${petId}`;
-  const headers = await getServerRequestHeaders();
+export default async function AdoptionInfo({ pet }: AdoptionInfoProps) {
+  const adoption = await fetchAdoption(pet.petId);
 
-  try {
-    const res = await fetch(url, { cache: "no-store", headers });
-    if (!res.ok) return null;
-    const data = await res.json();
-    return data.data;
-  } catch {
-    return null;
-  }
-}
-
-export default async function AdoptionInfo({ petId, ownerId }: AdoptionInfoProps) {
-  const adoption = await getAdoption(petId);
-
-  return <AdoptionInfoContent petId={petId} ownerId={ownerId} initialAdoption={adoption} />;
+  return (
+    <AdoptionInfoContent
+      petId={pet.petId}
+      ownerId={pet.owner.userId ?? ""}
+      initialAdoption={adoption}
+    />
+  );
 }
