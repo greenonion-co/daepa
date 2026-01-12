@@ -1,4 +1,5 @@
 import { cache } from "react";
+import { notFound } from "next/navigation";
 import {
   PetDto,
   PetImageItem,
@@ -106,4 +107,25 @@ export function preloadPetData(petId: string) {
   void fetchImages(petId);
   void fetchParents(petId);
   void fetchAdoption(petId);
+}
+
+/**
+ * 펫 상세 페이지의 공통 데이터 로딩 로직입니다.
+ *
+ * 1. preloadPetData로 모든 데이터 병렬 요청 시작
+ * 2. pet 데이터 await
+ * 3. pet이 없으면 notFound() 호출
+ *
+ * @param petId - 조회할 펫의 ID
+ * @returns 펫 데이터 (없으면 notFound로 인해 반환되지 않음)
+ */
+export async function loadPetDetailPageData(petId: string): Promise<PetDto> {
+  preloadPetData(petId);
+  const pet = await fetchPet(petId);
+
+  if (!pet) {
+    notFound();
+  }
+
+  return pet;
 }

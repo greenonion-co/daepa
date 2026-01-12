@@ -1,26 +1,13 @@
-import { Suspense } from "react";
-import { notFound } from "next/navigation";
 import Image from "next/image";
 import { Metadata } from "next";
 import { DateTime } from "luxon";
 import { SPECIES_KOREAN_INFO } from "../../constants";
-import { fetchPet, preloadPetData } from "./data";
-import BreedingInfoContent from "./components/BreedingInfoContent";
-import Images from "./components/이미지";
-import PedigreeInfo from "./components/혈통정보";
-import AdoptionInfo from "./components/분양정보";
+import { fetchPet, loadPetDetailPageData } from "./data";
+import { createPetDetailSlots } from "./components/createPetDetailSlots";
 import PetDetailLayout from "./components/PetDetailLayout";
 
-// 섹션 로딩 스켈레톤
-export function SectionSkeleton() {
-  return (
-    <div className="flex flex-1 animate-pulse flex-col gap-2 rounded-2xl bg-white p-3 dark:bg-neutral-900">
-      <div className="w-15 h-4 rounded bg-gray-200 dark:bg-gray-700" />
-      <div className="h-6 w-40 rounded bg-gray-200 dark:bg-gray-700" />
-      <div className="h-[200px] rounded-xl bg-gray-200 dark:bg-gray-700" />
-    </div>
-  );
-}
+// 다른 파일에서 import할 수 있도록 re-export
+export { SectionSkeleton } from "./components/SectionSkeleton";
 
 interface PetPageProps {
   params: Promise<{
@@ -66,17 +53,7 @@ export async function generateMetadata({ params }: PetPageProps): Promise<Metada
 
 export default async function PetPage({ params }: PetPageProps) {
   const { petId } = await params;
-
-  // 모든 데이터 fetch 병렬 시작 (await 없이)
-  preloadPetData(petId);
-
-  // pet 데이터는 notFound 체크에 필요하므로 await
-  const pet = await fetchPet(petId);
-
-  // 펫을 찾을 수 없는 경우
-  if (!pet) {
-    notFound();
-  }
+  const pet = await loadPetDetailPageData(petId);
 
   // 삭제된 펫인 경우 처리
   if (pet.isDeleted) {
@@ -106,36 +83,5 @@ export default async function PetPage({ params }: PetPageProps) {
     );
   }
 
-  /*
-   * BreedingInfoContent는 다른 슬롯과 달리 Suspense 없이 직접 사용합니다.
-   * 이유: 추가 데이터 fetch가 없고, pet 데이터만 전달하므로 async 작업이 불필요합니다.
-   * 다른 슬롯(Images, PedigreeInfo, AdoptionInfo)은 각각 별도 API를 호출하므로 Suspense가 필요합니다.
-   */
-  return (
-    <PetDetailLayout
-      pet={pet}
-      breedingSlot={
-        <BreedingInfoContent
-          petId={pet.petId}
-          ownerId={pet.owner.userId ?? ""}
-          initialPet={pet}
-        />
-      }
-      imagesSlot={
-        <Suspense fallback={<SectionSkeleton />}>
-          <Images pet={pet} />
-        </Suspense>
-      }
-      pedigreeSlot={
-        <Suspense fallback={<SectionSkeleton />}>
-          <PedigreeInfo pet={pet} />
-        </Suspense>
-      }
-      adoptionSlot={
-        <Suspense fallback={<SectionSkeleton />}>
-          <AdoptionInfo pet={pet} />
-        </Suspense>
-      }
-    />
-  );
+  return <PetDetailLayout pet={pet} {...createPetDetailSlots(pet)} />;
 }
