@@ -331,13 +331,9 @@ const AdoptionDashboard = memo(() => {
             >
               <div className="overflow-hidden">
                 <div className="flex flex-wrap items-stretch justify-center gap-3 pt-2">
-                  {father && (
-                    <SiblingPetCard pet={father} width={140} />
-                  )}
+                  {father && <SiblingPetCard pet={father} width={140} />}
 
-                  {mother && (
-                    <SiblingPetCard pet={mother} width={140} />
-                  )}
+                  {mother && <SiblingPetCard pet={mother} width={140} />}
                 </div>
               </div>
             </div>
@@ -358,7 +354,7 @@ const AdoptionDashboard = memo(() => {
           <div
             className={cn(
               "my-4 grid grid-cols-2 rounded-2xl bg-gradient-to-r from-blue-200/25 to-purple-200/25 p-4 sm:grid-cols-4 dark:from-blue-900/30 dark:to-purple-900/30",
-              isMobile && "px-0",
+              isMobile && "my-2 px-0 py-0",
             )}
           >
             <StatCard label="총 분양" value={statistics.totalCount} />
@@ -434,7 +430,7 @@ const AdoptionDashboard = memo(() => {
                       {statistics.sex.map((item) => (
                         <div key={item.key}>
                           <span
-                            className="ml-0.5 mr-2 inline-block h-3 w-3"
+                            className="mr-2 ml-0.5 inline-block h-3 w-3"
                             style={{ backgroundColor: getSexColor(item.key) }}
                           />
                           <span className="font-bold">{formatPrice(item.revenue)}</span>{" "}

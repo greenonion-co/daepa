@@ -3,6 +3,7 @@ import { REGISTER_PAGE } from "../../constants";
 import { useUserStore } from "../../store/user";
 import { ArrowLeftCircle } from "lucide-react";
 import { memo } from "react";
+import { isNativeApp } from "@/lib/native-bridge";
 
 export const FormHeader = memo(({ funnel }: { funnel: number }) => {
   const router = useRouter();
@@ -10,7 +11,7 @@ export const FormHeader = memo(({ funnel }: { funnel: number }) => {
 
   return (
     <>
-      {funnel === REGISTER_PAGE.SECOND && (
+      {!isNativeApp() && funnel === REGISTER_PAGE.SECOND && (
         <button
           className="mb-2 flex cursor-pointer items-center gap-2 text-gray-500 hover:font-bold hover:text-blue-700"
           type="button"
@@ -21,7 +22,7 @@ export const FormHeader = memo(({ funnel }: { funnel: number }) => {
         </button>
       )}
 
-      <div className="mb-8 text-2xl">
+      <div className="mb-8 text-2xl font-[500]">
         <span className="relative font-bold after:absolute after:bottom-0 after:left-0 after:-z-10 after:h-[15px] after:w-full after:bg-[#247DFE] after:opacity-20">
           {user?.name}
         </span>

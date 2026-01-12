@@ -10,10 +10,12 @@ import { useIsMobile } from "@/hooks/useMobile";
 import SearchInput from "./SearchInput";
 import Image from "next/image";
 import { useUserStore } from "../store/user";
+import { isNativeApp } from "@/lib/native-bridge";
 
 const Menubar = ({ unreadCount }: { unreadCount: number }) => {
   const { user } = useUserStore();
   const isLoggedIn = !!user?.userId;
+  const isNative = isNativeApp();
 
   const pathname = usePathname();
   const isMobile = useIsMobile();
@@ -25,34 +27,38 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
     <div
       className={cn(
         "dark:bg-background flex h-[52px] items-center justify-between px-2",
-        isMobile && !isPetDetail && "bg-background sticky left-0 top-0 z-50 w-full",
+        isMobile && !isPetDetail && "bg-background sticky top-0 left-0 z-50 w-full",
+        isNative && "pr-4",
       )}
     >
       {!isLoggedIn ? (
-        <Image src="/assets/logo.png" alt="브리더스룸 로고" width={60} height={60} />
+        isNative ? null : (
+          <Image src="/assets/logo.png" alt="브리더스룸 로고" width={60} height={60} />
+        )
       ) : (
         <>
           <div className="flex items-center">
-            {!isMobile && (
+            {!isNative && !isMobile && (
               <Link href="/pet" className="mr-5 font-bold">
                 <Image src="/assets/logo.png" alt="브리더스룸 로고" width={60} height={60} />
               </Link>
             )}
 
-            {SIDEBAR_ITEMS.map((item) => (
-              <Link
-                className={cn(
-                  item.url === pathname
-                    ? "font-bold text-black dark:text-white"
-                    : "font-semibold text-gray-500 dark:text-gray-400",
-                  isMobile ? "px-1.5" : "px-3 py-1.5",
-                )}
-                key={item.title}
-                href={item.url}
-              >
-                {item.title}
-              </Link>
-            ))}
+            {!isNative &&
+              SIDEBAR_ITEMS.map((item) => (
+                <Link
+                  className={cn(
+                    item.url === pathname
+                      ? "font-bold text-black dark:text-white"
+                      : "font-semibold text-gray-500 dark:text-gray-400",
+                    isMobile ? "px-1.5" : "px-3 py-1.5",
+                  )}
+                  key={item.title}
+                  href={item.url}
+                >
+                  {item.title}
+                </Link>
+              ))}
             {!pathname.includes("/register/") && (
               <Link href="/register/1">
                 <div
@@ -70,7 +76,6 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
               </Link>
             )}
           </div>
-
           <div className="flex items-center gap-2">
             {!isMobile && pathname === "/pet" && (
               <SearchInput
@@ -84,19 +89,20 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
                 <Link href="/notifications" className="relative">
                   <Mail className="text-gray-500 dark:text-neutral-400" />
                   {unreadCount > 0 && (
-                    <div className="absolute -right-2 -top-2 flex h-[18px] w-[18px] items-center justify-center rounded-full bg-red-500 text-[12px] font-medium text-white">
+                    <div className="absolute -top-2 -right-2 flex h-[18px] w-[18px] items-center justify-center rounded-full bg-red-500 text-[12px] font-medium text-white">
                       {unreadCount > 9 ? "9+" : unreadCount}
                     </div>
                   )}
                 </Link>
-                <Link href="/settings">
-                  <Settings className="text-gray-500 dark:text-neutral-400" />
-                </Link>
+                {!isNative && (
+                  <Link href="/settings">
+                    <Settings className="text-gray-500 dark:text-neutral-400" />
+                  </Link>
+                )}
               </>
             )}
           </div>
-
-          <UserButton />
+          {!isNative && <UserButton />}
         </>
       )}
     </div>
