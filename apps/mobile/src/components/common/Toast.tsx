@@ -198,7 +198,7 @@ class Toast extends Component<ToastProps, ToastState> {
     return (
       <View style={styles.overlay} pointerEvents="box-none">
         {isVisible && (
-          <View style={styles.bottomContainer}>
+          <View style={styles.bottomContainer} pointerEvents="box-none">
             <Animated.View
               style={[
                 styles.toastContainer,
