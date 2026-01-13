@@ -30,7 +30,7 @@ export default function FeedPetCard({ pet }: FeedPetCardProps) {
   const sexLabel = getSexLabel(pet.sex);
 
   return (
-    <Link href={`/pet/${pet.petId}?_hideTopBar=1`} data-no-intercept className="block">
+    <Link href={`/pet/${pet.petId}`} className="block">
       <article className="overflow-hidden rounded-2xl bg-white transition-shadow hover:shadow-md dark:bg-gray-900">
         {/* Header - 유저 정보 */}
         <div className="flex items-center gap-3 px-4 py-3">
