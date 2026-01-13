@@ -199,7 +199,7 @@ const Header = ({
         />
 
         <div className="flex items-center gap-1">
-          <QRCode petId={pet.petId} isScrolled={isScrolled} />
+          <QRCode pet={pet} isScrolled={isScrolled} />
           {isLoggedIn && isMyPet && <DeletePetDialog petId={pet.petId} petName={pet.name} />}
         </div>
       </div>
