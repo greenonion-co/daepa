@@ -6,6 +6,8 @@ import Header from "./Header";
 
 type TabType = "breeding" | "adoption" | "images" | "pedigree";
 
+const SMOOTH_SCROLL_DURATION_MS = 500;
+
 interface PetDetailLayoutProps {
   pet: PetDto;
   variant?: "page" | "modal";
@@ -129,22 +131,15 @@ export default function PetDetailLayout({
       }
     }
 
-    // 스크롤 이벤트 리스너 추가 (스크롤 완료 감지)
-    const target = scrollContainer || window;
-    const handleScrollEnd = () => {
-      // 기존 타이머가 있으면 클리어
-      if (scrollTimeoutRef.current) {
-        clearTimeout(scrollTimeoutRef.current);
-      }
+    // 기존 타임아웃이 있으면 클리어
+    if (scrollTimeoutRef.current) {
+      clearTimeout(scrollTimeoutRef.current);
+    }
 
-      // 스크롤이 멈춘 후 100ms 대기 후 플래그 해제
-      scrollTimeoutRef.current = setTimeout(() => {
-        isScrollingRef.current = false;
-        target.removeEventListener("scroll", handleScrollEnd);
-      }, 100);
-    };
-
-    target.addEventListener("scroll", handleScrollEnd);
+    // smooth scroll 완료 후 플래그 해제
+    scrollTimeoutRef.current = setTimeout(() => {
+      isScrollingRef.current = false;
+    }, SMOOTH_SCROLL_DURATION_MS);
   };
 
   const tabs: {

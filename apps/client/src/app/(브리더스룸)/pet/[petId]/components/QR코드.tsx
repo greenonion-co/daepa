@@ -74,13 +74,19 @@ const QRCode = ({ pet, isScrolled }: QRCodeProps) => {
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
   const [selectedSize, setSelectedSize] = useState<string>("medium");
   const [isDownloading, setIsDownloading] = useState(false);
+  const [qrError, setQrError] = useState(false);
 
   // QR 코드 생성
   useEffect(() => {
     const fetchQrCode = async () => {
-      const currentUrl = window.location.href;
-      const qrCodeDataUrl = await generateQRCode(currentUrl);
-      setQrCodeDataUrl(qrCodeDataUrl);
+      try {
+        setQrError(false);
+        const petUrl = `${window.location.origin}/pet/${pet.petId}`;
+        const dataUrl = await generateQRCode(petUrl);
+        setQrCodeDataUrl(dataUrl);
+      } catch {
+        setQrError(true);
+      }
     };
     fetchQrCode();
   }, [pet.petId]);
@@ -96,9 +102,15 @@ const QRCode = ({ pet, isScrolled }: QRCodeProps) => {
     const qrImage = new Image();
     qrImage.src = qrCodeDataUrl;
 
-    await new Promise((resolve) => {
-      qrImage.onload = resolve;
-    });
+    try {
+      await new Promise<void>((resolve, reject) => {
+        qrImage.onload = () => resolve();
+        qrImage.onerror = () => reject(new Error("QR 이미지 로드 실패"));
+      });
+    } catch {
+      setQrError(true);
+      return;
+    }
 
     const sizeConfig = SIZE_OPTIONS.find((s) => s.id === selectedSize) ?? SIZE_OPTIONS[1]!;
     const { qrSize, padding, lineHeight, fontSize } = sizeConfig;
@@ -186,7 +198,11 @@ const QRCode = ({ pet, isScrolled }: QRCodeProps) => {
                 isMyPet && "border",
               )}
             >
-              {previewDataUrl ? (
+              {qrError ? (
+                <div className="flex h-[200px] w-[200px] items-center justify-center text-sm text-red-500">
+                  QR 코드 생성에 실패했습니다
+                </div>
+              ) : previewDataUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={previewDataUrl} alt="QR Code Preview" className="max-h-[280px]" />
               ) : (
@@ -252,7 +268,7 @@ const QRCode = ({ pet, isScrolled }: QRCodeProps) => {
 
           <DialogFooter className="gap-2 sm:gap-0">
             {isMyPet && (
-              <Button onClick={downloadImage} disabled={isDownloading || !previewDataUrl}>
+              <Button onClick={downloadImage} disabled={isDownloading || !previewDataUrl || qrError}>
                 {isDownloading ? "생성 중..." : "다운로드"}
               </Button>
             )}
