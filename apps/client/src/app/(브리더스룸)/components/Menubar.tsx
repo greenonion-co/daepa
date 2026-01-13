@@ -11,6 +11,8 @@ import SearchInput from "./SearchInput";
 import Image from "next/image";
 import { useUserStore } from "../store/user";
 import { isNativeApp } from "@/lib/native-bridge";
+import LoginPromoSheet from "./LoginPromoSheet";
+import { overlay } from "overlay-kit";
 
 const Menubar = ({ unreadCount }: { unreadCount: number }) => {
   const { user } = useUserStore();
@@ -23,6 +25,23 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
 
   const { setSearchKeyword } = useSearchKeywordStore();
 
+  const openLoginPromoSheet = () => {
+    overlay.open(({ isOpen, close }) => (
+      <LoginPromoSheet
+        isOpen={isOpen}
+        onOpenChange={(open) => !open && close()}
+        title="내 펫을 등록해보세요"
+        description={
+          <>
+            <span className="font-semibold text-blue-700">펫 등록</span>하고
+            <br />
+            <span className="font-semibold text-gray-800">혈통 관리</span>를 시작하세요
+          </>
+        }
+      />
+    ));
+  };
+
   return (
     <div
       className={cn(
@@ -32,7 +51,23 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
       )}
     >
       {!isLoggedIn ? (
-        isNative ? null : (
+        isNative ? (
+          !pathname.includes("/register/") && (
+            <button
+              onClick={openLoginPromoSheet}
+              className={cn(
+                "flex w-fit items-center rounded-lg px-2 py-1 hover:bg-gray-100 dark:hover:bg-gray-800",
+              )}
+            >
+              <div className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/50 dark:text-blue-400">
+                <Plus className="h-3 w-3" />
+              </div>
+              <div className="flex items-center gap-1 px-2 py-1 text-[14px] font-[500] text-blue-600 dark:text-blue-400">
+                펫 추가하기
+              </div>
+            </button>
+          )
+        ) : (
           <Image src="/assets/logo.png" alt="브리더스룸 로고" width={60} height={60} />
         )
       ) : (

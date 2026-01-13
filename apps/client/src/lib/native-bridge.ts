@@ -72,19 +72,6 @@ export const sendToNative = (message: NativeMessage): boolean => {
 };
 
 /**
- * 로그아웃 요청 (앱에서 처리)
- */
-export const requestLogout = (): void => {
-  if (isNativeApp()) {
-    sendToNative({ type: "LOGOUT" });
-  } else {
-    // 웹에서의 로그아웃 처리
-    localStorage.removeItem("accessToken");
-    window.location.href = "/login";
-  }
-};
-
-/**
  * 네이티브 공유 기능 요청
  */
 export const requestShare = (url: string, title?: string): boolean => {

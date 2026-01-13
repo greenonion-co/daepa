@@ -81,7 +81,10 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
       switch (message.type) {
         case 'LOGOUT':
           clear();
-          navigation.replace('Login');
+          navigation.reset({
+            index: 1,
+            routes: [{ name: 'Tabs' }, { name: 'Login' }],
+          });
           break;
         case 'NAVIGATE': {
           const { path, screen, params, options } = message;
