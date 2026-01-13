@@ -13,7 +13,7 @@ import { isEqual } from "es-toolkit";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useIsMyPet } from "@/hooks/useIsMyPet";
-import { isArray } from "es-toolkit/compat";
+import { isEmpty } from "es-toolkit/compat";
 
 interface ImagesContentProps {
   pet: PetDto;
@@ -37,7 +37,7 @@ const ImagesContent = ({ pet, initialImages }: ImagesContentProps) => {
     queryKey: [petImageControllerFindOne.name, pet.petId],
     queryFn: () => petImageControllerFindOne(pet.petId),
     select: (response) => response.data,
-    enabled: !isArray(initialImages),
+    enabled: isEmpty(initialImages),
   });
 
   // 서버에서 받은 초기 데이터 또는 React Query 데이터 사용
