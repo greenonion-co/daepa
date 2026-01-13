@@ -1,10 +1,15 @@
+import { Suspense } from "react";
 import Image from "next/image";
 import { Metadata } from "next";
 import { DateTime } from "luxon";
 import { SPECIES_KOREAN_INFO } from "../../constants";
 import { fetchPet, loadPetDetailPageData } from "./data";
-import { createPetDetailSlots } from "./components/createPetDetailSlots";
 import PetDetailLayout from "./components/PetDetailLayout";
+import BreedingInfoContent from "./components/BreedingInfoContent";
+import Images from "./components/이미지";
+import PedigreeInfo from "./components/혈통정보";
+import AdoptionInfo from "./components/분양정보";
+import SectionSkeleton from "./components/SectionSkeleton";
 
 interface PetPageProps {
   params: Promise<{
@@ -80,5 +85,31 @@ export default async function PetPage({ params }: PetPageProps) {
     );
   }
 
-  return <PetDetailLayout pet={pet} {...createPetDetailSlots(pet)} />;
+  return (
+    <PetDetailLayout
+      pet={pet}
+      breedingSlot={
+        <BreedingInfoContent
+          petId={pet.petId}
+          ownerId={pet.owner.userId ?? ""}
+          initialPet={pet}
+        />
+      }
+      imagesSlot={
+        <Suspense fallback={<SectionSkeleton />}>
+          <Images pet={pet} />
+        </Suspense>
+      }
+      pedigreeSlot={
+        <Suspense fallback={<SectionSkeleton />}>
+          <PedigreeInfo pet={pet} />
+        </Suspense>
+      }
+      adoptionSlot={
+        <Suspense fallback={<SectionSkeleton />}>
+          <AdoptionInfo pet={pet} />
+        </Suspense>
+      }
+    />
+  );
 }
