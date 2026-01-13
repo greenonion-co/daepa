@@ -6,4 +6,5 @@
 export const IMAGE_TRANSFORMS = {
   sm: "width=320,height=320,format=webp",
   lg: "width=800,height=800,format=webp",
+  xl: "width=1600,height=1600,format=webp",
 } as const;
