@@ -3,7 +3,6 @@
 import { ReactNode, useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { ModalProvider } from "./ModalContext";
 
 interface PetDetailModalProps {
@@ -48,9 +47,7 @@ export default function PetDetailModal({ children, onClose }: PetDetailModalProp
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent className="flex h-[100dvh] max-h-[100dvh] w-full max-w-full flex-col gap-0 overflow-hidden rounded-none bg-gray-100 px-0 pt-[16px] pb-0 sm:max-w-full md:h-auto md:max-h-[90vh] md:w-[calc(100%-2rem)] md:max-w-[900px] md:rounded-2xl dark:bg-neutral-800">
-        <VisuallyHidden>
-          <DialogTitle>펫 상세 정보</DialogTitle>
-        </VisuallyHidden>
+        <DialogTitle className="sr-only">펫 상세 정보</DialogTitle>
         <ModalProvider navigateAway={navigateAway}>{children}</ModalProvider>
       </DialogContent>
     </Dialog>
