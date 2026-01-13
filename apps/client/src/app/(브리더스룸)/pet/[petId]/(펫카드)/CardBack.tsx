@@ -9,7 +9,7 @@ import {
   petControllerFindPetByPetId,
   PetDtoType,
 } from "@repo/api-client";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 
 import AdoptionReceipt from "./components/AdoptionReceipt";
 import PetVisibilityControl from "./components/PetVisibilityControl";

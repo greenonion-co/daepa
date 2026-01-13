@@ -11,7 +11,7 @@ import {
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { isEqual } from "es-toolkit";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { useIsMyPet } from "@/hooks/useIsMyPet";
 import { isArray } from "es-toolkit/compat";
 
@@ -119,7 +119,7 @@ const ImagesContent = ({ pet, initialImages }: ImagesContentProps) => {
   }, [pet, isSuccess, photos]);
 
   return (
-    <div className="shadow-xs flex flex-1 flex-col gap-2 rounded-2xl bg-white p-3 dark:bg-neutral-900">
+    <div className="flex flex-1 flex-col gap-2 rounded-2xl bg-white p-3 shadow-xs dark:bg-neutral-900">
       <div className="text-[14px] font-[600] text-gray-600 dark:text-gray-300">이미지</div>
 
       {!isEditMode && photos.length === 0 && (

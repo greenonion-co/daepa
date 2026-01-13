@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { overlay } from "overlay-kit";
 import Dialog from "@/app/(브리더스룸)/components/Form/Dialog";
 import { useMutation } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { useRouter } from "next/navigation";
 import { memo, useCallback } from "react";
 import { petControllerDeletePet } from "@repo/api-client";

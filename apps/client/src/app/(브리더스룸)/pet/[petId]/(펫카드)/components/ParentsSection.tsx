@@ -8,7 +8,7 @@ import {
   UnlinkParentDtoRole,
   UpdateParentRequestDtoStatus,
 } from "@repo/api-client";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { usePetStore } from "@/app/(브리더스룸)/pet/store/pet";
 import { memo, useCallback } from "react";
 import { AxiosError } from "axios";
@@ -86,7 +86,7 @@ const ParentsSection = memo(({ petId, isMyPet }: ParentsSectionProps) => {
   );
 
   return (
-    <div className="pb-4 pt-4">
+    <div className="pt-4 pb-4">
       <h2 className="mb-3 text-xl font-bold">혈통 정보</h2>
 
       <div className="grid grid-cols-2 gap-4">

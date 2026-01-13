@@ -11,7 +11,7 @@ import {
 } from "@repo/api-client";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { getChangedFields } from "@/lib/utils";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { useNameStore } from "@/app/(브리더스룸)/store/name";
 import { DUPLICATE_CHECK_STATUS } from "@/app/(브리더스룸)/constants";
 import { AxiosError } from "axios";
@@ -159,7 +159,7 @@ const BreedingInfoContent = ({ petId, ownerId, initialPet }: BreedingInfoContent
   if (!pet || Object.keys(formData).length === 0) return null;
 
   return (
-    <div className="shadow-xs flex flex-1 flex-col gap-2 rounded-2xl bg-white p-3 dark:bg-neutral-900">
+    <div className="flex flex-1 flex-col gap-2 rounded-2xl bg-white p-3 shadow-xs dark:bg-neutral-900">
       <div className="text-[14px] font-[600] text-gray-600 dark:text-gray-300">펫정보</div>
 
       {/* 공개 여부 */}

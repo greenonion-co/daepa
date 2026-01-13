@@ -11,7 +11,7 @@ import {
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useCallback } from "react";
 import { AxiosError } from "axios";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { useUserStore } from "@/app/(브리더스룸)/store/user";
 import { Info } from "lucide-react";
 import { useIsMyPet } from "@/hooks/useIsMyPet";
@@ -111,7 +111,7 @@ const PedigreeInfoContent = ({
   );
 
   return (
-    <div className="shadow-xs flex flex-1 flex-col gap-2 rounded-2xl bg-white p-3 dark:bg-neutral-900">
+    <div className="flex flex-1 flex-col gap-2 rounded-2xl bg-white p-3 shadow-xs dark:bg-neutral-900">
       <div className="text-[14px] font-[600] text-gray-600 dark:text-gray-300">혈통정보</div>
 
       <div className="flex items-center gap-1 text-[12px] text-gray-500 dark:text-gray-400">
