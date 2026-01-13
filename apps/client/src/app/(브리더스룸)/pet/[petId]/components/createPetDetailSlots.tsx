@@ -4,7 +4,7 @@ import BreedingInfoContent from "./BreedingInfoContent";
 import Images from "./이미지";
 import PedigreeInfo from "./혈통정보";
 import AdoptionInfo from "./분양정보";
-import { SectionSkeleton } from "./SectionSkeleton";
+import SectionSkeleton from "./SectionSkeleton";
 
 /**
  * PetDetailLayout에 전달할 슬롯 컴포넌트들을 생성합니다.
@@ -18,11 +18,7 @@ import { SectionSkeleton } from "./SectionSkeleton";
 export function createPetDetailSlots(pet: PetDto) {
   return {
     breedingSlot: (
-      <BreedingInfoContent
-        petId={pet.petId}
-        ownerId={pet.owner.userId ?? ""}
-        initialPet={pet}
-      />
+      <BreedingInfoContent petId={pet.petId} ownerId={pet.owner.userId ?? ""} initialPet={pet} />
     ),
     imagesSlot: (
       <Suspense fallback={<SectionSkeleton />}>

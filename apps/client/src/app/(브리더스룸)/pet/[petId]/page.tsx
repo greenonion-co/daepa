@@ -6,9 +6,6 @@ import { fetchPet, loadPetDetailPageData } from "./data";
 import { createPetDetailSlots } from "./components/createPetDetailSlots";
 import PetDetailLayout from "./components/PetDetailLayout";
 
-// 다른 파일에서 import할 수 있도록 re-export
-export { SectionSkeleton } from "./components/SectionSkeleton";
-
 interface PetPageProps {
   params: Promise<{
     petId: string;
