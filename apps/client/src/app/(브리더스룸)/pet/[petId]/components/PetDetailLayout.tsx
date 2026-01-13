@@ -168,12 +168,12 @@ export default function PetDetailLayout({
         size={variant === "modal" ? "small" : "medium"}
       />
 
-      <div className="flex flex-wrap gap-3 px-2">
+      <div className="flex flex-wrap gap-3 px-2 pt-2">
         {/* 펫정보 */}
         <div
           ref={breedingRef}
           data-section="breeding"
-          className="flex min-w-[300px] max-w-[440px] flex-1 max-[580px]:order-2 max-[580px]:max-w-none"
+          className="flex max-w-[440px] min-w-[300px] flex-1 max-[580px]:order-2 max-[580px]:max-w-none"
         >
           {breedingSlot}
         </div>
@@ -182,7 +182,7 @@ export default function PetDetailLayout({
         <div
           ref={imagesRef}
           data-section="images"
-          className="flex min-h-[480px] min-w-[300px] max-w-[440px] flex-1 max-[580px]:order-1 max-[580px]:max-w-none"
+          className="flex min-h-[480px] max-w-[440px] min-w-[300px] flex-1 max-[580px]:order-1 max-[580px]:max-w-none"
         >
           {imagesSlot}
         </div>
@@ -191,7 +191,7 @@ export default function PetDetailLayout({
         <div
           ref={pedigreeRef}
           data-section="pedigree"
-          className="flex min-w-[300px] max-w-[440px] flex-1 max-[580px]:order-4 max-[580px]:max-w-none"
+          className="flex max-w-[440px] min-w-[300px] flex-1 max-[580px]:order-4 max-[580px]:max-w-none"
         >
           {pedigreeSlot}
         </div>
@@ -200,7 +200,7 @@ export default function PetDetailLayout({
         <div
           ref={adoptionRef}
           data-section="adoption"
-          className="flex min-h-[480px] min-w-[300px] max-w-[440px] flex-1 max-[580px]:order-3 max-[580px]:max-w-none"
+          className="flex min-h-[480px] max-w-[440px] min-w-[300px] flex-1 max-[580px]:order-3 max-[580px]:max-w-none"
         >
           {adoptionSlot}
         </div>
