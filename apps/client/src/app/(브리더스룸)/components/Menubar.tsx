@@ -77,11 +77,13 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
             )}
           </div>
           <div className="flex items-center gap-2">
-            {!isMobile && pathname === "/pet" && (
-              <SearchInput
-                placeholder="펫 이름으로 검색하세요"
-                onKeyDown={(value) => setSearchKeyword(value)}
-              />
+            {pathname === "/pet" && (
+              <div className="w-45">
+                <SearchInput
+                  placeholder="이름 또는 설명 검색.."
+                  onKeyDown={(value) => setSearchKeyword(value)}
+                />
+              </div>
             )}
 
             {isMobile && (

@@ -5,6 +5,7 @@ import Script from "next/script";
 
 import { Providers } from "./providers";
 import { Toaster } from "@/components/ui/sonner";
+import AppShell from "./components/AppShell";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,8 +36,7 @@ export default function RootLayout({
         />
         <Providers>
           <Toaster />
-
-          {children}
+          <AppShell>{children}</AppShell>
         </Providers>
       </body>
     </html>
