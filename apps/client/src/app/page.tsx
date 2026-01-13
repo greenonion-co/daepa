@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
 import { PetControllerFindAllFilterType } from "@repo/api-client";
 import FloatingToggle from "@/components/common/FloatingToggle";
 import PetList from "@/components/feed/PetList";
@@ -10,27 +10,29 @@ export default function Home() {
     PetControllerFindAllFilterType.ALL,
   );
 
-  return (
-    <div className="relative w-full">
-      {/* 전체 리스트 */}
-      <div
-        className={filterType === PetControllerFindAllFilterType.ALL ? "block" : "hidden"}
-      >
-        <PetList
-          filterType={PetControllerFindAllFilterType.ALL}
-          isVisible={filterType === PetControllerFindAllFilterType.ALL}
-        />
-      </div>
+  // 각 탭별 스크롤 위치 저장
+  const scrollPositions = useRef<Record<string, number>>({});
 
-      {/* 내 펫 리스트 */}
-      <div
-        className={filterType === PetControllerFindAllFilterType.MY ? "block" : "hidden"}
-      >
-        <PetList
-          filterType={PetControllerFindAllFilterType.MY}
-          isVisible={filterType === PetControllerFindAllFilterType.MY}
-        />
-      </div>
+  const handleFilterChange = useCallback(
+    (newFilter: PetControllerFindAllFilterType) => {
+      // 현재 스크롤 위치 저장
+      scrollPositions.current[filterType] = window.scrollY;
+
+      // 필터 변경
+      setFilterType(newFilter);
+
+      // 새 탭의 스크롤 위치로 복원
+      requestAnimationFrame(() => {
+        window.scrollTo(0, scrollPositions.current[newFilter] ?? 0);
+      });
+    },
+    [filterType],
+  );
+
+  return (
+    <div className="relative w-full" key={filterType}>
+      {/* 현재 선택된 리스트만 렌더링 */}
+      <PetList filterType={filterType} isVisible={true} />
 
       <FloatingToggle
         options={[
@@ -38,7 +40,7 @@ export default function Home() {
           { label: "내 펫", value: PetControllerFindAllFilterType.MY },
         ]}
         value={filterType}
-        onChange={setFilterType}
+        onChange={handleFilterChange}
       />
     </div>
   );
