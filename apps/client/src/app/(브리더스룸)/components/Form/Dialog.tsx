@@ -16,6 +16,8 @@ const Dialog = ({
   onCloseAction,
   onConfirmAction,
   onExit,
+  confirmText = "확인",
+  cancelText = "취소",
 }: {
   title: string;
   description: string;
@@ -23,6 +25,8 @@ const Dialog = ({
   onCloseAction: () => void;
   onConfirmAction: () => void;
   onExit: () => void;
+  confirmText?: string;
+  cancelText?: string;
 }) => {
   useEffect(() => {
     return () => onExit();
@@ -37,8 +41,8 @@ const Dialog = ({
           {description}
         </AlertDialogDescription>
         <AlertDialogFooter>
-          <AlertDialogCancel onClick={onCloseAction}>취소</AlertDialogCancel>
-          <AlertDialogAction onClick={onConfirmAction}>확인</AlertDialogAction>
+          <AlertDialogCancel onClick={onCloseAction}>{cancelText}</AlertDialogCancel>
+          <AlertDialogAction onClick={onConfirmAction}>{confirmText}</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

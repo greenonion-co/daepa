@@ -36,7 +36,6 @@ export function useAppRouter() {
 
   const back = useCallback(() => {
     if (isNativeApp()) {
-      // 네이티브 앱에서는 history.back() 사용
       requestGoBack();
       return;
     }

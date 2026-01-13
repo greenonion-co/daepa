@@ -115,8 +115,8 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
           break;
         }
         case 'GO_BACK':
-          if (canGoBack && webViewRef.current) {
-            webViewRef.current.goBack();
+          if (navigation.canGoBack()) {
+            navigation.goBack();
           }
           break;
         case 'POP_TO_ROOT':

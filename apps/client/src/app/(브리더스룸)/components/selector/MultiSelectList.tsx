@@ -78,8 +78,10 @@ export default function MultiSelectList({
           {selectList?.map((key) => (
             <button
               key={key}
-              className={`mr-2 mb-2 rounded-full pt-1 pr-3 pb-1 pl-4 ${
-                selectedItems.includes(key) ? "bg-[#1A56B3] text-[#D9E1EC]" : "hover:bg-gray-100"
+              className={`mr-1 mb-1 rounded-full border border-gray-200 px-3 py-1 text-center ${
+                selectedItems.includes(key)
+                  ? "bg-neutral-800 text-neutral-100"
+                  : "hover:bg-gray-100"
               } dark:hover:bg-gray-800`}
               onClick={() => handleMultipleSelect(key)}
             >

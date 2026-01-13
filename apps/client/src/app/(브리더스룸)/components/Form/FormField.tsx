@@ -201,9 +201,9 @@ export const FormField = ({
                 value.map((item) => (
                   <div
                     className={cn(
-                      `mb-2 flex items-center gap-2 rounded-full border-2 border-[#1A56B3] pt-1 pr-3 pb-1 pl-3 text-[14px] font-semibold text-[#1A56B3]`,
+                      `flex items-center gap-1 rounded-full bg-neutral-800 px-3 py-1 text-center text-[600] text-neutral-100`,
                       disabled &&
-                        "rounded-xl border-gray-200 bg-gray-100 text-black dark:bg-gray-600/50 dark:text-white",
+                        "border border-gray-200 bg-gray-100 text-black dark:bg-gray-600/50 dark:text-white",
                     )}
                     key={item}
                   >
@@ -211,6 +211,7 @@ export const FormField = ({
                     {!disabled && (
                       <button
                         type="button"
+                        className="flex items-center"
                         onClick={() => {
                           handleChange({
                             type: name,
@@ -218,7 +219,7 @@ export const FormField = ({
                           });
                         }}
                       >
-                        <Close fontSize="small" className="text-[#1A56B3]" />
+                        <Close fontSize="small" className="text-neutral-100" />
                       </button>
                     )}
                   </div>

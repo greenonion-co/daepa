@@ -12,13 +12,13 @@ const Config = __DEV__
       // 개발 환경
       SERVER_BASE_URL: `http://${LOCAL_IP}:4000`,
       CLIENT_BASE_URL: `http://${LOCAL_IP}:3000`,
-      CDN_URL: 'https://daepa.store/cdn-cgi/image',
+      CDN_URL: 'https://media.breedy.kr/cdn-cgi/image',
     }
   : {
       // 프로덕션 환경
       SERVER_BASE_URL: 'https://api.daepa.store',
       CLIENT_BASE_URL: 'https://daepa.store',
-      CDN_URL: 'https://daepa.store/cdn-cgi/image',
+      CDN_URL: 'https://media.breedy.kr/cdn-cgi/image',
     };
 
 export default Config;
