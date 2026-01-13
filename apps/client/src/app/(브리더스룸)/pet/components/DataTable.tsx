@@ -20,7 +20,6 @@ import {
 } from "@/components/ui/table";
 import { Filters } from "./Filters";
 import useTableStore from "../store/table";
-import { useRouter } from "next/navigation";
 import { PetDto } from "@repo/api-client";
 import Loading from "@/components/common/Loading";
 import { cn } from "@/lib/utils";
@@ -30,6 +29,7 @@ import SearchInput from "../../components/SearchInput";
 import { useIsMobile } from "@/hooks/useMobile";
 import { useSearchKeywordStore } from "../../store/searchKeyword";
 import Image from "next/image";
+import { useAppRouter } from "@/hooks/useAppRouter";
 
 interface DataTableProps<TData> {
   columns: ColumnDef<TData>[];
@@ -62,7 +62,7 @@ export const DataTable = ({
 
   const isMobile = useIsMobile();
 
-  const router = useRouter();
+  const router = useAppRouter();
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const table = useReactTable({
