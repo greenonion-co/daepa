@@ -78,7 +78,7 @@ const PetThumbnail = ({
   const { data: thumbnail, isLoading } = useQuery({
     queryKey: getPetThumbnailQueryKey(petId ?? ""),
     queryFn: () => petImageControllerFindThumbnail(petId ?? ""),
-    select: (response) => response.data,
+    select: (response) => response.data.data,
     enabled: !!petId && enabled,
     // 이미지 변경 전까지 캐시 영구 유지
     // 변경 시 queryClient.invalidateQueries로 수동 무효화

@@ -32,7 +32,7 @@ const ImagesContent = ({ pet, initialImages }: ImagesContentProps) => {
   const { data: queryPhotos, refetch } = useQuery({
     queryKey: [petImageControllerFindOne.name, pet.petId],
     queryFn: () => petImageControllerFindOne(pet.petId),
-    select: (response) => response.data,
+    select: (response) => response.data.data,
     enabled: isEmpty(initialImages),
   });
 
