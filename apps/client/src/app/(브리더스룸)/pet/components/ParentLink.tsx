@@ -23,6 +23,7 @@ import { useUserStore } from "../../store/user";
 import { useCallback } from "react";
 import PetThumbnail from "@/components/common/PetThumbnail";
 import BadgeList from "../../components/BadgeList";
+import Link from "next/link";
 
 interface ParentLinkProps {
   species: PetDtoSpecies;
@@ -180,6 +181,14 @@ const ParentLink = ({
   const isMyPet = parent.owner.userId === user?.userId;
   const isDeleted = parent.isDeleted;
 
+  const handleParentClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (isClickDisabled || isDeleted) {
+      e.preventDefault();
+    }
+    // Link will handle navigation (intercepting route will show modal)
+  };
+
   return (
     <div className="flex-1">
       <dt className="mb-2 flex items-center gap-2 text-xs font-medium text-gray-500 dark:text-gray-400">
@@ -199,12 +208,9 @@ const ParentLink = ({
           </Button>
         )}
 
-        <div
-          onClick={(e) => {
-            e.stopPropagation();
-            if (isClickDisabled) e.preventDefault();
-            else if (!isDeleted) window.location.href = `/pet/${parent.petId}`;
-          }}
+        <Link
+          href={`/pet/${parent.petId}`}
+          onClick={handleParentClick}
           className={cn(
             "flex cursor-pointer flex-col items-center",
             isDeleted && "cursor-not-allowed opacity-70",
@@ -260,7 +266,7 @@ const ParentLink = ({
               badgeClassName="bg-white text-black dark:bg-gray-700 dark:text-gray-200"
             />
           </div>
-        </div>
+        </Link>
       </div>
     </div>
   );

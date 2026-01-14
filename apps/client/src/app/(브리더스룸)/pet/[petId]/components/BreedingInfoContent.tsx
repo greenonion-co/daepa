@@ -1,3 +1,5 @@
+"use client";
+
 import { usePetStore } from "@/app/(브리더스룸)/pet/store/pet";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -14,15 +16,21 @@ import { useNameStore } from "@/app/(브리더스룸)/store/name";
 import { DUPLICATE_CHECK_STATUS } from "@/app/(브리더스룸)/constants";
 import { AxiosError } from "axios";
 import { useIsMyPet } from "@/hooks/useIsMyPet";
-import { useBreedingInfoStore } from "../../store/breedingInfo";
 
 import { PublicToggle } from "./펫정보/PublicToggle";
 import { PetBasicInfo } from "./펫정보/PetBasicInfo";
 import { PetDetailInfo } from "./펫정보/PetDetailInfo";
 import { EggInfo } from "./펫정보/EggInfo";
 import EditActionButtons from "./EditActionButtons";
+import { useBreedingInfoStore } from "../../store/breedingInfo";
 
-const BreedingInfo = ({ petId, ownerId }: { petId: string; ownerId: string }) => {
+interface BreedingInfoContentProps {
+  petId: string;
+  ownerId: string;
+  initialPet: PetDto | null;
+}
+
+const BreedingInfoContent = ({ petId, ownerId, initialPet }: BreedingInfoContentProps) => {
   const { formData, errors, setFormData } = usePetStore();
   const { duplicateCheckStatus } = useNameStore();
   const { setBreedingInfo } = useBreedingInfoStore();
@@ -32,18 +40,25 @@ const BreedingInfo = ({ petId, ownerId }: { petId: string; ownerId: string }) =>
 
   const isViewingMyPet = useIsMyPet(ownerId);
 
-  // 펫 데이터 조회
-  const { data: pet, refetch } = useQuery({
+  // 펫 데이터 조회 (초기 데이터가 있으면 자동 fetch 하지 않음)
+  const { data: queryPet, refetch } = useQuery({
     queryKey: [petControllerFindPetByPetId.name, petId],
     queryFn: () => petControllerFindPetByPetId(petId),
     select: (response) => response.data.data,
+    enabled: !initialPet,
   });
+
+  // 서버에서 받은 초기 데이터 또는 React Query 데이터 사용
+  const pet = queryPet ?? initialPet;
 
   const isEgg = useMemo(() => pet?.type === PetDtoType.EGG, [pet?.type]);
 
   // 펫 업데이트 mutation
   const { mutateAsync: mutateUpdatePet } = useMutation({
-    mutationFn: (updateData: UpdatePetDto) => petControllerUpdate(pet?.petId ?? "", updateData),
+    mutationFn: (updateData: UpdatePetDto) => {
+      if (!pet?.petId) throw new Error("Pet ID is required");
+      return petControllerUpdate(pet.petId, updateData);
+    },
   });
 
   // 변경된 필드 추출
@@ -147,7 +162,7 @@ const BreedingInfo = ({ petId, ownerId }: { petId: string; ownerId: string }) =>
   if (!pet || Object.keys(formData).length === 0) return null;
 
   return (
-    <div className="shadow-xs flex flex-1 flex-col gap-2 rounded-2xl bg-white p-3 dark:bg-neutral-900">
+    <div className="flex flex-1 flex-col gap-2 rounded-2xl bg-white p-3 shadow-xs dark:bg-neutral-900">
       <div className="text-[14px] font-[600] text-gray-600 dark:text-gray-300">펫정보</div>
 
       {/* 공개 여부 */}
@@ -187,4 +202,4 @@ const BreedingInfo = ({ petId, ownerId }: { petId: string; ownerId: string }) =>
   );
 };
 
-export default BreedingInfo;
+export default BreedingInfoContent;

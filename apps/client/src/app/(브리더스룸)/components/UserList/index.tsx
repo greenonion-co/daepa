@@ -1,3 +1,5 @@
+"use client";
+
 import Loading from "@/components/common/Loading";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";

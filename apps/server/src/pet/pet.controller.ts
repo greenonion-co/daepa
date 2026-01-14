@@ -31,8 +31,14 @@ import {
   getSchemaPath,
 } from '@nestjs/swagger';
 import { CommonResponseDto } from 'src/common/response.dto';
-import { JwtUser } from 'src/auth/auth.decorator';
+import {
+  JwtUser,
+  OptionalJwtUser,
+  Public,
+  OptionalJwtAuthGuard,
+} from 'src/auth/auth.decorator';
 import { JwtUserPayload } from 'src/auth/strategies/jwt.strategy';
+import { UseGuards } from '@nestjs/common';
 import { PageDto, PageMetaDto, PageOptionsDto } from 'src/common/page.dto';
 import { PetRelationService } from 'src/pet_relation/pet_relation.service';
 import {
@@ -143,6 +149,8 @@ export class PetController {
   }
 
   @Get('/parents/:petId')
+  @Public()
+  @UseGuards(OptionalJwtAuthGuard)
   @ApiParam({
     name: 'petId',
     description: '펫 아이디',
@@ -160,12 +168,12 @@ export class PetController {
   async getParentsByPetId(
     @Param('petId') petId: string,
     @Query() queryDto: GetParentsByPetIdQueryDto,
-    @JwtUser() token: JwtUserPayload,
+    @OptionalJwtUser() token: JwtUserPayload | null,
   ): Promise<GetParentsByPetIdResponseDto> {
     const { statuses } = queryDto;
     const data = await this.petService.getParentsByPetId(
       petId,
-      token.userId,
+      token?.userId,
       statuses ? { statuses } : undefined,
     );
     return {
@@ -274,6 +282,8 @@ export class PetController {
   }
 
   @Get(':petId')
+  @Public()
+  @UseGuards(OptionalJwtAuthGuard)
   @ApiParam({
     name: 'petId',
     description: '펫 아이디',
@@ -290,9 +300,9 @@ export class PetController {
   })
   async findPetByPetId(
     @Param('petId') petId: string,
-    @JwtUser() token: JwtUserPayload,
+    @OptionalJwtUser() token: JwtUserPayload | null,
   ): Promise<FindPetByPetIdResponseDto> {
-    const data = await this.petService.findPetByPetId(petId, token.userId);
+    const data = await this.petService.findPetByPetId(petId, token?.userId);
     return {
       success: true,
       message: '펫 정보 조회 성공',

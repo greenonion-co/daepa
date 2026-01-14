@@ -14,6 +14,7 @@ import Link from "next/link";
 
 const SettingList = () => {
   const { user } = useUserStore();
+  const isLoggedIn = !!user?.userId;
   const { theme, setTheme } = useTheme();
   const { logout } = useLogout();
 
@@ -23,23 +24,27 @@ const SettingList = () => {
   return (
     <ScrollArea className="h-full flex-1 pb-[60px]">
       <div className="flex flex-col p-4 pt-0">
-        <Link
-          href="/settings"
-          className="group mb-4 flex h-[36px] w-full items-center justify-between rounded-2xl border bg-white px-4 text-sm font-[500] shadow-sm dark:bg-neutral-800 dark:hover:bg-neutral-800/80"
-        >
-          <span>전체 설정 보기</span>
-          <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-        </Link>
+        {isLoggedIn && (
+          <>
+            <Link
+              href="/settings"
+              className="group mb-4 flex h-[36px] w-full items-center justify-between rounded-2xl border bg-white px-4 text-sm font-[500] shadow-sm dark:bg-neutral-800 dark:hover:bg-neutral-800/80"
+            >
+              <span>전체 설정 보기</span>
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+            </Link>
 
-        {/* 계정 정보 */}
-        <div className="mb-6 text-sm">
-          <h3 className="mb-3 font-semibold text-gray-700 dark:text-gray-400">계정 정보</h3>
+            {/* 계정 정보 */}
+            <div className="mb-6 text-sm">
+              <h3 className="mb-3 font-semibold text-gray-700 dark:text-gray-400">계정 정보</h3>
 
-          <Item label="닉네임" content={user?.name} />
-          <Item label="이메일" content={user?.email} />
-        </div>
+              <Item label="닉네임" content={user?.name} />
+              <Item label="이메일" content={user?.email} />
+            </div>
 
-        <Separator className="my-4" />
+            <Separator className="my-4" />
+          </>
+        )}
 
         <div className="mb-6 text-sm">
           <h3 className="mb-3 font-semibold text-gray-700 dark:text-gray-400">앱 설정</h3>
@@ -50,29 +55,41 @@ const SettingList = () => {
           />
         </div>
 
-        <Separator className="my-4" />
+        <div className="mb-4 w-full text-center text-sm text-gray-600 dark:text-gray-400">
+          {isLoggedIn ? (
+            <>
+              <Separator className="my-4" />
 
-        <button
-          type="button"
-          className="mb-4 w-full justify-start gap-2 text-sm text-gray-600 dark:text-gray-400"
-          onClick={() => {
-            overlay.open(({ isOpen, close, unmount }) => (
-              <Dialog
-                title="로그아웃"
-                description="정말 로그아웃 하시겠습니까?"
-                onExit={unmount}
-                isOpen={isOpen}
-                onCloseAction={close}
-                onConfirmAction={async () => {
-                  await logout();
-                  close();
+              <button
+                type="button"
+                onClick={() => {
+                  overlay.open(({ isOpen, close, unmount }) => (
+                    <Dialog
+                      title="로그아웃"
+                      description="정말 로그아웃 하시겠습니까?"
+                      onExit={unmount}
+                      isOpen={isOpen}
+                      onCloseAction={close}
+                      onConfirmAction={async () => {
+                        await logout();
+                        close();
+                      }}
+                    />
+                  ));
                 }}
-              />
-            ));
-          }}
-        >
-          로그아웃
-        </button>
+              >
+                로그아웃
+              </button>
+            </>
+          ) : (
+            <Link
+              href="/sign-in"
+              className="flex h-[42px] items-center justify-center rounded-xl bg-blue-600 text-[16px] font-bold text-white"
+            >
+              로그인
+            </Link>
+          )}
+        </div>
 
         {/* 도움말 섹션 */}
         <div className="rounded-lg bg-blue-50 p-4 dark:bg-neutral-800">

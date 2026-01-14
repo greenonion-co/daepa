@@ -9,10 +9,10 @@ import { cn, getStatusBadge } from "@/lib/utils";
 import Loading from "@/components/common/Loading";
 import EditAdoptionForm from "./EditAdoptionForm";
 import AdoptionReceipt from "../../pet/[petId]/(펫카드)/components/AdoptionReceipt";
-import Link from "next/link";
 import PetThumbnail from "@/components/common/PetThumbnail";
 import BadgeList from "../../components/BadgeList";
 import { DateTime } from "luxon";
+import Link from "next/link";
 
 interface AdoptionDetailModalProps {
   isOpen: boolean;
@@ -30,7 +30,6 @@ interface PetInfoCardProps {
   hatchingDate?: string;
   isDeleted?: boolean;
   petId: string;
-  onClose: () => void;
 }
 
 const PetInfoCard = ({
@@ -42,7 +41,6 @@ const PetInfoCard = ({
   hatchingDate,
   isDeleted,
   petId,
-  onClose,
 }: PetInfoCardProps) => {
   const cardContent = (
     <div
@@ -77,7 +75,11 @@ const PetInfoCard = ({
           </div>
           <div className="flex flex-col gap-2 text-sm text-gray-600 dark:text-gray-300">
             <BadgeList items={morphs} />
-            <BadgeList items={traits} variant="outline" badgeClassName="bg-white text-black dark:bg-gray-700 dark:text-gray-200" />
+            <BadgeList
+              items={traits}
+              variant="outline"
+              badgeClassName="bg-white text-black dark:bg-gray-700 dark:text-gray-200"
+            />
             {hatchingDate && (
               <p className="font-[600] text-blue-600">
                 {DateTime.fromFormat(hatchingDate, "yyyy-MM-dd").toFormat("yy.M.d")}
@@ -94,7 +96,7 @@ const PetInfoCard = ({
   }
 
   return (
-    <Link href={`/pet/${petId}`} onClick={onClose} className="cursor-pointer">
+    <Link href={`/pet/${petId}`} className="cursor-pointer">
       {cardContent}
     </Link>
   );
@@ -146,7 +148,6 @@ const AdoptionDetailModal = ({ isOpen, petId, onClose, onUpdate }: AdoptionDetai
             hatchingDate={hatchingDate}
             isDeleted={isDeleted}
             petId={petId}
-            onClose={onClose}
           />
 
           <div className="space-y-3">

@@ -1,5 +1,16 @@
 const TOKEN_KEY = "accessToken";
 
+// 쿠키 유틸리티 함수
+function setCookie(name: string, value: string, days: number = 7): void {
+  const expires = new Date();
+  expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000);
+  document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/;SameSite=Lax`;
+}
+
+function deleteCookie(name: string): void {
+  document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+}
+
 export const tokenStorage = {
   setToken(token: string): void {
     try {
@@ -8,6 +19,8 @@ export const tokenStorage = {
         return;
       }
       localStorage.setItem(TOKEN_KEY, token);
+      // 쿠키에도 저장 (서버 컴포넌트에서 접근 가능하도록)
+      setCookie(TOKEN_KEY, token);
     } catch (error) {
       console.error("Failed to set token in localStorage:", error);
     }
@@ -31,6 +44,8 @@ export const tokenStorage = {
   removeToken(): void {
     try {
       localStorage.removeItem(TOKEN_KEY);
+      // 쿠키에서도 삭제
+      deleteCookie(TOKEN_KEY);
     } catch (error) {
       console.error("Failed to remove token from localStorage:", error);
     }

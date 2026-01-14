@@ -20,7 +20,7 @@ const ParentCard = ({ parent }: { parent?: PetSummaryLayingDto }) => {
   return (
     <Link
       href={`/pet/${parent.petId}`}
-      className="flex h-full flex-1 flex-col items-center gap-2 rounded-2xl p-[2px] transition-all hover:bg-gradient-to-r hover:from-[#60a5fa] hover:to-[#c084fc]"
+      className="flex h-full flex-1 cursor-pointer flex-col items-center gap-2 rounded-2xl p-[2px] transition-all hover:bg-gradient-to-r hover:from-[#60a5fa] hover:to-[#c084fc]"
     >
       <div className="flex h-full w-full flex-col items-center gap-1 rounded-2xl bg-white dark:bg-neutral-800">
         <div className="relative w-full">

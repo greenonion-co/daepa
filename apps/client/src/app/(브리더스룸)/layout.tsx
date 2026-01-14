@@ -15,7 +15,7 @@ export default function BrLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const { initialize } = useUserStore();
+  const { initialize, user } = useUserStore();
   const pathname = usePathname();
   const isPetDetail = pathname?.startsWith("/pet/") ?? false;
   const isMobile = useIsMobile();
@@ -24,6 +24,7 @@ export default function BrLayout({
     queryKey: [userNotificationControllerGetUnreadCount.name],
     queryFn: () => userNotificationControllerGetUnreadCount(),
     select: (response) => response.data.count,
+    enabled: !!user,
   });
 
   useEffect(() => {

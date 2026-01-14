@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import Link from "next/link";
 
 import { SPECIES_KOREAN_INFO } from "../../constants";
 import { PetDtoSpecies } from "@repo/api-client";
@@ -12,6 +11,7 @@ import { Cookie, Info } from "lucide-react";
 import Image from "next/image";
 import PetThumbnail from "@/components/common/PetThumbnail";
 import BadgeList from "../BadgeList";
+import Link from "next/link";
 
 interface RecentlyViewedPet {
   petId: string;
@@ -80,7 +80,7 @@ const RecentlyViewedList = () => {
                 key={item.petId}
                 href={`/pet/${item.petId}`}
                 className={cn(
-                  "group flex items-center gap-3 rounded-xl p-2 hover:bg-gray-50 hover:shadow-lg dark:hover:bg-neutral-800",
+                  "group flex cursor-pointer items-center gap-3 rounded-xl p-2 hover:bg-gray-50 hover:shadow-lg dark:hover:bg-neutral-800",
                   item.petId === petId && "bg-gray-50 shadow-lg dark:bg-neutral-800",
                 )}
               >

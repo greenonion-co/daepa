@@ -5,9 +5,9 @@ import { MatingByDateDto, MatingByParentsDto } from "@repo/api-client";
 import { cn } from "@/lib/utils";
 import { compact } from "es-toolkit";
 import MatingItem from "./MatingItem";
-import Link from "next/link";
 import { useIsMobile } from "@/hooks/useMobile";
 import { DateTime } from "luxon";
+import Link from "next/link";
 import {
   Select,
   SelectContent,
@@ -194,8 +194,8 @@ const MatingDetailDialog = ({
                   </>
                 ) : (
                   <Link
-                    href={`/pet/${matingGroup.father?.petId}`}
-                    className="text-blue-600 underline dark:text-blue-400"
+                    href={`/pet/${matingGroup.father.petId}`}
+                    className="cursor-pointer text-blue-600 underline dark:text-blue-400"
                   >
                     {matingGroup.father?.name}
                   </Link>
@@ -216,8 +216,8 @@ const MatingDetailDialog = ({
                   </>
                 ) : (
                   <Link
-                    href={`/pet/${matingGroup.mother?.petId}`}
-                    className="text-blue-600 underline dark:text-blue-400"
+                    href={`/pet/${matingGroup.mother.petId}`}
+                    className="cursor-pointer text-blue-600 underline dark:text-blue-400"
                   >
                     {matingGroup.mother?.name}
                   </Link>

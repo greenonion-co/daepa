@@ -62,6 +62,8 @@ import type {
   DetailJson,
   FilterPetListResponseDto,
   FindPetByPetIdResponseDto,
+  FindPetImagesResponseDto,
+  FindThumbnailResponseDto,
   GetChildrenPageResponseDto,
   GetParentsByPetIdResponseDto,
   GetSiblingsPageResponseDto,
@@ -73,9 +75,8 @@ import type {
   PetControllerGetClutchMatesByPetId200,
   PetControllerGetDeletedPets200,
   PetHiddenStatusDto,
-  PetImageItem,
   PetParentDto,
-  SiblingPetDetailDto,
+  PetSummaryDto,
   TokenResponseDto,
   UserControllerGetUserListSimple200,
   UserDto,
@@ -514,11 +515,11 @@ export const pairControllerUpdatePair = (pairId: number, updatePairDto: UpdatePa
 };
 
 /**
- * 펫 ID를 기반으로 해당 펫의 대표 이미지를 조회합니다. 이미지가 없는 경우 null을 반환합니다.
+ * 펫 ID를 기반으로 해당 펫의 대표 이미지를 조회합니다. 이미지가 없는 경우 data가 null입니다.
  * @summary 펫 대표이미지(썸네일) 조회
  */
 export const petImageControllerFindThumbnail = (petId: string) => {
-  return useCustomInstance<PetImageItem>({
+  return useCustomInstance<FindThumbnailResponseDto>({
     url: `/api/v1/pet-image/thumbnail/${petId}`,
     method: "GET",
   });
@@ -529,7 +530,10 @@ export const petImageControllerFindThumbnail = (petId: string) => {
  * @summary 펫 이미지 조회
  */
 export const petImageControllerFindOne = (petId: string) => {
-  return useCustomInstance<PetImageItem[]>({ url: `/api/v1/pet-image/${petId}`, method: "GET" });
+  return useCustomInstance<FindPetImagesResponseDto>({
+    url: `/api/v1/pet-image/${petId}`,
+    method: "GET",
+  });
 };
 
 /**
@@ -1173,9 +1177,9 @@ export const getPetControllerGetParentsByPetIdResponseMock = (
   ...overrideResponse,
 });
 
-export const getPetControllerGetSiblingsByPetIdResponseSiblingPetDetailDtoMock = (
-  overrideResponse: Partial<SiblingPetDetailDto> = {},
-): SiblingPetDetailDto => ({
+export const getPetControllerGetSiblingsByPetIdResponsePetSummaryDtoMock = (
+  overrideResponse: Partial<PetSummaryDto> = {},
+): PetSummaryDto => ({
   ...{
     petId: faker.string.alpha(20),
     type: faker.helpers.arrayElement([
@@ -1232,42 +1236,6 @@ export const getPetControllerGetSiblingsByPetIdResponseSiblingPetDetailDtoMock =
       faker.number.int({ min: undefined, max: undefined }),
       undefined,
     ]),
-    laying: faker.helpers.arrayElement([
-      {
-        ...{
-          id: faker.number.int({ min: undefined, max: undefined }),
-          matingId: faker.helpers.arrayElement([
-            faker.number.int({ min: undefined, max: undefined }),
-            undefined,
-          ]),
-          layingDate: faker.helpers.arrayElement([
-            `${faker.date.past().toISOString().split(".")[0]}Z`,
-            undefined,
-          ]),
-          clutch: faker.helpers.arrayElement([
-            faker.number.int({ min: undefined, max: undefined }),
-            undefined,
-          ]),
-        },
-      },
-      undefined,
-    ]),
-    mating: faker.helpers.arrayElement([
-      {
-        ...{
-          id: faker.number.int({ min: undefined, max: undefined }),
-          pairId: faker.helpers.arrayElement([
-            faker.number.int({ min: undefined, max: undefined }),
-            undefined,
-          ]),
-          matingDate: faker.helpers.arrayElement([
-            `${faker.date.past().toISOString().split(".")[0]}Z`,
-            undefined,
-          ]),
-        },
-      },
-      undefined,
-    ]),
   },
   ...overrideResponse,
 });
@@ -1287,7 +1255,7 @@ export const getPetControllerGetSiblingsByPetIdResponseMock = (
 ): GetSiblingsPageResponseDto => ({
   data: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
     faker.helpers.arrayElement([
-      { ...getPetControllerGetSiblingsByPetIdResponseSiblingPetDetailDtoMock() },
+      { ...getPetControllerGetSiblingsByPetIdResponsePetSummaryDtoMock() },
       { ...getPetControllerGetSiblingsByPetIdResponsePetHiddenStatusDtoMock() },
     ]),
   ),
@@ -1399,9 +1367,9 @@ export const getPetControllerGetChildrenByPetIdResponseMock = (
   ...overrideResponse,
 });
 
-export const getPetControllerGetClutchMatesByPetIdResponseSiblingPetDetailDtoMock = (
-  overrideResponse: Partial<SiblingPetDetailDto> = {},
-): SiblingPetDetailDto => ({
+export const getPetControllerGetClutchMatesByPetIdResponsePetSummaryDtoMock = (
+  overrideResponse: Partial<PetSummaryDto> = {},
+): PetSummaryDto => ({
   ...{
     petId: faker.string.alpha(20),
     type: faker.helpers.arrayElement([
@@ -1458,42 +1426,6 @@ export const getPetControllerGetClutchMatesByPetIdResponseSiblingPetDetailDtoMoc
       faker.number.int({ min: undefined, max: undefined }),
       undefined,
     ]),
-    laying: faker.helpers.arrayElement([
-      {
-        ...{
-          id: faker.number.int({ min: undefined, max: undefined }),
-          matingId: faker.helpers.arrayElement([
-            faker.number.int({ min: undefined, max: undefined }),
-            undefined,
-          ]),
-          layingDate: faker.helpers.arrayElement([
-            `${faker.date.past().toISOString().split(".")[0]}Z`,
-            undefined,
-          ]),
-          clutch: faker.helpers.arrayElement([
-            faker.number.int({ min: undefined, max: undefined }),
-            undefined,
-          ]),
-        },
-      },
-      undefined,
-    ]),
-    mating: faker.helpers.arrayElement([
-      {
-        ...{
-          id: faker.number.int({ min: undefined, max: undefined }),
-          pairId: faker.helpers.arrayElement([
-            faker.number.int({ min: undefined, max: undefined }),
-            undefined,
-          ]),
-          matingDate: faker.helpers.arrayElement([
-            `${faker.date.past().toISOString().split(".")[0]}Z`,
-            undefined,
-          ]),
-        },
-      },
-      undefined,
-    ]),
   },
   ...overrideResponse,
 });
@@ -1513,7 +1445,7 @@ export const getPetControllerGetClutchMatesByPetIdResponseMock = (
 ): PetControllerGetClutchMatesByPetId200 => ({
   data: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
     faker.helpers.arrayElement([
-      { ...getPetControllerGetClutchMatesByPetIdResponseSiblingPetDetailDtoMock() },
+      { ...getPetControllerGetClutchMatesByPetIdResponsePetSummaryDtoMock() },
       { ...getPetControllerGetClutchMatesByPetIdResponsePetHiddenStatusDtoMock() },
     ]),
   ),
@@ -4192,22 +4124,34 @@ export const getPairControllerUpdatePairResponseMock = (
 });
 
 export const getPetImageControllerFindThumbnailResponseMock = (
-  overrideResponse: Partial<PetImageItem> = {},
-): PetImageItem => ({
-  fileName: faker.string.alpha(20),
-  url: faker.string.alpha(20),
-  mimeType: faker.string.alpha(20),
-  size: faker.number.int({ min: undefined, max: undefined }),
+  overrideResponse: Partial<FindThumbnailResponseDto> = {},
+): FindThumbnailResponseDto => ({
+  success: faker.datatype.boolean(),
+  message: faker.string.alpha(20),
+  data: {
+    ...{
+      fileName: faker.string.alpha(20),
+      url: faker.string.alpha(20),
+      mimeType: faker.string.alpha(20),
+      size: faker.number.int({ min: undefined, max: undefined }),
+    },
+  },
   ...overrideResponse,
 });
 
-export const getPetImageControllerFindOneResponseMock = (): PetImageItem[] =>
-  Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+export const getPetImageControllerFindOneResponseMock = (
+  overrideResponse: Partial<FindPetImagesResponseDto> = {},
+): FindPetImagesResponseDto => ({
+  success: faker.datatype.boolean(),
+  message: faker.string.alpha(20),
+  data: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
     fileName: faker.string.alpha(20),
     url: faker.string.alpha(20),
     mimeType: faker.string.alpha(20),
     size: faker.number.int({ min: undefined, max: undefined }),
-  }));
+  })),
+  ...overrideResponse,
+});
 
 export const getPetImageControllerSavePetImagesResponseMock = (
   overrideResponse: Partial<CommonResponseDto> = {},
@@ -5557,10 +5501,10 @@ export const getPairControllerUpdatePairMockHandler = (
 
 export const getPetImageControllerFindThumbnailMockHandler = (
   overrideResponse?:
-    | PetImageItem
+    | FindThumbnailResponseDto
     | ((
         info: Parameters<Parameters<typeof http.get>[1]>[0],
-      ) => Promise<PetImageItem> | PetImageItem),
+      ) => Promise<FindThumbnailResponseDto> | FindThumbnailResponseDto),
 ) => {
   return http.get("*/api/v1/pet-image/thumbnail/:petId", async (info) => {
     await delay(1000);
@@ -5580,10 +5524,10 @@ export const getPetImageControllerFindThumbnailMockHandler = (
 
 export const getPetImageControllerFindOneMockHandler = (
   overrideResponse?:
-    | PetImageItem[]
+    | FindPetImagesResponseDto
     | ((
         info: Parameters<Parameters<typeof http.get>[1]>[0],
-      ) => Promise<PetImageItem[]> | PetImageItem[]),
+      ) => Promise<FindPetImagesResponseDto> | FindPetImagesResponseDto),
 ) => {
   return http.get("*/api/v1/pet-image/:petId", async (info) => {
     await delay(1000);

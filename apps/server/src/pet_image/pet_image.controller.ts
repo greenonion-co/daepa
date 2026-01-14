@@ -1,9 +1,13 @@
 import { Controller, Get, Param, Put, Body } from '@nestjs/common';
 import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { PetImageService } from './pet_image.service';
-import { PetImageItem, SaveFilesDto } from './pet_image.dto';
+import {
+  SaveFilesDto,
+  FindThumbnailResponseDto,
+  FindPetImagesResponseDto,
+} from './pet_image.dto';
 import { CommonResponseDto } from 'src/common/response.dto';
-import { JwtUser } from '../auth/auth.decorator';
+import { JwtUser, Public } from '../auth/auth.decorator';
 import { JwtUserPayload } from '../auth/strategies/jwt.strategy';
 
 @ApiTags('pet-image')
@@ -12,10 +16,11 @@ export class PetImageController {
   constructor(private readonly petImageService: PetImageService) {}
 
   @Get('/thumbnail/:petId')
+  @Public()
   @ApiOperation({
     summary: '펫 대표이미지(썸네일) 조회',
     description:
-      '펫 ID를 기반으로 해당 펫의 대표 이미지를 조회합니다. 이미지가 없는 경우 null을 반환합니다.',
+      '펫 ID를 기반으로 해당 펫의 대표 이미지를 조회합니다. 이미지가 없는 경우 data가 null입니다.',
   })
   @ApiParam({
     name: 'petId',
@@ -25,16 +30,22 @@ export class PetImageController {
   })
   @ApiResponse({
     status: 200,
-    description: '펫 대표 이미지 조회 성공 (없는 경우 null)',
-    type: PetImageItem,
+    description: '펫 대표 이미지 조회 성공',
+    type: FindThumbnailResponseDto,
   })
   async findThumbnail(
     @Param('petId') petId: string,
-  ): Promise<PetImageItem | null> {
-    return this.petImageService.findThumbnailByPetId(petId);
+  ): Promise<FindThumbnailResponseDto> {
+    const thumbnail = await this.petImageService.findThumbnailByPetId(petId);
+    return {
+      success: true,
+      message: '펫 대표 이미지 조회가 완료되었습니다.',
+      data: thumbnail,
+    };
   }
 
   @Get(':petId')
+  @Public()
   @ApiOperation({
     summary: '펫 이미지 조회',
     description:
@@ -48,11 +59,16 @@ export class PetImageController {
   })
   @ApiResponse({
     status: 200,
-    description: '펫 이미지 파일 목록 조회 성공 (없는 경우 빈 배열)',
-    type: [PetImageItem],
+    description: '펫 이미지 파일 목록 조회 성공',
+    type: FindPetImagesResponseDto,
   })
-  async findOne(@Param('petId') petId: string): Promise<PetImageItem[]> {
-    return this.petImageService.findOneByPetId(petId);
+  async findOne(@Param('petId') petId: string): Promise<FindPetImagesResponseDto> {
+    const images = await this.petImageService.findOneByPetId(petId);
+    return {
+      success: true,
+      message: '펫 이미지 조회가 완료되었습니다.',
+      data: images,
+    };
   }
 
   @Put(':petId')

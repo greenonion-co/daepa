@@ -20,9 +20,6 @@ const LinkButton = ({
     <Tooltip>
       <TooltipTrigger asChild>
         <Link
-          onClick={(e) => {
-            e.stopPropagation();
-          }}
           href={href}
           className={cn(
             "inline-flex items-center gap-1 rounded-md bg-sky-100 py-0.5 pl-2 pr-1 text-sky-600 dark:bg-sky-900 dark:text-sky-400",

@@ -268,8 +268,12 @@ export default function SiblingPetCard({
       cardContent
     );
 
+  if (isDeleted) {
+    return <div className="pointer-events-none">{wrappedContent}</div>;
+  }
+
   return (
-    <Link href={`/pet/${pet.petId}`} className={cn(isDeleted && "pointer-events-none")}>
+    <Link href={`/pet/${pet.petId}`} className="cursor-pointer">
       {wrappedContent}
     </Link>
   );

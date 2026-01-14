@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useRef, useState, useCallback, useEffect } from "react";
 import {
   ColumnDef,
   flexRender,
@@ -30,6 +30,7 @@ import SearchInput from "../../components/SearchInput";
 import { useIsMobile } from "@/hooks/useMobile";
 import { useSearchKeywordStore } from "../../store/searchKeyword";
 import Image from "next/image";
+import PetDetailModal from "../[petId]/components/PetDetailModal";
 
 interface DataTableProps<TData> {
   columns: ColumnDef<TData>[];
@@ -63,7 +64,8 @@ export const DataTable = ({
   const isMobile = useIsMobile();
 
   const router = useRouter();
-  const [isRefreshing, setIsRefreshing] = React.useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [selectedPet, setSelectedPet] = useState<PetDto | null>(null);
 
   const table = useReactTable({
     data,
@@ -79,17 +81,26 @@ export const DataTable = ({
     },
   });
 
-  const handleRowClick = ({ e, id }: { e: React.MouseEvent<HTMLTableRowElement>; id: string }) => {
-    // checkbox나 버튼 클릭 시에는 detail 페이지로 이동하지 않음
-    if (
-      !isClickable ||
-      (e.target as HTMLElement).closest("button") ||
-      (e.target as HTMLElement).closest('[role="checkbox"]')
-    ) {
-      return;
-    }
-    router.push(`/pet/${id}`);
-  };
+  const handleRowClick = useCallback(
+    ({ e, pet }: { e: React.MouseEvent<HTMLTableRowElement>; pet: PetDto }) => {
+      // checkbox, 버튼, 링크 클릭 시에는 row 클릭 이벤트 무시
+      if (
+        !isClickable ||
+        (e.target as HTMLElement).closest("button") ||
+        (e.target as HTMLElement).closest('[role="checkbox"]') ||
+        (e.target as HTMLElement).closest("a")
+      ) {
+        return;
+      }
+
+      if (isMobile) {
+        router.push(`/pet/${pet.petId}`);
+      } else {
+        setSelectedPet(pet);
+      }
+    },
+    [isClickable, isMobile, router],
+  );
 
   useEffect(() => {
     return () => {
@@ -175,7 +186,7 @@ export const DataTable = ({
                         ? "bg-blue-100 hover:bg-blue-200 dark:bg-gray-800 dark:hover:bg-blue-800/20"
                         : "opacity-80 hover:opacity-100 dark:opacity-40 dark:hover:opacity-100",
                     )}
-                    onClick={(e) => handleRowClick({ e, id: row.original.petId })}
+                    onClick={(e) => handleRowClick({ e, pet: row.original })}
                   >
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id}>
@@ -188,13 +199,7 @@ export const DataTable = ({
                 {hasMore && (
                   <TableRow ref={loaderRefAction}>
                     <TableCell colSpan={columns.length} className="h-20 text-center">
-                      {isFetchingMore ? (
-                        <div className="flex items-center justify-center">
-                          <div className="h-6 w-6 animate-spin rounded-full border-b-2 border-blue-500" />
-                        </div>
-                      ) : (
-                        <Loading />
-                      )}
+                      {isFetchingMore ? <Loading /> : null}
                     </TableCell>
                   </TableRow>
                 )}
@@ -229,6 +234,14 @@ export const DataTable = ({
           </TableBody>
         </Table>
       </div>
+
+      {selectedPet && (
+        <PetDetailModal
+          isOpen={!!selectedPet}
+          pet={selectedPet}
+          onClose={() => setSelectedPet(null)}
+        />
+      )}
     </div>
   );
 };

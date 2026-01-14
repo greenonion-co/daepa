@@ -13,7 +13,7 @@ import { PARENT_STATUS } from '../../parent_request/parent_request.constants';
 export function replaceParentPublicSafe(
   parentPet: PetParentDto | null,
   childPetOwnerId: string | null,
-  viewerId: string,
+  viewerId?: string,
 ) {
   // 부모 펫이 없으면 null 반환
   if (!parentPet) return null;
@@ -56,7 +56,7 @@ export function replaceParentPublicSafe(
  */
 export function replaceSiblingPublicSafe<T extends PetSummaryDto>(
   pet: T,
-  viewerId: string,
+  viewerId?: string,
 ): T | { petId: string; hiddenStatus: PET_HIDDEN_STATUS } {
   const isOwner = pet.owner?.userId === viewerId;
 

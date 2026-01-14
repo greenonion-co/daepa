@@ -2,12 +2,15 @@ import { ChevronsLeft, Clock7, Mail, Settings } from "lucide-react";
 import { useState } from "react";
 import SidebarPanel from "./SidebarPanel";
 import { cn } from "@/lib/utils";
+import { useUserStore } from "../store/user";
 
 type SIDEBAR_TYPE = "알림" | "최근 본" | "설정";
 
 const Sidebar = ({ unreadCount }: { unreadCount: number }) => {
+  const { user } = useUserStore();
+  const isLoggedIn = !!user?.userId;
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
-  const [type, setType] = useState<SIDEBAR_TYPE>("알림");
+  const [type, setType] = useState<SIDEBAR_TYPE>(isLoggedIn ? "알림" : "최근 본");
 
   const handleClickSidebarItem = (selectedType: SIDEBAR_TYPE) => {
     setType(selectedType);
@@ -32,21 +35,24 @@ const Sidebar = ({ unreadCount }: { unreadCount: number }) => {
           onClick={() => setIsNotificationOpen((prev) => !prev)}
           aria-label={isNotificationOpen ? "사이드바 닫기" : "사이드바 열기"}
         />
-        <SidebarItem
-          icon={
-            <div className="relative">
-              <Mail className="text-gray-500 dark:text-neutral-400" />
-              {unreadCount > 0 && (
-                <div className="absolute -right-2 -top-2 flex h-[18px] w-[18px] items-center justify-center rounded-full bg-red-500 text-[12px] font-medium text-white">
-                  {unreadCount > 9 ? "9+" : unreadCount}
-                </div>
-              )}
-            </div>
-          }
-          label="알림"
-          selected={isNotificationOpen && type === "알림"}
-          onClick={() => handleClickSidebarItem("알림")}
-        />
+        {isLoggedIn && (
+          <SidebarItem
+            icon={
+              <div className="relative">
+                <Mail className="text-gray-500 dark:text-neutral-400" />
+                {unreadCount > 0 && (
+                  <div className="absolute -right-2 -top-2 flex h-[18px] w-[18px] items-center justify-center rounded-full bg-red-500 text-[12px] font-medium text-white">
+                    {unreadCount > 9 ? "9+" : unreadCount}
+                  </div>
+                )}
+              </div>
+            }
+            label="알림"
+            selected={isNotificationOpen && type === "알림"}
+            onClick={() => handleClickSidebarItem("알림")}
+          />
+        )}
+
         <SidebarItem
           icon={<Clock7 className="text-gray-500 dark:text-neutral-400" />}
           label="최근 본"
