@@ -83,11 +83,12 @@ export const DataTable = ({
 
   const handleRowClick = useCallback(
     ({ e, pet }: { e: React.MouseEvent<HTMLTableRowElement>; pet: PetDto }) => {
-      // checkbox나 버튼 클릭 시에는 모달을 열지 않음
+      // checkbox, 버튼, 링크 클릭 시에는 row 클릭 이벤트 무시
       if (
         !isClickable ||
         (e.target as HTMLElement).closest("button") ||
-        (e.target as HTMLElement).closest('[role="checkbox"]')
+        (e.target as HTMLElement).closest('[role="checkbox"]') ||
+        (e.target as HTMLElement).closest("a")
       ) {
         return;
       }
