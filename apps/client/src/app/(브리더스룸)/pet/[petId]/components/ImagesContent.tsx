@@ -29,11 +29,7 @@ const ImagesContent = ({ pet, initialImages }: ImagesContentProps) => {
 
   const isViewingMyPet = useIsMyPet(ownerId);
 
-  const {
-    data: queryPhotos,
-    isSuccess,
-    refetch,
-  } = useQuery({
+  const { data: queryPhotos, refetch } = useQuery({
     queryKey: [petImageControllerFindOne.name, pet.petId],
     queryFn: () => petImageControllerFindOne(pet.petId),
     select: (response) => response.data,
@@ -82,7 +78,7 @@ const ImagesContent = ({ pet, initialImages }: ImagesContentProps) => {
 
   // 최근 본 펫을 localStorage에 저장
   useEffect(() => {
-    if (!pet || !isSuccess) return;
+    if (!pet) return;
 
     const STORAGE_KEY = "recently_viewed_pets";
     const MAX_ITEMS = 20;
@@ -116,7 +112,7 @@ const ImagesContent = ({ pet, initialImages }: ImagesContentProps) => {
     } catch (error) {
       console.error("Failed to save recently viewed pet:", error);
     }
-  }, [pet, isSuccess, photos]);
+  }, [pet, photos]);
 
   return (
     <div className="shadow-xs flex flex-1 flex-col gap-2 rounded-2xl bg-white p-3 dark:bg-neutral-900">
