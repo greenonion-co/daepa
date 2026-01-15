@@ -18,7 +18,6 @@ import { LayingEntity } from 'src/laying/laying.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PetLayingDto, PetSummaryLayingDto } from 'src/pet/pet.dto';
 import { format } from 'date-fns';
-import { PetImageEntity } from 'src/pet_image/pet_image.entity';
 import { EggDetailEntity } from 'src/egg_detail/egg_detail.entity';
 
 interface PairWithMating {
@@ -253,12 +252,6 @@ export class PairService {
           'pd',
           'pd.petId = p.petId',
         )
-        .leftJoinAndMapOne(
-          'p.petImages',
-          PetImageEntity,
-          'pi',
-          'pi.petId = p.petId',
-        )
         .where('p.petId IN (:...parentPetIds)', { parentPetIds })
         .select([
           'p.petId',
@@ -271,7 +264,6 @@ export class PairService {
           'pd.traits',
           'pd.weight',
           'pd.growth',
-          'pi.files',
         ])
         .getMany();
 
