@@ -7,7 +7,6 @@ import { buildR2TransformedUrl, cn } from "@/lib/utils";
 import { IMAGE_TRANSFORMS } from "@/app/constants";
 import { Dialog, DialogOverlay, DialogPortal, DialogTitle } from "@/components/ui/dialog";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
 interface ImageViewerProps {
   isOpen: boolean;
@@ -81,9 +80,7 @@ export default function ImageViewer({
           onPointerDownOutside={(e) => e.preventDefault()}
           aria-describedby={undefined}
         >
-          <VisuallyHidden>
-            <DialogTitle>이미지 전체화면 보기</DialogTitle>
-          </VisuallyHidden>
+          <DialogTitle className="sr-only">이미지 전체화면 보기</DialogTitle>
           <button
             type="button"
             onClick={onClose}
