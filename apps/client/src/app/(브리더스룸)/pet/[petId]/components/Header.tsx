@@ -7,9 +7,11 @@ import { SPECIES_KOREAN_ALIAS_INFO } from "@/app/(브리더스룸)/constants";
 import Link from "next/link";
 import { DeletePetDialog } from "./DeletePetDialog";
 import { useAdoptionStore } from "@/app/(브리더스룸)/pet/store/adoption";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import TooltipText from "@/app/(브리더스룸)/components/TooltipText";
-import PetThumbnail from "@/components/common/PetThumbnail";
+import PetThumbnail, { getPetThumbnailQueryKey } from "@/components/common/PetThumbnail";
+import { petImageControllerFindThumbnail } from "@repo/api-client";
+import { useQuery } from "@tanstack/react-query";
 import { useUserStore } from "@/app/(브리더스룸)/store/user";
 import { useIsMyPet } from "@/hooks/useIsMyPet";
 import LoginPromoSheet from "@/app/(브리더스룸)/components/LoginPromoSheet";
@@ -42,6 +44,14 @@ const Header = ({
   const [isScrolled, setIsScrolled] = useState(size === "small");
   const [isPromoSheetOpen, setIsPromoSheetOpen] = useState(false);
 
+  const { data: thumbnail } = useQuery({
+    queryKey: getPetThumbnailQueryKey(pet.petId),
+    queryFn: () => petImageControllerFindThumbnail(pet.petId),
+    select: (response) => response.data.data,
+    staleTime: Infinity,
+    gcTime: Infinity,
+  });
+
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
@@ -51,11 +61,9 @@ const Header = ({
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // 최근 본 펫을 localStorage에 저장 (petId 변경 시에만 실행)
-  const savedPetIdRef = useRef<string | null>(null);
+  // 최근 본 펫을 localStorage에 저장
   useEffect(() => {
-    if (!pet || savedPetIdRef.current === pet.petId) return;
-    savedPetIdRef.current = pet.petId;
+    if (!pet) return;
 
     try {
       const stored = localStorage.getItem(RECENTLY_VIEWED_STORAGE_KEY);
@@ -65,7 +73,7 @@ const Header = ({
         petId: pet.petId,
         name: pet.name,
         species: pet.species,
-        photoUrl: undefined,
+        photoUrl: thumbnail?.url,
         morphs: pet.morphs,
         hatchingDate: pet.hatchingDate,
       };
@@ -81,7 +89,7 @@ const Header = ({
     } catch (error) {
       console.error("Failed to save recently viewed pet:", error);
     }
-  }, [pet]);
+  }, [pet, thumbnail]);
 
   const { breedingInfo } = useBreedingInfoStore();
   const breedingData = breedingInfo?.petId === pet?.petId ? breedingInfo : null;
