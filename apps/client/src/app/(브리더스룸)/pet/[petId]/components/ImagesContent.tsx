@@ -8,7 +8,8 @@ import {
   petImageControllerSavePetImages,
   PetDto,
 } from "@repo/api-client";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { getPetThumbnailQueryKey } from "@/components/common/PetThumbnail";
 import { isEqual } from "es-toolkit";
 import { useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -21,6 +22,7 @@ interface ImagesContentProps {
 }
 
 const ImagesContent = ({ pet, initialImages }: ImagesContentProps) => {
+  const queryClient = useQueryClient();
   const [isEditMode, setIsEditMode] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   // 편집 중일 때만 임시 상태 사용 (null이면 photos 사용)
@@ -62,8 +64,18 @@ const ImagesContent = ({ pet, initialImages }: ImagesContentProps) => {
         return;
       }
 
+      // 첫 번째 이미지(썸네일) 변경 여부 확인
+      const isThumbnailChanged = photos[0]?.fileName !== displayImages[0]?.fileName;
+
       await mutateSaveImages(displayImages);
       await refetch();
+
+      // 썸네일이 변경된 경우 썸네일 쿼리 무효화
+      if (isThumbnailChanged) {
+        await queryClient.invalidateQueries({
+          queryKey: getPetThumbnailQueryKey(pet.petId),
+        });
+      }
 
       toast.success("이미지 수정이 완료되었습니다.");
       setEditingImages(null);
@@ -74,7 +86,7 @@ const ImagesContent = ({ pet, initialImages }: ImagesContentProps) => {
     } finally {
       setIsProcessing(false);
     }
-  }, [mutateSaveImages, displayImages, photos, refetch]);
+  }, [mutateSaveImages, displayImages, photos, refetch, queryClient, pet.petId]);
 
   return (
     <div className="shadow-xs flex flex-1 flex-col gap-2 rounded-2xl bg-white p-3 dark:bg-neutral-900">
