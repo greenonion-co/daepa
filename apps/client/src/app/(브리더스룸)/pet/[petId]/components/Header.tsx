@@ -7,13 +7,17 @@ import { SPECIES_KOREAN_ALIAS_INFO } from "@/app/(브리더스룸)/constants";
 import Link from "next/link";
 import { DeletePetDialog } from "./DeletePetDialog";
 import { useAdoptionStore } from "@/app/(브리더스룸)/pet/store/adoption";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import TooltipText from "@/app/(브리더스룸)/components/TooltipText";
 import PetThumbnail from "@/components/common/PetThumbnail";
 import { useUserStore } from "@/app/(브리더스룸)/store/user";
 import { useIsMyPet } from "@/hooks/useIsMyPet";
 import LoginPromoSheet from "@/app/(브리더스룸)/components/LoginPromoSheet";
 import { useBreedingInfoStore } from "../../store/breedingInfo";
+import {
+  RECENTLY_VIEWED_MAX_ITEMS,
+  RECENTLY_VIEWED_STORAGE_KEY,
+} from "@/app/(브리더스룸)/components/SidebarPanel/최근본";
 
 type TabType = "breeding" | "adoption" | "images" | "pedigree";
 
@@ -46,6 +50,38 @@ const Header = ({
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // 최근 본 펫을 localStorage에 저장 (petId 변경 시에만 실행)
+  const savedPetIdRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!pet || savedPetIdRef.current === pet.petId) return;
+    savedPetIdRef.current = pet.petId;
+
+    try {
+      const stored = localStorage.getItem(RECENTLY_VIEWED_STORAGE_KEY);
+      const currentList: Array<{ petId: string }> = stored ? JSON.parse(stored) : [];
+
+      const newItem = {
+        petId: pet.petId,
+        name: pet.name,
+        species: pet.species,
+        photoUrl: undefined,
+        morphs: pet.morphs,
+        hatchingDate: pet.hatchingDate,
+      };
+
+      // 중복 제거 후 새 항목을 맨 앞에 추가
+      const updatedList = [
+        newItem,
+        ...currentList.filter((item) => item.petId !== pet.petId),
+      ].slice(0, RECENTLY_VIEWED_MAX_ITEMS);
+
+      localStorage.setItem(RECENTLY_VIEWED_STORAGE_KEY, JSON.stringify(updatedList));
+      window.dispatchEvent(new Event("recentlyViewedUpdated"));
+    } catch (error) {
+      console.error("Failed to save recently viewed pet:", error);
+    }
+  }, [pet]);
 
   const { breedingInfo } = useBreedingInfoStore();
   const breedingData = breedingInfo?.petId === pet?.petId ? breedingInfo : null;
