@@ -18,7 +18,6 @@ import { PetEntity } from '../pet/pet.entity';
 import { PET_SEX, PET_SPECIES, PET_TYPE } from '../pet/pet.constants';
 import { UserNotificationService } from '../user_notification/user_notification.service';
 import { USER_NOTIFICATION_TYPE } from '../user_notification/user_notification.constant';
-import { PetImageEntity } from 'src/pet_image/pet_image.entity';
 import { PetParentDto } from 'src/pet/pet.dto';
 import { PetDetailEntity } from 'src/pet_detail/pet_detail.entity';
 import { UserEntity } from 'src/user/user.entity';
@@ -40,7 +39,6 @@ interface ParentRawData {
   pd_sex: PET_SEX | null;
   pd_morphs: string[] | null;
   pd_traits: string[] | null;
-  img_files: PetImageEntity['files'] | null;
   user_user_id: string;
   user_name: string;
   user_role: USER_ROLE;
@@ -186,12 +184,10 @@ export class ParentRequestService {
                 childPet: {
                   id: childPet?.petId ?? '',
                   name: childPet.name ?? undefined,
-                  photos: childPet?.photos?.files ?? undefined,
                 },
                 parentPet: {
                   id: parentPet?.petId ?? '',
                   name: parentPet.name ?? undefined,
-                  photos: parentPet?.photos?.files ?? undefined,
                 },
                 role,
                 message,
@@ -408,12 +404,10 @@ export class ParentRequestService {
           childPet: {
             id: parentRequest.childPetId,
             name: childPet?.name ?? undefined,
-            photos: childPet?.photos?.files ?? undefined,
           },
           parentPet: {
             id: parentRequest.parentPetId,
             name: parentPet?.name ?? undefined,
-            photos: parentPet?.photos?.files ?? undefined,
           },
           role: parentRequest.role,
           message: parentRequest.message,
@@ -449,51 +443,29 @@ export class ParentRequestService {
     childPetId: string,
     parentPetId: string,
   ) {
-    const [childPetInfo, parentPetInfo, childPetPhotos, parentPetPhotos] =
-      await Promise.all([
-        entityManager.findOne(PetEntity, {
-          where: { petId: childPetId, isDeleted: false },
-          select: ['name', 'petId', 'ownerId'],
-        }),
-        entityManager
-          .createQueryBuilder(PetEntity, 'pet')
-          .innerJoinAndMapOne(
-            'pet.petDetail',
-            PetDetailEntity,
-            'petDetail',
-            'petDetail.petId = pet.petId',
-          )
-          .select([
-            'pet.type',
-            'pet.name',
-            'pet.petId',
-            'pet.ownerId',
-            'petDetail.sex',
-          ])
-          .where('pet.petId = :parentPetId', { parentPetId })
-          .getOne(),
-        entityManager.findOne(PetImageEntity, {
-          where: { petId: childPetId },
-          select: ['files'],
-        }),
-        entityManager.findOne(PetImageEntity, {
-          where: { petId: parentPetId },
-          select: ['files'],
-        }),
-      ]);
-
-    const childPet = childPetInfo
-      ? {
-          ...childPetInfo,
-          photos: childPetPhotos,
-        }
-      : null;
-    const parentPet = parentPetInfo
-      ? {
-          ...parentPetInfo,
-          photos: parentPetPhotos,
-        }
-      : null;
+    const [childPet, parentPet] = await Promise.all([
+      entityManager.findOne(PetEntity, {
+        where: { petId: childPetId, isDeleted: false },
+        select: ['name', 'petId', 'ownerId'],
+      }),
+      entityManager
+        .createQueryBuilder(PetEntity, 'pet')
+        .innerJoinAndMapOne(
+          'pet.petDetail',
+          PetDetailEntity,
+          'petDetail',
+          'petDetail.petId = pet.petId',
+        )
+        .select([
+          'pet.type',
+          'pet.name',
+          'pet.petId',
+          'pet.ownerId',
+          'petDetail.sex',
+        ])
+        .where('pet.petId = :parentPetId', { parentPetId })
+        .getOne(),
+    ]);
 
     return { childPet, parentPet };
   }
@@ -546,7 +518,7 @@ export class ParentRequestService {
       let mother: PetParentDto | null = null;
 
       for (const row of parentData) {
-        const base = plainToInstance(PetParentDto, {
+        const parent = plainToInstance(PetParentDto, {
           petId: row.p_pet_id,
           name: row.p_name ?? '',
           species: row.p_species as PET_SPECIES,
@@ -566,10 +538,8 @@ export class ParentRequestService {
           isDeleted: !!row.p_is_deleted,
         });
 
-        const info = { ...base, photos: row.img_files ?? undefined };
-
-        if (row.pd_sex === PET_SEX.MALE) father = info;
-        else if (row.pd_sex === PET_SEX.FEMALE) mother = info;
+        if (row.pd_sex === PET_SEX.MALE) father = parent;
+        else if (row.pd_sex === PET_SEX.FEMALE) mother = parent;
       }
 
       return { father, mother };

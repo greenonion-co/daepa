@@ -38,7 +38,7 @@ export const fetchImages = cache(async (petId: string): Promise<PetImageItem[]> 
     const res = await fetch(url, { cache: "no-store", headers });
     if (!res.ok) return [];
     const data = await res.json();
-    return data;
+    return data.data;
   } catch {
     return [];
   }

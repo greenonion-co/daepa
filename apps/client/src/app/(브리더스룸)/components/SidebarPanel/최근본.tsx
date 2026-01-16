@@ -22,8 +22,8 @@ interface RecentlyViewedPet {
   hatchingDate?: string;
 }
 
-const STORAGE_KEY = "recently_viewed_pets";
-const MAX_ITEMS = 20;
+export const RECENTLY_VIEWED_STORAGE_KEY = "recently_viewed_pets";
+export const RECENTLY_VIEWED_MAX_ITEMS = 20;
 
 const RecentlyViewedList = () => {
   const { petId } = useParams();
@@ -32,7 +32,7 @@ const RecentlyViewedList = () => {
   useEffect(() => {
     const loadRecentlyViewed = () => {
       try {
-        const stored = localStorage.getItem(STORAGE_KEY);
+        const stored = localStorage.getItem(RECENTLY_VIEWED_STORAGE_KEY);
         if (stored) {
           const parsed = JSON.parse(stored) as RecentlyViewedPet[];
           setItems(parsed);
@@ -45,7 +45,7 @@ const RecentlyViewedList = () => {
     loadRecentlyViewed();
 
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === STORAGE_KEY) {
+      if (e.key === RECENTLY_VIEWED_STORAGE_KEY) {
         loadRecentlyViewed();
       }
     };
@@ -69,7 +69,9 @@ const RecentlyViewedList = () => {
       {items && items.length > 0 && (
         <div className="flex items-center gap-2 pl-4 text-red-500 dark:text-red-400">
           <Info size={14} />
-          <div className="text-[14px]">최대 {MAX_ITEMS}개의 펫을 확인 가능합니다.</div>
+          <div className="text-[14px]">
+            최대 {RECENTLY_VIEWED_MAX_ITEMS}개의 펫을 확인 가능합니다.
+          </div>
         </div>
       )}
       <ScrollArea className="flex h-full flex-1 pb-[60px]">

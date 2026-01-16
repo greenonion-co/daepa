@@ -30,6 +30,7 @@ import SearchInput from "../../components/SearchInput";
 import { useIsMobile } from "@/hooks/useMobile";
 import { useSearchKeywordStore } from "../../store/searchKeyword";
 import Image from "next/image";
+import PetDetailModal from "../[petId]/components/PetDetailModal";
 
 interface DataTableProps<TData> {
   columns: ColumnDef<TData>[];
@@ -64,6 +65,7 @@ export const DataTable = ({
 
   const router = useRouter();
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [selectedPet, setSelectedPet] = useState<PetDto | null>(null);
 
   const table = useReactTable({
     data,
@@ -81,17 +83,23 @@ export const DataTable = ({
 
   const handleRowClick = useCallback(
     ({ e, pet }: { e: React.MouseEvent<HTMLTableRowElement>; pet: PetDto }) => {
-      // checkbox나 버튼 클릭 시에는 모달을 열지 않음
+      // checkbox, 버튼, 링크 클릭 시에는 row 클릭 이벤트 무시
       if (
         !isClickable ||
         (e.target as HTMLElement).closest("button") ||
-        (e.target as HTMLElement).closest('[role="checkbox"]')
+        (e.target as HTMLElement).closest('[role="checkbox"]') ||
+        (e.target as HTMLElement).closest("a")
       ) {
         return;
       }
-      router.push(`/pet/${pet.petId}`);
+
+      if (isMobile) {
+        router.push(`/pet/${pet.petId}`);
+      } else {
+        setSelectedPet(pet);
+      }
     },
-    [isClickable, router],
+    [isClickable, isMobile, router],
   );
 
   useEffect(() => {
@@ -226,6 +234,14 @@ export const DataTable = ({
           </TableBody>
         </Table>
       </div>
+
+      {selectedPet && (
+        <PetDetailModal
+          isOpen={!!selectedPet}
+          pet={selectedPet}
+          onClose={() => setSelectedPet(null)}
+        />
+      )}
     </div>
   );
 };

@@ -8,6 +8,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
+import { CommonResponseDto } from '../common/response.dto';
 
 export class PetImageItem {
   @ApiProperty({
@@ -130,4 +131,21 @@ export class PetImageResponseDto {
   @ApiProperty()
   @IsDate()
   updatedAt: Date;
+}
+
+export class FindThumbnailResponseDto extends CommonResponseDto {
+  @ApiProperty({
+    description: '펫 대표 이미지 (없는 경우 null)',
+    type: PetImageItem,
+    nullable: true,
+  })
+  data: PetImageItem | null;
+}
+
+export class FindPetImagesResponseDto extends CommonResponseDto {
+  @ApiProperty({
+    description: '펫 이미지 목록',
+    type: [PetImageItem],
+  })
+  data: PetImageItem[];
 }

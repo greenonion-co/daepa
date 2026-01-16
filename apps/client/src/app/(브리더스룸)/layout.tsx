@@ -12,10 +12,8 @@ import { userNotificationControllerGetUnreadCount } from "@repo/api-client";
 
 export default function BrLayout({
   children,
-  modal,
 }: Readonly<{
   children: React.ReactNode;
-  modal: React.ReactNode;
 }>) {
   const { initialize, user } = useUserStore();
   const pathname = usePathname();
@@ -42,7 +40,6 @@ export default function BrLayout({
         {children}
       </div>
       {!isMobile && <Sidebar unreadCount={unreadCount} />}
-      {modal}
     </main>
   );
 }
