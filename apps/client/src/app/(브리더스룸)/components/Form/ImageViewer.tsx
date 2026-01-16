@@ -24,12 +24,13 @@ export default function ImageViewer({
   fileName,
 }: ImageViewerProps) {
   const [isXlLoaded, setIsXlLoaded] = useState(false);
+  const [needsXl, setNeedsXl] = useState(false);
 
-  const needsXl = typeof window !== "undefined" && window.innerWidth >= 400;
-
-  // 모달 닫힐 때 xl 로드 상태 초기화
+  // 모달 닫힐 때 상태 초기화, 열릴 때 needsXl 결정
   useEffect(() => {
-    if (!isOpen) {
+    if (isOpen) {
+      setNeedsXl(window.innerWidth >= 400);
+    } else {
       setIsXlLoaded(false);
     }
   }, [isOpen]);
