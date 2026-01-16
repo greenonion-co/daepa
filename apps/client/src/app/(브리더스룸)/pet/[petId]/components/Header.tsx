@@ -9,11 +9,17 @@ import { DeletePetDialog } from "./DeletePetDialog";
 import { useAdoptionStore } from "@/app/(브리더스룸)/pet/store/adoption";
 import { useEffect, useState } from "react";
 import TooltipText from "@/app/(브리더스룸)/components/TooltipText";
-import PetThumbnail from "@/components/common/PetThumbnail";
+import PetThumbnail, { getPetThumbnailQueryKey } from "@/components/common/PetThumbnail";
+import { petImageControllerFindThumbnail } from "@repo/api-client";
+import { useQuery } from "@tanstack/react-query";
 import { useUserStore } from "@/app/(브리더스룸)/store/user";
 import { useIsMyPet } from "@/hooks/useIsMyPet";
 import LoginPromoSheet from "@/app/(브리더스룸)/components/LoginPromoSheet";
 import { useBreedingInfoStore } from "../../store/breedingInfo";
+import {
+  RECENTLY_VIEWED_MAX_ITEMS,
+  RECENTLY_VIEWED_STORAGE_KEY,
+} from "@/app/(브리더스룸)/components/SidebarPanel/최근본";
 
 type TabType = "breeding" | "adoption" | "images" | "pedigree";
 
@@ -38,6 +44,14 @@ const Header = ({
   const [isScrolled, setIsScrolled] = useState(size === "small");
   const [isPromoSheetOpen, setIsPromoSheetOpen] = useState(false);
 
+  const { data: thumbnail } = useQuery({
+    queryKey: getPetThumbnailQueryKey(pet.petId),
+    queryFn: () => petImageControllerFindThumbnail(pet.petId),
+    select: (response) => response.data.data,
+    staleTime: Infinity,
+    gcTime: Infinity,
+  });
+
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
@@ -46,6 +60,36 @@ const Header = ({
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // 최근 본 펫을 localStorage에 저장
+  useEffect(() => {
+    if (!pet) return;
+
+    try {
+      const stored = localStorage.getItem(RECENTLY_VIEWED_STORAGE_KEY);
+      const currentList: Array<{ petId: string }> = stored ? JSON.parse(stored) : [];
+
+      const newItem = {
+        petId: pet.petId,
+        name: pet.name,
+        species: pet.species,
+        photoUrl: thumbnail?.url,
+        morphs: pet.morphs,
+        hatchingDate: pet.hatchingDate,
+      };
+
+      // 중복 제거 후 새 항목을 맨 앞에 추가
+      const updatedList = [
+        newItem,
+        ...currentList.filter((item) => item.petId !== pet.petId),
+      ].slice(0, RECENTLY_VIEWED_MAX_ITEMS);
+
+      localStorage.setItem(RECENTLY_VIEWED_STORAGE_KEY, JSON.stringify(updatedList));
+      window.dispatchEvent(new Event("recentlyViewedUpdated"));
+    } catch (error) {
+      console.error("Failed to save recently viewed pet:", error);
+    }
+  }, [pet, thumbnail]);
 
   const { breedingInfo } = useBreedingInfoStore();
   const breedingData = breedingInfo?.petId === pet?.petId ? breedingInfo : null;

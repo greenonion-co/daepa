@@ -8,9 +8,10 @@ import {
   petImageControllerSavePetImages,
   PetDto,
 } from "@repo/api-client";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { getPetThumbnailQueryKey } from "@/components/common/PetThumbnail";
 import { isEqual } from "es-toolkit";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useIsMyPet } from "@/hooks/useIsMyPet";
 import { isEmpty } from "es-toolkit/compat";
@@ -21,6 +22,7 @@ interface ImagesContentProps {
 }
 
 const ImagesContent = ({ pet, initialImages }: ImagesContentProps) => {
+  const queryClient = useQueryClient();
   const [isEditMode, setIsEditMode] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   // 편집 중일 때만 임시 상태 사용 (null이면 photos 사용)
@@ -62,8 +64,18 @@ const ImagesContent = ({ pet, initialImages }: ImagesContentProps) => {
         return;
       }
 
+      // 첫 번째 이미지(썸네일) 변경 여부 확인
+      const isThumbnailChanged = photos[0]?.fileName !== displayImages[0]?.fileName;
+
       await mutateSaveImages(displayImages);
       await refetch();
+
+      // 썸네일이 변경된 경우 썸네일 쿼리 무효화
+      if (isThumbnailChanged) {
+        await queryClient.invalidateQueries({
+          queryKey: getPetThumbnailQueryKey(pet.petId),
+        });
+      }
 
       toast.success("이미지 수정이 완료되었습니다.");
       setEditingImages(null);
@@ -74,45 +86,7 @@ const ImagesContent = ({ pet, initialImages }: ImagesContentProps) => {
     } finally {
       setIsProcessing(false);
     }
-  }, [mutateSaveImages, displayImages, photos, refetch]);
-
-  // 최근 본 펫을 localStorage에 저장
-  useEffect(() => {
-    if (!pet) return;
-
-    const STORAGE_KEY = "recently_viewed_pets";
-    const MAX_ITEMS = 20;
-
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      const currentList = stored ? JSON.parse(stored) : [];
-
-      // 현재 펫 정보
-      const newItem = {
-        petId: pet.petId,
-        name: pet.name,
-        species: pet.species,
-        photoUrl: photos[0]?.url,
-        morphs: pet.morphs,
-        hatchingDate: pet.hatchingDate,
-      };
-
-      // 중복 제거 (같은 petId가 있으면 제거)
-      const filteredList = currentList.filter(
-        (item: { petId: string }) => item.petId !== pet.petId,
-      );
-
-      // 새 항목을 맨 앞에 추가
-      const updatedList = [newItem, ...filteredList].slice(0, MAX_ITEMS);
-
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedList));
-
-      // 커스텀 이벤트 발생시켜서 다른 컴포넌트에 알림
-      window.dispatchEvent(new Event("recentlyViewedUpdated"));
-    } catch (error) {
-      console.error("Failed to save recently viewed pet:", error);
-    }
-  }, [pet, photos]);
+  }, [mutateSaveImages, displayImages, photos, refetch, queryClient, pet.petId]);
 
   return (
     <div className="shadow-xs flex flex-1 flex-col gap-2 rounded-2xl bg-white p-3 dark:bg-neutral-900">
