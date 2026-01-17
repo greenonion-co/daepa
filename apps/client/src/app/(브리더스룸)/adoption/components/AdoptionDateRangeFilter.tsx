@@ -115,7 +115,7 @@ const AdoptionDateRangeFilter = () => {
       {isOpen && (
         <div
           className={cn(
-            "absolute left-0 top-[40px] z-50 rounded-2xl border-[1.8px] border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800",
+            "absolute right-0 top-[40px] z-50 rounded-2xl border-[1.8px] border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800",
             "origin-top transform transition-all duration-200 ease-out",
             isEntering
               ? "translate-y-0 scale-100 opacity-100"
