@@ -8,10 +8,10 @@
 
 ```
 apps/mobile/src/screens/WebView/
-├── index.tsx      # 메인 WebView 컴포넌트
-├── types.ts       # 타입 정의
-├── scripts.ts     # 주입 JavaScript 스크립트
-└── webview.md     # 이 문서
+├── index.tsx       # 메인 WebView 컴포넌트
+├── types.ts        # 타입 정의
+├── scripts.ts      # 주입 JavaScript 스크립트
+└── description.md  # 이 문서
 
 apps/client/src/lib/
 └── native-bridge.ts  # 웹에서 앱으로 통신하는 브릿지 유틸리티
@@ -242,7 +242,7 @@ case 'LOG':
 ```
 
 ### TOKEN_REFRESH_FAILED
-토큰 갱신 실패 알림
+토큰 갱신 실패 시 인증 정보를 삭제하고 로그인 화면으로 이동
 
 ```tsx
 // 웹에서 호출
@@ -251,6 +251,10 @@ notifyTokenRefreshFailed();
 // 앱에서 처리
 case 'TOKEN_REFRESH_FAILED':
   clear();  // 인증 정보 삭제
+  navigation.reset({
+    index: 1,
+    routes: [{ name: 'Tabs' }, { name: 'Login' }],
+  });
 ```
 
 ### READY
