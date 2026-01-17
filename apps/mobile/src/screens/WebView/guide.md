@@ -362,7 +362,7 @@ useFocusEffect(
       return false;  // 기본 동작 (앱 종료 또는 네이티브 뒤로가기)
     };
 
-    BackHandler.addEventListener('hardwareBackPress', onBackPress);
+    const subscription = BackHandler.addEventListener('hardwareBackPress', onBackPress);
     return () => subscription.remove();
   }, [canGoBack])
 );
