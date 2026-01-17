@@ -98,6 +98,7 @@ function GeneralTabs() {
           paddingBottom: Platform.OS === 'android' ? insets.bottom : 0,
           height: Platform.OS === 'android' ? 60 + insets.bottom : undefined,
         },
+        tabBarHideOnKeyboard: true,
       }}
     >
       <GeneralTab.Screen
@@ -149,6 +150,7 @@ function AdminTabs() {
           paddingBottom: Platform.OS === 'android' ? insets.bottom : 0,
           height: Platform.OS === 'android' ? 60 + insets.bottom : undefined,
         },
+        tabBarHideOnKeyboard: true,
       }}
     >
       <AdminTab.Screen
