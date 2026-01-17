@@ -28,6 +28,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useAppRouter } from "@/hooks/useAppRouter";
 import PetDetailModal from "../[petId]/components/PetDetailModal";
+import { useIsMobile } from "@/hooks/useMobile";
 
 interface DataTableProps<TData> {
   columns: ColumnDef<TData>[];
@@ -60,6 +61,8 @@ export const DataTable = ({
   const router = useAppRouter();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedPet, setSelectedPet] = useState<PetDto | null>(null);
+
+  const isMobile = useIsMobile();
 
   const table = useReactTable({
     data,
