@@ -10,7 +10,7 @@ import {
   CreateMatingDtoSpecies,
 } from "@repo/api-client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { AxiosError } from "axios";
 import { DateTime } from "luxon";
 import CalendarInput from "./CalendarInput";

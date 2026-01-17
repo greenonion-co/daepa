@@ -59,10 +59,12 @@ export class PetController {
   ) {}
 
   @Get()
+  @Public()
+  @UseGuards(OptionalJwtAuthGuard)
   @ApiExtraModels(PetDto, PageMetaDto)
   @ApiResponse({
     status: 200,
-    description: 'BR룸 펫 목록 조회 성공',
+    description: '펫 목록 조회 성공',
     schema: {
       type: 'object',
       required: ['data', 'meta'],
@@ -77,9 +79,12 @@ export class PetController {
   })
   async findAll(
     @Query() pageOptionsDto: PetFilterDto,
-    @JwtUser() token: JwtUserPayload,
+    @OptionalJwtUser() token: JwtUserPayload | null,
   ): Promise<PageDto<PetDto>> {
-    return this.petService.getPetListFull(pageOptionsDto, token.userId);
+    return this.petService.getPetListFull(
+      pageOptionsDto,
+      token?.userId ?? null,
+    );
   }
 
   @Post()

@@ -1,45 +1,23 @@
 "use client";
 
 import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import {
-  User,
-  Shield,
-  Palette,
-  Moon,
-  Sun,
-  Trash2,
-  Settings,
-  ChevronRight,
-  Edit2,
-  Info,
-  CircleX,
-  CircleCheck,
-} from "lucide-react";
+import { Moon, Sun, Edit2, LogOut, Trash2, HelpCircle, FileText, Shield, Mail } from "lucide-react";
 import DeleteAccountButton from "./components/DeleteAccountButton";
+import { SettingsGroup, SettingsItem } from "./components";
+import NicknameDuplicateCheckInput from "./components/NicknameDuplicateCheckInput";
 import { Switch } from "@/components/ui/switch";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  userControllerGetUserProfile,
-  userControllerCreateInitUserInfo,
-  userControllerVerifyName,
-} from "@repo/api-client";
-import { toast } from "sonner";
+import { userControllerGetUserProfile, userControllerCreateInitUserInfo } from "@repo/api-client";
+import { toast } from "@/lib/toast";
 import Image from "next/image";
-import { USER_STATUS_MAP } from "@/app/(브리더스룸)/constants";
 import { cn } from "@/lib/utils";
 import { AxiosError } from "axios";
 import { providerIconMap } from "../../(user)/constants";
 import { DUPLICATE_CHECK_STATUS } from "../constants";
 import { useLogout } from "@/hooks/useLogout";
-
-const NICKNAME_MAX_LENGTH = 15;
-const NICKNAME_MIN_LENGTH = 2;
 
 const SettingsPage = () => {
   const queryClient = useQueryClient();
@@ -61,10 +39,6 @@ const SettingsPage = () => {
 
   const { mutateAsync: updateNickname, isPending: isUpdatingNickname } = useMutation({
     mutationFn: userControllerCreateInitUserInfo,
-  });
-
-  const { mutateAsync: verifyName, isPending: isVerifyingName } = useMutation({
-    mutationFn: userControllerVerifyName,
   });
 
   const handleThemeChange = (isDark: boolean) => {
@@ -91,73 +65,9 @@ const SettingsPage = () => {
     setDuplicateCheckStatus(DUPLICATE_CHECK_STATUS.NONE);
   };
 
-  // 중복확인 함수
-  const handleDuplicateCheck = async () => {
-    if (
-      !newNickname ||
-      newNickname.length < NICKNAME_MIN_LENGTH ||
-      newNickname.length > NICKNAME_MAX_LENGTH
-    ) {
-      toast.error("올바른 닉네임을 입력해주세요.");
-      return;
-    }
-
-    if (newNickname === userProfile?.name) {
-      toast.error("현재 닉네임과 동일합니다.");
-      return;
-    }
-
-    setDuplicateCheckStatus(DUPLICATE_CHECK_STATUS.CHECKING);
-
-    try {
-      const response = await verifyName({ name: newNickname });
-
-      if (response.data.success) {
-        setDuplicateCheckStatus(DUPLICATE_CHECK_STATUS.AVAILABLE);
-        toast.success("사용 가능한 닉네임입니다.");
-      }
-    } catch (error: unknown) {
-      if (error instanceof AxiosError) {
-        if (error.response?.status === 409) {
-          setDuplicateCheckStatus(DUPLICATE_CHECK_STATUS.DUPLICATE);
-          toast.error("이미 사용중인 닉네임입니다.");
-        } else if (error.response?.status === 400) {
-          // 서버 유효성 검증 에러 (예: DELETED_ 접두사)
-          setDuplicateCheckStatus(DUPLICATE_CHECK_STATUS.NONE);
-          const message = error.response?.data?.message;
-          const errorMessage = Array.isArray(message) ? message[0] : message;
-          toast.error(errorMessage || "유효하지 않은 닉네임입니다.");
-        } else {
-          setDuplicateCheckStatus(DUPLICATE_CHECK_STATUS.NONE);
-          toast.error("중복확인 중 오류가 발생했습니다. 다시 시도해주세요.");
-        }
-      } else {
-        setDuplicateCheckStatus(DUPLICATE_CHECK_STATUS.NONE);
-        toast.error("중복확인 중 오류가 발생했습니다. 다시 시도해주세요.");
-      }
-    }
-  };
-
   // 닉네임 저장
   const handleSaveNickname = async () => {
-    if (
-      !newNickname ||
-      newNickname.length < NICKNAME_MIN_LENGTH ||
-      newNickname.length > NICKNAME_MAX_LENGTH
-    ) {
-      toast.error("닉네임은 2자 이상 15자 이하여야 합니다.");
-      return;
-    }
-
-    if (newNickname === userProfile?.name) {
-      toast.error("현재 닉네임과 동일합니다.");
-      return;
-    }
-
-    if (
-      duplicateCheckStatus !== DUPLICATE_CHECK_STATUS.AVAILABLE &&
-      newNickname !== userProfile?.name
-    ) {
+    if (duplicateCheckStatus !== DUPLICATE_CHECK_STATUS.AVAILABLE) {
       toast.error("중복확인을 먼저 진행해주세요.");
       return;
     }
@@ -182,296 +92,190 @@ const SettingsPage = () => {
   };
 
   return (
-    <div className="container mx-auto max-w-4xl space-y-6 px-2 py-2">
-      {/* 헤더 */}
-      <div className="mb-8 flex items-center gap-3">
-        <Settings className="h-8 w-8" />
-        <div className="flex-1">
-          <div className="flex items-center gap-3">
-            <h1 className="text-[16px] font-bold text-gray-900 dark:text-white">설정</h1>
-            <Badge
-              className={cn(
-                userProfile?.isBiz
-                  ? "bg-green-700 hover:bg-green-800"
-                  : "bg-blue-700 hover:bg-blue-800",
-                "text-white",
-              )}
-            >
-              {userProfile?.isBiz ? "사업자" : "일반 사용자"}
-            </Badge>
-          </div>
-          <p className="text-[14px] text-gray-600 dark:text-gray-400">
-            계정 및 앱 설정을 관리하세요
-          </p>
-        </div>
-      </div>
-
-      <div className="grid gap-6 md:grid-cols-2">
-        {/* 계정 정보 */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <User className="h-5 w-5" />
-              계정 정보
-            </CardTitle>
-            <CardDescription>기본적인 계정 정보를 확인하고 관리하세요</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="nickname">닉네임</Label>
-              {isEditingNickname ? (
-                <div className="space-y-2">
-                  <div className="flex gap-2">
-                    <Input
-                      id="nickname"
-                      placeholder="닉네임을 입력하세요"
-                      value={newNickname}
-                      onChange={(e) => {
-                        if (e.target.value.length > NICKNAME_MAX_LENGTH) {
-                          e.target.value = e.target.value.slice(0, NICKNAME_MAX_LENGTH);
-                        }
-                        setNewNickname(e.target.value);
-                        setDuplicateCheckStatus(DUPLICATE_CHECK_STATUS.NONE);
-                      }}
-                      maxLength={NICKNAME_MAX_LENGTH}
-                      className="flex-1"
-                    />
-                    <Button
-                      variant="outline"
-                      className="h-10"
-                      onClick={handleDuplicateCheck}
-                      disabled={
-                        isVerifyingName || !newNickname || newNickname === userProfile?.name
-                      }
-                    >
-                      {isVerifyingName ? "확인중..." : "중복확인"}
-                    </Button>
-                  </div>
-                  <div className="flex h-5 text-sm">
-                    {duplicateCheckStatus === DUPLICATE_CHECK_STATUS.AVAILABLE && (
-                      <div className="flex items-center gap-1 text-green-600">
-                        <CircleCheck className="h-4 w-4" />
-                        사용 가능한 닉네임입니다
-                      </div>
-                    )}
-                    {duplicateCheckStatus === DUPLICATE_CHECK_STATUS.DUPLICATE && (
-                      <div className="flex items-center gap-1 text-red-600">
-                        <CircleX className="h-4 w-4" />
-                        이미 사용중인 닉네임입니다
-                      </div>
-                    )}
-                    {duplicateCheckStatus === DUPLICATE_CHECK_STATUS.NONE && (
-                      <div className="flex items-center gap-1 text-gray-500">
-                        <Info className="h-4 w-4" />
-                        닉네임은 {NICKNAME_MIN_LENGTH}자 이상 {NICKNAME_MAX_LENGTH}자 이하여야
-                        합니다
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex gap-2">
-                    <Button
-                      size="sm"
-                      onClick={handleSaveNickname}
-                      disabled={
-                        isUpdatingNickname ||
-                        duplicateCheckStatus !== DUPLICATE_CHECK_STATUS.AVAILABLE
-                      }
-                    >
-                      {isUpdatingNickname ? "저장중..." : "저장"}
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={handleCancelEditNickname}
-                      disabled={isUpdatingNickname}
-                    >
-                      취소
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <Input
-                    id="nickname"
-                    placeholder="닉네임을 입력하세요"
-                    value={userProfile?.name ?? ""}
-                    disabled
-                    className="flex-1"
-                  />
-                  <Button size="icon" variant="outline" onClick={handleStartEditNickname}>
-                    <Edit2 />
-                  </Button>
-                </div>
-              )}
+    <div className="min-h-screen dark:bg-neutral-900">
+      <div>
+        {/* 프로필 섹션 */}
+        <SettingsGroup>
+          <div className="flex items-center gap-4 bg-neutral-100 p-2 px-4 dark:bg-neutral-700">
+            <div className="relative flex h-16 w-16 items-center justify-center">
+              <Image src="/assets/lizard.png" alt="조회된 펫 없음" fill />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">이메일</Label>
-
-              <div className="relative">
-                <Input
-                  id="email"
-                  type="email"
-                  value={userProfile?.email ?? ""}
-                  placeholder="이메일을 입력하세요"
-                  disabled
-                />
-                <div className="absolute right-4 top-1/2 flex -translate-y-1/2 gap-2">
-                  {normalizedProviders.map((provider) => (
-                    <Image
-                      key={provider}
-                      src={providerIconMap[provider]}
-                      alt={provider}
-                      width={24}
-                      height={24}
-                    />
-                  ))}
-                </div>
+            <div className="flex-1">
+              <div className="flex items-center gap-2">
+                <h2 className="text-[17px] font-semibold text-gray-900 dark:text-white">
+                  {userProfile?.name ?? "사용자"}
+                </h2>
+                <Badge
+                  className={cn(
+                    "text-[11px] font-[600]",
+                    userProfile?.isBiz
+                      ? "bg-green-600 hover:bg-green-700"
+                      : "bg-blue-600 hover:bg-blue-700",
+                  )}
+                >
+                  {userProfile?.isBiz ? "사업자" : "일반"}
+                </Badge>
               </div>
-
-              <p className="text-xs text-gray-500">
-                SNS 간편 로그인으로 가입한 계정은 이메일 변경이 제한됩니다
+              <p className="text-[13px] text-gray-500 dark:text-gray-400">
+                {userProfile?.email ?? ""}
               </p>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </SettingsGroup>
 
-        {/* 개인정보 보호 */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Shield className="h-5 w-5" />
-              개인정보 보호
-            </CardTitle>
-            <CardDescription>개인정보 보호 및 보안 설정을 관리하세요</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between rounded-lg bg-gray-50 p-3 dark:bg-neutral-800">
-              <div>
-                <Label className="text-sm font-medium">계정 상태</Label>
-                <p className="text-xs text-gray-500">
-                  {USER_STATUS_MAP[userProfile?.status ?? "pending"]}
-                </p>
+        {/* 계정 정보 */}
+        <SettingsGroup title="계정 정보">
+          {isEditingNickname ? (
+            <div className="space-y-3 p-4">
+              <NicknameDuplicateCheckInput
+                value={newNickname}
+                onChange={setNewNickname}
+                duplicateCheckStatus={duplicateCheckStatus}
+                setDuplicateCheckStatus={setDuplicateCheckStatus}
+                currentNickname={userProfile?.name}
+              />
+              <div className="flex gap-2">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  onClick={handleCancelEditNickname}
+                  disabled={isUpdatingNickname}
+                  className="flex-1 rounded-xl"
+                >
+                  취소
+                </Button>
+                <Button
+                  size="lg"
+                  onClick={handleSaveNickname}
+                  disabled={
+                    isUpdatingNickname || duplicateCheckStatus !== DUPLICATE_CHECK_STATUS.AVAILABLE
+                  }
+                  className="flex-1 rounded-xl"
+                >
+                  {isUpdatingNickname ? "저장중..." : "저장"}
+                </Button>
               </div>
-              <Badge variant="secondary">정상</Badge>
             </div>
-            <div className="flex items-center justify-between rounded-lg bg-gray-50 p-3 dark:bg-neutral-800">
-              <div>
-                <Label className="text-sm font-medium">사업자 여부</Label>
+          ) : (
+            <SettingsItem
+              icon={<Edit2 className="h-4 w-4" />}
+              iconBgColor="bg-blue-100 dark:bg-blue-900/30"
+              iconColor="text-blue-600 dark:text-blue-400"
+              label="닉네임"
+              value={userProfile?.name ?? "설정되지 않음"}
+              onClick={handleStartEditNickname}
+              showChevron
+            />
+          )}
+          <SettingsItem
+            icon={<Mail className="h-4 w-4" />}
+            iconBgColor="bg-gray-100 dark:bg-neutral-700"
+            iconColor="text-gray-600 dark:text-gray-400"
+            label="이메일"
+            value={
+              <div className="flex items-center gap-2">
+                <span className="text-[13px] font-[600] text-gray-700 dark:text-gray-400">
+                  {userProfile?.email ?? ""}
+                </span>
+                {normalizedProviders.map((provider) => (
+                  <Image
+                    key={provider}
+                    src={providerIconMap[provider]}
+                    alt={provider}
+                    width={18}
+                    height={18}
+                  />
+                ))}
               </div>
-
-              <Badge
-                className={cn(userProfile?.isBiz ? "bg-green-700" : "bg-blue-700", "text-white")}
-              >
-                {userProfile?.isBiz ? "사업자" : "일반 사용자"}
+            }
+          />
+          <SettingsItem
+            icon={<Shield className="h-4 w-4" />}
+            iconBgColor="bg-green-100 dark:bg-green-900/30"
+            iconColor="text-green-600 dark:text-green-400"
+            label="계정 상태"
+            rightElement={
+              <Badge variant="secondary" className="text-[12px]">
+                정상
               </Badge>
-            </div>
-            <div className="flex items-center justify-between rounded-lg bg-gray-50 p-3 dark:bg-neutral-800">
-              <div>
-                <Label className="text-sm font-medium">가입일</Label>
-                <p className="text-xs text-gray-500">
-                  {userProfile?.createdAt
-                    ? new Date(userProfile.createdAt).toLocaleDateString()
-                    : "가입일 정보 없음"}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            }
+          />
+        </SettingsGroup>
 
         {/* 앱 설정 */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Palette className="h-5 w-5" />앱 설정
-            </CardTitle>
-            <CardDescription>앱의 외관과 동작을 커스터마이징하세요</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <Label className="text-sm font-medium">
-                  다크 모드
-                  {theme === "light" ? (
-                    <Sun className="h-4 w-4 fill-yellow-500 text-yellow-500" />
-                  ) : (
-                    <Moon className="h-4 w-4 fill-gray-200 text-gray-200" />
-                  )}
-                </Label>
-                <p className="text-xs text-gray-500">어두운 테마로 전환</p>
-              </div>
-              <Switch checked={theme === "dark"} onCheckedChange={handleThemeChange} />
-            </div>
-          </CardContent>
-        </Card>
+        <SettingsGroup title="앱 설정">
+          <SettingsItem
+            icon={theme === "dark" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+            iconBgColor={theme === "dark" ? "bg-indigo-100 dark:bg-indigo-900/30" : "bg-yellow-100"}
+            iconColor={
+              theme === "dark" ? "text-indigo-600 dark:text-indigo-400" : "text-yellow-600"
+            }
+            label="다크 모드"
+            rightElement={<Switch checked={theme === "dark"} onCheckedChange={handleThemeChange} />}
+          />
+        </SettingsGroup>
+
+        {/* 도움말 및 지원 */}
+        <SettingsGroup title="도움말">
+          <SettingsItem
+            icon={<HelpCircle className="h-4 w-4" />}
+            iconBgColor="bg-purple-100 dark:bg-purple-900/30"
+            iconColor="text-purple-600 dark:text-purple-400"
+            label="자주 묻는 질문"
+            showChevron
+            onClick={() => {}}
+          />
+          <SettingsItem
+            icon={<Mail className="h-4 w-4" />}
+            iconBgColor="bg-teal-100 dark:bg-teal-900/30"
+            iconColor="text-teal-600 dark:text-teal-400"
+            label="고객센터 문의"
+            showChevron
+            onClick={() => {}}
+          />
+          <SettingsItem
+            icon={<FileText className="h-4 w-4" />}
+            iconBgColor="bg-gray-100 dark:bg-neutral-700"
+            iconColor="text-gray-600 dark:text-gray-400"
+            label="이용약관"
+            showChevron
+            onClick={() => {}}
+          />
+          <SettingsItem
+            icon={<Shield className="h-4 w-4" />}
+            iconBgColor="bg-gray-100 dark:bg-neutral-700"
+            iconColor="text-gray-600 dark:text-gray-400"
+            label="개인정보처리방침"
+            showChevron
+            onClick={() => {}}
+          />
+        </SettingsGroup>
+
+        {/* 계정 관리 (위험 영역) */}
+        <SettingsGroup title="계정 관리">
+          <SettingsItem
+            icon={<LogOut className="h-4 w-4" />}
+            iconBgColor="bg-red-100 dark:bg-red-900/30"
+            iconColor="text-red-600 dark:text-red-400"
+            label="로그아웃"
+            isDestructive
+            onClick={logout}
+          />
+          <SettingsItem
+            icon={<Trash2 className="h-4 w-4" />}
+            iconBgColor="bg-red-100 dark:bg-red-900/30"
+            iconColor="text-red-600 dark:text-red-400"
+            label="회원탈퇴"
+            isDestructive
+            rightElement={<DeleteAccountButton />}
+          />
+        </SettingsGroup>
+
+        {/* 버전 정보 */}
+        <div className="mt-8 text-center">
+          <p className="text-[13px] text-gray-400 dark:text-gray-500">버전 1.0.0</p>
+        </div>
       </div>
-
-      {/* 계정 관리 */}
-      <Card className="border-red-200 dark:border-red-900">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-red-700 dark:text-red-400/70">
-            <Trash2 className="h-5 w-5" />
-            계정 관리
-          </CardTitle>
-          <CardDescription className="text-red-600 dark:text-red-400/70">
-            계정 관련 중요한 작업을 수행할 수 있습니다
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/20">
-            <div>
-              <Label className="text-sm font-medium text-red-700 dark:text-red-300">로그아웃</Label>
-              <p className="text-xs text-red-600/70 dark:text-red-400/70">
-                현재 세션에서 로그아웃합니다
-              </p>
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={logout}
-              className="border-red-300 text-red-700 hover:bg-red-100 dark:border-red-700 dark:text-red-300 dark:hover:bg-red-900/30"
-            >
-              로그아웃
-            </Button>
-          </div>
-
-          <div className="flex items-center justify-between rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/20">
-            <div>
-              <Label className="text-sm font-medium text-red-700 dark:text-red-300">회원탈퇴</Label>
-              <p className="text-xs text-red-600/70 dark:text-red-400/70">
-                계정을 영구적으로 삭제합니다. 이 작업은 되돌릴 수 없습니다.
-              </p>
-            </div>
-            <DeleteAccountButton />
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* 도움말 및 지원 */}
-      <Card>
-        <CardHeader>
-          <CardTitle>도움말 및 지원</CardTitle>
-          <CardDescription>문제가 있으시면 언제든지 문의해주세요</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-2">
-          <Button variant="ghost" className="w-full justify-between">
-            <span>자주 묻는 질문</span>
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-          <Button variant="ghost" className="w-full justify-between">
-            <span>고객센터 문의</span>
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-          <Button variant="ghost" className="w-full justify-between">
-            <span>이용약관</span>
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-          <Button variant="ghost" className="w-full justify-between">
-            <span>개인정보처리방침</span>
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        </CardContent>
-      </Card>
     </div>
   );
 };

@@ -7,6 +7,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { setupApiClient } from "@/lib/setupApiClient";
 import { AxiosError } from "axios";
+import { AuthProvider } from "@/providers/AuthProvider";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -35,11 +36,13 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <SidebarProvider>
-          <OverlayProvider>{children}</OverlayProvider>
-        </SidebarProvider>
-      </ThemeProvider>
+      <AuthProvider>
+        <ThemeProvider>
+          <SidebarProvider>
+            <OverlayProvider>{children}</OverlayProvider>
+          </SidebarProvider>
+        </ThemeProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }

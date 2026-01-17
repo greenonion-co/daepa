@@ -6,7 +6,7 @@ import {
   UpdateParentRequestDto,
   UpdateParentRequestDtoStatus,
 } from "@repo/api-client";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { AxiosError } from "axios";
 
 export const useNotificationActions = () => {

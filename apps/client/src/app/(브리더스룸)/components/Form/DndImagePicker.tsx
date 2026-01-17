@@ -13,8 +13,8 @@ import { CSS } from "@dnd-kit/utilities";
 import { useDropzone } from "react-dropzone";
 import Image from "next/image";
 import { buildR2TransformedUrl, cn } from "@/lib/utils";
+import { toast } from "@/lib/toast";
 import { X, Plus, Loader2, Info, Maximize2 } from "lucide-react";
-import { toast } from "sonner";
 import { useCallback, useEffect, useState } from "react";
 import { isNil, range, remove } from "es-toolkit";
 import { ACCEPT_IMAGE_FORMATS } from "../../constants";
@@ -285,7 +285,7 @@ export default function DndImagePicker({
                   />
                 ));
               }}
-              className="absolute right-2 bottom-2 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white transition-colors hover:bg-black/70"
+              className="absolute bottom-2 right-2 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white transition-colors hover:bg-black/70"
               aria-label="전체화면으로 보기"
             >
               <Maximize2 className="h-4 w-4" />
@@ -331,7 +331,7 @@ function SortableThumb({
       style={style}
       className={cn(
         "relative h-24 w-full select-none",
-        isDragging && "z-50 scale-105 rotate-3 shadow-xl", // 드래그 중 스타일
+        isDragging && "z-50 rotate-3 scale-105 shadow-xl", // 드래그 중 스타일
       )}
     >
       <div
@@ -377,7 +377,7 @@ function SortableThumb({
           type="button"
           onClick={onDelete}
           className={cn(
-            "absolute top-1 right-1 z-10 inline-flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-red-500 text-white shadow-sm transition-all duration-200",
+            "absolute right-1 top-1 z-10 inline-flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-red-500 text-white shadow-sm transition-all duration-200",
             "hover:bg-red-600 active:scale-95",
             isDragging && "opacity-0", // 드래그 중에는 삭제 버튼 숨김
           )}

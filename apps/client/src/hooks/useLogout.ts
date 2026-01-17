@@ -1,9 +1,10 @@
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { tokenStorage } from "@/lib/tokenStorage";
 import { AxiosError } from "axios";
 import { useMutation } from "@tanstack/react-query";
 import { authControllerSignOut } from "@repo/api-client";
+import { isNativeApp, sendToNative } from "@/lib/native-bridge";
 
 export const useLogout = () => {
   const router = useRouter();
@@ -16,7 +17,13 @@ export const useLogout = () => {
       await signOut();
       tokenStorage.removeToken();
       toast.success("로그아웃 되었습니다.");
-      router.replace("/sign-in");
+      if (isNativeApp()) {
+        sendToNative({ type: "LOGOUT" });
+      } else {
+        // 웹에서의 로그아웃 처리
+        localStorage.removeItem("accessToken");
+        router.push("/sign-in");
+      }
     } catch (error) {
       if (error instanceof AxiosError) {
         toast.error(error.response?.data?.message ?? "로그아웃에 실패했습니다.");

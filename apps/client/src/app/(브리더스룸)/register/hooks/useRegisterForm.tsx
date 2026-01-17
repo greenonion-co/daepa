@@ -1,5 +1,6 @@
 import { useCallback, useMemo } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
+import { useAppRouter } from "@/hooks/useAppRouter";
 import { DUPLICATE_CHECK_STATUS, TRAIT_LIST_BY_SPECIES } from "../../constants";
 import { FormFieldName, FormStep } from "../../pet/types/form.type";
 import {
@@ -13,7 +14,7 @@ import MultiSelectList from "../../components/selector/MultiSelectList";
 import Dialog from "../../components/Form/Dialog";
 
 import { validateStep } from "@/lib/form";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { useNameStore } from "../../store/name";
 import { PetDtoSpecies } from "@repo/api-client";
 import { BaseFormData } from "../../pet/store/base";
@@ -43,8 +44,9 @@ export const useRegisterForm = ({
   nameFieldRef,
   setShouldShake,
 }: UseRegisterFormProps) => {
-  const router = useRouter();
+  const router = useAppRouter();
   const { funnel } = useParams();
+  const searchParams = useSearchParams();
   const { duplicateCheckStatus } = useNameStore();
 
   // 다음 단계로 이동
@@ -93,7 +95,8 @@ export const useRegisterForm = ({
       }
 
       if (step === formStep.length) {
-        router.push("/register/2");
+        const params = searchParams.toString();
+        router.push(`/register/2${params ? `?${params}` : ""}`);
         return;
       }
 
@@ -113,6 +116,7 @@ export const useRegisterForm = ({
       duplicateCheckStatus,
       setShouldShake,
       nameFieldRef,
+      searchParams,
     ],
   );
 

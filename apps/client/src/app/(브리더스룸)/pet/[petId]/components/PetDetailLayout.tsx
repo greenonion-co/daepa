@@ -2,7 +2,10 @@
 
 import { ReactNode, RefObject, useEffect, useRef, useState } from "react";
 import { PetDto } from "@repo/api-client";
+import { useIsMyPet } from "@/hooks/useIsMyPet";
 import Header from "./Header";
+import { useIsMobile } from "@/hooks/useMobile";
+import { cn } from "@/lib/utils";
 
 type TabType = "breeding" | "adoption" | "images" | "pedigree";
 
@@ -25,6 +28,8 @@ export default function PetDetailLayout({
   pedigreeSlot,
   adoptionSlot,
 }: PetDetailLayoutProps) {
+  const isMyPet = useIsMyPet(pet.owner.userId);
+  const isMobile = useIsMobile();
   const [activeTab, setActiveTab] = useState<TabType>("images");
   const isScrollingRef = useRef<boolean>(false);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -149,7 +154,7 @@ export default function PetDetailLayout({
   }[] = [
     { id: "images", label: "이미지", ref: imagesRef },
     { id: "breeding", label: "펫정보", ref: breedingRef },
-    { id: "adoption", label: "분양정보", ref: adoptionRef },
+    ...(isMyPet ? [{ id: "adoption" as TabType, label: "분양정보", ref: adoptionRef }] : []),
     { id: "pedigree", label: "혈통정보", ref: pedigreeRef },
   ];
 
@@ -177,7 +182,10 @@ export default function PetDetailLayout({
         <div
           ref={imagesRef}
           data-section="images"
-          className="flex min-h-[480px] max-w-[440px] min-w-[300px] flex-1 max-[580px]:order-1 max-[580px]:max-w-none"
+          className={cn(
+            "flex max-w-[440px] min-w-[300px] flex-1 max-[580px]:order-1 max-[580px]:max-w-none",
+            !isMobile && "min-h-[480px]",
+          )}
         >
           {imagesSlot}
         </div>
@@ -192,13 +200,15 @@ export default function PetDetailLayout({
         </div>
 
         {/* 분양 정보 */}
-        <div
-          ref={adoptionRef}
-          data-section="adoption"
-          className="flex min-h-[480px] max-w-[440px] min-w-[300px] flex-1 max-[580px]:order-3 max-[580px]:max-w-none"
-        >
-          {adoptionSlot}
-        </div>
+        {isMyPet && (
+          <div
+            ref={adoptionRef}
+            data-section="adoption"
+            className="flex min-h-[480px] max-w-[440px] min-w-[300px] flex-1 max-[580px]:order-3 max-[580px]:max-w-none"
+          >
+            {adoptionSlot}
+          </div>
+        )}
       </div>
     </>
   );

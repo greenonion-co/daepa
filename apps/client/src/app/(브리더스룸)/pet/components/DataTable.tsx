@@ -20,17 +20,15 @@ import {
 } from "@/components/ui/table";
 import { Filters } from "./Filters";
 import useTableStore from "../store/table";
-import { useRouter } from "next/navigation";
 import { PetDto } from "@repo/api-client";
 import Loading from "@/components/common/Loading";
 import { cn } from "@/lib/utils";
 import { RefreshCcw } from "lucide-react";
 import Link from "next/link";
-import SearchInput from "../../components/SearchInput";
-import { useIsMobile } from "@/hooks/useMobile";
-import { useSearchKeywordStore } from "../../store/searchKeyword";
 import Image from "next/image";
+import { useAppRouter } from "@/hooks/useAppRouter";
 import PetDetailModal from "../[petId]/components/PetDetailModal";
+import { useIsMobile } from "@/hooks/useMobile";
 
 interface DataTableProps<TData> {
   columns: ColumnDef<TData>[];
@@ -59,13 +57,12 @@ export const DataTable = ({
 }: DataTableProps<PetDto>) => {
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const { sorting, rowSelection, setSorting, setRowSelection } = useTableStore();
-  const { setSearchKeyword } = useSearchKeywordStore();
 
-  const isMobile = useIsMobile();
-
-  const router = useRouter();
+  const router = useAppRouter();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedPet, setSelectedPet] = useState<PetDto | null>(null);
+
+  const isMobile = useIsMobile();
 
   const table = useReactTable({
     data,
@@ -112,15 +109,7 @@ export const DataTable = ({
 
   return (
     <div className="w-full">
-      <div className="px-2">
-        {hasFilter && <Filters />}
-        {isMobile && (
-          <SearchInput
-            placeholder="펫 이름으로 검색하세요"
-            onKeyDown={(value) => setSearchKeyword(value)}
-          />
-        )}
-      </div>
+      <div className="px-2">{hasFilter && <Filters />}</div>
 
       <div className="mb-2 flex justify-between">
         <button

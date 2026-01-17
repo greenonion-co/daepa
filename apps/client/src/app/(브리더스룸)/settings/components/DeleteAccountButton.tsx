@@ -4,7 +4,7 @@ import { useState } from "react";
 import { authControllerDeleteAccount } from "@repo/api-client";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -53,7 +53,7 @@ const DeleteAccountButton = () => {
         <Button
           variant="outline"
           size="sm"
-          className="border-red-300 text-red-700 hover:bg-red-100 dark:border-red-700 dark:text-red-300 dark:hover:bg-red-900/30"
+          className="border-red-300 text-red-700 hover:bg-red-100 dark:border-red-700 dark:bg-red-700/50 dark:text-red-300 dark:hover:bg-red-900/30"
         >
           회원탈퇴
         </Button>

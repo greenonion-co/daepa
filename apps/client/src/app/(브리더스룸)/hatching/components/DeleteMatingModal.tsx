@@ -1,7 +1,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { pairControllerGetPairList, matingControllerDeleteMating } from "@repo/api-client";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { AxiosError } from "axios";
 import { Info } from "lucide-react";
 

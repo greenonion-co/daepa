@@ -6,7 +6,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { overlay } from "overlay-kit";
 import { memo, useCallback } from "react";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 
 interface PetVisibilityControlProps {
   petId: string;

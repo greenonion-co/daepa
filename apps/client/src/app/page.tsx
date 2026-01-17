@@ -1,34 +1,47 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import Loading from "@/components/common/Loading";
-import { useUserStore } from "@/app/(브리더스룸)/store/user";
+import { useState, useRef, useCallback } from "react";
+import { PetControllerFindAllFilterType } from "@repo/api-client";
+import FloatingToggle from "@/components/common/FloatingToggle";
+import PetList from "@/components/feed/PetList";
 
 export default function Home() {
-  const router = useRouter();
-  const { user, initialize } = useUserStore();
-  const [isInitialized, setIsInitialized] = useState(false);
+  const [filterType, setFilterType] = useState<PetControllerFindAllFilterType>(
+    PetControllerFindAllFilterType.ALL,
+  );
 
-  useEffect(() => {
-    initialize().finally(() => setIsInitialized(true));
-  }, [initialize]);
+  // 각 탭별 스크롤 위치 저장
+  const scrollPositions = useRef<Record<string, number>>({});
 
-  useEffect(() => {
-    if (!isInitialized) return;
+  const handleFilterChange = useCallback(
+    (newFilter: PetControllerFindAllFilterType) => {
+      // 현재 스크롤 위치 저장
+      scrollPositions.current[filterType] = window.scrollY;
 
-    const isLoggedIn = !!user?.userId;
+      // 필터 변경
+      setFilterType(newFilter);
 
-    if (isLoggedIn) {
-      router.replace("/pet");
-    } else {
-      router.replace("/sign-in");
-    }
-  }, [isInitialized, user, router]);
+      // 새 탭의 스크롤 위치로 복원
+      requestAnimationFrame(() => {
+        window.scrollTo(0, scrollPositions.current[newFilter] ?? 0);
+      });
+    },
+    [filterType],
+  );
 
   return (
-    <div className="flex h-screen w-full items-center justify-center">
-      <Loading />
+    <div className="relative w-full" key={filterType}>
+      {/* 현재 선택된 리스트만 렌더링 */}
+      <PetList filterType={filterType} isVisible={true} />
+
+      <FloatingToggle
+        options={[
+          { label: "전체", value: PetControllerFindAllFilterType.ALL },
+          { label: "내 펫", value: PetControllerFindAllFilterType.MY },
+        ]}
+        value={filterType}
+        onChange={handleFilterChange}
+      />
     </div>
   );
 }

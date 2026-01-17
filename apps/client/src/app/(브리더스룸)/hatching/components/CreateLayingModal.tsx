@@ -11,7 +11,7 @@ import {
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AlertCircle, Info } from "lucide-react";
 import { DateTime } from "luxon";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { AxiosError } from "axios";
 import CalendarSelect from "./CalendarSelect";
 import CustomSelect from "./Charts/CustomSelect";

@@ -8,7 +8,6 @@ import {
   Dimensions,
   Easing,
   Keyboard,
-  KeyboardAvoidingView,
   Platform,
   StyleSheet,
   Text,
@@ -56,7 +55,6 @@ class Toast extends Component<ToastProps, ToastState> {
 
   private keyboardShow?: EmitterSubscription;
   private keyboardHide?: EmitterSubscription;
-  private screenWidth: number = 0;
   private timerID: ReturnType<typeof setTimeout> | null = null;
 
   componentDidMount() {
@@ -101,7 +99,10 @@ class Toast extends Component<ToastProps, ToastState> {
   }
 
   static show(message: string, icon?: TOAST_ICON_TYPE, inset?: number) {
-    Toast._ref?.show(message, icon, inset);
+    if (Toast._ref) {
+      Toast._ref.show(message, icon, inset);
+    } else {
+    }
   }
 
   show(message: string, icon?: TOAST_ICON_TYPE, inset?: number) {
@@ -109,17 +110,25 @@ class Toast extends Component<ToastProps, ToastState> {
       clearTimeout(this.timerID);
     }
 
+    const newAnimationFlag = new Animated.Value(0);
     const newState: ToastState = {
       ...this.state,
       isVisible: true,
       message,
       icon,
       inset,
-      animationFlag: new Animated.Value(0),
+      animationFlag: newAnimationFlag,
     };
 
-    this.setState(newState);
-    this.showAnimation();
+    this.setState(newState, () => {
+      // setState 완료 후 애니메이션 시작
+      Animated.timing(newAnimationFlag, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+        easing: Easing.cubic,
+      }).start();
+    });
 
     this.timerID = this.timer();
   }
@@ -180,53 +189,39 @@ class Toast extends Component<ToastProps, ToastState> {
   }
 
   render() {
-    const {
-      isVisible,
-      message,
-      keyboardShown,
-      animationFlag,
-      inset: insetState,
-    } = this.state;
+    const { isVisible, message, animationFlag } = this.state;
 
-    const inset =
-      insetState === undefined
-        ? keyboardShown
-          ? 16
-          : TOAST_BOTTOM_INSET
-        : insetState;
-
-    const width = this.screenWidth - TOAST_MARGIN * 2;
+    const screenWidth =
+      this.state.screenWidth || Dimensions.get('screen').width;
+    const width = screenWidth - TOAST_MARGIN * 2;
 
     return (
-      <>
+      <View style={styles.overlay} pointerEvents="box-none">
         {isVisible && (
-          <KeyboardAvoidingView
-            style={[styles.background, { bottom: inset }]}
-            behavior="padding"
-            keyboardVerticalOffset={inset}
-          >
+          <View style={styles.bottomContainer} pointerEvents="box-none">
             <Animated.View
-              style={{
-                ...styles.container,
-                opacity: animationFlag,
-                transform: [
-                  {
-                    translateY: animationFlag.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: [10, 0],
-                    }),
-                  },
-                ],
-                width,
-              }}
+              style={[
+                styles.toastContainer,
+                {
+                  width,
+                  opacity: animationFlag,
+                  transform: [
+                    {
+                      translateY: animationFlag.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [20, 0],
+                      }),
+                    },
+                  ],
+                },
+              ]}
             >
               <View>{this.getIcon()}</View>
-
               <Text style={styles.message}>{message}</Text>
             </Animated.View>
-          </KeyboardAvoidingView>
+          </View>
         )}
-      </>
+      </View>
     );
   }
 }
@@ -234,13 +229,18 @@ class Toast extends Component<ToastProps, ToastState> {
 export default Toast;
 
 const styles = StyleSheet.create({
-  background: {
-    position: 'absolute',
-    width: '100%',
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
     zIndex: 99999999999,
-    paddingHorizontal: 10,
   },
-  container: {
+  bottomContainer: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    paddingBottom: TOAST_BOTTOM_INSET,
+  },
+  toastContainer: {
     padding: 20,
     backgroundColor: '#181818bf',
     borderRadius: 12,

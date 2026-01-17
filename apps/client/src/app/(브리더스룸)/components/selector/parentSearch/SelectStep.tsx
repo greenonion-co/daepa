@@ -11,6 +11,7 @@ const SelectStep = ({
   handlePetSelect,
   hasMore,
   isFetchingMore,
+  isLoading,
   searchType,
   loaderRefAction,
 }: {
@@ -18,51 +19,50 @@ const SelectStep = ({
   handlePetSelect: (pet: PetParentDtoWithMessage) => void;
   hasMore: boolean;
   isFetchingMore: boolean;
+  isLoading: boolean;
   searchType: PetListType;
   loaderRefAction: (node?: Element | null) => void;
 }) => {
   const { user } = useUserStore();
+  const petList = pets?.filter((pet) =>
+    searchType === PetListType.MY
+      ? pet.owner?.userId === user?.userId
+      : pet.owner?.userId !== user?.userId,
+  );
+
+  if (isLoading)
+    return (
+      <div className="h-[calc(100vh-200px)]">
+        <Loading />
+      </div>
+    );
+
+  if (petList.length === 0)
+    return (
+      <div className="flex h-full w-full flex-col items-center justify-center py-5 text-center text-[14px] text-gray-700 dark:text-gray-300">
+        <Image src="/assets/lizard.png" alt="브리더스룸 로그인 로고" width={200} height={200} />
+        조회된 펫이 없습니다.
+      </div>
+    );
 
   return (
     <div className="h-full overflow-y-auto">
       <div>
         <ScrollArea className="h-[calc(100vh-200px)]">
-          {pets?.filter((pet) =>
-            searchType === PetListType.MY
-              ? pet.owner?.userId === user?.userId
-              : pet.owner?.userId !== user?.userId,
-          ).length === 0 ? (
-            <div className="flex h-full w-full flex-col items-center justify-center py-5 text-center text-[14px] text-gray-700 dark:text-gray-300">
-              <Image
-                src="/assets/lizard.png"
-                alt="브리더스룸 로그인 로고"
-                width={200}
-                height={200}
-              />
-              조회된 펫이 없습니다.
-            </div>
-          ) : (
-            <div className="mb-10 grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-              {pets
-                ?.filter((pet) =>
-                  searchType === PetListType.MY
-                    ? pet.owner?.userId === user?.userId
-                    : pet.owner?.userId !== user?.userId,
-                )
-                .map((pet) => (
-                  <PetItem key={pet.petId} item={pet} handlePetSelect={handlePetSelect} />
-                ))}
-            </div>
-          )}
+          <div className="mb-10 grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+            {pets
+              ?.filter((pet) =>
+                searchType === PetListType.MY
+                  ? pet.owner?.userId === user?.userId
+                  : pet.owner?.userId !== user?.userId,
+              )
+              .map((pet) => (
+                <PetItem key={pet.petId} item={pet} handlePetSelect={handlePetSelect} />
+              ))}
+          </div>
           {hasMore && (
             <div ref={loaderRefAction} className="h-20 text-center">
-              {isFetchingMore ? (
-                <div className="flex items-center justify-center">
-                  <div className="h-6 w-6 animate-spin rounded-full border-b-2 border-blue-500" />
-                </div>
-              ) : (
-                <Loading />
-              )}
+              {isFetchingMore && <Loading />}
             </div>
           )}
         </ScrollArea>

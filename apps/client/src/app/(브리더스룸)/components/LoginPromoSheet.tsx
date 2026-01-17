@@ -10,6 +10,8 @@ import {
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import { isNativeApp, navigate } from "@/lib/native-bridge";
+import { useRouter } from "next/navigation";
 
 interface LoginPromoSheetProps {
   isOpen: boolean;
@@ -19,11 +21,13 @@ interface LoginPromoSheetProps {
 }
 
 const LoginPromoSheet = ({ isOpen, onOpenChange, title, description }: LoginPromoSheetProps) => {
+  const router = useRouter();
+
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
       <SheetContent
         side="bottom"
-        className="mx-5 mb-5 max-w-[700px] rounded-3xl px-6 pb-8 pt-6 sm:mx-auto"
+        className="mx-5 mb-5 max-w-[700px] rounded-3xl px-6 pt-6 pb-8 sm:mx-auto"
       >
         <SheetHeader className="flex items-center">
           <Image
@@ -44,7 +48,11 @@ const LoginPromoSheet = ({ isOpen, onOpenChange, title, description }: LoginProm
             className="w-full rounded-xl bg-neutral-800 py-6 text-base font-semibold hover:bg-black"
             onClick={() => {
               onOpenChange(false);
-              window.location.href = "/sign-in";
+              if (isNativeApp()) {
+                navigate({ screen: "Login" });
+              } else {
+                router.push("/sign-in");
+              }
             }}
           >
             시작하기

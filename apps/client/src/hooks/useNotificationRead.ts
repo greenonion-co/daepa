@@ -9,7 +9,7 @@ import {
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { useCallback } from "react";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 
 export const useNotificationRead = () => {
   const queryClient = useQueryClient();

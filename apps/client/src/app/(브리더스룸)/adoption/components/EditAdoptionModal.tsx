@@ -22,7 +22,7 @@ import EditAdoptionForm from "./EditAdoptionForm";
 import { AdoptionEditFormDto } from "../types";
 import { Button } from "@/components/ui/button";
 import Header from "../../components/selector/parentSearch/Header";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import PetItem from "../../components/selector/PetItem";
 import Loading from "@/components/common/Loading";
 import SingleSelect from "../../components/selector/SingleSelect";

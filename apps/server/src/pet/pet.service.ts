@@ -365,7 +365,7 @@ export class PetService {
 
   async getPetListFull(
     pageOptionsDto: PetFilterDto,
-    userId: string,
+    userId: string | null,
   ): Promise<PageDto<PetDto>> {
     const queryBuilder = this.petRepository
       .createQueryBuilder('pets')
@@ -403,17 +403,20 @@ export class PetService {
         'adoptions',
       ]);
 
-    if (pageOptionsDto.filterType === PET_LIST_FILTER_TYPE.MY) {
-      // 자신의 모든 펫 조회 가능
+    if (pageOptionsDto.filterType === PET_LIST_FILTER_TYPE.MY && userId) {
+      // 자신의 모든 펫 조회 가능 (로그인 필요)
       queryBuilder.andWhere('pets.ownerId = :userId', { userId });
-    } else if (pageOptionsDto.filterType === PET_LIST_FILTER_TYPE.NOT_MY) {
-      // 자신의 펫을 제외한 모든 펫 조회 가능
+    } else if (
+      pageOptionsDto.filterType === PET_LIST_FILTER_TYPE.NOT_MY &&
+      userId
+    ) {
+      // 자신의 펫을 제외한 모든 펫 조회 가능 (로그인 필요)
       queryBuilder.andWhere(
         'pets.isPublic = :isPublic AND pets.ownerId != :userId',
         { isPublic: true, userId },
       );
     } else {
-      // 기본적으로 공개된 펫만 조회 가능
+      // 기본적으로 공개된 펫만 조회 가능 (비로그인 포함)
       queryBuilder.andWhere('pets.isPublic = :isPublic', { isPublic: true });
     }
 
@@ -438,12 +441,12 @@ export class PetService {
         const fatherDisplayable = replaceParentPublicSafe(
           father,
           petRaw.ownerId,
-          userId,
+          userId ?? undefined,
         );
         const motherDisplayable = replaceParentPublicSafe(
           mother,
           petRaw.ownerId,
-          userId,
+          userId ?? undefined,
         );
 
         const petDto = plainToInstance(PetDto, {

@@ -4,7 +4,7 @@ import {
   UpdateParentRequestDtoStatus,
 } from "@repo/api-client";
 import { useCallback, useState } from "react";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { useNotificationRead } from "@/hooks/useNotificationRead";
 import { useNotificationActions } from "../hooks/useNotificationActions";
 import NotificationHeader from "./NotificationHeader";

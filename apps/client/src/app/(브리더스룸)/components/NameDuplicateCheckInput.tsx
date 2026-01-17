@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { useEffect } from "react";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { useMutation } from "@tanstack/react-query";
 import { petControllerVerifyName } from "@repo/api-client";
 import { AxiosError } from "axios";
@@ -109,7 +109,7 @@ const NameDuplicateCheckInput = ({
             {...props}
           />
           {!disabled && value && typeof value === "string" && (
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">
+            <div className="absolute top-1/2 right-3 -translate-y-1/2 text-xs text-gray-400">
               {value.length}/{NAME_MAX_LENGTH}
             </div>
           )}

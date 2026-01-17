@@ -11,7 +11,7 @@ import {
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useCallback } from "react";
 import { AxiosError } from "axios";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { useUserStore } from "@/app/(브리더스룸)/store/user";
 import { Info } from "lucide-react";
 import { useIsMyPet } from "@/hooks/useIsMyPet";
@@ -119,7 +119,7 @@ const PedigreeInfoContent = ({
         이미지 혹은 이름을 클릭하면 상세 페이지로 이동합니다.
       </div>
 
-      <div className="flex gap-3 max-[400px]:flex-col">
+      <div className="flex gap-3 max-[300px]:flex-col">
         <ParentLink
           species={species}
           label="부"

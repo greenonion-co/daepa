@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from "react";
 import type { Theme } from "@/types/theme";
+import { isNativeApp, requestSetTheme } from "@/lib/native-bridge";
 
 interface ThemeContextType {
   theme: Theme;
@@ -51,11 +52,21 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
   useEffect(() => {
     if (!mounted) return;
     document.documentElement.classList.toggle("dark", theme === "dark");
+
+    // 네이티브 앱에 테마 동기화
+    if (isNativeApp()) {
+      requestSetTheme(theme);
+    }
   }, [theme, mounted]);
 
   const handleSetTheme = (newTheme: Theme) => {
     setTheme(newTheme);
     localStorage.setItem("theme", newTheme);
+
+    // 네이티브 앱에 테마 변경 알림
+    if (isNativeApp()) {
+      requestSetTheme(newTheme);
+    }
   };
 
   const toggleTheme = () => {

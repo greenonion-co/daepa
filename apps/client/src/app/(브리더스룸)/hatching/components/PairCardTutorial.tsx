@@ -249,7 +249,7 @@ export function PairCardTutorialOverlay({ onClose, containerRef }: PairCardTutor
   if (!spotlightRect || !tooltipPosition) return null;
 
   return (
-    <div className="absolute inset-0 z-20 overflow-hidden rounded-2xl">
+    <div className="absolute inset-0 z-20 overflow-hidden rounded-xl">
       {/* 배경 오버레이 (스포트라이트 구멍 제외) */}
       <svg className="absolute inset-0 h-full w-full">
         <defs>
@@ -277,7 +277,7 @@ export function PairCardTutorialOverlay({ onClose, containerRef }: PairCardTutor
 
       {/* 스포트라이트 테두리 */}
       <div
-        className="pointer-events-none absolute rounded-lg ring-2 ring-blue-400 ring-offset-2 ring-offset-transparent"
+        className="pointer-events-none absolute rounded-xl ring-2 ring-blue-400 ring-offset-2 ring-offset-transparent"
         style={{
           top: spotlightRect.top,
           left: spotlightRect.left,
@@ -289,7 +289,7 @@ export function PairCardTutorialOverlay({ onClose, containerRef }: PairCardTutor
       {/* 닫기 버튼 */}
       <button
         onClick={handleClose}
-        className="absolute right-2 top-2 z-10 rounded-full bg-white/70 p-1 text-black/70 backdrop-blur-sm hover:bg-white/20 hover:text-white"
+        className="absolute top-2 right-2 z-10 rounded-full bg-white/70 p-1 text-black/70 backdrop-blur-sm hover:bg-white/20 hover:text-white"
       >
         <X className="h-4 w-4" />
       </button>
@@ -327,7 +327,7 @@ export function PairCardTutorialOverlay({ onClose, containerRef }: PairCardTutor
           <div className="mb-2 flex justify-center">{currentStepData.mockContent}</div>
         )}
 
-        <p className="mb-2 text-[11px] font-[500] leading-relaxed text-gray-600 dark:text-gray-300">
+        <p className="mb-2 text-[11px] leading-relaxed font-[500] text-gray-600 dark:text-gray-300">
           {currentStepData?.description}
         </p>
 

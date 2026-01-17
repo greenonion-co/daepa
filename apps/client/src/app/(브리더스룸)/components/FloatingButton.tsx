@@ -16,7 +16,7 @@ const FloatingButton = ({ leftButton, rightButton, className }: FloatingButtonPr
   return (
     <div
       className={cn(
-        "fixed bottom-0 left-0 right-0 z-10 bg-white p-2 shadow-[0_-4px_10px_rgba(0,0,0,0.1)] dark:bg-black",
+        "fixed right-0 bottom-0 left-0 z-10 bg-white p-4 shadow-[0_-4px_10px_rgba(0,0,0,0.1)] dark:bg-black",
         className,
       )}
     >

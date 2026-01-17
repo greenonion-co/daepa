@@ -9,7 +9,7 @@ import {
   GROWTH_KOREAN_INFO,
   SPECIES_KOREAN_INFO,
 } from "../../constants";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { CalendarIcon, InfoIcon } from "lucide-react";
 import { useSelect } from "../../register/hooks/useSelect";
 import { PetParentDtoWithMessage } from "../../pet/store/parentLink";
@@ -135,7 +135,7 @@ export const FormField = ({
           <div className="relative pt-2">
             <textarea
               name={name}
-              className={`min-h-[160px] w-full rounded-xl bg-gray-100 p-4 text-left text-[18px] focus:outline-none focus:ring-0 dark:bg-gray-600/50 dark:text-white`}
+              className={`min-h-[160px] w-full rounded-xl bg-gray-100 p-4 text-left text-[18px] focus:ring-0 focus:outline-none dark:bg-gray-600/50 dark:text-white`}
               value={String(value || "")}
               maxLength={maxLength}
               onChange={(e) => handleChange({ type: field.name, value: e.target.value })}
@@ -148,7 +148,7 @@ export const FormField = ({
               }}
             />
             {!disabled && (
-              <div className="absolute bottom-4 right-4 text-sm text-gray-500">
+              <div className="absolute right-4 bottom-4 text-sm text-gray-500">
                 {currentLength}/{maxLength}
               </div>
             )}
@@ -201,9 +201,9 @@ export const FormField = ({
                 value.map((item) => (
                   <div
                     className={cn(
-                      `mb-2 flex items-center gap-2 rounded-full border-2 border-[#1A56B3] pb-1 pl-3 pr-3 pt-1 text-[14px] font-semibold text-[#1A56B3]`,
+                      `flex items-center gap-1 rounded-full bg-neutral-800 px-3 py-1 text-center text-[600] text-neutral-100`,
                       disabled &&
-                        "rounded-xl border-gray-200 bg-gray-100 text-black dark:bg-gray-600/50 dark:text-white",
+                        "border border-gray-200 bg-gray-100 text-black dark:bg-gray-600/50 dark:text-white",
                     )}
                     key={item}
                   >
@@ -211,6 +211,7 @@ export const FormField = ({
                     {!disabled && (
                       <button
                         type="button"
+                        className="flex items-center"
                         onClick={() => {
                           handleChange({
                             type: name,
@@ -218,7 +219,7 @@ export const FormField = ({
                           });
                         }}
                       >
-                        <Close fontSize="small" className="text-[#1A56B3]" />
+                        <Close fontSize="small" className="text-neutral-100" />
                       </button>
                     )}
                   </div>

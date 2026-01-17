@@ -11,8 +11,8 @@ import {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getPetThumbnailQueryKey } from "@/components/common/PetThumbnail";
 import { isEqual } from "es-toolkit";
+import { toast } from "@/lib/toast";
 import { useCallback, useMemo, useState } from "react";
-import { toast } from "sonner";
 import { useIsMyPet } from "@/hooks/useIsMyPet";
 import { isEmpty } from "es-toolkit/compat";
 
