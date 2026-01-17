@@ -35,7 +35,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         {!hasNativeTopBar && <Menubar unreadCount={unreadCount} />}
         {children}
       </div>
-      {!isNativeApp() && isMobile && <Sidebar unreadCount={unreadCount} />}
+      {!isNativeApp() && !isMobile && <Sidebar unreadCount={unreadCount} />}
     </main>
   );
 }
