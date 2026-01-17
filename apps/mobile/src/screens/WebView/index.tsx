@@ -45,6 +45,7 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
   const [canGoBack, setCanGoBack] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [isAtTop, setIsAtTop] = useState(true); // WebView 스크롤 위치 추적
   const insets = useSafeAreaInsets();
 
   const accessToken = useAuthStore(state => state.accessToken);
@@ -207,6 +208,13 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
     setTimeout(() => setRefreshing(false), 1000);
   }, []);
 
+  // WebView 스크롤 위치 추적 (Android)
+  const handleScroll = useCallback((event: any) => {
+    const { contentOffset } = event.nativeEvent;
+    // 스크롤이 최상단(y <= 0)이면 RefreshControl 활성화
+    setIsAtTop(contentOffset.y <= 0);
+  }, []);
+
   // 동적 컨테이너 스타일
   const containerStyle = useMemo(
     () => [
@@ -257,10 +265,12 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
       {Platform.OS === 'android' ? (
         <ScrollView
           contentContainerStyle={styles.scrollViewContent}
+          scrollEnabled={isAtTop}
           refreshControl={
             <RefreshControl
               refreshing={refreshing}
               onRefresh={onRefresh}
+              enabled={isAtTop}
               colors={[theme === 'dark' ? '#fff' : '#000']}
               progressBackgroundColor={colors.background}
             />
@@ -279,6 +289,7 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
               setCanGoBack(navState.canGoBack);
             }}
             onLoadEnd={() => setRefreshing(false)}
+            onScroll={handleScroll}
             // 성능 및 기능 설정
             javaScriptEnabled
             domStorageEnabled
