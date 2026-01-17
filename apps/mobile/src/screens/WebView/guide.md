@@ -11,7 +11,7 @@ apps/mobile/src/screens/WebView/
 ├── index.tsx       # 메인 WebView 컴포넌트
 ├── types.ts        # 타입 정의
 ├── scripts.ts      # 주입 JavaScript 스크립트
-└── description.md  # 이 문서
+└── guide.md  # 이 문서
 
 apps/client/src/lib/
 └── native-bridge.ts  # 웹에서 앱으로 통신하는 브릿지 유틸리티
