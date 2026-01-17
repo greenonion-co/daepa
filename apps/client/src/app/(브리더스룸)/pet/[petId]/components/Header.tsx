@@ -9,12 +9,17 @@ import { DeletePetDialog } from "./DeletePetDialog";
 import { useAdoptionStore } from "@/app/(브리더스룸)/pet/store/adoption";
 import { useEffect, useState } from "react";
 import TooltipText from "@/app/(브리더스룸)/components/TooltipText";
-import PetThumbnail from "@/components/common/PetThumbnail";
+import PetThumbnail, { getPetThumbnailQueryKey } from "@/components/common/PetThumbnail";
+import { petImageControllerFindThumbnail } from "@repo/api-client";
+import { useQuery } from "@tanstack/react-query";
 import { useUserStore } from "@/app/(브리더스룸)/store/user";
 import { useIsMyPet } from "@/hooks/useIsMyPet";
 import LoginPromoSheet from "@/app/(브리더스룸)/components/LoginPromoSheet";
 import { useBreedingInfoStore } from "../../store/breedingInfo";
-import { useModalContext } from "./ModalContext";
+import {
+  RECENTLY_VIEWED_MAX_ITEMS,
+  RECENTLY_VIEWED_STORAGE_KEY,
+} from "@/app/(브리더스룸)/components/SidebarPanel/최근본";
 
 type TabType = "breeding" | "adoption" | "images" | "pedigree";
 
@@ -33,12 +38,19 @@ const Header = ({
   activeTab,
   onTabClick = () => {},
 }: HeaderProps) => {
-  const modalContext = useModalContext();
   const isMyPet = useIsMyPet(pet.owner.userId);
   const { user } = useUserStore();
   const isLoggedIn = !!user?.userId;
   const [isScrolled, setIsScrolled] = useState(size === "small");
   const [isPromoSheetOpen, setIsPromoSheetOpen] = useState(false);
+
+  const { data: thumbnail } = useQuery({
+    queryKey: getPetThumbnailQueryKey(pet.petId),
+    queryFn: () => petImageControllerFindThumbnail(pet.petId),
+    select: (response) => response.data.data,
+    staleTime: Infinity,
+    gcTime: Infinity,
+  });
 
   useEffect(() => {
     const handleScroll = () => {
@@ -48,6 +60,36 @@ const Header = ({
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // 최근 본 펫을 localStorage에 저장
+  useEffect(() => {
+    if (!pet) return;
+
+    try {
+      const stored = localStorage.getItem(RECENTLY_VIEWED_STORAGE_KEY);
+      const currentList: Array<{ petId: string }> = stored ? JSON.parse(stored) : [];
+
+      const newItem = {
+        petId: pet.petId,
+        name: pet.name,
+        species: pet.species,
+        photoUrl: thumbnail?.url,
+        morphs: pet.morphs,
+        hatchingDate: pet.hatchingDate,
+      };
+
+      // 중복 제거 후 새 항목을 맨 앞에 추가
+      const updatedList = [
+        newItem,
+        ...currentList.filter((item) => item.petId !== pet.petId),
+      ].slice(0, RECENTLY_VIEWED_MAX_ITEMS);
+
+      localStorage.setItem(RECENTLY_VIEWED_STORAGE_KEY, JSON.stringify(updatedList));
+      window.dispatchEvent(new Event("recentlyViewedUpdated"));
+    } catch (error) {
+      console.error("Failed to save recently viewed pet:", error);
+    }
+  }, [pet, thumbnail]);
 
   const { breedingInfo } = useBreedingInfoStore();
   const breedingData = breedingInfo?.petId === pet?.petId ? breedingInfo : null;
@@ -62,7 +104,7 @@ const Header = ({
         "dark:bg-background sticky top-0 z-20 flex flex-col gap-2 bg-gray-100 px-2 transition-all transition-shadow duration-200",
         isScrolled ? "pt-2 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1)]" : "",
         size === "small" &&
-          "before:dark:bg-background top-2 before:absolute before:-top-2 before:right-0 before:left-0 before:h-2 before:bg-gray-100", // 모달에서 X 버튼 아래로 위치
+          "before:dark:bg-background top-2 before:absolute before:-top-2 before:left-0 before:right-0 before:h-2 before:bg-gray-100", // 모달에서 X 버튼 아래로 위치
       )}
     >
       <div className="flex items-center gap-2">
@@ -164,12 +206,6 @@ const Header = ({
               e.preventDefault();
               setIsPromoSheetOpen(true);
             }
-            // 모달에서는 모달 닫고 soft navigation으로 이동
-            else if (modalContext) {
-              e.preventDefault();
-              modalContext.navigateAway(`/pet/${pet.petId}/relation`);
-            }
-            // 일반 페이지에서는 Link 기본 동작 사용
           }}
           className={cn(
             "flex items-center gap-0.5 rounded-lg bg-blue-100 px-2 font-[700] text-white transition-colors hover:bg-blue-200 dark:bg-blue-900/40 dark:hover:bg-blue-800/40",
@@ -199,7 +235,7 @@ const Header = ({
         />
 
         <div className="flex items-center gap-1">
-          <QRCode petId={pet.petId} isScrolled={isScrolled} />
+          <QRCode pet={pet} isScrolled={isScrolled} />
           {isLoggedIn && isMyPet && <DeletePetDialog petId={pet.petId} petName={pet.name} />}
         </div>
       </div>
@@ -211,7 +247,7 @@ const Header = ({
             key={tab.id}
             onClick={() => onTabClick(tab.id, tab.ref)}
             className={cn(
-              "px-4 py-2 text-sm whitespace-nowrap transition-colors",
+              "whitespace-nowrap px-4 py-2 text-sm transition-colors",
               activeTab === tab.id
                 ? "border-b-2 border-neutral-800 font-[600] dark:border-white"
                 : "text-neutral-600 hover:bg-gray-200 dark:text-gray-400 dark:hover:bg-gray-800",

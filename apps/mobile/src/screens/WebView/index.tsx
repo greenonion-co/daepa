@@ -67,12 +67,15 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
   const hideTopBar = initialPath.includes('_hideTopBar=1');
   const showTopBar = isPushed && !hideTopBar;
 
-  console.log('[WebView] Loading URL:', webViewUrl);
-  console.log('[WebView] CLIENT_BASE_URL:', CLIENT_BASE_URL);
+  if (__DEV__) {
+    console.log('[WebView] Loading URL:', webViewUrl);
+  }
 
   // 페이지 로드 전에 실행되는 스크립트 (매 페이지마다 실행됨)
-  const injectedJavaScriptBeforeContentLoaded =
-    createInjectedJavaScriptBeforeContentLoaded(accessToken);
+  const injectedJavaScriptBeforeContentLoaded = useMemo(
+    () => createInjectedJavaScriptBeforeContentLoaded(accessToken),
+    [accessToken],
+  );
 
   // 웹에서 앱으로 오는 메시지 처리
   const handleMessage = (event: WebViewMessageEvent) => {
@@ -131,7 +134,10 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
           break;
         case 'TOKEN_REFRESH_FAILED':
           clear();
-
+          navigation.reset({
+            index: 1,
+            routes: [{ name: 'Tabs' }, { name: 'Login' }],
+          });
           break;
         case 'LOG': {
           const prefix = '[WebView]';

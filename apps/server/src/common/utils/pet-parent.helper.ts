@@ -56,7 +56,7 @@ export function replaceParentPublicSafe(
  */
 export function replaceSiblingPublicSafe<T extends PetSummaryDto>(
   pet: T,
-  viewerId: string,
+  viewerId?: string,
 ): T | { petId: string; hiddenStatus: PET_HIDDEN_STATUS } {
   const isOwner = pet.owner?.userId === viewerId;
 

@@ -55,7 +55,10 @@ const BreedingInfoContent = ({ petId, ownerId, initialPet }: BreedingInfoContent
 
   // 펫 업데이트 mutation
   const { mutateAsync: mutateUpdatePet } = useMutation({
-    mutationFn: (updateData: UpdatePetDto) => petControllerUpdate(pet?.petId ?? "", updateData),
+    mutationFn: (updateData: UpdatePetDto) => {
+      if (!pet?.petId) throw new Error("Pet ID is required");
+      return petControllerUpdate(pet.petId, updateData);
+    },
   });
 
   // 변경된 필드 추출

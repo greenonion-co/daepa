@@ -21,7 +21,7 @@ import ParentLink from "../../components/ParentLink";
 interface PedigreeInfoContentProps {
   species: PetDtoSpecies;
   petId: string;
-  userId: string;
+  userId?: string;
   initialParents: GetParentsByPetIdResponseDtoData | null;
 }
 

@@ -5,6 +5,9 @@ require Pod::Executable.execute_command('node', ['-p',
     {paths: [process.argv[1]]},
   )', __dir__]).strip
 
+# react-native-config 환경변수를 xcconfig로 변환
+system("#{__dir__}/scripts/set-env.sh")
+
 platform :ios, min_ios_version_supported
 prepare_react_native_project!
 
@@ -32,5 +35,20 @@ target 'mobile' do
       :mac_catalyst_enabled => false,
       # :ccache_enabled => true
     )
+
+    # react-native-config 환경변수를 Pods xcconfig에 include
+    installer.pods_project.targets.each do |target|
+      target.build_configurations.each do |build_config|
+        next unless build_config.base_configuration_reference
+        xcconfig_path = build_config.base_configuration_reference.real_path
+        next unless xcconfig_path && File.exist?(xcconfig_path)
+        xcconfig_content = File.read(xcconfig_path)
+        unless xcconfig_content.include?("Config.xcconfig")
+          File.open(xcconfig_path, 'a') do |file|
+            file.puts "\n#include \"../../../Config.xcconfig\""
+          end
+        end
+      end
+    end
   end
 end
