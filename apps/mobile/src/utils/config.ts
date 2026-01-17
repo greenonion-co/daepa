@@ -1,24 +1,19 @@
 /**
  * 앱 설정 값들을 관리하는 Config
- * __DEV__를 사용해 개발/프로덕션 환경 자동 전환
+ * react-native-config를 사용해 .env 파일에서 환경변수 로드
+ *
+ * 사용법:
+ * - 개발 환경: .env 파일 사용 (기본)
+ * - 프로덕션 환경: .env.production 파일 사용
+ *
+ * 로컬 IP 변경 시 .env 파일의 SERVER_BASE_URL, CLIENT_BASE_URL 수정
  */
+import RNConfig from 'react-native-config';
 
-// 로컬 개발 시 사용할 IP (본인 컴퓨터의 IP로 변경 필요)
-// 터미널에서 `ifconfig | grep "inet "` 로 확인
-const LOCAL_IP = '';
-
-const Config = __DEV__
-  ? {
-      // 개발 환경
-      SERVER_BASE_URL: `http://${LOCAL_IP}:4000`,
-      CLIENT_BASE_URL: `http://${LOCAL_IP}:3000`,
-      CDN_URL: 'https://media.breedy.kr/cdn-cgi/image',
-    }
-  : {
-      // 프로덕션 환경
-      SERVER_BASE_URL: 'https://api.daepa.store',
-      CLIENT_BASE_URL: 'https://daepa.store',
-      CDN_URL: 'https://media.breedy.kr/cdn-cgi/image',
-    };
+const Config = {
+  SERVER_BASE_URL: RNConfig.SERVER_BASE_URL ?? 'https://breedy.kr',
+  CLIENT_BASE_URL: RNConfig.CLIENT_BASE_URL ?? 'https://breedy.kr',
+  CDN_URL: RNConfig.CDN_URL ?? 'https://media.breedy.kr/cdn-cgi/image',
+};
 
 export default Config;
