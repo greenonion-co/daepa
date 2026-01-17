@@ -95,7 +95,7 @@ const SettingsPage = () => {
     <div className="min-h-screen dark:bg-neutral-900">
       <div>
         {/* 프로필 섹션 */}
-        <SettingsGroup>
+        <SettingsGroup className="px-2">
           <div className="flex items-center gap-4 bg-neutral-100 p-2 px-4 dark:bg-neutral-700">
             <div className="relative flex h-16 w-16 items-center justify-center">
               <Image src="/assets/lizard.png" alt="조회된 펫 없음" fill />

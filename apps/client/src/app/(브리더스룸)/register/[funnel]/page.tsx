@@ -247,7 +247,7 @@ export default function RegisterPage({ params }: { params: Promise<{ funnel: str
             {OPTION_STEPS.map((step) => {
               const isNameField = step.field.name === "name";
               const NameFieldClassName = isNameField
-                ? "mt-8 border-gray-700 rounded-2xl border-[1.5px] p-6 dark:border-gray-300"
+                ? "mt-8 border-gray-700 rounded-2xl border-[1.5px] p-4 dark:border-gray-300"
                 : "";
 
               const nameLabelClassName = isNameField

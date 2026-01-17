@@ -59,6 +59,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#1f2937',
     marginBottom: 4,
+    textAlign: 'center',
   },
 
   loginButton: {
