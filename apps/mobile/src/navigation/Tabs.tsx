@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from 'react';
-import { View, StyleSheet, StatusBar } from 'react-native';
+import { View, StyleSheet, StatusBar, Platform } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Home,
   FileChartColumnIncreasing,
@@ -72,6 +73,7 @@ function SettingsScreen() {
 function GeneralTabs() {
   const theme = useThemeStore(state => state.theme);
   const colors = themeColors[theme];
+  const insets = useSafeAreaInsets();
 
   return (
     <GeneralTab.Navigator
@@ -93,6 +95,8 @@ function GeneralTabs() {
           borderWidth: 1,
           borderBottomWidth: 0,
           borderColor: colors.tabBarBorder,
+          paddingBottom: Platform.OS === 'android' ? insets.bottom : 0,
+          height: Platform.OS === 'android' ? 60 + insets.bottom : undefined,
         },
       }}
     >
@@ -120,6 +124,7 @@ function GeneralTabs() {
 function AdminTabs() {
   const theme = useThemeStore(state => state.theme);
   const colors = themeColors[theme];
+  const insets = useSafeAreaInsets();
 
   return (
     <AdminTab.Navigator
@@ -141,6 +146,8 @@ function AdminTabs() {
           borderWidth: 1,
           borderBottomWidth: 0,
           borderColor: colors.tabBarBorder,
+          paddingBottom: Platform.OS === 'android' ? insets.bottom : 0,
+          height: Platform.OS === 'android' ? 60 + insets.bottom : undefined,
         },
       }}
     >
