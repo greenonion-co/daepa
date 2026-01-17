@@ -34,7 +34,7 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({
       setIsRegisterPending(true);
 
       const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_SERVER_BASE_URL}/api/v1/user/init-info`,
+        `${process.env.SERVER_BASE_URL}/api/v1/user/init-info`,
         { name: nickname, isBiz: userType === 'biz' },
         {
           headers: {
