@@ -1,5 +1,4 @@
 import { ApiExtraModels, ApiProperty, PickType } from '@nestjs/swagger';
-import { Exclude, Type } from 'class-transformer';
 import {
   IsArray,
   IsDate,
@@ -14,8 +13,7 @@ import { PageOptionsDto } from 'src/common/page.dto';
 import { EGG_STATUS } from 'src/egg_detail/egg_detail.constants';
 import { LayingBaseDto, LayingByDateDto } from 'src/laying/laying.dto';
 import { PET_SPECIES } from 'src/pet/pet.constants';
-import { PetDto, PetLayingDto, PetSummaryLayingDto } from 'src/pet/pet.dto';
-import { PetImageItem } from 'src/pet_image/pet_image.dto';
+import { PetLayingDto, PetSummaryLayingDto } from 'src/pet/pet.dto';
 
 export class PairBaseDto {
   @ApiProperty({
@@ -76,57 +74,6 @@ export class PairBaseDto {
   })
   @IsDate()
   updatedAt: Date;
-}
-
-class PairParentDto extends PickType(PetDto, [
-  'petId',
-  'name',
-  'sex',
-  'morphs',
-  'traits',
-  'weight',
-  'growth',
-]) {
-  @ApiProperty({
-    description: '펫 대표 이미지',
-    required: false,
-    type: PetImageItem,
-  })
-  @IsOptional()
-  @IsObject()
-  @Type(() => PetImageItem)
-  thumbnail?: PetImageItem;
-}
-
-export class PairDto extends PickType(PairBaseDto, ['id', 'species']) {
-  @ApiProperty({
-    description: '아빠 펫 정보',
-    example: {},
-    required: false,
-    type: PairParentDto,
-  })
-  @IsOptional()
-  @IsObject()
-  father?: PairParentDto;
-
-  @ApiProperty({
-    description: '엄마 펫 정보',
-    example: {},
-    required: false,
-    type: PairParentDto,
-  })
-  @IsOptional()
-  @IsObject()
-  mother?: PairParentDto;
-
-  @Exclude()
-  declare ownerId: string;
-
-  @Exclude()
-  declare fatherId: string;
-
-  @Exclude()
-  declare motherId: string;
 }
 
 class LayingWithPetsDto extends PickType(LayingBaseDto, ['clutch']) {

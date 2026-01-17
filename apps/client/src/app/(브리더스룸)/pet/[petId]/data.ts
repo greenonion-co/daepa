@@ -10,10 +10,15 @@ import { getServerRequestHeaders } from "@/lib/server/auth";
 
 const BASE_URL = process.env.NEXT_PUBLIC_SERVER_BASE_URL;
 
+// 헤더를 캐시하여 같은 렌더링 사이클 내 중복 호출 제거
+const getCachedHeaders = cache(async () => {
+  return getServerRequestHeaders();
+});
+
 // React cache()로 감싸서 동일 렌더링 사이클 내 요청 중복 제거
 export const fetchPet = cache(async (petId: string): Promise<PetDto | null> => {
   const url = `${BASE_URL}/api/v1/pet/${petId}`;
-  const headers = await getServerRequestHeaders();
+  const headers = await getCachedHeaders();
 
   try {
     const res = await fetch(url, { cache: "no-store", headers });
@@ -27,13 +32,13 @@ export const fetchPet = cache(async (petId: string): Promise<PetDto | null> => {
 
 export const fetchImages = cache(async (petId: string): Promise<PetImageItem[]> => {
   const url = `${BASE_URL}/api/v1/pet-image/${petId}`;
-  const headers = await getServerRequestHeaders();
+  const headers = await getCachedHeaders();
 
   try {
     const res = await fetch(url, { cache: "no-store", headers });
     if (!res.ok) return [];
     const data = await res.json();
-    return data;
+    return data.data;
   } catch {
     return [];
   }
@@ -42,7 +47,7 @@ export const fetchImages = cache(async (petId: string): Promise<PetImageItem[]> 
 export const fetchParents = cache(
   async (petId: string): Promise<GetParentsByPetIdResponseDtoData | null> => {
     const url = `${BASE_URL}/api/v1/pet/parents/${petId}`;
-    const headers = await getServerRequestHeaders();
+    const headers = await getCachedHeaders();
 
     try {
       const res = await fetch(url, { cache: "no-store", headers });
@@ -57,7 +62,7 @@ export const fetchParents = cache(
 
 export const fetchAdoption = cache(async (petId: string): Promise<PetAdoptionDto | null> => {
   const url = `${BASE_URL}/api/v1/adoption/by-pet/${petId}`;
-  const headers = await getServerRequestHeaders();
+  const headers = await getCachedHeaders();
 
   try {
     const res = await fetch(url, { cache: "no-store", headers });

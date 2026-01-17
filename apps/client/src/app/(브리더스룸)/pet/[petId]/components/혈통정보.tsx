@@ -13,7 +13,7 @@ export default async function PedigreeInfo({ pet }: PedigreeInfoProps) {
     <PedigreeInfoContent
       species={pet.species}
       petId={pet.petId}
-      userId={pet.owner.userId ?? ""}
+      userId={pet.owner?.userId}
       initialParents={parents}
     />
   );
