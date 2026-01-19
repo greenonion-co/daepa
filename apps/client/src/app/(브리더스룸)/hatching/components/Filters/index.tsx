@@ -6,7 +6,11 @@ import ParentSearchSelector from "../../../components/selector/parentSearch";
 import FilterItem from "./FilterItem";
 import SingleSelect from "@/app/(브리더스룸)/components/selector/SingleSelect";
 
-const Filters = () => {
+interface FiltersProps {
+  variant?: "default" | "light";
+}
+
+const Filters = ({ variant = "default" }: FiltersProps) => {
   const {
     species,
     eggStatus,
@@ -52,6 +56,7 @@ const Filters = () => {
         type="species"
         saveASAP
         initialItem={species}
+        variant={variant}
         onSelect={(item) => {
           const changed = species !== item;
           setSpecies(item);
@@ -65,6 +70,7 @@ const Filters = () => {
       <FilterItem
         value={father?.name}
         placeholder="부 개체"
+        variant={variant}
         onClose={() => {
           setFather(null);
         }}
@@ -76,6 +82,7 @@ const Filters = () => {
       <FilterItem
         value={mother?.name}
         placeholder="모 개체"
+        variant={variant}
         onClose={() => {
           setMother(null);
         }}

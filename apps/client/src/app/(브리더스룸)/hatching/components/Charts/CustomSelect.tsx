@@ -124,7 +124,7 @@ const CustomSelect = ({
           )}
         >
           <div className="mb-2 font-[500] dark:text-gray-100">{title}</div>
-          <div className="mb-2">
+          <div className="mb-2 max-h-[240px] overflow-y-auto">
             {options.map((option) => (
               <SelectItem
                 key={option.key}

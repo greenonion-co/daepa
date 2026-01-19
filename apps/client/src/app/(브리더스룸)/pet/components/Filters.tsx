@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef, useLayoutEffect, useState } from "react";
 import {
   GENDER_KOREAN_INFO,
   GROWTH_KOREAN_INFO,
@@ -14,43 +15,96 @@ import { useFilterStore } from "../../store/filter";
 
 interface FiltersProps {
   showPublicFilter?: boolean;
+  variant?: "default" | "light";
 }
 
-export function Filters({ showPublicFilter = true }: FiltersProps) {
+export function Filters({ showPublicFilter = true, variant = "default" }: FiltersProps) {
+  const isLight = variant === "light";
   const { searchFilters, setSearchFilters, resetFilters } = useFilterStore();
 
+  const containerRef = useRef<HTMLDivElement>(null);
+  const allBtnRef = useRef<HTMLButtonElement>(null);
+  const publicBtnRef = useRef<HTMLButtonElement>(null);
+  const privateBtnRef = useRef<HTMLButtonElement>(null);
+
+  const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 });
+
+  useLayoutEffect(() => {
+    const container = containerRef.current;
+    let activeBtn: HTMLButtonElement | null = null;
+
+    if (searchFilters.isPublic === undefined) {
+      activeBtn = allBtnRef.current;
+    } else if (searchFilters.isPublic === 1) {
+      activeBtn = publicBtnRef.current;
+    } else {
+      activeBtn = privateBtnRef.current;
+    }
+
+    if (container && activeBtn) {
+      const containerRect = container.getBoundingClientRect();
+      const btnRect = activeBtn.getBoundingClientRect();
+      setIndicatorStyle({
+        left: btnRect.left - containerRect.left,
+        width: btnRect.width,
+      });
+    }
+  }, [searchFilters.isPublic]);
+
   return (
-    <div className="mb-4 flex flex-wrap items-center gap-2">
+    <div className="mb-2 flex flex-wrap items-center gap-2">
       {showPublicFilter && (
-        <div className="flex h-[32px] items-center gap-2 rounded-lg bg-gray-100 px-1 dark:bg-gray-800">
+        <div
+          ref={containerRef}
+          className={cn(
+            "relative flex h-[32px] items-center gap-2 rounded-lg px-0.5",
+            isLight ? "bg-white shadow-sm dark:bg-gray-700" : "bg-gray-100 dark:bg-gray-800",
+          )}
+        >
+          {/* 애니메이션 인디케이터 */}
+          <div
+            className={cn(
+              "absolute rounded-lg shadow-sm transition-all duration-200 ease-out",
+              isLight ? "bg-gray-100 dark:bg-gray-600" : "bg-white dark:bg-gray-700",
+            )}
+            style={{
+              left: indicatorStyle.left,
+              width: indicatorStyle.width,
+              height: "calc(100% - 4px)",
+              top: "2px",
+            }}
+          />
           <button
+            ref={allBtnRef}
             onClick={() => setSearchFilters({ ...searchFilters, isPublic: undefined })}
             className={cn(
-              "cursor-pointer rounded-lg px-2 py-1 text-sm font-semibold text-gray-800 dark:text-gray-200",
+              "relative z-10 cursor-pointer rounded-md px-2 py-0.5 text-sm font-semibold transition-colors duration-200",
               searchFilters.isPublic === undefined
-                ? "bg-white shadow-sm dark:bg-gray-700"
+                ? "text-gray-800 dark:text-gray-200"
                 : "text-gray-600 dark:text-gray-400",
             )}
           >
             전체
           </button>
           <button
+            ref={publicBtnRef}
             onClick={() => setSearchFilters({ ...searchFilters, isPublic: 1 })}
             className={cn(
-              "cursor-pointer rounded-lg px-2 py-1 text-sm font-semibold text-gray-800 dark:text-gray-200",
+              "relative z-10 cursor-pointer rounded-md px-2 py-0.5 text-sm font-semibold transition-colors duration-200",
               searchFilters.isPublic === 1
-                ? "bg-white shadow-sm dark:bg-gray-700"
+                ? "text-gray-800 dark:text-gray-200"
                 : "text-gray-600 dark:text-gray-400",
             )}
           >
             공개
           </button>
           <button
+            ref={privateBtnRef}
             onClick={() => setSearchFilters({ ...searchFilters, isPublic: 0 })}
             className={cn(
-              "cursor-pointer rounded-lg px-2 py-1 text-sm font-semibold text-gray-800 dark:text-gray-200",
+              "relative z-10 cursor-pointer rounded-md px-2 py-0.5 text-sm font-semibold transition-colors duration-200",
               searchFilters.isPublic === 0
-                ? "bg-white shadow-sm dark:bg-gray-700"
+                ? "text-gray-800 dark:text-gray-200"
                 : "text-gray-600 dark:text-gray-400",
             )}
           >
@@ -65,6 +119,7 @@ export function Filters({ showPublicFilter = true }: FiltersProps) {
         type="species"
         initialItem={searchFilters.species}
         saveASAP
+        variant={variant}
         onSelect={(item) => {
           if (item === searchFilters.species) return;
 
@@ -82,17 +137,34 @@ export function Filters({ showPublicFilter = true }: FiltersProps) {
             type="morphs"
             title="모프"
             displayMap={MORPH_LIST_BY_SPECIES[searchFilters.species]}
+            variant={variant}
           />
           <MultiSelectFilter
             type="traits"
             title="형질"
             displayMap={TRAIT_LIST_BY_SPECIES[searchFilters.species]}
+            variant={variant}
           />
         </>
       )}
-      <MultiSelectFilter type="growth" title="크기" displayMap={GROWTH_KOREAN_INFO} />
-      <MultiSelectFilter type="sex" title="성별" displayMap={GENDER_KOREAN_INFO} />
-      <MultiSelectFilter type="status" title="분양상태" displayMap={SALE_STATUS_KOREAN_INFO} />
+      <MultiSelectFilter
+        type="growth"
+        title="크기"
+        displayMap={GROWTH_KOREAN_INFO}
+        variant={variant}
+      />
+      <MultiSelectFilter
+        type="sex"
+        title="성별"
+        displayMap={GENDER_KOREAN_INFO}
+        variant={variant}
+      />
+      <MultiSelectFilter
+        type="status"
+        title="분양상태"
+        displayMap={SALE_STATUS_KOREAN_INFO}
+        variant={variant}
+      />
       {/* TODO: 먹이 필터 추가 */}
 
       <button

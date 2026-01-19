@@ -8,8 +8,9 @@ import {
   BrAdoptionControllerGetAllAdoptionsStatus,
   BrAdoptionControllerGetAllAdoptionsSpecies,
 } from "@repo/api-client";
-import { formatPrice } from "@/lib/utils";
+import { cn, formatPrice } from "@/lib/utils";
 import Loading from "@/components/common/Loading";
+import { useIsMobile } from "@/hooks/useMobile";
 import { Badge } from "@/components/ui/badge";
 import SiblingPetCard from "@/app/(브리더스룸)/pet/[petId]/relation/components/SiblingPetCard";
 import HorizontalScrollSection from "@/app/(브리더스룸)/pet/[petId]/relation/components/HorizontalScrollSection";
@@ -29,6 +30,7 @@ const PriceRangePetsModal = ({
   priceRange,
   species,
 }: PriceRangePetsModalProps) => {
+  const isMobile = useIsMobile();
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
     queryKey: ["priceRangeAdoptions", priceRange?.minPrice, priceRange?.maxPrice, species],
     queryFn: ({ pageParam = 1 }) =>
@@ -67,18 +69,28 @@ const PriceRangePetsModal = ({
         {/* 가격대 요약 정보 */}
         <div className="mx-4 grid grid-cols-3 gap-3 rounded-xl bg-gradient-to-r from-blue-200/25 to-purple-200/25 p-4 dark:from-blue-900/30 dark:to-purple-900/30">
           <div className="text-center">
-            <p className="text-sm text-gray-500 dark:text-gray-400">총 분양가</p>
-            <p className="text-lg font-bold text-emerald-600">{formatPrice(priceRange.revenue)}</p>
+            <p className={cn("text-gray-500 dark:text-gray-400", isMobile ? "text-xs" : "text-sm")}>
+              총 분양가
+            </p>
+            <p className={cn("font-bold text-emerald-600", isMobile ? "text-sm" : "text-lg")}>
+              {formatPrice(priceRange.revenue)}
+            </p>
           </div>
           <div className="text-center">
-            <p className="text-sm text-gray-500 dark:text-gray-400">평균 분양가</p>
-            <p className="text-lg font-bold text-blue-600">
+            <p className={cn("text-gray-500 dark:text-gray-400", isMobile ? "text-xs" : "text-sm")}>
+              평균 분양가
+            </p>
+            <p className={cn("font-bold text-blue-600", isMobile ? "text-sm" : "text-lg")}>
               {formatPrice(priceRange.averagePrice)}
             </p>
           </div>
           <div className="text-center">
-            <p className="text-sm text-gray-500 dark:text-gray-400">전체 분양 대비</p>
-            <p className="text-lg font-bold text-purple-600">{priceRange.percentage}%</p>
+            <p className={cn("text-gray-500 dark:text-gray-400", isMobile ? "text-xs" : "text-sm")}>
+              전체 분양 대비
+            </p>
+            <p className={cn("font-bold text-purple-600", isMobile ? "text-sm" : "text-lg")}>
+              {priceRange.percentage}%
+            </p>
           </div>
         </div>
 

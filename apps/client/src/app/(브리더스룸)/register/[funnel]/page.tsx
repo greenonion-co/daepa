@@ -21,7 +21,7 @@ import { cn } from "@/lib/utils";
 import FloatingButton from "../../components/FloatingButton";
 import { useIsMobile } from "@/hooks/useMobile";
 import { useAppRouter } from "@/hooks/useAppRouter";
-import { isNativeApp, navigate, requestPopToRoot } from "@/lib/native-bridge";
+import { isNativeApp, requestPopToRoot } from "@/lib/native-bridge";
 import PreviousDataSheet from "../components/PreviousDataSheet";
 
 const formatFormData = (formData: BaseFormData): CreatePetDto | undefined => {
@@ -84,30 +84,32 @@ export default function RegisterPage({ params }: { params: Promise<{ funnel: str
   const visibleSteps = FORM_STEPS.slice(-step - 1);
   const nameFieldRef = useRef<HTMLDivElement>(null);
   const [shouldShake, setShouldShake] = useState(false);
-  const [showPreviousDataSheet, setShowPreviousDataSheet] = useState(false);
-  const hasCheckedPreviousData = useRef(false);
+  const [showPreviousDataSheet, setShowPreviousDataSheet] = useState<boolean | null>(null);
 
   const { mutateAsync: mutateCreatePet, isPending: isCreating } = useMutation({
     mutationFn: petControllerCreate,
   });
 
-  // 이전 작성 데이터가 있으면 바텀시트 표시 (최초 마운트 시에만)
+  // 이전 작성 데이터가 있으면 바텀시트 표시 여부 결정
   useEffect(() => {
-    if (hasCheckedPreviousData.current) return;
-    if (funnel !== REGISTER_PAGE.FIRST) return;
+    if (showPreviousDataSheet !== null) return;
 
-    hasCheckedPreviousData.current = true;
+    const STORAGE_KEY = "register_previous_data_checked";
+    if (sessionStorage.getItem(STORAGE_KEY) || funnel !== REGISTER_PAGE.FIRST) {
+      setShowPreviousDataSheet(false);
+      return;
+    }
+
+    sessionStorage.setItem(STORAGE_KEY, "true");
 
     const initialFormData = useRegisterPetStore.getState().formData;
     const hasFormData = Object.keys(initialFormData).length > 0;
-    if (!hasFormData) return;
-
-    setShowPreviousDataSheet(true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    setShowPreviousDataSheet(hasFormData);
+  }, [funnel, showPreviousDataSheet]);
 
   useEffect(() => {
     if (funnel === REGISTER_PAGE.SECOND) return;
+    if (showPreviousDataSheet === null || showPreviousDataSheet) return;
 
     const currentStep = FORM_STEPS[FORM_STEPS.length - step - 1];
     if (!currentStep) return;
@@ -126,7 +128,7 @@ export default function RegisterPage({ params }: { params: Promise<{ funnel: str
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [step]);
+  }, [step, showPreviousDataSheet]);
 
   useEffect(() => {
     if (funnel === REGISTER_PAGE.SECOND) return;
@@ -200,11 +202,7 @@ export default function RegisterPage({ params }: { params: Promise<{ funnel: str
           resetForm();
           toast.success("입력 내용이 초기화되었습니다.");
           if (funnel === REGISTER_PAGE.SECOND) {
-            if (isNativeApp()) {
-              navigate({ path: "/register/1", options: { popToTop: true } });
-            } else {
-              void router.replace("/register/1");
-            }
+            void router.replace("/register/1");
           }
         }}
         title="입력 내용 초기화"
@@ -300,7 +298,7 @@ export default function RegisterPage({ params }: { params: Promise<{ funnel: str
       </form>
 
       <PreviousDataSheet
-        isOpen={showPreviousDataSheet}
+        isOpen={showPreviousDataSheet === true}
         formData={formData}
         onContinue={() => setShowPreviousDataSheet(false)}
         onReset={() => {
