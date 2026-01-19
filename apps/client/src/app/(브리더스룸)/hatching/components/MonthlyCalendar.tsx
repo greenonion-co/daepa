@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useEffect, useMemo, useRef, useState } from "react";
+import { memo, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 import { useQuery } from "@tanstack/react-query";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/useMobile";
 import { DateTime } from "luxon";
 import Image from "next/image";
+import { isNativeApp } from "@/lib/native-bridge";
 
 const MonthlyCalendar = memo(() => {
   const isMobile = useIsMobile();
@@ -24,6 +25,35 @@ const MonthlyCalendar = memo(() => {
   const [isScrolled, setIsScrolled] = useState(false);
 
   const [tab, setTab] = useState<"all" | PetDtoType>("all");
+
+  // 탭 인디케이터를 위한 refs와 state
+  const tabContainerRef = useRef<HTMLDivElement>(null);
+  const allBtnRef = useRef<HTMLButtonElement>(null);
+  const eggBtnRef = useRef<HTMLButtonElement>(null);
+  const petBtnRef = useRef<HTMLButtonElement>(null);
+  const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 });
+
+  useLayoutEffect(() => {
+    const container = tabContainerRef.current;
+    let activeBtn: HTMLButtonElement | null = null;
+
+    if (tab === "all") {
+      activeBtn = allBtnRef.current;
+    } else if (tab === PetDtoType.EGG) {
+      activeBtn = eggBtnRef.current;
+    } else {
+      activeBtn = petBtnRef.current;
+    }
+
+    if (container && activeBtn) {
+      const containerRect = container.getBoundingClientRect();
+      const btnRect = activeBtn.getBoundingClientRect();
+      setIndicatorStyle({
+        left: btnRect.left - containerRect.left,
+        width: btnRect.width,
+      });
+    }
+  }, [tab]);
 
   // 월별 해칭된 펫 조회
   const { data: monthlyData, isPending: monthlyIsPending } = useQuery({
@@ -115,17 +145,12 @@ const MonthlyCalendar = memo(() => {
     }
   }, []);
 
-  const tabs: Array<{ key: "all" | PetDtoType; label: string }> = [
-    { key: "all", label: "전체" },
-    { key: PetDtoType.EGG, label: "알" },
-    { key: PetDtoType.PET, label: "해칭 완료" },
-  ];
-
   return (
     <div
       className={cn(
         "flex",
         isMobile && "h-[calc(100dvh-92px)] overflow-hidden pb-[env(safe-area-inset-bottom)]",
+        isNativeApp() && "-mb-20",
       )}
     >
       {!isMobile && (
@@ -147,11 +172,12 @@ const MonthlyCalendar = memo(() => {
             className={cn(
               "shrink-0 touch-none transition-all duration-300",
               isScrolled &&
-                "dark:bg-background sticky top-0 z-20 w-full origin-top-left scale-75 bg-white [margin-bottom:-24%]",
+                "dark:bg-background sticky top-0 z-20 w-full origin-top-left scale-75 [margin-bottom:-24%]",
             )}
           >
             <Calendar
               mode="single"
+              className="p-0 pb-2"
               selected={selectedDate}
               onSelect={(date) => {
                 if (!date) return;
@@ -163,30 +189,69 @@ const MonthlyCalendar = memo(() => {
           </div>
         )}
 
-        <div className={cn("w-full", isMobile && "flex min-h-0 flex-1 flex-col")}>
-          <div className="flex h-[32px] w-fit shrink-0 items-center gap-2 rounded-lg bg-gray-100 px-1 dark:bg-gray-800">
-            {tabs.map(({ key, label }) => {
-              return (
-                <button
-                  key={key}
-                  onClick={() => setTab(key)}
-                  className={cn(
-                    "cursor-pointer rounded-lg px-2 py-1 text-sm font-semibold text-gray-800 dark:text-gray-200",
-                    tab === key
-                      ? "bg-white shadow-sm dark:bg-gray-700"
-                      : "text-gray-600 dark:text-gray-400",
-                  )}
-                >
-                  {label}
-                </button>
-              );
-            })}
+        <div
+          className={cn(
+            "w-full",
+            isMobile && "flex min-h-0 flex-1 flex-col",
+            isScrolled ? "mt-2" : "-mt-5",
+          )}
+        >
+          <div
+            ref={tabContainerRef}
+            className="relative flex h-[32px] w-fit shrink-0 items-center gap-2 rounded-lg bg-gray-100 px-0.5 shadow-sm dark:bg-neutral-800"
+          >
+            {/* 애니메이션 인디케이터 */}
+            <div
+              className="absolute rounded-lg bg-white shadow-sm transition-all duration-200 ease-out dark:bg-neutral-700"
+              style={{
+                left: indicatorStyle.left,
+                width: indicatorStyle.width,
+                height: "calc(100% - 4px)",
+                top: "2px",
+              }}
+            />
+            <button
+              ref={allBtnRef}
+              onClick={() => setTab("all")}
+              className={cn(
+                "relative z-10 cursor-pointer rounded-lg px-2 py-1 text-sm font-semibold transition-colors duration-200",
+                tab === "all"
+                  ? "bg-white text-gray-800 dark:bg-transparent dark:text-gray-200"
+                  : "text-gray-600 dark:text-gray-400",
+              )}
+            >
+              전체
+            </button>
+            <button
+              ref={eggBtnRef}
+              onClick={() => setTab(PetDtoType.EGG)}
+              className={cn(
+                "relative z-10 cursor-pointer rounded-lg px-2 py-1 text-sm font-semibold transition-colors duration-200",
+                tab === PetDtoType.EGG
+                  ? "bg-white text-gray-800 dark:bg-transparent dark:text-gray-200"
+                  : "text-gray-600 dark:text-gray-400",
+              )}
+            >
+              알
+            </button>
+            <button
+              ref={petBtnRef}
+              onClick={() => setTab(PetDtoType.PET)}
+              className={cn(
+                "relative z-10 cursor-pointer rounded-lg px-2 py-1 text-sm font-semibold transition-colors duration-200",
+                tab === PetDtoType.PET
+                  ? "bg-white text-gray-800 dark:bg-transparent dark:text-gray-200"
+                  : "text-gray-600 dark:text-gray-400",
+              )}
+            >
+              해칭 완료
+            </button>
           </div>
 
           <ScrollArea
             ref={scrollAreaRef}
             className={cn(
-              "relative [&>[data-radix-scroll-area-viewport]]:overscroll-contain",
+              "relative mt-1 [&>[data-radix-scroll-area-viewport]]:overscroll-contain",
               isMobile ? "min-h-0 flex-1" : "h-[calc(100vh-150px)]",
             )}
           >
@@ -212,7 +277,7 @@ const MonthlyCalendar = memo(() => {
                     key={group.weekKey}
                     ref={(el) => void (groupRefs.current[group.weekKey] = el)}
                   >
-                    <div className="dark:supports-[backdrop-filter]:bg-background/60 sticky top-0 bg-white/70 px-1 py-2 text-[15px] font-semibold supports-[backdrop-filter]:bg-white/60 dark:text-gray-100">
+                    <div className="dark:supports-[backdrop-filter]:bg-background/60 sticky top-0 bg-white/70 px-1 py-2 text-[15px] font-semibold supports-[backdrop-filter]:bg-white/80 dark:text-gray-100">
                       {group.label}
                     </div>
                     {group.items
@@ -243,6 +308,8 @@ const MonthlyCalendar = memo(() => {
                       })}
                   </div>
                 ))}
+
+                <div className="0 h-20" />
               </>
             )}
           </ScrollArea>

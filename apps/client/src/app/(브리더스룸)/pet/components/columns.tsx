@@ -8,8 +8,6 @@ import {
   GENDER_KOREAN_INFO,
   GROWTH_KOREAN_INFO,
   SALE_STATUS_KOREAN_INFO,
-  SPECIES_KOREAN_ALIAS_INFO,
-  SPECIES_KOREAN_INFO,
   STATUS_MAP,
   TABLE_HEADER,
 } from "../../constants";
@@ -17,7 +15,6 @@ import {
   UpdateParentRequestDtoStatus,
   PetDto,
   PetDtoGrowth,
-  PetDtoSpecies,
   PetParentDto,
   PetHiddenStatusDtoHiddenStatus,
   AdoptionDto,
@@ -31,6 +28,7 @@ import TooltipText from "../../components/TooltipText";
 export const columns: ColumnDef<PetDto>[] = [
   {
     accessorKey: "isPublic",
+    size: 25,
     header: () => {
       return (
         <TooltipText
@@ -54,22 +52,23 @@ export const columns: ColumnDef<PetDto>[] = [
       );
     },
   },
-  {
-    accessorKey: "species",
-    header: TABLE_HEADER.species,
-    cell: ({ row }) => {
-      const species = row.getValue("species") as PetDtoSpecies;
-      return (
-        <TooltipText
-          title="종"
-          text={SPECIES_KOREAN_ALIAS_INFO[species]}
-          content={SPECIES_KOREAN_INFO[species]}
-        />
-      );
-    },
-  },
+  // {
+  //   accessorKey: "species",
+  //   header: TABLE_HEADER.species,
+  //   cell: ({ row }) => {
+  //     const species = row.getValue("species") as PetDtoSpecies;
+  //     return (
+  //       <TooltipText
+  //         title="종"
+  //         text={SPECIES_KOREAN_ALIAS_INFO[species]}
+  //         content={SPECIES_KOREAN_INFO[species]}
+  //       />
+  //     );
+  //   },
+  // },
   {
     accessorKey: "adoption",
+    size: 60,
     header: TABLE_HEADER.adoption_status,
     cell: ({ cell }) => {
       const adoptionData = cell.getValue() as AdoptionDto;
@@ -109,35 +108,53 @@ export const columns: ColumnDef<PetDto>[] = [
   {
     accessorKey: "name",
     header: TABLE_HEADER.name,
-
     cell: ({ row }) => {
       const name = row.getValue("name") as string;
-      return <TooltipText title="이름" text={name} />;
+      return (
+        <div className="max-w-[70px] break-words">
+          <TooltipText title="이름" text={name} displayTextLength={6} className="font-semibold" />
+        </div>
+      );
     },
   },
   {
     accessorKey: "morphs",
     header: TABLE_HEADER.morphs,
-    cell: ({ row }) => <BadgeList items={row.original.morphs} />,
+    cell: ({ row }) =>
+      row.original.morphs && row.original.morphs.length > 0 ? (
+        <div className="max-w-[80px] break-words">
+          <BadgeList items={row.original.morphs} />
+        </div>
+      ) : (
+        <span className="text-gray-400">미정</span>
+      ),
   },
   {
     accessorKey: "traits",
     header: TABLE_HEADER.traits,
-    cell: ({ row }) => (
-      <BadgeList
-        items={row.original.traits}
-        variant="outline"
-        badgeClassName="bg-white text-black dark:bg-gray-700 dark:text-gray-200"
-      />
-    ),
+    cell: ({ row }) =>
+      row.original.traits && row.original.traits.length > 0 ? (
+        <div className="max-w-[80px] break-words">
+          <BadgeList
+            items={row.original.traits}
+            variant="outline"
+            badgeClassName="bg-white text-black dark:bg-gray-700 dark:text-gray-200"
+          />
+        </div>
+      ) : (
+        <span className="text-gray-400">미정</span>
+      ),
   },
   {
     accessorKey: "sex",
     header: TABLE_HEADER.sex,
     cell: ({ row }) => {
       const sex = row.getValue("sex") as string;
+      const isMale = sex === "MALE";
       return (
-        <div className="capitalize">
+        <div
+          className={`font-semibold capitalize ${isMale ? "text-blue-500 dark:text-blue-400" : "text-red-500 dark:text-red-400"}`}
+        >
           {GENDER_KOREAN_INFO[sex as keyof typeof GENDER_KOREAN_INFO]}
         </div>
       );
@@ -154,6 +171,7 @@ export const columns: ColumnDef<PetDto>[] = [
   {
     accessorKey: "weight",
     header: TABLE_HEADER.weight,
+    size: 40,
     cell: ({ row }) => (
       <div className="capitalize">{row.original.weight ? row.getValue("weight") + "g" : "-"}</div>
     ),
@@ -209,11 +227,15 @@ export const columns: ColumnDef<PetDto>[] = [
         );
       }
 
+      const truncatedName =
+        father.name && father.name.length > 6
+          ? `${father.name.slice(0, 6)}...`
+          : (father.name ?? "");
       return (
         <LinkButton
           href={`/pet/${father.petId}`}
-          label={father.name ?? ""}
-          tooltip="펫 상세 페이지로 이동"
+          label={truncatedName}
+          tooltip={father.name ?? "펫 상세 페이지로 이동"}
           className={`${STATUS_MAP[status].color} hover:text-accent/80 font-semibold text-white`}
           icon={
             status === UpdateParentRequestDtoStatus.APPROVED ? (
@@ -261,11 +283,15 @@ export const columns: ColumnDef<PetDto>[] = [
         );
       }
 
+      const truncatedName =
+        mother.name && mother.name.length > 6
+          ? `${mother.name.slice(0, 6)}...`
+          : (mother.name ?? "");
       return (
         <LinkButton
           href={`/pet/${mother.petId}`}
-          label={mother.name ?? ""}
-          tooltip="펫 상세 페이지로 이동"
+          label={truncatedName}
+          tooltip={mother.name ?? "펫 상세 페이지로 이동"}
           // status가 없으면 내 펫
           className={`${STATUS_MAP[status].color} hover:text-accent/80 font-semibold text-white`}
           icon={

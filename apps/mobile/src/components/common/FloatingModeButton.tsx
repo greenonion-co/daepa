@@ -10,6 +10,7 @@ import {
   Platform,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Toast from './Toast';
 
 export type AppMode = 'general' | 'admin';
 
@@ -46,6 +47,7 @@ export default function FloatingModeButton({
   const selectMode = (mode: AppMode) => {
     onModeChange(mode);
     toggleMenu();
+    Toast.show(`${MODE_CONFIG[mode].label} 모드로 전환되었습니다`, 'check');
   };
 
   const generalStyle = {
@@ -115,7 +117,10 @@ export default function FloatingModeButton({
         ]}
       >
         {/* 일반 모드 버튼 */}
-        <Animated.View style={[styles.menuItem, generalStyle]}>
+        <Animated.View
+          style={[styles.menuItem, generalStyle]}
+          pointerEvents={isOpen ? 'auto' : 'none'}
+        >
           <TouchableOpacity
             style={[
               styles.menuButton,
@@ -126,8 +131,8 @@ export default function FloatingModeButton({
                       ? '#fff'
                       : '#000'
                     : theme === 'dark'
-                    ? '#404040'
-                    : '#c2c2c2',
+                      ? '#404040'
+                      : '#c2c2c2',
               },
             ]}
             onPress={() => selectMode('general')}
@@ -143,8 +148,8 @@ export default function FloatingModeButton({
                         ? '#000'
                         : '#fff'
                       : theme === 'dark'
-                      ? '#fff'
-                      : '#000',
+                        ? '#fff'
+                        : '#000',
                 },
               ]}
             >
@@ -154,7 +159,10 @@ export default function FloatingModeButton({
         </Animated.View>
 
         {/* 관리자 모드 버튼 */}
-        <Animated.View style={[styles.menuItem, adminStyle]}>
+        <Animated.View
+          style={[styles.menuItem, adminStyle]}
+          pointerEvents={isOpen ? 'auto' : 'none'}
+        >
           <TouchableOpacity
             style={[
               styles.menuButton,
@@ -165,8 +173,8 @@ export default function FloatingModeButton({
                       ? '#fff'
                       : '#000'
                     : theme === 'dark'
-                    ? '#404040'
-                    : '#c2c2c2',
+                      ? '#404040'
+                      : '#c2c2c2',
               },
             ]}
             onPress={() => selectMode('admin')}
@@ -182,8 +190,8 @@ export default function FloatingModeButton({
                         ? '#000'
                         : '#fff'
                       : theme === 'dark'
-                      ? '#fff'
-                      : '#000',
+                        ? '#fff'
+                        : '#000',
                 },
               ]}
             >

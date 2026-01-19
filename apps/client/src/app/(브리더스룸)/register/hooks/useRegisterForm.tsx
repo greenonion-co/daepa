@@ -1,6 +1,5 @@
 import { useCallback, useMemo } from "react";
-import { useParams, useSearchParams } from "next/navigation";
-import { useAppRouter } from "@/hooks/useAppRouter";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { DUPLICATE_CHECK_STATUS, TRAIT_LIST_BY_SPECIES } from "../../constants";
 import { FormFieldName, FormStep } from "../../pet/types/form.type";
 import {
@@ -44,7 +43,7 @@ export const useRegisterForm = ({
   nameFieldRef,
   setShouldShake,
 }: UseRegisterFormProps) => {
-  const router = useAppRouter();
+  const router = useRouter();
   const { funnel } = useParams();
   const searchParams = useSearchParams();
   const { duplicateCheckStatus } = useNameStore();
