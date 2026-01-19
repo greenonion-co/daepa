@@ -26,7 +26,8 @@ export type WebViewMessage =
       type: 'TOAST';
       message: string;
       variant: 'success' | 'error' | 'info' | 'warning';
-    };
+    }
+  | { type: 'SET_PULL_TO_REFRESH'; enabled: boolean };
 
 export type WebViewRouteParams = {
   WebView: WebViewParams | undefined;
@@ -34,4 +35,5 @@ export type WebViewRouteParams = {
 
 export interface WebViewScreenProps {
   initialPath?: string;
+  backgroundColor?: string;
 }
