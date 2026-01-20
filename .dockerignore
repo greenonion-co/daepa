@@ -1,0 +1,48 @@
+# Dependencies
+node_modules
+**/node_modules
+
+# Build outputs
+dist
+**/dist
+.next
+**/.next
+.turbo
+**/.turbo
+
+# Environment files
+.env
+.env.*
+**/.env
+**/.env.*
+
+# IDE
+.idea
+.vscode
+**/.idea
+**/.vscode
+
+# Git
+.git
+.gitignore
+
+# Logs
+*.log
+**/*.log
+
+# Test & Coverage
+coverage
+**/coverage
+test
+**/test
+
+# Mobile (빌드에 불필요)
+apps/mobile
+
+# Documentation
+apps/docs
+*.md
+
+# OS files
+.DS_Store
+**/.DS_Store
