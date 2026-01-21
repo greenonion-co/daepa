@@ -330,7 +330,10 @@ export class ParentRequestService {
     notificationId: number,
     updateParentRequestDto: UpdateParentRequestDto,
   ) {
-    return this.dataSource.transaction(async (entityManager: EntityManager) => {
+    // 삭제된 펫으로 인한 취소 메시지를 트랜잭션 외부에서 throw하기 위한 변수
+    let cancelledByDeletedPetReason: string | null = null;
+
+    await this.dataSource.transaction(async (entityManager: EntityManager) => {
       const existingNotification = await entityManager.findOneBy(
         UserNotificationEntity,
         {
@@ -367,13 +370,65 @@ export class ParentRequestService {
         throw new BadRequestException('이미 취소된 요청입니다.');
       }
 
-      const { childPet, parentPet } = await this.getPetInfo(
-        entityManager,
-        parentRequest.childPetId,
-        parentRequest.parentPetId,
-      );
+      // 펫 정보 조회 (삭제 여부 포함, isDeleted 필터 없이 조회하여 삭제된 펫도 감지)
+      const [childPet, parentPet] = await Promise.all([
+        entityManager.findOne(PetEntity, {
+          where: { petId: parentRequest.childPetId },
+          select: ['name', 'petId', 'ownerId', 'isDeleted'],
+        }),
+        entityManager
+          .createQueryBuilder(PetEntity, 'pet')
+          .innerJoinAndMapOne(
+            'pet.petDetail',
+            PetDetailEntity,
+            'petDetail',
+            'petDetail.petId = pet.petId',
+          )
+          .select([
+            'pet.type',
+            'pet.name',
+            'pet.petId',
+            'pet.ownerId',
+            'pet.isDeleted',
+            'petDetail.sex',
+          ])
+          .where('pet.petId = :parentPetId', {
+            parentPetId: parentRequest.parentPetId,
+          })
+          .getOne(),
+      ]);
 
-      if (!parentPet?.ownerId || !childPet?.ownerId) {
+      const isChildPetDeleted = !childPet || childPet.isDeleted;
+      const isParentPetDeleted = !parentPet || parentPet.isDeleted;
+
+      // 삭제된 펫이 있으면 요청 자동 취소 (트랜잭션 내에서 업데이트 후 커밋)
+      if (isChildPetDeleted || isParentPetDeleted) {
+        await entityManager.update(
+          ParentRequestEntity,
+          { id: parentRequest.id },
+          { status: PARENT_STATUS.CANCELLED },
+        );
+
+        const deletedPetType = isChildPetDeleted ? '자식' : '부모';
+        cancelledByDeletedPetReason = `삭제된 펫(${deletedPetType})이 포함되어, 요청이 취소되었습니다.`;
+
+        await entityManager.update(
+          UserNotificationEntity,
+          { id: existingNotification.id },
+          {
+            detailJson: {
+              ...existingNotification.detailJson,
+              message: cancelledByDeletedPetReason,
+              status: PARENT_STATUS.CANCELLED,
+            },
+          },
+        );
+
+        // 트랜잭션 정상 종료 (커밋) 후 외부에서 예외 throw
+        return;
+      }
+
+      if (!parentPet.ownerId || !childPet.ownerId) {
         throw new NotFoundException('주인 정보를 찾을 수 없습니다.');
       }
 
@@ -436,6 +491,11 @@ export class ParentRequestService {
         { detailJson: updateExistingNotification },
       );
     });
+
+    // 트랜잭션 커밋 후 삭제된 펫으로 인한 취소 예외 throw
+    if (cancelledByDeletedPetReason) {
+      throw new BadRequestException(cancelledByDeletedPetReason);
+    }
   }
 
   async getPetInfo(
@@ -464,6 +524,7 @@ export class ParentRequestService {
           'petDetail.sex',
         ])
         .where('pet.petId = :parentPetId', { parentPetId })
+        .andWhere('pet.isDeleted = :isDeleted', { isDeleted: false })
         .getOne(),
     ]);
 
