@@ -123,7 +123,7 @@ function Calendar({
                   disabled={isMinMonth}
                   className={cn(
                     "size-7 border-none p-0",
-                    isMinMonth ? "cursor-not-allowed opacity-30" : "opacity-50 hover:opacity-100",
+                    isMinMonth ? "cursor-not-allowed opacity-30" : "opacity-90 hover:opacity-100",
                   )}
                 >
                   <ChevronLeft className="size-4" />
@@ -136,7 +136,7 @@ function Calendar({
                   disabled={isMaxMonth}
                   className={cn(
                     "size-7 border-none",
-                    isMaxMonth ? "cursor-not-allowed opacity-30" : "opacity-50 hover:opacity-100",
+                    isMaxMonth ? "cursor-not-allowed opacity-30" : "opacity-90 hover:opacity-100",
                   )}
                 >
                   <ChevronRight className="size-4" />

@@ -31,7 +31,12 @@ const Header = ({
   const [keyword, setKeyword] = useState("");
 
   return (
-    <div className={cn("dark:bg-background sticky -top-[12px] z-20 mt-3 bg-white py-4", className)}>
+    <div
+      className={cn(
+        "dark:bg-background sticky -top-[12px] z-20 mt-3 bg-white py-4 pt-0",
+        className,
+      )}
+    >
       <div className="flex items-center gap-2 pb-2">
         <button
           onClick={() => step === 2 && setStep(1)}

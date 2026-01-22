@@ -405,7 +405,7 @@ export const TRAIT_LIST_BY_SPECIES: Record<PetDtoSpecies, Record<string, string>
 
 export const SALE_STATUS_KOREAN_INFO = {
   NONE: "미정",
-  NFS: "분양 안함(NFS)",
+  NFS: "NFS",
   ON_SALE: "분양 가능",
   ON_RESERVATION: "예약 중",
   SOLD: "분양 완료",
@@ -425,7 +425,7 @@ export const TABLE_HEADER = {
   desc: "설명",
   foods: "먹이",
   isPublic: "공개",
-  adoption_status: "분양 상태",
+  adoption_status: "분양",
   pet_name: "이름",
   pet_species: "종",
   pet_morphs: "모프",

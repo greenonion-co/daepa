@@ -17,7 +17,7 @@ const PetItem = ({
       key={item.petId}
       type="button"
       className={cn(
-        "group flex flex-col rounded-xl p-2 text-left",
+        "group flex flex-col rounded-xl text-left",
         disabled ? "pointer-events-none cursor-not-allowed opacity-60" : "cursor-pointer",
       )}
       disabled={disabled}

@@ -55,7 +55,7 @@ const HatchingPetCard = ({ date, pets, tab, isSelected }: PetCardProps) => {
     <div
       ref={ref}
       className={cn(
-        "mb-7 scroll-mt-20",
+        "mb-7 scroll-mt-20 rounded-2xl bg-white dark:bg-transparent",
         isSelected && "rounded-xl border-[1.5px] border-blue-200 shadow-md dark:border-blue-700/50",
       )}
     >
@@ -207,11 +207,7 @@ const HatchingPetCard = ({ date, pets, tab, isSelected }: PetCardProps) => {
                 {cardContent}
               </div>
             ) : (
-              <Link
-                key={pet.petId}
-                href={`/pet/${pet.petId}`}
-                className="w-full cursor-pointer"
-              >
+              <Link key={pet.petId} href={`/pet/${pet.petId}`} className="w-full cursor-pointer">
                 {cardContent}
               </Link>
             );

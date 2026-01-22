@@ -75,6 +75,8 @@ function GeneralTabs() {
   const colors = themeColors[theme];
   const insets = useSafeAreaInsets();
 
+  const tabBarHeight = Platform.OS === 'android' ? 60 + insets.bottom : 80;
+
   return (
     <GeneralTab.Navigator
       screenOptions={{
@@ -89,6 +91,10 @@ function GeneralTabs() {
           marginBottom: 5,
         },
         tabBarStyle: {
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
           backgroundColor: colors.tabBar,
           borderTopLeftRadius: 20,
           borderTopRightRadius: 20,
@@ -96,7 +102,7 @@ function GeneralTabs() {
           borderBottomWidth: 0,
           borderColor: colors.tabBarBorder,
           paddingBottom: Platform.OS === 'android' ? insets.bottom : 0,
-          height: Platform.OS === 'android' ? 60 + insets.bottom : undefined,
+          height: tabBarHeight,
         },
         tabBarHideOnKeyboard: true,
       }}
@@ -127,6 +133,8 @@ function AdminTabs() {
   const colors = themeColors[theme];
   const insets = useSafeAreaInsets();
 
+  const tabBarHeight = Platform.OS === 'android' ? 60 + insets.bottom : 80;
+
   return (
     <AdminTab.Navigator
       screenOptions={{
@@ -141,6 +149,10 @@ function AdminTabs() {
           marginBottom: 5,
         },
         tabBarStyle: {
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
           backgroundColor: colors.tabBar,
           borderTopLeftRadius: 25,
           borderTopRightRadius: 25,
@@ -148,9 +160,12 @@ function AdminTabs() {
           borderBottomWidth: 0,
           borderColor: colors.tabBarBorder,
           paddingBottom: Platform.OS === 'android' ? insets.bottom : 0,
-          height: Platform.OS === 'android' ? 60 + insets.bottom : undefined,
+          height: tabBarHeight,
         },
         tabBarHideOnKeyboard: true,
+        sceneStyle: {
+          backgroundColor: theme === 'dark' ? '#111827' : '#f3f4f6',
+        },
       }}
     >
       <AdminTab.Screen

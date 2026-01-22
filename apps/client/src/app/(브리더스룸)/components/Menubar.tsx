@@ -46,7 +46,7 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
     <div
       className={cn(
         "dark:bg-background flex h-[52px] items-center justify-between px-2",
-        isMobile && !isPetDetail && "bg-background sticky top-0 left-0 z-50 w-full",
+        isMobile && !isPetDetail && "bg-background sticky left-0 top-0 z-50 w-full",
         isNative && "pr-4",
       )}
     >
@@ -126,7 +126,7 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
                 <Link href="/notifications" className="relative">
                   <Mail className="text-gray-500 dark:text-neutral-400" />
                   {unreadCount > 0 && (
-                    <div className="absolute -top-2 -right-2 flex h-[18px] w-[18px] items-center justify-center rounded-full bg-red-500 text-[12px] font-medium text-white">
+                    <div className="absolute -right-2 -top-2 flex h-[18px] w-[18px] items-center justify-center rounded-full bg-red-500 text-[12px] font-medium text-white">
                       {unreadCount > 9 ? "9+" : unreadCount}
                     </div>
                   )}
