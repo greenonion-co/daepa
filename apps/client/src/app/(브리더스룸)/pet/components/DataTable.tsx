@@ -29,6 +29,9 @@ import Image from "next/image";
 import { useAppRouter } from "@/hooks/useAppRouter";
 import PetDetailModal from "../[petId]/components/PetDetailModal";
 import { useIsMobile } from "@/hooks/useMobile";
+import SearchInput from "../../components/SearchInput";
+import { useSearchKeywordStore } from "../../store/searchKeyword";
+import { isNativeApp } from "@/lib/native-bridge";
 
 interface DataTableProps<TData> {
   columns: ColumnDef<TData>[];
@@ -50,7 +53,6 @@ export const DataTable = ({
   hasMore,
   isFetchingMore,
   loaderRefAction,
-  hasFilter = true,
   isClickable = true,
   refetch,
   isEmpty = false,
@@ -63,6 +65,7 @@ export const DataTable = ({
   const [selectedPet, setSelectedPet] = useState<PetDto | null>(null);
 
   const isMobile = useIsMobile();
+  const { setSearchKeyword } = useSearchKeywordStore();
 
   const table = useReactTable({
     data,
@@ -109,7 +112,15 @@ export const DataTable = ({
 
   return (
     <div className="w-full">
-      <div className="px-2">{hasFilter && <Filters />}</div>
+      <div className="px-2">
+        <Filters />
+        {!isNativeApp() && (
+          <SearchInput
+            placeholder="이름 또는 설명 검색.."
+            onKeyDown={(value) => setSearchKeyword(value)}
+          />
+        )}
+      </div>
 
       <div className="mb-2 flex justify-between">
         <button
