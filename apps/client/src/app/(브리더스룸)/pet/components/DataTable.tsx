@@ -116,7 +116,7 @@ export const DataTable = ({
         <Filters />
         {!isNativeApp() && isMobile && (
           <SearchInput
-            placeholder="이름 또는 설명 검색.."
+            placeholder="개체 이름 검색"
             value={searchKeyword}
             onKeyDown={(value) => setSearchKeyword(value)}
           />
