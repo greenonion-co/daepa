@@ -91,12 +91,12 @@ export const DataTable = ({
   return (
     <div className="w-full">
       <div className="rounded-md">
-        <Table className="bg-white">
+        <Table className="bg-white dark:bg-gray-900">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
-                  const size = header.column.columnDef.size;
+                  const size = header.getSize();
                   return (
                     <TableHead
                       className="font-[400] text-gray-600 dark:text-gray-400"
@@ -128,7 +128,7 @@ export const DataTable = ({
                     onClick={(e) => handleRowClick({ e, pet: row.original })}
                   >
                     {row.getVisibleCells().map((cell) => {
-                      const size = cell.column.columnDef.size;
+                      const size = cell.column.getSize();
                       return (
                         <TableCell
                           key={cell.id}

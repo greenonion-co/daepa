@@ -253,7 +253,8 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
       styles.container,
       {
         paddingTop: insets.top,
-        paddingBottom: isPushed ? insets.bottom : 0,
+        paddingBottom:
+          Platform.OS === 'ios' ? insets.bottom : isPushed ? insets.bottom : 0,
         backgroundColor: colors.background,
       },
     ],

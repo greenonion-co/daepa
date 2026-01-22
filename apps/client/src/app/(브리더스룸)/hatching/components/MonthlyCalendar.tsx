@@ -309,7 +309,7 @@ const MonthlyCalendar = memo(() => {
                   </div>
                 ))}
 
-                <div className="0 h-20" />
+                <div className="h-20" />
               </>
             )}
           </ScrollArea>

@@ -40,7 +40,7 @@ export default function PetCard({ pet }: PetCardProps) {
   };
 
   return (
-    <div className="relative cursor-pointer overflow-hidden rounded-lg bg-white transition-all duration-150 hover:shadow-md active:scale-[0.98] dark:bg-neutral-800 dark:active:bg-gray-800">
+    <div className="relative overflow-hidden rounded-lg bg-white transition-all duration-150 hover:shadow-md active:scale-[0.98] dark:bg-neutral-800 dark:active:bg-gray-800">
       <div className="flex gap-2 p-2">
         {/* 이미지 + 성별 */}
         <div className="flex shrink-0 flex-col items-center gap-0.5 self-center">
@@ -107,8 +107,11 @@ export default function PetCard({ pet }: PetCardProps) {
             )}
             {/* 해칭일 */}
             {pet.hatchingDate && (
-              <p className="text-xs text-gray-400 dark:text-gray-500">
-                {DateTime.fromISO(pet.hatchingDate).toFormat("yy.MM.dd")}
+              <p className="text-xs text-gray-700 dark:text-gray-500">
+                {(() => {
+                  const dt = DateTime.fromISO(pet.hatchingDate);
+                  return dt.isValid ? dt.toFormat("yy.MM.dd") : "-";
+                })()}
               </p>
             )}
           </div>

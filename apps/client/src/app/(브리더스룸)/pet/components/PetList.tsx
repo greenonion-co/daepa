@@ -90,6 +90,15 @@ export default function PetList() {
     }
   }, [inView, fetchNextPage, hasNextPage, isFetchingNextPage]);
 
+  // 타임아웃 cleanup
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
+
   if (isLoading) return <Loading />;
 
   return (
@@ -121,13 +130,11 @@ export default function PetList() {
         </button>
 
         <div className="flex items-center gap-2">
-          <Link href="/pet/deleted">
-            <button
-              type="button"
-              className="cursor-pointer rounded-lg px-2 py-1 text-xs text-red-600 underline hover:bg-red-100 dark:text-red-400 dark:hover:bg-red-900/30"
-            >
-              삭제된 펫 보기
-            </button>
+          <Link
+            href="/pet/deleted"
+            className="cursor-pointer rounded-lg px-2 py-1 text-xs text-red-600 underline hover:bg-red-100 dark:text-red-400 dark:hover:bg-red-900/30"
+          >
+            삭제된 펫 보기
           </Link>
           <ViewModeToggle />
         </div>
