@@ -3,11 +3,22 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Moon, Sun, Edit2, LogOut, Trash2, HelpCircle, FileText, Shield, Mail } from "lucide-react";
+import {
+  Moon,
+  Sun,
+  Edit2,
+  LogOut,
+  Trash2,
+  HelpCircle,
+  FileText,
+  Shield,
+  Mail,
+  Smartphone,
+} from "lucide-react";
+import type { Theme } from "@/types/theme";
 import DeleteAccountButton from "./components/DeleteAccountButton";
 import { SettingsGroup, SettingsItem } from "./components";
 import NicknameDuplicateCheckInput from "./components/NicknameDuplicateCheckInput";
-import { Switch } from "@/components/ui/switch";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { userControllerGetUserProfile, userControllerCreateInitUserInfo } from "@repo/api-client";
@@ -22,7 +33,7 @@ import { useLogout } from "@/hooks/useLogout";
 const SettingsPage = () => {
   const queryClient = useQueryClient();
   const { logout } = useLogout();
-  const { theme, setTheme } = useTheme();
+  const { theme, resolvedTheme, setTheme } = useTheme();
 
   // 닉네임 수정 관련 상태
   const [isEditingNickname, setIsEditingNickname] = useState(false);
@@ -41,9 +52,11 @@ const SettingsPage = () => {
     mutationFn: userControllerCreateInitUserInfo,
   });
 
-  const handleThemeChange = (isDark: boolean) => {
-    setTheme(isDark ? "dark" : "light");
-  };
+  const themeOptions: Array<{ key: Theme; label: string; icon: React.ReactNode }> = [
+    { key: "light", label: "라이트", icon: <Sun className="h-4 w-4" /> },
+    { key: "dark", label: "다크", icon: <Moon className="h-4 w-4" /> },
+    { key: "system", label: "시스템", icon: <Smartphone className="h-4 w-4" /> },
+  ];
 
   const normalizedProviders = Array.isArray(userProfile?.provider)
     ? userProfile?.provider
@@ -92,10 +105,10 @@ const SettingsPage = () => {
   };
 
   return (
-    <div className="min-h-screen dark:bg-neutral-900">
+    <div className="min-h-screen">
       <div>
         {/* 프로필 섹션 */}
-        <SettingsGroup>
+        <SettingsGroup className="px-2">
           <div className="flex items-center gap-4 bg-neutral-100 p-2 px-4 dark:bg-neutral-700">
             <div className="relative flex h-16 w-16 items-center justify-center">
               <Image src="/assets/lizard.png" alt="조회된 펫 없음" fill />
@@ -205,13 +218,39 @@ const SettingsPage = () => {
         {/* 앱 설정 */}
         <SettingsGroup title="앱 설정">
           <SettingsItem
-            icon={theme === "dark" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
-            iconBgColor={theme === "dark" ? "bg-indigo-100 dark:bg-indigo-900/30" : "bg-yellow-100"}
-            iconColor={
-              theme === "dark" ? "text-indigo-600 dark:text-indigo-400" : "text-yellow-600"
+            icon={
+              resolvedTheme === "dark" ? (
+                <Moon className="h-4 w-4" />
+              ) : (
+                <Sun className="h-4 w-4" />
+              )
             }
-            label="다크 모드"
-            rightElement={<Switch checked={theme === "dark"} onCheckedChange={handleThemeChange} />}
+            iconBgColor={
+              resolvedTheme === "dark" ? "bg-indigo-100 dark:bg-indigo-900/30" : "bg-yellow-100"
+            }
+            iconColor={
+              resolvedTheme === "dark" ? "text-indigo-600 dark:text-indigo-400" : "text-yellow-600"
+            }
+            label="테마"
+            rightElement={
+              <div className="flex items-center gap-1 rounded-lg bg-gray-100 p-0.5 dark:bg-neutral-700">
+                {themeOptions.map((option) => (
+                  <button
+                    key={option.key}
+                    onClick={() => setTheme(option.key)}
+                    className={cn(
+                      "flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium transition-colors",
+                      theme === option.key
+                        ? "bg-white text-gray-900 shadow-sm dark:bg-neutral-600 dark:text-white"
+                        : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200",
+                    )}
+                  >
+                    {option.icon}
+                    <span className="hidden sm:inline">{option.label}</span>
+                  </button>
+                ))}
+              </div>
+            }
           />
         </SettingsGroup>
 

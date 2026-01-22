@@ -34,6 +34,8 @@ interface PetThumbnailProps {
   rounded?: boolean;
   /** 쿼리 비활성화 */
   enabled?: boolean;
+  /** 이미지 채우기 방식 @default "contain" */
+  objectFit?: "contain" | "cover";
 }
 
 /**
@@ -74,6 +76,7 @@ const PetThumbnail = ({
   className = "",
   rounded = false,
   enabled = true,
+  objectFit = "contain",
 }: PetThumbnailProps) => {
   const { data: thumbnail, isLoading } = useQuery({
     queryKey: getPetThumbnailQueryKey(petId ?? ""),
@@ -91,12 +94,18 @@ const PetThumbnail = ({
 
   return (
     <div
-      className={`relative aspect-square w-full overflow-hidden bg-gray-100 ${rounded ? "rounded-full" : "rounded-2xl"} ${className}`}
+      className={`relative aspect-square w-full overflow-hidden bg-gray-100 dark:bg-transparent ${rounded ? "rounded-full" : "rounded-2xl"} ${className}`}
     >
       {isLoading ? (
         <Loading />
       ) : imageUrl ? (
-        <Image src={imageUrl} alt={alt} fill sizes={`${maxSize}px`} className="object-contain" />
+        <Image
+          src={imageUrl}
+          alt={alt}
+          fill
+          sizes={`${maxSize}px`}
+          className={objectFit === "cover" ? "object-cover" : "object-contain"}
+        />
       ) : (
         <div className="flex h-full w-full items-center justify-center opacity-50">
           <Image

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback } from "react";
 import {
   ColumnDef,
   flexRender,
@@ -18,13 +18,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Filters } from "./Filters";
 import useTableStore from "../store/table";
 import { PetDto } from "@repo/api-client";
 import Loading from "@/components/common/Loading";
 import { cn } from "@/lib/utils";
-import { RefreshCcw } from "lucide-react";
-import Link from "next/link";
 import Image from "next/image";
 import { useAppRouter } from "@/hooks/useAppRouter";
 import PetDetailModal from "../[petId]/components/PetDetailModal";
@@ -33,36 +30,28 @@ import { useIsMobile } from "@/hooks/useMobile";
 interface DataTableProps<TData> {
   columns: ColumnDef<TData>[];
   data: TData[];
-  totalCount?: number;
   hasMore?: boolean;
   isFetchingMore?: boolean;
   loaderRefAction: (node?: Element | null) => void;
   hasFilter?: boolean;
   isClickable?: boolean;
-  refetch: () => Promise<unknown> | void;
   isEmpty?: boolean;
 }
 
 export const DataTable = ({
   columns,
   data,
-  totalCount = 0,
   hasMore,
   isFetchingMore,
   loaderRefAction,
-  hasFilter = true,
   isClickable = true,
-  refetch,
   isEmpty = false,
 }: DataTableProps<PetDto>) => {
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isMobile = useIsMobile();
   const { sorting, rowSelection, setSorting, setRowSelection } = useTableStore();
 
   const router = useAppRouter();
-  const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedPet, setSelectedPet] = useState<PetDto | null>(null);
-
-  const isMobile = useIsMobile();
 
   const table = useReactTable({
     data,
@@ -99,59 +88,20 @@ export const DataTable = ({
     [isClickable, isMobile, router],
   );
 
-  useEffect(() => {
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
-  }, []);
-
   return (
     <div className="w-full">
-      <div className="px-2">{hasFilter && <Filters />}</div>
-
-      <div className="mb-2 flex justify-between">
-        <button
-          type="button"
-          aria-label="검색 결과 새로고침"
-          aria-busy={isRefreshing}
-          disabled={isRefreshing}
-          onClick={async () => {
-            if (isRefreshing) return;
-            setIsRefreshing(true);
-            try {
-              await refetch();
-            } finally {
-              timeoutRef.current = setTimeout(() => setIsRefreshing(false), 500);
-            }
-          }}
-          className="flex w-fit items-center gap-1 rounded-lg px-2 py-1 text-[12px] text-gray-600 hover:bg-blue-100 hover:text-blue-700 dark:text-gray-400 dark:hover:bg-blue-900/30 dark:hover:text-blue-400"
-        >
-          검색된 펫・{totalCount}마리
-          <RefreshCcw className={cn("h-3 w-3", isRefreshing && "animate-spin")} />
-        </button>
-
-        <Link href="/pet/deleted">
-          <button
-            type="button"
-            className="h-[32px] cursor-pointer rounded-lg px-3 text-sm text-red-600 underline hover:bg-red-100 dark:text-red-400 dark:hover:bg-red-900/30"
-          >
-            삭제된 펫 보기
-          </button>
-        </Link>
-      </div>
-
       <div className="rounded-md">
-        <Table>
+        <Table className="bg-white dark:bg-gray-900">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
+                  const size = header.getSize();
                   return (
                     <TableHead
                       className="font-[400] text-gray-600 dark:text-gray-400"
                       key={header.id}
+                      style={size ? { width: size, maxWidth: size } : undefined}
                     >
                       {header.isPlaceholder
                         ? null
@@ -177,11 +127,17 @@ export const DataTable = ({
                     )}
                     onClick={(e) => handleRowClick({ e, pet: row.original })}
                   >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </TableCell>
-                    ))}
+                    {row.getVisibleCells().map((cell) => {
+                      const size = cell.column.getSize();
+                      return (
+                        <TableCell
+                          key={cell.id}
+                          style={size ? { width: size, maxWidth: size } : undefined}
+                        >
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </TableCell>
+                      );
+                    })}
                   </TableRow>
                 ))}
                 {/* 무한 스크롤 로더 */}

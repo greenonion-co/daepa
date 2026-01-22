@@ -23,6 +23,7 @@
       </intent-filter>
     </activity>
 
+    <!-- 카카오 로그인 -->
     <activity
       android:name="com.kakao.sdk.auth.AuthCodeHandlerActivity"
       android:exported="true">
@@ -36,4 +37,5 @@
       </intent-filter>
     </activity>
   </application>
+
 </manifest>
