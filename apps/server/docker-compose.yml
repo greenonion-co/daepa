@@ -6,7 +6,7 @@ services:
   # 데이터베이스 서비스 정의
   db:
     image: mysql:8.0 # 사용할 MySQL 이미지 버전 (원하는 안정적인 버전으로 변경 가능)
-    container_name: mysql_backend # 컨테이너 이름 지정
+    container_name: mysql_backend_local # 컨테이너 이름 지정
     restart: always # 컨테이너 종료 시 항상 재시작
     environment: # MySQL 환경 변수 설정 (컨테이너 초기 설정에 사용)
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD} # Docker root 비밀번호 (실제 사용 시 안전한 값으로)
