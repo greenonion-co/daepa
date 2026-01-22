@@ -9,12 +9,14 @@ import { useInView } from "react-intersection-observer";
 
 import { useInfiniteQuery } from "@tanstack/react-query";
 import NotificationItem from "./components/NotificationItem";
+import LoadingScreen from "@/app/loading";
 
 const NotificationsPage = () => {
   const { ref, inView } = useInView();
 
   const {
     data = [],
+    isLoading,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
@@ -43,16 +45,20 @@ const NotificationsPage = () => {
     }
   }, [inView, fetchNextPage, hasNextPage, isFetchingNextPage]);
 
+  if (isLoading) return <LoadingScreen />;
+
+  if (data.length === 0) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <p className="text-muted-foreground">알림이 없습니다.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="flex h-full w-full items-center justify-center">
       <ScrollArea className={"h-full w-full max-w-[500px] py-2"}>
         <div className="flex flex-col items-center gap-2 px-2 pt-0">
-          {data.length === 0 && (
-            <div className="flex h-full items-center justify-center">
-              <p className="text-muted-foreground">알림이 없습니다.</p>
-            </div>
-          )}
-
           <div className="flex w-full flex-col gap-2">
             {data.map((item) => (
               <NotificationItem key={item.id} item={item} />

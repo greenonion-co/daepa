@@ -7,6 +7,7 @@ import { buildR2TransformedUrl, cn } from "@/lib/utils";
 import { IMAGE_TRANSFORMS } from "@/app/constants";
 import { Dialog, DialogOverlay, DialogPortal, DialogTitle } from "@/components/ui/dialog";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
+import { useWebViewZoom } from "@/hooks/useWebViewZoom";
 
 interface ImageViewerProps {
   isOpen: boolean;
@@ -25,6 +26,9 @@ export default function ImageViewer({
 }: ImageViewerProps) {
   const [isXlLoaded, setIsXlLoaded] = useState(false);
   const [needsXl, setNeedsXl] = useState(false);
+
+  // 앱 WebView에서 줌 허용
+  useWebViewZoom(isOpen);
 
   // 모달 닫힐 때 상태 초기화, 열릴 때 needsXl 결정
   useEffect(() => {
@@ -74,7 +78,7 @@ export default function ImageViewer({
             // 900px 미만: 전체화면
             "inset-0",
             // 900px 이상: Dialog 형태
-            "min-[900px]:inset-auto min-[900px]:top-1/2 min-[900px]:left-1/2 min-[900px]:-translate-x-1/2 min-[900px]:-translate-y-1/2",
+            "min-[900px]:inset-auto min-[900px]:left-1/2 min-[900px]:top-1/2 min-[900px]:-translate-x-1/2 min-[900px]:-translate-y-1/2",
             "min-[900px]:h-[80vh] min-[900px]:max-h-[800px] min-[900px]:w-[80vw] min-[900px]:max-w-[1200px]",
             "min-[900px]:overflow-hidden min-[900px]:rounded-2xl",
           )}
@@ -85,7 +89,7 @@ export default function ImageViewer({
           <button
             type="button"
             onClick={onClose}
-            className="absolute top-4 right-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/60 text-neutral-900 transition-colors hover:bg-white/80"
+            className="absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/60 text-neutral-900 transition-colors hover:bg-white/80"
             aria-label="닫기"
           >
             <X className="h-6 w-6" />
