@@ -8,7 +8,6 @@ import {
 } from "@repo/api-client";
 import { DateTime } from "luxon";
 import { EyeOff, Lock, ScanFace } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { useUserStore } from "@/app/(브리더스룸)/store/user";
 import { cn, formatPrice } from "@/lib/utils";
