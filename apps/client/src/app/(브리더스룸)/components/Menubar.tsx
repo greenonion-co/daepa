@@ -22,6 +22,7 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
   const pathname = usePathname();
   const isMobile = useIsMobile();
   const isPetDetail = pathname?.startsWith("/pet/") ?? false;
+  const isFeedPage = pathname === "/";
 
   const { setSearchKeyword } = useSearchKeywordStore();
 
@@ -50,7 +51,7 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
         isNative && "pr-4",
       )}
     >
-      {!isLoggedIn ? (
+      {!isLoggedIn || isFeedPage ? (
         isNative ? (
           !pathname.includes("/register/") && (
             <button
@@ -112,7 +113,7 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
             )}
           </div>
           <div className="flex items-center gap-2">
-            {isNative && pathname === "/pet" && (
+            {isNative && isFeedPage && (
               <div className="w-45">
                 <SearchInput
                   placeholder="이름 또는 설명 검색.."
