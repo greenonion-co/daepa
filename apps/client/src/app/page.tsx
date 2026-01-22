@@ -30,7 +30,7 @@ export default function Home() {
   );
 
   return (
-    <div className="relative w-full" key={filterType}>
+    <div className="relative mx-auto max-w-[480px]" key={filterType}>
       {/* 현재 선택된 리스트만 렌더링 */}
       <PetList filterType={filterType} isVisible={true} />
 
