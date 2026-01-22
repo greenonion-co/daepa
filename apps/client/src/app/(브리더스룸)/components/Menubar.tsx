@@ -18,7 +18,7 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
   const { user } = useUserStore();
   const pathname = usePathname();
   const isMobile = useIsMobile();
-  const { setSearchKeyword } = useSearchKeywordStore();
+  const { searchKeyword, setSearchKeyword } = useSearchKeywordStore();
 
   // 상태 플래그
   const isLoggedIn = !!user?.userId;
@@ -72,6 +72,7 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
     <div className="w-45">
       <SearchInput
         placeholder="이름 또는 설명 검색.."
+        value={searchKeyword}
         onKeyDown={(value) => setSearchKeyword(value)}
       />
     </div>
@@ -154,7 +155,7 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
 
       {/* 우측: 검색 + 알림 + 설정 */}
       <div className="flex items-center gap-2">
-        {isNative && isPetListPage && <SearchInputBox />}
+        {isPetListPage && <SearchInputBox />}
         {isMobile && (
           <>
             <NotificationIcon />

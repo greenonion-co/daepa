@@ -65,7 +65,7 @@ export const DataTable = ({
   const [selectedPet, setSelectedPet] = useState<PetDto | null>(null);
 
   const isMobile = useIsMobile();
-  const { setSearchKeyword } = useSearchKeywordStore();
+  const { searchKeyword, setSearchKeyword } = useSearchKeywordStore();
 
   const table = useReactTable({
     data,
@@ -117,6 +117,7 @@ export const DataTable = ({
         {!isNativeApp() && isMobile && (
           <SearchInput
             placeholder="이름 또는 설명 검색.."
+            value={searchKeyword}
             onKeyDown={(value) => setSearchKeyword(value)}
           />
         )}
