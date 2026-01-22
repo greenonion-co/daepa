@@ -10,6 +10,7 @@ interface TopBarProps {
   showBackButton?: boolean;
   leftComponent?: React.ReactNode;
   rightComponent?: React.ReactNode;
+  onBackPress?: () => void;
 }
 
 const TopBar = ({
@@ -19,13 +20,16 @@ const TopBar = ({
   showBackButton = true,
   leftComponent,
   rightComponent,
+  onBackPress,
 }: TopBarProps) => {
   const navigation = useNavigation();
   const theme = useThemeStore(state => state.theme);
   const colors = themeColors[theme];
 
   const onLeftButtonPress = () => {
-    if (navigation.canGoBack()) {
+    if (onBackPress) {
+      onBackPress();
+    } else if (navigation.canGoBack()) {
       navigation.goBack();
     }
   };

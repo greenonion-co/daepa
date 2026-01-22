@@ -11,7 +11,7 @@
 import RNConfig from 'react-native-config';
 
 const Config = {
-  SERVER_BASE_URL: RNConfig.SERVER_BASE_URL ?? 'https://breedy.kr',
+  SERVER_BASE_URL: RNConfig.SERVER_BASE_URL ?? 'https://api.breedy.kr',
   CLIENT_BASE_URL: RNConfig.CLIENT_BASE_URL ?? 'https://breedy.kr',
   CDN_URL: RNConfig.CDN_URL ?? 'https://media.breedy.kr/cdn-cgi/image',
 };

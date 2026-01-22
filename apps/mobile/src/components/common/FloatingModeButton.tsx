@@ -7,6 +7,7 @@ import {
   StyleSheet,
   Animated,
   Pressable,
+  Platform,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Toast from './Toast';
@@ -105,7 +106,16 @@ export default function FloatingModeButton({
           <Pressable style={styles.backdropPressable} onPress={toggleMenu} />
         </Animated.View>
       )}
-      <View style={[styles.container, { bottom: 80 + insets.bottom }]}>
+      <View
+        style={[
+          styles.container,
+          {
+            bottom:
+              80 +
+              (Platform.OS === 'android' ? insets.bottom + 7 : insets.bottom),
+          },
+        ]}
+      >
         {/* 일반 모드 버튼 */}
         <Animated.View
           style={[styles.menuItem, generalStyle]}
@@ -297,7 +307,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   currentModeLabelText: {
-    fontSize: 10,
+    fontSize: 9,
     color: '#ffffffff',
     fontWeight: 600,
   },

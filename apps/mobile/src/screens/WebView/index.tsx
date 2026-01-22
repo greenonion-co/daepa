@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   ScrollView,
   RefreshControl,
+  Animated,
 } from 'react-native';
 import { WebView, WebViewMessageEvent } from 'react-native-webview';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -45,6 +46,10 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
   const [canGoBack, setCanGoBack] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [isAtTop, setIsAtTop] = useState(true); // WebView 스크롤 위치 추적
+  const [pullToRefreshEnabled, setPullToRefreshEnabled] = useState(false); // 기본 비활성화
+  const [loadingProgress, setLoadingProgress] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
   const insets = useSafeAreaInsets();
 
   const accessToken = useAuthStore(state => state.accessToken);
@@ -176,6 +181,9 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
         case 'SET_THEME':
           setTheme(message.theme);
           break;
+        case 'SET_PULL_TO_REFRESH':
+          setPullToRefreshEnabled(message.enabled);
+          break;
         default:
           break;
       }
@@ -205,6 +213,15 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
     }, [canGoBack]),
   );
 
+  // TopBar 뒤로가기 버튼 처리 (WebView 내부 히스토리 우선)
+  const handleTopBarBackPress = useCallback(() => {
+    if (canGoBack && webViewRef.current) {
+      webViewRef.current.goBack();
+    } else if (navigation.canGoBack()) {
+      navigation.goBack();
+    }
+  }, [canGoBack, navigation]);
+
   // Pull-to-refresh 핸들러
   const onRefresh = useCallback(() => {
     setRefreshing(true);
@@ -213,12 +230,28 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
     setTimeout(() => setRefreshing(false), 1000);
   }, []);
 
+  // WebView 스크롤 위치 추적 (Android)
+  const handleScroll = useCallback((event: any) => {
+    const { contentOffset } = event.nativeEvent;
+    // 스크롤이 최상단(y <= 0)이면 RefreshControl 활성화
+    setIsAtTop(contentOffset.y <= 0);
+  }, []);
+
+  // 로딩 진행률 처리
+  const handleLoadProgress = useCallback(
+    (event: { nativeEvent: { progress: number } }) => {
+      const progress = event.nativeEvent.progress;
+      setLoadingProgress(progress);
+      setIsLoading(progress < 1);
+    },
+    [],
+  );
+
   // 동적 컨테이너 스타일
   const containerStyle = useMemo(
     () => [
       styles.container,
       {
-        // 하단 탭바가 없는 경우(push된 화면)에만 paddingBottom 적용
         paddingTop: insets.top,
         paddingBottom: isPushed ? insets.bottom : 0,
         backgroundColor: colors.background,
@@ -239,11 +272,6 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
     [colors.background],
   );
 
-  const errorUrlStyle = useMemo(
-    () => [styles.errorUrl, { color: theme === 'dark' ? '#999' : '#666' }],
-    [theme],
-  );
-
   const retryButtonStyle = useMemo(
     () => [
       styles.retryButton,
@@ -259,14 +287,30 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
 
   return (
     <View style={containerStyle}>
-      {showTopBar && <TopBar />}
+      {showTopBar && <TopBar onBackPress={handleTopBarBackPress} />}
+      {/* 로딩 Progress Bar */}
+      {isLoading && (
+        <View style={styles.progressBarContainer}>
+          <Animated.View
+            style={[
+              styles.progressBar,
+              {
+                width: `${loadingProgress * 100}%`,
+                backgroundColor: theme === 'dark' ? '#60a5fa' : '#3b82f6',
+              },
+            ]}
+          />
+        </View>
+      )}
       {Platform.OS === 'android' ? (
         <ScrollView
           contentContainerStyle={styles.scrollViewContent}
+          scrollEnabled={isAtTop}
           refreshControl={
             <RefreshControl
               refreshing={refreshing}
               onRefresh={onRefresh}
+              enabled={pullToRefreshEnabled && isAtTop}
               colors={[theme === 'dark' ? '#fff' : '#000']}
               progressBackgroundColor={colors.background}
             />
@@ -284,7 +328,17 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
             onNavigationStateChange={navState => {
               setCanGoBack(navState.canGoBack);
             }}
-            onLoadEnd={() => setRefreshing(false)}
+            onLoadStart={() => {
+              setPullToRefreshEnabled(false);
+              setIsLoading(true);
+              setLoadingProgress(0);
+            }}
+            onLoadEnd={() => {
+              setRefreshing(false);
+              setIsLoading(false);
+            }}
+            onLoadProgress={handleLoadProgress}
+            onScroll={handleScroll}
             // 성능 및 기능 설정
             javaScriptEnabled
             domStorageEnabled
@@ -331,7 +385,16 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
           onNavigationStateChange={navState => {
             setCanGoBack(navState.canGoBack);
           }}
-          onLoadEnd={() => setRefreshing(false)}
+          onLoadStart={() => {
+            setPullToRefreshEnabled(false);
+            setIsLoading(true);
+            setLoadingProgress(0);
+          }}
+          onLoadEnd={() => {
+            setRefreshing(false);
+            setIsLoading(false);
+          }}
+          onLoadProgress={handleLoadProgress}
           // 성능 및 기능 설정
           javaScriptEnabled
           domStorageEnabled
@@ -344,7 +407,7 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
           // 캐시 설정
           cacheEnabled
           // iOS Pull-to-refresh
-          pullToRefreshEnabled
+          pullToRefreshEnabled={pullToRefreshEnabled}
           // 에러 처리
           onError={syntheticEvent => {
             const { nativeEvent } = syntheticEvent;
@@ -368,7 +431,7 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
       {error && (
         <View style={errorContainerStyle}>
           <Text style={styles.errorText}>{error}</Text>
-          <Text style={errorUrlStyle}>URL: {webViewUrl}</Text>
+          {/* <Text style={errorUrlStyle}>URL: {webViewUrl}</Text> */}
           <TouchableOpacity
             style={retryButtonStyle}
             onPress={() => {
@@ -388,6 +451,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+  },
+  progressBarContainer: {
+    height: 2,
+    backgroundColor: 'transparent',
+    width: '100%',
+  },
+  progressBar: {
+    height: '100%',
   },
   scrollViewContent: {
     flex: 1,

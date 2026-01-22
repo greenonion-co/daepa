@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { PetControllerFindAllFilterType } from "@repo/api-client";
 import FloatingToggle from "@/components/common/FloatingToggle";
 import PetList from "@/components/feed/PetList";
+import { requestSetPullToRefresh } from "@/lib/native-bridge";
 
 export default function Home() {
   const [filterType, setFilterType] = useState<PetControllerFindAllFilterType>(
@@ -29,8 +30,12 @@ export default function Home() {
     [filterType],
   );
 
+  useEffect(() => {
+    requestSetPullToRefresh();
+  }, []);
+
   return (
-    <div className="relative w-full" key={filterType}>
+    <div className="relative w-full px-1" key={filterType}>
       {/* 현재 선택된 리스트만 렌더링 */}
       <PetList filterType={filterType} isVisible={true} />
 

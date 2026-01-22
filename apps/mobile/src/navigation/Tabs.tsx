@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { View, StyleSheet, StatusBar, Platform } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Home,
   FileChartColumnIncreasing,
@@ -16,7 +17,6 @@ import { GeneralTabParamList, AdminTabParamList } from '@/types/navigation';
 import { useAuthStore } from '@/store/auth';
 import { useThemeStore, themeColors } from '@/store/theme';
 import { UserDtoRole } from '@repo/api-client';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const GeneralTab = createBottomTabNavigator<GeneralTabParamList>();
 const AdminTab = createBottomTabNavigator<AdminTabParamList>();
@@ -104,6 +104,7 @@ function GeneralTabs() {
           paddingBottom: Platform.OS === 'android' ? insets.bottom : 0,
           height: tabBarHeight,
         },
+        tabBarHideOnKeyboard: true,
       }}
     >
       <GeneralTab.Screen

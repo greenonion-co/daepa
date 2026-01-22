@@ -7,7 +7,7 @@ interface SettingsGroupProps {
 }
 
 export const SettingsGroup = ({ title, className, children }: SettingsGroupProps) => (
-  <div className={cn("mx-2 mb-4", className)}>
+  <div className={cn("mb-4", className)}>
     {title && (
       <h2 className="mb-2 px-4 text-[13px] font-medium uppercase text-gray-500 dark:text-gray-400">
         {title}
