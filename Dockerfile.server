@@ -1,0 +1,186 @@
+# =============================================================================
+# Dockerfile.server - NestJS 서버 프로덕션 빌드
+# =============================================================================
+#
+# 이 Dockerfile은 Turborepo 모노레포 환경에서 NestJS 서버만 빌드합니다.
+# "멀티 스테이지 빌드"를 사용하여 최종 이미지 크기를 최소화합니다.
+#
+# 빌드 흐름:
+#   [pruner] → [installer] → [builder] → [production]
+#       ↓           ↓            ↓             ↓
+#   필요한 것만   의존성       TypeScript    실행 파일만
+#   추출         설치         → JS 컴파일    포함
+#
+# 사용법:
+#   docker build -f Dockerfile.server -t daepa-server .
+#   docker compose up --build
+#
+# =============================================================================
+
+
+# =============================================================================
+# 1단계: PRUNER - 모노레포에서 필요한 패키지만 추출
+# =============================================================================
+# 목적: 전체 모노레포에서 "server" 앱 실행에 필요한 패키지만 분리
+# 왜 필요한가: 모노레포에는 client, mobile, docs 등 불필요한 앱이 많음
+#             turbo prune으로 server와 그 의존성만 추출하여 빌드 효율화
+# =============================================================================
+FROM node:20-alpine AS pruner
+
+# pnpm 글로벌 설치 경로 설정
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+
+# corepack: Node.js 내장 패키지 매니저 관리 도구
+# pnpm@9.0.0: package.json의 "packageManager" 버전과 일치시켜야 함
+RUN corepack enable && corepack prepare pnpm@9.0.0 --activate
+
+# turbo: Turborepo CLI - 모노레포 빌드/의존성 관리 도구
+RUN pnpm add -g turbo
+
+WORKDIR /app
+
+# 전체 모노레포를 복사 (.dockerignore로 불필요한 파일 제외됨)
+# 주의: node_modules는 .dockerignore에서 제외되어 복사되지 않음
+COPY . .
+
+# turbo prune: server 앱과 그 의존성만 추출
+# --docker 플래그: Docker 빌드에 최적화된 출력 구조 생성
+#
+# 생성되는 디렉토리 구조:
+#   /app/out/
+#   ├── json/                    # package.json 파일들만 (소스 코드 없음)
+#   │   ├── package.json         # 루트 package.json
+#   │   └── apps/server/
+#   │       └── package.json     # server의 package.json
+#   ├── full/                    # 전체 소스 코드 (필요한 패키지만)
+#   │   ├── apps/server/         # server 소스 코드
+#   │   ├── packages/...         # server가 의존하는 workspace 패키지
+#   │   └── turbo.json
+#   ├── pnpm-lock.yaml           # 정리된 lockfile
+#   └── pnpm-workspace.yaml      # workspace 설정
+RUN turbo prune server --docker
+
+
+# =============================================================================
+# 2단계: INSTALLER - 의존성 설치 (캐시 최적화)
+# =============================================================================
+# 목적: npm 패키지 의존성 설치
+# 왜 별도 단계인가: Docker 레이어 캐싱 활용
+#   - package.json이 변경되지 않으면 이 단계가 캐시됨
+#   - 소스 코드만 변경되면 의존성 재설치 없이 빠르게 빌드
+# =============================================================================
+FROM node:20-alpine AS installer
+
+RUN corepack enable && corepack prepare pnpm@9.0.0 --activate
+
+WORKDIR /app
+
+# pruner에서 추출한 package.json 파일들 복사
+# json/ 폴더: 소스 코드 없이 package.json만 포함
+# → 의존성 설치에 필요한 최소한의 파일
+COPY --from=pruner /app/out/json/ .
+
+# lockfile 복사: 정확한 버전의 패키지 설치 보장
+COPY --from=pruner /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
+
+# workspace 설정 복사: pnpm이 모노레포 구조를 인식하도록
+COPY --from=pruner /app/out/pnpm-workspace.yaml ./pnpm-workspace.yaml
+
+# 의존성 설치
+# --frozen-lockfile: lockfile과 정확히 일치하는 버전만 설치
+#                    불일치 시 에러 발생 (프로덕션 안정성 보장)
+RUN pnpm install --frozen-lockfile
+
+
+# =============================================================================
+# 3단계: BUILDER - TypeScript 컴파일 (소스 → JavaScript)
+# =============================================================================
+# 목적: TypeScript 소스 코드를 JavaScript로 컴파일
+# 입력: .ts 파일들 (apps/server/src/)
+# 출력: .js 파일들 (apps/server/dist/)
+# =============================================================================
+FROM node:20-alpine AS builder
+
+# pnpm 글로벌 설치 경로 설정
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+
+RUN corepack enable && corepack prepare pnpm@9.0.0 --activate
+
+# turbo: 빌드 명령어 실행에 필요
+RUN pnpm add -g turbo
+
+WORKDIR /app
+
+# installer에서 설치된 node_modules 포함 전체 복사
+# 이제 의존성이 설치된 상태
+COPY --from=installer /app/ .
+
+# pruner에서 추출한 실제 소스 코드 복사
+# full/ 폴더: package.json + 소스 코드 모두 포함
+COPY --from=pruner /app/out/full/ .
+
+# NestJS 애플리케이션 빌드
+# --filter=server: 모노레포에서 server 앱만 빌드
+#
+# 실행되는 명령어 (turbo.json 참조):
+#   1. 의존하는 패키지들 먼저 빌드 (dependsOn: ["^build"])
+#   2. nest build 실행 (apps/server/package.json의 build 스크립트)
+#
+# 결과물: apps/server/dist/ 폴더에 컴파일된 JS 파일 생성
+RUN turbo run build --filter=server
+
+
+# =============================================================================
+# 4단계: PRODUCTION - 최종 실행 이미지
+# =============================================================================
+# 목적: 실행에 필요한 파일만 포함한 가벼운 최종 이미지
+# 포함되는 것: node_modules (프로덕션만), dist/ (컴파일된 JS)
+# 제외되는 것: TypeScript 소스, devDependencies, 빌드 도구
+#
+# 이미지 크기 비교 (예시):
+#   - builder 단계: ~800MB (모든 devDependencies 포함)
+#   - production 단계: ~200MB (실행에 필요한 것만)
+# =============================================================================
+FROM node:20-alpine AS production
+
+RUN corepack enable && corepack prepare pnpm@9.0.0 --activate
+
+WORKDIR /app
+
+# package.json 파일들 복사 (프로덕션 의존성 정보)
+COPY --from=pruner /app/out/json/ .
+COPY --from=pruner /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
+COPY --from=pruner /app/out/pnpm-workspace.yaml ./pnpm-workspace.yaml
+
+# 프로덕션 의존성만 설치
+# --prod: devDependencies 제외 (jest, typescript, eslint 등 불필요)
+# --frozen-lockfile: 정확한 버전 보장
+#
+# 제외되는 devDependencies 예시:
+#   - @nestjs/cli, @nestjs/testing
+#   - typescript, ts-node, ts-jest
+#   - jest, supertest
+#   - eslint, prettier
+RUN pnpm install --prod --frozen-lockfile
+
+# builder에서 컴파일된 JavaScript 파일만 복사
+# 복사되는 것: apps/server/dist/src/main.js 및 관련 JS 파일들
+# 복사되지 않는 것: .ts 소스 파일, test 폴더, 설정 파일들
+COPY --from=builder /app/apps/server/dist ./apps/server/dist
+
+# 작업 디렉토리를 server 앱으로 이동
+# node 실행 시 상대 경로가 올바르게 작동하도록
+WORKDIR /app/apps/server
+
+# 컨테이너가 4000번 포트를 사용함을 문서화
+# 실제 포트 매핑은 docker-compose.yml 또는 docker run -p 에서 설정
+EXPOSE 4000
+
+# 애플리케이션 실행
+# node dist/src/main.js - NestJS 앱 진입점
+#
+# 참고: package.json의 "start:prod" 스크립트와 동일
+#       "start:prod": "node dist/src/main"
+CMD ["node", "dist/src/main"]
