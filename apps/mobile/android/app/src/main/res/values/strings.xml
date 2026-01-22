@@ -1,4 +1,4 @@
 <resources>
-    <string name="app_name">mobile</string>
-    <string name="kakao_app_key">ef37de42bcb32118670fdbf663063b73</string>
+    <string name="app_name">브리디</string>
+    <!-- kakao_app_key는 build.gradle에서 .env의 KAKAO_APP_KEY로 주입됨 -->
 </resources>

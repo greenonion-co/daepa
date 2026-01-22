@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import BootSplash from 'react-native-bootsplash';
 import Navigation from './src/navigation';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { setupApiClient } from './src/utils/apiSetup';
@@ -29,22 +30,25 @@ function App() {
   useEffect(() => {
     if (hydrated) {
       setupApiClient();
+      BootSplash.hide({ fade: true });
     }
   }, [hydrated]);
 
   return (
     <SafeAreaProvider>
       <QueryClientProvider client={queryClient}>
-        {hydrated ? (
-          <View style={styles.container}>
-            <NavigationContainer>
-              <Navigation />
-            </NavigationContainer>
-            <Toast ref={Toast.setRef} />
-            <Loading ref={Loading.setRef} />
-            <Popup ref={Popup.setRef} />
-          </View>
-        ) : null}
+        <View style={styles.container}>
+          {hydrated ? (
+            <>
+              <NavigationContainer>
+                <Navigation />
+              </NavigationContainer>
+              <Toast ref={Toast.setRef} />
+              <Loading ref={Loading.setRef} />
+              <Popup ref={Popup.setRef} />
+            </>
+          ) : null}
+        </View>
       </QueryClientProvider>
     </SafeAreaProvider>
   );
@@ -53,6 +57,7 @@ function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#FFFFFF',
   },
 });
 
