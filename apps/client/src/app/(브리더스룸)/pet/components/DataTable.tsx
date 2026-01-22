@@ -114,7 +114,7 @@ export const DataTable = ({
     <div className="w-full">
       <div className="px-2">
         <Filters />
-        {!isNativeApp() && (
+        {!isNativeApp() && isMobile && (
           <SearchInput
             placeholder="이름 또는 설명 검색.."
             onKeyDown={(value) => setSearchKeyword(value)}

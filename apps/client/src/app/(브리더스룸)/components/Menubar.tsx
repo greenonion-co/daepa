@@ -16,15 +16,20 @@ import { overlay } from "overlay-kit";
 
 const Menubar = ({ unreadCount }: { unreadCount: number }) => {
   const { user } = useUserStore();
-  const isLoggedIn = !!user?.userId;
-  const isNative = isNativeApp();
-
   const pathname = usePathname();
   const isMobile = useIsMobile();
-  const isPetDetail = pathname?.startsWith("/pet/") ?? false;
-  const isFeedPage = pathname === "/";
-
   const { setSearchKeyword } = useSearchKeywordStore();
+
+  // 상태 플래그
+  const isLoggedIn = !!user?.userId;
+  const isNative = isNativeApp();
+  const isRegisterPage = pathname.includes("/register/");
+  const isPetDetailPage = pathname?.startsWith("/pet/") ?? false;
+  const isFeedPage = pathname === "/";
+  const isPetListPage = pathname === "/pet";
+
+  // 게스트 또는 피드 페이지 조건
+  const showGuestOrFeedView = !isLoggedIn || isFeedPage;
 
   const openLoginPromoSheet = () => {
     overlay.open(({ isOpen, close }) => (
@@ -43,106 +48,139 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
     ));
   };
 
+  // 펫 추가 버튼 컴포넌트
+  const AddPetButton = ({ onClick, asLink }: { onClick?: () => void; asLink?: boolean }) => {
+    const content = (
+      <div className="flex w-fit items-center rounded-lg px-2 py-1 hover:bg-gray-100 dark:hover:bg-gray-800">
+        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/50 dark:text-blue-400">
+          <Plus className="h-3 w-3" />
+        </div>
+        <span className="px-2 py-1 text-[14px] font-[500] text-blue-600 dark:text-blue-400">
+          펫 추가하기
+        </span>
+      </div>
+    );
+
+    if (asLink) {
+      return <Link href="/register/1">{content}</Link>;
+    }
+    return <button onClick={onClick}>{content}</button>;
+  };
+
+  // 검색 입력 컴포넌트
+  const SearchInputBox = () => (
+    <div className="w-45">
+      <SearchInput
+        placeholder="이름 또는 설명 검색.."
+        onKeyDown={(value) => setSearchKeyword(value)}
+      />
+    </div>
+  );
+
+  // 알림 아이콘 컴포넌트
+  const NotificationIcon = () => (
+    <Link href="/notifications" className="relative">
+      <Mail className="text-gray-500 dark:text-neutral-400" />
+      {unreadCount > 0 && (
+        <div className="absolute -right-2 -top-2 flex h-[18px] w-[18px] items-center justify-center rounded-full bg-red-500 text-[12px] font-medium text-white">
+          {unreadCount > 9 ? "9+" : unreadCount}
+        </div>
+      )}
+    </Link>
+  );
+
+  // 로고 컴포넌트
+  const Logo = ({ withLink = false }: { withLink?: boolean }) => {
+    const logo = <Image src="/assets/logo.png" alt="브리더스룸 로고" width={60} height={60} />;
+    if (withLink) {
+      return (
+        <Link href="/pet" className="mr-5 font-bold">
+          {logo}
+        </Link>
+      );
+    }
+    return logo;
+  };
+
+  // 네비게이션 링크 컴포넌트
+  const NavLinks = () => (
+    <>
+      {SIDEBAR_ITEMS.map((item) => (
+        <Link
+          key={item.title}
+          href={item.url}
+          className={cn(
+            item.url === pathname
+              ? "font-bold text-black dark:text-white"
+              : "font-semibold text-gray-500 dark:text-gray-400",
+            isMobile ? "px-1.5" : "px-3 py-1.5",
+          )}
+        >
+          {item.title}
+        </Link>
+      ))}
+    </>
+  );
+
+  // 게스트/피드 뷰 렌더링
+  const renderGuestOrFeedView = () => {
+    // 네이티브 앱: 펫 추가 버튼 + 검색
+    if (isNative && !isRegisterPage) {
+      return (
+        <div className="flex flex-1 justify-between">
+          <AddPetButton onClick={openLoginPromoSheet} />
+          {isFeedPage && <SearchInputBox />}
+        </div>
+      );
+    }
+
+    // 웹: 로고만 표시
+    if (!isNative) {
+      return <Logo />;
+    }
+
+    return null;
+  };
+
+  // 로그인 사용자 뷰 렌더링
+  const renderLoggedInView = () => (
+    <>
+      {/* 좌측: 로고 + 네비게이션 + 펫 추가 */}
+      <div className="flex items-center">
+        {!isNative && !isMobile && <Logo withLink />}
+        {!isNative && <NavLinks />}
+        {!isRegisterPage && <AddPetButton asLink />}
+      </div>
+
+      {/* 우측: 검색 + 알림 + 설정 */}
+      <div className="flex items-center gap-2">
+        {isNative && isPetListPage && <SearchInputBox />}
+        {isMobile && (
+          <>
+            <NotificationIcon />
+            {!isNative && (
+              <Link href="/settings">
+                <Settings className="text-gray-500 dark:text-neutral-400" />
+              </Link>
+            )}
+          </>
+        )}
+      </div>
+
+      {/* 유저 버튼 (웹 전용) */}
+      {!isNative && <UserButton />}
+    </>
+  );
+
   return (
     <div
       className={cn(
         "dark:bg-background flex h-[52px] items-center justify-between px-2",
-        isMobile && !isPetDetail && "bg-background sticky left-0 top-0 z-50 w-full",
+        isMobile && !isPetDetailPage && "bg-background sticky left-0 top-0 z-50 w-full",
         isNative && "pr-4",
       )}
     >
-      {!isLoggedIn || isFeedPage ? (
-        isNative ? (
-          !pathname.includes("/register/") && (
-            <button
-              onClick={openLoginPromoSheet}
-              className={cn(
-                "flex w-fit items-center rounded-lg px-2 py-1 hover:bg-gray-100 dark:hover:bg-gray-800",
-              )}
-            >
-              <div className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/50 dark:text-blue-400">
-                <Plus className="h-3 w-3" />
-              </div>
-              <div className="flex items-center gap-1 px-2 py-1 text-[14px] font-[500] text-blue-600 dark:text-blue-400">
-                펫 추가하기
-              </div>
-            </button>
-          )
-        ) : (
-          <Image src="/assets/logo.png" alt="브리더스룸 로고" width={60} height={60} />
-        )
-      ) : (
-        <>
-          <div className="flex items-center">
-            {!isNative && !isMobile && (
-              <Link href="/pet" className="mr-5 font-bold">
-                <Image src="/assets/logo.png" alt="브리더스룸 로고" width={60} height={60} />
-              </Link>
-            )}
-
-            {!isNative &&
-              SIDEBAR_ITEMS.map((item) => (
-                <Link
-                  className={cn(
-                    item.url === pathname
-                      ? "font-bold text-black dark:text-white"
-                      : "font-semibold text-gray-500 dark:text-gray-400",
-                    isMobile ? "px-1.5" : "px-3 py-1.5",
-                  )}
-                  key={item.title}
-                  href={item.url}
-                >
-                  {item.title}
-                </Link>
-              ))}
-            {!pathname.includes("/register/") && (
-              <Link href="/register/1">
-                <div
-                  className={cn(
-                    "flex w-fit items-center rounded-lg px-2 py-1 hover:bg-gray-100 dark:hover:bg-gray-800",
-                  )}
-                >
-                  <div className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/50 dark:text-blue-400">
-                    <Plus className="h-3 w-3" />
-                  </div>
-                  <div className="flex items-center gap-1 px-2 py-1 text-[14px] font-[500] text-blue-600 dark:text-blue-400">
-                    펫 추가하기
-                  </div>
-                </div>
-              </Link>
-            )}
-          </div>
-          <div className="flex items-center gap-2">
-            {isNative && isFeedPage && (
-              <div className="w-45">
-                <SearchInput
-                  placeholder="이름 또는 설명 검색.."
-                  onKeyDown={(value) => setSearchKeyword(value)}
-                />
-              </div>
-            )}
-
-            {isMobile && (
-              <>
-                <Link href="/notifications" className="relative">
-                  <Mail className="text-gray-500 dark:text-neutral-400" />
-                  {unreadCount > 0 && (
-                    <div className="absolute -right-2 -top-2 flex h-[18px] w-[18px] items-center justify-center rounded-full bg-red-500 text-[12px] font-medium text-white">
-                      {unreadCount > 9 ? "9+" : unreadCount}
-                    </div>
-                  )}
-                </Link>
-                {!isNative && (
-                  <Link href="/settings">
-                    <Settings className="text-gray-500 dark:text-neutral-400" />
-                  </Link>
-                )}
-              </>
-            )}
-          </div>
-          {!isNative && <UserButton />}
-        </>
-      )}
+      {showGuestOrFeedView ? renderGuestOrFeedView() : renderLoggedInView()}
     </div>
   );
 };
