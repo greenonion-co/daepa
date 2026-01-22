@@ -155,7 +155,7 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
 
       {/* 우측: 검색 + 알림 + 설정 */}
       <div className="flex items-center gap-2">
-        {isPetListPage && <SearchInputBox />}
+        {!isMobile && isPetListPage && <SearchInputBox />}
         {isMobile && (
           <>
             <NotificationIcon />
