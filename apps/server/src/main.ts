@@ -10,8 +10,17 @@ async function bootstrap() {
   if (!process.env.CLIENT_BASE_URL || !process.env.SERVER_BASE_URL) {
     throw new Error('CLIENT_BASE_URL and SERVER_BASE_URL must be defined');
   }
+
+  // CORS 허용 origin 목록 (localhost + 추가 IP)
+  const corsOrigins = [
+    process.env.CLIENT_BASE_URL,
+    process.env.SERVER_BASE_URL,
+    // 모바일 앱 테스트용 IP (MOBILE_CLIENT_URL 환경변수가 있으면 추가)
+    process.env.MOBILE_CLIENT_URL,
+  ].filter(Boolean) as string[];
+
   app.enableCors({
-    origin: [process.env.CLIENT_BASE_URL, process.env.SERVER_BASE_URL],
+    origin: corsOrigins,
     credentials: true,
   });
 
