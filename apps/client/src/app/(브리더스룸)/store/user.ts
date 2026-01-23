@@ -5,6 +5,7 @@ import { isNativeApp, syncUserToNative } from "@/lib/native-bridge";
 
 interface UserState {
   user: UserProfileDto | null;
+  isLoggedIn: boolean;
 }
 
 interface UserActions {
@@ -17,10 +18,11 @@ type UserStore = UserState & UserActions;
 
 export const useUserStore = create<UserStore>()((set) => ({
   user: null,
+  isLoggedIn: false,
 
   // Actions
-  setUser: (user) => set({ user }),
-  clearUser: () => set({ user: null }),
+  setUser: (user) => set({ user, isLoggedIn: !!user?.userId }),
+  clearUser: () => set({ user: null, isLoggedIn: false }),
 
   // 초기화 함수
   initialize: async () => {
@@ -29,6 +31,7 @@ export const useUserStore = create<UserStore>()((set) => ({
       if (!token) {
         set({
           user: null,
+          isLoggedIn: false,
         });
         return;
       }
@@ -43,6 +46,7 @@ export const useUserStore = create<UserStore>()((set) => ({
 
       set({
         user: userData,
+        isLoggedIn: !!userData?.userId,
       });
 
       // 네이티브 앱인 경우 유저 데이터 동기화

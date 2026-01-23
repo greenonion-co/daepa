@@ -7,8 +7,7 @@ import { useUserStore } from "../store/user";
 type SIDEBAR_TYPE = "알림" | "최근 본" | "설정";
 
 const Sidebar = ({ unreadCount }: { unreadCount: number }) => {
-  const { user } = useUserStore();
-  const isLoggedIn = !!user?.userId;
+  const { isLoggedIn } = useUserStore();
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [type, setType] = useState<SIDEBAR_TYPE>(isLoggedIn ? "알림" : "최근 본");
 

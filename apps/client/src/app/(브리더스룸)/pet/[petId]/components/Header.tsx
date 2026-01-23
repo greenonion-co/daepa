@@ -39,8 +39,7 @@ const Header = ({
   onTabClick = () => {},
 }: HeaderProps) => {
   const isMyPet = useIsMyPet(pet.owner.userId);
-  const { user } = useUserStore();
-  const isLoggedIn = !!user?.userId;
+  const { user, isLoggedIn } = useUserStore();
   const [isScrolled, setIsScrolled] = useState(size === "small");
   const [isPromoSheetOpen, setIsPromoSheetOpen] = useState(false);
 

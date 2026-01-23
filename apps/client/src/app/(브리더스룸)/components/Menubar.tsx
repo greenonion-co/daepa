@@ -15,13 +15,12 @@ import LoginPromoSheet from "./LoginPromoSheet";
 import { overlay } from "overlay-kit";
 
 const Menubar = ({ unreadCount }: { unreadCount: number }) => {
-  const { user } = useUserStore();
+  const { isLoggedIn } = useUserStore();
   const pathname = usePathname();
   const isMobile = useIsMobile();
   const { searchKeyword, setSearchKeyword } = useSearchKeywordStore();
 
   // 상태 플래그
-  const isLoggedIn = !!user?.userId;
   const isNative = isNativeApp();
   const isRegisterPage = pathname.includes("/register/");
   const isPetDetailPage = pathname?.startsWith("/pet/") ?? false;
