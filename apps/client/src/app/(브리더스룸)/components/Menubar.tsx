@@ -141,11 +141,11 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
   );
 
   // 로그인 사용자 뷰 렌더링
-  const renderLoggedInView = () => (
+  const renderMemberView = () => (
     <>
       {/* 좌측: 로고 + 네비게이션 + 펫 추가 */}
       <div className="flex items-center">
-        {!isNative && !isMobile && <Logo withLink />}
+        <Logo withLink />
         {!isNative && <NavLinks />}
         {!isRegisterPage && <AddPetButton asLink />}
       </div>
@@ -175,7 +175,7 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
         isNative && "pr-4",
       )}
     >
-      {isLoggedIn ? renderLoggedInView() : renderGuestView()}
+      {isLoggedIn ? renderMemberView() : renderGuestView()}
     </div>
   );
 };
