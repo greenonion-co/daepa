@@ -31,13 +31,13 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
       <LoginPromoSheet
         isOpen={isOpen}
         onOpenChange={(open) => !open && close()}
-        title="펫을 등록해보세요"
+        title="내 펫을 등록해보세요"
         description={
           <>
-            <span className="font-semibold text-blue-700">내 펫을 등록</span>하고
+            <span className="text-gray-800">펫을 등록</span>하면
             <br />
-            <span className="font-semibold text-gray-800">브리딩・분양・혈통 관리</span>를
-            시작하세요
+            <span className="font-semibold text-blue-700">브리딩・혈통 인증・분양 관리</span>가
+            가능해요!
           </>
         }
       />
