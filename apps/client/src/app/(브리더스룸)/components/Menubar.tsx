@@ -89,7 +89,7 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
 
   // 로고 컴포넌트
   const Logo = ({ withLink = false }: { withLink?: boolean }) => {
-    const logo = <Image src="/assets/logo.png" alt="브리더스룸 로고" width={60} height={60} />;
+    const logo = <Image src="/assets/logo.png" alt="브리디 로그인 로고" width={60} height={60} />;
     if (withLink) {
       return (
         <Link href="/" className="mr-5 font-bold">
