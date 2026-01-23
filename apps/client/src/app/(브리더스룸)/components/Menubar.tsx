@@ -5,7 +5,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Mail, Plus, Settings } from "lucide-react";
 import { useSearchKeywordStore } from "../store/searchKeyword";
-import LoginButton from "./LoginButton";
 import { useIsMobile } from "@/hooks/useMobile";
 import SearchInput from "./SearchInput";
 import Image from "next/image";
@@ -32,12 +31,13 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
       <LoginPromoSheet
         isOpen={isOpen}
         onOpenChange={(open) => !open && close()}
-        title="내 펫을 등록해보세요"
+        title="펫을 등록해보세요"
         description={
           <>
-            <span className="font-semibold text-blue-700">펫 등록</span>하고
+            <span className="font-semibold text-blue-700">내 펫을 등록</span>하고
             <br />
-            <span className="font-semibold text-gray-800">혈통 관리</span>를 시작하세요
+            <span className="font-semibold text-gray-800">브리딩・분양・혈통 관리</span>를
+            시작하세요
           </>
         }
       />
@@ -120,30 +120,12 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
   );
 
   // 게스트/피드 뷰 렌더링
-  const renderGuestOrFeedView = () => {
-    // 네이티브 앱: 펫 추가 버튼 + 검색
-    if (isNative && !isRegisterPage) {
-      return (
-        <div className="flex flex-1 justify-between">
-          <AddPetButton onClick={openLoginPromoSheet} />
-          {/* 로그인된 상태에만 검색창 제공 */}
-          {isFeedPage && isLoggedIn && <SearchInputBox />}
-        </div>
-      );
-    }
-
-    // 웹: 로고만 표시
-    if (!isNative) {
-      return (
-        <>
-          <Logo withLink />
-          {isFeedPage && <LoginButton />}
-        </>
-      );
-    }
-
-    return null;
-  };
+  const renderGuestView = () => (
+    <>
+      <Logo withLink />
+      {isFeedPage && <AddPetButton onClick={openLoginPromoSheet} />}
+    </>
+  );
 
   // 로그인 사용자 뷰 렌더링
   const renderLoggedInView = () => (
@@ -180,7 +162,7 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
         isNative && "pr-4",
       )}
     >
-      {isLoggedIn ? renderLoggedInView() : renderGuestOrFeedView()}
+      {isLoggedIn ? renderLoggedInView() : renderGuestView()}
     </div>
   );
 };
