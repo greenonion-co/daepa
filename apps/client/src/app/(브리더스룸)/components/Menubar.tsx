@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Mail, Plus, Settings } from "lucide-react";
 import { useSearchKeywordStore } from "../store/searchKeyword";
-import UserButton from "./UserButton";
+import LoginButton from "./LoginButton";
 import { useIsMobile } from "@/hooks/useMobile";
 import SearchInput from "./SearchInput";
 import Image from "next/image";
@@ -27,9 +27,6 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
   const isPetDetailPage = pathname?.startsWith("/pet/") ?? false;
   const isFeedPage = pathname === "/";
   const isPetListPage = pathname === "/pet";
-
-  // 게스트 또는 피드 페이지 조건
-  const showGuestOrFeedView = !isLoggedIn || isFeedPage;
 
   const openLoginPromoSheet = () => {
     overlay.open(({ isOpen, close }) => (
@@ -95,7 +92,7 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
     const logo = <Image src="/assets/logo.png" alt="브리더스룸 로고" width={60} height={60} />;
     if (withLink) {
       return (
-        <Link href="/pet" className="mr-5 font-bold">
+        <Link href="/" className="mr-5 font-bold">
           {logo}
         </Link>
       );
@@ -130,14 +127,20 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
       return (
         <div className="flex flex-1 justify-between">
           <AddPetButton onClick={openLoginPromoSheet} />
-          {isFeedPage && <SearchInputBox />}
+          {/* 로그인된 상태에만 검색창 제공 */}
+          {isFeedPage && isLoggedIn && <SearchInputBox />}
         </div>
       );
     }
 
     // 웹: 로고만 표시
     if (!isNative) {
-      return <Logo />;
+      return (
+        <>
+          <Logo withLink />
+          {isFeedPage && <LoginButton />}
+        </>
+      );
     }
 
     return null;
@@ -155,7 +158,7 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
 
       {/* 우측: 검색 + 알림 + 설정 */}
       <div className="flex items-center gap-2">
-        {!isMobile && isPetListPage && <SearchInputBox />}
+        {!isMobile && (isFeedPage || isPetListPage) && <SearchInputBox />}
         {isMobile && (
           <>
             <NotificationIcon />
@@ -167,9 +170,6 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
           </>
         )}
       </div>
-
-      {/* 유저 버튼 (웹 전용) */}
-      {!isNative && <UserButton />}
     </>
   );
 
@@ -181,7 +181,7 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
         isNative && "pr-4",
       )}
     >
-      {showGuestOrFeedView ? renderGuestOrFeedView() : renderLoggedInView()}
+      {isLoggedIn ? renderLoggedInView() : renderGuestOrFeedView()}
     </div>
   );
 };
