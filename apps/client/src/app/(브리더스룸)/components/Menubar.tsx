@@ -89,6 +89,19 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
   // 로고 컴포넌트
   const Logo = ({ withLink = false }: { withLink?: boolean }) => {
     const logo = <Image src="/assets/logo.png" alt="브리디 로그인 로고" width={60} height={60} />;
+
+    if (isNative && withLink) {
+      return (
+        <button
+          type="button"
+          className="mr-5 font-bold"
+          onClick={() => window.scrollTo({ top: 0, behavior: "instant" })}
+        >
+          {logo}
+        </button>
+      );
+    }
+
     if (withLink) {
       return (
         <Link href="/" className="mr-5 font-bold">
@@ -158,7 +171,7 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
     <div
       className={cn(
         "dark:bg-background flex h-[52px] items-center justify-between px-2",
-        isMobile && !isPetDetailPage && "bg-background sticky left-0 top-0 z-50 w-full",
+        !isPetDetailPage && "bg-background sticky left-0 top-0 z-50 w-full",
         isNative && "pr-4",
       )}
     >
