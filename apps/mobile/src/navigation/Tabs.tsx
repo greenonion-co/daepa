@@ -104,7 +104,7 @@ function SettingsScreen() {
 
 // 일반 모드 탭
 function GeneralTabs() {
-  const { isLoggedIn } = useAuthStore();
+  const isLoggedIn = useAuthStore(state => !!state.user);
   const theme = useThemeStore(state => state.theme);
   const colors = themeColors[theme];
 
