@@ -27,7 +27,7 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
 
   // 검색 입력 컴포넌트
   const SearchInputBox = () => (
-    <div className="w-45">
+    <div className="w-44">
       <SearchInput
         placeholder="개체 이름 검색"
         value={searchKeyword}
