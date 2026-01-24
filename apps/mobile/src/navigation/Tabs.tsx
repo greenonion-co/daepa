@@ -60,6 +60,8 @@ function AddPetButton({ onPress }: { onPress: () => void }) {
       onPress={onPress}
       activeOpacity={0.8}
       style={styles.addButtonContainer}
+      accessibilityRole="button"
+      accessibilityLabel="펫 추가하기"
     >
       <View style={styles.addButtonInner}>
         <Plus size={28} color="#fff" strokeWidth={2.5} />
