@@ -2,8 +2,7 @@ import { Plus } from "lucide-react";
 import Link from "next/link";
 import { useUserStore } from "@/app/(브리더스룸)/store/user";
 import { useIsMobile } from "@/hooks/useMobile";
-import { overlay } from "overlay-kit";
-import LoginPromoSheet from "@/app/(브리더스룸)/components/LoginPromoSheet";
+import { openLoginPromoSheet } from "@/app/(브리더스룸)/components/LoginPromoSheet";
 
 const FloatingButton = () => {
   return (
@@ -23,24 +22,6 @@ const TextButton = () => (
     </span>
   </div>
 );
-
-const openLoginPromoSheet = () => {
-  overlay.open(({ isOpen, close }) => (
-    <LoginPromoSheet
-      isOpen={isOpen}
-      onOpenChange={(open) => !open && close()}
-      title="내 펫을 등록해보세요"
-      description={
-        <>
-          <span className="text-gray-800">펫을 등록</span>하면
-          <br />
-          <span className="font-semibold text-blue-700">브리딩・혈통 인증・분양 관리</span>가
-          가능해요!
-        </>
-      }
-    />
-  ));
-};
 
 const AddPetButton = () => {
   const { isLoggedIn } = useUserStore();

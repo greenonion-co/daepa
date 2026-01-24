@@ -1,12 +1,16 @@
 import React, { useState, useCallback } from 'react';
-import { View, StyleSheet, StatusBar } from 'react-native';
+import { View, StyleSheet, StatusBar, TouchableOpacity } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import {
   Home,
   FileChartColumnIncreasing,
   Calendar,
   ContactRound,
+  Plus,
 } from 'lucide-react-native';
+import { useNavigation } from '@react-navigation/native';
+import type { StackNavigationProp } from '@react-navigation/stack';
+import type { RootStackParamList } from '@/types/navigation';
 import WebViewScreen from '../screens/WebView';
 import GuestSettingsScreen from '../screens/Settings/GuestSettings';
 import FloatingModeButton, {
@@ -16,6 +20,7 @@ import { GeneralTabParamList, AdminTabParamList } from '@/types/navigation';
 import { useAuthStore } from '@/store/auth';
 import { useThemeStore, themeColors } from '@/store/theme';
 import { UserDtoRole } from '@repo/api-client';
+import { openLoginPromoSheet } from '@/components/common/LoginPromoSheet';
 
 const GeneralTab = createBottomTabNavigator<GeneralTabParamList>();
 const AdminTab = createBottomTabNavigator<AdminTabParamList>();
@@ -35,6 +40,26 @@ const EggIcon = ({ color }: { color: string }) => (
 const HeartIcon = ({ color }: { color: string }) => (
   <FileChartColumnIncreasing size={TAB_ICON_SIZE} color={color} />
 );
+
+// 빈 컴포넌트 (+ 버튼용, 실제로 렌더링되지 않음)
+function EmptyScreen() {
+  return null;
+}
+
+// 중앙 + 버튼 컴포넌트
+function AddPetButton({ onPress }: { onPress: () => void }) {
+  return (
+    <TouchableOpacity
+      onPress={onPress}
+      activeOpacity={0.8}
+      style={styles.addButtonContainer}
+    >
+      <View style={styles.addButtonInner}>
+        <Plus size={28} color="#fff" strokeWidth={2.5} />
+      </View>
+    </TouchableOpacity>
+  );
+}
 
 // WebView 래퍼 컴포넌트들
 function HomeWebView() {
@@ -70,8 +95,21 @@ function SettingsScreen() {
 
 // 일반 모드 탭
 function GeneralTabs() {
+  const { isLoggedIn } = useAuthStore();
   const theme = useThemeStore(state => state.theme);
   const colors = themeColors[theme];
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+
+  const handleAddPet = useCallback(
+    (loggedIn: boolean) => {
+      if (loggedIn) {
+        navigation.navigate('Main', { path: '/register/1' });
+      } else {
+        openLoginPromoSheet();
+      }
+    },
+    [navigation],
+  );
 
   return (
     <GeneralTab.Navigator
@@ -102,6 +140,16 @@ function GeneralTabs() {
         options={{
           tabBarLabel: '홈',
           tabBarIcon: HomeIcon,
+        }}
+      />
+      <GeneralTab.Screen
+        name="AddPet"
+        component={EmptyScreen}
+        options={{
+          tabBarLabel: '',
+          tabBarButton: () => (
+            <AddPetButton onPress={() => handleAddPet(isLoggedIn)} />
+          ),
         }}
       />
       <GeneralTab.Screen
@@ -217,5 +265,24 @@ export default function Tabs() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  addButtonContainer: {
+    flex: 1,
+    top: -15,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  addButtonInner: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: '#3B82F6',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#3B82F6',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
   },
 });

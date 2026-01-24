@@ -6,6 +6,7 @@ import { UserDto } from '@repo/api-client';
 type AuthState = {
   accessToken: string | null;
   user: UserDto | null;
+  isLoggedIn: boolean;
   setAccessToken: (token: string | null) => void;
   setUser: (user: UserDto | null) => void;
   clear: () => void;
@@ -16,9 +17,10 @@ export const useAuthStore = create<AuthState>()(
     set => ({
       accessToken: null,
       user: null,
+      isLoggedIn: false,
       setAccessToken: token => set({ accessToken: token }),
-      setUser: user => set({ user }),
-      clear: () => set({ accessToken: null, user: null }),
+      setUser: user => set({ user, isLoggedIn: !!user }),
+      clear: () => set({ accessToken: null, user: null, isLoggedIn: false }),
     }),
     {
       name: 'auth-store',

@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { isNativeApp, navigate } from "@/lib/native-bridge";
 import { useRouter } from "next/navigation";
+import { overlay } from "overlay-kit";
 
 interface LoginPromoSheetProps {
   isOpen: boolean;
@@ -27,7 +28,7 @@ const LoginPromoSheet = ({ isOpen, onOpenChange, title, description }: LoginProm
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
       <SheetContent
         side="bottom"
-        className="mx-5 mb-5 max-w-[700px] rounded-3xl px-6 pt-6 pb-8 sm:mx-auto"
+        className="mx-5 mb-5 max-w-[700px] rounded-3xl px-6 pb-8 pt-6 sm:mx-auto"
       >
         <SheetHeader className="flex items-center">
           <Image
@@ -67,6 +68,24 @@ const LoginPromoSheet = ({ isOpen, onOpenChange, title, description }: LoginProm
       </SheetContent>
     </Sheet>
   );
+};
+
+export const openLoginPromoSheet = () => {
+  overlay.open(({ isOpen, close }) => (
+    <LoginPromoSheet
+      isOpen={isOpen}
+      onOpenChange={(open) => !open && close()}
+      title="내 펫을 등록해보세요"
+      description={
+        <>
+          <span className="text-gray-800">펫을 등록</span>하면
+          <br />
+          <span className="font-semibold text-blue-700">브리딩・혈통 인증・분양 관리</span>가
+          가능해요!
+        </>
+      }
+    />
+  ));
 };
 
 export default LoginPromoSheet;

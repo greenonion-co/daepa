@@ -20,6 +20,7 @@ export type WebViewParams = {
 // Tab Navigator params (일반 모드)
 export type GeneralTabParamList = {
   Home: WebViewParams | undefined;
+  AddPet: undefined;
   Settings: undefined;
 };
 
