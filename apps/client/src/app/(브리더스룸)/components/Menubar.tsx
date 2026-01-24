@@ -3,15 +3,14 @@ import { SIDEBAR_ITEMS } from "../constants";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Mail, Plus, Settings } from "lucide-react";
+import { Mail, Settings } from "lucide-react";
 import { useSearchKeywordStore } from "../store/searchKeyword";
 import { useIsMobile } from "@/hooks/useMobile";
 import SearchInput from "./SearchInput";
 import Image from "next/image";
 import { useUserStore } from "../store/user";
 import { isNativeApp } from "@/lib/native-bridge";
-import LoginPromoSheet from "./LoginPromoSheet";
-import { overlay } from "overlay-kit";
+import AddPetButton from "@/app/(브리더스룸)/components/AddPetButton";
 
 const Menubar = ({ unreadCount }: { unreadCount: number }) => {
   const { isLoggedIn } = useUserStore();
@@ -25,43 +24,6 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
   const isPetDetailPage = pathname?.startsWith("/pet/") ?? false;
   const isFeedPage = pathname === "/";
   const isPetListPage = pathname === "/pet";
-
-  const openLoginPromoSheet = () => {
-    overlay.open(({ isOpen, close }) => (
-      <LoginPromoSheet
-        isOpen={isOpen}
-        onOpenChange={(open) => !open && close()}
-        title="내 펫을 등록해보세요"
-        description={
-          <>
-            <span className="text-gray-800">펫을 등록</span>하면
-            <br />
-            <span className="font-semibold text-blue-700">브리딩・혈통 인증・분양 관리</span>가
-            가능해요!
-          </>
-        }
-      />
-    ));
-  };
-
-  // 펫 추가 버튼 컴포넌트
-  const AddPetButton = ({ onClick, asLink }: { onClick?: () => void; asLink?: boolean }) => {
-    const content = (
-      <div className="flex w-fit items-center rounded-lg px-2 py-1 hover:bg-gray-100 dark:hover:bg-gray-800">
-        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/50 dark:text-blue-400">
-          <Plus className="h-3 w-3" />
-        </div>
-        <span className="px-2 py-1 text-[14px] font-[500] text-blue-600 dark:text-blue-400">
-          펫 추가하기
-        </span>
-      </div>
-    );
-
-    if (asLink) {
-      return <Link href="/register/1">{content}</Link>;
-    }
-    return <button onClick={onClick}>{content}</button>;
-  };
 
   // 검색 입력 컴포넌트
   const SearchInputBox = () => (
@@ -109,6 +71,7 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
         </Link>
       );
     }
+
     return logo;
   };
 
@@ -136,7 +99,8 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
   const renderGuestView = () => (
     <>
       <Logo withLink />
-      {isFeedPage && <AddPetButton onClick={openLoginPromoSheet} />}
+      {/* 웹에서만 메뉴바에 렌더링 */}
+      {!isNative && !isMobile && !isRegisterPage && <AddPetButton />}
     </>
   );
 
@@ -147,7 +111,8 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
       <div className="flex items-center">
         <Logo withLink />
         {!isNative && <NavLinks />}
-        {!isRegisterPage && <AddPetButton asLink />}
+        {/* 웹에서만 메뉴바에 렌더링 */}
+        {!isNative && !isMobile && !isRegisterPage && <AddPetButton />}
       </div>
 
       {/* 우측: 검색 + 알림 + 설정 */}

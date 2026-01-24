@@ -9,6 +9,7 @@ import { useIsMobile } from "@/hooks/useMobile";
 import { useQuery } from "@tanstack/react-query";
 import { userNotificationControllerGetUnreadCount } from "@repo/api-client";
 import { isNativeApp } from "@/lib/native-bridge";
+import AddPetButton from "@/app/(브리더스룸)/components/AddPetButton";
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const { user } = useUserStore();
@@ -35,6 +36,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         {!hasNativeTopBar && <Menubar unreadCount={unreadCount} />}
         {children}
       </div>
+      {/* 모바일 웹 */}
+      {!isNativeApp() && isMobile && <AddPetButton />}
+      {/* 웹 */}
       {!isNativeApp() && !isMobile && <Sidebar unreadCount={unreadCount} />}
     </main>
   );
