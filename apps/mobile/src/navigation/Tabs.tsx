@@ -1,6 +1,13 @@
 import React, { useState, useCallback } from 'react';
-import { View, StyleSheet, StatusBar, TouchableOpacity } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  StatusBar,
+  TouchableOpacity,
+  Platform,
+} from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Home,
   FileChartColumnIncreasing,
@@ -98,6 +105,7 @@ function GeneralTabs() {
   const { isLoggedIn } = useAuthStore();
   const theme = useThemeStore(state => state.theme);
   const colors = themeColors[theme];
+
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
 
   const handleAddPet = useCallback(
@@ -110,6 +118,10 @@ function GeneralTabs() {
     },
     [navigation],
   );
+
+  const insets = useSafeAreaInsets();
+
+  const tabBarHeight = Platform.OS === 'android' ? 60 + insets.bottom : 80;
 
   return (
     <GeneralTab.Navigator
@@ -125,13 +137,20 @@ function GeneralTabs() {
           marginBottom: 5,
         },
         tabBarStyle: {
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
           backgroundColor: colors.tabBar,
           borderTopLeftRadius: 20,
           borderTopRightRadius: 20,
           borderWidth: 1,
           borderBottomWidth: 0,
           borderColor: colors.tabBarBorder,
+          paddingBottom: Platform.OS === 'android' ? insets.bottom : 0,
+          height: tabBarHeight,
         },
+        tabBarHideOnKeyboard: true,
       }}
     >
       <GeneralTab.Screen
@@ -168,6 +187,9 @@ function GeneralTabs() {
 function AdminTabs() {
   const theme = useThemeStore(state => state.theme);
   const colors = themeColors[theme];
+  const insets = useSafeAreaInsets();
+
+  const tabBarHeight = Platform.OS === 'android' ? 60 + insets.bottom : 80;
 
   return (
     <AdminTab.Navigator
@@ -183,12 +205,22 @@ function AdminTabs() {
           marginBottom: 5,
         },
         tabBarStyle: {
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
           backgroundColor: colors.tabBar,
           borderTopLeftRadius: 25,
           borderTopRightRadius: 25,
           borderWidth: 1,
           borderBottomWidth: 0,
           borderColor: colors.tabBarBorder,
+          paddingBottom: Platform.OS === 'android' ? insets.bottom : 0,
+          height: tabBarHeight,
+        },
+        tabBarHideOnKeyboard: true,
+        sceneStyle: {
+          backgroundColor: theme === 'dark' ? '#111827' : '#f3f4f6',
         },
       }}
     >

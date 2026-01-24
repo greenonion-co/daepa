@@ -15,6 +15,7 @@ interface SingleSelectProps {
   showTitle?: boolean;
   showSelectAll?: boolean; // 전체 선택 항목 표시
   saveASAP?: boolean; // 즉시 반영
+  variant?: "default" | "light";
 }
 
 const SingleSelect = ({
@@ -25,7 +26,9 @@ const SingleSelect = ({
   showTitle = false,
   showSelectAll = false,
   saveASAP = false,
+  variant = "default",
 }: SingleSelectProps) => {
+  const isLight = variant === "light";
   const isMobile = useIsMobile();
   const [isOpen, setIsOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<any>(initialItem);
@@ -92,7 +95,9 @@ const SingleSelect = ({
           "flex h-[32px] w-fit cursor-pointer items-center gap-1 rounded-lg px-2 py-1 text-[14px] font-[500]",
           initialItem
             ? "bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400"
-            : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200",
+            : isLight
+              ? "bg-white text-gray-800 shadow-sm dark:bg-gray-700 dark:text-gray-200"
+              : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200",
           disabled &&
             "cursor-not-allowed bg-white text-black dark:bg-neutral-900 dark:text-gray-200",
         )}
@@ -143,7 +148,7 @@ const SingleSelect = ({
           )}
         >
           <div className="mb-2 font-[500] dark:text-gray-200">{SELECTOR_CONFIGS[type].title}</div>
-          <div className="mb-2">
+          <div className="mb-2 max-h-[240px] overflow-y-auto">
             {showSelectAll && (
               <SelectItem
                 item={{

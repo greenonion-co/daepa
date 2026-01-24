@@ -34,7 +34,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     >
       <div className={cn("w-full", !isMobile && "max-w-[calc(100%-55px)]")}>
         {!hasNativeTopBar && <Menubar unreadCount={unreadCount} />}
-        {children}
+        <div className={cn(isNativeApp() && "pb-[80px]")}>{children}</div>
       </div>
       {/* 모바일 웹 */}
       {!isNativeApp() && isMobile && <AddPetButton />}

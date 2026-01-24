@@ -5,7 +5,8 @@ import type { Theme } from "@/types/theme";
 import { isNativeApp, requestSetTheme } from "@/lib/native-bridge";
 
 interface ThemeContextType {
-  theme: Theme;
+  theme: Theme; // 사용자 설정값 (light/dark/system)
+  resolvedTheme: "light" | "dark"; // 실제 적용되는 테마
   setTheme: (theme: Theme) => void;
   toggleTheme: () => void;
 }
@@ -16,29 +17,50 @@ interface ThemeProviderProps {
   children: React.ReactNode;
 }
 
+// 시스템 테마 가져오기
+const getSystemTheme = (): "light" | "dark" => {
+  if (typeof window === "undefined") return "light";
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+};
+
 export function ThemeProvider({ children }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>("light");
+  const [theme, setTheme] = useState<Theme>("system");
+  const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">("light");
   const [mounted, setMounted] = useState(false);
+
+  // 실제 적용할 테마 계산
+  const computeResolvedTheme = (t: Theme): "light" | "dark" => {
+    if (t === "system") {
+      return getSystemTheme();
+    }
+    return t;
+  };
 
   useEffect(() => {
     setMounted(true);
 
     // 로컬 스토리지에서 저장된 테마 확인
-    const savedTheme = localStorage.getItem("theme") as Theme;
+    const savedTheme = localStorage.getItem("theme") as Theme | null;
 
-    if (savedTheme) {
+    if (savedTheme && (savedTheme === "light" || savedTheme === "dark" || savedTheme === "system")) {
       setTheme(savedTheme);
+      setResolvedTheme(computeResolvedTheme(savedTheme));
     } else {
-      // 시스템 다크모드 감지
-      const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-      setTheme(mediaQuery.matches ? "dark" : "light");
+      // 저장된 테마가 없으면 system 기본값
+      setTheme("system");
+      setResolvedTheme(getSystemTheme());
     }
+  }, []);
 
-    // 시스템 테마 변경 감지 리스너 (로컬 스토리지에 저장된 테마가 없을 때만)
+  // 시스템 테마 변경 감지 리스너
+  useEffect(() => {
+    if (!mounted) return;
+
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-    const handleChange = (e: MediaQueryListEvent) => {
-      if (!localStorage.getItem("theme")) {
-        setTheme(e.matches ? "dark" : "light");
+    const handleChange = () => {
+      // system 모드일 때만 시스템 테마 변경에 반응
+      if (theme === "system") {
+        setResolvedTheme(getSystemTheme());
       }
     };
 
@@ -47,30 +69,27 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     return () => {
       mediaQuery.removeEventListener("change", handleChange);
     };
-  }, []);
+  }, [mounted, theme]);
 
+  // resolvedTheme 변경 시 DOM과 네이티브 앱에 적용
   useEffect(() => {
     if (!mounted) return;
-    document.documentElement.classList.toggle("dark", theme === "dark");
+    document.documentElement.classList.toggle("dark", resolvedTheme === "dark");
 
     // 네이티브 앱에 테마 동기화
     if (isNativeApp()) {
-      requestSetTheme(theme);
+      requestSetTheme(resolvedTheme);
     }
-  }, [theme, mounted]);
+  }, [resolvedTheme, mounted]);
 
   const handleSetTheme = (newTheme: Theme) => {
     setTheme(newTheme);
+    setResolvedTheme(computeResolvedTheme(newTheme));
     localStorage.setItem("theme", newTheme);
-
-    // 네이티브 앱에 테마 변경 알림
-    if (isNativeApp()) {
-      requestSetTheme(newTheme);
-    }
   };
 
   const toggleTheme = () => {
-    const newTheme = theme === "light" ? "dark" : "light";
+    const newTheme = resolvedTheme === "light" ? "dark" : "light";
     handleSetTheme(newTheme);
   };
 
@@ -80,7 +99,7 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
   }
 
   return (
-    <ThemeContext.Provider value={{ theme, setTheme: handleSetTheme, toggleTheme }}>
+    <ThemeContext.Provider value={{ theme, resolvedTheme, setTheme: handleSetTheme, toggleTheme }}>
       {children}
     </ThemeContext.Provider>
   );

@@ -12,14 +12,28 @@ export const injectedJsForNoZoom = `
     }
     meta.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
 
-    // 터치 줌 방지
+    // 줌 허용/비허용 전환 함수
+    window.__setAllowZoom = function(allow) {
+      window.__allowZoom = allow;
+      if (meta) {
+        if (allow) {
+          meta.content = 'width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0, user-scalable=yes';
+        } else {
+          meta.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
+        }
+      }
+    };
+
+    // 터치 줌 방지 (window.__allowZoom이 true면 허용)
     document.addEventListener('gesturestart', function(e) {
+      if (window.__allowZoom) return;
       e.preventDefault();
     }, { passive: false });
 
-    // 더블탭 줌 방지
+    // 더블탭 줌 방지 (window.__allowZoom이 true면 허용)
     var lastTouchEnd = 0;
     document.addEventListener('touchend', function(e) {
+      if (window.__allowZoom) return;
       var now = Date.now();
       if (now - lastTouchEnd <= 300) {
         e.preventDefault();

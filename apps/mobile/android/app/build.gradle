@@ -73,6 +73,17 @@ def enableProguardInReleaseBuilds = false
  */
 def jscFlavor = 'io.github.react-native-community:jsc-android:2026004.+'
 
+// 환경변수 검증
+def kakaoAppKey = project.env.get("KAKAO_APP_KEY") ?: ""
+
+// 릴리스 빌드 시 필수 환경변수 검증
+gradle.taskGraph.whenReady { taskGraph ->
+    def isReleaseBuild = taskGraph.allTasks.any { it.name.toLowerCase().contains("release") }
+    if (isReleaseBuild && kakaoAppKey.isEmpty()) {
+        throw new RuntimeException("KAKAO_APP_KEY is required for release builds. Please set it in your .env file.")
+    }
+}
+
 android {
     ndkVersion rootProject.ext.ndkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
@@ -88,6 +99,10 @@ android {
 
         // react-native-config 환경변수를 리소스로 사용 가능하게 설정
         resValue "string", "build_config_package", "com.mobile"
+        resValue "string", "kakao_app_key", kakaoAppKey
+
+        // AndroidManifest.xml에서 사용할 placeholder
+        manifestPlaceholders["KAKAO_APP_KEY"] = kakaoAppKey
     }
     signingConfigs {
         debug {

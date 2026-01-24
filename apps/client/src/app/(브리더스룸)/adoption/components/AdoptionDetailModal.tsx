@@ -13,6 +13,7 @@ import PetThumbnail from "@/components/common/PetThumbnail";
 import BadgeList from "../../components/BadgeList";
 import { DateTime } from "luxon";
 import Link from "next/link";
+import { useIsMobile } from "@/hooks/useMobile";
 
 interface AdoptionDetailModalProps {
   isOpen: boolean;
@@ -30,6 +31,7 @@ interface PetInfoCardProps {
   hatchingDate?: string;
   isDeleted?: boolean;
   petId: string;
+  isMobile?: boolean;
 }
 
 const PetInfoCard = ({
@@ -41,6 +43,7 @@ const PetInfoCard = ({
   hatchingDate,
   isDeleted,
   petId,
+  isMobile,
 }: PetInfoCardProps) => {
   const cardContent = (
     <div
@@ -50,11 +53,16 @@ const PetInfoCard = ({
       )}
     >
       <div className={"flex items-center gap-2.5"}>
-        <div className={"w-16"}>
-          <PetThumbnail petId={petId} maxSize={70} />
+        <div className={isMobile ? "w-12" : "w-16"}>
+          <PetThumbnail petId={petId} maxSize={isMobile ? 50 : 70} />
         </div>
         <div>
-          <div className="mb-2 flex items-center gap-2 font-semibold dark:text-gray-100">
+          <div
+            className={cn(
+              "mb-2 flex items-center gap-2 font-semibold dark:text-gray-100",
+              isMobile && "text-sm",
+            )}
+          >
             {isDeleted ? (
               <div>
                 <span className="cursor-not-allowed line-through decoration-red-500">{name}</span>
@@ -64,20 +72,26 @@ const PetInfoCard = ({
               name
             )}
 
-            <div className="text-muted-foreground text-sm">
+            <div className={cn("text-muted-foreground", isMobile ? "text-xs" : "text-sm")}>
               | {(SPECIES_KOREAN_INFO as Record<string, string>)[species] || "미분류"}
             </div>
             {sex && (
-              <p className="text-sm text-blue-500">
+              <p className={cn("text-blue-500", isMobile ? "text-xs" : "text-sm")}>
                 | {(GENDER_KOREAN_INFO as Record<string, string>)[sex]}
               </p>
             )}
           </div>
-          <div className="flex flex-col gap-2 text-sm text-gray-600 dark:text-gray-300">
-            <BadgeList items={morphs} />
+          <div
+            className={cn(
+              "flex flex-col gap-2 text-gray-600 dark:text-gray-300",
+              isMobile ? "text-xs" : "text-sm",
+            )}
+          >
+            <BadgeList items={morphs} badgeSize={isMobile ? "sm" : "md"} />
             <BadgeList
               items={traits}
               variant="outline"
+              badgeSize={isMobile ? "sm" : "md"}
               badgeClassName="bg-white text-black dark:bg-gray-700 dark:text-gray-200"
             />
             {hatchingDate && (
@@ -103,6 +117,7 @@ const PetInfoCard = ({
 };
 
 const AdoptionDetailModal = ({ isOpen, petId, onClose, onUpdate }: AdoptionDetailModalProps) => {
+  const isMobile = useIsMobile();
   const {
     data: adoptionData,
     isLoading,
@@ -148,6 +163,7 @@ const AdoptionDetailModal = ({ isOpen, petId, onClose, onUpdate }: AdoptionDetai
             hatchingDate={hatchingDate}
             isDeleted={isDeleted}
             petId={petId}
+            isMobile={isMobile}
           />
 
           <div className="space-y-3">

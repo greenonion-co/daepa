@@ -40,7 +40,9 @@ type NativeMessage =
   | { type: "TOKEN_REFRESH_FAILED" }
   | { type: "SET_USER_DATA"; user: unknown }
   | { type: "SET_THEME"; theme: ThemeMode }
-  | { type: "TOAST"; message: string; variant: "success" | "error" | "info" | "warning" };
+  | { type: "TOAST"; message: string; variant: "success" | "error" | "info" | "warning" }
+  | { type: "SET_TOP_BAR_VISIBLE"; visible: boolean }
+  | { type: "SET_PULL_TO_REFRESH"; enabled: boolean };
 
 /**
  * 현재 환경이 네이티브 앱 WebView인지 확인
@@ -167,4 +169,12 @@ export const requestPopToRoot = (): boolean => {
  */
 export const requestSetTheme = (theme: ThemeMode): boolean => {
   return sendToNative({ type: "SET_THEME", theme });
+};
+
+/**
+ * 네이티브 앱에 Pull-to-Refresh 활성화/비활성화 요청
+ * @param enabled - true면 활성화, false면 비활성화
+ */
+export const requestSetPullToRefresh = (enabled: boolean = true): boolean => {
+  return sendToNative({ type: "SET_PULL_TO_REFRESH", enabled });
 };

@@ -31,7 +31,7 @@ export default function FeedPetCard({ pet }: FeedPetCardProps) {
 
   return (
     <Link href={`/pet/${pet.petId}`} className="block">
-      <article className="overflow-hidden rounded-2xl bg-white transition-shadow hover:shadow-md dark:bg-gray-900">
+      <article className="overflow-hidden rounded-2xl bg-white transition-shadow hover:shadow-md dark:bg-neutral-900">
         {/* Header - 유저 정보 */}
         <div className="flex items-center gap-3 px-4 py-3">
           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-r from-blue-200 to-purple-200 text-xs font-bold text-white">
@@ -46,8 +46,13 @@ export default function FeedPetCard({ pet }: FeedPetCardProps) {
         </div>
 
         {/* 이미지 */}
-        <div className="relative aspect-square w-full bg-gray-100 dark:bg-gray-800">
-          <PetThumbnail petId={pet.petId} maxSize={400} className="h-full w-full rounded-none" />
+        <div className="relative aspect-square w-full bg-gray-100 dark:bg-transparent">
+          <PetThumbnail
+            petId={pet.petId}
+            objectFit="cover"
+            maxSize={400}
+            className="h-full w-full rounded-none"
+          />
         </div>
 
         {/* 액션 버튼 (인스타 스타일) */}
