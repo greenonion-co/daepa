@@ -61,6 +61,7 @@ class LoginPromoSheet extends Component<LoginPromoSheetProps, LoginPromoSheetSta
 
   componentWillUnmount(): void {
     this.backHandlerSub?.remove();
+    LoginPromoSheet._ref = null;
   }
 
   show = () => {
