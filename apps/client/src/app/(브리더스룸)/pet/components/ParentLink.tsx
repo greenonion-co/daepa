@@ -131,7 +131,7 @@ const ParentLink = ({
         </dt>
         <div className="flex flex-col items-center gap-2">
           <button
-            className="relative aspect-square w-full overflow-hidden rounded-2xl bg-gray-100 transition-colors hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-700"
+            className="relative aspect-square w-full overflow-hidden rounded-2xl bg-gray-100 transition-colors hover:bg-gray-200 dark:bg-[#18171C] dark:hover:bg-gray-700"
             onClick={handleSelect}
             disabled={!editable}
           >

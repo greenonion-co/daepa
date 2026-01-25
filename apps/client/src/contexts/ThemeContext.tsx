@@ -71,6 +71,33 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     };
   }, [mounted, theme]);
 
+  // 네이티브 앱에서 테마 변경 메시지 수신
+  useEffect(() => {
+    if (!mounted || !isNativeApp()) return;
+
+    const handleNativeMessage = (event: MessageEvent) => {
+      try {
+        const data = typeof event.data === "string" ? JSON.parse(event.data) : event.data;
+        if (data?.type === "THEME_CHANGE" && (data.theme === "light" || data.theme === "dark")) {
+          setTheme(data.theme);
+          setResolvedTheme(data.theme);
+          localStorage.setItem("theme", data.theme);
+        }
+      } catch {
+        // JSON 파싱 실패 무시
+      }
+    };
+
+    // Android는 document, iOS는 window에서 이벤트 수신
+    document.addEventListener("message", handleNativeMessage as EventListener);
+    window.addEventListener("message", handleNativeMessage);
+
+    return () => {
+      document.removeEventListener("message", handleNativeMessage as EventListener);
+      window.removeEventListener("message", handleNativeMessage);
+    };
+  }, [mounted]);
+
   // resolvedTheme 변경 시 DOM과 네이티브 앱에 적용
   useEffect(() => {
     if (!mounted) return;

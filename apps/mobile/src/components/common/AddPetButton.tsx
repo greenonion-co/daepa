@@ -1,5 +1,5 @@
-import React, { useState, useCallback } from 'react';
-import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useState, useCallback, useRef } from 'react';
+import { StyleSheet, Pressable, Animated } from 'react-native';
 import { Plus } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
@@ -11,6 +11,7 @@ function AddPetButton() {
   const isLoggedIn = useAuthStore(state => !!state.user);
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const [showLoginPromo, setShowLoginPromo] = useState(false);
+  const scale = useRef(new Animated.Value(1)).current;
 
   const handlePress = useCallback(() => {
     if (isLoggedIn) {
@@ -20,19 +21,36 @@ function AddPetButton() {
     }
   }, [isLoggedIn, navigation]);
 
+  const handlePressIn = useCallback(() => {
+    Animated.timing(scale, {
+      toValue: 0.9,
+      duration: 100,
+      useNativeDriver: true,
+    }).start();
+  }, [scale]);
+
+  const handlePressOut = useCallback(() => {
+    Animated.timing(scale, {
+      toValue: 1,
+      duration: 100,
+      useNativeDriver: true,
+    }).start();
+  }, [scale]);
+
   return (
     <>
-      <TouchableOpacity
+      <Pressable
         onPress={handlePress}
-        activeOpacity={0.8}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
         style={styles.container}
         accessibilityRole="button"
         accessibilityLabel="펫 추가하기"
       >
-        <View style={styles.inner}>
+        <Animated.View style={[styles.inner, { transform: [{ scale }] }]}>
           <Plus size={28} color="#fff" strokeWidth={2.5} />
-        </View>
-      </TouchableOpacity>
+        </Animated.View>
+      </Pressable>
 
       <LoginPromoSheet
         visible={showLoginPromo}
@@ -55,10 +73,10 @@ const styles = StyleSheet.create({
     width: 52,
     height: 52,
     borderRadius: 26,
-    backgroundColor: '#3B82F6',
+    backgroundColor: '#2D3645',
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#3B82F6',
+    shadowColor: '#2D3645',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,

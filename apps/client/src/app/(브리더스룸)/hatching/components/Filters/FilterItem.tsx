@@ -35,8 +35,8 @@ const FilterItem = ({
         hasValue
           ? "bg-blue-100 text-blue-600 dark:bg-blue-900/50 dark:text-blue-400"
           : isLight
-            ? "bg-white text-gray-800 shadow-sm dark:bg-gray-700 dark:text-gray-200"
-            : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200",
+            ? "bg-white text-gray-800 shadow-sm dark:bg-[#18171C] dark:text-gray-200"
+            : "bg-gray-100 text-gray-800 dark:bg-[#18171C] dark:text-gray-200",
         disabled && "cursor-not-allowed opacity-50",
       )}
       onClick={() => !disabled && onClick()}

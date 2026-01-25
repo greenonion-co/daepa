@@ -1,4 +1,4 @@
-import React, { useRef, useCallback, useState, useMemo } from 'react';
+import React, { useRef, useCallback, useState, useMemo, useEffect } from 'react';
 import {
   StyleSheet,
   View,
@@ -81,6 +81,15 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
     () => createInjectedJavaScriptBeforeContentLoaded(accessToken),
     [accessToken],
   );
+
+  // 테마 변경 시 WebView에 메시지 전송
+  useEffect(() => {
+    if (webViewRef.current) {
+      webViewRef.current.postMessage(
+        JSON.stringify({ type: 'THEME_CHANGE', theme }),
+      );
+    }
+  }, [theme]);
 
   // 웹에서 앱으로 오는 메시지 처리
   const handleMessage = (event: WebViewMessageEvent) => {
@@ -324,7 +333,7 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
           <WebView
             ref={webViewRef}
             source={{ uri: webViewUrl }}
-            style={styles.webview}
+            style={[styles.webview, { backgroundColor: colors.background }]}
             injectedJavaScriptBeforeContentLoaded={
               injectedJavaScriptBeforeContentLoaded
             }
@@ -381,7 +390,7 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
         <WebView
           ref={webViewRef}
           source={{ uri: webViewUrl }}
-          style={styles.webview}
+          style={[styles.webview, { backgroundColor: colors.background }]}
           injectedJavaScriptBeforeContentLoaded={
             injectedJavaScriptBeforeContentLoaded
           }

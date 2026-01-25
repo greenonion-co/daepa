@@ -111,7 +111,7 @@ const MultiSelectFilter = ({
           currentFilterValue && currentFilterValue.length > 0
             ? "bg-blue-100 text-blue-600 dark:bg-blue-900/50 dark:text-blue-400"
             : isLight
-              ? "bg-white text-gray-800 shadow-sm dark:bg-gray-700 dark:text-gray-200"
+              ? "bg-white text-gray-800 shadow-sm dark:bg-[#18171C] dark:text-gray-200"
               : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200",
         )}
         aria-expanded={isOpen}
@@ -152,7 +152,7 @@ const MultiSelectFilter = ({
         <div
           ref={dropdownRef}
           className={cn(
-            "absolute top-10 z-50 w-[320px] rounded-2xl border-[1.8px] border-gray-200 bg-white p-5 shadow-lg dark:border-gray-600 dark:bg-gray-800",
+            "absolute top-10 z-50 w-[320px] rounded-2xl border-[1.8px] border-gray-200 bg-white p-5 shadow-lg dark:border-gray-600 dark:bg-[#18171C]",
             "transform transition-all duration-200 ease-out",
             // 수평 위치
             dropdownPosition === "left" ? "left-0" : "right-0",

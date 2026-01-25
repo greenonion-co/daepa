@@ -69,7 +69,7 @@ const PairCard = ({
   return (
     <div
       ref={cardRef}
-      className="group relative flex flex-col rounded-2xl border border-gray-200/50 bg-white p-2 shadow-lg transition-all hover:border-gray-300 hover:bg-gray-100/20 hover:shadow-xl dark:border-gray-700 dark:bg-neutral-800"
+      className="group relative flex flex-col rounded-2xl border border-gray-200/50 bg-white p-2 shadow-lg transition-all hover:border-gray-300 hover:bg-gray-100/20 hover:shadow-xl dark:border-none dark:border-gray-700 dark:bg-[#18171C]"
     >
       {/* 튜토리얼 오버레이 */}
       {showTutorial && onCloseTutorial && (
@@ -130,7 +130,7 @@ const PairCard = ({
             desc: pair.desc,
           });
         }}
-        className="group/memo relative mt-3 cursor-pointer rounded-lg border border-gray-200 bg-gradient-to-br from-amber-50/50 to-orange-50/30 px-3 transition-all hover:border-orange-300 hover:shadow-md dark:border-gray-700 dark:from-neutral-800 dark:to-neutral-800"
+        className="group/memo relative mt-3 cursor-pointer rounded-lg border border-gray-200 bg-gradient-to-br from-amber-50/50 to-orange-50/30 px-3 transition-all hover:border-orange-300 hover:shadow-md dark:border-gray-700 dark:from-[#18171C] dark:to-[#1F1E23]"
       >
         <div className="flex items-center gap-2">
           <StickyNote className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-600 dark:text-amber-500" />

@@ -7,12 +7,12 @@ interface SettingsGroupProps {
 }
 
 export const SettingsGroup = ({ title, className, children }: SettingsGroupProps) => (
-  <div className={cn("mb-4", className)}>
+  <div className={cn("mb-4 px-2", className)}>
     {title && (
       <h2 className="mb-2 px-4 text-[13px] font-medium uppercase text-gray-500 dark:text-gray-400">
         {title}
       </h2>
     )}
-    <div className="overflow-hidden rounded-xl dark:bg-neutral-800">{children}</div>
+    <div className="overflow-hidden rounded-xl dark:bg-[#18171C]">{children}</div>
   </div>
 );

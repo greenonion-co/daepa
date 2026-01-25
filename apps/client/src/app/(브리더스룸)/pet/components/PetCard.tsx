@@ -40,7 +40,7 @@ export default function PetCard({ pet }: PetCardProps) {
   };
 
   return (
-    <div className="relative overflow-hidden rounded-lg bg-white transition-all duration-150 hover:shadow-md active:scale-[0.98] dark:bg-neutral-800 dark:active:bg-gray-800">
+    <div className="relative overflow-hidden rounded-lg bg-white transition-all duration-150 hover:shadow-md active:scale-[0.98] dark:bg-[#18171C] dark:active:bg-gray-800">
       <div className="flex gap-2 p-2">
         {/* 이미지 + 성별 */}
         <div className="flex shrink-0 flex-col items-center gap-0.5 self-center">

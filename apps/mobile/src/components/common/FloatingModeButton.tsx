@@ -32,6 +32,28 @@ export default function FloatingModeButton({
   const theme = useThemeStore(state => state.theme);
   const animation = useRef(new Animated.Value(0)).current;
   const insets = useSafeAreaInsets();
+  const lastTapRef = useRef<number>(0);
+
+  // 더블탭으로 모드 전환
+  const handleDoubleTap = () => {
+    const now = Date.now();
+    const DOUBLE_TAP_DELAY = 300;
+
+    if (now - lastTapRef.current < DOUBLE_TAP_DELAY) {
+      // 더블탭 감지 - 모드 전환
+      const newMode = currentMode === 'general' ? 'admin' : 'general';
+      onModeChange(newMode);
+      Toast.show(`${MODE_CONFIG[newMode].label} 모드로 전환되었습니다`, 'check');
+      // 메뉴가 열려있으면 닫기
+      if (isOpen) {
+        toggleMenu();
+      }
+    } else {
+      // 싱글탭 - 메뉴 토글
+      toggleMenu();
+    }
+    lastTapRef.current = now;
+  };
 
   const toggleMenu = () => {
     const toValue = isOpen ? 0 : 1;
@@ -206,7 +228,7 @@ export default function FloatingModeButton({
             styles.mainButton,
             { backgroundColor: theme === 'dark' ? '#fff' : '#000' },
           ]}
-          onPress={toggleMenu}
+          onPress={handleDoubleTap}
           activeOpacity={0.8}
         >
           <Animated.Text

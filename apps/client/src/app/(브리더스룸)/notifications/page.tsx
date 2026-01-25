@@ -58,7 +58,7 @@ const NotificationsPage = () => {
   return (
     <div className="flex h-full w-full items-center justify-center">
       <ScrollArea className={"h-full w-full max-w-[500px] py-2"}>
-        <div className="flex flex-col items-center gap-2 px-2 pt-0">
+        <div className="flex flex-col items-center gap-2 pt-0">
           <div className="flex w-full flex-col gap-2">
             {data.map((item) => (
               <NotificationItem key={item.id} item={item} />

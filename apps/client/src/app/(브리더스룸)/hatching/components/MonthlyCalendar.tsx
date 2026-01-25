@@ -198,11 +198,11 @@ const MonthlyCalendar = memo(() => {
         >
           <div
             ref={tabContainerRef}
-            className="relative flex h-[32px] w-fit shrink-0 items-center gap-2 rounded-lg bg-gray-100 px-0.5 shadow-sm dark:bg-neutral-800"
+            className="relative flex h-[32px] w-fit shrink-0 items-center gap-2 rounded-lg bg-gray-100 px-0.5 shadow-sm dark:bg-[#18171C]"
           >
             {/* 애니메이션 인디케이터 */}
             <div
-              className="absolute rounded-lg bg-white shadow-sm transition-all duration-200 ease-out dark:bg-neutral-700"
+              className="absolute rounded-lg bg-white shadow-sm transition-all duration-200 ease-out dark:bg-[#101012]"
               style={{
                 left: indicatorStyle.left,
                 width: indicatorStyle.width,
