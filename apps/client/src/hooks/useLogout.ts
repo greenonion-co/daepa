@@ -17,6 +17,11 @@ export const useLogout = () => {
         router.push("/sign-in");
       }
     } catch (error) {
+      console.error("로그아웃 실패:", error);
+      if (error instanceof Error) {
+        console.error("Error message:", error.message);
+        console.error("Error stack:", error.stack);
+      }
       toast.error("로그아웃에 실패했습니다.");
     }
   };
