@@ -58,14 +58,14 @@ export function Filters({ showPublicFilter = true, variant = "default" }: Filter
           ref={containerRef}
           className={cn(
             "relative flex h-[32px] items-center gap-2 rounded-lg px-0.5",
-            isLight ? "bg-white shadow-sm dark:bg-gray-700" : "bg-gray-100 dark:bg-gray-800",
+            isLight ? "bg-white shadow-sm dark:bg-[#18171C]" : "bg-gray-100 dark:bg-gray-800",
           )}
         >
           {/* 애니메이션 인디케이터 */}
           <div
             className={cn(
               "absolute rounded-lg shadow-sm transition-all duration-200 ease-out",
-              isLight ? "bg-gray-100 dark:bg-gray-600" : "bg-white dark:bg-gray-700",
+              isLight ? "bg-gray-100 dark:bg-[#101012]" : "bg-white dark:bg-gray-700",
             )}
             style={{
               left: indicatorStyle.left,

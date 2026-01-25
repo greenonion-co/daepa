@@ -90,7 +90,7 @@ export const DataTable = ({
   return (
     <div className="w-full">
       <div className="rounded-md">
-        <Table className="bg-white dark:bg-gray-900">
+        <Table className="bg-white dark:bg-[#101012]">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
@@ -121,8 +121,8 @@ export const DataTable = ({
                     className={cn(
                       "cursor-pointer",
                       "isPublic" in row.original && row.original.isPublic
-                        ? "bg-blue-100 hover:bg-blue-200 dark:bg-gray-800 dark:hover:bg-blue-800/20"
-                        : "opacity-80 hover:opacity-100 dark:opacity-40 dark:hover:opacity-100",
+                        ? "bg-blue-100 hover:bg-blue-200 dark:bg-[#101012] dark:hover:bg-blue-800/20"
+                        : "opacity-80 hover:opacity-100 dark:opacity-30 dark:hover:opacity-100",
                     )}
                     onClick={(e) => handleRowClick({ e, pet: row.original })}
                   >

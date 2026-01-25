@@ -32,7 +32,6 @@ const GeneralTab = createBottomTabNavigator<GeneralTabParamList>();
 const AdminTab = createBottomTabNavigator<AdminTabParamList>();
 
 const TAB_ICON_SIZE = 24;
-const INACTIVE_OPACITY = 0.4;
 
 // 애니메이션 탭 아이콘 생성 함수
 const createAnimatedTabIcon = (
@@ -43,21 +42,15 @@ const createAnimatedTabIcon = (
   }>,
   label: string,
 ) => {
-  return ({ focused, color }: { focused: boolean; color: string }) => {
-    const contentOpacity = focused ? 1 : INACTIVE_OPACITY;
-
+  return ({ color }: { focused: boolean; color: string }) => {
     return (
       <View style={styles.tabIconContainer}>
-        <View style={{ opacity: contentOpacity }}>
-          <IconComponent
-            width={TAB_ICON_SIZE}
-            height={TAB_ICON_SIZE}
-            fill={color}
-          />
-        </View>
-        <Text style={[styles.tabLabel, { color, opacity: contentOpacity }]}>
-          {label}
-        </Text>
+        <IconComponent
+          width={TAB_ICON_SIZE}
+          height={TAB_ICON_SIZE}
+          fill={color}
+        />
+        <Text style={[styles.tabLabel, { color }]}>{label}</Text>
       </View>
     );
   };
@@ -169,7 +162,7 @@ function GeneralTabs() {
             borderWidth: 1,
             borderBottomWidth: 0,
             borderColor: colors.tabBarBorder,
-            paddingBottom: Platform.OS === 'android' ? insets.bottom : 15,
+            paddingBottom: Platform.OS === 'android' ? insets.bottom : 20,
             height: tabBarHeight,
           },
           tabBarHideOnKeyboard: true,
@@ -238,7 +231,7 @@ function AdminTabs() {
           borderWidth: 1,
           borderBottomWidth: 0,
           borderColor: colors.tabBarBorder,
-          paddingBottom: Platform.OS === 'android' ? insets.bottom : 15,
+          paddingBottom: Platform.OS === 'android' ? insets.bottom : 20,
           height: tabBarHeight,
         },
         tabBarHideOnKeyboard: true,

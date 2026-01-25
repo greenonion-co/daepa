@@ -135,7 +135,7 @@ export const FormField = ({
           <div className="relative pt-2">
             <textarea
               name={name}
-              className={`min-h-[160px] w-full rounded-xl bg-gray-100 p-4 text-left text-[18px] focus:ring-0 focus:outline-none dark:bg-gray-600/50 dark:text-white`}
+              className={`min-h-[160px] w-full rounded-xl bg-gray-100 p-4 text-left text-[18px] focus:outline-none focus:ring-0 dark:bg-[#18171C] dark:text-white`}
               value={String(value || "")}
               maxLength={maxLength}
               onChange={(e) => handleChange({ type: field.name, value: e.target.value })}
@@ -148,7 +148,7 @@ export const FormField = ({
               }}
             />
             {!disabled && (
-              <div className="absolute right-4 bottom-4 text-sm text-gray-500">
+              <div className="absolute bottom-4 right-4 text-sm text-gray-500">
                 {currentLength}/{maxLength}
               </div>
             )}

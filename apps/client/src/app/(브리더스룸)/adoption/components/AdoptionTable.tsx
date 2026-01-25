@@ -191,7 +191,7 @@ const AdoptionTable = () => {
                     data-state={row.getIsSelected() && "selected"}
                     className={cn(
                       "cursor-pointer",
-                      "bg-purple-50 hover:bg-purple-100 dark:bg-purple-900/10 dark:hover:bg-purple-900/30",
+                      "bg-purple-50 hover:bg-purple-100 dark:bg-[#18171C] dark:hover:bg-purple-900/30",
                     )}
                     onClick={() => {
                       overlay.open(({ isOpen, close }) => (
