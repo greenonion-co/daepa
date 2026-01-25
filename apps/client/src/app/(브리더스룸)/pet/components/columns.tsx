@@ -126,7 +126,7 @@ export const columns: ColumnDef<PetDto>[] = [
           <BadgeList items={row.original.morphs} />
         </div>
       ) : (
-        <span className="text-gray-400">미정</span>
+        <span className="text-gray-400">-</span>
       ),
   },
   {
@@ -142,7 +142,7 @@ export const columns: ColumnDef<PetDto>[] = [
           />
         </div>
       ) : (
-        <span className="text-gray-400">미정</span>
+        <span className="text-gray-400">-</span>
       ),
   },
   {
@@ -173,7 +173,13 @@ export const columns: ColumnDef<PetDto>[] = [
     header: TABLE_HEADER.weight,
     size: 40,
     cell: ({ row }) => (
-      <div className="capitalize">{row.original.weight ? row.getValue("weight") + "g" : "-"}</div>
+      <div className="capitalize">
+        {row.original.weight ? (
+          row.getValue("weight") + "g"
+        ) : (
+          <span className={"text-gray-400"}>-</span>
+        )}
+      </div>
     ),
   },
   {
@@ -181,11 +187,15 @@ export const columns: ColumnDef<PetDto>[] = [
     header: TABLE_HEADER.hatchingDate,
     cell: ({ row }) => {
       const hatchingDateRaw = row.getValue("hatchingDate") as string | undefined;
-      if (!hatchingDateRaw) return <div className="capitalize">-</div>;
+      if (!hatchingDateRaw) return <div className="text-gray-400">-</div>;
       const hatchingDate = DateTime.fromISO(hatchingDateRaw);
       return (
         <div className="capitalize">
-          {hatchingDate.isValid ? hatchingDate.toFormat("yy.M.d") : "-"}
+          {hatchingDate.isValid ? (
+            hatchingDate.toFormat("yy.M.d")
+          ) : (
+            <span className={"text-gray-400"}>-</span>
+          )}
         </div>
       );
     },
@@ -195,7 +205,7 @@ export const columns: ColumnDef<PetDto>[] = [
     header: TABLE_HEADER.father,
     cell: ({ row }) => {
       if (!row.original.father) {
-        return <span>-</span>;
+        return <span className={"text-gray-400"}>-</span>;
       }
 
       if (
@@ -251,7 +261,7 @@ export const columns: ColumnDef<PetDto>[] = [
     header: TABLE_HEADER.mother,
     cell: ({ row }) => {
       if (!row.original.mother) {
-        return <span>-</span>;
+        return <span className={"text-gray-400"}>-</span>;
       }
 
       if (
