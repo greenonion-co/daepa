@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { isAndroid } from "@/lib/native-bridge";
 
 interface ToggleOption<T extends string> {
   label: string;
@@ -24,7 +25,13 @@ export default function FloatingToggle<T extends string>({
   const isRightSelected = value === rightOption.value;
 
   return (
-    <div className={cn("bottom-17 fixed left-1/2 z-50 -translate-x-1/2", className)}>
+    <div
+      className={cn(
+        "fixed left-1/2 z-50 -translate-x-1/2",
+        isAndroid() ? "bottom-19" : "bottom-17",
+        className,
+      )}
+    >
       <div className="relative flex h-12 items-center rounded-full bg-neutral-900/90 p-1 shadow-lg dark:bg-gray-900/70">
         {/* 슬라이딩 배경 */}
         <div

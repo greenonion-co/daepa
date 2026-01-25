@@ -1095,10 +1095,9 @@ export class PetService {
   ) {
     // 키워드 검색
     if (pageOptionsDto.keyword) {
-      queryBuilder.andWhere(
-        'pets.name LIKE :keyword OR pets.desc LIKE :keyword',
-        { keyword: `%${pageOptionsDto.keyword}%` },
-      );
+      queryBuilder.andWhere('pets.name LIKE :keyword', {
+        keyword: `%${pageOptionsDto.keyword}%`,
+      });
     }
 
     // 종 필터링

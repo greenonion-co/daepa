@@ -13,6 +13,7 @@ import GuestSettingsScreen from '../screens/Settings/GuestSettings';
 import FloatingModeButton, {
   AppMode,
 } from '../components/common/FloatingModeButton';
+import AddPetButton from '../components/common/AddPetButton';
 import { GeneralTabParamList, AdminTabParamList } from '@/types/navigation';
 import { useAuthStore } from '@/store/auth';
 import { useThemeStore, themeColors } from '@/store/theme';
@@ -36,6 +37,11 @@ const EggIcon = ({ color }: { color: string }) => (
 const HeartIcon = ({ color }: { color: string }) => (
   <FileChartColumnIncreasing size={TAB_ICON_SIZE} color={color} />
 );
+
+// 빈 컴포넌트 (+ 버튼용, 실제로 렌더링되지 않음)
+function EmptyScreen() {
+  return null;
+}
 
 // WebView 래퍼 컴포넌트들
 function HomeWebView() {
@@ -78,52 +84,62 @@ function GeneralTabs() {
   const tabBarHeight = Platform.OS === 'android' ? 60 + insets.bottom : 80;
 
   return (
-    <GeneralTab.Navigator
-      screenOptions={{
-        headerShown: false,
-        tabBarActiveTintColor: colors.tabBarActive,
-        tabBarInactiveTintColor: colors.tabBarInactive,
-        tabBarLabelStyle: {
-          fontSize: 12,
-          fontWeight: '700',
-        },
-        tabBarIconStyle: {
-          marginBottom: 5,
-        },
-        tabBarStyle: {
-          position: 'absolute',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          backgroundColor: colors.tabBar,
-          borderTopLeftRadius: 20,
-          borderTopRightRadius: 20,
-          borderWidth: 1,
-          borderBottomWidth: 0,
-          borderColor: colors.tabBarBorder,
-          paddingBottom: Platform.OS === 'android' ? insets.bottom : 0,
-          height: tabBarHeight,
-        },
-        tabBarHideOnKeyboard: true,
-      }}
-    >
-      <GeneralTab.Screen
-        name="Home"
-        component={HomeWebView}
-        options={{
-          tabBarLabel: '홈',
-          tabBarIcon: HomeIcon,
+    <>
+      <GeneralTab.Navigator
+        screenOptions={{
+          headerShown: false,
+          tabBarActiveTintColor: colors.tabBarActive,
+          tabBarInactiveTintColor: colors.tabBarInactive,
+          tabBarLabelStyle: {
+            fontSize: 12,
+            fontWeight: '700',
+          },
+          tabBarIconStyle: {
+            marginBottom: 5,
+          },
+          tabBarStyle: {
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            backgroundColor: colors.tabBar,
+            borderTopLeftRadius: 20,
+            borderTopRightRadius: 20,
+            borderWidth: 1,
+            borderBottomWidth: 0,
+            borderColor: colors.tabBarBorder,
+            paddingBottom: Platform.OS === 'android' ? insets.bottom : 0,
+            height: tabBarHeight,
+          },
+          tabBarHideOnKeyboard: true,
         }}
-      />
-      <GeneralTab.Screen
-        name="Settings"
-        component={SettingsScreen}
-        options={{
-          tabBarLabel: '설정',
-          tabBarIcon: SettingsIcon,
-        }}
-      />
-    </GeneralTab.Navigator>
+      >
+        <GeneralTab.Screen
+          name="Home"
+          component={HomeWebView}
+          options={{
+            tabBarLabel: '홈',
+            tabBarIcon: HomeIcon,
+          }}
+        />
+        <GeneralTab.Screen
+          name="AddPet"
+          component={EmptyScreen}
+          options={{
+            tabBarLabel: '',
+            tabBarButton: AddPetButton,
+          }}
+        />
+        <GeneralTab.Screen
+          name="Settings"
+          component={SettingsScreen}
+          options={{
+            tabBarLabel: '설정',
+            tabBarIcon: SettingsIcon,
+          }}
+        />
+      </GeneralTab.Navigator>
+    </>
   );
 }
 

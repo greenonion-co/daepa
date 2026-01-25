@@ -1,12 +1,14 @@
 "use client";
 
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback } from "react";
 import { PetControllerFindAllFilterType } from "@repo/api-client";
 import FloatingToggle from "@/components/common/FloatingToggle";
 import PetList from "@/components/feed/PetList";
-import { requestSetPullToRefresh } from "@/lib/native-bridge";
+import { useUserStore } from "@/app/(브리더스룸)/store/user";
 
 export default function Home() {
+  const { isLoggedIn } = useUserStore();
+
   const [filterType, setFilterType] = useState<PetControllerFindAllFilterType>(
     PetControllerFindAllFilterType.ALL,
   );
@@ -30,23 +32,21 @@ export default function Home() {
     [filterType],
   );
 
-  useEffect(() => {
-    requestSetPullToRefresh();
-  }, []);
-
   return (
-    <div className="relative w-full px-1" key={filterType}>
+    <div className="relative mx-auto max-w-[480px]" key={filterType}>
       {/* 현재 선택된 리스트만 렌더링 */}
       <PetList filterType={filterType} isVisible={true} />
 
-      <FloatingToggle
-        options={[
-          { label: "전체", value: PetControllerFindAllFilterType.ALL },
-          { label: "내 펫", value: PetControllerFindAllFilterType.MY },
-        ]}
-        value={filterType}
-        onChange={handleFilterChange}
-      />
+      {isLoggedIn && (
+        <FloatingToggle
+          options={[
+            { label: "전체", value: PetControllerFindAllFilterType.ALL },
+            { label: "내 펫", value: PetControllerFindAllFilterType.MY },
+          ]}
+          value={filterType}
+          onChange={handleFilterChange}
+        />
+      )}
     </div>
   );
 }

@@ -35,5 +35,5 @@ export function useIsMyPet(ownerId: string | undefined): boolean {
 
     // 사용자 ID와 펫 소유자 ID 비교
     return user.userId === ownerId;
-  }, [user?.userId, ownerId]);
+  }, [user, ownerId]);
 }

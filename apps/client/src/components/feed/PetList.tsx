@@ -9,6 +9,7 @@ import { tokenStorage } from "@/lib/tokenStorage";
 import { isNativeApp, navigate } from "@/lib/native-bridge";
 import LoadingScreen from "@/app/loading";
 import { useAppRouter } from "@/hooks/useAppRouter";
+import { useSearchKeywordStore } from "@/app/(브리더스룸)/store/searchKeyword";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -21,6 +22,8 @@ export default function PetList({ filterType, isVisible }: PetListProps) {
   const router = useAppRouter();
   const observerRef = useRef<IntersectionObserver | null>(null);
   const loadMoreRef = useRef<HTMLDivElement>(null);
+
+  const { searchKeyword } = useSearchKeywordStore();
 
   const handleRegisterClick = () => {
     if (tokenStorage.hasToken()) {
@@ -36,13 +39,14 @@ export default function PetList({ filterType, isVisible }: PetListProps) {
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isError } =
     useInfiniteQuery({
-      queryKey: [petControllerFindAll.name, filterType],
+      queryKey: [petControllerFindAll.name, filterType, searchKeyword],
       queryFn: async ({ pageParam = 1 }) => {
         const result = await petControllerFindAll({
           page: pageParam,
           itemPerPage: ITEMS_PER_PAGE,
           order: "DESC",
           filterType,
+          keyword: searchKeyword,
         });
         return result;
       },

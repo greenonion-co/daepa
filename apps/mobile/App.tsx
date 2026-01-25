@@ -1,6 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { View, StyleSheet } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
+import {
+  NavigationContainer,
+  NavigationContainerRef,
+} from '@react-navigation/native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import BootSplash from 'react-native-bootsplash';
 import Navigation from './src/navigation';
@@ -10,10 +13,13 @@ import { useAuthStore } from './src/store/auth';
 import Toast from '@/components/common/Toast';
 import Loading from '@/components/common/Loading';
 import Popup from '@/components/common/Popup';
+import { RootStackParamList } from '@/types/navigation';
 
 const queryClient = new QueryClient();
 
 function App() {
+  const navigationRef =
+    useRef<NavigationContainerRef<RootStackParamList>>(null);
   const [hydrated, setHydrated] = useState(
     useAuthStore.persist?.hasHydrated?.() ?? false,
   );
@@ -38,16 +44,12 @@ function App() {
     <SafeAreaProvider>
       <QueryClientProvider client={queryClient}>
         <View style={styles.container}>
-          {hydrated ? (
-            <>
-              <NavigationContainer>
-                <Navigation />
-              </NavigationContainer>
-              <Toast ref={Toast.setRef} />
-              <Loading ref={Loading.setRef} />
-              <Popup ref={Popup.setRef} />
-            </>
-          ) : null}
+          <NavigationContainer ref={navigationRef}>
+            <Navigation />
+          </NavigationContainer>
+          <Toast ref={Toast.setRef} />
+          <Loading ref={Loading.setRef} />
+          <Popup ref={Popup.setRef} />
         </View>
       </QueryClientProvider>
     </SafeAreaProvider>

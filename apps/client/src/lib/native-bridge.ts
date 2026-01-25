@@ -53,6 +53,14 @@ export const isNativeApp = (): boolean => {
 };
 
 /**
+ * Android 환경인지 확인
+ */
+export const isAndroid = (): boolean => {
+  if (typeof window === "undefined") return false;
+  return /android/i.test(navigator.userAgent);
+};
+
+/**
  * 네이티브 앱으로 메시지 전송
  */
 export const sendToNative = (message: NativeMessage): boolean => {
@@ -107,6 +115,14 @@ export const notifyTokenRefreshFailed = (): boolean => {
  */
 export const requestGoBack = (): boolean => {
   return sendToNative({ type: "GO_BACK" });
+};
+
+/**
+ * 네이티브 TopBar 표시/숨김 요청
+ * @param visible - true면 표시, false면 숨김
+ */
+export const setTopBarVisible = (visible: boolean): boolean => {
+  return sendToNative({ type: "SET_TOP_BAR_VISIBLE", visible });
 };
 
 /**

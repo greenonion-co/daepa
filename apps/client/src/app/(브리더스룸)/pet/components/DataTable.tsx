@@ -33,7 +33,6 @@ interface DataTableProps<TData> {
   hasMore?: boolean;
   isFetchingMore?: boolean;
   loaderRefAction: (node?: Element | null) => void;
-  hasFilter?: boolean;
   isClickable?: boolean;
   isEmpty?: boolean;
 }

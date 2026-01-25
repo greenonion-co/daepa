@@ -8,11 +8,11 @@ import {
 } from "@repo/api-client";
 import { DateTime } from "luxon";
 import { EyeOff, Lock, ScanFace } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { useUserStore } from "@/app/(브리더스룸)/store/user";
 import { cn, formatPrice } from "@/lib/utils";
 import BadgeList from "@/app/(브리더스룸)/components/BadgeList";
+import PetThumbnail from "@/components/common/PetThumbnail";
 
 /** 기본 펫 정보 인터페이스 */
 interface BasePetInfo {
@@ -123,12 +123,7 @@ export default function SiblingPetCard({
       style={{ width }}
     >
       <div className="relative aspect-square w-full rounded-xl bg-gray-100 dark:bg-gray-800">
-        <Image
-          src="/assets/lizard.png"
-          alt={pet.name ?? "펫 이미지"}
-          fill
-          className="object-cover"
-        />
+        <PetThumbnail maxSize={150} petId={pet.petId} />
 
         {isDeleted ? (
           <div className="absolute bottom-1 right-1 rounded-md bg-red-600 px-1 py-0.5 text-[10px] font-bold text-white">
@@ -189,12 +184,7 @@ export default function SiblingPetCard({
       )}
     >
       <div className="relative h-14 w-14 shrink-0 rounded-xl bg-gray-100 dark:bg-gray-800">
-        <Image
-          src="/assets/lizard.png"
-          alt={pet.name ?? "펫 이미지"}
-          fill
-          className="rounded-xl object-cover"
-        />
+        <PetThumbnail maxSize={150} petId={pet.petId} />
         {isDeleted && (
           <div className="absolute -right-1 -top-1 rounded-md bg-red-600 px-1 py-0.5 text-[8px] font-bold text-white">
             삭제됨

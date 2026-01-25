@@ -13,8 +13,7 @@ import { useLogout } from "@/hooks/useLogout";
 import Link from "next/link";
 
 const SettingList = () => {
-  const { user } = useUserStore();
-  const isLoggedIn = !!user?.userId;
+  const { user, isLoggedIn } = useUserStore();
   const { theme, setTheme } = useTheme();
   const { logout } = useLogout();
 
