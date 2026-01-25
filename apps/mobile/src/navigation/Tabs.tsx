@@ -55,9 +55,7 @@ const createAnimatedTabIcon = (
             fill={color}
           />
         </View>
-        <Text
-          style={[styles.tabLabel, { color, opacity: contentOpacity }]}
-        >
+        <Text style={[styles.tabLabel, { color, opacity: contentOpacity }]}>
           {label}
         </Text>
       </View>
@@ -171,7 +169,7 @@ function GeneralTabs() {
             borderWidth: 1,
             borderBottomWidth: 0,
             borderColor: colors.tabBarBorder,
-            paddingBottom: Platform.OS === 'android' ? insets.bottom : 0,
+            paddingBottom: Platform.OS === 'android' ? insets.bottom : 15,
             height: tabBarHeight,
           },
           tabBarHideOnKeyboard: true,
@@ -240,7 +238,7 @@ function AdminTabs() {
           borderWidth: 1,
           borderBottomWidth: 0,
           borderColor: colors.tabBarBorder,
-          paddingBottom: Platform.OS === 'android' ? insets.bottom : 0,
+          paddingBottom: Platform.OS === 'android' ? insets.bottom : 15,
           height: tabBarHeight,
         },
         tabBarHideOnKeyboard: true,
