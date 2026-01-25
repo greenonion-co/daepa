@@ -17,6 +17,7 @@ import { UserDto } from 'src/user/user.dto';
 import { JwtUser, PassportValidatedUser, Public } from './auth.decorator';
 import {
   AppleNativeLoginRequestDto,
+  GoogleNativeLoginRequestDto,
   KakaoNativeLoginRequestDto,
   TokenResponseDto,
 } from './auth.dto';
@@ -139,6 +140,44 @@ export class AuthController {
         userId: validatedUser.userId,
       });
       return updated;
+    }
+    return user;
+  }
+
+  @Post('sign-in/google/native')
+  @Public()
+  @ApiResponse({
+    status: 200,
+    description: '구글 네이티브 로그인 성공',
+    type: UserDto,
+  })
+  async googleNative(
+    @Req() _req: Request,
+    @Res({ passthrough: true }) res: Response,
+    @Body() body: GoogleNativeLoginRequestDto,
+  ) {
+    const { idToken } = body;
+
+    const validatedUser = await this.authService.validateGoogleNativeAndGetUser({
+      idToken,
+    });
+
+    const jwtRefreshToken = await this.authService.createJwtRefreshToken(
+      validatedUser.userId,
+    );
+
+    res.cookie('refreshToken', jwtRefreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 180 * 24 * 60 * 60 * 1000,
+    });
+
+    const user = await this.userService.findOne({
+      userId: validatedUser.userId,
+    });
+    if (!user) {
+      throw new UnauthorizedException('사용자를 찾을 수 없습니다.');
     }
     return user;
   }

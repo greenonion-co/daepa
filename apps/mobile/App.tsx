@@ -14,6 +14,14 @@ import Toast from '@/components/common/Toast';
 import Loading from '@/components/common/Loading';
 import Popup from '@/components/common/Popup';
 import { RootStackParamList } from '@/types/navigation';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import Config from 'react-native-config';
+
+// Google Sign-In 초기화
+GoogleSignin.configure({
+  iosClientId: Config.GOOGLE_CLIENT_ID_IOS,
+  webClientId: Config.GOOGLE_CLIENT_ID_WEB, // Android용
+});
 
 const queryClient = new QueryClient();
 

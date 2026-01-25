@@ -338,6 +338,9 @@ importers:
       '@react-native-async-storage/async-storage':
         specifier: ^2.2.0
         version: 2.2.0(react-native@0.80.2(@babel/core@7.27.1)(@react-native-community/cli@19.1.1(typescript@5.0.4))(@types/react@19.1.0)(react@19.1.0))
+      '@react-native-google-signin/google-signin':
+        specifier: ^16.1.1
+        version: 16.1.1(react-native@0.80.2(@babel/core@7.27.1)(@react-native-community/cli@19.1.1(typescript@5.0.4))(@types/react@19.1.0)(react@19.1.0))(react@19.1.0)
       '@react-native-seoul/kakao-login':
         specifier: ^5.4.1
         version: 5.4.1(react-native@0.80.2(@babel/core@7.27.1)(@react-native-community/cli@19.1.1(typescript@5.0.4))(@types/react@19.1.0)(react@19.1.0))(react@19.1.0)
@@ -3523,6 +3526,16 @@ packages:
     resolution: {integrity: sha512-H17sV83KPg2H2GCNuUSMM1ZM2sy6msVSmxrhJSycH8ua3i9Iixja8DeYtGIcJUzjdU/4U2eSDs6PjOSZUVn8CQ==}
     engines: {node: '>=18'}
     hasBin: true
+
+  '@react-native-google-signin/google-signin@16.1.1':
+    resolution: {integrity: sha512-lcHBnZ7uvCJiWtGooKOklo/4okqszWvJ0BatW1UaIe+ynmpVpp1lyJkvv1Mj08d39k4soaWuhZVNKjD/RFL34Q==}
+    peerDependencies:
+      expo: '>=52.0.40'
+      react: '*'
+      react-native: '*'
+    peerDependenciesMeta:
+      expo:
+        optional: true
 
   '@react-native-seoul/kakao-login@5.4.1':
     resolution: {integrity: sha512-ezhkX3AsJZ3Qf3b0QDJEpPIvWDqxuz2N9lKd9g90ULpzaYa+d0r7UdfCe4h+/Fo859t7t0vFSXqIbLLIHSlxFw==}
@@ -13895,6 +13908,11 @@ snapshots:
       - supports-color
       - typescript
       - utf-8-validate
+
+  '@react-native-google-signin/google-signin@16.1.1(react-native@0.80.2(@babel/core@7.27.1)(@react-native-community/cli@19.1.1(typescript@5.0.4))(@types/react@19.1.0)(react@19.1.0))(react@19.1.0)':
+    dependencies:
+      react: 19.1.0
+      react-native: 0.80.2(@babel/core@7.27.1)(@react-native-community/cli@19.1.1(typescript@5.0.4))(@types/react@19.1.0)(react@19.1.0)
 
   '@react-native-seoul/kakao-login@5.4.1(react-native@0.80.2(@babel/core@7.27.1)(@react-native-community/cli@19.1.1(typescript@5.0.4))(@types/react@19.1.0)(react@19.1.0))(react@19.1.0)':
     dependencies:

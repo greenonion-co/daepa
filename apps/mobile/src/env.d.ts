@@ -7,6 +7,11 @@ declare module 'react-native-config' {
     // 카카오 SDK
     KAKAO_APP_KEY: string;
 
+    // Google Sign-In
+    GOOGLE_CLIENT_ID_IOS?: string;
+    GOOGLE_CLIENT_ID_WEB?: string;
+    GOOGLE_REVERSED_CLIENT_ID?: string;
+
     // 네트워크 설정
     LOCAL_IP?: string;
     SERVER_BASE_URL: string;

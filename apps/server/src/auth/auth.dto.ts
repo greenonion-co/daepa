@@ -56,3 +56,9 @@ export class AppleNativeLoginRequestDto {
   @IsBoolean()
   isBiz?: boolean;
 }
+
+export class GoogleNativeLoginRequestDto {
+  @ApiProperty({ description: 'Google ID Token (JWT)' })
+  @IsString()
+  idToken: string;
+}

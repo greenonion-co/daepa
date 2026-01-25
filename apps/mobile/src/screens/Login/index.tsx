@@ -4,6 +4,7 @@ import { StyleSheet, View, Text, Image } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import KakaoLoginButton from '../Settings/KakaoLoginButton';
 import AppleLoginButton from '../Settings/AppleLoginButton';
+import GoogleLoginButton from '../Settings/GoogleLoginButton';
 
 const LoginScreen = () => {
   return (
@@ -24,6 +25,7 @@ const LoginScreen = () => {
             {/* 로그인 버튼들 */}
             <View style={styles.buttonContainer}>
               <AppleLoginButton />
+              <GoogleLoginButton />
               <KakaoLoginButton />
             </View>
           </View>
