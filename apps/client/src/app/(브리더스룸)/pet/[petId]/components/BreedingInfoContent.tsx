@@ -5,11 +5,12 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   petControllerFindPetByPetId,
   petControllerUpdate,
+  brPetControllerFindAll,
   UpdatePetDto,
   PetDtoType,
   PetDto,
 } from "@repo/api-client";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getChangedFields } from "@/lib/utils";
 import { toast } from "@/lib/toast";
 import { useNameStore } from "@/app/(브리더스룸)/store/name";
@@ -31,6 +32,7 @@ interface BreedingInfoContentProps {
 }
 
 const BreedingInfoContent = ({ petId, ownerId, initialPet }: BreedingInfoContentProps) => {
+  const queryClient = useQueryClient();
   const { formData, errors, setFormData } = usePetStore();
   const { duplicateCheckStatus } = useNameStore();
   const { setBreedingInfo } = useBreedingInfoStore();
@@ -113,6 +115,8 @@ const BreedingInfoContent = ({ petId, ownerId, initialPet }: BreedingInfoContent
 
       await mutateUpdatePet(changedFields);
       await refetch();
+      // 펫 목록 쿼리 갱신
+      await queryClient.invalidateQueries({ queryKey: [brPetControllerFindAll.name] });
       toast.success("펫 정보 수정이 완료되었습니다.");
       setIsEditMode(false);
     } catch (error) {
@@ -125,7 +129,15 @@ const BreedingInfoContent = ({ petId, ownerId, initialPet }: BreedingInfoContent
     } finally {
       setIsProcessing(false);
     }
-  }, [formData, mutateUpdatePet, pet, duplicateCheckStatus, refetch, getChangedFieldsForPet]);
+  }, [
+    formData,
+    mutateUpdatePet,
+    pet,
+    duplicateCheckStatus,
+    refetch,
+    getChangedFieldsForPet,
+    queryClient,
+  ]);
 
   // 취소 핸들러
   const handleCancel = useCallback(() => {
@@ -162,7 +174,7 @@ const BreedingInfoContent = ({ petId, ownerId, initialPet }: BreedingInfoContent
   if (!pet || Object.keys(formData).length === 0) return null;
 
   return (
-    <div className="flex flex-1 flex-col gap-2 rounded-2xl bg-white p-3 shadow-xs dark:bg-neutral-900">
+    <div className="shadow-xs flex flex-1 flex-col gap-2 rounded-2xl bg-white p-3 dark:bg-neutral-900">
       <div className="text-[14px] font-[600] text-gray-600 dark:text-gray-300">펫정보</div>
 
       {/* 공개 여부 */}
