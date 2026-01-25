@@ -225,7 +225,7 @@ const Header = ({
           title="펫의 가족 관계를 한눈에"
           description={
             <>
-              <span className="font-semibold text-blue-700">부모, 형제, 자녀</span>까지
+              <span className="font-semibold text-blue-700">부모, 동배, 자손</span>까지
               <br />
               <span className="font-semibold text-gray-800">펫 관계도</span> 로 혈통을 쉽게 확인할
               수 있어요
