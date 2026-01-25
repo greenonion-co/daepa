@@ -136,7 +136,7 @@ const SingleSelect = ({
         <div
           ref={dropdownRef}
           className={cn(
-            "absolute top-10 z-50 w-[320px] rounded-2xl border-[1.8px] border-gray-200 bg-white p-5 shadow-lg dark:border-gray-600 dark:bg-gray-800",
+            "absolute top-10 z-50 w-[320px] rounded-2xl border-[1.8px] border-gray-200 bg-white p-5 shadow-lg dark:border-gray-600 dark:bg-[#18171C]",
             "transform transition-all duration-200 ease-out",
             // 수평 위치
             dropdownPosition === "left" ? "left-0" : "right-0",

@@ -109,7 +109,7 @@ const SettingsPage = () => {
       <div>
         {/* 프로필 섹션 */}
         <SettingsGroup className="px-2">
-          <div className="flex items-center gap-4 bg-neutral-100 p-2 px-4 dark:bg-neutral-700">
+          <div className="flex items-center gap-4 bg-neutral-100 p-2 px-4 dark:bg-[#18171C]">
             <div className="relative flex h-16 w-16 items-center justify-center">
               <Image src="/assets/lizard.png" alt="조회된 펫 없음" fill />
             </div>
@@ -219,11 +219,7 @@ const SettingsPage = () => {
         <SettingsGroup title="앱 설정">
           <SettingsItem
             icon={
-              resolvedTheme === "dark" ? (
-                <Moon className="h-4 w-4" />
-              ) : (
-                <Sun className="h-4 w-4" />
-              )
+              resolvedTheme === "dark" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />
             }
             iconBgColor={
               resolvedTheme === "dark" ? "bg-indigo-100 dark:bg-indigo-900/30" : "bg-yellow-100"

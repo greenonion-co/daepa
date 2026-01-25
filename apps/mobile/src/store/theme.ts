@@ -28,16 +28,16 @@ export const themeColors = {
     background: '#ffffff',
     tabBar: '#ffffff',
     tabBarBorder: '#e0e0e0',
-    tabBarActive: '#000000',
+    tabBarActive: '#2D3645',
     tabBarInactive: '#999999',
     statusBar: 'dark-content' as const,
   },
   dark: {
-    background: '#171717', // neutral-900
-    tabBar: '#171717', // neutral-900
+    background: '#101012',
+    tabBar: '#18171C',
     tabBarBorder: '#262626', // neutral-800
-    tabBarActive: '#ffffff',
-    tabBarInactive: '#a3a3a3', // neutral-400
+    tabBarActive: '#E4E4E6',
+    tabBarInactive: '#4C4D57',
     statusBar: 'light-content' as const,
   },
 };

@@ -1,13 +1,22 @@
-import React, { useState, useCallback } from 'react';
-import { View, StyleSheet, StatusBar, Platform } from 'react-native';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import React, { useState, useCallback, useRef } from 'react';
 import {
-  Home,
-  FileChartColumnIncreasing,
-  Calendar,
-  ContactRound,
-} from 'lucide-react-native';
+  View,
+  StyleSheet,
+  StatusBar,
+  Platform,
+  Pressable,
+  Animated,
+  Text,
+} from 'react-native';
+import {
+  createBottomTabNavigator,
+  BottomTabBarButtonProps,
+} from '@react-navigation/bottom-tabs';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import HomeSvg from '@/assets/svgs/tabIcons/Home.svg';
+import Profile from '@/assets/svgs/tabIcons/Profile.svg';
+import Calendar from '@/assets/svgs/tabIcons/Calendar.svg';
+import Chart from '@/assets/svgs/tabIcons/Chart.svg';
 import WebViewScreen from '../screens/WebView';
 import GuestSettingsScreen from '../screens/Settings/GuestSettings';
 import FloatingModeButton, {
@@ -24,19 +33,71 @@ const AdminTab = createBottomTabNavigator<AdminTabParamList>();
 
 const TAB_ICON_SIZE = 24;
 
-// 탭 아이콘 컴포넌트들
-const HomeIcon = ({ color }: { color: string }) => (
-  <Home size={TAB_ICON_SIZE} color={color} />
-);
-const SettingsIcon = ({ color }: { color: string }) => (
-  <ContactRound size={TAB_ICON_SIZE} color={color} />
-);
-const EggIcon = ({ color }: { color: string }) => (
-  <Calendar size={TAB_ICON_SIZE} color={color} />
-);
-const HeartIcon = ({ color }: { color: string }) => (
-  <FileChartColumnIncreasing size={TAB_ICON_SIZE} color={color} />
-);
+// 애니메이션 탭 아이콘 생성 함수
+const createAnimatedTabIcon = (
+  IconComponent: React.FC<{
+    width: number;
+    height: number;
+    fill: string;
+  }>,
+  label: string,
+) => {
+  return ({ color }: { focused: boolean; color: string }) => {
+    return (
+      <View style={styles.tabIconContainer}>
+        <IconComponent
+          width={TAB_ICON_SIZE}
+          height={TAB_ICON_SIZE}
+          fill={color}
+        />
+        <Text style={[styles.tabLabel, { color }]}>{label}</Text>
+      </View>
+    );
+  };
+};
+
+// 애니메이션 탭 버튼 (누르는 효과)
+const AnimatedTabButton = (props: BottomTabBarButtonProps) => {
+  const scale = useRef(new Animated.Value(1)).current;
+  const { onPress, onLongPress, style, children } = props;
+
+  const handlePressIn = useCallback(() => {
+    Animated.timing(scale, {
+      toValue: 0.9,
+      duration: 100,
+      useNativeDriver: true,
+    }).start();
+  }, [scale]);
+
+  const handlePressOut = useCallback(() => {
+    Animated.timing(scale, {
+      toValue: 1,
+      duration: 100,
+      useNativeDriver: true,
+    }).start();
+  }, [scale]);
+
+  return (
+    <Pressable
+      onPress={onPress}
+      onLongPress={onLongPress}
+      onPressIn={handlePressIn}
+      onPressOut={handlePressOut}
+      style={[style, styles.tabButton]}
+    >
+      <Animated.View style={{ transform: [{ scale }] }}>
+        {children}
+      </Animated.View>
+    </Pressable>
+  );
+};
+
+// 탭 아이콘들
+const HomeTabIcon = createAnimatedTabIcon(HomeSvg, '피드');
+const SettingsTabIcon = createAnimatedTabIcon(Profile, '마이페이지');
+const EggTabIcon = createAnimatedTabIcon(Calendar, '해칭룸');
+const HeartTabIcon = createAnimatedTabIcon(Chart, '분양룸');
+const AdminHomeTabIcon = createAnimatedTabIcon(HomeSvg, '내 펫');
 
 // 빈 컴포넌트 (+ 버튼용, 실제로 렌더링되지 않음)
 function EmptyScreen() {
@@ -90,13 +151,6 @@ function GeneralTabs() {
           headerShown: false,
           tabBarActiveTintColor: colors.tabBarActive,
           tabBarInactiveTintColor: colors.tabBarInactive,
-          tabBarLabelStyle: {
-            fontSize: 12,
-            fontWeight: '700',
-          },
-          tabBarIconStyle: {
-            marginBottom: 5,
-          },
           tabBarStyle: {
             position: 'absolute',
             bottom: 0,
@@ -108,7 +162,7 @@ function GeneralTabs() {
             borderWidth: 1,
             borderBottomWidth: 0,
             borderColor: colors.tabBarBorder,
-            paddingBottom: Platform.OS === 'android' ? insets.bottom : 0,
+            paddingBottom: Platform.OS === 'android' ? insets.bottom : 20,
             height: tabBarHeight,
           },
           tabBarHideOnKeyboard: true,
@@ -118,8 +172,9 @@ function GeneralTabs() {
           name="Home"
           component={HomeWebView}
           options={{
-            tabBarLabel: '홈',
-            tabBarIcon: HomeIcon,
+            tabBarLabel: () => null,
+            tabBarIcon: HomeTabIcon,
+            tabBarButton: AnimatedTabButton,
           }}
         />
         <GeneralTab.Screen
@@ -134,8 +189,9 @@ function GeneralTabs() {
           name="Settings"
           component={SettingsScreen}
           options={{
-            tabBarLabel: '설정',
-            tabBarIcon: SettingsIcon,
+            tabBarLabel: () => null,
+            tabBarIcon: SettingsTabIcon,
+            tabBarButton: AnimatedTabButton,
           }}
         />
       </GeneralTab.Navigator>
@@ -158,11 +214,11 @@ function AdminTabs() {
         tabBarActiveTintColor: colors.tabBarActive,
         tabBarInactiveTintColor: colors.tabBarInactive,
         tabBarLabelStyle: {
-          fontSize: 12,
-          fontWeight: '500',
+          fontSize: 10,
+          fontWeight: '300',
         },
         tabBarIconStyle: {
-          marginBottom: 5,
+          marginBottom: 2,
         },
         tabBarStyle: {
           position: 'absolute',
@@ -175,7 +231,7 @@ function AdminTabs() {
           borderWidth: 1,
           borderBottomWidth: 0,
           borderColor: colors.tabBarBorder,
-          paddingBottom: Platform.OS === 'android' ? insets.bottom : 0,
+          paddingBottom: Platform.OS === 'android' ? insets.bottom : 20,
           height: tabBarHeight,
         },
         tabBarHideOnKeyboard: true,
@@ -188,32 +244,36 @@ function AdminTabs() {
         name="Home"
         component={AdminHomeWebView}
         options={{
-          tabBarLabel: '홈',
-          tabBarIcon: HomeIcon,
+          tabBarLabel: () => null,
+          tabBarIcon: AdminHomeTabIcon,
+          tabBarButton: AnimatedTabButton,
         }}
       />
       <AdminTab.Screen
         name="Hatching"
         component={HatchingWebView}
         options={{
-          tabBarLabel: '해칭룸',
-          tabBarIcon: EggIcon,
+          tabBarLabel: () => null,
+          tabBarIcon: EggTabIcon,
+          tabBarButton: AnimatedTabButton,
         }}
       />
       <AdminTab.Screen
         name="Adoption"
         component={AdoptionWebView}
         options={{
-          tabBarLabel: '분양룸',
-          tabBarIcon: HeartIcon,
+          tabBarLabel: () => null,
+          tabBarIcon: HeartTabIcon,
+          tabBarButton: AnimatedTabButton,
         }}
       />
       <AdminTab.Screen
         name="Settings"
         component={SettingsScreen}
         options={{
-          tabBarLabel: 'My',
-          tabBarIcon: SettingsIcon,
+          tabBarLabel: () => null,
+          tabBarIcon: SettingsTabIcon,
+          tabBarButton: AnimatedTabButton,
         }}
       />
     </AdminTab.Navigator>
@@ -257,5 +317,20 @@ export default function Tabs() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  tabButton: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  tabIconContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: 60,
+  },
+  tabLabel: {
+    fontSize: 10,
+    marginTop: 4,
+    textAlign: 'center',
   },
 });

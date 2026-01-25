@@ -41,7 +41,6 @@ export default function FeedPetCard({ pet }: FeedPetCardProps) {
             <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
               {pet.owner.name || "익명"}
             </p>
-            <p className="text-xs text-gray-500 dark:text-gray-400">{pet.species}</p>
           </div>
         </div>
 
