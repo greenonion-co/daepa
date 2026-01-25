@@ -77,7 +77,9 @@ const GoogleLoginButton = () => {
     } catch (e) {
       if (e instanceof Error && !e.message.includes('SIGN_IN_CANCELLED')) {
         Toast.show('로그인에 실패했습니다. 다시 시도해주세요.');
-        console.log(e);
+        if (__DEV__) {
+          console.log(e);
+        }
       }
     } finally {
       Loading.close();
