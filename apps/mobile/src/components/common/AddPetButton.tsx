@@ -14,7 +14,7 @@ function AddPetButton() {
 
   const handlePress = useCallback(() => {
     if (isLoggedIn) {
-      navigation.navigate('Main', { path: '/register/1' });
+      navigation.navigate('Main', { path: '/register/1?_nativeTopBar=1' });
     } else {
       setShowLoginPromo(true);
     }
