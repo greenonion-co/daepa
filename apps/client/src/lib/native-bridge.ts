@@ -53,6 +53,14 @@ export const isNativeApp = (): boolean => {
 };
 
 /**
+ * Android 환경인지 확인
+ */
+export const isAndroid = (): boolean => {
+  if (typeof window === "undefined") return false;
+  return /android/i.test(navigator.userAgent);
+};
+
+/**
  * 네이티브 앱으로 메시지 전송
  */
 export const sendToNative = (message: NativeMessage): boolean => {

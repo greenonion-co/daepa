@@ -13,7 +13,6 @@ import { useAuthStore } from './src/store/auth';
 import Toast from '@/components/common/Toast';
 import Loading from '@/components/common/Loading';
 import Popup from '@/components/common/Popup';
-import LoginPromoSheet from '@/components/common/LoginPromoSheet';
 import { RootStackParamList } from '@/types/navigation';
 
 const queryClient = new QueryClient();
@@ -45,24 +44,12 @@ function App() {
     <SafeAreaProvider>
       <QueryClientProvider client={queryClient}>
         <View style={styles.container}>
-          {hydrated ? (
-            <View style={styles.container}>
-              <NavigationContainer
-                ref={navigationRef}
-                onReady={() => {
-                  if (navigationRef.current) {
-                    LoginPromoSheet.setNavigationRef(navigationRef.current);
-                  }
-                }}
-              >
-                <Navigation />
-              </NavigationContainer>
-              <Toast ref={Toast.setRef} />
-              <Loading ref={Loading.setRef} />
-              <Popup ref={Popup.setRef} />
-              <LoginPromoSheet ref={LoginPromoSheet.setRef} />
-            </View>
-          ) : null}
+          <NavigationContainer ref={navigationRef}>
+            <Navigation />
+          </NavigationContainer>
+          <Toast ref={Toast.setRef} />
+          <Loading ref={Loading.setRef} />
+          <Popup ref={Popup.setRef} />
         </View>
       </QueryClientProvider>
     </SafeAreaProvider>

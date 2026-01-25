@@ -1,122 +1,45 @@
-import React, { Component } from 'react';
+import React from 'react';
 import {
-  BackHandler,
-  Dimensions,
   Image,
+  Modal,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
-  Animated,
 } from 'react-native';
-import { CommonActions, NavigationContainerRef } from '@react-navigation/native';
-import { RootStackParamList } from '@/types/navigation';
+import { CommonActions, useNavigation } from '@react-navigation/native';
 
-interface LoginPromoSheetProps {}
-
-interface LoginPromoSheetState {
+interface LoginPromoSheetProps {
   visible: boolean;
-  slideAnim: Animated.Value;
+  onClose: () => void;
 }
 
-/**
- * 로그인 유도 바텀 시트
- * LoginPromoSheet.show()로 호출
- */
-class LoginPromoSheet extends Component<LoginPromoSheetProps, LoginPromoSheetState> {
-  state: LoginPromoSheetState = {
-    visible: false,
-    slideAnim: new Animated.Value(300),
+const LoginPromoSheet = ({ visible, onClose }: LoginPromoSheetProps) => {
+  const navigation = useNavigation();
+
+  const handleLogin = () => {
+    onClose();
+    navigation.dispatch(CommonActions.navigate({ name: 'Login' }));
   };
 
-  private backHandlerSub?: { remove: () => void };
-  static _ref: LoginPromoSheet | null = null;
-  static _navigationRef: NavigationContainerRef<RootStackParamList> | null = null;
-
-  static setRef = (ref: LoginPromoSheet | null) => {
-    LoginPromoSheet._ref = ref;
-  };
-
-  static setNavigationRef = (ref: NavigationContainerRef<RootStackParamList> | null) => {
-    LoginPromoSheet._navigationRef = ref;
-  };
-
-  static show = () => {
-    LoginPromoSheet._ref?.show();
-  };
-
-  static close = () => {
-    LoginPromoSheet._ref?.close();
-  };
-
-  componentDidMount() {
-    this.backHandlerSub = BackHandler.addEventListener('hardwareBackPress', () => {
-      if (this.state.visible) {
-        this.close();
-        return true;
-      }
-      return false;
-    });
-  }
-
-  componentWillUnmount(): void {
-    this.backHandlerSub?.remove();
-    LoginPromoSheet._ref = null;
-  }
-
-  show = () => {
-    this.setState({ visible: true }, () => {
-      Animated.spring(this.state.slideAnim, {
-        toValue: 0,
-        useNativeDriver: true,
-        tension: 65,
-        friction: 11,
-      }).start();
-    });
-  };
-
-  close = () => {
-    Animated.timing(this.state.slideAnim, {
-      toValue: 300,
-      duration: 200,
-      useNativeDriver: true,
-    }).start(() => {
-      this.setState({ visible: false });
-    });
-  };
-
-  handleLogin = () => {
-    this.close();
-    // 로그인 화면으로 이동
-    if (LoginPromoSheet._navigationRef) {
-      LoginPromoSheet._navigationRef.dispatch(
-        CommonActions.navigate({ name: 'Login' })
-      );
-    }
-  };
-
-  render() {
-    const { visible, slideAnim } = this.state;
-
-    if (!visible) return null;
-
-    return (
+  return (
+    <Modal
+      visible={visible}
+      transparent
+      animationType="fade"
+      onRequestClose={onClose}
+    >
       <View style={styles.backdrop}>
         <TouchableOpacity
           style={styles.backdropTouchable}
           activeOpacity={1}
-          onPress={this.close}
+          onPress={onClose}
         />
-        <Animated.View
-          style={[
-            styles.sheetContainer,
-            { transform: [{ translateY: slideAnim }] },
-          ]}
-        >
+        <View style={styles.sheetContainer}>
           {/* 이미지 */}
           <View style={styles.imageContainer}>
             <Image
-              source={require('@/assets/images/lizard.png')}
+              source={require('@/assets/images/lizard_face.png')}
               style={styles.image}
               resizeMode="contain"
             />
@@ -127,15 +50,17 @@ class LoginPromoSheet extends Component<LoginPromoSheetProps, LoginPromoSheetSta
 
           {/* 설명 */}
           <Text style={styles.description}>
-            <Text style={styles.descriptionDark}>펫을 등록</Text>하면{'\n'}
-            <Text style={styles.descriptionHighlight}>브리딩・혈통 인증・분양 관리</Text>가
-            가능해요!
+            펫을 등록하고{'\n'}
+            <Text style={styles.descriptionHighlight}>
+              브리딩・혈통 인증・분양 관리
+            </Text>
+            {'\n'}기능을 이용해보세요!
           </Text>
 
           {/* 시작하기 버튼 */}
           <TouchableOpacity
             style={styles.primaryButton}
-            onPress={this.handleLogin}
+            onPress={handleLogin}
             activeOpacity={0.8}
           >
             <Text style={styles.primaryButtonText}>시작하기</Text>
@@ -144,31 +69,22 @@ class LoginPromoSheet extends Component<LoginPromoSheetProps, LoginPromoSheetSta
           {/* 다음에 할게요 버튼 */}
           <TouchableOpacity
             style={styles.secondaryButton}
-            onPress={this.close}
+            onPress={onClose}
             activeOpacity={0.6}
           >
             <Text style={styles.secondaryButtonText}>다음에 할게요</Text>
           </TouchableOpacity>
-        </Animated.View>
+        </View>
       </View>
-    );
-  }
-}
-
-export const openLoginPromoSheet = () => {
-  LoginPromoSheet.show();
+    </Modal>
+  );
 };
 
 export default LoginPromoSheet;
 
-const { height: HEIGHT, width: WIDTH } = Dimensions.get('window');
-
 const styles = StyleSheet.create({
   backdrop: {
-    position: 'absolute',
-    width: WIDTH,
-    height: HEIGHT,
-    zIndex: 1000,
+    flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'flex-end',
   },
@@ -177,12 +93,13 @@ const styles = StyleSheet.create({
   },
   sheetContainer: {
     backgroundColor: '#fff',
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
+    borderRadius: 24,
     paddingHorizontal: 24,
     paddingTop: 24,
-    paddingBottom: 40,
+    paddingBottom: 20,
     alignItems: 'center',
+    marginBottom: 16,
+    marginHorizontal: 16,
   },
   imageContainer: {
     marginBottom: 16,
@@ -192,29 +109,27 @@ const styles = StyleSheet.create({
     height: 100,
   },
   title: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: '700',
     color: '#1f2937',
     textAlign: 'center',
-    marginBottom: 8,
+    marginBottom: 12,
   },
   description: {
-    fontSize: 14,
-    color: '#6b7280',
+    fontSize: 16,
+    color: '#000000ff',
     textAlign: 'center',
     lineHeight: 22,
-    marginBottom: 24,
+    marginBottom: 30,
   },
-  descriptionDark: {
-    color: '#1f2937',
-  },
+  descriptionDark: {},
   descriptionHighlight: {
     fontWeight: '600',
     color: '#1d4ed8',
   },
   primaryButton: {
     width: '100%',
-    backgroundColor: '#1f2937',
+    backgroundColor: '#000000',
     borderRadius: 12,
     paddingVertical: 16,
     alignItems: 'center',
