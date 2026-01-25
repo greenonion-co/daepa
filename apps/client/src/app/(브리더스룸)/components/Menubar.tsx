@@ -13,7 +13,7 @@ import { isNativeApp } from "@/lib/native-bridge";
 import AddPetButton from "@/app/(브리더스룸)/components/AddPetButton";
 
 const Menubar = ({ unreadCount }: { unreadCount: number }) => {
-  const { isLoggedIn } = useUserStore();
+  const isLoggedIn = useUserStore((state) => !!state.user?.userId);
   const pathname = usePathname();
   const isMobile = useIsMobile();
   const { searchKeyword, setSearchKeyword } = useSearchKeywordStore();

@@ -7,7 +7,7 @@ import PetList from "@/components/feed/PetList";
 import { useUserStore } from "@/app/(브리더스룸)/store/user";
 
 export default function Home() {
-  const { isLoggedIn } = useUserStore();
+  const isLoggedIn = useUserStore((state) => !!state.user?.userId);
 
   const [filterType, setFilterType] = useState<PetControllerFindAllFilterType>(
     PetControllerFindAllFilterType.ALL,
