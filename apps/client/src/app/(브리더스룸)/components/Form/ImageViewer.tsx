@@ -8,6 +8,7 @@ import { IMAGE_TRANSFORMS } from "@/app/constants";
 import { Dialog, DialogOverlay, DialogPortal, DialogTitle } from "@/components/ui/dialog";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { useWebViewZoom } from "@/hooks/useWebViewZoom";
+import { setTopBarVisible } from "@/lib/native-bridge";
 
 interface ImageViewerProps {
   isOpen: boolean;
@@ -29,6 +30,16 @@ export default function ImageViewer({
 
   // 앱 WebView에서 줌 허용
   useWebViewZoom(isOpen);
+
+  // 네이티브 TopBar 숨김/표시
+  useEffect(() => {
+    if (isOpen) {
+      setTopBarVisible(false);
+    }
+    return () => {
+      setTopBarVisible(true);
+    };
+  }, [isOpen]);
 
   // 모달 닫힐 때 상태 초기화, 열릴 때 needsXl 결정
   useEffect(() => {

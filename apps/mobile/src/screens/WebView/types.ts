@@ -27,7 +27,8 @@ export type WebViewMessage =
       message: string;
       variant: 'success' | 'error' | 'info' | 'warning';
     }
-  | { type: 'SET_PULL_TO_REFRESH'; enabled: boolean };
+  | { type: 'SET_PULL_TO_REFRESH'; enabled: boolean }
+  | { type: 'SET_TOP_BAR_VISIBLE'; visible: boolean };
 
 export type WebViewRouteParams = {
   WebView: WebViewParams | undefined;

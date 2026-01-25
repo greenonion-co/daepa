@@ -118,6 +118,14 @@ export const requestGoBack = (): boolean => {
 };
 
 /**
+ * 네이티브 TopBar 표시/숨김 요청
+ * @param visible - true면 표시, false면 숨김
+ */
+export const setTopBarVisible = (visible: boolean): boolean => {
+  return sendToNative({ type: "SET_TOP_BAR_VISIBLE", visible });
+};
+
+/**
  * 네이티브 앱에 유저 데이터 동기화
  */
 export const syncUserToNative = (user: unknown): boolean => {

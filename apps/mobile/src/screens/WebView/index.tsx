@@ -50,6 +50,7 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
   const [pullToRefreshEnabled, setPullToRefreshEnabled] = useState(false); // 기본 비활성화
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [topBarVisible, setTopBarVisible] = useState(true); // TopBar 표시 여부
   const insets = useSafeAreaInsets();
 
   const accessToken = useAuthStore(state => state.accessToken);
@@ -69,7 +70,7 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
 
   // URL 파라미터에서 _hideTopBar 체크
   const hideTopBar = initialPath.includes('_hideTopBar=1');
-  const showTopBar = isPushed && !hideTopBar;
+  const showTopBar = isPushed && !hideTopBar && topBarVisible;
 
   if (__DEV__) {
     console.log('[WebView] Loading URL:', webViewUrl);
@@ -183,6 +184,9 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
           break;
         case 'SET_PULL_TO_REFRESH':
           setPullToRefreshEnabled(message.enabled);
+          break;
+        case 'SET_TOP_BAR_VISIBLE':
+          setTopBarVisible(message.visible);
           break;
         default:
           break;
