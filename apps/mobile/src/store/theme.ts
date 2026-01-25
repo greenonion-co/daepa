@@ -28,7 +28,7 @@ export const themeColors = {
     background: '#ffffff',
     tabBar: '#ffffff',
     tabBarBorder: '#e0e0e0',
-    tabBarActive: '#000000',
+    tabBarActive: '#2D3645',
     tabBarInactive: '#999999',
     statusBar: 'dark-content' as const,
   },
