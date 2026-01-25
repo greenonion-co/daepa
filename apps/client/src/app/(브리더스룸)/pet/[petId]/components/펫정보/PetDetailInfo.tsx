@@ -19,6 +19,7 @@ interface PetDetailInfoProps {
     morphs?: string[];
     traits?: string[];
     foods?: string[];
+    desc?: string;
   };
   isEditMode: boolean;
   onFieldChange: (field: string, value: any) => void;
@@ -106,6 +107,30 @@ export const PetDetailInfo = ({ formData, isEditMode, onFieldChange }: PetDetail
             initialItems={formData.foods}
             onSelect={(items) => onFieldChange("foods", items)}
           />
+        }
+      />
+
+      <FormItem
+        label="소개"
+        content={
+          <div className="w-full">
+            <textarea
+              disabled={!isEditMode}
+              value={formData.desc ?? ""}
+              onChange={(e) => onFieldChange("desc", e.target.value)}
+              maxLength={100}
+              placeholder={isEditMode ? "펫 소개를 입력하세요" : "-"}
+              className={cn(
+                "min-h-[80px] w-full resize-none rounded-md border border-gray-200 p-2 text-sm font-[500] placeholder:font-[500] disabled:bg-transparent dark:border-gray-700 dark:bg-transparent",
+                !isEditMode && "border-none",
+              )}
+            />
+            {isEditMode && (
+              <div className="mt-1 text-right text-xs text-gray-400">
+                {formData.desc?.length ?? 0}/100
+              </div>
+            )}
+          </div>
         }
       />
     </>

@@ -1,38 +1,35 @@
 import { create } from "zustand";
-import { userControllerGetUserProfile, UserProfileDto } from "@repo/api-client";
+import {
+  userControllerGetUserProfile,
+  authControllerSignOut,
+  UserProfileDto,
+} from "@repo/api-client";
 import { tokenStorage } from "@/lib/tokenStorage";
-import { isNativeApp, syncUserToNative } from "@/lib/native-bridge";
+import { isNativeApp, syncUserToNative, sendToNative } from "@/lib/native-bridge";
 
 interface UserState {
   user: UserProfileDto | null;
-  isLoggedIn: boolean;
 }
 
 interface UserActions {
-  setUser: (user: UserProfileDto) => void;
-  clearUser: () => void;
+  /** 앱 시작 시 토큰 기반으로 사용자 정보 초기화 */
   initialize: () => Promise<void>;
+  /** 로그인 성공 시 토큰 저장 + 사용자 정보 조회 */
+  onLoginSuccess: (token: string) => Promise<void>;
+  /** 로그아웃 처리 (API 호출 + 토큰 삭제 + 상태 초기화) */
+  onLogout: () => Promise<void>;
 }
 
 type UserStore = UserState & UserActions;
 
-export const useUserStore = create<UserStore>()((set) => ({
+export const useUserStore = create<UserStore>()((set, get) => ({
   user: null,
-  isLoggedIn: false,
 
-  // Actions
-  setUser: (user) => set({ user, isLoggedIn: !!user?.userId }),
-  clearUser: () => set({ user: null, isLoggedIn: false }),
-
-  // 초기화 함수
   initialize: async () => {
     try {
       const token = tokenStorage.getToken();
       if (!token) {
-        set({
-          user: null,
-          isLoggedIn: false,
-        });
+        set({ user: null });
         return;
       }
 
@@ -43,11 +40,7 @@ export const useUserStore = create<UserStore>()((set) => ({
       }
 
       const userData = data.data;
-
-      set({
-        user: userData,
-        isLoggedIn: !!userData?.userId,
-      });
+      set({ user: userData });
 
       // 네이티브 앱인 경우 유저 데이터 동기화
       if (isNativeApp() && userData) {
@@ -55,6 +48,27 @@ export const useUserStore = create<UserStore>()((set) => ({
       }
     } catch (error) {
       console.error(error);
+      set({ user: null });
+    }
+  },
+
+  onLoginSuccess: async (token: string) => {
+    tokenStorage.setToken(token);
+    await get().initialize();
+  },
+
+  onLogout: async () => {
+    try {
+      await authControllerSignOut();
+    } catch (error) {
+      console.error("로그아웃 API 호출 실패:", error);
+    } finally {
+      tokenStorage.removeToken();
+      set({ user: null });
+
+      if (isNativeApp()) {
+        sendToNative({ type: "LOGOUT" });
+      }
     }
   },
 }));

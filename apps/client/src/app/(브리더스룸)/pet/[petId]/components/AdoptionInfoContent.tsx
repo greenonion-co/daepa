@@ -6,6 +6,7 @@ import {
   PetAdoptionDtoStatus,
   UpdateAdoptionDto,
   adoptionControllerGetAdoptionByPetId,
+  brPetControllerFindAll,
   PetAdoptionDtoMethod,
   UserProfilePublicDto,
 } from "@repo/api-client";
@@ -23,7 +24,7 @@ import UserList from "@/app/(브리더스룸)/components/UserList";
 import { overlay } from "overlay-kit";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "@/lib/toast";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useIsMyPet } from "@/hooks/useIsMyPet";
 import EditActionButtons from "./EditActionButtons";
 import { useRouter } from "next/navigation";
@@ -36,6 +37,7 @@ interface AdoptionInfoContentProps {
 
 const AdoptionInfoContent = ({ petId, ownerId, initialAdoption }: AdoptionInfoContentProps) => {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { setAdoption } = useAdoptionStore();
   const [isEditMode, setIsEditMode] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -206,6 +208,8 @@ const AdoptionInfoContent = ({ petId, ownerId, initialAdoption }: AdoptionInfoCo
       await updateAdoption({ adoptionId, data: changedFields });
 
       setIsEditMode(false);
+      // 펫 목록 쿼리 갱신
+      await queryClient.invalidateQueries({ queryKey: [brPetControllerFindAll.name] });
 
       // 판매완료인 경우, 더 이상 본인 펫이 아님
       if (adoptionData.status === PetAdoptionDtoStatus.SOLD) {
@@ -268,7 +272,7 @@ const AdoptionInfoContent = ({ petId, ownerId, initialAdoption }: AdoptionInfoCo
   if (!adoption?.adoptionId) return null;
 
   return (
-    <div className="flex flex-1 flex-col gap-2 rounded-2xl bg-white p-3 shadow-xs dark:bg-neutral-900">
+    <div className="shadow-xs flex flex-1 flex-col gap-2 rounded-2xl bg-white p-3 dark:bg-neutral-900">
       <div className="text-[14px] font-[600] text-gray-600 dark:text-gray-300">분양정보</div>
 
       {!showAdoptionInfo && (
@@ -428,7 +432,7 @@ const AdoptionInfoContent = ({ petId, ownerId, initialAdoption }: AdoptionInfoCo
               <div className="relative w-full pt-2">
                 <textarea
                   className={cn(
-                    `min-h-[100px] w-full rounded-xl bg-gray-100 p-3 text-left text-[14px] focus:ring-0 focus:outline-none dark:bg-neutral-800 dark:text-white`,
+                    `min-h-[100px] w-full rounded-xl bg-gray-100 p-3 text-left text-[14px] focus:outline-none focus:ring-0 dark:bg-neutral-800 dark:text-white`,
                     !isEditMode && "dark:bg-neutral-900",
                   )}
                   value={String(adoptionData.memo || "")}
@@ -448,7 +452,7 @@ const AdoptionInfoContent = ({ petId, ownerId, initialAdoption }: AdoptionInfoCo
                   }}
                 />
                 {isEditMode && (
-                  <div className="absolute right-4 bottom-4 text-[12px] text-gray-500 dark:text-gray-400">
+                  <div className="absolute bottom-4 right-4 text-[12px] text-gray-500 dark:text-gray-400">
                     {adoptionData.memo?.length ?? 0}/{500}
                   </div>
                 )}

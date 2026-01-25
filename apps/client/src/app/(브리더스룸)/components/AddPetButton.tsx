@@ -24,7 +24,7 @@ const TextButton = () => (
 );
 
 const AddPetButton = () => {
-  const { isLoggedIn } = useUserStore();
+  const isLoggedIn = useUserStore((state) => !!state.user?.userId);
   const isMobile = useIsMobile();
 
   // 웹, 모바일웹

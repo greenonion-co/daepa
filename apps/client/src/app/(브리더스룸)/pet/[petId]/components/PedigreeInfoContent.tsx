@@ -4,11 +4,12 @@ import {
   parentRequestControllerLinkParent,
   parentRequestControllerUnlinkParent,
   petControllerGetParentsByPetId,
+  brPetControllerFindAll,
   PetDtoSpecies,
   UnlinkParentDtoRole,
   GetParentsByPetIdResponseDtoData,
 } from "@repo/api-client";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback } from "react";
 import { AxiosError } from "axios";
 import { toast } from "@/lib/toast";
@@ -31,6 +32,7 @@ const PedigreeInfoContent = ({
   userId,
   initialParents,
 }: PedigreeInfoContentProps) => {
+  const queryClient = useQueryClient();
   const { user } = useUserStore();
 
   const isMyPet = useIsMyPet(userId);
@@ -76,6 +78,9 @@ const PedigreeInfoContent = ({
           message: value.message ?? "",
         });
         await refetch();
+
+        await queryClient.invalidateQueries({ queryKey: [brPetControllerFindAll.name] });
+
         toast.success(
           value.isMyPet ? "부모 등록이 완료되었습니다." : "부모 요청이 전송되었습니다.",
         );
@@ -87,7 +92,7 @@ const PedigreeInfoContent = ({
         }
       }
     },
-    [mutateRequestParent, refetch],
+    [mutateRequestParent, refetch, queryClient],
   );
 
   const handleUnlink = useCallback(
@@ -98,6 +103,7 @@ const PedigreeInfoContent = ({
       try {
         await mutateUnlinkParent({ role: label });
         await refetch();
+        queryClient.invalidateQueries({ queryKey: [brPetControllerFindAll.name] });
         toast.success("부모 연동이 해제되었습니다.");
       } catch (error) {
         if (error instanceof AxiosError) {
@@ -107,11 +113,11 @@ const PedigreeInfoContent = ({
         }
       }
     },
-    [parents, mutateUnlinkParent, refetch],
+    [parents, mutateUnlinkParent, refetch, queryClient],
   );
 
   return (
-    <div className="flex flex-1 flex-col gap-2 rounded-2xl bg-white p-3 shadow-xs dark:bg-neutral-900">
+    <div className="shadow-xs flex flex-1 flex-col gap-2 rounded-2xl bg-white p-3 dark:bg-neutral-900">
       <div className="text-[14px] font-[600] text-gray-600 dark:text-gray-300">혈통정보</div>
 
       <div className="flex items-center gap-1 text-[12px] text-gray-500 dark:text-gray-400">

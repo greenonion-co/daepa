@@ -1,35 +1,28 @@
 import { useRouter } from "next/navigation";
 import { toast } from "@/lib/toast";
-import { tokenStorage } from "@/lib/tokenStorage";
-import { AxiosError } from "axios";
-import { useMutation } from "@tanstack/react-query";
-import { authControllerSignOut } from "@repo/api-client";
-import { isNativeApp, sendToNative } from "@/lib/native-bridge";
+import { useUserStore } from "@/app/(브리더스룸)/store/user";
+import { isNativeApp } from "@/lib/native-bridge";
 
 export const useLogout = () => {
   const router = useRouter();
-  const { mutateAsync: signOut } = useMutation({
-    mutationFn: authControllerSignOut,
-  });
+  const onLogout = useUserStore((state) => state.onLogout);
 
   const logout = async () => {
     try {
-      await signOut();
-      tokenStorage.removeToken();
+      await onLogout();
       toast.success("로그아웃 되었습니다.");
-      if (isNativeApp()) {
-        sendToNative({ type: "LOGOUT" });
-      } else {
-        // 웹에서의 로그아웃 처리
-        localStorage.removeItem("accessToken");
+
+      // 웹에서는 로그인 페이지로 이동 (네이티브는 store에서 LOGOUT 메시지 전송)
+      if (!isNativeApp()) {
         router.push("/sign-in");
       }
     } catch (error) {
-      if (error instanceof AxiosError) {
-        toast.error(error.response?.data?.message ?? "로그아웃에 실패했습니다.");
-      } else {
-        toast.error("로그아웃에 실패했습니다.");
+      console.error("로그아웃 실패:", error);
+      if (error instanceof Error) {
+        console.error("Error message:", error.message);
+        console.error("Error stack:", error.stack);
       }
+      toast.error("로그아웃에 실패했습니다.");
     }
   };
 
