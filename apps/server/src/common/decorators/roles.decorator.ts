@@ -32,7 +32,7 @@ export class RolesGuard implements CanActivate {
     if (!user) {
       throw new ForbiddenException('사용자 정보가 없습니다.');
     }
-    console.log(user);
+
     const hasRole = requiredRoles.some((role) => user.role === role);
 
     if (!hasRole) {

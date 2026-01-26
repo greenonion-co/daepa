@@ -19,6 +19,7 @@ import {
   PetHatchingDateRangeDto,
   FilterPetListResponseDto,
 } from '../pet.dto';
+import { PET_LIST_FILTER_TYPE } from '../pet.constants';
 import { ApiExtraModels } from '@nestjs/swagger';
 import { JwtUser } from 'src/auth/auth.decorator';
 import { JwtUserPayload } from 'src/auth/strategies/jwt.strategy';
@@ -48,7 +49,9 @@ export class BrPetController {
     @Query() pageOptionsDto: PetFilterDto,
     @JwtUser() token: JwtUserPayload,
   ): Promise<PageDto<PetDto>> {
-    return this.petService.getBrPetListFull(pageOptionsDto, token.userId);
+    // BR API는 자신의 펫만 조회
+    pageOptionsDto.filterType = PET_LIST_FILTER_TYPE.MY;
+    return this.petService.getPetListFull(pageOptionsDto, token.userId);
   }
 
   @Get('hatching/year/:year')
