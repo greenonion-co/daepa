@@ -2,14 +2,12 @@ import { Controller, Get, Query } from '@nestjs/common';
 import { ApiExtraModels, ApiResponse, getSchemaPath } from '@nestjs/swagger';
 import { PageMetaDto } from 'src/common/page.dto';
 import { PageDto } from 'src/common/page.dto';
-import { BrAccessOnly } from '../../common/decorators/roles.decorator';
 import { JwtUser } from '../../auth/auth.decorator';
 import { AdoptionService } from '../adoption.service';
 import { AdoptionDto, AdoptionFilterDto } from '../adoption.dto';
 import { JwtUserPayload } from '../../auth/strategies/jwt.strategy';
 
 @Controller('/v1/br/adoption')
-@BrAccessOnly()
 export class BrAdoptionController {
   constructor(private readonly adoptionService: AdoptionService) {}
 

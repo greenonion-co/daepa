@@ -5,11 +5,9 @@ import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtUser } from 'src/auth/auth.decorator';
 import { JwtUserPayload } from 'src/auth/strategies/jwt.strategy';
 import { CommonResponseDto } from 'src/common/response.dto';
-import { BrAccessOnly } from 'src/common/decorators/roles.decorator';
 
 @ApiTags('산란')
 @Controller('v1/layings')
-@BrAccessOnly()
 export class LayingController {
   constructor(private readonly layingService: LayingService) {}
 
