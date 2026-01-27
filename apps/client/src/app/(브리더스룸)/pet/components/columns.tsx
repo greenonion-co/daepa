@@ -73,13 +73,13 @@ export const columns: ColumnDef<PetDto>[] = [
     cell: ({ cell }) => {
       const adoptionData = cell.getValue() as AdoptionDto;
 
-      if (!adoptionData?.status) return <span>미정</span>;
+      if (!adoptionData?.status) return <span className="text-gray-500 dark:text-gray-400">-</span>;
 
       if (adoptionData?.status === PetAdoptionDtoStatus.NFS)
         return <div className="w-fit rounded-md bg-pink-500 px-2 text-white">NFS</div>;
 
       if (adoptionData?.status === PetAdoptionDtoStatus.NONE)
-        return <span className="text-gray-500 dark:text-gray-400">미정</span>;
+        return <span className="text-gray-500 dark:text-gray-400">-</span>;
       return (
         <TooltipText
           title={SALE_STATUS_KOREAN_INFO[adoptionData?.status]}
