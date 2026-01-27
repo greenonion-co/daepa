@@ -1,4 +1,10 @@
-import React, { useRef, useCallback, useState, useMemo, useEffect } from 'react';
+import React, {
+  useRef,
+  useCallback,
+  useState,
+  useMemo,
+  useEffect,
+} from 'react';
 import {
   StyleSheet,
   View,
@@ -47,7 +53,7 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [isAtTop, setIsAtTop] = useState(true); // WebView 스크롤 위치 추적
-  const [pullToRefreshEnabled, setPullToRefreshEnabled] = useState(false); // 기본 비활성화
+  const [pullToRefreshEnabled, setPullToRefreshEnabled] = useState(true); // 기본 활성화
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [topBarVisible, setTopBarVisible] = useState(true); // TopBar 표시 여부
@@ -343,13 +349,13 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
               setCanGoBack(navState.canGoBack);
             }}
             onLoadStart={() => {
-              setPullToRefreshEnabled(false);
               setIsLoading(true);
               setLoadingProgress(0);
             }}
             onLoadEnd={() => {
               setRefreshing(false);
               setIsLoading(false);
+              setPullToRefreshEnabled(true);
             }}
             onLoadProgress={handleLoadProgress}
             onScroll={handleScroll}
@@ -400,13 +406,13 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
             setCanGoBack(navState.canGoBack);
           }}
           onLoadStart={() => {
-            setPullToRefreshEnabled(false);
             setIsLoading(true);
             setLoadingProgress(0);
           }}
           onLoadEnd={() => {
             setRefreshing(false);
             setIsLoading(false);
+            setPullToRefreshEnabled(true);
           }}
           onLoadProgress={handleLoadProgress}
           // 성능 및 기능 설정

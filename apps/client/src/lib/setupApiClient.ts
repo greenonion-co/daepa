@@ -23,7 +23,7 @@ const getApiBaseURL = (): string => {
   }
 
   // 일반 브라우저에서는 localhost 사용
-  return process.env.NEXT_PUBLIC_SERVER_BASE_URL || "http://localhost:4000";
+  return "http://localhost:4000";
 };
 
 // 모듈 로드 시점에 baseURL 설정
