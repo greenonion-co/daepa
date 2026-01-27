@@ -1,0 +1,76 @@
+name: Deploy to Lightsail
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: '배포 환경'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.LIGHTSAIL_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.LIGHTSAIL_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy to Lightsail
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_HOST }} << 'ENDSSH'
+            set -e
+
+            echo "📦 Pulling latest code..."
+            cd ~/daepa
+            git fetch origin main
+            git reset --hard origin/main
+
+            echo "🔨 Building and restarting containers..."
+            docker-compose down
+            docker-compose build --no-cache
+            docker-compose up -d
+
+            echo "⏳ Waiting for container to start..."
+            sleep 10
+
+            echo "🔍 Checking container status..."
+            docker-compose ps
+
+            echo "📋 Recent logs:"
+            docker-compose logs --tail=50 app
+
+            echo "✅ Deployment completed!"
+          ENDSSH
+
+      - name: Health Check
+        run: |
+          echo "🏥 Running health check..."
+          sleep 5
+          response=$(curl -s -o /dev/null -w "%{http_code}" http://${{ secrets.LIGHTSAIL_HOST }}:4000/api || echo "000")
+          if [ "$response" = "200" ] || [ "$response" = "401" ]; then
+            echo "✅ Server is responding (HTTP $response)"
+          else
+            echo "⚠️ Server response: HTTP $response"
+          fi
+
+      - name: Deployment Summary
+        run: |
+          echo "## 🚀 Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Environment:** ${{ github.event.inputs.environment }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch:** ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Deployed by:** ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Time:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
