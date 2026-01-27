@@ -28,7 +28,7 @@ import TooltipText from "../../components/TooltipText";
 export const columns: ColumnDef<PetDto>[] = [
   {
     accessorKey: "isPublic",
-    size: 40,
+    size: 60,
     header: () => {
       return (
         <TooltipText
@@ -119,28 +119,26 @@ export const columns: ColumnDef<PetDto>[] = [
   },
   {
     accessorKey: "morphs",
+    size: 160,
     header: TABLE_HEADER.morphs,
     cell: ({ row }) =>
       row.original.morphs && row.original.morphs.length > 0 ? (
-        <div className="max-w-[80px] break-words">
-          <BadgeList items={row.original.morphs} />
-        </div>
+        <BadgeList items={row.original.morphs} />
       ) : (
         <span className="text-gray-400">-</span>
       ),
   },
   {
     accessorKey: "traits",
+    size: 160,
     header: TABLE_HEADER.traits,
     cell: ({ row }) =>
       row.original.traits && row.original.traits.length > 0 ? (
-        <div className="max-w-[80px] break-words">
-          <BadgeList
-            items={row.original.traits}
-            variant="outline"
-            badgeClassName="bg-white text-black dark:bg-gray-700 dark:text-gray-200"
-          />
-        </div>
+        <BadgeList
+          items={row.original.traits}
+          variant="outline"
+          badgeClassName="bg-white text-black dark:bg-gray-700 dark:text-gray-200"
+        />
       ) : (
         <span className="text-gray-400">-</span>
       ),
