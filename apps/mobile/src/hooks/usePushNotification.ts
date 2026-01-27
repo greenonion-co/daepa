@@ -56,9 +56,9 @@ const usePushNotification = () => {
         });
 
         await AsyncStorage.setItem(FCM_TOKEN_KEY, token);
-        console.log('[FCM] Token registered successfully');
+        if (__DEV__) console.log('[FCM] Token registered successfully');
       } catch (error) {
-        console.error('[FCM] Failed to register token:', error);
+        if (__DEV__) console.error('[FCM] Failed to register token:', error);
       } finally {
         isRegistering.current = false;
       }
@@ -92,9 +92,9 @@ const usePushNotification = () => {
 
   // 알림 권한 요청 및 토큰 등록
   const requestPermissionAndRegisterToken = useCallback(async () => {
-    console.log('[FCM] requestPermissionAndRegisterToken called, accessToken:', !!accessToken);
+    if (__DEV__) console.log('[FCM] requestPermissionAndRegisterToken called');
     if (!accessToken) {
-      console.log('[FCM] No accessToken, skipping');
+      if (__DEV__) console.log('[FCM] No accessToken, skipping');
       return;
     }
 
@@ -107,7 +107,7 @@ const usePushNotification = () => {
           authStatus === messaging.AuthorizationStatus.PROVISIONAL;
 
         if (!enabled) {
-          console.log('[FCM] iOS permission denied');
+          if (__DEV__) console.log('[FCM] iOS permission denied');
           return;
         }
 
@@ -118,20 +118,20 @@ const usePushNotification = () => {
       } else {
         const granted = await requestAndroidPermission();
         if (!granted) {
-          console.log('[FCM] Android permission denied');
+          if (__DEV__) console.log('[FCM] Android permission denied');
           return;
         }
       }
 
       // FCM 토큰 가져오기
       const token = await messaging().getToken();
-      console.log('[FCM] Got token:', token?.substring(0, 20) + '...');
+      if (__DEV__) console.log('[FCM] Got token');
       if (token) {
         // 로그인 시 항상 서버에 토큰 등록 (서버에서 upsert 처리)
         await registerFcmToken(token);
       }
     } catch (error) {
-      console.error('[FCM] Error requesting permission:', error);
+      if (__DEV__) console.error('[FCM] Error requesting permission:', error);
     }
   }, [accessToken, registerFcmToken]);
 
@@ -142,7 +142,7 @@ const usePushNotification = () => {
     }
 
     const unsubscribe = messaging().onTokenRefresh(newToken => {
-      console.log('[FCM] Token refreshed');
+      if (__DEV__) console.log('[FCM] Token refreshed');
       registerFcmToken(newToken);
     });
 
@@ -152,7 +152,7 @@ const usePushNotification = () => {
   // 포그라운드 메시지 리스너
   useEffect(() => {
     const unsubscribe = messaging().onMessage(async remoteMessage => {
-      console.log('[FCM] Foreground message:', remoteMessage);
+      if (__DEV__) console.log('[FCM] Foreground message received');
 
       // 포그라운드에서는 인앱 배너로 알림 표시
       if (remoteMessage.notification) {
@@ -171,8 +171,8 @@ const usePushNotification = () => {
   // 백그라운드/종료 상태에서 알림 클릭 시
   useEffect(() => {
     // 백그라운드에서 알림 클릭으로 앱 열림
-    messaging().onNotificationOpenedApp(remoteMessage => {
-      console.log('[FCM] Notification opened app:', remoteMessage);
+    const unsubscribe = messaging().onNotificationOpenedApp(remoteMessage => {
+      if (__DEV__) console.log('[FCM] Notification opened app');
       const notificationId = remoteMessage.data?.notificationId as string;
       if (notificationId) {
         setPendingNotificationId(notificationId);
@@ -184,13 +184,15 @@ const usePushNotification = () => {
       .getInitialNotification()
       .then(remoteMessage => {
         if (remoteMessage) {
-          console.log('[FCM] App opened from quit state:', remoteMessage);
+          if (__DEV__) console.log('[FCM] App opened from quit state');
           const notificationId = remoteMessage.data?.notificationId as string;
           if (notificationId) {
             setPendingNotificationId(notificationId);
           }
         }
       });
+
+    return () => unsubscribe();
   }, [setPendingNotificationId]);
 
   // 로그인 상태 변경 시 토큰 등록

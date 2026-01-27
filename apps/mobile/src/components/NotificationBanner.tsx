@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -34,6 +34,16 @@ const NotificationBanner: React.FC<NotificationBannerProps> = ({
   const isDark = theme === 'dark';
   const translateY = useRef(new Animated.Value(-150)).current;
 
+  const handleDismiss = useCallback(() => {
+    Animated.timing(translateY, {
+      toValue: -150,
+      duration: 200,
+      useNativeDriver: true,
+    }).start(() => {
+      onDismiss();
+    });
+  }, [translateY, onDismiss]);
+
   useEffect(() => {
     if (visible) {
       // 슬라이드 다운
@@ -51,17 +61,7 @@ const NotificationBanner: React.FC<NotificationBannerProps> = ({
 
       return () => clearTimeout(timer);
     }
-  }, [visible, duration]);
-
-  const handleDismiss = () => {
-    Animated.timing(translateY, {
-      toValue: -150,
-      duration: 200,
-      useNativeDriver: true,
-    }).start(() => {
-      onDismiss();
-    });
-  };
+  }, [visible, duration, translateY, handleDismiss]);
 
   const handlePress = () => {
     handleDismiss();

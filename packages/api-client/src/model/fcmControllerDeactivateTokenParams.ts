@@ -7,5 +7,8 @@
  */
 
 export type FcmControllerDeactivateTokenParams = {
+  /**
+   * 기기 고유 ID
+   */
   deviceId: string;
 };

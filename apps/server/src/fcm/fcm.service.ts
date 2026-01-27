@@ -44,6 +44,12 @@ export class FcmService implements OnModuleInit {
           private_key: string;
         };
 
+        // 이미 초기화된 경우 스킵 (핫 리로드 시 중복 초기화 방지)
+        if (admin.apps.length > 0) {
+          this.logger.log('Firebase Admin already initialized, skipping.');
+          return;
+        }
+
         // cert()에 명시적으로 필요한 필드만 전달
         const credential = admin.credential.cert({
           projectId: serviceAccountJson.project_id,

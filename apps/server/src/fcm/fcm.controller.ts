@@ -1,7 +1,11 @@
 import { Body, Controller, Delete, Post, Query } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { FcmService } from './fcm.service';
-import { RegisterFcmTokenDto, TestPushNotificationDto } from './fcm.dto';
+import {
+  DeactivateTokenQueryDto,
+  RegisterFcmTokenDto,
+  TestPushNotificationDto,
+} from './fcm.dto';
 import { JwtUser } from 'src/auth/auth.decorator';
 import { JwtUserPayload } from 'src/auth/strategies/jwt.strategy';
 import { CommonResponseDto } from 'src/common/response.dto';
@@ -36,9 +40,9 @@ export class FcmController {
   })
   async deactivateToken(
     @JwtUser() token: JwtUserPayload,
-    @Query('deviceId') deviceId: string,
+    @Query() query: DeactivateTokenQueryDto,
   ): Promise<CommonResponseDto> {
-    await this.fcmService.deactivateToken(token.userId, deviceId);
+    await this.fcmService.deactivateToken(token.userId, query.deviceId);
     return {
       success: true,
       message: 'FCM 토큰이 비활성화되었습니다.',

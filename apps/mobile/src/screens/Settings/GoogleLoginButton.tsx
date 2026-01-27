@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { TouchableOpacity, Text, StyleSheet, View } from 'react-native';
 import {
   GoogleSignin,
@@ -37,6 +37,7 @@ const GoogleIcon = () => (
 );
 
 const GoogleLoginButton = () => {
+  const [isLoading, setIsLoading] = useState(false);
   const { navigateByStatus } = useLogin();
 
   const { mutateAsync: mutateGetToken } = useMutation({
@@ -48,6 +49,8 @@ const GoogleLoginButton = () => {
   });
 
   const handleGoogleLogin = async () => {
+    if (isLoading) return;
+    setIsLoading(true);
     Loading.show();
     try {
       await GoogleSignin.hasPlayServices();
@@ -82,6 +85,7 @@ const GoogleLoginButton = () => {
         }
       }
     } finally {
+      setIsLoading(false);
       Loading.close();
     }
   };
@@ -91,6 +95,7 @@ const GoogleLoginButton = () => {
       style={styles.button}
       onPress={handleGoogleLogin}
       activeOpacity={0.8}
+      disabled={isLoading}
     >
       <View style={styles.iconContainer}>
         <GoogleIcon />

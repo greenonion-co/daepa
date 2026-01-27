@@ -36,3 +36,10 @@ export class TestPushNotificationDto {
   @IsNotEmpty()
   body: string;
 }
+
+export class DeactivateTokenQueryDto {
+  @ApiProperty({ description: '기기 고유 ID' })
+  @IsString()
+  @IsNotEmpty()
+  deviceId: string;
+}

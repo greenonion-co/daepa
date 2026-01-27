@@ -43,17 +43,23 @@ export class UserNotificationService {
       userNotificationEntity,
     );
 
-    // 푸시 알림 발송 (비동기로 처리하여 트랜잭션에 영향 없음)
+    return savedNotification;
+  }
+
+  /**
+   * 푸시 알림 발송 (트랜잭션 커밋 후 호출부에서 사용)
+   */
+  async sendPushNotificationForNotification(
+    notification: UserNotificationEntity,
+  ): Promise<void> {
     this.sendPushNotification(
-      savedNotification.id,
-      dto.receiverId,
-      dto.type,
-      dto.detailJson,
+      notification.id,
+      notification.receiverId,
+      notification.type,
+      notification.detailJson,
     ).catch((err) => {
       console.error('Failed to send push notification:', err);
     });
-
-    return savedNotification;
   }
 
   /**

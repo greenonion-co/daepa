@@ -4,7 +4,7 @@ import { userNotificationControllerFindAll } from "@repo/api-client";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 import Loading from "@/components/common/Loading";
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import { useInView } from "react-intersection-observer";
 import { useSearchParams } from "next/navigation";
 
@@ -12,7 +12,7 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import NotificationItem from "./components/NotificationItem";
 import LoadingScreen from "@/app/loading";
 
-const NotificationsPage = () => {
+const NotificationsContent = () => {
   const { ref, inView } = useInView();
   const searchParams = useSearchParams();
   const targetNotificationId = searchParams.get("id");
@@ -81,6 +81,14 @@ const NotificationsPage = () => {
         </div>
       </ScrollArea>
     </div>
+  );
+};
+
+const NotificationsPage = () => {
+  return (
+    <Suspense fallback={<LoadingScreen />}>
+      <NotificationsContent />
+    </Suspense>
   );
 };
 
