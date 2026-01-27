@@ -1,11 +1,11 @@
 "use client";
 
-import { Lock, LockOpen, Mars, Venus, ShieldQuestion } from "lucide-react";
+import { Lock, LockOpen } from "lucide-react";
+import { getSexIcon } from "@/lib/sex-icon";
 import { ColumnDef } from "@tanstack/react-table";
 import { BadgeCheck } from "lucide-react";
 import BadgeList from "../../components/BadgeList";
 import {
-  GENDER_KOREAN_INFO,
   GROWTH_KOREAN_INFO,
   SALE_STATUS_KOREAN_INFO,
   STATUS_MAP,
@@ -147,18 +147,7 @@ export const columns: ColumnDef<PetDto>[] = [
     accessorKey: "sex",
     size: 50,
     header: TABLE_HEADER.sex,
-    cell: ({ row }) => {
-      const sex = row.getValue("sex") as string;
-      if (sex === "M") {
-        return <Mars className={"w-5 stroke-3 text-blue-400"} />;
-      }
-      if (sex === "F") {
-        return <Venus className={"w-5 stroke-3 text-red-400"} />;
-      }
-      return (
-        <div className={"grid w-5 place-items-center text-xl font-bold text-yellow-400"}>?</div>
-      );
-    },
+    cell: ({ row }) => getSexIcon(row.getValue("sex") as string),
   },
   {
     accessorKey: "growth",

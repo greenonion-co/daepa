@@ -1,31 +1,17 @@
 "use client";
 
 import { ChevronRight, Lock } from "lucide-react";
-import { PetDto, PetDtoGrowth, PetDtoSex, PetAdoptionDtoStatus } from "@repo/api-client";
+import { PetDto, PetDtoGrowth, PetAdoptionDtoStatus } from "@repo/api-client";
 import { cn } from "@/lib/utils";
 import PetThumbnail from "@/components/common/PetThumbnail";
 import { GROWTH_KOREAN_INFO, SALE_STATUS_KOREAN_INFO } from "../../constants";
 import BadgeList from "../../components/BadgeList";
 import { useAppRouter } from "@/hooks/useAppRouter";
 import { DateTime } from "luxon";
+import { getSexIcon } from "@/lib/sex-icon";
 
 interface PetCardProps {
   pet: PetDto;
-}
-
-function getSexLabel(sex?: PetDtoSex) {
-  switch (sex) {
-    case PetDtoSex.MALE:
-      return "수컷";
-    case PetDtoSex.FEMALE:
-      return "암컷";
-    default:
-      return null;
-  }
-}
-
-function isMale(sex?: PetDtoSex) {
-  return sex === PetDtoSex.MALE;
 }
 
 export default function PetCard({ pet }: PetCardProps) {
@@ -33,7 +19,7 @@ export default function PetCard({ pet }: PetCardProps) {
 
   const adoptionStatus = pet.adoption?.status;
   const adoptionLabel = adoptionStatus ? SALE_STATUS_KOREAN_INFO[adoptionStatus] : null;
-  const sexLabel = getSexLabel(pet.sex);
+  const sexLabel = getSexIcon(pet.sex, { size: "xs" });
 
   const handleCardClick = () => {
     router.push(`/pet/${pet.petId}`);
@@ -44,7 +30,7 @@ export default function PetCard({ pet }: PetCardProps) {
       <div className="flex gap-2 p-2">
         {/* 이미지 + 성별 */}
         <div className="flex shrink-0 flex-col items-center gap-0.5 self-center">
-          <div className="h-15 w-15 relative">
+          <div className="relative h-15 w-15">
             <PetThumbnail
               petId={pet.petId}
               maxSize={160}
@@ -61,7 +47,7 @@ export default function PetCard({ pet }: PetCardProps) {
             </div>
             {/* 분양 상태 뱃지 */}
             {adoptionStatus && adoptionStatus !== PetAdoptionDtoStatus.NONE && (
-              <div className="absolute -right-1 -top-2">
+              <div className="absolute -top-2 -right-1">
                 <span
                   className={cn(
                     "rounded-md px-1.5 py-0.5 text-[10px] font-semibold shadow-sm",
@@ -84,7 +70,9 @@ export default function PetCard({ pet }: PetCardProps) {
             <span
               className={cn(
                 "text-[10px] font-[500]",
-                isMale(pet.sex) ? "text-blue-500" : "text-red-500",
+                (pet.sex === "M" && "text-blue-500") ||
+                  (pet.sex === "F" && "text-red-500") ||
+                  "text-amber-500",
               )}
             >
               {sexLabel}

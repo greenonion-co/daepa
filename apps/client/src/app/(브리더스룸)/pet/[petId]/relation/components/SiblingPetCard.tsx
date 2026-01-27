@@ -13,6 +13,7 @@ import { useUserStore } from "@/app/(브리더스룸)/store/user";
 import { cn, formatPrice } from "@/lib/utils";
 import BadgeList from "@/app/(브리더스룸)/components/BadgeList";
 import PetThumbnail from "@/components/common/PetThumbnail";
+import { getSexIcon } from "@/lib/sex-icon";
 
 /** 기본 펫 정보 인터페이스 */
 interface BasePetInfo {
@@ -52,19 +53,6 @@ function isHiddenPet(pet: PetData): pet is PetHiddenStatusDto {
 
 function hasOwner(pet: PetData): pet is PetWithOwner {
   return "owner" in pet && pet.owner !== undefined;
-}
-
-function getSexLabel(sex?: string) {
-  switch (sex) {
-    case "MALE":
-    case SiblingPetDetailDtoSex.MALE:
-      return "♂";
-    case "FEMALE":
-    case SiblingPetDetailDtoSex.FEMALE:
-      return "♀";
-    default:
-      return null;
-  }
 }
 
 function isMale(sex?: string) {
@@ -109,7 +97,7 @@ export default function SiblingPetCard({
     );
   }
 
-  const sexLabel = getSexLabel(pet.sex);
+  const sexLabel = getSexIcon(pet.sex, { size: "xs" });
   const isMyPet = hasOwner(pet) && pet.owner.userId === user?.userId;
   const ownerName = hasOwner(pet) ? pet.owner.name : null;
   const isDeleted = pet.isDeleted;
@@ -126,7 +114,7 @@ export default function SiblingPetCard({
         <PetThumbnail maxSize={150} petId={pet.petId} />
 
         {isDeleted ? (
-          <div className="absolute bottom-1 right-1 rounded-md bg-red-600 px-1 py-0.5 text-[10px] font-bold text-white">
+          <div className="absolute right-1 bottom-1 rounded-md bg-red-600 px-1 py-0.5 text-[10px] font-bold text-white">
             삭제됨
           </div>
         ) : null}
@@ -186,7 +174,7 @@ export default function SiblingPetCard({
       <div className="relative h-14 w-14 shrink-0 rounded-xl bg-gray-100 dark:bg-gray-800">
         <PetThumbnail maxSize={150} petId={pet.petId} />
         {isDeleted && (
-          <div className="absolute -right-1 -top-1 rounded-md bg-red-600 px-1 py-0.5 text-[8px] font-bold text-white">
+          <div className="absolute -top-1 -right-1 rounded-md bg-red-600 px-1 py-0.5 text-[8px] font-bold text-white">
             삭제됨
           </div>
         )}
