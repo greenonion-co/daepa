@@ -28,7 +28,7 @@ import TooltipText from "../../components/TooltipText";
 export const columns: ColumnDef<PetDto>[] = [
   {
     accessorKey: "isPublic",
-    size: 25,
+    size: 40,
     header: () => {
       return (
         <TooltipText
@@ -147,6 +147,7 @@ export const columns: ColumnDef<PetDto>[] = [
   },
   {
     accessorKey: "sex",
+    size: 50,
     header: TABLE_HEADER.sex,
     cell: ({ row }) => {
       const sex = row.getValue("sex") as string;
@@ -162,6 +163,7 @@ export const columns: ColumnDef<PetDto>[] = [
   },
   {
     accessorKey: "growth",
+    size: 60,
     header: TABLE_HEADER.growth,
     cell: ({ row }) => {
       const growth = row.getValue("growth") as PetDtoGrowth;
@@ -171,7 +173,7 @@ export const columns: ColumnDef<PetDto>[] = [
   {
     accessorKey: "weight",
     header: TABLE_HEADER.weight,
-    size: 40,
+    size: 60,
     cell: ({ row }) => (
       <div className="capitalize">
         {row.original.weight ? (
@@ -184,6 +186,7 @@ export const columns: ColumnDef<PetDto>[] = [
   },
   {
     accessorKey: "hatchingDate",
+    size: 80,
     header: TABLE_HEADER.hatchingDate,
     cell: ({ row }) => {
       const hatchingDateRaw = row.getValue("hatchingDate") as string | undefined;
@@ -192,7 +195,7 @@ export const columns: ColumnDef<PetDto>[] = [
       return (
         <div className="capitalize">
           {hatchingDate.isValid ? (
-            hatchingDate.toFormat("yy.M.d")
+            hatchingDate.toFormat("yy.MM.dd")
           ) : (
             <span className={"text-gray-400"}>-</span>
           )}
