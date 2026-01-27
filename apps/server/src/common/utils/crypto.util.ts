@@ -6,7 +6,7 @@ const AUTH_TAG_LENGTH = 16;
 const ENCODING = 'base64';
 
 function getSecretKey(): Buffer {
-  const secret = 'DAEPA_WAS_ADOPTED_ON_HANGLENAL';
+  const secret = process.env.OAUTH_REFRESH_SECRET;
   if (!secret) {
     throw new Error(
       'OAUTH_REFRESH_SECRET environment variable is not configured',
