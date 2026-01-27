@@ -6,20 +6,10 @@ import { DateTime } from "luxon";
 import PetThumbnail from "@/components/common/PetThumbnail";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { getSexIcon } from "@/lib/sex-icon";
 
 interface FeedPetCardProps {
   pet: PetDto;
-}
-
-function getSexLabel(sex?: PetDtoSex) {
-  switch (sex) {
-    case PetDtoSex.MALE:
-      return "수컷";
-    case PetDtoSex.FEMALE:
-      return "암컷";
-    default:
-      return null;
-  }
 }
 
 function isMale(sex?: PetDtoSex) {
@@ -27,7 +17,7 @@ function isMale(sex?: PetDtoSex) {
 }
 
 export default function FeedPetCard({ pet }: FeedPetCardProps) {
-  const sexLabel = getSexLabel(pet.sex);
+  const sexLabel = getSexIcon(pet.sex, { size: "sm" });
 
   return (
     <Link href={`/pet/${pet.petId}`} className="block">

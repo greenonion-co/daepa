@@ -1,11 +1,11 @@
 "use client";
 
 import { Lock, LockOpen } from "lucide-react";
+import { getSexIcon } from "@/lib/sex-icon";
 import { ColumnDef } from "@tanstack/react-table";
 import { BadgeCheck } from "lucide-react";
 import BadgeList from "../../components/BadgeList";
 import {
-  GENDER_KOREAN_INFO,
   GROWTH_KOREAN_INFO,
   SALE_STATUS_KOREAN_INFO,
   STATUS_MAP,
@@ -28,7 +28,7 @@ import TooltipText from "../../components/TooltipText";
 export const columns: ColumnDef<PetDto>[] = [
   {
     accessorKey: "isPublic",
-    size: 25,
+    size: 60,
     header: () => {
       return (
         <TooltipText
@@ -73,13 +73,13 @@ export const columns: ColumnDef<PetDto>[] = [
     cell: ({ cell }) => {
       const adoptionData = cell.getValue() as AdoptionDto;
 
-      if (!adoptionData?.status) return <span>미정</span>;
+      if (!adoptionData?.status) return <span className="text-gray-500 dark:text-gray-400">-</span>;
 
       if (adoptionData?.status === PetAdoptionDtoStatus.NFS)
         return <div className="w-fit rounded-md bg-pink-500 px-2 text-white">NFS</div>;
 
       if (adoptionData?.status === PetAdoptionDtoStatus.NONE)
-        return <span className="text-gray-500 dark:text-gray-400">미정</span>;
+        return <span className="text-gray-500 dark:text-gray-400">-</span>;
       return (
         <TooltipText
           title={SALE_STATUS_KOREAN_INFO[adoptionData?.status]}
@@ -119,49 +119,39 @@ export const columns: ColumnDef<PetDto>[] = [
   },
   {
     accessorKey: "morphs",
+    size: 160,
     header: TABLE_HEADER.morphs,
     cell: ({ row }) =>
       row.original.morphs && row.original.morphs.length > 0 ? (
-        <div className="max-w-[80px] break-words">
-          <BadgeList items={row.original.morphs} />
-        </div>
+        <BadgeList items={row.original.morphs} />
       ) : (
         <span className="text-gray-400">-</span>
       ),
   },
   {
     accessorKey: "traits",
+    size: 160,
     header: TABLE_HEADER.traits,
     cell: ({ row }) =>
       row.original.traits && row.original.traits.length > 0 ? (
-        <div className="max-w-[80px] break-words">
-          <BadgeList
-            items={row.original.traits}
-            variant="outline"
-            badgeClassName="bg-white text-black dark:bg-gray-700 dark:text-gray-200"
-          />
-        </div>
+        <BadgeList
+          items={row.original.traits}
+          variant="outline"
+          badgeClassName="bg-white text-black dark:bg-gray-700 dark:text-gray-200"
+        />
       ) : (
         <span className="text-gray-400">-</span>
       ),
   },
   {
     accessorKey: "sex",
+    size: 50,
     header: TABLE_HEADER.sex,
-    cell: ({ row }) => {
-      const sex = row.getValue("sex") as string;
-      const isMale = sex === "MALE";
-      return (
-        <div
-          className={`font-semibold capitalize ${isMale ? "text-blue-500 dark:text-blue-400" : "text-red-500 dark:text-red-400"}`}
-        >
-          {GENDER_KOREAN_INFO[sex as keyof typeof GENDER_KOREAN_INFO]}
-        </div>
-      );
-    },
+    cell: ({ row }) => getSexIcon(row.getValue("sex") as string),
   },
   {
     accessorKey: "growth",
+    size: 60,
     header: TABLE_HEADER.growth,
     cell: ({ row }) => {
       const growth = row.getValue("growth") as PetDtoGrowth;
@@ -171,7 +161,7 @@ export const columns: ColumnDef<PetDto>[] = [
   {
     accessorKey: "weight",
     header: TABLE_HEADER.weight,
-    size: 40,
+    size: 60,
     cell: ({ row }) => (
       <div className="capitalize">
         {row.original.weight ? (
@@ -184,6 +174,7 @@ export const columns: ColumnDef<PetDto>[] = [
   },
   {
     accessorKey: "hatchingDate",
+    size: 80,
     header: TABLE_HEADER.hatchingDate,
     cell: ({ row }) => {
       const hatchingDateRaw = row.getValue("hatchingDate") as string | undefined;
@@ -192,7 +183,7 @@ export const columns: ColumnDef<PetDto>[] = [
       return (
         <div className="capitalize">
           {hatchingDate.isValid ? (
-            hatchingDate.toFormat("yy.M.d")
+            hatchingDate.toFormat("yy.MM.dd")
           ) : (
             <span className={"text-gray-400"}>-</span>
           )}

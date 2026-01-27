@@ -7,7 +7,6 @@ import {
   Patch,
   Query,
 } from '@nestjs/common';
-import { BrAccessOnly } from 'src/common/decorators/roles.decorator';
 import {
   MatingByParentsDto,
   PairDetailDto,
@@ -22,7 +21,6 @@ import { PairService } from './pair.service';
 import { CommonResponseDto } from 'src/common/response.dto';
 
 @Controller('v1/pairs')
-@BrAccessOnly()
 export class PairController {
   constructor(private readonly pairService: PairService) {}
 

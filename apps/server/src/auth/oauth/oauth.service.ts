@@ -12,6 +12,7 @@ import { OauthDto } from './oauth.dto';
 import { OAUTH_PROVIDER } from '../auth.constants';
 import { EntityManager } from 'typeorm';
 import type { JWTPayload as JoseJWTPayload } from 'jose';
+import { encrypt, decryptSafe } from 'src/common/utils/crypto.util';
 
 type KakaoDisconnectResponse = {
   id: number;
@@ -77,11 +78,16 @@ export class OauthService {
     manager?: EntityManager,
   ) {
     const run = async (em: EntityManager) => {
+      // OAuth provider refresh token 암호화하여 저장
+      const encryptedRefreshToken = providerInfo.refreshToken
+        ? encrypt(providerInfo.refreshToken)
+        : undefined;
+
       await em.insert(OauthEntity, {
         email: providerInfo.email,
         provider: providerInfo.provider,
         providerId: providerInfo.providerId,
-        refreshToken: providerInfo.refreshToken,
+        refreshToken: encryptedRefreshToken,
         userId: providerInfo.userId,
       });
     };
@@ -156,13 +162,16 @@ export class OauthService {
       throw new BadRequestException('Google OAuth RefreshToken Not Found');
     }
 
+    // 암호화된 refresh token 복호화
+    const decryptedRefreshToken = decryptSafe(oauth.refreshToken);
+
     try {
       const response = await firstValueFrom(
         this.httpService
           .post<unknown>(
             'https://oauth2.googleapis.com/revoke',
             {
-              token: oauth.refreshToken,
+              token: decryptedRefreshToken,
             },
             {
               headers: {
@@ -363,10 +372,13 @@ export class OauthService {
     try {
       const clientSecret = await this.generateAppleClientSecret();
 
+      // 암호화된 refresh token 복호화
+      const decryptedRefreshToken = decryptSafe(oauth.refreshToken);
+
       const form = new URLSearchParams();
       form.append('client_id', process.env.NEXT_PUBLIC_APPLE_CLIENT_ID ?? '');
       form.append('client_secret', clientSecret);
-      form.append('token', oauth.refreshToken);
+      form.append('token', decryptedRefreshToken);
       form.append('token_type_hint', 'refresh_token');
 
       const response = await firstValueFrom(

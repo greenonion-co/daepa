@@ -22,6 +22,7 @@ import { UserDto } from 'src/user/user.dto';
 import { DataSource, EntityManager } from 'typeorm';
 import { OAUTH_PROVIDER } from './auth.constants';
 import { DateTime } from 'luxon';
+import { encrypt } from 'src/common/utils/crypto.util';
 
 export type ValidatedUser = {
   userId: string;
@@ -135,8 +136,9 @@ export class AuthService {
         );
       }
 
-      // refreshToken이 전달된 경우 provider와 무관하게 업데이트
+      // refreshToken이 전달된 경우 provider와 무관하게 업데이트 (암호화하여 저장)
       if (providerInfo.refreshToken) {
+        const encryptedRefreshToken = encrypt(providerInfo.refreshToken);
         await this.oauthRepository.update(
           {
             email: providerInfo.email,
@@ -144,7 +146,7 @@ export class AuthService {
             providerId: providerInfo.providerId,
           },
           {
-            refreshToken: providerInfo.refreshToken,
+            refreshToken: encryptedRefreshToken,
           },
         );
       }

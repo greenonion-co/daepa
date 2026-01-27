@@ -1,6 +1,5 @@
 import { Controller, Get, Query } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { BrAccessOnly } from 'src/common/decorators/roles.decorator';
 import { JwtUser } from 'src/auth/auth.decorator';
 import { JwtUserPayload } from 'src/auth/strategies/jwt.strategy';
 import { StatisticsService } from './statistics.service';
@@ -13,7 +12,6 @@ import {
 
 @Controller('v1/statistics')
 @ApiTags('Statistics')
-@BrAccessOnly()
 export class StatisticsController {
   constructor(private readonly statisticsService: StatisticsService) {}
 
