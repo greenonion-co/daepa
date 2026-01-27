@@ -21,6 +21,7 @@ import type {
   CreatePetDto,
   DeletePetDto,
   DeleteUserNotificationDto,
+  FcmControllerDeactivateTokenParams,
   GoogleNativeLoginRequestDto,
   KakaoNativeLoginRequestDto,
   PairControllerGetPairListParams,
@@ -30,9 +31,11 @@ import type {
   PetControllerGetDeletedPetsParams,
   PetControllerGetParentsByPetIdParams,
   PetControllerGetSiblingsByPetIdParams,
+  RegisterFcmTokenDto,
   SaveFilesDto,
   StatisticsControllerGetAdoptionStatisticsParams,
   StatisticsControllerGetPairStatisticsParams,
+  TestPushNotificationDto,
   UnlinkParentDto,
   UpdateAdoptionDto,
   UpdateLayingDto,
@@ -587,6 +590,35 @@ export const statisticsControllerGetAdoptionStatistics = (
   });
 };
 
+export const fcmControllerRegisterToken = (registerFcmTokenDto: RegisterFcmTokenDto) => {
+  return useCustomInstance<CommonResponseDto>({
+    url: `/api/v1/fcm/token`,
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    data: registerFcmTokenDto,
+  });
+};
+
+export const fcmControllerDeactivateToken = (params: FcmControllerDeactivateTokenParams) => {
+  return useCustomInstance<CommonResponseDto>({
+    url: `/api/v1/fcm/token`,
+    method: "DELETE",
+    params,
+  });
+};
+
+/**
+ * @summary 푸시 알림 테스트 (현재 로그인한 사용자에게 전송)
+ */
+export const fcmControllerSendTestPush = (testPushNotificationDto: TestPushNotificationDto) => {
+  return useCustomInstance<CommonResponseDto>({
+    url: `/api/v1/fcm/test`,
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    data: testPushNotificationDto,
+  });
+};
+
 export type PetControllerFindAllResult = NonNullable<
   Awaited<ReturnType<typeof petControllerFindAll>>
 >;
@@ -754,6 +786,15 @@ export type StatisticsControllerGetPairStatisticsResult = NonNullable<
 >;
 export type StatisticsControllerGetAdoptionStatisticsResult = NonNullable<
   Awaited<ReturnType<typeof statisticsControllerGetAdoptionStatistics>>
+>;
+export type FcmControllerRegisterTokenResult = NonNullable<
+  Awaited<ReturnType<typeof fcmControllerRegisterToken>>
+>;
+export type FcmControllerDeactivateTokenResult = NonNullable<
+  Awaited<ReturnType<typeof fcmControllerDeactivateToken>>
+>;
+export type FcmControllerSendTestPushResult = NonNullable<
+  Awaited<ReturnType<typeof fcmControllerSendTestPush>>
 >;
 
 export const getPetControllerFindAllResponsePetParentDtoMock = (
@@ -4360,6 +4401,30 @@ export const getStatisticsControllerGetAdoptionStatisticsResponseMock = (
   ...overrideResponse,
 });
 
+export const getFcmControllerRegisterTokenResponseMock = (
+  overrideResponse: Partial<CommonResponseDto> = {},
+): CommonResponseDto => ({
+  success: faker.datatype.boolean(),
+  message: faker.string.alpha(20),
+  ...overrideResponse,
+});
+
+export const getFcmControllerDeactivateTokenResponseMock = (
+  overrideResponse: Partial<CommonResponseDto> = {},
+): CommonResponseDto => ({
+  success: faker.datatype.boolean(),
+  message: faker.string.alpha(20),
+  ...overrideResponse,
+});
+
+export const getFcmControllerSendTestPushResponseMock = (
+  overrideResponse: Partial<CommonResponseDto> = {},
+): CommonResponseDto => ({
+  success: faker.datatype.boolean(),
+  message: faker.string.alpha(20),
+  ...overrideResponse,
+});
+
 export const getPetControllerFindAllMockHandler = (
   overrideResponse?:
     | PetControllerFindAll200
@@ -5627,6 +5692,75 @@ export const getStatisticsControllerGetAdoptionStatisticsMockHandler = (
     );
   });
 };
+
+export const getFcmControllerRegisterTokenMockHandler = (
+  overrideResponse?:
+    | CommonResponseDto
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<CommonResponseDto> | CommonResponseDto),
+) => {
+  return http.post("*/api/v1/fcm/token", async (info) => {
+    await delay(1000);
+
+    return new HttpResponse(
+      JSON.stringify(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getFcmControllerRegisterTokenResponseMock(),
+      ),
+      { status: 201, headers: { "Content-Type": "application/json" } },
+    );
+  });
+};
+
+export const getFcmControllerDeactivateTokenMockHandler = (
+  overrideResponse?:
+    | CommonResponseDto
+    | ((
+        info: Parameters<Parameters<typeof http.delete>[1]>[0],
+      ) => Promise<CommonResponseDto> | CommonResponseDto),
+) => {
+  return http.delete("*/api/v1/fcm/token", async (info) => {
+    await delay(1000);
+
+    return new HttpResponse(
+      JSON.stringify(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getFcmControllerDeactivateTokenResponseMock(),
+      ),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+  });
+};
+
+export const getFcmControllerSendTestPushMockHandler = (
+  overrideResponse?:
+    | CommonResponseDto
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<CommonResponseDto> | CommonResponseDto),
+) => {
+  return http.post("*/api/v1/fcm/test", async (info) => {
+    await delay(1000);
+
+    return new HttpResponse(
+      JSON.stringify(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getFcmControllerSendTestPushResponseMock(),
+      ),
+      { status: 201, headers: { "Content-Type": "application/json" } },
+    );
+  });
+};
 export const getProjectDaepaAPIMock = () => [
   getPetControllerFindAllMockHandler(),
   getPetControllerCreateMockHandler(),
@@ -5684,4 +5818,7 @@ export const getProjectDaepaAPIMock = () => [
   getPetImageControllerSavePetImagesMockHandler(),
   getStatisticsControllerGetPairStatisticsMockHandler(),
   getStatisticsControllerGetAdoptionStatisticsMockHandler(),
+  getFcmControllerRegisterTokenMockHandler(),
+  getFcmControllerDeactivateTokenMockHandler(),
+  getFcmControllerSendTestPushMockHandler(),
 ];

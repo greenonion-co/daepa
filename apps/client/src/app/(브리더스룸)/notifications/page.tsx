@@ -6,6 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import Loading from "@/components/common/Loading";
 import { useEffect } from "react";
 import { useInView } from "react-intersection-observer";
+import { useSearchParams } from "next/navigation";
 
 import { useInfiniteQuery } from "@tanstack/react-query";
 import NotificationItem from "./components/NotificationItem";
@@ -13,6 +14,8 @@ import LoadingScreen from "@/app/loading";
 
 const NotificationsPage = () => {
   const { ref, inView } = useInView();
+  const searchParams = useSearchParams();
+  const targetNotificationId = searchParams.get("id");
 
   const {
     data = [],
@@ -61,7 +64,11 @@ const NotificationsPage = () => {
         <div className="flex flex-col items-center gap-2 pt-0">
           <div className="flex w-full flex-col gap-2">
             {data.map((item) => (
-              <NotificationItem key={item.id} item={item} />
+              <NotificationItem
+                key={item.id}
+                item={item}
+                defaultOpen={targetNotificationId === String(item.id)}
+              />
             ))}
           </div>
 

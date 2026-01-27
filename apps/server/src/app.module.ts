@@ -53,6 +53,9 @@ import { PetRelationEntity } from './pet_relation/pet_relation.entity';
 import { PetRelationService } from './pet_relation/pet_relation.service';
 import { StatisticsController } from './statistics/statistics.controller';
 import { StatisticsService } from './statistics/statistics.service';
+import { FcmTokenEntity } from './fcm/fcm_token.entity';
+import { FcmService } from './fcm/fcm.service';
+import { FcmController } from './fcm/fcm.controller';
 
 const ENTITIES = [
   UserEntity,
@@ -68,6 +71,7 @@ const ENTITIES = [
   PetDetailEntity,
   EggDetailEntity,
   PetRelationEntity,
+  FcmTokenEntity,
 ];
 
 @Module({
@@ -113,6 +117,7 @@ const ENTITIES = [
     PairController,
     PetImageController,
     StatisticsController,
+    FcmController,
   ],
   providers: [
     AppService,
@@ -133,6 +138,7 @@ const ENTITIES = [
     PairService,
     PetRelationService,
     StatisticsService,
+    FcmService,
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,

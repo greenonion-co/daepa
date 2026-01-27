@@ -158,9 +158,11 @@ export class AuthController {
   ) {
     const { idToken } = body;
 
-    const validatedUser = await this.authService.validateGoogleNativeAndGetUser({
-      idToken,
-    });
+    const validatedUser = await this.authService.validateGoogleNativeAndGetUser(
+      {
+        idToken,
+      },
+    );
 
     const jwtRefreshToken = await this.authService.createJwtRefreshToken(
       validatedUser.userId,
