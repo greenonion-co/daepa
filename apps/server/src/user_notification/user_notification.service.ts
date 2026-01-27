@@ -49,10 +49,10 @@ export class UserNotificationService {
   /**
    * 푸시 알림 발송 (트랜잭션 커밋 후 호출부에서 사용)
    */
-  async sendPushNotificationForNotification(
+  sendPushNotificationForNotification(
     notification: UserNotificationEntity,
-  ): Promise<void> {
-    this.sendPushNotification(
+  ): void {
+    void this.sendPushNotification(
       notification.id,
       notification.receiverId,
       notification.type,

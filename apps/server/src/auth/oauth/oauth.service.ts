@@ -226,7 +226,8 @@ export class OauthService {
       );
 
       const googleClientIdIos = process.env.GOOGLE_CLIENT_ID_IOS?.trim();
-      const googleClientIdAndroid = process.env.GOOGLE_CLIENT_ID_ANDROID?.trim();
+      const googleClientIdAndroid =
+        process.env.GOOGLE_CLIENT_ID_ANDROID?.trim();
       const googleClientIdWeb = process.env.GOOGLE_CLIENT_ID_WEB?.trim();
 
       const audiences = [

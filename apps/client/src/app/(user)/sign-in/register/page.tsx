@@ -14,7 +14,6 @@ import { AxiosError } from "axios";
 import { DUPLICATE_CHECK_STATUS } from "@/app/(브리더스룸)/constants";
 import NameInput from "@/app/(브리더스룸)/components/NameInput";
 import { useNameStore } from "@/app/(브리더스룸)/store/name";
-import { useIsMobile } from "@/hooks/useMobile";
 
 const NICKNAME_MAX_LENGTH = 15;
 const NICKNAME_MIN_LENGTH = 2;
@@ -41,7 +40,6 @@ type RegisterFormData = z.infer<typeof registerSchema>;
 
 const RegisterPage = () => {
   const router = useRouter();
-  const isMobile = useIsMobile();
   const { duplicateCheckStatus } = useNameStore();
 
   const { mutateAsync: mutateRegister, isPending: isRegisterPending } = useMutation({
