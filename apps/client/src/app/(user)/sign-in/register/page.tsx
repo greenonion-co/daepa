@@ -12,10 +12,8 @@ import { useMutation } from "@tanstack/react-query";
 import { userControllerCreateInitUserInfo } from "@repo/api-client";
 import { AxiosError } from "axios";
 import { DUPLICATE_CHECK_STATUS } from "@/app/(브리더스룸)/constants";
-import Image from "next/image";
 import NameInput from "@/app/(브리더스룸)/components/NameInput";
 import { useNameStore } from "@/app/(브리더스룸)/store/name";
-import { useIsMobile } from "@/hooks/useMobile";
 
 const NICKNAME_MAX_LENGTH = 15;
 const NICKNAME_MIN_LENGTH = 2;
@@ -42,7 +40,6 @@ type RegisterFormData = z.infer<typeof registerSchema>;
 
 const RegisterPage = () => {
   const router = useRouter();
-  const isMobile = useIsMobile();
   const { duplicateCheckStatus } = useNameStore();
 
   const { mutateAsync: mutateRegister, isPending: isRegisterPending } = useMutation({
@@ -105,30 +102,23 @@ const RegisterPage = () => {
   };
 
   const inputClassName = cn(
-    `text-[15px] w-full h-9 pr-1 px-3 text-left focus:border-gray-400 focus:border-[1.8px] border-[1.2px] border rounded-md border-input focus:outline-none focus:ring-0 text-gray-400 dark:text-gray-400
-    transition-all duration-300 ease-in-out placeholder:text-gray-400 flex items-center `,
-    errors.nickname?.message && "border-red-500 focus:border-red-500",
+    `text-[16px] w-full h-9 pr-1 px-3 text-left focus:border-gray-400 focus:border-[1.8px] border-[1.2px] border rounded-md border-input focus:outline-none focus:ring-0 text-gray-700
+    transition-all duration-300 ease-in-out placeholder:text-gray-400 flex items-center
+    dark:bg-gray-800 dark:border-gray-600 dark:text-white dark:placeholder:text-gray-500 dark:focus:border-gray-400`,
+    errors.nickname?.message && "border-red-500 focus:border-red-500 dark:border-red-500",
   );
 
   return (
-    <div className="flex min-h-screen w-full items-center justify-center bg-transparent bg-gradient-to-b from-[#e5cf94] to-white dark:bg-black">
+    <div className="dark:bg-background flex min-h-screen w-full items-center justify-center bg-gradient-to-b from-[#e5cf94] to-white dark:bg-none">
       <div className="my-5 w-[90vw] max-w-md">
         <div className="mb-5 text-center text-3xl font-bold text-gray-800/90 dark:text-white">
           회원정보 설정
-          <div className="text-[14px] font-[500] text-gray-600 dark:text-gray-400">
-            서비스 이용을 위해 필요한 정보를 설정해주세요
+          <div className="mt-1 text-[14px] font-[500] text-gray-600 dark:text-gray-400">
+            회원가입 완료를 위해 필요한 정보를 설정해주세요
           </div>
         </div>
 
-        <div className="rounded-3xl bg-gradient-to-b from-white to-gray-50 p-5 dark:border dark:border-gray-700 dark:bg-gray-800/80">
-          <div
-            className={cn(
-              "flex h-full w-full items-center justify-center py-5",
-              isMobile && "py-2",
-            )}
-          >
-            <Image src="/assets/lizard.png" alt="회원정보 설정 로고" width={100} height={100} />
-          </div>
+        <div className="rounded-3xl bg-gradient-to-b from-white to-gray-50 p-5 pt-10 dark:bg-[#18171C] dark:bg-none">
           <div>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
               {/* 닉네임 입력 */}
@@ -193,7 +183,7 @@ const RegisterPage = () => {
               </div>
 
               {/* 닉네임 규칙 안내 */}
-              <div className="space-y-2 rounded-lg bg-gray-50 p-2 dark:bg-gray-700/50">
+              <div className="space-y-2 rounded-lg p-2">
                 <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">
                   닉네임/업체명 규칙
                 </h4>
@@ -213,7 +203,7 @@ const RegisterPage = () => {
                   isRegisterPending ||
                   duplicateCheckStatus !== DUPLICATE_CHECK_STATUS.AVAILABLE
                 }
-                className="h-12 w-full rounded-xl bg-black text-base font-bold transition-all duration-200 hover:bg-blue-700 disabled:bg-gray-300 disabled:text-gray-500"
+                className="h-12 w-full rounded-xl bg-black text-base font-bold text-white transition-all duration-200 hover:bg-gray-800 disabled:bg-gray-300 disabled:text-gray-500 dark:bg-white dark:text-black dark:hover:bg-gray-200 dark:disabled:bg-gray-700 dark:disabled:text-gray-500"
               >
                 {isRegisterPending ? (
                   <div className="flex items-center gap-2">

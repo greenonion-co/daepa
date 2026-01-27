@@ -214,6 +214,55 @@ export class OauthService {
     }
   }
 
+  async verifyGoogleIdToken(idToken: string): Promise<{
+    sub: string;
+    email: string;
+  }> {
+    try {
+      const { jwtVerify, createRemoteJWKSet } = await import('jose');
+
+      const jwks = createRemoteJWKSet(
+        new URL('https://www.googleapis.com/oauth2/v3/certs'),
+      );
+
+      const googleClientIdIos = process.env.GOOGLE_CLIENT_ID_IOS?.trim();
+      const googleClientIdAndroid =
+        process.env.GOOGLE_CLIENT_ID_ANDROID?.trim();
+      const googleClientIdWeb = process.env.GOOGLE_CLIENT_ID_WEB?.trim();
+
+      const audiences = [
+        googleClientIdIos,
+        googleClientIdAndroid,
+        googleClientIdWeb,
+      ].filter(Boolean) as string[];
+
+      if (audiences.length === 0) {
+        throw new BadRequestException(
+          'Server misconfiguration: At least one GOOGLE_CLIENT_ID is required for Google ID token verification',
+        );
+      }
+
+      const { payload } = await jwtVerify(idToken, jwks, {
+        issuer: ['https://accounts.google.com', 'accounts.google.com'],
+        audience: audiences,
+      });
+
+      const sub = payload.sub;
+      const email = (payload as Record<string, unknown>).email as
+        | string
+        | undefined;
+
+      if (!sub || !email) {
+        throw new BadRequestException('Invalid Google ID token payload');
+      }
+
+      return { sub, email };
+    } catch (error) {
+      this.logger.error(error);
+      throw error;
+    }
+  }
+
   async exchangeAppleAuthorizationCode(
     authorizationCode: string,
   ): Promise<string | undefined> {

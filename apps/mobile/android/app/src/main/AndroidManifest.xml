@@ -1,5 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
   <uses-permission android:name="android.permission.INTERNET" />
+  <!-- 푸시 알림 권한 (Android 13+) -->
+  <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
   <application
     android:name=".MainApplication"
@@ -36,6 +38,14 @@
           android:scheme="kakao${KAKAO_APP_KEY}" />
       </intent-filter>
     </activity>
+
+    <!-- 푸시 알림 기본 채널 설정 -->
+    <meta-data
+      android:name="com.google.firebase.messaging.default_notification_channel_id"
+      android:value="default" />
+    <meta-data
+      android:name="com.google.firebase.messaging.default_notification_icon"
+      android:resource="@mipmap/ic_launcher" />
   </application>
 
 </manifest>

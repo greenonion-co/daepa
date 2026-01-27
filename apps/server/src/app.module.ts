@@ -53,6 +53,8 @@ import { PetRelationEntity } from './pet_relation/pet_relation.entity';
 import { PetRelationService } from './pet_relation/pet_relation.service';
 import { StatisticsController } from './statistics/statistics.controller';
 import { StatisticsService } from './statistics/statistics.service';
+import { FcmModule } from './fcm/fcm.module';
+import { FcmTokenEntity } from './fcm/fcm_token.entity';
 
 const ENTITIES = [
   UserEntity,
@@ -68,6 +70,7 @@ const ENTITIES = [
   PetDetailEntity,
   EggDetailEntity,
   PetRelationEntity,
+  FcmTokenEntity,
 ];
 
 @Module({
@@ -97,6 +100,7 @@ const ENTITIES = [
       secret: process.env.JWT_SECRET ?? '',
       signOptions: { expiresIn: '1h' },
     }),
+    FcmModule,
   ],
   controllers: [
     AppController,

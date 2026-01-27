@@ -41,7 +41,7 @@ const Profile = () => {
       });
       useAuthStore.getState().clear();
       Toast.show('회원 탈퇴에 성공했습니다.');
-    } catch (error) {
+    } catch {
       Toast.show('회원 탈퇴에 실패했습니다. 다시 시도해주세요.');
     } finally {
       Loading.close();
@@ -73,7 +73,7 @@ const Profile = () => {
       });
 
       Toast.show('로그아웃에 성공했습니다.');
-    } catch (error) {
+    } catch {
       Toast.show('로그아웃에 실패했습니다. 다시 시도해주세요.');
     } finally {
       Loading.close();

@@ -1,13 +1,21 @@
 import React from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { StyleSheet, View, Text, Image } from 'react-native';
+import { StyleSheet, View, Text, Image, useColorScheme } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import KakaoLoginButton from '../Settings/KakaoLoginButton';
 import AppleLoginButton from '../Settings/AppleLoginButton';
+import GoogleLoginButton from '../Settings/GoogleLoginButton';
 
 const LoginScreen = () => {
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+
+  const gradientColors = isDark
+    ? ['#18171C', '#18171C']
+    : ['#e5cf94', '#ffffff'];
+
   return (
-    <LinearGradient colors={['#e5cf94', '#ffffff']} style={styles.gradient}>
+    <LinearGradient colors={gradientColors} style={styles.gradient}>
       <SafeAreaView style={styles.container}>
         <View style={styles.content}>
           {/* 메인 카드 */}
@@ -24,12 +32,13 @@ const LoginScreen = () => {
             {/* 로그인 버튼들 */}
             <View style={styles.buttonContainer}>
               <AppleLoginButton />
+              <GoogleLoginButton />
               <KakaoLoginButton />
             </View>
           </View>
 
           {/* 추가 안내 */}
-          <Text style={styles.footerText}>
+          <Text style={[styles.footerText, isDark && styles.footerTextDark]}>
             문제가 있으시면 고객센터로 문의해주세요
           </Text>
         </View>
@@ -80,6 +89,9 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: '#6b7280',
     textAlign: 'center',
+  },
+  footerTextDark: {
+    color: '#9ca3af',
   },
 });
 

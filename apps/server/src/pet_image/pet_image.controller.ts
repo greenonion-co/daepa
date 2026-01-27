@@ -62,7 +62,9 @@ export class PetImageController {
     description: '펫 이미지 파일 목록 조회 성공',
     type: FindPetImagesResponseDto,
   })
-  async findOne(@Param('petId') petId: string): Promise<FindPetImagesResponseDto> {
+  async findOne(
+    @Param('petId') petId: string,
+  ): Promise<FindPetImagesResponseDto> {
     const images = await this.petImageService.findOneByPetId(petId);
     return {
       success: true,

@@ -68,9 +68,7 @@ export class AdoptionService {
       userId,
     );
 
-    const petName = pet.isDeleted
-      ? extractOriginalPetName(pet.name)
-      : pet.name;
+    const petName = pet.isDeleted ? extractOriginalPetName(pet.name) : pet.name;
 
     return {
       ...adoptionData,

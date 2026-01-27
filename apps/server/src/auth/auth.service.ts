@@ -105,6 +105,25 @@ export class AuthService {
     });
   }
 
+  async validateGoogleNativeAndGetUser({
+    idToken,
+  }: {
+    idToken: string;
+  }): Promise<ValidatedUser> {
+    const { sub: providerId, email } =
+      await this.oauthService.verifyGoogleIdToken(idToken);
+
+    if (!providerId || !email) {
+      throw new UnauthorizedException('유효하지 않은 Google 토큰입니다.');
+    }
+
+    return this.validateUser({
+      email,
+      provider: OAUTH_PROVIDER.GOOGLE,
+      providerId,
+    });
+  }
+
   async validateUser(providerInfo: ProviderInfo): Promise<ValidatedUser> {
     // 기존 OAuth 계정 확인
     const oauthFound = await this.getOAuthWithUserByProviderInfo(providerInfo);

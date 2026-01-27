@@ -21,6 +21,8 @@ import type {
   CreatePetDto,
   DeletePetDto,
   DeleteUserNotificationDto,
+  FcmControllerDeactivateTokenParams,
+  GoogleNativeLoginRequestDto,
   KakaoNativeLoginRequestDto,
   PairControllerGetPairListParams,
   PetControllerFindAllParams,
@@ -29,9 +31,11 @@ import type {
   PetControllerGetDeletedPetsParams,
   PetControllerGetParentsByPetIdParams,
   PetControllerGetSiblingsByPetIdParams,
+  RegisterFcmTokenDto,
   SaveFilesDto,
   StatisticsControllerGetAdoptionStatisticsParams,
   StatisticsControllerGetPairStatisticsParams,
+  TestPushNotificationDto,
   UnlinkParentDto,
   UpdateAdoptionDto,
   UpdateLayingDto,
@@ -306,6 +310,17 @@ export const authControllerAppleNative = (
   });
 };
 
+export const authControllerGoogleNative = (
+  googleNativeLoginRequestDto: GoogleNativeLoginRequestDto,
+) => {
+  return useCustomInstance<UserDto>({
+    url: `/api/auth/sign-in/google/native`,
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    data: googleNativeLoginRequestDto,
+  });
+};
+
 export const authControllerKakaoLogin = () => {
   return useCustomInstance<unknown>({ url: `/api/auth/sign-in/kakao`, method: "GET" });
 };
@@ -575,6 +590,35 @@ export const statisticsControllerGetAdoptionStatistics = (
   });
 };
 
+export const fcmControllerRegisterToken = (registerFcmTokenDto: RegisterFcmTokenDto) => {
+  return useCustomInstance<CommonResponseDto>({
+    url: `/api/v1/fcm/token`,
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    data: registerFcmTokenDto,
+  });
+};
+
+export const fcmControllerDeactivateToken = (params: FcmControllerDeactivateTokenParams) => {
+  return useCustomInstance<CommonResponseDto>({
+    url: `/api/v1/fcm/token`,
+    method: "DELETE",
+    params,
+  });
+};
+
+/**
+ * @summary 푸시 알림 테스트 (현재 로그인한 사용자에게 전송)
+ */
+export const fcmControllerSendTestPush = (testPushNotificationDto: TestPushNotificationDto) => {
+  return useCustomInstance<CommonResponseDto>({
+    url: `/api/v1/fcm/test`,
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    data: testPushNotificationDto,
+  });
+};
+
 export type PetControllerFindAllResult = NonNullable<
   Awaited<ReturnType<typeof petControllerFindAll>>
 >;
@@ -646,6 +690,9 @@ export type AuthControllerKakaoNativeResult = NonNullable<
 >;
 export type AuthControllerAppleNativeResult = NonNullable<
   Awaited<ReturnType<typeof authControllerAppleNative>>
+>;
+export type AuthControllerGoogleNativeResult = NonNullable<
+  Awaited<ReturnType<typeof authControllerGoogleNative>>
 >;
 export type AuthControllerKakaoLoginResult = NonNullable<
   Awaited<ReturnType<typeof authControllerKakaoLogin>>
@@ -739,6 +786,15 @@ export type StatisticsControllerGetPairStatisticsResult = NonNullable<
 >;
 export type StatisticsControllerGetAdoptionStatisticsResult = NonNullable<
   Awaited<ReturnType<typeof statisticsControllerGetAdoptionStatistics>>
+>;
+export type FcmControllerRegisterTokenResult = NonNullable<
+  Awaited<ReturnType<typeof fcmControllerRegisterToken>>
+>;
+export type FcmControllerDeactivateTokenResult = NonNullable<
+  Awaited<ReturnType<typeof fcmControllerDeactivateToken>>
+>;
+export type FcmControllerSendTestPushResult = NonNullable<
+  Awaited<ReturnType<typeof fcmControllerSendTestPush>>
 >;
 
 export const getPetControllerFindAllResponsePetParentDtoMock = (
@@ -3180,6 +3236,28 @@ export const getAuthControllerAppleNativeResponseMock = (
   ...overrideResponse,
 });
 
+export const getAuthControllerGoogleNativeResponseMock = (
+  overrideResponse: Partial<UserDto> = {},
+): UserDto => ({
+  userId: faker.string.alpha(20),
+  name: faker.string.alpha(20),
+  email: faker.string.alpha(20),
+  role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
+  isBiz: faker.datatype.boolean(),
+  refreshToken: {},
+  refreshTokenExpiresAt: {},
+  status: faker.helpers.arrayElement([
+    "pending",
+    "active",
+    "inactive",
+    "suspended",
+    "deleted",
+  ] as const),
+  createdAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+  updatedAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+  ...overrideResponse,
+});
+
 export const getAuthControllerGetTokenResponseMock = (
   overrideResponse: Partial<TokenResponseDto> = {},
 ): TokenResponseDto => ({
@@ -4323,6 +4401,30 @@ export const getStatisticsControllerGetAdoptionStatisticsResponseMock = (
   ...overrideResponse,
 });
 
+export const getFcmControllerRegisterTokenResponseMock = (
+  overrideResponse: Partial<CommonResponseDto> = {},
+): CommonResponseDto => ({
+  success: faker.datatype.boolean(),
+  message: faker.string.alpha(20),
+  ...overrideResponse,
+});
+
+export const getFcmControllerDeactivateTokenResponseMock = (
+  overrideResponse: Partial<CommonResponseDto> = {},
+): CommonResponseDto => ({
+  success: faker.datatype.boolean(),
+  message: faker.string.alpha(20),
+  ...overrideResponse,
+});
+
+export const getFcmControllerSendTestPushResponseMock = (
+  overrideResponse: Partial<CommonResponseDto> = {},
+): CommonResponseDto => ({
+  success: faker.datatype.boolean(),
+  message: faker.string.alpha(20),
+  ...overrideResponse,
+});
+
 export const getPetControllerFindAllMockHandler = (
   overrideResponse?:
     | PetControllerFindAll200
@@ -4867,6 +4969,27 @@ export const getAuthControllerAppleNativeMockHandler = (
             ? await overrideResponse(info)
             : overrideResponse
           : getAuthControllerAppleNativeResponseMock(),
+      ),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+  });
+};
+
+export const getAuthControllerGoogleNativeMockHandler = (
+  overrideResponse?:
+    | UserDto
+    | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<UserDto> | UserDto),
+) => {
+  return http.post("*/api/auth/sign-in/google/native", async (info) => {
+    await delay(1000);
+
+    return new HttpResponse(
+      JSON.stringify(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getAuthControllerGoogleNativeResponseMock(),
       ),
       { status: 200, headers: { "Content-Type": "application/json" } },
     );
@@ -5569,6 +5692,75 @@ export const getStatisticsControllerGetAdoptionStatisticsMockHandler = (
     );
   });
 };
+
+export const getFcmControllerRegisterTokenMockHandler = (
+  overrideResponse?:
+    | CommonResponseDto
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<CommonResponseDto> | CommonResponseDto),
+) => {
+  return http.post("*/api/v1/fcm/token", async (info) => {
+    await delay(1000);
+
+    return new HttpResponse(
+      JSON.stringify(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getFcmControllerRegisterTokenResponseMock(),
+      ),
+      { status: 201, headers: { "Content-Type": "application/json" } },
+    );
+  });
+};
+
+export const getFcmControllerDeactivateTokenMockHandler = (
+  overrideResponse?:
+    | CommonResponseDto
+    | ((
+        info: Parameters<Parameters<typeof http.delete>[1]>[0],
+      ) => Promise<CommonResponseDto> | CommonResponseDto),
+) => {
+  return http.delete("*/api/v1/fcm/token", async (info) => {
+    await delay(1000);
+
+    return new HttpResponse(
+      JSON.stringify(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getFcmControllerDeactivateTokenResponseMock(),
+      ),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+  });
+};
+
+export const getFcmControllerSendTestPushMockHandler = (
+  overrideResponse?:
+    | CommonResponseDto
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<CommonResponseDto> | CommonResponseDto),
+) => {
+  return http.post("*/api/v1/fcm/test", async (info) => {
+    await delay(1000);
+
+    return new HttpResponse(
+      JSON.stringify(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getFcmControllerSendTestPushResponseMock(),
+      ),
+      { status: 201, headers: { "Content-Type": "application/json" } },
+    );
+  });
+};
 export const getProjectDaepaAPIMock = () => [
   getPetControllerFindAllMockHandler(),
   getPetControllerCreateMockHandler(),
@@ -5594,6 +5786,7 @@ export const getProjectDaepaAPIMock = () => [
   getBrPetControllerGetPetsByDateRangeMockHandler(),
   getAuthControllerKakaoNativeMockHandler(),
   getAuthControllerAppleNativeMockHandler(),
+  getAuthControllerGoogleNativeMockHandler(),
   getAuthControllerKakaoLoginMockHandler(),
   getAuthControllerGoogleLoginMockHandler(),
   getAuthControllerGetTokenMockHandler(),
@@ -5625,4 +5818,7 @@ export const getProjectDaepaAPIMock = () => [
   getPetImageControllerSavePetImagesMockHandler(),
   getStatisticsControllerGetPairStatisticsMockHandler(),
   getStatisticsControllerGetAdoptionStatisticsMockHandler(),
+  getFcmControllerRegisterTokenMockHandler(),
+  getFcmControllerDeactivateTokenMockHandler(),
+  getFcmControllerSendTestPushMockHandler(),
 ];
