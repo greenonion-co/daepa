@@ -204,7 +204,7 @@ export class UserService {
         userId,
         name: pendingName,
         email: providerInfo.email,
-        role: USER_ROLE.USER,
+        role: USER_ROLE.BREEDER,
         provider: providerInfo.provider,
         providerId: providerInfo.providerId,
         status,
