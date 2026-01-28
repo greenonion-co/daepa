@@ -3,7 +3,6 @@ import {
   Injectable,
   UnauthorizedException,
   Logger,
-  UnprocessableEntityException,
 } from '@nestjs/common';
 import { UserService } from 'src/user/user.service';
 import { ProviderInfo } from './auth.types';
@@ -82,9 +81,23 @@ export class AuthService {
         };
       }
 
-      throw new UnprocessableEntityException({
-        code: 600,
-        message: 'Apple 이메일이 필요합니다.',
+      // Apple에서 이메일을 제공하지 않은 신규 유저의 경우, Apple 프록시 이메일 형식으로 생성
+      const placeholderEmail = `${providerId}@privaterelay.appleid.com`;
+
+      // Authorization Code가 있으면 Apple 토큰 교환으로 refresh_token 확보
+      let appleRefreshToken: string | undefined;
+      if (authorizationCode) {
+        appleRefreshToken =
+          await this.oauthService.exchangeAppleAuthorizationCode(
+            authorizationCode,
+          );
+      }
+
+      return this.validateUser({
+        email: placeholderEmail,
+        provider: OAUTH_PROVIDER.APPLE,
+        providerId,
+        refreshToken: appleRefreshToken,
       });
     }
 
