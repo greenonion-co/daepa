@@ -16,6 +16,7 @@ import NameInput from "@/app/(브리더스룸)/components/NameInput";
 import { useNameStore } from "@/app/(브리더스룸)/store/name";
 import { isNativeApp, requestResetToHome, setNativeAccessToken } from "@/lib/native-bridge";
 import { tokenStorage } from "@/lib/tokenStorage";
+import { useUserStore } from "@/app/(브리더스룸)/store/user";
 
 const NICKNAME_MAX_LENGTH = 15;
 const NICKNAME_MIN_LENGTH = 2;
@@ -43,6 +44,7 @@ type RegisterFormData = z.infer<typeof registerSchema>;
 const RegisterPage = () => {
   const router = useRouter();
   const { duplicateCheckStatus } = useNameStore();
+  const { initialize } = useUserStore();
 
   const { mutateAsync: mutateRegister, isPending: isRegisterPending } = useMutation({
     mutationFn: userControllerCreateInitUserInfo,
@@ -92,7 +94,9 @@ const RegisterPage = () => {
           return;
         }
 
-        // 웹인 경우 기존 로직 유지
+        // 웹인 경우: 사용자 정보 초기화 후 리다이렉트
+        await initialize();
+
         const redirectUrl = localStorage.getItem("redirectUrl");
         if (redirectUrl) {
           localStorage.removeItem("redirectUrl");

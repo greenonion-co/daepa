@@ -229,7 +229,7 @@ export class AuthController {
     // 쿠키 설정 (PC 브라우저용 - 호환성 유지)
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
-      secure: true,
+      secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge: 180 * 24 * 60 * 60 * 1000, // 180일
     });
@@ -265,7 +265,7 @@ export class AuthController {
     // 쿠키 설정 (PC 브라우저용 - 호환성 유지)
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
-      secure: true,
+      secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge: 180 * 24 * 60 * 60 * 1000, // 180일
     });
@@ -302,7 +302,7 @@ export class AuthController {
     if (newRefreshToken) {
       res.cookie('refreshToken', newRefreshToken, {
         httpOnly: true,
-        secure: true,
+        secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
         maxAge: 180 * 24 * 60 * 60 * 1000, // 180일
       });
@@ -331,7 +331,7 @@ export class AuthController {
 
     res.clearCookie('refreshToken', {
       httpOnly: true,
-      secure: true,
+      secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
     });
 
@@ -355,7 +355,7 @@ export class AuthController {
 
     res.clearCookie('refreshToken', {
       httpOnly: true,
-      secure: true,
+      secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
     });
 

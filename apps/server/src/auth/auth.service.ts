@@ -377,10 +377,26 @@ export class AuthService {
           }
           break;
         case OAUTH_PROVIDER.GOOGLE:
-          await this.oauthService.disconnectGoogle(userId);
+          try {
+            await this.oauthService.disconnectGoogle(userId);
+          } catch (error) {
+            this.logger.warn(
+              `Google unlink failed but continuing account deletion: ${
+                (error as Error).message
+              }`,
+            );
+          }
           break;
         case OAUTH_PROVIDER.APPLE:
-          await this.oauthService.disconnectApple(userId);
+          try {
+            await this.oauthService.disconnectApple(userId);
+          } catch (error) {
+            this.logger.warn(
+              `Apple unlink failed but continuing account deletion: ${
+                (error as Error).message
+              }`,
+            );
+          }
           break;
       }
     }
