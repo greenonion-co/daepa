@@ -338,6 +338,9 @@ importers:
       '@react-native-async-storage/async-storage':
         specifier: ^2.2.0
         version: 2.2.0(react-native@0.80.2(@babel/core@7.27.1)(@react-native-community/cli@19.1.1(typescript@5.0.4))(@types/react@19.1.0)(react@19.1.0))
+      '@react-native-cookies/cookies':
+        specifier: ^6.2.1
+        version: 6.2.1(react-native@0.80.2(@babel/core@7.27.1)(@react-native-community/cli@19.1.1(typescript@5.0.4))(@types/react@19.1.0)(react@19.1.0))
       '@react-native-firebase/app':
         specifier: ^23.8.4
         version: 23.8.4(@react-native-async-storage/async-storage@2.2.0(react-native@0.80.2(@babel/core@7.27.1)(@react-native-community/cli@19.1.1(typescript@5.0.4))(@types/react@19.1.0)(react@19.1.0)))(react-native@0.80.2(@babel/core@7.27.1)(@react-native-community/cli@19.1.1(typescript@5.0.4))(@types/react@19.1.0)(react@19.1.0))(react@19.1.0)
@@ -3853,6 +3856,11 @@ packages:
     resolution: {integrity: sha512-H17sV83KPg2H2GCNuUSMM1ZM2sy6msVSmxrhJSycH8ua3i9Iixja8DeYtGIcJUzjdU/4U2eSDs6PjOSZUVn8CQ==}
     engines: {node: '>=18'}
     hasBin: true
+
+  '@react-native-cookies/cookies@6.2.1':
+    resolution: {integrity: sha512-D17wCA0DXJkGJIxkL74Qs9sZ3sA+c+kCoGmXVknW7bVw/W+Vv1m/7mWTNi9DLBZSRddhzYw8SU0aJapIaM/g5w==}
+    peerDependencies:
+      react-native: '>= 0.60.2'
 
   '@react-native-firebase/app@23.8.4':
     resolution: {integrity: sha512-xURXijgL5gH5O6X7aUXKS5TObDT/aqWpdJpyUNWvRtG2cUxDRcLaSfJnSJP0TREBFAP1Dntdms2kmt5l2oSYZg==}
@@ -14917,6 +14925,11 @@ snapshots:
       - supports-color
       - typescript
       - utf-8-validate
+
+  '@react-native-cookies/cookies@6.2.1(react-native@0.80.2(@babel/core@7.27.1)(@react-native-community/cli@19.1.1(typescript@5.0.4))(@types/react@19.1.0)(react@19.1.0))':
+    dependencies:
+      invariant: 2.2.4
+      react-native: 0.80.2(@babel/core@7.27.1)(@react-native-community/cli@19.1.1(typescript@5.0.4))(@types/react@19.1.0)(react@19.1.0)
 
   '@react-native-firebase/app@23.8.4(@react-native-async-storage/async-storage@2.2.0(react-native@0.80.2(@babel/core@7.27.1)(@react-native-community/cli@19.1.1(typescript@5.0.4))(@types/react@19.1.0)(react@19.1.0)))(react-native@0.80.2(@babel/core@7.27.1)(@react-native-community/cli@19.1.1(typescript@5.0.4))(@types/react@19.1.0)(react@19.1.0))(react@19.1.0)':
     dependencies:
