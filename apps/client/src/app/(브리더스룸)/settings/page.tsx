@@ -184,12 +184,9 @@ const SettingsPage = () => {
             icon={<Mail className="h-4 w-4" />}
             iconBgColor="bg-gray-100 dark:bg-neutral-700"
             iconColor="text-gray-600 dark:text-gray-400"
-            label="이메일"
+            label="계정 연동"
             value={
               <div className="flex items-center gap-2">
-                <span className="text-[13px] font-[600] text-gray-700 dark:text-gray-400">
-                  {userProfile?.email ?? ""}
-                </span>
                 {normalizedProviders.map((provider) => (
                   <Image
                     key={provider}
@@ -197,6 +194,7 @@ const SettingsPage = () => {
                     alt={provider}
                     width={18}
                     height={18}
+                    className={cn(provider === "apple" && "dark:invert")}
                   />
                 ))}
               </div>
