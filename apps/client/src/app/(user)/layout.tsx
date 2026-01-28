@@ -1,4 +1,3 @@
-import { isNativeApp, requestResetToHome } from "@/lib/native-bridge";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -12,11 +11,7 @@ export default async function UserLayout({
 
   // 이미 로그인된 사용자는 홈으로 리다이렉트
   if (token?.value) {
-    if (isNativeApp()) {
-      requestResetToHome();
-    } else {
-      redirect("/");
-    }
+    redirect("/");
   }
 
   return <>{children}</>;

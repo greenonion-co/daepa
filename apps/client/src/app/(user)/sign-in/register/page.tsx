@@ -86,10 +86,12 @@ const RegisterPage = () => {
         // 네이티브 앱인 경우 토큰 동기화 후 홈 탭으로 이동
         if (isNativeApp()) {
           const token = tokenStorage.getToken();
-          if (token) {
-            setNativeAccessToken(token);
+          if (!token) {
+            console.error("토큰이 없습니다. 회원가입 플로우에 문제가 있습니다.");
+            toast.error("인증 정보를 찾을 수 없습니다. 다시 로그인해주세요.");
+            return;
           }
-          //  홈으로 리셋
+          setNativeAccessToken(token);
           requestResetToHome();
           return;
         }
