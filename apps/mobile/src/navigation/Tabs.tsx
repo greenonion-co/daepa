@@ -293,7 +293,7 @@ function AdminTabs() {
           },
         })}
       />
-      <GeneralTab.Screen
+      <AdminTab.Screen
         name="AddPet"
         component={EmptyScreen}
         options={{
