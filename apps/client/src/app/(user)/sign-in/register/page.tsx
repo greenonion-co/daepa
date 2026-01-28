@@ -91,8 +91,18 @@ const RegisterPage = () => {
             toast.error("인증 정보를 찾을 수 없습니다. 다시 로그인해주세요.");
             return;
           }
-          setNativeAccessToken(token);
-          requestResetToHome();
+          const tokenSent = setNativeAccessToken(token);
+          if (!tokenSent) {
+            console.error("네이티브 앱에 토큰 전송 실패");
+            toast.error("앱과 통신에 실패했습니다. 다시 시도해주세요.");
+            return;
+          }
+          const resetSuccess = requestResetToHome();
+          if (!resetSuccess) {
+            console.error("네이티브 앱 홈 리셋 실패");
+            toast.error("앱과 통신에 실패했습니다. 다시 시도해주세요.");
+            return;
+          }
           return;
         }
 
