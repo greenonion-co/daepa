@@ -26,6 +26,10 @@ if [ -f "$ENV_FILE" ]; then
       value="${value#\"}"
       value="${value%\'}"
       value="${value#\'}"
+      # Remove CR (for CRLF line endings)
+      value="${value//$'\r'/}"
+      # Escape $ to prevent xcconfig variable expansion
+      value="${value//\$/\$\$}"
       echo "$key = $value" >> "$OUTPUT_FILE"
     fi
   done < "$ENV_FILE"
