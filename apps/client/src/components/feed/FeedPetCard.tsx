@@ -25,11 +25,11 @@ export default function FeedPetCard({ pet }: FeedPetCardProps) {
         {/* Header - 유저 정보 */}
         <div className="flex items-center gap-3 px-4 py-3">
           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-r from-blue-200 to-purple-200 text-xs font-bold text-white">
-            {pet.owner.name?.charAt(0) || "?"}
+            {pet.owner?.name?.charAt(0) || "?"}
           </div>
           <div className="flex-1">
             <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-              {pet.owner.name || "익명"}
+              {pet.owner?.name || "익명"}
             </p>
           </div>
         </div>
