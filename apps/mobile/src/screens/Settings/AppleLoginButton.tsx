@@ -90,6 +90,7 @@ const AppleLoginButton = () => {
       });
     } catch (e) {
       console.log(e);
+      Toast.show('로그인에 실패했습니다. 다시 시도해주세요.');
     } finally {
       Loading.close();
     }
