@@ -6,7 +6,6 @@ import {
   petControllerGetClutchMatesByPetId,
   petControllerGetParentsByPetId,
   petControllerGetSiblingsByPetId,
-  SiblingPetDetailDto,
 } from "@repo/api-client";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { use, useMemo } from "react";
@@ -23,7 +22,7 @@ interface PetDetailPageProps {
   }>;
 }
 
-function isVisiblePet(pet: unknown): pet is SiblingPetDetailDto {
+function isVisiblePet(pet: unknown): pet is { petId: string } {
   return typeof pet === "object" && pet !== null && !("hiddenStatus" in pet);
 }
 

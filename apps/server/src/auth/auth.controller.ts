@@ -19,6 +19,7 @@ import {
   AppleNativeLoginRequestDto,
   GoogleNativeLoginRequestDto,
   KakaoNativeLoginRequestDto,
+  NativeLoginResponseDto,
   TokenResponseDto,
 } from './auth.dto';
 import { JwtUserPayload } from './strategies/jwt.strategy';
@@ -40,13 +41,13 @@ export class AuthController {
   @ApiResponse({
     status: 200,
     description: '카카오 네이티브 로그인 성공',
-    type: UserDto,
+    type: NativeLoginResponseDto,
   })
   async kakaoNative(
     @Req() _req: Request,
     @Res({ passthrough: true }) res: Response,
     @Body() body: KakaoNativeLoginRequestDto,
-  ) {
+  ): Promise<NativeLoginResponseDto> {
     const { email, id, refreshToken } = body;
 
     const validatedUser = await this.authService.validateUser({
@@ -73,7 +74,13 @@ export class AuthController {
     if (!user) {
       throw new UnauthorizedException('사용자를 찾을 수 없습니다.');
     }
-    return user;
+
+    const accessToken = this.authService.createJwtAccessToken({
+      userId: user.userId,
+      role: user.role,
+    });
+
+    return { ...user, accessToken };
   }
 
   @Post('sign-in/apple/native')
@@ -81,7 +88,7 @@ export class AuthController {
   @ApiResponse({
     status: 200,
     description: '애플 네이티브 로그인 성공',
-    type: UserDto,
+    type: NativeLoginResponseDto,
   })
   @ApiResponse({
     status: 401,
@@ -97,7 +104,7 @@ export class AuthController {
     @Req() _req: Request,
     @Res({ passthrough: true }) res: Response,
     @Body() body: AppleNativeLoginRequestDto,
-  ) {
+  ): Promise<NativeLoginResponseDto> {
     const { identityToken, email, authorizationCode, name, isBiz } = body;
 
     const validatedUser = await this.authService.validateAppleNativeAndGetUser({
@@ -117,31 +124,40 @@ export class AuthController {
       maxAge: 180 * 24 * 60 * 60 * 1000,
     });
 
-    const user = await this.userService.findOne({
+    let user = await this.userService.findOne({
       userId: validatedUser.userId,
     });
     if (!user) {
       throw new UnauthorizedException('사용자를 찾을 수 없습니다.');
     }
+
     if (typeof name === 'string' && name.trim().length > 0) {
       await this.userService.createInitUserInfo(validatedUser.userId, {
         name: name.trim(),
         isBiz,
       });
-      const updated = await this.userService.findOne({
+      user = await this.userService.findOne({
         userId: validatedUser.userId,
       });
-      return updated;
     } else if (typeof isBiz !== 'undefined') {
       await this.userService.update(validatedUser.userId, {
         isBiz,
       });
-      const updated = await this.userService.findOne({
+      user = await this.userService.findOne({
         userId: validatedUser.userId,
       });
-      return updated;
     }
-    return user;
+
+    if (!user) {
+      throw new UnauthorizedException('사용자를 찾을 수 없습니다.');
+    }
+
+    const accessToken = this.authService.createJwtAccessToken({
+      userId: user.userId,
+      role: user.role,
+    });
+
+    return { ...user, accessToken };
   }
 
   @Post('sign-in/google/native')
@@ -149,13 +165,13 @@ export class AuthController {
   @ApiResponse({
     status: 200,
     description: '구글 네이티브 로그인 성공',
-    type: UserDto,
+    type: NativeLoginResponseDto,
   })
   async googleNative(
     @Req() _req: Request,
     @Res({ passthrough: true }) res: Response,
     @Body() body: GoogleNativeLoginRequestDto,
-  ) {
+  ): Promise<NativeLoginResponseDto> {
     const { idToken } = body;
 
     const validatedUser = await this.authService.validateGoogleNativeAndGetUser(
@@ -181,7 +197,13 @@ export class AuthController {
     if (!user) {
       throw new UnauthorizedException('사용자를 찾을 수 없습니다.');
     }
-    return user;
+
+    const accessToken = this.authService.createJwtAccessToken({
+      userId: user.userId,
+      role: user.role,
+    });
+
+    return { ...user, accessToken };
   }
 
   @Get('sign-in/kakao')
@@ -207,7 +229,7 @@ export class AuthController {
     // 쿠키 설정 (PC 브라우저용 - 호환성 유지)
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
-      secure: true,
+      secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge: 180 * 24 * 60 * 60 * 1000, // 180일
     });
@@ -243,7 +265,7 @@ export class AuthController {
     // 쿠키 설정 (PC 브라우저용 - 호환성 유지)
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
-      secure: true,
+      secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge: 180 * 24 * 60 * 60 * 1000, // 180일
     });
@@ -280,7 +302,7 @@ export class AuthController {
     if (newRefreshToken) {
       res.cookie('refreshToken', newRefreshToken, {
         httpOnly: true,
-        secure: true,
+        secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
         maxAge: 180 * 24 * 60 * 60 * 1000, // 180일
       });
@@ -309,7 +331,7 @@ export class AuthController {
 
     res.clearCookie('refreshToken', {
       httpOnly: true,
-      secure: true,
+      secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
     });
 
@@ -333,7 +355,7 @@ export class AuthController {
 
     res.clearCookie('refreshToken', {
       httpOnly: true,
-      secure: true,
+      secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
     });
 

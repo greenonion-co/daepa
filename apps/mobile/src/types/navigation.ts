@@ -28,6 +28,7 @@ export type GeneralTabParamList = {
 export type AdminTabParamList = {
   Home: WebViewParams | undefined;
   Hatching: undefined;
+  AddPet: undefined;
   Adoption: undefined;
   Settings: undefined;
 };

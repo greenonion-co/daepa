@@ -209,4 +209,15 @@ export class UserNotificationService {
       },
     });
   }
+
+  async markAllAsRead(userId: string): Promise<UpdateResult> {
+    return await this.userNotificationRepository.update(
+      {
+        receiverId: userId,
+        status: USER_NOTIFICATION_STATUS.UNREAD,
+        isDeleted: false,
+      },
+      { status: USER_NOTIFICATION_STATUS.READ },
+    );
+  }
 }

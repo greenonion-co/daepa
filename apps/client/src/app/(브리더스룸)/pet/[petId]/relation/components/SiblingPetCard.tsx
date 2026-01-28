@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  PetHiddenStatusDto,
-  PetHiddenStatusDtoHiddenStatus,
-  SiblingPetDetailDto,
-  SiblingPetDetailDtoSex,
-} from "@repo/api-client";
+import { PetHiddenStatusDto, PetHiddenStatusDtoHiddenStatus } from "@repo/api-client";
 import { DateTime } from "luxon";
 import { EyeOff, Lock, ScanFace } from "lucide-react";
 import Link from "next/link";
@@ -31,7 +26,7 @@ interface PetWithOwner extends BasePetInfo {
   owner: { userId: string; name: string };
 }
 
-type PetData = SiblingPetDetailDto | PetHiddenStatusDto | PetWithOwner | BasePetInfo;
+type PetData = PetHiddenStatusDto | PetWithOwner | BasePetInfo;
 
 type CardVariant = "vertical" | "horizontal";
 
@@ -56,7 +51,7 @@ function hasOwner(pet: PetData): pet is PetWithOwner {
 }
 
 function isMale(sex?: string) {
-  return sex === "MALE" || sex === SiblingPetDetailDtoSex.MALE;
+  return sex === "MALE";
 }
 
 export default function SiblingPetCard({

@@ -26,6 +26,7 @@ import {
 } from '@react-navigation/native';
 import { useAuthStore } from '@/store/auth';
 import { useThemeStore, themeColors } from '@/store/theme';
+import { useNavigationStore } from '@/store/navigation';
 import { RootStackNavigationProp } from '@/types/navigation';
 import Config from '@/utils/config';
 import LottieLoading from '@/components/common/LottieLoading';
@@ -62,6 +63,7 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
   const insets = useSafeAreaInsets();
 
   const accessToken = useAuthStore(state => state.accessToken);
+  const setAccessToken = useAuthStore(state => state.setAccessToken);
   const setUser = useAuthStore(state => state.setUser);
   const clear = useAuthStore(state => state.clear);
 
@@ -98,6 +100,34 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
       );
     }
   }, [theme]);
+
+  // initialPath를 route name으로 매핑
+  const getRouteNameFromPath = (path: string): string => {
+    // 쿼리 파라미터와 해시 제거
+    const pathname = path.split(/[?#]/)[0];
+
+    if (pathname === '/' || pathname === '') return 'Home';
+    if (pathname === '/pet') return 'Home'; // Admin 모드의 Home
+    if (pathname === '/hatching') return 'Hatching';
+    if (pathname === '/adoption') return 'Adoption';
+    if (pathname === '/settings') return 'Settings';
+    return pathname;
+  };
+
+  // 스크롤 투 탑 트리거 감지
+  const scrollToTopTrigger = useNavigationStore(
+    state => state.scrollToTopTrigger[getRouteNameFromPath(initialPath)],
+  );
+
+  useEffect(() => {
+    if (scrollToTopTrigger && webViewRef.current) {
+      // WebView에 스크롤 투 탑 JS 주입
+      webViewRef.current.injectJavaScript(`
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        true;
+      `);
+    }
+  }, [scrollToTopTrigger]);
 
   // 웹에서 앱으로 오는 메시지 처리
   const handleMessage = (event: WebViewMessageEvent) => {
@@ -149,7 +179,15 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
           }
           break;
         case 'POP_TO_ROOT':
+          // 기존 화면 유지하며 홈으로 이동 (펫 등록 등 일반적인 경우)
           navigation.popToTop();
+          break;
+        case 'RESET_TO_HOME':
+          // 홈을 새로 마운트하여 최신 토큰으로 로드 (회원가입 등 토큰 동기화 필요한 경우)
+          navigation.reset({
+            index: 0,
+            routes: [{ name: 'Tabs', key: `tabs-${Date.now()}` }],
+          });
           break;
         case 'READY':
           console.log('WebView is ready');
@@ -191,6 +229,11 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
         case 'SET_USER_DATA':
           if (message.user) {
             setUser(message.user as Parameters<typeof setUser>[0]);
+          }
+          break;
+        case 'SET_ACCESS_TOKEN':
+          if (message.token) {
+            setAccessToken(message.token);
           }
           break;
         case 'TOAST':

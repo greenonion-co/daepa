@@ -18,6 +18,7 @@ import CustomSelect from "./Charts/CustomSelect";
 import { SPECIES_KOREAN_INFO } from "../../constants";
 import NumberField from "../../components/Form/NumberField";
 import FormItem from "../../pet/[petId]/components/FormItem";
+import Loading from "@/components/common/Loading";
 
 interface CreateLayingModalProps {
   isOpen: boolean;
@@ -48,6 +49,7 @@ const CreateLayingModal = ({
 
   // 선택 모드에서만 사용하는 로컬 state
   const [localSelectedMatingId, setLocalSelectedMatingId] = useState<number | undefined>(undefined);
+  const [isLoading, setIsLoading] = useState(false);
 
   // matingId prop이 있으면 그것을 사용, 없으면 로컬 state 사용
   const selectedMatingId = matingId ?? localSelectedMatingId;
@@ -139,6 +141,8 @@ const CreateLayingModal = ({
       return;
     }
 
+    setIsLoading(true);
+
     try {
       await createLaying({
         matingId: selectedMatingId,
@@ -159,6 +163,8 @@ const CreateLayingModal = ({
       } else {
         toast.error("산란 추가에 실패했습니다.");
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -197,208 +203,220 @@ const CreateLayingModal = ({
             <span className="text-[16px] font-[500] text-gray-600"> 산란 정보 추가</span>
           </DialogTitle>
         </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <FormItem
-            label="종"
-            content={
-              <CustomSelect
-                title="종"
-                disabled
-                options={Object.values(PetDtoSpecies).map((species) => ({
-                  key: species,
-                  value: SPECIES_KOREAN_INFO[species],
-                }))}
-                selectedKey={formData.species}
-                onChange={(value) =>
-                  setFormData((prev) => ({ ...prev, species: value as PetDtoSpecies }))
+        {isLoading ? (
+          <Loading />
+        ) : (
+          <>
+            <div className="grid gap-4 py-4">
+              <FormItem
+                label="종"
+                content={
+                  <CustomSelect
+                    title="종"
+                    disabled
+                    options={Object.values(PetDtoSpecies).map((species) => ({
+                      key: species,
+                      value: SPECIES_KOREAN_INFO[species],
+                    }))}
+                    selectedKey={formData.species}
+                    onChange={(value) =>
+                      setFormData((prev) => ({ ...prev, species: value as PetDtoSpecies }))
+                    }
+                  />
                 }
               />
-            }
-          />
 
-          {/* 메이팅 선택 (matingDate가 없고 matingsByDate가 있는 경우) */}
-          {!matingDate && matingsByDate && matingsByDate.length > 0 && (
-            <FormItem
-              label="메이팅"
-              content={
-                <div className="col-span-3 flex flex-col gap-1">
-                  <CustomSelect
-                    title="메이팅 선택"
-                    options={matingsByDate
-                      .filter((mating) => {
-                        // matingDate가 없거나 formData.layingDate보다 이전인 메이팅만 표시
-                        if (!mating.matingDate) return true;
-                        if (!formData.layingDate) return true;
-                        const matingDateTime = DateTime.fromFormat(
-                          mating.matingDate,
-                          "yyyy-MM-dd",
-                        ).startOf("day");
-                        const layingDateTime = DateTime.fromISO(formData.layingDate).startOf("day");
-                        return matingDateTime < layingDateTime;
-                      })
-                      .map((mating, index, filteredArray) => {
-                        const season = filteredArray.length - index;
-
-                        return {
-                          key: String(mating.id),
-                          value: mating.matingDate
-                            ? DateTime.fromFormat(mating.matingDate, "yyyy-MM-dd").toFormat(
-                                `[시즌${season}] M월 d일`,
-                              )
-                            : `시즌 ${season}`,
-                        };
-                      })}
-                    selectedKey={String(selectedMatingId)}
-                    onChange={(value) => setLocalSelectedMatingId(Number(value))}
-                  />
-                  {!isLayingDateEditable && (
-                    <div className="flex items-center gap-1 text-sm text-gray-500">
-                      <Info className="h-4 w-4" /> 산란일 이전의 메이팅만 선택 가능합니다.
-                    </div>
-                  )}
-                  {!selectedMatingId && (
-                    <div className="flex items-center gap-1 text-sm text-red-600">
-                      <AlertCircle className="h-4 w-4" /> 산란을 기록할 메이팅 시즌을 선택해주세요.
-                    </div>
-                  )}
-                </div>
-              }
-            />
-          )}
-          {selectedMatingId && (
-            <>
-              {isLayingDateEditable && (
+              {/* 메이팅 선택 (matingDate가 없고 matingsByDate가 있는 경우) */}
+              {!matingDate && matingsByDate && matingsByDate.length > 0 && (
                 <FormItem
-                  label="산란일"
+                  label="메이팅"
                   content={
-                    <div className="col-span-3">
-                      <CalendarSelect
-                        type="edit"
-                        triggerText={
-                          formData.layingDate
-                            ? DateTime.fromJSDate(new Date(formData.layingDate)).toFormat(
-                                "yyyy년 MM월 dd일",
-                              )
-                            : "산란일"
-                        }
-                        confirmButtonText="선택 완료"
-                        disabledDates={currentLayingData?.map((laying) => laying.layingDate) ?? []}
-                        onConfirm={(date) => {
-                          if (!date) return;
-                          setFormData((prev) => ({
-                            ...prev,
-                            layingDate: date,
-                          }));
-                        }}
-                        disabled={isDateDisabled}
-                        initialDate={formData.layingDate}
-                      />
+                    <div className="col-span-3 flex flex-col gap-1">
+                      <CustomSelect
+                        title="메이팅 선택"
+                        options={matingsByDate
+                          .filter((mating) => {
+                            // matingDate가 없거나 formData.layingDate보다 이전인 메이팅만 표시
+                            if (!mating.matingDate) return true;
+                            if (!formData.layingDate) return true;
+                            const matingDateTime = DateTime.fromFormat(
+                              mating.matingDate,
+                              "yyyy-MM-dd",
+                            ).startOf("day");
+                            const layingDateTime = DateTime.fromISO(formData.layingDate).startOf(
+                              "day",
+                            );
+                            return matingDateTime < layingDateTime;
+                          })
+                          .map((mating, index, filteredArray) => {
+                            const season = filteredArray.length - index;
 
-                      {lastLayingDate && (
-                        <div className="mt-1 text-sm">
-                          <div className="flex items-center gap-1 text-gray-500">
-                            <Info className="h-4 w-4" /> 이전 산란일 이후 날짜만 선택 가능합니다.
-                          </div>
-                          <div className="font-semibold text-blue-500">
-                            마지막 산란일:{" "}
-                            {DateTime.fromJSDate(
-                              new Date(
-                                lastLayingDate
-                                  .toString()
-                                  .replace(/(\d{4})(\d{2})(\d{2})/, "$1-$2-$3"),
-                              ),
-                            ).toFormat("yyyy년 MM월 dd일")}
-                          </div>
+                            return {
+                              key: String(mating.id),
+                              value: mating.matingDate
+                                ? DateTime.fromFormat(mating.matingDate, "yyyy-MM-dd").toFormat(
+                                    `[시즌${season}] M월 d일`,
+                                  )
+                                : `시즌 ${season}`,
+                            };
+                          })}
+                        selectedKey={String(selectedMatingId)}
+                        onChange={(value) => setLocalSelectedMatingId(Number(value))}
+                      />
+                      {!isLayingDateEditable && (
+                        <div className="flex items-center gap-1 text-sm text-gray-500">
+                          <Info className="h-4 w-4" /> 산란일 이전의 메이팅만 선택 가능합니다.
+                        </div>
+                      )}
+                      {!selectedMatingId && (
+                        <div className="flex items-center gap-1 text-sm text-red-600">
+                          <AlertCircle className="h-4 w-4" /> 산란을 기록할 메이팅 시즌을
+                          선택해주세요.
                         </div>
                       )}
                     </div>
                   }
                 />
               )}
+              {selectedMatingId && (
+                <>
+                  {isLayingDateEditable && (
+                    <FormItem
+                      label="산란일"
+                      content={
+                        <div className="col-span-3">
+                          <CalendarSelect
+                            type="edit"
+                            triggerText={
+                              formData.layingDate
+                                ? DateTime.fromJSDate(new Date(formData.layingDate)).toFormat(
+                                    "yyyy년 MM월 dd일",
+                                  )
+                                : "산란일"
+                            }
+                            confirmButtonText="선택 완료"
+                            disabledDates={
+                              currentLayingData?.map((laying) => laying.layingDate) ?? []
+                            }
+                            onConfirm={(date) => {
+                              if (!date) return;
+                              setFormData((prev) => ({
+                                ...prev,
+                                layingDate: date,
+                              }));
+                            }}
+                            disabled={isDateDisabled}
+                            initialDate={formData.layingDate}
+                          />
 
-              <FormItem
-                label="차수"
-                content={
-                  <div className="col-span-3 flex flex-col gap-1">
-                    <NumberField
-                      field={{
-                        name: "clutch",
-                        type: "number",
-                      }}
-                      value={formData.clutch}
-                      setValue={(value) =>
-                        setFormData((prev) => ({ ...prev, clutch: value.value }))
-                      }
-                      inputClassName="h-[32px] w-full rounded-md border border-gray-200 p-2 placeholder:font-[500]"
-                      readOnly
-                      min={maxClutch + 1}
-                    />
-
-                    {maxClutch > 0 && (
-                      <div className="col-span-3">
-                        <div className="flex items-center gap-1 text-sm text-gray-500">
-                          <Info className="h-4 w-4" /> 가장 마지막 차수는 {maxClutch}차 입니다.
+                          {lastLayingDate && (
+                            <div className="mt-1 text-sm">
+                              <div className="flex items-center gap-1 text-gray-500">
+                                <Info className="h-4 w-4" /> 이전 산란일 이후 날짜만 선택
+                                가능합니다.
+                              </div>
+                              <div className="font-semibold text-blue-500">
+                                마지막 산란일:{" "}
+                                {DateTime.fromJSDate(
+                                  new Date(
+                                    lastLayingDate
+                                      .toString()
+                                      .replace(/(\d{4})(\d{2})(\d{2})/, "$1-$2-$3"),
+                                  ),
+                                ).toFormat("yyyy년 MM월 dd일")}
+                              </div>
+                            </div>
+                          )}
                         </div>
+                      }
+                    />
+                  )}
+
+                  <FormItem
+                    label="차수"
+                    content={
+                      <div className="col-span-3 flex flex-col gap-1">
+                        <NumberField
+                          field={{
+                            name: "clutch",
+                            type: "number",
+                          }}
+                          value={formData.clutch}
+                          setValue={(value) =>
+                            setFormData((prev) => ({ ...prev, clutch: value.value }))
+                          }
+                          inputClassName="h-[32px] w-full rounded-md border border-gray-200 p-2 placeholder:font-[500]"
+                          readOnly
+                          min={maxClutch + 1}
+                        />
+
+                        {maxClutch > 0 && (
+                          <div className="col-span-3">
+                            <div className="flex items-center gap-1 text-sm text-gray-500">
+                              <Info className="h-4 w-4" /> 가장 마지막 차수는 {maxClutch}차 입니다.
+                            </div>
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
-                }
-              />
-
-              <FormItem
-                label="알 개수"
-                content={
-                  <NumberField
-                    field={{
-                      name: "clutchCount",
-                      type: "number",
-                    }}
-                    value={formData.clutchCount}
-                    setValue={(value) =>
-                      setFormData((prev) => ({ ...prev, clutchCount: value.value }))
                     }
-                    readOnly
-                    min={1}
-                    max={4}
-                    inputClassName="h-[32px] w-full rounded-md border border-gray-200 p-2 placeholder:font-[500]"
                   />
-                }
-              />
 
-              <FormItem
-                label="해칭 온도"
-                content={
-                  <NumberField
-                    readOnly
-                    field={{ name: "temperature", type: "number", unit: "°C" }}
-                    value={String(formData.temperature ?? "")}
-                    setValue={(value) =>
-                      setFormData((prev) => ({ ...prev, temperature: value.value }))
+                  <FormItem
+                    label="알 개수"
+                    content={
+                      <NumberField
+                        field={{
+                          name: "clutchCount",
+                          type: "number",
+                        }}
+                        value={formData.clutchCount}
+                        setValue={(value) =>
+                          setFormData((prev) => ({ ...prev, clutchCount: value.value }))
+                        }
+                        readOnly
+                        min={1}
+                        max={4}
+                        inputClassName="h-[32px] w-full rounded-md border border-gray-200 p-2 placeholder:font-[500]"
+                      />
                     }
-                    inputClassName="h-[32px] w-full rounded-md border border-gray-200 p-2 placeholder:font-[500]"
-                    min={22}
-                    max={28}
                   />
-                }
-              />
-            </>
-          )}
-        </div>
-        <div className="flex justify-end gap-2">
-          <button
-            className="h-[32px] cursor-pointer rounded-lg bg-gray-100 px-3 text-sm font-semibold text-gray-600 hover:bg-gray-200"
-            onClick={onClose}
-          >
-            취소
-          </button>
-          <button
-            className="h-[32px] cursor-pointer rounded-lg bg-blue-500 px-3 text-sm font-semibold text-white hover:bg-blue-600 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-500"
-            onClick={handleSubmit}
-            disabled={!matingDate && matingsByDate && !selectedMatingId}
-          >
-            추가
-          </button>
-        </div>
+
+                  <FormItem
+                    label="해칭 온도"
+                    content={
+                      <NumberField
+                        readOnly
+                        field={{ name: "temperature", type: "number", unit: "°C" }}
+                        value={String(formData.temperature ?? "")}
+                        setValue={(value) =>
+                          setFormData((prev) => ({ ...prev, temperature: value.value }))
+                        }
+                        inputClassName="h-[32px] w-full rounded-md border border-gray-200 p-2 placeholder:font-[500]"
+                        min={22}
+                        max={28}
+                      />
+                    }
+                  />
+                </>
+              )}
+            </div>
+            <div className="flex justify-end gap-2">
+              <button
+                className="h-[32px] cursor-pointer rounded-lg bg-gray-100 px-3 text-sm font-semibold text-gray-600 hover:bg-gray-200"
+                onClick={onClose}
+              >
+                취소
+              </button>
+              <button
+                className="h-[32px] cursor-pointer rounded-lg bg-blue-500 px-3 text-sm font-semibold text-white hover:bg-blue-600 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-500"
+                onClick={handleSubmit}
+                disabled={!matingDate && matingsByDate && !selectedMatingId}
+              >
+                추가
+              </button>
+            </div>
+          </>
+        )}
       </DialogContent>
     </Dialog>
   );

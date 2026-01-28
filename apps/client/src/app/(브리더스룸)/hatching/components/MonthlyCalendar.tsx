@@ -172,7 +172,7 @@ const MonthlyCalendar = memo(() => {
             className={cn(
               "shrink-0 touch-none transition-all duration-300",
               isScrolled &&
-                "dark:bg-background sticky top-0 z-20 w-full origin-top-left scale-75 [margin-bottom:-24%]",
+                "dark:bg-background sticky top-0 z-20 [margin-bottom:-22%] w-full origin-top-left scale-75",
             )}
           >
             <Calendar

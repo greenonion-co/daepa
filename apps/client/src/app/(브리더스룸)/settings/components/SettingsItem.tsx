@@ -42,7 +42,7 @@ export const SettingsItem = ({
       <div className="min-w-0 flex-1">
         <span
           className={cn(
-            "text-[15px]",
+            "text-[15px] whitespace-nowrap",
             isDestructive ? "text-red-600 dark:text-red-400" : "text-gray-900 dark:text-white",
           )}
         >

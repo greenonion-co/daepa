@@ -1,14 +1,16 @@
-import UIKit
-import React
-import React_RCTAppDelegate
-import ReactAppDependencyProvider
-import KakaoSDKCommon
-import KakaoSDKAuth
 import FirebaseCore
 import FirebaseMessaging
+import KakaoSDKAuth
+import KakaoSDKCommon
+import React
+import ReactAppDependencyProvider
+import React_RCTAppDelegate
+import UIKit
 
 @main
-class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterDelegate, MessagingDelegate {
+class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterDelegate,
+  MessagingDelegate
+{
   var window: UIWindow?
 
   var reactNativeDelegate: ReactNativeDelegate?
@@ -48,7 +50,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
   }
 
   // APNs 토큰을 Firebase에 등록
-  func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+  func application(
+    _ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
+  ) {
     Messaging.messaging().apnsToken = deviceToken
   }
 
@@ -64,12 +68,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
   func application(
     _ app: UIApplication,
     open url: URL,
-    options: [UIApplication.OpenURLOptionsKey : Any] = [:]
+    options: [UIApplication.OpenURLOptionsKey: Any] = [:]
   ) -> Bool {
     if AuthApi.isKakaoTalkLoginUrl(url) {
       return AuthController.handleOpenUrl(url: url)
     }
     return false
+  }
+
+  // 앱이 활성화될 때 badge 초기화
+  func applicationDidBecomeActive(_ application: UIApplication) {
+    UIApplication.shared.applicationIconBadgeNumber = 0
   }
 }
 
@@ -79,10 +88,10 @@ class ReactNativeDelegate: RCTDefaultReactNativeFactoryDelegate {
   }
 
   override func bundleURL() -> URL? {
-#if DEBUG
-    RCTBundleURLProvider.sharedSettings().jsBundleURL(forBundleRoot: "index")
-#else
-    Bundle.main.url(forResource: "main", withExtension: "jsbundle")
-#endif
+    #if DEBUG
+      RCTBundleURLProvider.sharedSettings().jsBundleURL(forBundleRoot: "index")
+    #else
+      Bundle.main.url(forResource: "main", withExtension: "jsbundle")
+    #endif
   }
 }

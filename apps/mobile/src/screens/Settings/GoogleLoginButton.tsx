@@ -4,10 +4,7 @@ import {
   GoogleSignin,
   isSuccessResponse,
 } from '@react-native-google-signin/google-signin';
-import {
-  authControllerGetToken,
-  authControllerGoogleNative,
-} from '@repo/api-client';
+import { authControllerGoogleNative } from '@repo/api-client';
 import { useMutation } from '@tanstack/react-query';
 import useLogin from '../../hooks/useLogin';
 import Loading from '@/components/common/Loading';
@@ -40,10 +37,6 @@ const GoogleLoginButton = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { navigateByStatus } = useLogin();
 
-  const { mutateAsync: mutateGetToken } = useMutation({
-    mutationFn: authControllerGetToken,
-  });
-
   const { mutateAsync: googleNativeLogin } = useMutation({
     mutationFn: authControllerGoogleNative,
   });
@@ -71,11 +64,9 @@ const GoogleLoginButton = () => {
         idToken,
       });
 
-      const tokenRes = await mutateGetToken();
-
       navigateByStatus({
         status: googleRes.data.status,
-        token: tokenRes.data.token,
+        token: googleRes.data.accessToken,
       });
     } catch (e) {
       if (e instanceof Error && !e.message.includes('SIGN_IN_CANCELLED')) {
@@ -111,7 +102,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#FFFFFF',
-    height: 46,
+    height: 52,
     borderRadius: 12,
     gap: 12,
   },

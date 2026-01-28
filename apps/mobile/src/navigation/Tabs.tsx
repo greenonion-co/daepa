@@ -26,6 +26,7 @@ import AddPetButton from '../components/common/AddPetButton';
 import { GeneralTabParamList, AdminTabParamList } from '@/types/navigation';
 import { useAuthStore } from '@/store/auth';
 import { useThemeStore, themeColors } from '@/store/theme';
+import { useNavigationStore } from '@/store/navigation';
 import { UserDtoRole } from '@repo/api-client';
 
 const GeneralTab = createBottomTabNavigator<GeneralTabParamList>();
@@ -141,6 +142,9 @@ function GeneralTabs() {
   const theme = useThemeStore(state => state.theme);
   const colors = themeColors[theme];
   const insets = useSafeAreaInsets();
+  const triggerScrollToTop = useNavigationStore(
+    state => state.triggerScrollToTop,
+  );
 
   const tabBarHeight = Platform.OS === 'android' ? 60 + insets.bottom : 80;
 
@@ -176,6 +180,13 @@ function GeneralTabs() {
             tabBarIcon: HomeTabIcon,
             tabBarButton: AnimatedTabButton,
           }}
+          listeners={({ navigation }) => ({
+            tabPress: () => {
+              if (navigation.isFocused()) {
+                triggerScrollToTop('Home');
+              }
+            },
+          })}
         />
         <GeneralTab.Screen
           name="AddPet"
@@ -193,6 +204,13 @@ function GeneralTabs() {
             tabBarIcon: SettingsTabIcon,
             tabBarButton: AnimatedTabButton,
           }}
+          listeners={({ navigation }) => ({
+            tabPress: () => {
+              if (navigation.isFocused()) {
+                triggerScrollToTop('Settings');
+              }
+            },
+          })}
         />
       </GeneralTab.Navigator>
     </>
@@ -204,6 +222,9 @@ function AdminTabs() {
   const theme = useThemeStore(state => state.theme);
   const colors = themeColors[theme];
   const insets = useSafeAreaInsets();
+  const triggerScrollToTop = useNavigationStore(
+    state => state.triggerScrollToTop,
+  );
 
   const tabBarHeight = Platform.OS === 'android' ? 60 + insets.bottom : 80;
 
@@ -248,6 +269,13 @@ function AdminTabs() {
           tabBarIcon: AdminHomeTabIcon,
           tabBarButton: AnimatedTabButton,
         }}
+        listeners={({ navigation }) => ({
+          tabPress: () => {
+            if (navigation.isFocused()) {
+              triggerScrollToTop('Home');
+            }
+          },
+        })}
       />
       <AdminTab.Screen
         name="Hatching"
@@ -256,6 +284,21 @@ function AdminTabs() {
           tabBarLabel: () => null,
           tabBarIcon: EggTabIcon,
           tabBarButton: AnimatedTabButton,
+        }}
+        listeners={({ navigation }) => ({
+          tabPress: () => {
+            if (navigation.isFocused()) {
+              triggerScrollToTop('Hatching');
+            }
+          },
+        })}
+      />
+      <AdminTab.Screen
+        name="AddPet"
+        component={EmptyScreen}
+        options={{
+          tabBarLabel: '',
+          tabBarButton: AddPetButton,
         }}
       />
       <AdminTab.Screen
@@ -266,6 +309,13 @@ function AdminTabs() {
           tabBarIcon: HeartTabIcon,
           tabBarButton: AnimatedTabButton,
         }}
+        listeners={({ navigation }) => ({
+          tabPress: () => {
+            if (navigation.isFocused()) {
+              triggerScrollToTop('Adoption');
+            }
+          },
+        })}
       />
       <AdminTab.Screen
         name="Settings"
@@ -275,6 +325,13 @@ function AdminTabs() {
           tabBarIcon: SettingsTabIcon,
           tabBarButton: AnimatedTabButton,
         }}
+        listeners={({ navigation }) => ({
+          tabPress: () => {
+            if (navigation.isFocused()) {
+              triggerScrollToTop('Settings');
+            }
+          },
+        })}
       />
     </AdminTab.Navigator>
   );

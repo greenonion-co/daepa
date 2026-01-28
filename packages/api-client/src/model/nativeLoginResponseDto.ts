@@ -5,10 +5,10 @@
  * Project Daepa API description
  * OpenAPI spec version: 1.0
  */
-import type { UserDtoRole } from "./userDtoRole";
-import type { UserDtoStatus } from "./userDtoStatus";
+import type { NativeLoginResponseDtoRole } from "./nativeLoginResponseDtoRole";
+import type { NativeLoginResponseDtoStatus } from "./nativeLoginResponseDtoStatus";
 
-export interface UserDto {
+export interface NativeLoginResponseDto {
   /** 회원 고유 ID */
   userId: string;
   /** 회원 이름 */
@@ -16,7 +16,7 @@ export interface UserDto {
   /** 회원 이메일 */
   email: string;
   /** 회원 역할 */
-  role: UserDtoRole;
+  role: NativeLoginResponseDtoRole;
   /** 사업자 여부 */
   isBiz: boolean;
   /**
@@ -30,9 +30,11 @@ export interface UserDto {
    */
   refreshTokenExpiresAt: string | null;
   /** 유저 상태 */
-  status: UserDtoStatus;
+  status: NativeLoginResponseDtoStatus;
   /** 생성 시간 */
   createdAt: string;
   /** 수정 시간 */
   updatedAt: string;
+  /** Access Token */
+  accessToken: string;
 }

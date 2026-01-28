@@ -113,26 +113,28 @@ const SettingsPage = () => {
             <div className="relative flex h-16 w-16 items-center justify-center">
               <Image src="/assets/lizard.png" alt="조회된 펫 없음" fill />
             </div>
-            <div className="flex-1">
-              <div className="flex items-center gap-2">
-                <h2 className="text-[17px] font-semibold text-gray-900 dark:text-white">
-                  {userProfile?.name ?? "사용자"}
-                </h2>
-                <Badge
-                  className={cn(
-                    "text-[11px] font-[600]",
-                    userProfile?.isBiz
-                      ? "bg-green-600 hover:bg-green-700"
-                      : "bg-blue-600 hover:bg-blue-700",
-                  )}
-                >
-                  {userProfile?.isBiz ? "사업자" : "일반"}
-                </Badge>
+            {userProfile?.userId && (
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
+                  <h2 className="text-[17px] font-semibold text-gray-900 dark:text-white">
+                    {userProfile?.name ?? "사용자"}
+                  </h2>
+                  <Badge
+                    className={cn(
+                      "text-[11px] font-[600]",
+                      userProfile?.isBiz
+                        ? "bg-green-600 hover:bg-green-700"
+                        : "bg-blue-600 hover:bg-blue-700",
+                    )}
+                  >
+                    {userProfile?.isBiz ? "사업자" : "일반"}
+                  </Badge>
+                </div>
+                <p className="text-[13px] text-gray-500 dark:text-gray-400">
+                  {userProfile?.email ?? ""}
+                </p>
               </div>
-              <p className="text-[13px] text-gray-500 dark:text-gray-400">
-                {userProfile?.email ?? ""}
-              </p>
-            </div>
+            )}
           </div>
         </SettingsGroup>
 
@@ -184,12 +186,9 @@ const SettingsPage = () => {
             icon={<Mail className="h-4 w-4" />}
             iconBgColor="bg-gray-100 dark:bg-neutral-700"
             iconColor="text-gray-600 dark:text-gray-400"
-            label="이메일"
+            label="계정 연동"
             value={
               <div className="flex items-center gap-2">
-                <span className="text-[13px] font-[600] text-gray-700 dark:text-gray-400">
-                  {userProfile?.email ?? ""}
-                </span>
                 {normalizedProviders.map((provider) => (
                   <Image
                     key={provider}
@@ -197,6 +196,7 @@ const SettingsPage = () => {
                     alt={provider}
                     width={18}
                     height={18}
+                    className={cn(provider === "apple" && "dark:invert")}
                   />
                 ))}
               </div>

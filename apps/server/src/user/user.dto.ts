@@ -63,6 +63,8 @@ class UserBaseDto {
 
   @ApiProperty({
     description: 'refresh token',
+    type: 'string',
+    nullable: true,
   })
   @IsString()
   @IsOptional()
@@ -70,6 +72,9 @@ class UserBaseDto {
 
   @ApiProperty({
     description: 'refresh token 만료 시간',
+    type: 'string',
+    format: 'date-time',
+    nullable: true,
   })
   @IsDate()
   @IsOptional()

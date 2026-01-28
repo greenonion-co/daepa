@@ -75,6 +75,22 @@ export class UserNotificationController {
     return { count };
   }
 
+  @Patch('read-all')
+  @ApiResponse({
+    status: 200,
+    description: '모든 알림을 읽음 처리했습니다.',
+    type: CommonResponseDto,
+  })
+  async markAllAsRead(
+    @JwtUser() token: JwtUserPayload,
+  ): Promise<CommonResponseDto> {
+    await this.userNotificationService.markAllAsRead(token.userId);
+    return {
+      success: true,
+      message: '모든 알림을 읽음 처리했습니다.',
+    };
+  }
+
   @Get(':id')
   @ApiResponse({
     status: 200,

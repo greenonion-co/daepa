@@ -25,6 +25,7 @@ const PetLinkCard = ({ detailData }: PetLinkCardProps) => {
               petId={detailData.childPet.id}
               alt={detailData.childPet.name}
               maxSize={128}
+              objectFit="cover"
             />
             <TooltipText text={detailData.childPet.name ?? ""} />
           </Link>
@@ -43,6 +44,7 @@ const PetLinkCard = ({ detailData }: PetLinkCardProps) => {
               petId={detailData?.parentPet?.id}
               alt={detailData.parentPet.name}
               maxSize={128}
+              objectFit="cover"
             />
             <TooltipText text={detailData.parentPet.name ?? ""} />
           </Link>

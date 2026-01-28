@@ -14,6 +14,9 @@ import { AxiosError } from "axios";
 import { DUPLICATE_CHECK_STATUS } from "@/app/(브리더스룸)/constants";
 import NameInput from "@/app/(브리더스룸)/components/NameInput";
 import { useNameStore } from "@/app/(브리더스룸)/store/name";
+import { isNativeApp, requestResetToHome, setNativeAccessToken } from "@/lib/native-bridge";
+import { tokenStorage } from "@/lib/tokenStorage";
+import { useUserStore } from "@/app/(브리더스룸)/store/user";
 
 const NICKNAME_MAX_LENGTH = 15;
 const NICKNAME_MIN_LENGTH = 2;
@@ -41,6 +44,7 @@ type RegisterFormData = z.infer<typeof registerSchema>;
 const RegisterPage = () => {
   const router = useRouter();
   const { duplicateCheckStatus } = useNameStore();
+  const { initialize } = useUserStore();
 
   const { mutateAsync: mutateRegister, isPending: isRegisterPending } = useMutation({
     mutationFn: userControllerCreateInitUserInfo,
@@ -78,6 +82,33 @@ const RegisterPage = () => {
 
       if (response.data.success) {
         toast.success(response.data.message);
+
+        // 네이티브 앱인 경우 토큰 동기화 후 홈 탭으로 이동
+        if (isNativeApp()) {
+          const token = tokenStorage.getToken();
+          if (!token) {
+            console.error("토큰이 없습니다. 회원가입 플로우에 문제가 있습니다.");
+            toast.error("인증 정보를 찾을 수 없습니다. 다시 로그인해주세요.");
+            return;
+          }
+          const tokenSent = setNativeAccessToken(token);
+          if (!tokenSent) {
+            console.error("네이티브 앱에 토큰 전송 실패");
+            toast.error("앱과 통신에 실패했습니다. 다시 시도해주세요.");
+            return;
+          }
+          const resetSuccess = requestResetToHome();
+          if (!resetSuccess) {
+            console.error("네이티브 앱 홈 리셋 실패");
+            toast.error("앱과 통신에 실패했습니다. 다시 시도해주세요.");
+            return;
+          }
+          return;
+        }
+
+        // 웹인 경우: 사용자 정보 초기화 후 리다이렉트
+        await initialize();
+
         const redirectUrl = localStorage.getItem("redirectUrl");
         if (redirectUrl) {
           localStorage.removeItem("redirectUrl");

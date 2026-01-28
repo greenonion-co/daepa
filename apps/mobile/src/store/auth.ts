@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import CookieManager from '@react-native-cookies/cookies';
 import { UserDto } from '@repo/api-client';
 
 type AuthState = {
@@ -18,7 +19,11 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       setAccessToken: token => set({ accessToken: token }),
       setUser: user => set({ user }),
-      clear: () => set({ accessToken: null, user: null }),
+      clear: () => {
+        // WebView 쿠키 삭제
+        CookieManager.clearAll().catch(console.error);
+        set({ accessToken: null, user: null });
+      },
     }),
     {
       name: 'auth-store',
@@ -27,6 +32,14 @@ export const useAuthStore = create<AuthState>()(
         accessToken: state.accessToken,
         user: state.user,
       }),
+      onRehydrateStorage: () => {
+        return state => {
+          // 앱 시작 시 토큰이 없으면 WebView 쿠키도 정리
+          if (!state?.accessToken) {
+            CookieManager.clearAll().catch(console.error);
+          }
+        };
+      },
     },
   ),
 );

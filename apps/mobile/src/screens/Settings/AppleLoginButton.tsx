@@ -8,18 +8,10 @@ import {
 } from 'react-native';
 import appleAuth from '@invertase/react-native-apple-authentication';
 import { useMutation } from '@tanstack/react-query';
-import {
-  authControllerAppleNative,
-  authControllerGetToken,
-  UserDtoStatus,
-} from '@repo/api-client';
+import { authControllerAppleNative } from '@repo/api-client';
 import useLogin from '../../hooks/useLogin';
 import Loading from '@/components/common/Loading';
 import Toast from '@/components/common/Toast';
-import { useNavigation } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { isAxiosError } from 'axios';
-import { RootStackParamList } from '@/types/navigation';
 import Svg, { Path } from 'react-native-svg';
 
 // 애플 아이콘 컴포넌트
@@ -35,47 +27,9 @@ const AppleIcon = () => (
 const AppleLoginButton = () => {
   const { navigateByStatus } = useLogin();
   const isAndroid = Platform.OS === 'android';
-  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
 
-  const { mutateAsync: mutateGetToken } = useMutation({
-    mutationFn: async (_status: UserDtoStatus) => {
-      return authControllerGetToken();
-    },
-    onSuccess: async (data, status) => {
-      navigateByStatus({ status, token: data.data.token });
-
-      Loading.close();
-    },
-    onError: error => {
-      console.log('getToken error', error);
-      Loading.close();
-      Toast.show('로그인에 실패했습니다. 다시 시도해주세요.');
-    },
-  });
-
-  const { mutateAsync: appleLogin } = useMutation({
+  const { mutateAsync: appleNativeLogin } = useMutation({
     mutationFn: authControllerAppleNative,
-    onSuccess: data => {
-      mutateGetToken(data.data.status);
-    },
-    onError: (error: unknown, variables) => {
-      Loading.close();
-
-      if (
-        isAxiosError(error) &&
-        error.response?.status === 422 &&
-        error.response.data?.code === 600
-      ) {
-        navigation.navigate('EmailRegister', {
-          identityToken: variables.identityToken,
-          authorizationCode: variables.authorizationCode ?? '',
-          nonce: variables.nonce ?? '',
-        });
-        return;
-      }
-
-      Toast.show('로그인에 실패했습니다. 다시 시도해주세요.');
-    },
   });
 
   const handleAppleLoginOnAndroid = async () => {
@@ -95,6 +49,10 @@ const AppleLoginButton = () => {
   const handleAppleLoginOnIOS = async () => {
     Loading.show();
 
+    let identityToken: string | null = null;
+    let authorizationCode: string | null = null;
+    let nonce: string | null = null;
+
     try {
       const body = {
         requestedOperation: appleAuth.Operation.LOGIN,
@@ -104,29 +62,36 @@ const AppleLoginButton = () => {
 
       const appleAuthRequestResponse = await appleAuth.performRequest(body);
 
-      const { email, identityToken, authorizationCode, nonce } =
-        appleAuthRequestResponse;
+      identityToken = appleAuthRequestResponse.identityToken;
+      authorizationCode = appleAuthRequestResponse.authorizationCode;
+      nonce = appleAuthRequestResponse.nonce;
+      const email = appleAuthRequestResponse.email;
 
       if (!identityToken) {
-        Loading.close();
         Toast.show('로그인에 실패했습니다. 다시 시도해주세요.');
         return;
       }
 
       if (!authorizationCode || !nonce) {
-        Loading.close();
         Toast.show('로그인에 실패했습니다. 다시 시도해주세요.');
         return;
       }
 
-      appleLogin({
+      const appleRes = await appleNativeLogin({
         identityToken,
         email: email ?? undefined,
         authorizationCode: authorizationCode ?? undefined,
         nonce: nonce ?? undefined,
       });
+
+      navigateByStatus({
+        status: appleRes.data.status,
+        token: appleRes.data.accessToken,
+      });
     } catch (e) {
       console.log(e);
+      Toast.show('로그인에 실패했습니다. 다시 시도해주세요.');
+    } finally {
       Loading.close();
     }
   };
@@ -151,7 +116,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#000000',
-    height: 46,
+    height: 52,
     borderRadius: 12,
     gap: 12,
   },

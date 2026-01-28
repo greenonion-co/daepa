@@ -3,7 +3,6 @@ import {
   Injectable,
   UnauthorizedException,
   Logger,
-  UnprocessableEntityException,
 } from '@nestjs/common';
 import { UserService } from 'src/user/user.service';
 import { ProviderInfo } from './auth.types';
@@ -76,15 +75,48 @@ export class AuthService {
         providerId,
       });
       if (existing?.user) {
+        // 기존 유저인 경우에도 authorizationCode가 있으면 refresh_token 업데이트
+        if (authorizationCode) {
+          const appleRefreshToken =
+            await this.oauthService.exchangeAppleAuthorizationCode(
+              authorizationCode,
+            );
+          if (appleRefreshToken) {
+            const encryptedRefreshToken = encrypt(appleRefreshToken);
+            await this.oauthRepository.update(
+              {
+                provider: OAUTH_PROVIDER.APPLE,
+                providerId,
+              },
+              {
+                refreshToken: encryptedRefreshToken,
+              },
+            );
+          }
+        }
         return {
           userId: existing.user.userId,
           userStatus: existing.user.status,
         };
       }
 
-      throw new UnprocessableEntityException({
-        code: 600,
-        message: 'Apple 이메일이 필요합니다.',
+      // Apple에서 이메일을 제공하지 않은 신규 유저의 경우, Apple 프록시 이메일 형식으로 생성
+      const placeholderEmail = `${providerId}@privaterelay.appleid.com`;
+
+      // Authorization Code가 있으면 Apple 토큰 교환으로 refresh_token 확보
+      let appleRefreshToken: string | undefined;
+      if (authorizationCode) {
+        appleRefreshToken =
+          await this.oauthService.exchangeAppleAuthorizationCode(
+            authorizationCode,
+          );
+      }
+
+      return this.validateUser({
+        email: placeholderEmail,
+        provider: OAUTH_PROVIDER.APPLE,
+        providerId,
+        refreshToken: appleRefreshToken,
       });
     }
 
@@ -364,10 +396,26 @@ export class AuthService {
           }
           break;
         case OAUTH_PROVIDER.GOOGLE:
-          await this.oauthService.disconnectGoogle(userId);
+          try {
+            await this.oauthService.disconnectGoogle(userId);
+          } catch (error) {
+            this.logger.warn(
+              `Google unlink failed but continuing account deletion: ${
+                (error as Error).message
+              }`,
+            );
+          }
           break;
         case OAUTH_PROVIDER.APPLE:
-          await this.oauthService.disconnectApple(userId);
+          try {
+            await this.oauthService.disconnectApple(userId);
+          } catch (error) {
+            this.logger.warn(
+              `Apple unlink failed but continuing account deletion: ${
+                (error as Error).message
+              }`,
+            );
+          }
           break;
       }
     }

@@ -5,6 +5,7 @@ import { authControllerDeleteAccount } from "@repo/api-client";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "@/lib/toast";
+import { isNativeApp, requestResetToHome } from "@/lib/native-bridge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,12 +20,13 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { tokenStorage } from "@/lib/tokenStorage";
+import { useUserStore } from "../../store/user";
 
 const DeleteAccountButton = () => {
   const router = useRouter();
   const [confirmText, setConfirmText] = useState("");
   const [isOpen, setIsOpen] = useState(false);
+  const onLogout = useUserStore((state) => state.onLogout);
 
   const { mutateAsync: mutateDeleteAccount, isPending } = useMutation({
     mutationFn: authControllerDeleteAccount,
@@ -38,11 +40,17 @@ const DeleteAccountButton = () => {
 
     try {
       await mutateDeleteAccount();
-      tokenStorage.removeToken();
+      await onLogout();
       toast.success("탈퇴 처리되었습니다.");
-      router.replace("/");
+
+      if (isNativeApp()) {
+        requestResetToHome();
+      } else {
+        router.replace("/");
+      }
     } catch (error) {
       console.error(error);
+      console.log("🚀 ~ handleDeleteAccount ~ error:", error);
       toast.error("탈퇴 처리 중 오류가 발생했습니다.");
     }
   };
@@ -58,7 +66,7 @@ const DeleteAccountButton = () => {
           회원탈퇴
         </Button>
       </AlertDialogTrigger>
-      <AlertDialogContent>
+      <AlertDialogContent className="rounded-2xl">
         <AlertDialogHeader>
           <AlertDialogTitle>정말 탈퇴하시겠습니까?</AlertDialogTitle>
           <AlertDialogDescription>

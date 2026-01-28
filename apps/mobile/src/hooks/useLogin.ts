@@ -16,8 +16,8 @@ const useLogin = () => {
   }) => {
     switch (status) {
       case UserDtoStatus.PENDING:
-        navigation.navigate('Register', {
-          token,
+        navigation.navigate('Main', {
+          path: '/sign-in/register?_nativeTopBar=1&_hideTopBar=1',
         });
         break;
       case UserDtoStatus.ACTIVE:
