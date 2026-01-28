@@ -6,8 +6,6 @@
  * OpenAPI spec version: 1.0
  */
 import type { NativeLoginResponseDtoRole } from "./nativeLoginResponseDtoRole";
-import type { NativeLoginResponseDtoRefreshToken } from "./nativeLoginResponseDtoRefreshToken";
-import type { NativeLoginResponseDtoRefreshTokenExpiresAt } from "./nativeLoginResponseDtoRefreshTokenExpiresAt";
 import type { NativeLoginResponseDtoStatus } from "./nativeLoginResponseDtoStatus";
 
 export interface NativeLoginResponseDto {
@@ -21,10 +19,16 @@ export interface NativeLoginResponseDto {
   role: NativeLoginResponseDtoRole;
   /** 사업자 여부 */
   isBiz: boolean;
-  /** refresh token */
-  refreshToken: NativeLoginResponseDtoRefreshToken;
-  /** refresh token 만료 시간 */
-  refreshTokenExpiresAt: NativeLoginResponseDtoRefreshTokenExpiresAt;
+  /**
+   * refresh token
+   * @nullable
+   */
+  refreshToken: string | null;
+  /**
+   * refresh token 만료 시간
+   * @nullable
+   */
+  refreshTokenExpiresAt: string | null;
   /** 유저 상태 */
   status: NativeLoginResponseDtoStatus;
   /** 생성 시간 */

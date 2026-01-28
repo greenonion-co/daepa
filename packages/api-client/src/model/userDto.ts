@@ -6,8 +6,6 @@
  * OpenAPI spec version: 1.0
  */
 import type { UserDtoRole } from "./userDtoRole";
-import type { UserDtoRefreshToken } from "./userDtoRefreshToken";
-import type { UserDtoRefreshTokenExpiresAt } from "./userDtoRefreshTokenExpiresAt";
 import type { UserDtoStatus } from "./userDtoStatus";
 
 export interface UserDto {
@@ -21,10 +19,16 @@ export interface UserDto {
   role: UserDtoRole;
   /** 사업자 여부 */
   isBiz: boolean;
-  /** refresh token */
-  refreshToken: UserDtoRefreshToken;
-  /** refresh token 만료 시간 */
-  refreshTokenExpiresAt: UserDtoRefreshTokenExpiresAt;
+  /**
+   * refresh token
+   * @nullable
+   */
+  refreshToken: string | null;
+  /**
+   * refresh token 만료 시간
+   * @nullable
+   */
+  refreshTokenExpiresAt: string | null;
   /** 유저 상태 */
   status: UserDtoStatus;
   /** 생성 시간 */
