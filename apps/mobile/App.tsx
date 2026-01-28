@@ -54,7 +54,7 @@ function App() {
   const handleNotificationPress = useCallback(() => {
     if (notification?.notificationId) {
       navigationRef.current?.navigate('Main', {
-        path: `/notifications?id=${notification.notificationId}`,
+        path: `/notifications?id=${notification.notificationId}?_nativeTopBar=1`,
       });
     }
   }, [notification?.notificationId]);
@@ -79,7 +79,7 @@ function App() {
   useEffect(() => {
     if (isNavigationReady && pendingNotificationId) {
       navigationRef.current?.navigate('Main', {
-        path: `/notifications?id=${pendingNotificationId}`,
+        path: `/notifications?id=${pendingNotificationId}?_nativeTopBar=1`,
       });
       clearPendingNotificationId();
     }
@@ -91,7 +91,8 @@ function App() {
         <View style={styles.container}>
           <NavigationContainer
             ref={navigationRef}
-            onReady={() => setIsNavigationReady(true)}>
+            onReady={() => setIsNavigationReady(true)}
+          >
             <Navigation />
           </NavigationContainer>
           <Toast ref={Toast.setRef} />
