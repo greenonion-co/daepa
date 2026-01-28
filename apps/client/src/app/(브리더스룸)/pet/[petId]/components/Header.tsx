@@ -103,7 +103,7 @@ const Header = ({
         "dark:bg-background sticky top-0 z-20 flex flex-col gap-2 bg-gray-100 px-2 transition-all transition-shadow duration-200",
         isScrolled ? "pt-2 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1)]" : "",
         size === "small" &&
-          "before:dark:bg-background top-2 before:absolute before:-top-2 before:left-0 before:right-0 before:h-2 before:bg-gray-100", // 모달에서 X 버튼 아래로 위치
+          "before:dark:bg-background top-2 before:absolute before:-top-2 before:right-0 before:left-0 before:h-2 before:bg-gray-100", // 모달에서 X 버튼 아래로 위치
       )}
     >
       <div className="flex items-center gap-2">
@@ -113,7 +113,7 @@ const Header = ({
             isScrolled ? "h-14 w-14" : "h-18 w-18",
           )}
         >
-          <PetThumbnail petId={pet.petId} maxSize={72} />
+          <PetThumbnail petId={pet.petId} maxSize={72} objectFit="cover" />
         </div>
         <div className="flex flex-1 flex-col">
           <div className="flex items-center gap-2">
@@ -246,7 +246,7 @@ const Header = ({
             key={tab.id}
             onClick={() => onTabClick(tab.id, tab.ref)}
             className={cn(
-              "whitespace-nowrap px-4 py-2 text-sm transition-colors",
+              "px-4 py-2 text-sm whitespace-nowrap transition-colors",
               activeTab === tab.id
                 ? "border-b-2 border-neutral-800 font-[600] dark:border-white"
                 : "text-neutral-600 hover:bg-gray-200 dark:text-gray-400 dark:hover:bg-gray-800",

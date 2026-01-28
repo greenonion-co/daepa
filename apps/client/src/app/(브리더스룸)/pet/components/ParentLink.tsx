@@ -136,7 +136,7 @@ const ParentLink = ({
             disabled={!editable}
           >
             {editable ? (
-              <Search className="absolute left-1/2 top-1/2 h-6 w-6 -translate-x-1/2 -translate-y-1/2 text-gray-400" />
+              <Search className="absolute top-1/2 left-1/2 h-6 w-6 -translate-x-1/2 -translate-y-1/2 text-gray-400" />
             ) : (
               <div className="text-center text-sm text-gray-400">미등록</div>
             )}
@@ -159,7 +159,7 @@ const ParentLink = ({
               <Button
                 variant="ghost"
                 size="sm"
-                className="absolute right-2 top-2 z-10 h-6 w-6 rounded-full bg-black/50 p-0 hover:bg-black/70"
+                className="absolute top-2 right-2 z-10 h-6 w-6 rounded-full bg-black/50 p-0 hover:bg-black/70"
                 onClick={(e) => handleUnlink(e, data)}
               >
                 <X className="h-4 w-4 text-white" />
@@ -201,7 +201,7 @@ const ParentLink = ({
           <Button
             variant="ghost"
             size="sm"
-            className="absolute right-2 top-2 z-10 h-6 w-6 rounded-full bg-black/50 p-0 hover:bg-black/70"
+            className="absolute top-2 right-2 z-10 h-6 w-6 rounded-full bg-black/50 p-0 hover:bg-black/70"
             onClick={(e) => handleUnlink(e, parent)}
           >
             <X className="h-4 w-4 text-white" />
@@ -226,12 +226,12 @@ const ParentLink = ({
                   }}
                 >
                   <div className="rounded-2xl bg-white">
-                    <PetThumbnail petId={parent.petId} maxSize={220} />
+                    <PetThumbnail petId={parent.petId} maxSize={220} objectFit="cover" />
                   </div>
                 </div>
               ) : (
                 <div className="rounded-2xl">
-                  <PetThumbnail petId={parent.petId} maxSize={220} />
+                  <PetThumbnail petId={parent.petId} maxSize={220} objectFit="cover" />
                 </div>
               )}
               {!isMyPet && (
