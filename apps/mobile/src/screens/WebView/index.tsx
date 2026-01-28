@@ -103,12 +103,15 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
 
   // initialPath를 route name으로 매핑
   const getRouteNameFromPath = (path: string): string => {
-    if (path === '/' || path === '') return 'Home';
-    if (path === '/pet') return 'Home'; // Admin 모드의 Home
-    if (path === '/hatching') return 'Hatching';
-    if (path === '/adoption') return 'Adoption';
-    if (path === '/settings') return 'Settings';
-    return path;
+    // 쿼리 파라미터와 해시 제거
+    const pathname = path.split(/[?#]/)[0];
+
+    if (pathname === '/' || pathname === '') return 'Home';
+    if (pathname === '/pet') return 'Home'; // Admin 모드의 Home
+    if (pathname === '/hatching') return 'Hatching';
+    if (pathname === '/adoption') return 'Adoption';
+    if (pathname === '/settings') return 'Settings';
+    return pathname;
   };
 
   // 스크롤 투 탑 트리거 감지
