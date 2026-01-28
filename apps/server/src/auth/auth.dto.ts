@@ -1,6 +1,16 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsBoolean, IsOptional, IsString } from 'class-validator';
 import { CommonResponseDto } from 'src/common/response.dto';
+import { UserDto } from 'src/user/user.dto';
+
+export class NativeLoginResponseDto extends UserDto {
+  @ApiProperty({
+    description: 'Access Token',
+    example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+  })
+  @IsString()
+  accessToken: string;
+}
 
 export class TokenResponseDto extends CommonResponseDto {
   @ApiProperty({

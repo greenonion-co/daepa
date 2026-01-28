@@ -71,6 +71,7 @@ import type {
   GetChildrenPageResponseDto,
   GetParentsByPetIdResponseDto,
   GetSiblingsPageResponseDto,
+  NativeLoginResponseDto,
   PairControllerGetPairList200,
   PairDetailDto,
   ParentLinkDetailJson,
@@ -83,7 +84,6 @@ import type {
   PetSummaryDto,
   TokenResponseDto,
   UserControllerGetUserListSimple200,
-  UserDto,
   UserNotificationControllerFindAll200,
   UserNotificationControllerGetUnreadCount200,
   UserNotificationDto,
@@ -298,7 +298,7 @@ export const brPetControllerGetPetsByDateRange = (
 export const authControllerKakaoNative = (
   kakaoNativeLoginRequestDto: KakaoNativeLoginRequestDto,
 ) => {
-  return useCustomInstance<UserDto>({
+  return useCustomInstance<NativeLoginResponseDto>({
     url: `/api/auth/sign-in/kakao/native`,
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -309,7 +309,7 @@ export const authControllerKakaoNative = (
 export const authControllerAppleNative = (
   appleNativeLoginRequestDto: AppleNativeLoginRequestDto,
 ) => {
-  return useCustomInstance<UserDto>({
+  return useCustomInstance<NativeLoginResponseDto>({
     url: `/api/auth/sign-in/apple/native`,
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -320,7 +320,7 @@ export const authControllerAppleNative = (
 export const authControllerGoogleNative = (
   googleNativeLoginRequestDto: GoogleNativeLoginRequestDto,
 ) => {
-  return useCustomInstance<UserDto>({
+  return useCustomInstance<NativeLoginResponseDto>({
     url: `/api/auth/sign-in/google/native`,
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -3211,8 +3211,8 @@ export const getBrPetControllerGetPetsByDateRangeResponseMock = (
 });
 
 export const getAuthControllerKakaoNativeResponseMock = (
-  overrideResponse: Partial<UserDto> = {},
-): UserDto => ({
+  overrideResponse: Partial<NativeLoginResponseDto> = {},
+): NativeLoginResponseDto => ({
   userId: faker.string.alpha(20),
   name: faker.string.alpha(20),
   email: faker.string.alpha(20),
@@ -3229,12 +3229,13 @@ export const getAuthControllerKakaoNativeResponseMock = (
   ] as const),
   createdAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
   updatedAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+  accessToken: faker.string.alpha(20),
   ...overrideResponse,
 });
 
 export const getAuthControllerAppleNativeResponseMock = (
-  overrideResponse: Partial<UserDto> = {},
-): UserDto => ({
+  overrideResponse: Partial<NativeLoginResponseDto> = {},
+): NativeLoginResponseDto => ({
   userId: faker.string.alpha(20),
   name: faker.string.alpha(20),
   email: faker.string.alpha(20),
@@ -3251,12 +3252,13 @@ export const getAuthControllerAppleNativeResponseMock = (
   ] as const),
   createdAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
   updatedAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+  accessToken: faker.string.alpha(20),
   ...overrideResponse,
 });
 
 export const getAuthControllerGoogleNativeResponseMock = (
-  overrideResponse: Partial<UserDto> = {},
-): UserDto => ({
+  overrideResponse: Partial<NativeLoginResponseDto> = {},
+): NativeLoginResponseDto => ({
   userId: faker.string.alpha(20),
   name: faker.string.alpha(20),
   email: faker.string.alpha(20),
@@ -3273,6 +3275,7 @@ export const getAuthControllerGoogleNativeResponseMock = (
   ] as const),
   createdAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
   updatedAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+  accessToken: faker.string.alpha(20),
   ...overrideResponse,
 });
 
@@ -4976,8 +4979,10 @@ export const getBrPetControllerGetPetsByDateRangeMockHandler = (
 
 export const getAuthControllerKakaoNativeMockHandler = (
   overrideResponse?:
-    | UserDto
-    | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<UserDto> | UserDto),
+    | NativeLoginResponseDto
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<NativeLoginResponseDto> | NativeLoginResponseDto),
 ) => {
   return http.post("*/api/auth/sign-in/kakao/native", async (info) => {
     await delay(1000);
@@ -4997,8 +5002,10 @@ export const getAuthControllerKakaoNativeMockHandler = (
 
 export const getAuthControllerAppleNativeMockHandler = (
   overrideResponse?:
-    | UserDto
-    | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<UserDto> | UserDto),
+    | NativeLoginResponseDto
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<NativeLoginResponseDto> | NativeLoginResponseDto),
 ) => {
   return http.post("*/api/auth/sign-in/apple/native", async (info) => {
     await delay(1000);
@@ -5018,8 +5025,10 @@ export const getAuthControllerAppleNativeMockHandler = (
 
 export const getAuthControllerGoogleNativeMockHandler = (
   overrideResponse?:
-    | UserDto
-    | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<UserDto> | UserDto),
+    | NativeLoginResponseDto
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<NativeLoginResponseDto> | NativeLoginResponseDto),
 ) => {
   return http.post("*/api/auth/sign-in/google/native", async (info) => {
     await delay(1000);

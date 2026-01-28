@@ -1,10 +1,7 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet, View } from 'react-native';
 import { login, getProfile } from '@react-native-seoul/kakao-login';
-import {
-  authControllerGetToken,
-  authControllerKakaoNative,
-} from '@repo/api-client';
+import { authControllerKakaoNative } from '@repo/api-client';
 import { useMutation } from '@tanstack/react-query';
 import useLogin from '../../hooks/useLogin';
 import Loading from '@/components/common/Loading';
@@ -33,10 +30,6 @@ const KakaoIcon = () => (
 const KakaoLoginButton = () => {
   const { navigateByStatus } = useLogin();
 
-  const { mutateAsync: mutateGetToken } = useMutation({
-    mutationFn: authControllerGetToken,
-  });
-
   const { mutateAsync: kakaoNativeLogin } = useMutation({
     mutationFn: authControllerKakaoNative,
   });
@@ -58,11 +51,9 @@ const KakaoLoginButton = () => {
         refreshToken: kakaoLogin.refreshToken,
       });
 
-      const tokenRes = await mutateGetToken();
-
       navigateByStatus({
         status: kakaoRes.data.status,
-        token: tokenRes.data.token,
+        token: kakaoRes.data.accessToken,
       });
     } catch (e) {
       if (
