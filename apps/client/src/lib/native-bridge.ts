@@ -33,12 +33,14 @@ type NativeMessage =
     }
   | { type: "GO_BACK" }
   | { type: "POP_TO_ROOT" }
+  | { type: "RESET_TO_HOME" }
   | { type: "SHARE"; url: string; title?: string }
   | { type: "OPEN_CAMERA" }
   | { type: "OPEN_GALLERY" }
   | { type: "HAPTIC"; style: "light" | "medium" | "heavy" }
   | { type: "TOKEN_REFRESH_FAILED" }
   | { type: "SET_USER_DATA"; user: unknown }
+  | { type: "SET_ACCESS_TOKEN"; token: string }
   | { type: "SET_THEME"; theme: ThemeMode }
   | { type: "TOAST"; message: string; variant: "success" | "error" | "info" | "warning" }
   | { type: "SET_TOP_BAR_VISIBLE"; visible: boolean }
@@ -130,6 +132,21 @@ export const setTopBarVisible = (visible: boolean): boolean => {
  */
 export const syncUserToNative = (user: unknown): boolean => {
   return sendToNative({ type: "SET_USER_DATA", user });
+};
+
+/**
+ * 네이티브 앱에 액세스 토큰 설정
+ */
+export const setNativeAccessToken = (token: string): boolean => {
+  return sendToNative({ type: "SET_ACCESS_TOKEN", token });
+};
+
+/**
+ * 네이티브 앱 홈으로 리셋 (새로 마운트)
+ * 회원가입 등 토큰 동기화가 필요한 경우 사용
+ */
+export const requestResetToHome = (): boolean => {
+  return sendToNative({ type: "RESET_TO_HOME" });
 };
 
 /**

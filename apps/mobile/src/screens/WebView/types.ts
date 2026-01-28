@@ -17,10 +17,12 @@ export type WebViewMessage =
     }
   | { type: 'GO_BACK' }
   | { type: 'POP_TO_ROOT' }
+  | { type: 'RESET_TO_HOME' }
   | { type: 'READY' }
   | { type: 'LOG'; level: 'log' | 'info' | 'warn' | 'error'; args: unknown[] }
   | { type: 'TOKEN_REFRESH_FAILED' }
   | { type: 'SET_USER_DATA'; user: unknown }
+  | { type: 'SET_ACCESS_TOKEN'; token: string }
   | { type: 'SET_THEME'; theme: ThemeMode }
   | {
       type: 'TOAST';

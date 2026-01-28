@@ -14,6 +14,8 @@ import { AxiosError } from "axios";
 import { DUPLICATE_CHECK_STATUS } from "@/app/(브리더스룸)/constants";
 import NameInput from "@/app/(브리더스룸)/components/NameInput";
 import { useNameStore } from "@/app/(브리더스룸)/store/name";
+import { isNativeApp, requestResetToHome, setNativeAccessToken } from "@/lib/native-bridge";
+import { tokenStorage } from "@/lib/tokenStorage";
 
 const NICKNAME_MAX_LENGTH = 15;
 const NICKNAME_MIN_LENGTH = 2;
@@ -78,6 +80,19 @@ const RegisterPage = () => {
 
       if (response.data.success) {
         toast.success(response.data.message);
+
+        // 네이티브 앱인 경우 토큰 동기화 후 홈 탭으로 이동
+        if (isNativeApp()) {
+          const token = tokenStorage.getToken();
+          if (token) {
+            setNativeAccessToken(token);
+          }
+          //  홈으로 리셋
+          requestResetToHome();
+          return;
+        }
+
+        // 웹인 경우 기존 로직 유지
         const redirectUrl = localStorage.getItem("redirectUrl");
         if (redirectUrl) {
           localStorage.removeItem("redirectUrl");
