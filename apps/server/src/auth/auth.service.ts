@@ -75,6 +75,25 @@ export class AuthService {
         providerId,
       });
       if (existing?.user) {
+        // 기존 유저인 경우에도 authorizationCode가 있으면 refresh_token 업데이트
+        if (authorizationCode) {
+          const appleRefreshToken =
+            await this.oauthService.exchangeAppleAuthorizationCode(
+              authorizationCode,
+            );
+          if (appleRefreshToken) {
+            const encryptedRefreshToken = encrypt(appleRefreshToken);
+            await this.oauthRepository.update(
+              {
+                provider: OAUTH_PROVIDER.APPLE,
+                providerId,
+              },
+              {
+                refreshToken: encryptedRefreshToken,
+              },
+            );
+          }
+        }
         return {
           userId: existing.user.userId,
           userStatus: existing.user.status,
