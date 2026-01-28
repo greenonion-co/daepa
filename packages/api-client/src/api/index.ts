@@ -248,6 +248,13 @@ export const userNotificationControllerGetUnreadCount = () => {
   });
 };
 
+export const userNotificationControllerMarkAllAsRead = () => {
+  return useCustomInstance<CommonResponseDto>({
+    url: `/api/v1/user-notification/read-all`,
+    method: "PATCH",
+  });
+};
+
 export const userNotificationControllerFindOne = (id: number) => {
   return useCustomInstance<UserNotificationDto>({
     url: `/api/v1/user-notification/${id}`,
@@ -669,6 +676,9 @@ export type UserNotificationControllerDeleteResult = NonNullable<
 >;
 export type UserNotificationControllerGetUnreadCountResult = NonNullable<
   Awaited<ReturnType<typeof userNotificationControllerGetUnreadCount>>
+>;
+export type UserNotificationControllerMarkAllAsReadResult = NonNullable<
+  Awaited<ReturnType<typeof userNotificationControllerMarkAllAsRead>>
 >;
 export type UserNotificationControllerFindOneResult = NonNullable<
   Awaited<ReturnType<typeof userNotificationControllerFindOne>>
@@ -1911,6 +1921,14 @@ export const getUserNotificationControllerGetUnreadCountResponseMock = (
     faker.number.int({ min: undefined, max: undefined }),
     undefined,
   ]),
+  ...overrideResponse,
+});
+
+export const getUserNotificationControllerMarkAllAsReadResponseMock = (
+  overrideResponse: Partial<CommonResponseDto> = {},
+): CommonResponseDto => ({
+  success: faker.datatype.boolean(),
+  message: faker.string.alpha(20),
   ...overrideResponse,
 });
 
@@ -4818,6 +4836,29 @@ export const getUserNotificationControllerGetUnreadCountMockHandler = (
   });
 };
 
+export const getUserNotificationControllerMarkAllAsReadMockHandler = (
+  overrideResponse?:
+    | CommonResponseDto
+    | ((
+        info: Parameters<Parameters<typeof http.patch>[1]>[0],
+      ) => Promise<CommonResponseDto> | CommonResponseDto),
+) => {
+  return http.patch("*/api/v1/user-notification/read-all", async (info) => {
+    await delay(1000);
+
+    return new HttpResponse(
+      JSON.stringify(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getUserNotificationControllerMarkAllAsReadResponseMock(),
+      ),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+  });
+};
+
 export const getUserNotificationControllerFindOneMockHandler = (
   overrideResponse?:
     | UserNotificationDto
@@ -5779,6 +5820,7 @@ export const getProjectDaepaAPIMock = () => [
   getUserNotificationControllerUpdateMockHandler(),
   getUserNotificationControllerDeleteMockHandler(),
   getUserNotificationControllerGetUnreadCountMockHandler(),
+  getUserNotificationControllerMarkAllAsReadMockHandler(),
   getUserNotificationControllerFindOneMockHandler(),
   getBrPetControllerFindAllMockHandler(),
   getBrPetControllerGetPetsByYearMockHandler(),
