@@ -32,6 +32,7 @@ import Config from '@/utils/config';
 import LottieLoading from '@/components/common/LottieLoading';
 import TopBar from '@/components/common/TopBar';
 import Toast from '@/components/common/Toast';
+import Loading from '@/components/common/Loading';
 import {
   WebViewMessage,
   WebViewRouteParams,
@@ -100,6 +101,13 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
       );
     }
   }, [theme]);
+
+  // 컴포넌트 언마운트 시 로딩 닫기
+  useEffect(() => {
+    return () => {
+      Loading.close();
+    };
+  }, []);
 
   // initialPath를 route name으로 매핑
   const getRouteNameFromPath = (path: string): string => {
@@ -248,6 +256,12 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
           break;
         case 'SET_TOP_BAR_VISIBLE':
           setTopBarVisible(message.visible);
+          break;
+        case 'SHOW_LOADING':
+          Loading.show();
+          break;
+        case 'HIDE_LOADING':
+          Loading.close();
           break;
         default:
           break;
