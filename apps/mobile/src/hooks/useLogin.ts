@@ -1,5 +1,5 @@
 import { UserDtoStatus } from '@repo/api-client';
-import { useNavigation } from '@react-navigation/native';
+import { CommonActions, useNavigation } from '@react-navigation/native';
 import { useAuthStore } from '../store/auth';
 import Toast from '@/components/common/Toast';
 import { RootStackNavigationProp } from '@/types/navigation';
@@ -14,6 +14,9 @@ const useLogin = () => {
     status: UserDtoStatus;
     token: string;
   }) => {
+    // 모든 상태에서 accessToken 저장 (WebView와 Native 인증 상태 동기화)
+    useAuthStore.getState().setAccessToken(token);
+
     switch (status) {
       case UserDtoStatus.PENDING:
         navigation.navigate('Main', {
@@ -21,16 +24,23 @@ const useLogin = () => {
         });
         break;
       case UserDtoStatus.ACTIVE:
-        useAuthStore.getState().setAccessToken(token);
-        navigation.navigate('Tabs', {
-          screen: 'Home',
-        });
+        // 로그인 성공 시 네비게이션 스택 초기화 (뒤로가기 방지)
+        navigation.dispatch(
+          CommonActions.reset({
+            index: 0,
+            routes: [{ name: 'Tabs', params: { screen: 'Home' } }],
+          }),
+        );
         Toast.show('로그인에 성공했습니다.');
         break;
       default:
-        navigation.navigate('Tabs', {
-          screen: 'Settings',
-        });
+        // 기타 상태도 스택 초기화
+        navigation.dispatch(
+          CommonActions.reset({
+            index: 0,
+            routes: [{ name: 'Tabs', params: { screen: 'Settings' } }],
+          }),
+        );
         break;
     }
   };
