@@ -6,6 +6,24 @@
       parallelizeBuildables = "YES"
       buildImplicitDependencies = "YES"
       buildArchitectures = "Automatic">
+      <PreActions>
+         <ExecutionAction
+            ActionType = "Xcode.IDEStandardExecutionActionsCore.ExecutionActionType.ShellScriptAction">
+            <ActionContent
+               title = "Set Development Environment"
+               scriptText = "# Development 환경 설정&#10;cd &quot;$PROJECT_DIR&quot;&#10;ENVFILE=.env.development ./scripts/set-env.sh&#10;# react-native-config가 빌드 시 올바른 env 파일을 사용하도록 설정&#10;echo &quot;.env.development&quot; &gt; /tmp/envfile&#10;">
+               <EnvironmentBuildable>
+                  <BuildableReference
+                     BuildableIdentifier = "primary"
+                     BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
+                     BuildableName = "mobile.app"
+                     BlueprintName = "mobile"
+                     ReferencedContainer = "container:mobile.xcodeproj">
+                  </BuildableReference>
+               </EnvironmentBuildable>
+            </ActionContent>
+         </ExecutionAction>
+      </PreActions>
       <BuildActionEntries>
          <BuildActionEntry
             buildForTesting = "YES"
