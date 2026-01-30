@@ -8,12 +8,12 @@ import { useSearchKeywordStore } from "../store/searchKeyword";
 import { useIsMobile } from "@/hooks/useMobile";
 import SearchInput from "./SearchInput";
 import Image from "next/image";
-import { useUserStore } from "../store/user";
+import { useIsLoggedIn } from "@/hooks/useAuth";
 import { isNativeApp } from "@/lib/native-bridge";
 import AddPetButton from "@/app/(브리더스룸)/components/AddPetButton";
 
 const Menubar = ({ unreadCount }: { unreadCount: number }) => {
-  const isLoggedIn = useUserStore((state) => !!state.user?.userId);
+  const isLoggedIn = useIsLoggedIn();
   const pathname = usePathname();
   const isMobile = useIsMobile();
   const { searchKeyword, setSearchKeyword } = useSearchKeywordStore();

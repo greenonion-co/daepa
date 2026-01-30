@@ -5,7 +5,7 @@ import { Separator } from "@/components/ui/separator";
 
 import { overlay } from "overlay-kit";
 import Dialog from "../../components/Form/Dialog";
-import { useUserStore } from "../../store/user";
+import { useAuth } from "@/hooks/useAuth";
 import { Switch } from "@/components/ui/switch";
 import { useTheme } from "@/contexts/ThemeContext";
 import { ArrowRight } from "lucide-react";
@@ -13,8 +13,7 @@ import { useLogout } from "@/hooks/useLogout";
 import Link from "next/link";
 
 const SettingList = () => {
-  const user = useUserStore((state) => state.user);
-  const isLoggedIn = !!user?.userId;
+  const { user, isLoggedIn } = useAuth();
   const { theme, setTheme } = useTheme();
   const { logout } = useLogout();
 
