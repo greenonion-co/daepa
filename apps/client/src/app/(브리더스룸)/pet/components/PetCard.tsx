@@ -80,18 +80,7 @@ export default function PetCard({ pet }: PetCardProps) {
               {pet.name ?? "이름 없음"}
             </h3>
             {/* 성별 */}
-            {sexLabel && (
-              <span
-                className={cn(
-                  "text-[10px] font-[500]",
-                  (pet.sex === "M" && "text-blue-500") ||
-                    (pet.sex === "F" && "text-red-500") ||
-                    "text-amber-500",
-                )}
-              >
-                {sexLabel}
-              </span>
-            )}
+            {sexLabel}
             {/* 성장단계 */}
             {pet.growth && (
               <p className="text-xs font-[500] text-gray-400 dark:text-gray-400">
