@@ -1,12 +1,12 @@
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useAuthStore } from '@/store/auth';
+import { useIsLoggedIn } from '@/hooks/useAuth';
 import Profile from './Profile';
 import KakaoLoginButton from './KakaoLoginButton';
 import AppleLoginButton from './AppleLoginButton';
 import { StyleSheet, View } from 'react-native';
 
 const SettingsScreen = () => {
-  const isLoggedIn = useAuthStore(state => !!state.accessToken);
+  const isLoggedIn = useIsLoggedIn();
 
   return (
     <SafeAreaView style={styles.container}>
