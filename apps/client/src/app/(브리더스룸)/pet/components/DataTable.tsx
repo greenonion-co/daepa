@@ -89,7 +89,7 @@ export const DataTable = ({
   return (
     <div className="w-full">
       <div className="rounded-md">
-        <Table className="dark:bg-[#101012]">
+        <Table className="bg-background dark:bg-[#101012]">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
