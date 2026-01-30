@@ -21,7 +21,9 @@ const LoginScreen = () => {
           {/* 메인 카드 */}
           <View style={styles.card}>
             {/* 로고 이미지 */}
-            <Text style={styles.title}>Breedy</Text>
+            <Text style={[styles.title, isDark && styles.titleDark]}>
+              Breedy
+            </Text>
             {/* 로그인 버튼들 */}
             <View style={styles.buttonContainer}>
               <AppleLoginButton />
@@ -59,6 +61,9 @@ const styles = StyleSheet.create({
     color: 'rgba(31, 41, 55, 0.9)',
     marginBottom: 10,
     textAlign: 'center',
+  },
+  titleDark: {
+    color: '#f3f4f6',
   },
   card: {
     width: '100%',
