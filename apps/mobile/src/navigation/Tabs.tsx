@@ -401,22 +401,20 @@ export default function Tabs() {
 
   // 최초 1회 모드 전환 안내
   useEffect(() => {
+    let timeoutId: NodeJS.Timeout | null = null;
+
     const checkModeGuide = async () => {
       if (!canChangeMode) {
-        console.log('[ModeGuide] canChangeMode is false, skipping guide');
         return;
       }
 
       try {
-        // 테스트용: AsyncStorage 키 초기화 (테스트 후 이 줄 삭제)
         // await AsyncStorage.removeItem(MODE_GUIDE_SHOWN_KEY);
 
         const hasShown = await AsyncStorage.getItem(MODE_GUIDE_SHOWN_KEY);
 
         if (!hasShown) {
-          // 약간의 딜레이 후 가이드 표시 (화면 로드 후)
-          setTimeout(() => {
-            console.log('[ModeGuide] Showing guide overlay');
+          timeoutId = setTimeout(() => {
             setIsGuideVisible(true);
           }, 1000);
         }
@@ -426,6 +424,12 @@ export default function Tabs() {
     };
 
     checkModeGuide();
+
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
   }, [canChangeMode]);
 
   const handleGuideClose = useCallback(async () => {
