@@ -48,7 +48,9 @@ if [ -f "$ENV_FILE" ]; then
     fi
   done < "$ENV_FILE"
 else
-  echo "Warning: Env file not found: $ENV_FILE"
+  echo "Error: Env file not found: $ENV_FILE"
+  echo "Please create the env file before building."
+  exit 1
 fi
 
 echo "Generated $OUTPUT_FILE"
