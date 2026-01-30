@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
+  Animated,
+  Dimensions,
   Image,
   Modal,
   StyleSheet,
@@ -9,6 +11,8 @@ import {
 } from 'react-native';
 import { CommonActions, useNavigation } from '@react-navigation/native';
 
+const SCREEN_HEIGHT = Dimensions.get('window').height;
+
 interface LoginPromoSheetProps {
   visible: boolean;
   onClose: () => void;
@@ -16,26 +20,89 @@ interface LoginPromoSheetProps {
 
 const LoginPromoSheet = ({ visible, onClose }: LoginPromoSheetProps) => {
   const navigation = useNavigation();
+  const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
+  const backdropAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (visible) {
+      // 백드롭 페이드 인 + 시트 슬라이드 업
+      Animated.parallel([
+        Animated.timing(backdropAnim, {
+          toValue: 1,
+          duration: 250,
+          useNativeDriver: true,
+        }),
+        Animated.spring(slideAnim, {
+          toValue: 0,
+          useNativeDriver: true,
+          tension: 65,
+          friction: 11,
+        }),
+      ]).start();
+    } else {
+      // 초기화
+      slideAnim.setValue(SCREEN_HEIGHT);
+      backdropAnim.setValue(0);
+    }
+  }, [visible, slideAnim, backdropAnim]);
+
+  const handleClose = () => {
+    // 백드롭 페이드 아웃 + 시트 슬라이드 다운
+    Animated.parallel([
+      Animated.timing(backdropAnim, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: SCREEN_HEIGHT,
+        duration: 250,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      onClose();
+    });
+  };
 
   const handleLogin = () => {
-    onClose();
-    navigation.dispatch(CommonActions.navigate({ name: 'Login' }));
+    handleClose();
+    // 약간의 딜레이 후 네비게이션 (애니메이션 완료 후)
+    setTimeout(() => {
+      navigation.dispatch(CommonActions.navigate({ name: 'Login' }));
+    }, 200);
   };
 
   return (
     <Modal
       visible={visible}
       transparent
-      animationType="fade"
-      onRequestClose={onClose}
+      animationType="none"
+      onRequestClose={handleClose}
     >
-      <View style={styles.backdrop}>
-        <TouchableOpacity
-          style={styles.backdropTouchable}
-          activeOpacity={1}
-          onPress={onClose}
-        />
-        <View style={styles.sheetContainer}>
+      <View style={styles.container}>
+        {/* 애니메이션 백드롭 */}
+        <Animated.View
+          style={[
+            styles.backdrop,
+            {
+              opacity: backdropAnim,
+            },
+          ]}
+        >
+          <TouchableOpacity
+            style={styles.backdropTouchable}
+            activeOpacity={1}
+            onPress={handleClose}
+          />
+        </Animated.View>
+
+        {/* 슬라이드 업 시트 */}
+        <Animated.View
+          style={[
+            styles.sheetContainer,
+            { transform: [{ translateY: slideAnim }] },
+          ]}
+        >
           {/* 이미지 */}
           <View style={styles.imageContainer}>
             <Image
@@ -69,12 +136,12 @@ const LoginPromoSheet = ({ visible, onClose }: LoginPromoSheetProps) => {
           {/* 다음에 할게요 버튼 */}
           <TouchableOpacity
             style={styles.secondaryButton}
-            onPress={onClose}
+            onPress={handleClose}
             activeOpacity={0.6}
           >
             <Text style={styles.secondaryButtonText}>다음에 할게요</Text>
           </TouchableOpacity>
-        </View>
+        </Animated.View>
       </View>
     </Modal>
   );
@@ -83,10 +150,13 @@ const LoginPromoSheet = ({ visible, onClose }: LoginPromoSheetProps) => {
 export default LoginPromoSheet;
 
 const styles = StyleSheet.create({
-  backdrop: {
+  container: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'flex-end',
+  },
+  backdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   backdropTouchable: {
     flex: 1,
@@ -122,7 +192,6 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     marginBottom: 30,
   },
-  descriptionDark: {},
   descriptionHighlight: {
     fontWeight: '600',
     color: '#1d4ed8',
