@@ -30,10 +30,11 @@ GoogleSignin.configure({
 const queryClient = new QueryClient();
 
 // 개발 환경 여부 확인 (로컬 IP 또는 localhost 사용 시)
+const serverUrl = AppConfig.SERVER_BASE_URL ?? '';
 const isDev =
-  AppConfig.SERVER_BASE_URL.includes('192.168') ||
-  AppConfig.SERVER_BASE_URL.includes('localhost') ||
-  AppConfig.SERVER_BASE_URL.includes('10.0.');
+  serverUrl.includes('192.168') ||
+  serverUrl.includes('localhost') ||
+  serverUrl.includes('10.0.');
 
 function App() {
   const navigationRef =
