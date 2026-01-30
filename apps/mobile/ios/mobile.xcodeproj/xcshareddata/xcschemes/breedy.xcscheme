@@ -11,7 +11,7 @@
             ActionType = "Xcode.IDEStandardExecutionActionsCore.ExecutionActionType.ShellScriptAction">
             <ActionContent
                title = "Set Production Environment"
-               scriptText = "# Production 환경 설정&#10;cd &quot;$PROJECT_DIR&quot;&#10;ENVFILE=.env.production ./scripts/set-env.sh&#10;# react-native-config가 빌드 시 올바른 env 파일을 사용하도록 설정&#10;echo &quot;.env.production&quot; &gt; /tmp/envfile&#10;">
+               scriptText = "# Production 환경 설정&#10;cd &quot;$PROJECT_DIR&quot;&#10;ENVFILE=.env.production ./scripts/set-env.sh&#10;# react-native-config가 빌드 시 올바른 env 파일을 사용하도록 설정&#10;echo &quot;.env.production&quot; &gt; /tmp/envfile-breedy&#10;">
                <EnvironmentBuildable>
                   <BuildableReference
                      BuildableIdentifier = "primary"
