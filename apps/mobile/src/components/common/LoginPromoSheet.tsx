@@ -66,10 +66,10 @@ const LoginPromoSheet = ({ visible, onClose }: LoginPromoSheetProps) => {
 
   const handleLogin = () => {
     handleClose();
-    // 약간의 딜레이 후 네비게이션 (애니메이션 완료 후)
+    // 애니메이션 완료 후 네비게이션 (슬라이드 애니메이션 250ms)
     setTimeout(() => {
       navigation.dispatch(CommonActions.navigate({ name: 'Login' }));
-    }, 200);
+    }, 260);
   };
 
   return (
