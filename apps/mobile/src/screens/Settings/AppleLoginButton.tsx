@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Platform,
   TouchableOpacity,
@@ -25,6 +25,7 @@ const AppleIcon = () => (
 );
 
 const AppleLoginButton = () => {
+  const [isLoading, setIsLoading] = useState(false);
   const { navigateByStatus } = useLogin();
   const isAndroid = Platform.OS === 'android';
 
@@ -33,20 +34,24 @@ const AppleLoginButton = () => {
   });
 
   const handleAppleLoginOnAndroid = async () => {
+    if (isLoading) return;
+    setIsLoading(true);
     Loading.show();
 
     try {
       Toast.show('아직 지원되지 않는 기능입니다. 곧 제공될 예정입니다.');
-      Loading.close();
-      return;
     } catch (e) {
       console.log('handleAppleLoginOnIOS error', e);
-      Loading.close();
       Toast.show('로그인에 실패했습니다. 다시 시도해주세요.');
+    } finally {
+      setIsLoading(false);
+      Loading.close();
     }
   };
 
   const handleAppleLoginOnIOS = async () => {
+    if (isLoading) return;
+    setIsLoading(true);
     Loading.show();
 
     let identityToken: string | null = null;
@@ -92,6 +97,7 @@ const AppleLoginButton = () => {
       console.log(e);
       Toast.show('로그인에 실패했습니다. 다시 시도해주세요.');
     } finally {
+      setIsLoading(false);
       Loading.close();
     }
   };
@@ -101,6 +107,7 @@ const AppleLoginButton = () => {
       style={styles.button}
       onPress={isAndroid ? handleAppleLoginOnAndroid : handleAppleLoginOnIOS}
       activeOpacity={0.8}
+      disabled={isLoading}
     >
       <View style={styles.iconContainer}>
         <AppleIcon />
