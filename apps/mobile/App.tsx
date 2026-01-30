@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, Text } from 'react-native';
+import AppConfig from './src/utils/config';
 import {
   NavigationContainer,
   NavigationContainerRef,
@@ -29,6 +30,13 @@ GoogleSignin.configure({
 });
 
 const queryClient = new QueryClient();
+
+// 개발 환경 여부 확인 (로컬 IP 또는 localhost 사용 시)
+const serverUrl = AppConfig.SERVER_BASE_URL ?? '';
+const isDev =
+  serverUrl.includes('192.168') ||
+  serverUrl.includes('localhost') ||
+  serverUrl.includes('10.0.');
 
 function App() {
   const navigationRef =
@@ -135,6 +143,11 @@ function App() {
             onPress={handleNotificationPress}
             onDismiss={hideNotification}
           />
+          {isDev && (
+            <View style={styles.devBadge}>
+              <Text style={styles.devBadgeText}>DEV</Text>
+            </View>
+          )}
         </View>
       </QueryClientProvider>
     </SafeAreaProvider>
@@ -145,6 +158,22 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FFFFFF',
+  },
+  devBadge: {
+    position: 'absolute',
+    top: 50,
+    right: 0,
+    backgroundColor: '#FF6B6B',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderTopLeftRadius: 4,
+    borderBottomLeftRadius: 4,
+    opacity: 0.9,
+  },
+  devBadgeText: {
+    color: '#FFFFFF',
+    fontSize: 10,
+    fontWeight: 'bold',
   },
 });
 

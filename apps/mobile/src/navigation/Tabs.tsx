@@ -1,4 +1,5 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   View,
   StyleSheet,
@@ -19,9 +20,9 @@ import Calendar from '@/assets/svgs/tabIcons/Calendar.svg';
 import Chart from '@/assets/svgs/tabIcons/Chart.svg';
 import WebViewScreen from '../screens/WebView';
 import GuestSettingsScreen from '../screens/Settings/GuestSettings';
-import FloatingModeButton, {
+import ModeSelectionSheet, {
   AppMode,
-} from '../components/common/FloatingModeButton';
+} from '../components/common/ModeSelectionSheet';
 import AddPetButton from '../components/common/AddPetButton';
 import { GeneralTabParamList, AdminTabParamList } from '@/types/navigation';
 import { useUser } from '@/hooks/useAuth';
@@ -29,6 +30,9 @@ import { useThemeStore, themeColors } from '@/store/theme';
 import { useNavigationStore } from '@/store/navigation';
 import { UserDtoRole } from '@repo/api-client';
 import useAuth from '@/hooks/useAuth';
+import ModeGuideOverlay from '../components/common/ModeGuideOverlay';
+
+const MODE_GUIDE_SHOWN_KEY = 'mode_switch_guide_shown';
 
 const GeneralTab = createBottomTabNavigator<GeneralTabParamList>();
 const AdminTab = createBottomTabNavigator<AdminTabParamList>();
@@ -83,6 +87,7 @@ const AnimatedTabButton = (props: BottomTabBarButtonProps) => {
     <Pressable
       onPress={onPress}
       onLongPress={onLongPress}
+      delayLongPress={300}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
       style={[style, styles.tabButton]}
@@ -100,6 +105,27 @@ const SettingsTabIcon = createAnimatedTabIcon(Profile, '마이페이지');
 const EggTabIcon = createAnimatedTabIcon(Calendar, '해칭룸');
 const HeartTabIcon = createAnimatedTabIcon(Chart, '분양룸');
 const AdminHomeTabIcon = createAnimatedTabIcon(HomeSvg, '내 펫');
+
+// 관리자 모드용 Settings 아이콘 (뱃지 포함)
+const AdminSettingsTabIcon = ({
+  color,
+}: {
+  focused: boolean;
+  color: string;
+}) => {
+  return (
+    <View style={styles.tabIconContainer}>
+      <View>
+        <Profile width={TAB_ICON_SIZE} height={TAB_ICON_SIZE} fill={color} />
+        {/* 관리자 모드 뱃지 */}
+        <View style={styles.adminBadge}>
+          <Text style={styles.adminBadgeText}>★</Text>
+        </View>
+      </View>
+      <Text style={[styles.tabLabel, { color }]}>마이페이지</Text>
+    </View>
+  );
+};
 
 // 빈 컴포넌트 (+ 버튼용, 실제로 렌더링되지 않음)
 function EmptyScreen() {
@@ -138,8 +164,12 @@ function SettingsScreen() {
   return <SettingsWebView />;
 }
 
+interface TabsProps {
+  onSettingsLongPress?: () => void;
+}
+
 // 일반 모드 탭
-function GeneralTabs() {
+function GeneralTabs({ onSettingsLongPress }: TabsProps) {
   const theme = useThemeStore(state => state.theme);
   const colors = themeColors[theme];
   const insets = useSafeAreaInsets();
@@ -148,6 +178,14 @@ function GeneralTabs() {
   );
 
   const tabBarHeight = Platform.OS === 'android' ? 60 + insets.bottom : 80;
+
+  // Settings 탭용 커스텀 버튼 (long-press 지원)
+  const SettingsTabButton = useCallback(
+    (props: BottomTabBarButtonProps) => (
+      <AnimatedTabButton {...props} onLongPress={onSettingsLongPress} />
+    ),
+    [onSettingsLongPress],
+  );
 
   return (
     <>
@@ -203,7 +241,7 @@ function GeneralTabs() {
           options={{
             tabBarLabel: () => null,
             tabBarIcon: SettingsTabIcon,
-            tabBarButton: AnimatedTabButton,
+            tabBarButton: SettingsTabButton,
           }}
           listeners={({ navigation }) => ({
             tabPress: () => {
@@ -219,7 +257,7 @@ function GeneralTabs() {
 }
 
 // 관리자 모드 탭
-function AdminTabs() {
+function AdminTabs({ onSettingsLongPress }: TabsProps) {
   const theme = useThemeStore(state => state.theme);
   const colors = themeColors[theme];
   const insets = useSafeAreaInsets();
@@ -228,6 +266,14 @@ function AdminTabs() {
   );
 
   const tabBarHeight = Platform.OS === 'android' ? 60 + insets.bottom : 80;
+
+  // Settings 탭용 커스텀 버튼 (long-press 지원)
+  const SettingsTabButton = useCallback(
+    (props: BottomTabBarButtonProps) => (
+      <AnimatedTabButton {...props} onLongPress={onSettingsLongPress} />
+    ),
+    [onSettingsLongPress],
+  );
 
   return (
     <AdminTab.Navigator
@@ -323,8 +369,8 @@ function AdminTabs() {
         component={SettingsScreen}
         options={{
           tabBarLabel: () => null,
-          tabBarIcon: SettingsTabIcon,
-          tabBarButton: AnimatedTabButton,
+          tabBarIcon: AdminSettingsTabIcon,
+          tabBarButton: SettingsTabButton,
         }}
         listeners={({ navigation }) => ({
           tabPress: () => {
@@ -341,17 +387,77 @@ function AdminTabs() {
 export default function Tabs() {
   const [currentMode, setCurrentMode] = useState<AppMode>('general');
   const user = useUser();
+  const [isModeSheetVisible, setIsModeSheetVisible] = useState(false);
+  const [isGuideVisible, setIsGuideVisible] = useState(false);
   const theme = useThemeStore(state => state.theme);
   const colors = themeColors[theme];
-
   const handleModeChange = useCallback((mode: AppMode) => {
     setCurrentMode(mode);
   }, []);
 
-  // user.role이 'user'가 아닌 경우에만 모드 변경 버튼 표시
-  const showModeButton =
+  // user.role이 'user'가 아닌 경우에만 모드 변경 기능 활성화
+  const canChangeMode =
     user?.role &&
     (user.role === UserDtoRole.ADMIN || user.role === UserDtoRole.BREEDER);
+
+  // 최초 1회 모드 전환 안내
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout | null = null;
+
+    const checkModeGuide = async () => {
+      if (!canChangeMode) {
+        return;
+      }
+
+      try {
+        // await AsyncStorage.removeItem(MODE_GUIDE_SHOWN_KEY);
+
+        const hasShown = await AsyncStorage.getItem(MODE_GUIDE_SHOWN_KEY);
+
+        if (!hasShown) {
+          timeoutId = setTimeout(() => {
+            setIsGuideVisible(true);
+          }, 1000);
+        }
+      } catch (error) {
+        console.error('Failed to check mode guide status:', error);
+      }
+    };
+
+    checkModeGuide();
+
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
+  }, [canChangeMode]);
+
+  const handleGuideClose = useCallback(async () => {
+    setIsGuideVisible(false);
+    try {
+      await AsyncStorage.setItem(MODE_GUIDE_SHOWN_KEY, 'true');
+    } catch (error) {
+      console.error('Failed to save mode guide status:', error);
+    }
+  }, []);
+
+  const handleSettingsLongPress = useCallback(() => {
+    if (canChangeMode) {
+      setIsModeSheetVisible(true);
+    }
+  }, [canChangeMode]);
+
+  // 가이드 스포트라이트 롱프레스 핸들러
+  const handleGuideSpotlightLongPress = useCallback(async () => {
+    setIsGuideVisible(false);
+    setIsModeSheetVisible(true);
+    try {
+      await AsyncStorage.setItem(MODE_GUIDE_SHOWN_KEY, 'true');
+    } catch (error) {
+      console.error('Failed to save mode guide status:', error);
+    }
+  }, []);
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -359,15 +465,28 @@ export default function Tabs() {
         barStyle={colors.statusBar}
         backgroundColor={colors.background}
       />
-      {currentMode === 'general' ? <GeneralTabs /> : <AdminTabs />}
+      {currentMode === 'general' ? (
+        <GeneralTabs onSettingsLongPress={handleSettingsLongPress} />
+      ) : (
+        <AdminTabs onSettingsLongPress={handleSettingsLongPress} />
+      )}
 
-      {/* 일반/관리자 모드 변경 버튼 (user 역할이 아닌 경우에만 표시) */}
-      {showModeButton && (
-        <FloatingModeButton
+      {/* 모드 선택 바텀시트 */}
+      {canChangeMode && (
+        <ModeSelectionSheet
+          visible={isModeSheetVisible}
+          onClose={() => setIsModeSheetVisible(false)}
           currentMode={currentMode}
           onModeChange={handleModeChange}
         />
       )}
+
+      {/* 최초 1회 모드 전환 가이드 */}
+      <ModeGuideOverlay
+        visible={isGuideVisible}
+        onClose={handleGuideClose}
+        onSpotlightLongPress={handleGuideSpotlightLongPress}
+      />
     </View>
   );
 }
@@ -390,5 +509,25 @@ const styles = StyleSheet.create({
     fontSize: 10,
     marginTop: 4,
     textAlign: 'center',
+  },
+  adminBadge: {
+    position: 'absolute',
+    top: -4,
+    right: -6,
+    width: 15,
+    height: 15,
+    borderRadius: 7.5,
+    backgroundColor: '#f59e0b',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  adminBadgeText: {
+    fontSize: 9,
+    color: '#fff',
+    fontWeight: '700',
+    textAlign: 'center',
+    lineHeight: 15,
+    includeFontPadding: false,
+    textAlignVertical: 'center',
   },
 });
