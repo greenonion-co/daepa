@@ -9,7 +9,6 @@ import {
   SheetFooter,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import Image from "next/image";
 import { isNativeApp, navigate } from "@/lib/native-bridge";
 import { useRouter } from "next/navigation";
 import { overlay } from "overlay-kit";
@@ -28,16 +27,9 @@ const LoginPromoSheet = ({ isOpen, onOpenChange, title, description }: LoginProm
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
       <SheetContent
         side="bottom"
-        className="mx-5 mb-5 max-w-[700px] rounded-3xl px-6 pb-8 pt-6 sm:mx-auto"
+        className="mx-5 mb-5 max-w-[700px] rounded-3xl px-6 pt-6 pb-8 sm:mx-auto"
       >
         <SheetHeader className="flex items-center">
-          <Image
-            alt="펫 관계도 바텀시트 이미지"
-            src="/assets/lizard_face.png"
-            width={100}
-            height={100}
-          />
-
           <SheetTitle className="text-center text-lg">{title}</SheetTitle>
           <SheetDescription className="text-center text-sm leading-relaxed text-neutral-600">
             {description}

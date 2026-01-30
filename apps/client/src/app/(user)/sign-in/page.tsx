@@ -21,46 +21,40 @@ const SignInPage = () => {
   }, [router]);
 
   return (
-    <div className="flex min-h-screen w-full items-center justify-center bg-gradient-to-b from-[#e5cf94] to-white dark:bg-black">
+    <div className="dark:from-background dark:to-background flex min-h-screen w-full items-center justify-center bg-gradient-to-b from-[#e5cf94] to-white">
       <div className="w-[90vw] max-w-md">
         {/* 메인 카드 */}
-        <div className="mb-5 text-center text-3xl font-bold text-gray-800/90 dark:text-white">
+        <div className="pb-5 text-center text-3xl font-bold text-gray-800/90 dark:text-white">
           브리디 로그인
         </div>
 
-        <div className="rounded-3xl bg-gradient-to-b from-white to-gray-50 p-5 dark:border dark:border-gray-700 dark:bg-gray-800/80">
-          <div className="flex h-full w-full items-center justify-center py-5">
-            <Image src="/assets/lizard.png" alt="브리디 로그인 로고" width={200} height={200} />
-          </div>
+        <div>
+          <AppleLoginButton />
+          <a
+            className="mb-2 flex h-[46px] w-full items-center justify-center gap-3 rounded-[12px] bg-[#F2F2F2]"
+            href={`${process.env.NEXT_PUBLIC_SERVER_BASE_URL}/api/auth/sign-in/${UserProfileDtoProviderItem.google}`}
+          >
+            <Image
+              src={providerIconMap[UserProfileDtoProviderItem.google]}
+              alt="Google"
+              width={36}
+              height={36}
+            />
+            <span className="font-semibold dark:text-black">구글로 시작하기</span>
+          </a>
 
-          <div>
-            <AppleLoginButton />
-            <a
-              className="mb-2 flex h-[46px] w-full items-center justify-center gap-3 rounded-[12px] bg-[#F2F2F2]"
-              href={`${process.env.NEXT_PUBLIC_SERVER_BASE_URL}/api/auth/sign-in/${UserProfileDtoProviderItem.google}`}
-            >
-              <Image
-                src={providerIconMap[UserProfileDtoProviderItem.google]}
-                alt="Google"
-                width={36}
-                height={36}
-              />
-              <span className="font-semibold dark:text-black">구글로 시작하기</span>
-            </a>
-
-            <a
-              className="flex h-[46px] w-full items-center justify-center gap-3 rounded-[12px] bg-[#FEE500]"
-              href={`${process.env.NEXT_PUBLIC_SERVER_BASE_URL}/api/auth/sign-in/${UserProfileDtoProviderItem.kakao}`}
-            >
-              <Image
-                src={providerIconMap[UserProfileDtoProviderItem.kakao]}
-                alt="Kakao"
-                width={18}
-                height={18}
-              />
-              <span className="font-semibold dark:text-black">카카오로 시작하기</span>
-            </a>
-          </div>
+          <a
+            className="flex h-[46px] w-full items-center justify-center gap-3 rounded-[12px] bg-[#FEE500]"
+            href={`${process.env.NEXT_PUBLIC_SERVER_BASE_URL}/api/auth/sign-in/${UserProfileDtoProviderItem.kakao}`}
+          >
+            <Image
+              src={providerIconMap[UserProfileDtoProviderItem.kakao]}
+              alt="Kakao"
+              width={18}
+              height={18}
+            />
+            <span className="font-semibold dark:text-black">카카오로 시작하기</span>
+          </a>
         </div>
 
         {/* 추가 안내 */}

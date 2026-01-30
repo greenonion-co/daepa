@@ -22,7 +22,6 @@ import {
   getMorphOrTraitColor,
 } from "./Charts";
 import Loading from "@/components/common/Loading";
-import Image from "next/image";
 import { STATISTICS_COLORS } from "../../constants";
 
 // 연도 옵션 생성 (최근 5년)
@@ -240,7 +239,6 @@ const PairStatisticsDashboard = memo(() => {
 
       {!species ? (
         <div className="text-muted-foreground flex h-40 flex-col items-center justify-center text-sm">
-          <Image src="/assets/lizard.png" alt="통계 데이터 없음" width={100} height={100} />
           종을 선택해주세요.
         </div>
       ) : isStatsLoading ? (
@@ -327,7 +325,6 @@ const PairStatisticsDashboard = memo(() => {
         </div>
       ) : (
         <div className="text-muted-foreground mt-6 flex flex-col items-center text-sm">
-          <Image src="/assets/lizard.png" alt="통계 데이터 없음" width={200} height={200} />
           조회된 해칭 내역이 없습니다.
         </div>
       )}

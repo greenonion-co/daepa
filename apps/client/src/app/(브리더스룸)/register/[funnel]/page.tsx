@@ -95,7 +95,7 @@ export default function RegisterPage({ params }: { params: Promise<{ funnel: str
     if (showPreviousDataSheet !== null) return;
 
     const STORAGE_KEY = "register_previous_data_checked";
-    if (sessionStorage.getItem(STORAGE_KEY) || funnel !== REGISTER_PAGE.FIRST) {
+    if (!sessionStorage.getItem(STORAGE_KEY) || funnel !== REGISTER_PAGE.FIRST) {
       setShowPreviousDataSheet(false);
       return;
     }

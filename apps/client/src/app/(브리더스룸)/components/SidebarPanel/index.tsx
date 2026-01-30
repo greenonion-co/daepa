@@ -14,7 +14,7 @@ const SidebarPanel = ({ isOpen, type }: SidebarPanelProps) => {
   return (
     <div
       className={cn(
-        "fixed right-[55px] top-0 z-20 h-full w-[315px] border-x bg-gray-100 shadow-lg transition-transform duration-300 dark:border-gray-900 dark:bg-black",
+        "fixed top-0 right-[55px] z-35 h-full w-[315px] border-x bg-gray-100 shadow-lg transition-transform duration-300 dark:border-gray-900 dark:bg-black",
         isOpen ? "translate-x-0" : "translate-x-[315px]",
       )}
     >

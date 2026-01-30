@@ -4,7 +4,6 @@ import Loading from "@/components/common/Loading";
 import { PetParentDtoWithMessage } from "@/app/(브리더스룸)/pet/store/parentLink";
 import { useUserStore } from "@/app/(브리더스룸)/store/user";
 import { PetControllerFindAllFilterType as PetListType } from "@repo/api-client";
-import Image from "next/image";
 
 const SelectStep = ({
   pets,
@@ -39,8 +38,7 @@ const SelectStep = ({
 
   if (petList.length === 0)
     return (
-      <div className="flex h-full w-full flex-col items-center justify-center py-5 text-center text-[14px] text-gray-700 dark:text-gray-300">
-        <Image src="/assets/lizard.png" alt="브리디 로그인 로고" width={200} height={200} />
+      <div className="flex h-[calc(100vh-200px)] w-full flex-col items-center justify-center py-5 text-center text-[14px] text-gray-700 dark:text-gray-300">
         조회된 펫이 없습니다.
       </div>
     );

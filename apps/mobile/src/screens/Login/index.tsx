@@ -1,6 +1,6 @@
 import React from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { StyleSheet, View, Text, Image, useColorScheme } from 'react-native';
+import { StyleSheet, View, Text, useColorScheme } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import KakaoLoginButton from '../Settings/KakaoLoginButton';
 import AppleLoginButton from '../Settings/AppleLoginButton';
@@ -21,14 +21,7 @@ const LoginScreen = () => {
           {/* 메인 카드 */}
           <View style={styles.card}>
             {/* 로고 이미지 */}
-            <View style={styles.logoContainer}>
-              <Image
-                source={require('@/assets/images/lizard.png')}
-                style={styles.logo}
-                resizeMode="contain"
-              />
-            </View>
-
+            <Text style={styles.title}>Breedy</Text>
             {/* 로그인 버튼들 */}
             <View style={styles.buttonContainer}>
               <AppleLoginButton />
@@ -61,7 +54,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   title: {
-    fontSize: 28,
+    fontSize: 48,
     fontWeight: 'bold',
     color: 'rgba(31, 41, 55, 0.9)',
     marginBottom: 10,
@@ -71,6 +64,7 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: 400,
     borderRadius: 24,
+    gap: 60,
   },
   logoContainer: {
     alignItems: 'center',

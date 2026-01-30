@@ -39,7 +39,7 @@ const LoginPromoSheet = ({ visible, onClose }: LoginPromoSheetProps) => {
           {/* 이미지 */}
           <View style={styles.imageContainer}>
             <Image
-              source={require('@/assets/images/lizard_face.png')}
+              source={require('@/assets/images/lizard_new.png')}
               style={styles.image}
               resizeMode="contain"
             />

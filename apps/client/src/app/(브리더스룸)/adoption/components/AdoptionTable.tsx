@@ -30,7 +30,6 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { AdoptionFilters } from "./AdoptionFilters";
 import { columns } from "./adoption_columns";
 import { brAdoptionControllerGetAllAdoptions } from "@repo/api-client";
-import Image from "next/image";
 // import ParentSearchSelector from "../../components/selector/parentSearch";
 
 const AdoptionTable = () => {
@@ -224,12 +223,6 @@ const AdoptionTable = () => {
               <TableRow>
                 <TableCell colSpan={columns.length}>
                   <div className="flex h-full w-full flex-col items-center justify-center py-5 text-center text-gray-700">
-                    <Image
-                      src="/assets/lizard.png"
-                      alt="분양 테이블 정보 없음"
-                      width={200}
-                      height={200}
-                    />
                     분양 정보가 없습니다.
                   </div>
                 </TableCell>

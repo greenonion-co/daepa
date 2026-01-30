@@ -26,7 +26,12 @@ export default function PetCard({ pet }: PetCardProps) {
   };
 
   return (
-    <div className="relative overflow-hidden rounded-lg bg-white transition-all duration-150 hover:shadow-md active:scale-[0.98] dark:bg-[#18171C] dark:active:bg-gray-800">
+    <div
+      className={cn(
+        "relative overflow-hidden rounded-2xl transition-all duration-150 hover:shadow-md active:scale-[0.98] dark:active:bg-gray-800",
+        pet.isPublic ? "bg-blue-50 dark:bg-[#18171C]" : "bg-gray-50 dark:bg-amber-950/30",
+      )}
+    >
       <div className="flex gap-2 p-2">
         {/* 이미지 + 성별 */}
         <div className="flex shrink-0 flex-col items-center gap-0.5 self-center">
@@ -34,7 +39,7 @@ export default function PetCard({ pet }: PetCardProps) {
             <PetThumbnail
               petId={pet.petId}
               maxSize={160}
-              className="h-full w-full rounded-xl"
+              className="h-full w-full rounded-xl bg-white"
               objectFit="cover"
             />
             {/* 공개/비공개 뱃지 */}
@@ -65,19 +70,6 @@ export default function PetCard({ pet }: PetCardProps) {
               </div>
             )}
           </div>
-          {/* 성별 */}
-          {sexLabel && (
-            <span
-              className={cn(
-                "text-[10px] font-[500]",
-                (pet.sex === "M" && "text-blue-500") ||
-                  (pet.sex === "F" && "text-red-500") ||
-                  "text-amber-500",
-              )}
-            >
-              {sexLabel}
-            </span>
-          )}
         </div>
 
         {/* 컨텐츠 */}
@@ -87,6 +79,19 @@ export default function PetCard({ pet }: PetCardProps) {
             <h3 className="truncate text-sm font-bold text-gray-900 dark:text-gray-100">
               {pet.name ?? "이름 없음"}
             </h3>
+            {/* 성별 */}
+            {sexLabel && (
+              <span
+                className={cn(
+                  "text-[10px] font-[500]",
+                  (pet.sex === "M" && "text-blue-500") ||
+                    (pet.sex === "F" && "text-red-500") ||
+                    "text-amber-500",
+                )}
+              >
+                {sexLabel}
+              </span>
+            )}
             {/* 성장단계 */}
             {pet.growth && (
               <p className="text-xs font-[500] text-gray-400 dark:text-gray-400">
