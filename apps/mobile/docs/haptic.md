@@ -14,9 +14,8 @@ React Native에서 iOS/Android 네이티브 햅틱 피드백을 사용하기 위
 ```
 apps/mobile/
 ├── ios/
-│   ├── mobile/
-│   │   ├── HapticFeedback.swift    # iOS 네이티브 모듈
-│   │   └── HapticFeedback.m        # React Native 브릿지
+│   ├── HapticFeedback.swift        # iOS 네이티브 모듈
+│   ├── HapticFeedback.m            # React Native 브릿지
 │   └── mobile-Bridging-Header.h    # Swift-ObjC 브릿징 헤더
 └── src/
     └── utils/
