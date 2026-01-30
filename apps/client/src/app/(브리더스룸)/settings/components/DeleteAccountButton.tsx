@@ -50,7 +50,6 @@ const DeleteAccountButton = () => {
       }
     } catch (error) {
       console.error(error);
-      console.log("🚀 ~ handleDeleteAccount ~ error:", error);
       toast.error("탈퇴 처리 중 오류가 발생했습니다.");
     }
   };
