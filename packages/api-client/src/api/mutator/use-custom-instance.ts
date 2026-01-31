@@ -179,8 +179,26 @@ AXIOS_INSTANCE.interceptors.response.use(
 
     if (error.response?.status === 403) {
       if (typeof window !== "undefined") {
-        alert("권한이 없습니다. 관리자에게 문의해주세요.");
-        window.location.href = "/";
+        const win = window as any;
+
+        if (win.isNativeApp || win.ReactNativeWebView) {
+          // WebView 환경 - 네이티브 Toast + 홈으로 이동
+          try {
+            win.ReactNativeWebView?.postMessage(
+              JSON.stringify({
+                type: "TOAST",
+                message: "권한이 없습니다. 관리자에게 문의해주세요.",
+              }),
+            );
+            win.ReactNativeWebView?.postMessage(JSON.stringify({ type: "RESET_TO_HOME" }));
+          } catch (e) {
+            console.error("Failed to notify native app:", e);
+          }
+        } else {
+          // 일반 웹 환경
+          alert("권한이 없습니다. 관리자에게 문의해주세요.");
+          window.location.href = "/";
+        }
       }
     }
 
