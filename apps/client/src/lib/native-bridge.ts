@@ -43,7 +43,9 @@ type NativeMessage =
   | { type: "SET_THEME"; theme: ThemeMode }
   | { type: "TOAST"; message: string; variant: "success" | "error" | "info" | "warning" }
   | { type: "SET_TOP_BAR_VISIBLE"; visible: boolean }
-  | { type: "SET_PULL_TO_REFRESH"; enabled: boolean };
+  | { type: "SET_PULL_TO_REFRESH"; enabled: boolean }
+  | { type: "SHOW_LOADING" }
+  | { type: "HIDE_LOADING" };
 
 /**
  * 현재 환경이 네이티브 앱 WebView인지 확인
@@ -202,4 +204,18 @@ export const requestSetTheme = (theme: ThemeMode): boolean => {
  */
 export const requestSetPullToRefresh = (enabled: boolean = true): boolean => {
   return sendToNative({ type: "SET_PULL_TO_REFRESH", enabled });
+};
+
+/**
+ * 네이티브 앱 로딩 화면 표시
+ */
+export const showNativeLoading = (): boolean => {
+  return sendToNative({ type: "SHOW_LOADING" });
+};
+
+/**
+ * 네이티브 앱 로딩 화면 숨기기
+ */
+export const hideNativeLoading = (): boolean => {
+  return sendToNative({ type: "HIDE_LOADING" });
 };

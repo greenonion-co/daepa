@@ -5,7 +5,12 @@ import { authControllerDeleteAccount } from "@repo/api-client";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "@/lib/toast";
-import { isNativeApp, requestResetToHome } from "@/lib/native-bridge";
+import {
+  isNativeApp,
+  requestResetToHome,
+  showNativeLoading,
+  hideNativeLoading,
+} from "@/lib/native-bridge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -38,12 +43,17 @@ const DeleteAccountButton = () => {
       return;
     }
 
+    if (isNativeApp()) {
+      showNativeLoading();
+    }
+
     try {
       await mutateDeleteAccount();
       await onLogout();
       toast.success("탈퇴 처리되었습니다.");
 
       if (isNativeApp()) {
+        // WebView 언마운트 시 자동으로 로딩이 닫힘
         requestResetToHome();
       } else {
         router.replace("/");
@@ -51,6 +61,10 @@ const DeleteAccountButton = () => {
     } catch (error) {
       console.error(error);
       toast.error("탈퇴 처리 중 오류가 발생했습니다.");
+      // 에러 발생 시에만 로딩 숨김
+      if (isNativeApp()) {
+        hideNativeLoading();
+      }
     }
   };
 

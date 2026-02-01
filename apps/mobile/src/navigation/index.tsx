@@ -1,7 +1,5 @@
 import { createStackNavigator } from '@react-navigation/stack';
 import Tabs from './Tabs';
-import RegisterScreen from '../screens/Register';
-import EmailRegisterScreen from '../screens/Register/email';
 import LoginScreen from '../screens/Login';
 import WebViewScreen from '../screens/WebView';
 import { RootStackParamList } from '@/types/navigation';
@@ -17,8 +15,6 @@ export default function Navigation() {
 
       {/* 로그인/회원가입 플로우 */}
       <Stack.Screen name="Login" component={LoginScreen} />
-      <Stack.Screen name="Register" component={RegisterScreen} />
-      <Stack.Screen name="EmailRegister" component={EmailRegisterScreen} />
     </Stack.Navigator>
   );
 }

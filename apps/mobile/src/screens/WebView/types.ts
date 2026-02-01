@@ -29,7 +29,9 @@ export type WebViewMessage =
       variant: 'success' | 'error' | 'info' | 'warning';
     }
   | { type: 'SET_PULL_TO_REFRESH'; enabled: boolean }
-  | { type: 'SET_TOP_BAR_VISIBLE'; visible: boolean };
+  | { type: 'SET_TOP_BAR_VISIBLE'; visible: boolean }
+  | { type: 'SHOW_LOADING' }
+  | { type: 'HIDE_LOADING' };
 
 export type WebViewRouteParams = {
   WebView: WebViewParams | undefined;
