@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { TouchableOpacity, Text, StyleSheet, View } from 'react-native';
 import { login, getProfile } from '@react-native-seoul/kakao-login';
 import { authControllerKakaoNative } from '@repo/api-client';
@@ -28,6 +28,7 @@ const KakaoIcon = () => (
 );
 
 const KakaoLoginButton = () => {
+  const [isLoading, setIsLoading] = useState(false);
   const { navigateByStatus } = useLogin();
 
   const { mutateAsync: kakaoNativeLogin } = useMutation({
@@ -35,6 +36,8 @@ const KakaoLoginButton = () => {
   });
 
   const handleKakaoLogin = async () => {
+    if (isLoading) return;
+    setIsLoading(true);
     Loading.show();
     try {
       const kakaoLogin = await login();
@@ -64,6 +67,7 @@ const KakaoLoginButton = () => {
         console.log(e);
       }
     } finally {
+      setIsLoading(false);
       Loading.close();
     }
   };
@@ -73,6 +77,7 @@ const KakaoLoginButton = () => {
       style={styles.button}
       onPress={handleKakaoLogin}
       activeOpacity={0.8}
+      disabled={isLoading}
     >
       <View style={styles.iconContainer}>
         <KakaoIcon />
