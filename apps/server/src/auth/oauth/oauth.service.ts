@@ -204,10 +204,10 @@ export class OauthService {
       const jwks = createRemoteJWKSet(
         new URL('https://appleid.apple.com/auth/keys'),
       );
-      const audiencesEnv = process.env.NEXT_PUBLIC_APPLE_CLIENT_ID?.trim();
+      const audiencesEnv = process.env.APPLE_CLIENT_ID?.trim();
       if (!audiencesEnv) {
         throw new BadRequestException(
-          'Server misconfiguration: NEXT_PUBLIC_APPLE_CLIENT_ID is required for Apple ID token verification',
+          'Server misconfiguration: APPLE_CLIENT_ID is required for Apple ID token verification',
         );
       }
 
@@ -276,7 +276,7 @@ export class OauthService {
     authorizationCode: string,
   ): Promise<string | undefined> {
     const clientSecret = await this.generateAppleClientSecret();
-    const clientId = process.env.NEXT_PUBLIC_APPLE_CLIENT_ID ?? '';
+    const clientId = process.env.APPLE_CLIENT_ID ?? '';
 
     const form = new URLSearchParams();
     form.append('client_id', clientId);
@@ -308,7 +308,7 @@ export class OauthService {
 
   private async generateAppleClientSecret(): Promise<string> {
     const teamId = process.env.APPLE_TEAM_ID ?? '';
-    const clientId = process.env.NEXT_PUBLIC_APPLE_CLIENT_ID ?? '';
+    const clientId = process.env.APPLE_CLIENT_ID ?? '';
     const keyId = process.env.APPLE_KEY_ID ?? '';
     let privateKey = process.env.APPLE_PRIVATE_KEY ?? '';
 
@@ -376,7 +376,7 @@ export class OauthService {
       const decryptedRefreshToken = decryptSafe(oauth.refreshToken);
 
       const form = new URLSearchParams();
-      form.append('client_id', process.env.NEXT_PUBLIC_APPLE_CLIENT_ID ?? '');
+      form.append('client_id', process.env.APPLE_CLIENT_ID ?? '');
       form.append('client_secret', clientSecret);
       form.append('token', decryptedRefreshToken);
       form.append('token_type_hint', 'refresh_token');
