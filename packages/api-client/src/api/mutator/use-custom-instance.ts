@@ -167,8 +167,8 @@ AXIOS_INSTANCE.interceptors.response.use(
             }
           } else if (window?.location?.pathname) {
             // 일반 웹 환경 - 현재 경로 저장 후 로그인 페이지로 리다이렉트
-            const currentPath = window.location.pathname + window.location.search;
-            if (currentPath !== "/sign-in") {
+            if (!window.location.pathname.startsWith("/sign-in")) {
+              const currentPath = window.location.pathname + window.location.search;
               localStorage.setItem("redirectUrl", currentPath);
               window.location.href = "/sign-in";
             }

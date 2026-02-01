@@ -22,6 +22,7 @@ const LoginPromoSheet = ({ visible, onClose }: LoginPromoSheetProps) => {
   const navigation = useNavigation();
   const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
   const backdropAnim = useRef(new Animated.Value(0)).current;
+  const isClosingRef = useRef(false);
 
   useEffect(() => {
     if (visible) {
@@ -44,9 +45,17 @@ const LoginPromoSheet = ({ visible, onClose }: LoginPromoSheetProps) => {
       slideAnim.setValue(SCREEN_HEIGHT);
       backdropAnim.setValue(0);
     }
+
+    return () => {
+      slideAnim.stopAnimation();
+      backdropAnim.stopAnimation();
+    };
   }, [visible, slideAnim, backdropAnim]);
 
   const handleClose = () => {
+    if (isClosingRef.current) return;
+    isClosingRef.current = true;
+
     // 백드롭 페이드 아웃 + 시트 슬라이드 다운
     Animated.parallel([
       Animated.timing(backdropAnim, {
@@ -60,11 +69,14 @@ const LoginPromoSheet = ({ visible, onClose }: LoginPromoSheetProps) => {
         useNativeDriver: true,
       }),
     ]).start(() => {
+      isClosingRef.current = false;
       onClose();
     });
   };
 
   const handleLogin = () => {
+    if (isClosingRef.current) return;
+
     handleClose();
     // 애니메이션 완료 후 네비게이션 (슬라이드 애니메이션 250ms)
     setTimeout(() => {

@@ -22,6 +22,10 @@ export const getServerRequestHeaders = cache(async (): Promise<Record<string, st
   }
 
   try {
+    if (!BASE_URL) {
+      throw new Error("NEXT_PUBLIC_SERVER_BASE_URL is not defined");
+    }
+
     const response = await fetch(`${BASE_URL}/api/auth/token`, {
       headers: { Cookie: `refreshToken=${refreshToken}` },
       cache: "no-store",
