@@ -48,7 +48,7 @@ const AuthPage = () => {
             localStorage.removeItem("redirectUrl");
             router.replace(redirectUrl);
           } else {
-            router.replace("/pet");
+            router.replace("/");
           }
 
           toast.success("로그인에 성공했습니다.");
