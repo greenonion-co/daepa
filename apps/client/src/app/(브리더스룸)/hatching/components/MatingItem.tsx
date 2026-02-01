@@ -17,7 +17,6 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/lib/toast";
 import { AxiosError } from "axios";
 import { cn } from "@/lib/utils";
-import Image from "next/image";
 import { TUTORIAL_TARGETS } from "./MatingDetailDialogTutorial";
 import TutorialMockLayingItem from "./TutorialMockLayingItem";
 
@@ -280,7 +279,6 @@ const MatingItem = ({ mating, father, mother, initialLayingId, showTutorial }: M
           <TutorialMockLayingItem />
         ) : (
           <div className="flex h-full w-full flex-col items-center justify-center py-5 text-center text-[14px] text-gray-700 dark:text-gray-400">
-            <Image src="/assets/lizard.png" alt="산란 데이터 없음" width={150} height={150} />
             산란된 알이 없습니다.
           </div>
         )}

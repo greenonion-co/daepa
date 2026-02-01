@@ -24,7 +24,6 @@ import PairCard from "./PairCard";
 import { overlay } from "overlay-kit";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import UpdatePairModal from "./UpdatePairModal";
-import Image from "next/image";
 import { CalendarEventDetail, EGG_STATUS } from "./PairMiniCalendar";
 import { usePairCardTutorial } from "./PairCardTutorial";
 
@@ -151,12 +150,11 @@ const PairList = memo(() => {
     return (
       <div className="flex items-center justify-center py-5 text-center">
         <div
-          className="group flex cursor-pointer flex-col items-center rounded-3xl bg-gradient-to-b from-[#e5cf94] to-[#fffcf2] p-10 pt-5 transition-all hover:scale-105 hover:shadow-xl dark:from-[#5a4a2a] dark:to-[#2a2a20]"
+          className="group flex cursor-pointer flex-col items-center rounded-3xl p-10 pt-5"
           onClick={handleOpenCreateForm}
         >
-          <Image src="/assets/lizard.png" alt="브리디 로그인 로고" width={200} height={200} />
           <div className="text-gray-600 dark:text-gray-300">개체를 추가해 관리를 시작해보세요!</div>
-          <div className="mt-3 flex items-center gap-1.5 rounded-full bg-[#c4a86a] px-4 py-2 text-sm font-semibold text-white transition-all group-hover:bg-[#a8904f] dark:bg-[#8a7a4a] dark:group-hover:bg-[#6a5a3a]">
+          <div className="mt-3 flex items-center gap-1.5 rounded-full bg-blue-500 px-4 py-2 text-sm font-semibold text-white transition-all group-hover:bg-blue-600">
             <Plus className="h-4 w-4" />
             페어 추가하기
           </div>

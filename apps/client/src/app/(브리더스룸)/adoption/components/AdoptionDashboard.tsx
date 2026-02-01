@@ -29,7 +29,6 @@ import {
 } from "./Charts";
 import { PriceRangeItemDto } from "@repo/api-client";
 import Loading from "@/components/common/Loading";
-import Image from "next/image";
 import { STATISTICS_COLORS, ADOPTION_STATISTICS_COLORS } from "../../constants";
 import { cn, formatPrice } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/useMobile";
@@ -343,7 +342,6 @@ const AdoptionDashboard = memo(() => {
 
       {!species ? (
         <div className="text-muted-foreground flex h-40 flex-col items-center justify-center text-sm">
-          <Image src="/assets/lizard.png" alt="통계 데이터 없음" width={100} height={100} />
           종을 선택해주세요.
         </div>
       ) : isStatsLoading ? (
@@ -547,7 +545,6 @@ const AdoptionDashboard = memo(() => {
         </div>
       ) : (
         <div className="text-muted-foreground mt-6 flex flex-col items-center text-sm">
-          <Image src="/assets/lizard.png" alt="통계 데이터 없음" width={200} height={200} />
           조회된 분양 내역이 없습니다.
         </div>
       )}

@@ -24,6 +24,7 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
   const isPetDetailPage = pathname?.startsWith("/pet/") ?? false;
   const isFeedPage = pathname === "/";
   const isPetListPage = pathname === "/pet";
+  const isSignInPage = pathname === "/sign-in";
 
   // 검색 입력 컴포넌트
   const SearchInputBox = () => (
@@ -41,7 +42,7 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
     <Link href="/notifications" className="relative">
       <Mail className="text-gray-500 dark:text-neutral-400" />
       {unreadCount > 0 && (
-        <div className="absolute -right-2 -top-2 flex h-[18px] w-[18px] items-center justify-center rounded-full bg-red-500 text-[12px] font-medium text-white">
+        <div className="absolute -top-2 -right-2 flex h-[18px] w-[18px] items-center justify-center rounded-full bg-red-500 text-[12px] font-medium text-white">
           {unreadCount > 9 ? "9+" : unreadCount}
         </div>
       )}
@@ -136,7 +137,8 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
     <div
       className={cn(
         "dark:bg-background flex h-[52px] items-center justify-between px-2",
-        !isPetDetailPage && "bg-background sticky left-0 top-0 z-50 w-full",
+        !isPetDetailPage && "sticky top-0 left-0 z-30 w-full",
+        !isPetDetailPage && (isSignInPage ? "bg-[#e5cf94]" : "bg-background"),
         isNative && "pr-4",
       )}
     >

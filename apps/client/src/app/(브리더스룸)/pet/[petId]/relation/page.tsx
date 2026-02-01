@@ -13,7 +13,6 @@ import SiblingPetCard from "./components/SiblingPetCard";
 import HorizontalScrollSection from "./components/HorizontalScrollSection";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/useMobile";
-import Image from "next/image";
 import Loading from "@/components/common/Loading";
 
 interface PetDetailPageProps {
@@ -158,8 +157,8 @@ function SiblingsPage({ params }: PetDetailPageProps) {
 
   if (isError) {
     return (
-      <div className="flex h-[calc(100vh-52px)] flex-1 flex-col items-center justify-center gap-1">
-        <Image src="/assets/lizard.png" alt="관계도 에러 펫" width={150} height={150} />
+      <div className="flex flex-1 flex-col items-center justify-center gap-1">
+        <Loading type="fail" />
         <p className="text-lg font-semibold text-gray-700">
           펫 정보를 불러오는 중 오류가 발생했습니다
         </p>
@@ -189,7 +188,6 @@ function SiblingsPage({ params }: PetDetailPageProps) {
         </section>
       ) : (
         <div className="flex h-full w-full flex-col items-center justify-center py-5 text-center text-[14px] text-gray-700">
-          <Image src="/assets/lizard.png" alt="통계 데이터 없음" width={200} height={200} />
           등록된 부/모 정보가 없습니다.
           <br />
           부/모를 등록해 펫의 관계도를 확인해보세요!
@@ -208,48 +206,53 @@ function SiblingsPage({ params }: PetDetailPageProps) {
 
         {/* 3. 클러치 메이트 */}
         <section className="min-w-0 overflow-hidden">
-          <h2 className="mb-3 text-[16px] font-bold text-gray-900">클러치 메이트</h2>
+          <div className="mb-3 flex items-center justify-between gap-2">
+            <h2 className="text-[16px] font-bold text-gray-900 dark:text-gray-300">
+              클러치 메이트
+            </h2>
+            <span className="text-[13px] text-gray-500">{clutchMates.length}마리</span>
+          </div>
           <HorizontalScrollSection>
-            {clutchMates.length > 0 ? (
-              clutchMates.map((mate) => <SiblingPetCard key={mate.petId} pet={mate} />)
-            ) : (
-              <div className="text-xs text-gray-500">클러치 메이트가 없습니다.</div>
-            )}
+            {clutchMates.length > 0 &&
+              clutchMates.map((mate) => <SiblingPetCard key={mate.petId} pet={mate} />)}
           </HorizontalScrollSection>
         </section>
       </div>
 
       {/* 4. 부모가 같은 펫 */}
       <section className="min-w-0 overflow-hidden">
-        <h2 className="mb-3 text-[16px] font-bold text-gray-900">부모가 같은 펫</h2>
+        <div className="mb-3 flex items-center gap-2">
+          <h2 className="text-[16px] font-bold text-gray-900 dark:text-gray-300">부모가 같은 펫</h2>
+          <span className="text-[13px] text-gray-500">{otherClutchSiblings.length}마리</span>
+        </div>
         <HorizontalScrollSection
           hasMore={hasNextSiblings}
           isLoading={isFetchingNextSiblings}
           onReachEnd={fetchNextSiblings}
         >
-          {otherClutchSiblings.length > 0 ? (
+          {otherClutchSiblings.length > 0 &&
             otherClutchSiblings.map((sibling) => {
               return <SiblingPetCard key={sibling.petId} pet={sibling} />;
-            })
-          ) : (
-            <div className="text-xs text-gray-500">부모가 같은 펫이 없습니다.</div>
-          )}
+            })}
         </HorizontalScrollSection>
       </section>
 
       {/* 5. 자식 펫 */}
       <section className="min-w-0 overflow-hidden">
-        <h2 className="mb-3 text-[16px] font-bold text-gray-900">자식</h2>
+        <div className="mb-3 flex items-center gap-2">
+          <h2 className="text-[16px] font-bold text-gray-900 dark:text-gray-300">자식</h2>
+          <span className="text-[13px] text-gray-500">
+            {childrenData?.children?.length ?? 0}마리
+          </span>
+        </div>
         <HorizontalScrollSection
           hasMore={hasNextChildren}
           isLoading={isFetchingNextChildren}
           onReachEnd={fetchNextChildren}
         >
-          {childrenData?.children && childrenData.children.length > 0 ? (
-            childrenData.children.map((child) => <SiblingPetCard key={child.petId} pet={child} />)
-          ) : (
-            <div className="text-xs text-gray-500">자식 펫이 없습니다.</div>
-          )}
+          {childrenData?.children &&
+            childrenData.children.length > 0 &&
+            childrenData.children.map((child) => <SiblingPetCard key={child.petId} pet={child} />)}
         </HorizontalScrollSection>
       </section>
     </div>

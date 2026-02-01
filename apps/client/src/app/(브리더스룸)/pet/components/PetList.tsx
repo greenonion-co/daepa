@@ -102,9 +102,9 @@ export default function PetList() {
   if (isLoading) return <Loading />;
 
   return (
-    <div className="min-h-screen space-y-1 bg-gray-100 pt-2 dark:bg-transparent">
+    <div className="min-h-screen space-y-1 pt-2 dark:bg-transparent">
       <div className="px-2">
-        <Filters variant="light" />
+        <Filters />
       </div>
 
       {/* 헤더: 검색 결과 + 삭제된 펫 보기 */}

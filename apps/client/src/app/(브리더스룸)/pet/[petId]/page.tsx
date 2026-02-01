@@ -1,5 +1,4 @@
 import { Suspense } from "react";
-import Image from "next/image";
 import { Metadata } from "next";
 import { DateTime } from "luxon";
 import { SPECIES_KOREAN_INFO } from "../../constants";
@@ -62,8 +61,6 @@ export default async function PetPage({ params }: PetPageProps) {
     return (
       <div className="flex h-[calc(100vh-52px)] flex-1 items-center justify-center">
         <div className="flex flex-col items-center gap-2 text-center">
-          <Image src="/assets/lizard.png" alt="Error" width={150} height={150} />
-
           <div>
             <h1 className="text-[16px] font-[500] text-gray-900 dark:text-gray-100">
               삭제된 펫입니다
@@ -89,11 +86,7 @@ export default async function PetPage({ params }: PetPageProps) {
     <PetDetailLayout
       pet={pet}
       breedingSlot={
-        <BreedingInfoContent
-          petId={pet.petId}
-          ownerId={pet.owner.userId ?? ""}
-          initialPet={pet}
-        />
+        <BreedingInfoContent petId={pet.petId} ownerId={pet.owner.userId ?? ""} initialPet={pet} />
       }
       imagesSlot={
         <Suspense fallback={<SectionSkeleton />}>

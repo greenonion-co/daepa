@@ -21,7 +21,7 @@ const Sidebar = ({ unreadCount }: { unreadCount: number }) => {
 
   return (
     <>
-      <div className="fixed right-0 z-50 flex h-full w-[55px] flex-col items-center gap-2 bg-gray-100 dark:bg-black">
+      <div className="fixed top-0 right-0 z-40 flex h-full w-[55px] flex-col items-center gap-2 bg-gray-100 dark:bg-black">
         <SidebarItem
           icon={
             <ChevronsLeft
@@ -40,7 +40,7 @@ const Sidebar = ({ unreadCount }: { unreadCount: number }) => {
               <div className="relative">
                 <Mail className="text-gray-500 dark:text-neutral-400" />
                 {unreadCount > 0 && (
-                  <div className="absolute -right-2 -top-2 flex h-[18px] w-[18px] items-center justify-center rounded-full bg-red-500 text-[12px] font-medium text-white">
+                  <div className="absolute -top-2 -right-2 flex h-[18px] w-[18px] items-center justify-center rounded-full bg-red-500 text-[12px] font-medium text-white">
                     {unreadCount > 9 ? "9+" : unreadCount}
                   </div>
                 )}

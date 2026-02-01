@@ -13,7 +13,6 @@ import { Calendar } from "./Calendar";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/useMobile";
 import { DateTime } from "luxon";
-import Image from "next/image";
 import { isNativeApp } from "@/lib/native-bridge";
 
 const MonthlyCalendar = memo(() => {
@@ -193,7 +192,8 @@ const MonthlyCalendar = memo(() => {
           className={cn(
             "w-full",
             isMobile && "flex min-h-0 flex-1 flex-col",
-            isScrolled ? "mt-2" : "-mt-5",
+            isScrolled && "mt-2",
+            isMobile && isScrolled && "-mt-5",
           )}
         >
           <div
@@ -216,7 +216,7 @@ const MonthlyCalendar = memo(() => {
               className={cn(
                 "relative z-10 cursor-pointer rounded-lg px-2 py-1 text-sm font-semibold transition-colors duration-200",
                 tab === "all"
-                  ? "bg-white text-gray-800 dark:bg-transparent dark:text-gray-200"
+                  ? "bg-white text-gray-800 dark:bg-neutral-300 dark:text-neutral-800"
                   : "text-gray-600 dark:text-gray-400",
               )}
             >
@@ -228,7 +228,7 @@ const MonthlyCalendar = memo(() => {
               className={cn(
                 "relative z-10 cursor-pointer rounded-lg px-2 py-1 text-sm font-semibold transition-colors duration-200",
                 tab === PetDtoType.EGG
-                  ? "bg-white text-gray-800 dark:bg-transparent dark:text-gray-200"
+                  ? "bg-white text-gray-800 dark:bg-neutral-300 dark:text-neutral-800"
                   : "text-gray-600 dark:text-gray-400",
               )}
             >
@@ -240,7 +240,7 @@ const MonthlyCalendar = memo(() => {
               className={cn(
                 "relative z-10 cursor-pointer rounded-lg px-2 py-1 text-sm font-semibold transition-colors duration-200",
                 tab === PetDtoType.PET
-                  ? "bg-white text-gray-800 dark:bg-transparent dark:text-gray-200"
+                  ? "bg-white text-gray-800 dark:bg-neutral-300 dark:text-neutral-800"
                   : "text-gray-600 dark:text-gray-400",
               )}
             >
@@ -259,12 +259,6 @@ const MonthlyCalendar = memo(() => {
               <Loading />
             ) : weeklyGroups.length === 0 ? (
               <div className="flex flex-col items-center justify-center pt-10 text-[14px] text-gray-700 dark:text-gray-300">
-                <Image
-                  src="/assets/lizard.png"
-                  alt="해칭 캘린더 도마뱀 이미지"
-                  width={150}
-                  height={150}
-                />
                 <span className="font-semibold text-black dark:text-gray-100">
                   {currentMonth.getFullYear()}년 {currentMonth.getMonth() + 1}월
                 </span>

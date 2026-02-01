@@ -107,14 +107,7 @@ const PetThumbnail = ({
           className={objectFit === "cover" ? "object-cover" : "object-contain"}
         />
       ) : (
-        <div className="flex h-full w-full items-center justify-center opacity-50">
-          <Image
-            src="/assets/lizard.png"
-            alt="기본 펫 이미지"
-            fill
-            className="object-contain p-1"
-          />
-        </div>
+        <div className="flex h-full w-full items-center justify-center opacity-50"></div>
       )}
     </div>
   );
