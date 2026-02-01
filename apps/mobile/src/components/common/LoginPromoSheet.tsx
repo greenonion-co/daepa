@@ -23,6 +23,7 @@ const LoginPromoSheet = ({ visible, onClose }: LoginPromoSheetProps) => {
   const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
   const backdropAnim = useRef(new Animated.Value(0)).current;
   const isClosingRef = useRef(false);
+  const loginTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (visible) {
@@ -52,6 +53,15 @@ const LoginPromoSheet = ({ visible, onClose }: LoginPromoSheetProps) => {
     };
   }, [visible, slideAnim, backdropAnim]);
 
+  // 언마운트 시 타이머 정리
+  useEffect(() => {
+    return () => {
+      if (loginTimeoutRef.current) {
+        clearTimeout(loginTimeoutRef.current);
+      }
+    };
+  }, []);
+
   const handleClose = () => {
     if (isClosingRef.current) return;
     isClosingRef.current = true;
@@ -79,7 +89,7 @@ const LoginPromoSheet = ({ visible, onClose }: LoginPromoSheetProps) => {
 
     handleClose();
     // 애니메이션 완료 후 네비게이션 (슬라이드 애니메이션 250ms)
-    setTimeout(() => {
+    loginTimeoutRef.current = setTimeout(() => {
       navigation.dispatch(CommonActions.navigate({ name: 'Login' }));
     }, 260);
   };
