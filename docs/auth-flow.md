@@ -53,13 +53,16 @@ type AuthState = {
 ```
 [WebView 로드]
     ↓ injectedJavaScriptBeforeContentLoaded 실행
-    ↓ Native accessToken을 WebView에 주입:
+    ↓ Native accessToken을 WebView localStorage에 주입:
+        - var token = JSON.stringify(accessToken)  // XSS 방지
         - localStorage.setItem('accessToken', token)
-        - document.cookie = 'accessToken=' + token
     ↓ WebView의 API 클라이언트가 이 토큰 사용
 ```
 
-**중요:** WebView → Native 토큰/유저 동기화는 하지 않음 (Native가 Source of Truth)
+**중요:**
+- accessToken은 localStorage에만 저장 (쿠키에 저장하지 않음)
+- 토큰 주입 시 `JSON.stringify()` 사용하여 XSS 공격 방지
+- WebView → Native 토큰/유저 동기화는 하지 않음 (Native가 Source of Truth)
 
 **관련 파일:**
 
@@ -107,7 +110,7 @@ useEffect(() => {
 ```
 [DeleteAccountButton (WebView)]
     ↓ authControllerDeleteAccount()
-    ↓ onLogout() (쿠키 삭제)
+    ↓ onLogout() (토큰 삭제)
     ↓ requestResetToHome() → Native 메시지
 
 [Native RESET_TO_HOME 핸들러]
@@ -157,7 +160,7 @@ const user = useUser();
 | SettingsScreen      | `useIsLoggedIn()`               | `apps/mobile/src/screens/Settings/index.tsx`  |
 | usePushNotification | `useAuth()` → `{ accessToken }` | `apps/mobile/src/hooks/usePushNotification.ts` |
 | 이벤트 핸들러       | `useAuthStore.getState().clear()` | 액션 실행 시 (구독 불필요)                    |
-| WebView             | 쿠키 기반                       | -                                             |
+| WebView             | localStorage 기반               | -                                             |
 
 ### Zustand 접근 패턴
 
@@ -182,7 +185,25 @@ const user = useUser();              // state.user 추상화
 
 ---
 
-## 5. 데이터 흐름 다이어그램
+## 5. 토큰 저장 위치
+
+### 환경별 토큰 저장소
+
+| 환경 | accessToken | refreshToken |
+|------|-------------|--------------|
+| Native | AsyncStorage | HttpOnly 쿠키 |
+| WebView | localStorage | HttpOnly 쿠키 |
+| Web (CSR) | localStorage | HttpOnly 쿠키 |
+| Web (SSR) | refreshToken으로 획득 | HttpOnly 쿠키 |
+
+**핵심:**
+- `accessToken`은 쿠키에 저장하지 않음 (localStorage만 사용)
+- `refreshToken`은 HttpOnly 쿠키로 서버에서 관리
+- 서버 컴포넌트에서는 refreshToken으로 accessToken을 획득하여 사용
+
+---
+
+## 6. 데이터 흐름 다이어그램
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -211,9 +232,9 @@ const user = useUser();              // state.user 추상화
 │                                                              │
 │  injectedJavaScriptBeforeContentLoaded:                      │
 │    localStorage.setItem('accessToken', nativeToken)          │
-│    document.cookie = 'accessToken=' + nativeToken            │
 │                                                              │
 │  WebView는 별도 토큰 저장 없음, Native 토큰만 사용            │
+│  (쿠키에 accessToken 저장하지 않음)                          │
 └─────────────────────────────────────────────────────────────┘
          │
          │ (액션 메시지만: WebView → Native)
@@ -226,11 +247,11 @@ const user = useUser();              // state.user 추상화
 
 ---
 
-## 6. WebView ↔ Native 메시지 타입
+## 7. WebView ↔ Native 메시지 타입
 
 ### Native → WebView (injectedJavaScript)
 
-- `window.nativeAccessToken` - 토큰 주입
+- `localStorage.accessToken` - 토큰 주입
 - `window.isNativeApp` - 네이티브 앱 여부
 
 ### WebView → Native (postMessage)
@@ -242,10 +263,11 @@ const user = useUser();              // state.user 추상화
 | `TOKEN_REFRESH_FAILED` | 토큰 갱신 실패        | `clear()` + Login 화면 이동 |
 | `NAVIGATE`             | 화면 이동             | navigation.navigate()       |
 | `GO_BACK`              | 뒤로가기              | navigation.goBack()         |
+| `TOAST`                | 토스트 메시지 표시    | Toast.show()                |
 
 ---
 
-## 7. 주요 파일 목록
+## 8. 주요 파일 목록
 
 | 파일                                        | 역할                                    |
 | ------------------------------------------- | --------------------------------------- |
@@ -254,6 +276,27 @@ const user = useUser();              // state.user 추상화
 | `apps/mobile/src/hooks/useAuth.ts`          | 인증 상태 확인 훅 (useAuth, useIsLoggedIn, useUser) |
 | `apps/mobile/src/hooks/useLogin.ts`         | 로그인 후 화면 이동 처리                |
 | `apps/mobile/src/screens/WebView/index.tsx` | WebView 메시지 핸들링                   |
+| `apps/mobile/src/screens/WebView/scripts.ts`| WebView 토큰 주입 스크립트              |
 | `apps/mobile/src/navigation/index.tsx`      | 네비게이션 (로그인 상태 기반)           |
 | `apps/mobile/src/navigation/Tabs.tsx`       | 탭 네비게이션 (Settings 분기)           |
 | `apps/client/src/lib/native-bridge.ts`      | WebView→Native 메시지 전송 함수         |
+
+---
+
+## 9. 보안 고려사항
+
+### 토큰 저장 보안
+
+| 저장소 | 토큰 종류 | XSS 위험 | CSRF 위험 |
+|--------|----------|----------|----------|
+| AsyncStorage (Native) | accessToken | 낮음 | 해당 없음 |
+| localStorage (WebView/Web) | accessToken | 있음 | 해당 없음 |
+| HttpOnly 쿠키 | refreshToken | 없음 | SameSite로 방어 |
+
+### 적용된 보안 조치
+
+1. **XSS 방지**: WebView 토큰 주입 시 `JSON.stringify()` 사용
+2. **CSRF 방지**: refreshToken 쿠키에 `SameSite=Lax` 설정
+3. **토큰 노출 최소화**: accessToken은 쿠키에 저장하지 않음
+4. **자동 로그아웃**: 토큰 갱신 실패 시 즉시 로그아웃 처리
+5. **무한루프 방지**: `/sign-in/*` 경로에서는 리다이렉트 제외
