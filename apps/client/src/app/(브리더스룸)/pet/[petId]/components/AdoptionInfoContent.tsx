@@ -28,14 +28,22 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useIsMyPet } from "@/hooks/useIsMyPet";
 import EditActionButtons from "./EditActionButtons";
 import { useRouter } from "next/navigation";
+import { useIsMobile } from "@/hooks/useMobile";
 
 interface AdoptionInfoContentProps {
   petId: string;
   ownerId: string;
   initialAdoption: PetAdoptionDto | null;
+  /** 데스크톱에서 분양완료 시 모달을 닫기 위한 콜백 */
+  onClose?: () => void;
 }
 
-const AdoptionInfoContent = ({ petId, ownerId, initialAdoption }: AdoptionInfoContentProps) => {
+const AdoptionInfoContent = ({
+  petId,
+  ownerId,
+  initialAdoption,
+  onClose,
+}: AdoptionInfoContentProps) => {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { setAdoption } = useAdoptionStore();
@@ -43,9 +51,11 @@ const AdoptionInfoContent = ({ petId, ownerId, initialAdoption }: AdoptionInfoCo
   const [isProcessing, setIsProcessing] = useState(false);
   const [adoptionData, setAdoptionData] = useState<Partial<PetAdoptionDto>>({});
 
+  const isMobile = useIsMobile();
+
   const isViewingMyPet = useIsMyPet(ownerId);
 
-  const { data: queryAdoption, refetch } = useQuery({
+  const { data: queryAdoption } = useQuery({
     queryKey: [adoptionControllerGetAdoptionByPetId.name, petId],
     queryFn: () => adoptionControllerGetAdoptionByPetId(petId),
     enabled: !!petId && !initialAdoption,
@@ -207,18 +217,23 @@ const AdoptionInfoContent = ({ petId, ownerId, initialAdoption }: AdoptionInfoCo
 
       await updateAdoption({ adoptionId, data: changedFields });
 
-      setIsEditMode(false);
       // 펫 목록 쿼리 갱신
       await queryClient.invalidateQueries({ queryKey: [brPetControllerFindAll.name] });
 
       // 판매완료인 경우, 더 이상 본인 펫이 아님
       if (adoptionData.status === PetAdoptionDtoStatus.SOLD) {
         toast.success("분양이 성공적으로 완료되었습니다!");
-        router.replace("/pet");
-      } else {
-        await refetch();
-        toast.success("분양 정보가 성공적으로 업데이트되었습니다.");
+        // 소유권 이전으로 더 이상 수정 불가 (isProcessing 유지하여 버튼 비활성화)
+        if (isMobile) {
+          router.replace("/pet");
+        } else {
+          onClose?.();
+        }
+        return;
       }
+
+      setIsEditMode(false);
+      toast.success("분양 정보가 성공적으로 업데이트되었습니다.");
     } catch (error: unknown) {
       console.error("분양 정보 수정 실패:", error);
 
@@ -232,7 +247,17 @@ const AdoptionInfoContent = ({ petId, ownerId, initialAdoption }: AdoptionInfoCo
     } finally {
       setIsProcessing(false);
     }
-  }, [updateAdoption, adoptionData, petId, refetch, router, adoption, getChangedFieldsForAdoption]);
+  }, [
+    queryClient,
+    updateAdoption,
+    adoptionData,
+    petId,
+    router,
+    adoption,
+    getChangedFieldsForAdoption,
+    isMobile,
+    onClose,
+  ]);
 
   const handleSelectBuyer = useCallback(() => {
     if (!isEditMode) return;
