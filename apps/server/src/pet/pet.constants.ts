@@ -24,6 +24,7 @@ export enum ADOPTION_SALE_STATUS {
   ON_SALE = 'ON_SALE', // 판매 중
   ON_RESERVATION = 'ON_RESERVATION', // 예약 중
   SOLD = 'SOLD', // 판매 완료
+  REFUNDED = 'REFUNDED', // 환불 완료
 }
 
 export enum PET_ADOPTION_METHOD {

@@ -16,4 +16,5 @@ export const BrAdoptionControllerGetAllAdoptionsStatus = {
   ON_SALE: "ON_SALE",
   ON_RESERVATION: "ON_RESERVATION",
   SOLD: "SOLD",
+  REFUNDED: "REFUNDED",
 } as const;

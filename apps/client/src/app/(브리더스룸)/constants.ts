@@ -409,6 +409,7 @@ export const SALE_STATUS_KOREAN_INFO = {
   ON_SALE: "분양 중",
   ON_RESERVATION: "예약 중",
   SOLD: "분양 완료",
+  REFUNDED: "환불 완료",
 };
 
 export const TABLE_HEADER = {
@@ -635,6 +636,10 @@ export const SELECTOR_CONFIGS: Record<
       {
         key: "SOLD",
         value: "분양 완료",
+      },
+      {
+        key: "REFUNDED",
+        value: "환불 완료",
       },
     ],
   },

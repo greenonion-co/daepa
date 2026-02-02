@@ -1052,6 +1052,7 @@ export const getPetControllerFindAllResponseMock = (
             "ON_SALE",
             "ON_RESERVATION",
             "SOLD",
+            "REFUNDED",
           ] as const),
           adoptionDate: `${faker.date.past().toISOString().split(".")[0]}Z`,
           memo: faker.string.alpha(20),
@@ -2255,6 +2256,7 @@ export const getBrPetControllerFindAllResponseMock = (
             "ON_SALE",
             "ON_RESERVATION",
             "SOLD",
+            "REFUNDED",
           ] as const),
           adoptionDate: `${faker.date.past().toISOString().split(".")[0]}Z`,
           memo: faker.string.alpha(20),
@@ -2553,6 +2555,7 @@ export const getBrPetControllerGetPetsByYearResponseMock = (): BrPetControllerGe
             "ON_SALE",
             "ON_RESERVATION",
             "SOLD",
+            "REFUNDED",
           ] as const),
           adoptionDate: `${faker.date.past().toISOString().split(".")[0]}Z`,
           memo: faker.string.alpha(20),
@@ -2858,6 +2861,7 @@ export const getBrPetControllerGetPetsByMonthResponseMock = (
               "ON_SALE",
               "ON_RESERVATION",
               "SOLD",
+              "REFUNDED",
             ] as const),
             adoptionDate: `${faker.date.past().toISOString().split(".")[0]}Z`,
             memo: faker.string.alpha(20),
@@ -3165,6 +3169,7 @@ export const getBrPetControllerGetPetsByDateRangeResponseMock = (
               "ON_SALE",
               "ON_RESERVATION",
               "SOLD",
+              "REFUNDED",
             ] as const),
             adoptionDate: `${faker.date.past().toISOString().split(".")[0]}Z`,
             memo: faker.string.alpha(20),
@@ -3498,6 +3503,7 @@ export const getAdoptionControllerGetAdoptionByPetIdResponseMock = (
           "ON_SALE",
           "ON_RESERVATION",
           "SOLD",
+          "REFUNDED",
         ] as const),
         seller: {
           ...{
@@ -3702,6 +3708,7 @@ export const getBrAdoptionControllerGetAllAdoptionsResponseMock = (
       "ON_SALE",
       "ON_RESERVATION",
       "SOLD",
+      "REFUNDED",
     ] as const),
     seller: {
       ...{

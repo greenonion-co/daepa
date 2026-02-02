@@ -225,8 +225,10 @@ export class AdoptionService {
       },
     );
 
-    // findAll은 판매완료된 분양정보만 조회
-    pageOptionsDto.status = ADOPTION_SALE_STATUS.SOLD;
+    // findAll은 판매완료 또는 환불완료된 분양정보 조회
+    qb.andWhere('adoptions.status IN (:...statuses)', {
+      statuses: [ADOPTION_SALE_STATUS.SOLD, ADOPTION_SALE_STATUS.REFUNDED],
+    });
     this.buildAdoptionFilterQuery(qb, pageOptionsDto);
 
     qb.orderBy('adoptions.adoptionDate', pageOptionsDto.order)
@@ -488,13 +490,22 @@ export class AdoptionService {
         }
       }
 
+      // isActive 계산: SOLD 또는 REFUNDED 상태이면 false
+      const calculateIsActive = (status?: ADOPTION_SALE_STATUS | null) => {
+        if (isUndefined(status)) {
+          return adoptionEntity.isActive;
+        }
+        return ![
+          ADOPTION_SALE_STATUS.SOLD,
+          ADOPTION_SALE_STATUS.REFUNDED,
+        ].includes(status as ADOPTION_SALE_STATUS);
+      };
+
       const newAdoptionEntity = new AdoptionEntity();
       Object.assign(newAdoptionEntity, {
         ...adoptionEntity,
         ...omitBy(updateAdoptionDto, isUndefined),
-        isActive: isUndefined(updateAdoptionDto.status)
-          ? adoptionEntity.isActive // status가 없으면 기존 isActive 유지
-          : updateAdoptionDto.status !== ADOPTION_SALE_STATUS.SOLD, // status가 있으면 새로 계산
+        isActive: calculateIsActive(updateAdoptionDto.status),
       });
 
       await em.save(AdoptionEntity, newAdoptionEntity);
@@ -515,6 +526,15 @@ export class AdoptionService {
           em,
           adoptionEntity.petId,
           updateAdoptionDto.buyerId ?? adoptionEntity.buyerId,
+        );
+      }
+
+      // REFUNDED 상태로 변경 시 소유권을 판매자에게 반환
+      if (updateAdoptionDto.status === ADOPTION_SALE_STATUS.REFUNDED) {
+        await this.updatePetOwner(
+          em,
+          adoptionEntity.petId,
+          adoptionEntity.sellerId,
         );
       }
 

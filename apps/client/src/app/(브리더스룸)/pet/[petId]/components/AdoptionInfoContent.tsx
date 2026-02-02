@@ -148,7 +148,10 @@ const AdoptionInfoContent = ({ petId, ownerId, initialAdoption }: AdoptionInfoCo
         return;
       }
 
-      if (adoptionData.status === PetAdoptionDtoStatus.SOLD) {
+      if (
+        initialAdoption?.status !== PetAdoptionDtoStatus.SOLD &&
+        adoptionData.status === PetAdoptionDtoStatus.SOLD
+      ) {
         // 판매완료 확인 모달
         const confirmed = await new Promise<boolean>((resolve) => {
           overlay.open(({ isOpen, close }) => (
@@ -269,10 +272,168 @@ const AdoptionInfoContent = ({ petId, ownerId, initialAdoption }: AdoptionInfoCo
     );
   }, [adoptionData.status]);
 
+  // 현재 상태가 SOLD인지 확인 (원본 데이터 기준)
+  const isSoldStatus = useMemo(() => {
+    return adoption?.status === PetAdoptionDtoStatus.SOLD;
+  }, [adoption?.status]);
+
+  // 현재 상태가 REFUNDED인지 확인 (원본 데이터 기준)
+  const isRefundedStatus = useMemo(() => {
+    return adoption?.status === ("REFUNDED" as PetAdoptionDtoStatus);
+  }, [adoption?.status]);
+
+  // 환불 처리
+  const handleRefund = useCallback(async () => {
+    const adoptionId = adoptionData.adoptionId;
+    if (!adoptionId) return;
+
+    const confirmed = await new Promise<boolean>((resolve) => {
+      overlay.open(({ isOpen, close }) => (
+        <Dialog
+          open={isOpen}
+          onOpenChange={() => {
+            resolve(false);
+            close();
+          }}
+        >
+          <DialogContent className="rounded-3xl p-6 dark:bg-neutral-900">
+            <DialogTitle className="text-sm font-semibold text-orange-500">환불 확인</DialogTitle>
+            <div className="flex flex-col gap-2 py-2 text-gray-600 dark:text-gray-400">
+              <span className="font-semibold">정말 환불 처리하시겠습니까?</span>
+              <span className="text-sm">- 환불 시 개체 소유권이 다시 돌아옵니다.</span>
+              <span className="text-sm">- 환불 이력이 기록됩니다.</span>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                className="flex-1"
+                variant="outline"
+                onClick={() => {
+                  resolve(false);
+                  close();
+                }}
+              >
+                취소
+              </Button>
+              <Button
+                className="flex-1 bg-orange-500 hover:bg-orange-600"
+                onClick={() => {
+                  resolve(true);
+                  close();
+                }}
+              >
+                환불하기
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      ));
+    });
+
+    if (!confirmed) return;
+
+    try {
+      setIsProcessing(true);
+      await updateAdoption({
+        adoptionId,
+        data: { status: "REFUNDED" as PetAdoptionDtoStatus },
+      });
+      await refetch();
+      toast.success("환불 처리가 완료되었습니다.");
+    } catch (error) {
+      console.error("환불 처리 실패:", error);
+      if (error instanceof AxiosError) {
+        const message = error.response?.data?.message;
+        const errorMessage = Array.isArray(message) ? message[0] : message;
+        toast.error(errorMessage || "환불 처리에 실패했습니다.");
+      } else {
+        toast.error("환불 처리에 실패했습니다.");
+      }
+    } finally {
+      setIsProcessing(false);
+    }
+  }, [adoptionData.adoptionId, updateAdoption, refetch]);
+
+  // 다시 분양하기 처리
+  const handleResell = useCallback(async () => {
+    const adoptionId = adoptionData.adoptionId;
+    if (!adoptionId) return;
+
+    const confirmed = await new Promise<boolean>((resolve) => {
+      overlay.open(({ isOpen, close }) => (
+        <Dialog
+          open={isOpen}
+          onOpenChange={() => {
+            resolve(false);
+            close();
+          }}
+        >
+          <DialogContent className="rounded-3xl p-6 dark:bg-neutral-900">
+            <DialogTitle className="text-sm font-semibold text-blue-500">다시 분양하기</DialogTitle>
+            <div className="flex flex-col gap-2 py-2 text-gray-600 dark:text-gray-400">
+              <span className="font-semibold">
+                이 개체를 다시 분양 가능 상태로 변경하시겠습니까?
+              </span>
+              <span className="text-sm">- 분양 가능 상태로 변경됩니다.</span>
+              <span className="text-sm">- 기존 입양자 정보는 삭제됩니다.</span>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                className="flex-1"
+                variant="outline"
+                onClick={() => {
+                  resolve(false);
+                  close();
+                }}
+              >
+                취소
+              </Button>
+              <Button
+                className="flex-1 bg-blue-500 hover:bg-blue-600"
+                onClick={() => {
+                  resolve(true);
+                  close();
+                }}
+              >
+                확인
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      ));
+    });
+
+    if (!confirmed) return;
+
+    try {
+      setIsProcessing(true);
+      await updateAdoption({
+        adoptionId,
+        data: {
+          status: PetAdoptionDtoStatus.ON_SALE,
+          buyerId: null,
+          adoptionDate: null,
+        },
+      });
+      await refetch();
+      toast.success("분양 가능 상태로 변경되었습니다.");
+    } catch (error) {
+      console.error("상태 변경 실패:", error);
+      if (error instanceof AxiosError) {
+        const message = error.response?.data?.message;
+        const errorMessage = Array.isArray(message) ? message[0] : message;
+        toast.error(errorMessage || "상태 변경에 실패했습니다.");
+      } else {
+        toast.error("상태 변경에 실패했습니다.");
+      }
+    } finally {
+      setIsProcessing(false);
+    }
+  }, [adoptionData.adoptionId, updateAdoption, refetch]);
+
   if (!adoption?.adoptionId) return null;
 
   return (
-    <div className="shadow-xs flex flex-1 flex-col gap-2 rounded-2xl bg-white p-3 dark:bg-neutral-900">
+    <div className="flex flex-1 flex-col gap-2 rounded-2xl bg-white p-3 shadow-xs dark:bg-neutral-900">
       <div className="text-[14px] font-[600] text-gray-600 dark:text-gray-300">분양정보</div>
 
       {!showAdoptionInfo && (
@@ -289,7 +450,7 @@ const AdoptionInfoContent = ({ petId, ownerId, initialAdoption }: AdoptionInfoCo
             content={
               <SingleSelect
                 saveASAP
-                disabled={!isEditMode}
+                disabled={!isEditMode || isSoldStatus || isRefundedStatus}
                 type="adoptionStatus"
                 initialItem={
                   !isEditMode && isNil(adoption) ? undefined : (adoptionData.status ?? "NONE")
@@ -316,7 +477,7 @@ const AdoptionInfoContent = ({ petId, ownerId, initialAdoption }: AdoptionInfoCo
             label="가격"
             content={
               <NumberField
-                disabled={!isEditMode}
+                disabled={!isEditMode || isRefundedStatus}
                 value={
                   isNotNil(adoptionData.price)
                     ? isEditMode
@@ -389,6 +550,8 @@ const AdoptionInfoContent = ({ petId, ownerId, initialAdoption }: AdoptionInfoCo
                 )}
 
                 {isEditMode &&
+                  !isSoldStatus &&
+                  !isRefundedStatus &&
                   (adoptionData.status === PetAdoptionDtoStatus.ON_RESERVATION ||
                   adoptionData.status === PetAdoptionDtoStatus.SOLD ? (
                     <Button
@@ -411,7 +574,7 @@ const AdoptionInfoContent = ({ petId, ownerId, initialAdoption }: AdoptionInfoCo
             content={
               <SingleSelect
                 saveASAP
-                disabled={!isEditMode}
+                disabled={!isEditMode || isRefundedStatus}
                 type="adoptionMethod"
                 initialItem={
                   !isEditMode && isNil(adoption) ? undefined : (adoptionData.method ?? "NONE")
@@ -432,7 +595,7 @@ const AdoptionInfoContent = ({ petId, ownerId, initialAdoption }: AdoptionInfoCo
               <div className="relative w-full pt-2">
                 <textarea
                   className={cn(
-                    `min-h-[100px] w-full rounded-xl bg-gray-100 p-3 text-left text-[14px] focus:outline-none focus:ring-0 dark:bg-neutral-800 dark:text-white`,
+                    `min-h-[100px] w-full rounded-xl bg-gray-100 p-3 text-left text-[16px] focus:ring-0 focus:outline-none dark:bg-neutral-800 dark:text-white`,
                     !isEditMode && "dark:bg-neutral-900",
                   )}
                   value={String(adoptionData.memo || "")}
@@ -452,7 +615,7 @@ const AdoptionInfoContent = ({ petId, ownerId, initialAdoption }: AdoptionInfoCo
                   }}
                 />
                 {isEditMode && (
-                  <div className="absolute bottom-4 right-4 text-[12px] text-gray-500 dark:text-gray-400">
+                  <div className="absolute right-4 bottom-4 text-[12px] text-gray-500 dark:text-gray-400">
                     {adoptionData.memo?.length ?? 0}/{500}
                   </div>
                 )}
@@ -462,17 +625,42 @@ const AdoptionInfoContent = ({ petId, ownerId, initialAdoption }: AdoptionInfoCo
         </>
       )}
 
-      <EditActionButtons
-        isVisible={isViewingMyPet}
-        isEditMode={isEditMode}
-        isProcessing={isProcessing}
-        onCancel={() => {
-          resetAdoption();
-          setIsEditMode(false);
-        }}
-        onSubmit={() => (isEditMode ? handleSave() : setIsEditMode(true))}
-        defaultLabel={!showAdoptionInfo ? "분양 정보 등록" : "수정하기"}
-      />
+      {/* REFUNDED가 아닌 경우에만 수정 버튼 표시 */}
+      {!isRefundedStatus && (
+        <EditActionButtons
+          isVisible={isViewingMyPet}
+          isEditMode={isEditMode}
+          isProcessing={isProcessing}
+          onCancel={() => {
+            resetAdoption();
+            setIsEditMode(false);
+          }}
+          onSubmit={() => (isEditMode ? handleSave() : setIsEditMode(true))}
+          defaultLabel={!showAdoptionInfo ? "분양 정보 등록" : "수정하기"}
+        />
+      )}
+
+      {/* SOLD 상태에서 환불하기 버튼 */}
+      {isViewingMyPet && isSoldStatus && !isEditMode && (
+        <Button
+          className="mt-2 w-full bg-orange-500 hover:bg-orange-600"
+          onClick={handleRefund}
+          disabled={isProcessing}
+        >
+          {isProcessing ? "처리 중..." : "환불하기"}
+        </Button>
+      )}
+
+      {/* REFUNDED 상태에서 다시 분양하기 버튼 */}
+      {isViewingMyPet && isRefundedStatus && (
+        <Button
+          className="mt-2 w-full bg-blue-500 hover:bg-blue-600"
+          onClick={handleResell}
+          disabled={isProcessing}
+        >
+          {isProcessing ? "처리 중..." : "다시 분양하기"}
+        </Button>
+      )}
     </div>
   );
 };

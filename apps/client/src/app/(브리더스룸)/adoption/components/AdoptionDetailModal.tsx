@@ -3,17 +3,17 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 import { useQuery } from "@tanstack/react-query";
-import { adoptionControllerGetAdoptionByPetId, PetAdoptionDtoStatus } from "@repo/api-client";
+import { adoptionControllerGetAdoptionByPetId } from "@repo/api-client";
 import { GENDER_KOREAN_INFO, SPECIES_KOREAN_INFO } from "../../constants";
-import { cn, getStatusBadge } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import Loading from "@/components/common/Loading";
-import EditAdoptionForm from "./EditAdoptionForm";
-import AdoptionReceipt from "../../pet/[petId]/(펫카드)/components/AdoptionReceipt";
 import PetThumbnail from "@/components/common/PetThumbnail";
 import BadgeList from "../../components/BadgeList";
 import { DateTime } from "luxon";
 import Link from "next/link";
 import { useIsMobile } from "@/hooks/useMobile";
+import AdoptionInfoContent from "../../pet/[petId]/components/AdoptionInfoContent";
+import { useUserStore } from "../../store/user";
 
 interface AdoptionDetailModalProps {
   isOpen: boolean;
@@ -118,10 +118,10 @@ const PetInfoCard = ({
 
 const AdoptionDetailModal = ({ isOpen, petId, onClose, onUpdate }: AdoptionDetailModalProps) => {
   const isMobile = useIsMobile();
+  const { user } = useUserStore();
   const {
     data: adoptionData,
     isLoading,
-    refetch,
     error,
   } = useQuery({
     queryKey: [adoptionControllerGetAdoptionByPetId.name, petId],
@@ -133,59 +133,36 @@ const AdoptionDetailModal = ({ isOpen, petId, onClose, onUpdate }: AdoptionDetai
   const petSummary = adoptionData?.pet;
   if (!petSummary) return null;
 
-  const { status } = adoptionData;
-  const isSold = status === PetAdoptionDtoStatus.SOLD;
   const { name, species, hatchingDate, sex, morphs, traits, isDeleted } = petSummary;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="max-h-[80vh] gap-0 overflow-y-auto px-4 sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              분양 상세 정보
-              {getStatusBadge(status)}
-            </div>
-          </DialogTitle>
+          <DialogTitle className="flex items-center justify-between"></DialogTitle>
         </DialogHeader>
 
         {isLoading && <Loading />}
         {error && <div>Error: {error.message}</div>}
 
-        <div className="space-y-4">
-          {/* 펫 정보 */}
-          <PetInfoCard
-            name={name}
-            species={species}
-            sex={sex}
-            morphs={morphs}
-            traits={traits}
-            hatchingDate={hatchingDate}
-            isDeleted={isDeleted}
-            petId={petId}
-            isMobile={isMobile}
-          />
+        {/* 펫 정보 */}
+        <PetInfoCard
+          name={name}
+          species={species}
+          sex={sex}
+          morphs={morphs}
+          traits={traits}
+          hatchingDate={hatchingDate}
+          isDeleted={isDeleted}
+          petId={petId}
+          isMobile={isMobile}
+        />
 
-          <div className="space-y-3">
-            {isSold ? (
-              // 판매완료 영수증
-              <AdoptionReceipt adoption={adoptionData} isEditable={false} />
-            ) : (
-              // 분양 정보 수정폼
-              <EditAdoptionForm
-                adoptionData={adoptionData}
-                onSubmit={(updated: boolean = true) => {
-                  if (updated) {
-                    onUpdate();
-                    refetch();
-                  }
-                  onClose();
-                }}
-                onCancel={onClose}
-              />
-            )}
-          </div>
-        </div>
+        <AdoptionInfoContent
+          petId={petId}
+          ownerId={user?.userId ?? ""}
+          initialAdoption={adoptionData as any}
+        />
       </DialogContent>
     </Dialog>
   );
