@@ -7,10 +7,10 @@ export default async function UserLayout({
   children: React.ReactNode;
 }>) {
   const cookieStore = await cookies();
-  const token = cookieStore.get("accessToken");
+  const refreshToken = cookieStore.get("refreshToken");
 
-  // 이미 로그인된 사용자는 홈으로 리다이렉트
-  if (token?.value) {
+  // 이미 로그인된 사용자는 홈으로 리다이렉트 (refreshToken 존재 여부로 판단)
+  if (refreshToken?.value) {
     redirect("/");
   }
 

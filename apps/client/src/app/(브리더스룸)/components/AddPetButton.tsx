@@ -1,6 +1,6 @@
 import { Plus } from "lucide-react";
 import Link from "next/link";
-import { useUserStore } from "@/app/(브리더스룸)/store/user";
+import { useIsLoggedIn } from "@/hooks/useAuth";
 import { useIsMobile } from "@/hooks/useMobile";
 import { openLoginPromoSheet } from "@/app/(브리더스룸)/components/LoginPromoSheet";
 
@@ -24,7 +24,7 @@ const TextButton = () => (
 );
 
 const AddPetButton = () => {
-  const isLoggedIn = useUserStore((state) => !!state.user?.userId);
+  const isLoggedIn = useIsLoggedIn();
   const isMobile = useIsMobile();
 
   // 웹, 모바일웹

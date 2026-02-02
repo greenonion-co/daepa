@@ -8,7 +8,7 @@ import { OAUTH_PROVIDER } from '../auth.constants';
 export class GoogleStrategy extends PassportStrategy(Strategy) {
   constructor(private readonly authService: AuthService) {
     super({
-      clientID: process.env.GOOGLE_CLIENT_ID ?? '',
+      clientID: process.env.GOOGLE_CLIENT_ID_WEB ?? '',
       clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? '',
       callbackURL: `${process.env.SERVER_BASE_URL}/api/auth/sign-in/google`,
       scope: ['profile', 'email'],

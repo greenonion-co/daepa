@@ -25,10 +25,11 @@ import ModeSelectionSheet, {
 } from '../components/common/ModeSelectionSheet';
 import AddPetButton from '../components/common/AddPetButton';
 import { GeneralTabParamList, AdminTabParamList } from '@/types/navigation';
-import { useAuthStore } from '@/store/auth';
+import { useUser } from '@/hooks/useAuth';
 import { useThemeStore, themeColors } from '@/store/theme';
 import { useNavigationStore } from '@/store/navigation';
 import { UserDtoRole } from '@repo/api-client';
+import useAuth from '@/hooks/useAuth';
 import ModeGuideOverlay from '../components/common/ModeGuideOverlay';
 
 const MODE_GUIDE_SHOWN_KEY = 'mode_switch_guide_shown';
@@ -154,9 +155,9 @@ function SettingsWebView() {
 
 // 로그인 여부에 따라 다른 설정 화면 표시
 function SettingsScreen() {
-  const accessToken = useAuthStore(state => state.accessToken);
+  const { isLoggedIn } = useAuth();
 
-  if (!accessToken) {
+  if (!isLoggedIn) {
     return <GuestSettingsScreen />;
   }
 
@@ -385,9 +386,9 @@ function AdminTabs({ onSettingsLongPress }: TabsProps) {
 
 export default function Tabs() {
   const [currentMode, setCurrentMode] = useState<AppMode>('general');
+  const user = useUser();
   const [isModeSheetVisible, setIsModeSheetVisible] = useState(false);
   const [isGuideVisible, setIsGuideVisible] = useState(false);
-  const user = useAuthStore(state => state.user);
   const theme = useThemeStore(state => state.theme);
   const colors = themeColors[theme];
   const handleModeChange = useCallback((mode: AppMode) => {

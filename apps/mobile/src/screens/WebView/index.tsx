@@ -64,8 +64,6 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
   const insets = useSafeAreaInsets();
 
   const accessToken = useAuthStore(state => state.accessToken);
-  const setAccessToken = useAuthStore(state => state.setAccessToken);
-  const setUser = useAuthStore(state => state.setUser);
   const clear = useAuthStore(state => state.clear);
 
   const theme = useThemeStore(state => state.theme);
@@ -234,16 +232,6 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
           }
           break;
         }
-        case 'SET_USER_DATA':
-          if (message.user) {
-            setUser(message.user as Parameters<typeof setUser>[0]);
-          }
-          break;
-        case 'SET_ACCESS_TOKEN':
-          if (message.token) {
-            setAccessToken(message.token);
-          }
-          break;
         case 'TOAST':
           Toast.show(message.message);
           break;

@@ -2,12 +2,12 @@ import { ChevronsLeft, Clock7, Mail, Settings } from "lucide-react";
 import { useState } from "react";
 import SidebarPanel from "./SidebarPanel";
 import { cn } from "@/lib/utils";
-import { useUserStore } from "../store/user";
+import { useIsLoggedIn } from "@/hooks/useAuth";
 
 type SIDEBAR_TYPE = "알림" | "최근 본" | "설정";
 
 const Sidebar = ({ unreadCount }: { unreadCount: number }) => {
-  const isLoggedIn = useUserStore((state) => !!state.user?.userId);
+  const isLoggedIn = useIsLoggedIn();
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [type, setType] = useState<SIDEBAR_TYPE>(isLoggedIn ? "알림" : "최근 본");
 

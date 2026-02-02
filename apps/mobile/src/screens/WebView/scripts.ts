@@ -82,14 +82,13 @@ export const createInjectedJavaScriptBeforeContentLoaded = (
 ): string => `
   (function() {
     try {
-      // 앱에서 주입한 토큰을 localStorage와 쿠키에 저장
-      var token = ${accessToken ? `'${accessToken}'` : 'null'};
+      // 앱에서 주입한 토큰을 localStorage에 저장
+      var token = ${accessToken ? JSON.stringify(accessToken) : 'null'};
       if (token) {
         localStorage.setItem('accessToken', token);
-        // 쿠키에도 저장 (서버 컴포넌트에서 접근 가능하도록)
-        var expires = new Date();
-        expires.setTime(expires.getTime() + 7 * 24 * 60 * 60 * 1000); // 7일
-        document.cookie = 'accessToken=' + token + ';expires=' + expires.toUTCString() + ';path=/;SameSite=Lax';
+      } else {
+        // 토큰이 없으면 localStorage에서 삭제 (네이티브 로그아웃 시)
+        localStorage.removeItem('accessToken');
       }
 
       // 앱 환경임을 표시

@@ -19,7 +19,7 @@ import * as path from 'path';
 import { encryptIfNeeded, isEncrypted } from '../src/common/utils/crypto.util';
 
 // .env 파일 로드
-const envPath = path.resolve(__dirname, '../.env');
+const envPath = path.resolve(__dirname, '../.env.local');
 if (fs.existsSync(envPath)) {
   const envContent = fs.readFileSync(envPath, 'utf-8');
   envContent.split('\n').forEach((line) => {

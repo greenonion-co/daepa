@@ -12,7 +12,7 @@ import TooltipText from "@/app/(브리더스룸)/components/TooltipText";
 import PetThumbnail, { getPetThumbnailQueryKey } from "@/components/common/PetThumbnail";
 import { petImageControllerFindThumbnail } from "@repo/api-client";
 import { useQuery } from "@tanstack/react-query";
-import { useUserStore } from "@/app/(브리더스룸)/store/user";
+import { useIsLoggedIn } from "@/hooks/useAuth";
 import { useIsMyPet } from "@/hooks/useIsMyPet";
 import LoginPromoSheet from "@/app/(브리더스룸)/components/LoginPromoSheet";
 import { useBreedingInfoStore } from "../../store/breedingInfo";
@@ -39,7 +39,7 @@ const Header = ({
   onTabClick = () => {},
 }: HeaderProps) => {
   const isMyPet = useIsMyPet(pet.owner.userId);
-  const isLoggedIn = useUserStore((state) => !!state.user?.userId);
+  const isLoggedIn = useIsLoggedIn();
   const [isScrolled, setIsScrolled] = useState(size === "small");
   const [isPromoSheetOpen, setIsPromoSheetOpen] = useState(false);
 

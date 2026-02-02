@@ -11,6 +11,7 @@ import Navigation from './src/navigation';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { setupApiClient } from './src/utils/apiSetup';
 import { useAuthStore } from './src/store/auth';
+import { userControllerGetUserProfile } from '@repo/api-client';
 import Toast from '@/components/common/Toast';
 import Loading from '@/components/common/Loading';
 import Popup from '@/components/common/Popup';
@@ -20,6 +21,7 @@ import Config from 'react-native-config';
 import usePushNotification from './src/hooks/usePushNotification';
 import NotificationBanner from './src/components/NotificationBanner';
 import { useNotificationStore } from './src/store/notification';
+import { debugAuthState } from './src/utils/debugAuth';
 
 // Google Sign-In 초기화
 GoogleSignin.configure({
@@ -76,12 +78,40 @@ function App() {
     };
   }, []);
 
+  // accessToken 변경 시 자동으로 user 정보 업데이트
+  const accessToken = useAuthStore(state => state.accessToken);
+  const setUser = useAuthStore(state => state.setUser);
+
   useEffect(() => {
     if (hydrated) {
       setupApiClient();
       BootSplash.hide({ fade: true });
+
+      // 개발 모드에서 인증 상태 디버그 출력
+      if (__DEV__) {
+        debugAuthState();
+      }
     }
   }, [hydrated]);
+
+  // accessToken이 변경되면 user 정보를 자동으로 가져옴
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (accessToken && hydrated) {
+        try {
+          const { data } = await userControllerGetUserProfile();
+          setUser(data.data);
+        } catch (error) {
+          if (__DEV__) {
+            console.error('Failed to fetch user profile:', error);
+          }
+        }
+      } else if (!accessToken) {
+        setUser(null);
+      }
+    };
+    fetchUserProfile();
+  }, [accessToken, hydrated, setUser]);
 
   // 백그라운드 알림 클릭으로 앱 열렸을 때 해당 알림으로 이동
   useEffect(() => {

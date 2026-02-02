@@ -5,7 +5,7 @@ import messaging, {
 import { Platform, PermissionsAndroid } from 'react-native';
 import { useNotificationStore } from '../store/notification';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useAuthStore } from '../store/auth';
+import { useAuth } from './useAuth';
 import { AXIOS_INSTANCE } from '@repo/api-client';
 
 const FCM_TOKEN_KEY = 'fcm_token';
@@ -29,7 +29,7 @@ const getDeviceId = async (): Promise<string> => {
 };
 
 const usePushNotification = () => {
-  const accessToken = useAuthStore(state => state.accessToken);
+  const { accessToken } = useAuth();
   const showNotification = useNotificationStore(state => state.showNotification);
   const setPendingNotificationId = useNotificationStore(
     state => state.setPendingNotificationId,

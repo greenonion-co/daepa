@@ -39,7 +39,6 @@ type NativeMessage =
   | { type: "OPEN_GALLERY" }
   | { type: "HAPTIC"; style: "light" | "medium" | "heavy" }
   | { type: "TOKEN_REFRESH_FAILED" }
-  | { type: "SET_USER_DATA"; user: unknown }
   | { type: "SET_ACCESS_TOKEN"; token: string }
   | { type: "SET_THEME"; theme: ThemeMode }
   | { type: "TOAST"; message: string; variant: "success" | "error" | "info" | "warning" }
@@ -127,13 +126,6 @@ export const requestGoBack = (): boolean => {
  */
 export const setTopBarVisible = (visible: boolean): boolean => {
   return sendToNative({ type: "SET_TOP_BAR_VISIBLE", visible });
-};
-
-/**
- * 네이티브 앱에 유저 데이터 동기화
- */
-export const syncUserToNative = (user: unknown): boolean => {
-  return sendToNative({ type: "SET_USER_DATA", user });
 };
 
 /**

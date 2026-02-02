@@ -17,13 +17,17 @@ export default async function BrLayout({
   children: React.ReactNode;
 }>) {
   const [cookieStore, headersList] = await Promise.all([cookies(), headers()]);
-  const token = cookieStore.get("accessToken");
-
+  const refreshToken = cookieStore.get("refreshToken");
   // 현재 경로 확인
   const pathname = headersList.get("x-pathname") || "";
 
   // 공개 경로는 인증 체크 스킵
-  if (!token?.value && !isPublicPath(pathname)) {
+  if (isPublicPath(pathname)) {
+    return <>{children}</>;
+  }
+
+  // 비공개 경로는 refreshToken 존재 여부로 인증 체크
+  if (!refreshToken?.value) {
     redirect("/sign-in");
   }
 

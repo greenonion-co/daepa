@@ -4,11 +4,11 @@ import { Plus } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import type { RootStackParamList } from '@/types/navigation';
-import { useAuthStore } from '@/store/auth';
+import { useIsLoggedIn } from '@/hooks/useAuth';
 import LoginPromoSheet from './LoginPromoSheet';
 
 function AddPetButton() {
-  const isLoggedIn = useAuthStore(state => !!state.user);
+  const isLoggedIn = useIsLoggedIn();
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const [showLoginPromo, setShowLoginPromo] = useState(false);
   const scale = useRef(new Animated.Value(1)).current;

@@ -21,7 +21,6 @@ export type WebViewMessage =
   | { type: 'READY' }
   | { type: 'LOG'; level: 'log' | 'info' | 'warn' | 'error'; args: unknown[] }
   | { type: 'TOKEN_REFRESH_FAILED' }
-  | { type: 'SET_USER_DATA'; user: unknown }
   | { type: 'SET_ACCESS_TOKEN'; token: string }
   | { type: 'SET_THEME'; theme: ThemeMode }
   | {

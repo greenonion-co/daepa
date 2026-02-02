@@ -4,10 +4,10 @@ import { useState, useRef, useCallback } from "react";
 import { PetControllerFindAllFilterType } from "@repo/api-client";
 import FloatingToggle from "@/components/common/FloatingToggle";
 import PetList from "@/components/feed/PetList";
-import { useUserStore } from "@/app/(브리더스룸)/store/user";
+import { useIsLoggedIn } from "@/hooks/useAuth";
 
 export default function Home() {
-  const isLoggedIn = useUserStore((state) => !!state.user?.userId);
+  const isLoggedIn = useIsLoggedIn();
 
   const [filterType, setFilterType] = useState<PetControllerFindAllFilterType>(
     PetControllerFindAllFilterType.ALL,
