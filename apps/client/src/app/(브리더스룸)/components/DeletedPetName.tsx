@@ -35,7 +35,6 @@ const DeletedPetName = ({ name, className, deletedClassName, maxLength }: Delete
           >
             {truncatedName}
           </span>
-          {/*<Delete className="h-3.5 w-3.5 text-gray-400 dark:text-gray-500" />*/}
         </div>
       </TooltipTrigger>
       <TooltipContent>삭제된 펫입니다</TooltipContent>
