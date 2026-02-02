@@ -372,7 +372,7 @@ const AdoptionInfoContent = ({
             content={
               !isEditMode || isAdoptionReservedOrSold ? (
                 <CalendarInput
-                  placeholder="분양 날짜"
+                  placeholder="-"
                   editable={isEditMode && isAdoptionReservedOrSold}
                   value={adoptionData.adoptionDate}
                   onSelect={(date) => {
