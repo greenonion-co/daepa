@@ -14,6 +14,7 @@ import { DateTime } from "luxon";
 import Link from "next/link";
 import { useIsMobile } from "@/hooks/useMobile";
 import AdoptionReceipt from "@/app/(브리더스룸)/adoption/components/AdoptionReceipt";
+import DeletedPetName from "../../components/DeletedPetName";
 
 interface AdoptionDetailModalProps {
   isOpen: boolean;
@@ -64,10 +65,10 @@ const PetInfoCard = ({
             )}
           >
             {isDeleted ? (
-              <div>
-                <span className="cursor-not-allowed line-through decoration-red-500">{name}</span>
-                <span className="text-[12px] font-normal text-red-500">[삭제됨]</span>
-              </div>
+              <DeletedPetName
+                name={name}
+                deletedClassName="cursor-not-allowed decoration-red-500"
+              />
             ) : (
               name
             )}

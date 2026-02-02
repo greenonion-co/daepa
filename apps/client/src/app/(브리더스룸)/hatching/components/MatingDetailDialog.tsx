@@ -24,6 +24,7 @@ import {
   useMatingDetailDialogTutorial,
   TUTORIAL_TARGETS,
 } from "./MatingDetailDialogTutorial";
+import DeletedPetName from "../../components/DeletedPetName";
 
 interface MatingDetailDialogProps {
   isOpen: boolean;
@@ -168,7 +169,7 @@ const MatingDetailDialog = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent
         ref={dialogContentRef}
-        className={cn("p-13 flex w-full flex-col rounded-3xl sm:max-w-[860px]", isMobile && "p-4")}
+        className={cn("flex w-full flex-col rounded-3xl p-13 sm:max-w-[860px]", isMobile && "p-4")}
       >
         {/* 튜토리얼 오버레이 */}
         {showTutorial && (
@@ -186,12 +187,7 @@ const MatingDetailDialog = ({
             >
               {matingGroup.father?.petId ? (
                 matingGroup.father?.isDeleted ? (
-                  <>
-                    <span className="cursor-not-allowed line-through decoration-red-500">
-                      {matingGroup.father?.name}
-                    </span>
-                    <span className="text-[12px] text-red-500">[삭제됨]</span>
-                  </>
+                  <DeletedPetName name={matingGroup.father?.name} />
                 ) : (
                   <Link
                     href={`/pet/${matingGroup.father.petId}`}
@@ -208,12 +204,7 @@ const MatingDetailDialog = ({
               <span>x</span>
               {matingGroup.mother?.petId ? (
                 matingGroup.mother?.isDeleted ? (
-                  <>
-                    <span className="cursor-not-allowed line-through decoration-red-500">
-                      {matingGroup.mother?.name}
-                    </span>
-                    <span className="text-[12px] text-red-500">[삭제됨]</span>
-                  </>
+                  <DeletedPetName name={matingGroup.mother?.name} />
                 ) : (
                   <Link
                     href={`/pet/${matingGroup.mother.petId}`}

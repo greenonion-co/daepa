@@ -21,6 +21,7 @@ import LinkButton from "../../components/LinkButton";
 import { BadgeCheck, Lock } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import BadgeList from "../../components/BadgeList";
+import DeletedPetName from "../../components/DeletedPetName";
 
 export const columns: ColumnDef<AdoptionDto>[] = [
   {
@@ -51,15 +52,11 @@ export const columns: ColumnDef<AdoptionDto>[] = [
       const petName = row.original.pet.name;
       const isDeleted = row.original.pet.isDeleted;
 
-      if (isDeleted) {
-        return (
-          <div className="cursor-not-allowed">
-            <span className="cursor-not-allowed line-through decoration-red-500">{petName}</span>
-            <span className="text-[12px] text-red-500">[삭제됨]</span>
-          </div>
-        );
-      }
-      return <div className="font-semibold">{petName}</div>;
+      return isDeleted ? (
+        <DeletedPetName name={petName} />
+      ) : (
+        <span className="font-semibold">{petName ?? "-"}</span>
+      );
     },
   },
   {
@@ -156,14 +153,7 @@ export const columns: ColumnDef<AdoptionDto>[] = [
       const isDeleted = fatherExist.isDeleted ?? false;
 
       if (isDeleted) {
-        return (
-          <div className="cursor-not-allowed">
-            <span className="cursor-not-allowed line-through decoration-red-500">
-              {fatherExist.name}
-            </span>
-            <span className="text-[12px] text-red-500">[삭제됨]</span>
-          </div>
-        );
+        return <DeletedPetName name={fatherExist.name} />;
       }
 
       return (
@@ -212,14 +202,7 @@ export const columns: ColumnDef<AdoptionDto>[] = [
       const isDeleted = motherExist.isDeleted ?? false;
 
       if (isDeleted) {
-        return (
-          <div className="cursor-not-allowed">
-            <span className="cursor-not-allowed line-through decoration-red-500">
-              {motherExist.name}
-            </span>
-            <span className="text-[12px] text-red-500">[삭제됨]</span>
-          </div>
-        );
+        return <DeletedPetName name={motherExist.name} />;
       }
 
       return (

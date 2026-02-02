@@ -24,6 +24,7 @@ import LinkButton from "../../components/LinkButton";
 import { DateTime } from "luxon";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import TooltipText from "../../components/TooltipText";
+import DeletedPetName from "../../components/DeletedPetName";
 
 export const columns: ColumnDef<PetDto>[] = [
   {
@@ -218,14 +219,7 @@ export const columns: ColumnDef<PetDto>[] = [
       const isDeleted = father.isDeleted;
 
       if (isDeleted) {
-        return (
-          <div className="cursor-not-allowed">
-            <span className="cursor-not-allowed line-through decoration-red-500">
-              {father.name}
-            </span>
-            <span className="text-[12px] text-red-500">[삭제됨]</span>
-          </div>
-        );
+        return <DeletedPetName name={father.name} maxLength={6} />;
       }
 
       const truncatedName =
@@ -274,14 +268,7 @@ export const columns: ColumnDef<PetDto>[] = [
       const isDeleted = mother.isDeleted;
 
       if (isDeleted) {
-        return (
-          <div className="cursor-not-allowed">
-            <span className="cursor-not-allowed line-through decoration-red-500">
-              {mother.name}
-            </span>
-            <span className="text-[12px] text-red-500">[삭제됨]</span>
-          </div>
-        );
+        return <DeletedPetName name={mother.name} maxLength={6} />;
       }
 
       const truncatedName =
