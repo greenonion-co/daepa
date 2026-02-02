@@ -8,12 +8,12 @@ import { GENDER_KOREAN_INFO, SPECIES_KOREAN_INFO } from "../../constants";
 import { cn, getStatusBadge } from "@/lib/utils";
 import Loading from "@/components/common/Loading";
 import EditAdoptionForm from "./EditAdoptionForm";
-import AdoptionReceipt from "../../pet/[petId]/(펫카드)/components/AdoptionReceipt";
 import PetThumbnail from "@/components/common/PetThumbnail";
 import BadgeList from "../../components/BadgeList";
 import { DateTime } from "luxon";
 import Link from "next/link";
 import { useIsMobile } from "@/hooks/useMobile";
+import AdoptionReceipt from "@/app/(브리더스룸)/adoption/components/AdoptionReceipt";
 
 interface AdoptionDetailModalProps {
   isOpen: boolean;
