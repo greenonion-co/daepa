@@ -24,7 +24,7 @@ const AdoptionPage = () => {
         className="flex flex-col gap-4"
       >
         <TabsList>
-          <TabsTrigger value="list">분양 리스트</TabsTrigger>
+          <TabsTrigger value="list">분양 목록</TabsTrigger>
           <TabsTrigger value="dashboard">대시보드</TabsTrigger>
         </TabsList>
 

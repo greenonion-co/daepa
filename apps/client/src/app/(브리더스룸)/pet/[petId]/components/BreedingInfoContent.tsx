@@ -174,8 +174,8 @@ const BreedingInfoContent = ({ petId, ownerId, initialPet }: BreedingInfoContent
   if (!pet || Object.keys(formData).length === 0) return null;
 
   return (
-    <div className="shadow-xs flex flex-1 flex-col gap-2 rounded-2xl bg-white p-3 dark:bg-neutral-900">
-      <div className="text-[14px] font-[600] text-gray-600 dark:text-gray-300">펫정보</div>
+    <div className="flex flex-1 flex-col gap-2 rounded-2xl bg-white p-3 shadow-xs dark:bg-neutral-900">
+      <div className="text-[14px] font-[600] text-gray-600 dark:text-gray-300">개체 정보</div>
 
       {/* 공개 여부 */}
       <PublicToggle

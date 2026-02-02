@@ -25,7 +25,7 @@ const HatchingPage = () => {
         className="flex flex-col"
       >
         <TabsList>
-          <TabsTrigger value="pair">페어 리스트</TabsTrigger>
+          <TabsTrigger value="pair">페어 목록</TabsTrigger>
           <TabsTrigger value="range">해칭 캘린더</TabsTrigger>
           <TabsTrigger value="dashboard">대시보드</TabsTrigger>
         </TabsList>
