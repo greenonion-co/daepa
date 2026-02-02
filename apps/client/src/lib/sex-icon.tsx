@@ -1,4 +1,4 @@
-import { Mars, Venus, Triangle } from "lucide-react";
+import { Mars, Venus, CircleHelp } from "lucide-react";
 import { cn } from "./utils";
 
 type SexIconSize = "xs" | "sm" | "md" | "lg" | "xl";
@@ -21,13 +21,13 @@ export function getSexIcon(sex: string | undefined | null, options: SexIconOptio
   const sizeClass = SIZE_CLASSES[size];
 
   if (sex === "M") {
-    return <Mars className={cn(sizeClass, "stroke-3 text-blue-400", className)} />;
+    return <Mars className={cn(sizeClass, "stroke-3 text-blue-300", className)} />;
   }
 
   if (sex === "F") {
-    return <Venus className={cn(sizeClass, "stroke-3 text-red-400", className)} />;
+    return <Venus className={cn(sizeClass, "stroke-3 text-red-300", className)} />;
   }
 
   // 미구분
-  return <Triangle className={cn(sizeClass, "stroke-3 text-yellow-400", className)} />;
+  return <CircleHelp className={cn(sizeClass, "stroke-3 text-neutral-300", className)} />;
 }
