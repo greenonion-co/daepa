@@ -373,7 +373,7 @@ export class PetService {
         isDeleted: false,
         type: PET_TYPE.PET,
       })
-      .leftJoinAndMapOne(
+      .innerJoinAndMapOne(
         'pets.owner',
         'users',
         'users',
