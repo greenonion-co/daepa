@@ -127,6 +127,7 @@ const PedigreeInfoContent = ({
 
       <div className="flex gap-3 max-[300px]:flex-col">
         <ParentLink
+          excludePetId={petId}
           species={species}
           label="부"
           data={parents?.father}
@@ -140,6 +141,7 @@ const PedigreeInfoContent = ({
           editable={isMyPet}
         />
         <ParentLink
+          excludePetId={petId}
           species={species}
           label="모"
           data={parents?.mother}
