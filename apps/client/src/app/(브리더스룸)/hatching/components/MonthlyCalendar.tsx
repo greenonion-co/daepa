@@ -268,7 +268,7 @@ const MonthlyCalendar = memo(() => {
                 <span className="font-semibold text-black dark:text-gray-100">
                   {currentMonth.getFullYear()}년 {currentMonth.getMonth() + 1}월
                 </span>
-                조회된 해칭 내역이 없습니다.
+                아직 데이터가 없습니다.
               </div>
             ) : (
               <>

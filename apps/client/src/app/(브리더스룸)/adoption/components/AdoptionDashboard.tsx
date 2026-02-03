@@ -548,7 +548,7 @@ const AdoptionDashboard = memo(() => {
       ) : (
         <div className="text-muted-foreground mt-6 flex flex-col items-center text-sm">
           <Image src="/assets/lizard.png" alt="통계 데이터 없음" width={200} height={200} />
-          조회된 분양 내역이 없습니다.
+          아직 데이터가 없습니다.
         </div>
       )}
 
