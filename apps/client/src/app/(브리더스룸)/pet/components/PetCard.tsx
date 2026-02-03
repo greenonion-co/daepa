@@ -12,17 +12,26 @@ import Link from "next/link";
 
 interface PetCardProps {
   pet: PetDto;
+  onCardClick?: (pet: PetDto) => void;
 }
 
-export default function PetCard({ pet }: PetCardProps) {
+export default function PetCard({ pet, onCardClick }: PetCardProps) {
   const adoptionStatus = pet.adoption?.status;
   const adoptionLabel = adoptionStatus ? SALE_STATUS_KOREAN_INFO[adoptionStatus] : null;
   const sexLabel = getSexIcon(pet.sex, { size: "xs" });
 
+  const handleClick = (e: React.MouseEvent) => {
+    // Link 클릭 시에는 카드 클릭 이벤트 무시
+    if ((e.target as HTMLElement).closest("a")) {
+      return;
+    }
+    onCardClick?.(pet);
+  };
+
   return (
-    <Link
-      href={`/pet/${pet.petId}`}
-      className="relative block overflow-hidden rounded-lg bg-white transition-all duration-150 hover:shadow-md active:scale-[0.98] dark:bg-[#18171C] dark:active:bg-gray-800"
+    <div
+      onClick={handleClick}
+      className="relative block cursor-pointer overflow-hidden rounded-lg bg-white transition-all duration-150 hover:shadow-md active:scale-[0.98] dark:bg-[#18171C] dark:active:bg-gray-800"
     >
       <div className="flex gap-2 p-2">
         {/* 이미지 + 성별 */}
@@ -137,6 +146,6 @@ export default function PetCard({ pet }: PetCardProps) {
           <ChevronRight className="h-4 w-4" />
         </div>
       </div>
-    </Link>
+    </div>
   );
 }
