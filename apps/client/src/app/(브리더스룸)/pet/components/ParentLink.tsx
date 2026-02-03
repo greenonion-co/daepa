@@ -26,6 +26,8 @@ import BadgeList from "../../components/BadgeList";
 import Link from "next/link";
 
 interface ParentLinkProps {
+  /** 검색 결과에서 제외할 펫 ID (자기 자신 제외용) */
+  excludePetId?: string;
   species: PetDtoSpecies;
   label: "부" | "모";
   data?: GetParentsByPetIdResponseDtoDataFather | GetParentsByPetIdResponseDtoDataMother;
@@ -36,6 +38,7 @@ interface ParentLinkProps {
 }
 
 const ParentLink = ({
+  excludePetId,
   species,
   label,
   data,
@@ -106,6 +109,7 @@ const ParentLink = ({
         isOpen={isOpen}
         onClose={close}
         species={species}
+        excludePetId={excludePetId}
         onSelect={(item) => {
           close();
           onSelect?.(item);

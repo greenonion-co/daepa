@@ -15,7 +15,6 @@ import Header from "./Header";
 import { useInView } from "react-intersection-observer";
 import { PetParentDtoWithMessage } from "@/app/(브리더스룸)/pet/store/parentLink";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { useParams } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 interface ParentSearchProps {
@@ -24,6 +23,8 @@ interface ParentSearchProps {
   isOpen: boolean;
   onlySelect?: boolean;
   allowMyPetOnly?: boolean;
+  /** 검색 결과에서 제외할 펫 ID (자기 자신 제외용) */
+  excludePetId?: string;
   onClose: () => void;
   onSelect: (item: PetDto) => void;
   onExit: () => void;
@@ -35,11 +36,11 @@ const ParentSearchSelector = ({
   isOpen,
   onlySelect = false,
   allowMyPetOnly = false,
+  excludePetId,
   onClose,
   onSelect,
   onExit,
 }: ParentSearchProps) => {
-  const { petId } = useParams<{ petId: string }>();
   const [searchQuery, setSearchQuery] = useState("");
   const [step, setStep] = useState(1);
   const [selectedPet, setSelectedPet] = useState<PetParentDtoWithMessage | null>(null);
@@ -68,7 +69,10 @@ const ParentSearchSelector = ({
     select: (data) =>
       data.pages
         .flatMap((page) => page.data.data)
-        .filter((pet) => pet.petId !== petId && pet.sex?.toString() === sex),
+        .filter(
+          (pet) =>
+            (!excludePetId || pet.petId !== excludePetId) && pet.sex?.toString() === sex,
+        ),
   });
 
   useEffect(() => {

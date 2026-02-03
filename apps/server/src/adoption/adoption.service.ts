@@ -455,25 +455,28 @@ export class AdoptionService {
     entityManager?: EntityManager,
   ): Promise<{ adoptionId: string }> {
     const run = async (em: EntityManager) => {
+      // 1. 기존 분양 정보 조회
       const adoptionEntity = await em.findOne(AdoptionEntity, {
-        where: {
-          adoptionId,
-          isDeleted: false,
-        },
+        where: { adoptionId, isDeleted: false },
       });
 
       if (!adoptionEntity) {
         throw new NotFoundException('분양 정보를 찾을 수 없습니다.');
       }
 
+      // 2. 최종 상태 결정 (업데이트 값 또는 기존 값)
+      const finalStatus = updateAdoptionDto.status ?? adoptionEntity.status;
+      const finalBuyerId = updateAdoptionDto.buyerId ?? adoptionEntity.buyerId;
+      const isSoldStatus = finalStatus === ADOPTION_SALE_STATUS.SOLD;
+      const isReservationOrSold = [
+        ADOPTION_SALE_STATUS.ON_RESERVATION,
+        ADOPTION_SALE_STATUS.SOLD,
+      ].includes(finalStatus);
+
+      // 3. 입양자 검증 (buyerId가 변경되는 경우)
       if (updateAdoptionDto.buyerId) {
-        if (
-          updateAdoptionDto.status &&
-          ![
-            ADOPTION_SALE_STATUS.ON_RESERVATION,
-            ADOPTION_SALE_STATUS.SOLD,
-          ].includes(updateAdoptionDto.status)
-        ) {
+        // 예약중/판매완료 상태에서만 입양자 설정 가능
+        if (!isReservationOrSold) {
           throw new BadRequestException(
             '예약중, 판매 완료 상태일 때만 입양자 정보를 입력할 수 있습니다.',
           );
@@ -482,27 +485,22 @@ export class AdoptionService {
         const buyer = await em.findOne(UserEntity, {
           where: { userId: updateAdoptionDto.buyerId },
         });
-
         if (!buyer) {
           throw new NotFoundException('입양자를 찾을 수 없습니다.');
         }
       }
 
-      const newAdoptionEntity = new AdoptionEntity();
-      Object.assign(newAdoptionEntity, {
-        ...adoptionEntity,
-        ...omitBy(updateAdoptionDto, isUndefined),
-        isActive: isUndefined(updateAdoptionDto.status)
-          ? adoptionEntity.isActive // status가 없으면 기존 isActive 유지
-          : updateAdoptionDto.status !== ADOPTION_SALE_STATUS.SOLD, // status가 있으면 새로 계산
-      });
+      // 4. 분양완료 처리 시 사전 검증 (DB 저장 전에 모든 검증 완료)
+      if (isSoldStatus) {
+        if (!finalBuyerId) {
+          throw new BadRequestException(
+            '분양완료 처리를 위해서는 입양자 정보가 필요합니다.',
+          );
+        }
 
-      await em.save(AdoptionEntity, newAdoptionEntity);
-
-      if (updateAdoptionDto.status === ADOPTION_SALE_STATUS.SOLD) {
         const hasPendingRequest =
           await this.parentRequestService.hasPendingRequestsByPetId(
-            newAdoptionEntity.petId,
+            adoptionEntity.petId,
             em,
           );
         if (hasPendingRequest) {
@@ -510,23 +508,30 @@ export class AdoptionService {
             '이 펫과 관련된 부모 요청을 모두 처리한 후 다시 시도해주세요.',
           );
         }
+      }
 
-        await this.updatePetOwner(
+      // 5. 분양 정보 업데이트
+      Object.assign(adoptionEntity, {
+        ...omitBy(updateAdoptionDto, isUndefined),
+        isActive: !isSoldStatus,
+      });
+      await em.save(AdoptionEntity, adoptionEntity);
+
+      // 6. 분양완료 시 소유권 이전 및 새 소유자용 분양 정보 생성
+      if (isSoldStatus) {
+        await this.updatePetOwner(em, adoptionEntity.petId, finalBuyerId);
+        await this.createAdoption(
+          finalBuyerId!,
+          { petId: adoptionEntity.petId, status: ADOPTION_SALE_STATUS.NONE },
           em,
-          adoptionEntity.petId,
-          updateAdoptionDto.buyerId ?? adoptionEntity.buyerId,
         );
       }
 
       return { adoptionId };
     };
 
-    if (entityManager) {
-      return await run(entityManager);
-    }
-
-    return this.dataSource.transaction(async (entityManager: EntityManager) => {
-      return await run(entityManager);
-    });
+    return entityManager
+      ? run(entityManager)
+      : this.dataSource.transaction(run);
   }
 }
