@@ -398,6 +398,9 @@ async function main() {
   }
 
   console.log('\n=== Done ===');
+
+  // 부모 정보 연동은 별도 스크립트(link-pet-parents.ts)로 실행
+  // npx ts-node scripts/link-pet-parents.ts scripts/data/petlist.csv
 }
 
 main()
