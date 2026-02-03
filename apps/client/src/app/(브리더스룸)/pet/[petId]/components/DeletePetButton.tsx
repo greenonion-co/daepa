@@ -22,12 +22,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { brPetControllerFindAll, petControllerDeletePet } from "@repo/api-client";
 
-interface DeletePetDialogProps {
+interface DeletePetButtonProps {
   petId: string;
   petName?: string;
 }
 
-export function DeletePetDialog({ petId, petName }: DeletePetDialogProps) {
+function DeletePetButton({ petId, petName }: DeletePetButtonProps) {
   const [open, setOpen] = useState(false);
   const [deleteReason, setDeleteReason] = useState("");
   const router = useRouter();
@@ -38,6 +38,7 @@ export function DeletePetDialog({ petId, petName }: DeletePetDialogProps) {
       return petControllerDeletePet(petId, { deleteReason });
     },
     onSuccess: () => {
+      setOpen(false);
       toast.success("펫이 삭제되었습니다.");
       queryClient.invalidateQueries({ queryKey: [brPetControllerFindAll.name] });
       router.push("/pet");
@@ -99,3 +100,5 @@ export function DeletePetDialog({ petId, petName }: DeletePetDialogProps) {
     </AlertDialog>
   );
 }
+
+export default DeletePetButton;

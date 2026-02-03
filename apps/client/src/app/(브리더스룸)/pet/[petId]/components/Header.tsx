@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import { PetAdoptionDtoStatus, PetDto } from "@repo/api-client";
 import { SPECIES_KOREAN_ALIAS_INFO } from "@/app/(브리더스룸)/constants";
 import Link from "next/link";
-import { DeletePetDialog } from "./DeletePetDialog";
+import DeletePetButton from "./DeletePetButton";
 import { useAdoptionStore } from "@/app/(브리더스룸)/pet/store/adoption";
 import { useEffect, useState } from "react";
 import TooltipText from "@/app/(브리더스룸)/components/TooltipText";
@@ -235,7 +235,7 @@ const Header = ({
 
         <div className="flex items-center gap-1">
           <QRCode pet={pet} isScrolled={isScrolled} />
-          {isLoggedIn && isMyPet && <DeletePetDialog petId={pet.petId} petName={pet.name} />}
+          {isLoggedIn && isMyPet && <DeletePetButton petId={pet.petId} petName={pet.name} />}
         </div>
       </div>
 
