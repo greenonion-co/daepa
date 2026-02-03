@@ -6,27 +6,33 @@ import { cn } from "@/lib/utils";
 import PetThumbnail from "@/components/common/PetThumbnail";
 import { GROWTH_KOREAN_INFO, SALE_STATUS_KOREAN_INFO } from "../../constants";
 import BadgeList from "../../components/BadgeList";
-import { useAppRouter } from "@/hooks/useAppRouter";
 import { DateTime } from "luxon";
 import { getSexIcon } from "@/lib/sex-icon";
+import Link from "next/link";
 
 interface PetCardProps {
   pet: PetDto;
+  onCardClick?: (pet: PetDto) => void;
 }
 
-export default function PetCard({ pet }: PetCardProps) {
-  const router = useAppRouter();
-
+export default function PetCard({ pet, onCardClick }: PetCardProps) {
   const adoptionStatus = pet.adoption?.status;
   const adoptionLabel = adoptionStatus ? SALE_STATUS_KOREAN_INFO[adoptionStatus] : null;
   const sexLabel = getSexIcon(pet.sex, { size: "xs" });
 
-  const handleCardClick = () => {
-    router.push(`/pet/${pet.petId}`);
+  const handleClick = (e: React.MouseEvent) => {
+    // Link 클릭 시에는 카드 클릭 이벤트 무시
+    if ((e.target as HTMLElement).closest("a")) {
+      return;
+    }
+    onCardClick?.(pet);
   };
 
   return (
-    <div className="relative overflow-hidden rounded-lg bg-white transition-all duration-150 hover:shadow-md active:scale-[0.98] dark:bg-[#18171C] dark:active:bg-gray-800">
+    <div
+      onClick={handleClick}
+      className="relative block cursor-pointer overflow-hidden rounded-lg bg-white transition-all duration-150 hover:shadow-md active:scale-[0.98] dark:bg-[#18171C] dark:active:bg-gray-800"
+    >
       <div className="flex gap-2 p-2">
         {/* 이미지 + 성별 */}
         <div className="flex shrink-0 flex-col items-center gap-0.5 self-center">
@@ -108,29 +114,23 @@ export default function PetCard({ pet }: PetCardProps) {
           {(pet.father || pet.mother) && (
             <p className="truncate pb-2 text-xs text-gray-600 dark:text-gray-300">
               {pet.father && "name" in pet.father && "petId" in pet.father && (
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    router.push(`/pet/${pet.father?.petId}`);
-                  }}
+                <Link
+                  href={`/pet/${pet.father.petId}`}
+                  onClick={(e) => e.stopPropagation()}
                   className="text-blue-500 underline hover:text-blue-600"
                 >
                   {pet.father.name}
-                </button>
+                </Link>
               )}
               {pet.father && pet.mother && " × "}
               {pet.mother && "name" in pet.mother && "petId" in pet.mother && (
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    router.push(`/pet/${pet.mother?.petId}`);
-                  }}
+                <Link
+                  href={`/pet/${pet.mother.petId}`}
+                  onClick={(e) => e.stopPropagation()}
                   className="text-blue-500 underline hover:text-blue-600"
                 >
                   {pet.mother.name}
-                </button>
+                </Link>
               )}
             </p>
           )}
@@ -142,11 +142,8 @@ export default function PetCard({ pet }: PetCardProps) {
           </div>
         </div>
 
-        <div
-          onClick={handleCardClick}
-          className="flex shrink-0 items-center self-center rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-gray-200 dark:text-gray-500 dark:hover:bg-gray-700"
-        >
-          <ChevronRight className={cn("h-4 w-4")} />
+        <div className="flex shrink-0 items-center self-center rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-gray-200 dark:text-gray-500 dark:hover:bg-gray-700">
+          <ChevronRight className="h-4 w-4" />
         </div>
       </div>
     </div>

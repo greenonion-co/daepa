@@ -45,7 +45,7 @@ export const columns: ColumnDef<PetDto>[] = [
       return (
         <div className="text-center">
           {isPublic ? (
-            <LockOpen className="h-4 w-4 text-neutral-800 dark:text-neutral-200" />
+            <LockOpen className="h-4 w-4 text-blue-500 dark:text-neutral-200" />
           ) : (
             <Lock className="h-4 w-4 text-yellow-500 dark:text-yellow-400" />
           )}
@@ -113,7 +113,7 @@ export const columns: ColumnDef<PetDto>[] = [
       const name = row.getValue("name") as string;
       return (
         <div className="max-w-[70px] break-words">
-          <TooltipText title="이름" text={name} displayTextLength={6} className="font-semibold" />
+          <TooltipText title="이름" text={name} displayTextLength={10} className="font-semibold" />
         </div>
       );
     },

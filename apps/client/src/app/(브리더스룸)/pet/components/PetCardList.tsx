@@ -1,8 +1,12 @@
 "use client";
 
+import { useState, useCallback } from "react";
 import { PetDto } from "@repo/api-client";
 import PetCard from "./PetCard";
 import Loading from "@/components/common/Loading";
+import { useIsMobile } from "@/hooks/useMobile";
+import { useAppRouter } from "@/hooks/useAppRouter";
+import PetDetailModal from "../[petId]/components/PetDetailModal";
 
 interface PetCardListProps {
   data: PetDto[];
@@ -19,6 +23,20 @@ export default function PetCardList({
   loaderRefAction,
   isEmpty,
 }: PetCardListProps) {
+  const isMobile = useIsMobile();
+  const router = useAppRouter();
+  const [selectedPet, setSelectedPet] = useState<PetDto | null>(null);
+
+  const handleCardClick = useCallback(
+    (pet: PetDto) => {
+      if (isMobile) {
+        router.push(`/pet/${pet.petId}`);
+      } else {
+        setSelectedPet(pet);
+      }
+    },
+    [isMobile, router],
+  );
   if (isEmpty) {
     return (
       <div className="flex min-h-[300px] flex-col items-center justify-center text-gray-500 dark:text-gray-400">
@@ -29,24 +47,34 @@ export default function PetCardList({
   }
 
   return (
-    <div className="space-y-2 px-2 pb-20">
-      {/* 카드 그리드 */}
-      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
-        {data.map((pet) => (
-          <PetCard key={pet.petId} pet={pet} />
-        ))}
+    <>
+      <div className="space-y-2 px-2 pb-20">
+        {/* 카드 그리드 */}
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+          {data.map((pet) => (
+            <PetCard key={pet.petId} pet={pet} onCardClick={handleCardClick} />
+          ))}
+        </div>
+
+        {/* 무한 스크롤 로더 */}
+        {hasMore ? (
+          <div ref={loaderRefAction} className="flex justify-center py-4">
+            {isFetchingMore && <Loading />}
+          </div>
+        ) : (
+          <span className="m-10 block text-center text-sm text-gray-400">
+            데이터를 모두 불러왔습니다.
+          </span>
+        )}
       </div>
 
-      {/* 무한 스크롤 로더 */}
-      {hasMore ? (
-        <div ref={loaderRefAction} className="flex justify-center py-4">
-          {isFetchingMore && <Loading />}
-        </div>
-      ) : (
-        <span className="m-10 block text-center text-sm text-gray-400">
-          데이터를 모두 불러왔습니다.
-        </span>
+      {selectedPet && (
+        <PetDetailModal
+          isOpen={!!selectedPet}
+          pet={selectedPet}
+          onClose={() => setSelectedPet(null)}
+        />
       )}
-    </div>
+    </>
   );
 }
