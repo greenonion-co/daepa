@@ -31,7 +31,7 @@ export default function PetCardList({
   return (
     <div className="space-y-2 px-2 pb-20">
       {/* 카드 그리드 */}
-      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(min(360px,100%),1fr))] gap-2">
         {data.map((pet) => (
           <PetCard key={pet.petId} pet={pet} />
         ))}
