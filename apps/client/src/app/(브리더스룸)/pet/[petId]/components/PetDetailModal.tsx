@@ -22,6 +22,7 @@ export default function PetDetailModal({ isOpen, pet, onClose }: PetDetailModalP
         <PetDetailLayout
           variant="modal"
           pet={pet}
+          onDelete={onClose}
           breedingSlot={
             <BreedingInfoContent
               petId={pet.petId}

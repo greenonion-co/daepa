@@ -21,36 +21,43 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { brPetControllerFindAll, petControllerDeletePet } from "@repo/api-client";
+import { useIsMobile } from "@/hooks/useMobile";
 
 interface DeletePetButtonProps {
   petId: string;
   petName?: string;
+  onSuccess?: () => void;
 }
 
-function DeletePetButton({ petId, petName }: DeletePetButtonProps) {
+function DeletePetButton({ petId, petName, onSuccess }: DeletePetButtonProps) {
   const [open, setOpen] = useState(false);
   const [deleteReason, setDeleteReason] = useState("");
   const router = useRouter();
   const queryClient = useQueryClient();
+  const isMobile = useIsMobile();
 
-  const deletePetMutation = useMutation({
+  const { mutateAsync, isPending } = useMutation({
     mutationFn: async () => {
       return petControllerDeletePet(petId, { deleteReason });
     },
-    onSuccess: () => {
+  });
+
+  const handleDelete = async () => {
+    try {
+      await mutateAsync();
       setOpen(false);
       toast.success("펫이 삭제되었습니다.");
       queryClient.invalidateQueries({ queryKey: [brPetControllerFindAll.name] });
-      router.push("/pet");
-    },
-    onError: (error: any) => {
+
+      if (isMobile) {
+        router.push("/pet");
+      } else {
+        onSuccess?.();
+      }
+    } catch (error: any) {
       const message = error?.response?.data?.message || "펫 삭제 중 오류가 발생했습니다.";
       toast.error(message);
-    },
-  });
-
-  const handleDelete = () => {
-    deletePetMutation.mutate();
+    }
   };
 
   return (
@@ -84,16 +91,16 @@ function DeletePetButton({ petId, petName }: DeletePetButtonProps) {
         </div>
 
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={deletePetMutation.isPending}>취소</AlertDialogCancel>
+          <AlertDialogCancel disabled={isPending}>취소</AlertDialogCancel>
           <AlertDialogAction
             onClick={(e) => {
               e.preventDefault();
               handleDelete();
             }}
-            disabled={deletePetMutation.isPending}
+            disabled={isPending}
             className="bg-red-500 hover:bg-red-600"
           >
-            {deletePetMutation.isPending ? "삭제 중..." : "삭제"}
+            {isPending ? "삭제 중..." : "삭제"}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
