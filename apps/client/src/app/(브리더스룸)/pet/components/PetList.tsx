@@ -1,6 +1,6 @@
 "use client";
 
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, keepPreviousData } from "@tanstack/react-query";
 import { columns } from "./columns";
 import DataTable from "./DataTable";
 import PetCardList from "./PetCardList";
@@ -64,6 +64,7 @@ export default function PetList() {
         items: resp.pages.flatMap((p) => p.data.data),
         totalCount: resp.pages[0]?.data.meta.totalCount ?? 0,
       }),
+      placeholderData: keepPreviousData,
     });
 
   const { items, totalCount } = data ?? {};
