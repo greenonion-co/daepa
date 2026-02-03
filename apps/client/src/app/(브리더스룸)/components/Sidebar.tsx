@@ -1,5 +1,5 @@
 import { ChevronsLeft, Clock7, Mail, Settings } from "lucide-react";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import SidebarPanel from "./SidebarPanel";
 import { cn } from "@/lib/utils";
 import { useIsLoggedIn } from "@/hooks/useAuth";
@@ -10,6 +10,21 @@ const Sidebar = ({ unreadCount }: { unreadCount: number }) => {
   const isLoggedIn = useIsLoggedIn();
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [type, setType] = useState<SIDEBAR_TYPE>(isLoggedIn ? "알림" : "최근 본");
+  const sidebarRef = useRef<HTMLDivElement>(null);
+
+  // 외부 클릭 시 사이드바 닫기
+  useEffect(() => {
+    if (!isNotificationOpen) return;
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (sidebarRef.current && !sidebarRef.current.contains(event.target as Node)) {
+        setIsNotificationOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isNotificationOpen]);
 
   const handleClickSidebarItem = (selectedType: SIDEBAR_TYPE) => {
     setType(selectedType);
@@ -20,7 +35,7 @@ const Sidebar = ({ unreadCount }: { unreadCount: number }) => {
   };
 
   return (
-    <>
+    <div ref={sidebarRef}>
       <div className="fixed right-0 z-50 flex h-full w-[55px] flex-col items-center gap-2 bg-gray-100 dark:bg-black">
         <SidebarItem
           icon={
@@ -67,7 +82,7 @@ const Sidebar = ({ unreadCount }: { unreadCount: number }) => {
         />
       </div>
       <SidebarPanel type={type} isOpen={isNotificationOpen} />
-    </>
+    </div>
   );
 };
 
