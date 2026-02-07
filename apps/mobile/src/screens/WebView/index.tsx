@@ -256,7 +256,13 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
           Loading.close();
           break;
         case 'SHOW_LOGIN_PROMO_SHEET':
-          setLoginPromoSheetVariant(message.variant);
+          const variant = message.variant;
+          if (variant === 'register' || variant === 'relation') {
+            setLoginPromoSheetVariant(variant);
+          } else {
+            console.warn('[WebView] Invalid promo sheet variant:', variant);
+            setLoginPromoSheetVariant(null);
+          }
           break;
         default:
           break;
