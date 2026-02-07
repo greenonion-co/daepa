@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import { PetAdoptionDtoStatus, PetDto } from "@repo/api-client";
 import { SPECIES_KOREAN_ALIAS_INFO } from "@/app/(브리더스룸)/constants";
 import Link from "next/link";
-import { DeletePetDialog } from "./DeletePetDialog";
+import DeletePetButton from "./DeletePetButton";
 import { useAdoptionStore } from "@/app/(브리더스룸)/pet/store/adoption";
 import { useEffect, useState } from "react";
 import TooltipText from "@/app/(브리더스룸)/components/TooltipText";
@@ -30,6 +30,8 @@ interface HeaderProps {
   tabs?: { id: TabType; label: string; ref: React.RefObject<HTMLDivElement | null> }[];
   activeTab?: TabType;
   onTabClick?: (tabId: TabType, ref: React.RefObject<HTMLDivElement | null>) => void;
+  /** 펫 삭제 성공 시 콜백 */
+  onDelete?: () => void;
 }
 
 const Header = ({
@@ -38,6 +40,7 @@ const Header = ({
   tabs = [],
   activeTab,
   onTabClick = () => {},
+  onDelete,
 }: HeaderProps) => {
   const isMyPet = useIsMyPet(pet.owner.userId);
   const isLoggedIn = useIsLoggedIn();
@@ -223,7 +226,9 @@ const Header = ({
 
         <div className="flex items-center gap-1">
           <QRCode pet={pet} isScrolled={isScrolled} />
-          {isLoggedIn && isMyPet && <DeletePetDialog petId={pet.petId} petName={pet.name} />}
+          {isLoggedIn && isMyPet && (
+            <DeletePetButton petId={pet.petId} petName={pet.name} onSuccess={onDelete} />
+          )}
         </div>
       </div>
 

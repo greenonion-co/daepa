@@ -16,7 +16,7 @@ import { cn } from "@/lib/utils";
 
 import { useFilterStore } from "../../store/filter";
 import { useSearchKeywordStore } from "../../store/searchKeyword";
-import { useViewModeStore } from "../../store/viewMode";
+import { useViewMode } from "../../store/viewMode";
 
 import Loading from "@/components/common/Loading";
 import { Filters } from "./Filters";
@@ -27,7 +27,7 @@ export default function PetList() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const { searchFilters } = useFilterStore();
   const { searchKeyword } = useSearchKeywordStore();
-  const { viewMode } = useViewModeStore();
+  const { viewMode } = useViewMode();
   const searchParams = useSearchParams();
   const router = useRouter();
   const itemPerPage = 10;

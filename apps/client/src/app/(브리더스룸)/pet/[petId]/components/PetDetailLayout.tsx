@@ -18,6 +18,8 @@ interface PetDetailLayoutProps {
   imagesSlot: ReactNode;
   pedigreeSlot: ReactNode;
   adoptionSlot: ReactNode;
+  /** 펫 삭제 성공 시 콜백 */
+  onDelete?: () => void;
 }
 
 export default function PetDetailLayout({
@@ -27,6 +29,7 @@ export default function PetDetailLayout({
   imagesSlot,
   pedigreeSlot,
   adoptionSlot,
+  onDelete,
 }: PetDetailLayoutProps) {
   const isMyPet = useIsMyPet(pet.owner.userId);
   const isMobile = useIsMobile();
@@ -166,6 +169,7 @@ export default function PetDetailLayout({
         activeTab={activeTab}
         onTabClick={handleTabClick}
         size={variant === "modal" ? "small" : "medium"}
+        onDelete={onDelete}
       />
 
       <div className="flex flex-wrap gap-3 px-2 pt-2">

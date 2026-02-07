@@ -667,7 +667,7 @@ export const SELECTOR_CONFIGS: Record<
 
 export const SIDEBAR_ITEMS = [
   {
-    title: "홈",
+    title: "마이펫",
     url: "/pet",
     icon: Home,
   },
