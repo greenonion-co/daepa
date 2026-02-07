@@ -31,7 +31,8 @@ export type WebViewMessage =
   | { type: 'SET_PULL_TO_REFRESH'; enabled: boolean }
   | { type: 'SET_TOP_BAR_VISIBLE'; visible: boolean }
   | { type: 'SHOW_LOADING' }
-  | { type: 'HIDE_LOADING' };
+  | { type: 'HIDE_LOADING' }
+  | { type: 'SHOW_LOGIN_PROMO_SHEET'; variant: 'register' | 'relation' };
 
 export type WebViewRouteParams = {
   WebView: WebViewParams | undefined;

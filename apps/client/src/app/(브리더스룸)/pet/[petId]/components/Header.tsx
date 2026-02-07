@@ -14,7 +14,8 @@ import { petImageControllerFindThumbnail } from "@repo/api-client";
 import { useQuery } from "@tanstack/react-query";
 import { useIsLoggedIn } from "@/hooks/useAuth";
 import { useIsMyPet } from "@/hooks/useIsMyPet";
-import LoginPromoSheet from "@/app/(브리더스룸)/components/LoginPromoSheet";
+import { openRelationPromoSheet } from "@/app/(브리더스룸)/components/LoginPromoSheet";
+import { useAppRouter } from "@/hooks/useAppRouter";
 import { useBreedingInfoStore } from "../../store/breedingInfo";
 import {
   RECENTLY_VIEWED_MAX_ITEMS,
@@ -40,8 +41,8 @@ const Header = ({
 }: HeaderProps) => {
   const isMyPet = useIsMyPet(pet.owner.userId);
   const isLoggedIn = useIsLoggedIn();
+  const router = useAppRouter();
   const [isScrolled, setIsScrolled] = useState(size === "small");
-  const [isPromoSheetOpen, setIsPromoSheetOpen] = useState(false);
 
   const { data: thumbnail } = useQuery({
     queryKey: getPetThumbnailQueryKey(pet.petId),
@@ -198,12 +199,13 @@ const Header = ({
           </div>
         </div>
 
-        <Link
-          href={`/pet/${pet.petId}/relation`}
-          onClick={(e) => {
-            if (!isLoggedIn) {
-              e.preventDefault();
-              setIsPromoSheetOpen(true);
+        <button
+          type="button"
+          onClick={() => {
+            if (isLoggedIn) {
+              router.push(`/pet/${pet.petId}/relation`);
+            } else {
+              openRelationPromoSheet();
             }
           }}
           className={cn(
@@ -217,21 +219,7 @@ const Header = ({
             className="text-blue-600"
             content="혈통 관계가 있는 펫들을 확인합니다."
           />
-        </Link>
-
-        <LoginPromoSheet
-          isOpen={isPromoSheetOpen}
-          onOpenChange={setIsPromoSheetOpen}
-          title="펫의 가족 관계를 한눈에"
-          description={
-            <>
-              <span className="font-semibold text-blue-700">부모, 동배, 자손</span>까지
-              <br />
-              <span className="font-semibold text-gray-800">펫 관계도</span> 로 혈통을 쉽게 확인할
-              수 있어요
-            </>
-          }
-        />
+        </button>
 
         <div className="flex items-center gap-1">
           <QRCode pet={pet} isScrolled={isScrolled} />

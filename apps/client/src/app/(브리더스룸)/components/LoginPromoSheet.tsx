@@ -10,7 +10,12 @@ import {
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import { isNativeApp, navigate } from "@/lib/native-bridge";
+import {
+  isNativeApp,
+  navigate,
+  showNativeLoginPromoSheet,
+  showNativeRelationPromoSheet,
+} from "@/lib/native-bridge";
 import { useRouter } from "next/navigation";
 import { overlay } from "overlay-kit";
 
@@ -28,7 +33,7 @@ const LoginPromoSheet = ({ isOpen, onOpenChange, title, description }: LoginProm
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
       <SheetContent
         side="bottom"
-        className="mx-5 mb-5 max-w-[700px] rounded-3xl px-6 pb-8 pt-6 sm:mx-auto"
+        className="mx-5 mb-5 max-w-[700px] rounded-3xl px-6 pt-6 pb-8 sm:mx-auto"
       >
         <SheetHeader className="flex items-center">
           <Image
@@ -71,6 +76,13 @@ const LoginPromoSheet = ({ isOpen, onOpenChange, title, description }: LoginProm
 };
 
 export const openLoginPromoSheet = () => {
+  // 네이티브 앱에서는 네이티브 LoginPromoSheet 사용
+  if (isNativeApp()) {
+    showNativeLoginPromoSheet();
+    return;
+  }
+
+  // 웹에서는 웹 버전 사용
   overlay.open(({ isOpen, close }) => (
     <LoginPromoSheet
       isOpen={isOpen}
@@ -78,10 +90,35 @@ export const openLoginPromoSheet = () => {
       title="내 펫을 등록해보세요"
       description={
         <>
-          <span className="text-gray-800">펫을 등록</span>하면
+          <span className="text-gray-800">개체를 등록</span>하면
           <br />
-          <span className="font-semibold text-blue-700">브리딩・혈통 인증・분양 관리</span>가
+          <span className="font-semibold text-blue-700">개체 관리・혈통 인증・분양 관리</span>가
           가능해요!
+        </>
+      }
+    />
+  ));
+};
+
+export const openRelationPromoSheet = () => {
+  // 네이티브 앱에서는 네이티브 LoginPromoSheet (relation variant) 사용
+  if (isNativeApp()) {
+    showNativeRelationPromoSheet();
+    return;
+  }
+
+  // 웹에서는 웹 버전 사용
+  overlay.open(({ isOpen, close }) => (
+    <LoginPromoSheet
+      isOpen={isOpen}
+      onOpenChange={(open) => !open && close()}
+      title="혈통 정보를 한눈에"
+      description={
+        <>
+          <span className="font-semibold text-blue-700">부모, 동배, 자손</span>까지
+          <br />
+          <span className="font-semibold text-gray-800">개체 관계도</span>로 혈통을 쉽게 확인할 수
+          있어요
         </>
       }
     />

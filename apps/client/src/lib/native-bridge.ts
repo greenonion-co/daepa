@@ -45,7 +45,8 @@ type NativeMessage =
   | { type: "SET_TOP_BAR_VISIBLE"; visible: boolean }
   | { type: "SET_PULL_TO_REFRESH"; enabled: boolean }
   | { type: "SHOW_LOADING" }
-  | { type: "HIDE_LOADING" };
+  | { type: "HIDE_LOADING" }
+  | { type: "SHOW_LOGIN_PROMO_SHEET"; variant: "register" | "relation" };
 
 /**
  * 현재 환경이 네이티브 앱 WebView인지 확인
@@ -218,4 +219,18 @@ export const showNativeLoading = (): boolean => {
  */
 export const hideNativeLoading = (): boolean => {
   return sendToNative({ type: "HIDE_LOADING" });
+};
+
+/**
+ * 네이티브 앱 로그인 프로모 시트 표시 (펫 등록 안내)
+ */
+export const showNativeLoginPromoSheet = (): boolean => {
+  return sendToNative({ type: "SHOW_LOGIN_PROMO_SHEET", variant: "register" });
+};
+
+/**
+ * 네이티브 앱 로그인 프로모 시트 표시 (펫 관계도 안내)
+ */
+export const showNativeRelationPromoSheet = (): boolean => {
+  return sendToNative({ type: "SHOW_LOGIN_PROMO_SHEET", variant: "relation" });
 };

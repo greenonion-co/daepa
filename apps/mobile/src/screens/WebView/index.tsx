@@ -33,6 +33,7 @@ import LottieLoading from '@/components/common/LottieLoading';
 import TopBar from '@/components/common/TopBar';
 import Toast from '@/components/common/Toast';
 import Loading from '@/components/common/Loading';
+import LoginPromoSheet from '@/components/common/LoginPromoSheet';
 import {
   WebViewMessage,
   WebViewRouteParams,
@@ -61,6 +62,9 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [topBarVisible, setTopBarVisible] = useState(true); // TopBar 표시 여부
+  const [loginPromoSheetVariant, setLoginPromoSheetVariant] = useState<
+    'register' | 'relation' | null
+  >(null);
   const insets = useSafeAreaInsets();
 
   const accessToken = useAuthStore(state => state.accessToken);
@@ -250,6 +254,9 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
           break;
         case 'HIDE_LOADING':
           Loading.close();
+          break;
+        case 'SHOW_LOGIN_PROMO_SHEET':
+          setLoginPromoSheetVariant(message.variant);
           break;
         default:
           break;
@@ -515,6 +522,11 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
           </TouchableOpacity>
         </View>
       )}
+      <LoginPromoSheet
+        visible={loginPromoSheetVariant !== null}
+        variant={loginPromoSheetVariant ?? 'register'}
+        onClose={() => setLoginPromoSheetVariant(null)}
+      />
     </View>
   );
 };
