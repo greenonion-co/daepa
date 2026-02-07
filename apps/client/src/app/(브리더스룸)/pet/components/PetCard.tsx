@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronRight, Lock } from "lucide-react";
+import { Lock } from "lucide-react";
 import { PetDto, PetDtoGrowth, PetAdoptionDtoStatus } from "@repo/api-client";
 import { cn } from "@/lib/utils";
 import PetThumbnail from "@/components/common/PetThumbnail";
@@ -12,21 +12,20 @@ import { getSexIcon } from "@/lib/sex-icon";
 
 interface PetCardProps {
   pet: PetDto;
+  onCardClick: (pet: PetDto) => void;
 }
 
-export default function PetCard({ pet }: PetCardProps) {
+export default function PetCard({ pet, onCardClick }: PetCardProps) {
   const router = useAppRouter();
-
   const adoptionStatus = pet.adoption?.status;
   const adoptionLabel = adoptionStatus ? SALE_STATUS_KOREAN_INFO[adoptionStatus] : null;
   const sexLabel = getSexIcon(pet.sex, { size: "xs" });
 
-  const handleCardClick = () => {
-    router.push(`/pet/${pet.petId}`);
-  };
-
   return (
-    <div className="relative overflow-hidden rounded-lg bg-white transition-all duration-150 hover:shadow-md active:scale-[0.98] dark:bg-[#18171C] dark:active:bg-gray-800">
+    <div
+      className="relative cursor-pointer overflow-hidden rounded-lg bg-white transition-all duration-150 hover:shadow-md active:scale-[0.98] dark:bg-[#18171C] dark:active:bg-gray-800"
+      onClick={() => onCardClick(pet)}
+    >
       <div className="flex gap-2 p-2">
         {/* 이미지 + 성별 */}
         <div className="flex shrink-0 flex-col items-center gap-0.5 self-center">
@@ -142,12 +141,6 @@ export default function PetCard({ pet }: PetCardProps) {
           </div>
         </div>
 
-        <div
-          onClick={handleCardClick}
-          className="flex shrink-0 items-center self-center rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-gray-200 dark:text-gray-500 dark:hover:bg-gray-700"
-        >
-          <ChevronRight className={cn("h-4 w-4")} />
-        </div>
       </div>
     </div>
   );
