@@ -295,6 +295,18 @@ async function main() {
           );
         }
 
+        if (fatherId && fatherId === petId) {
+          throw new Error(`부개체가 자식과 동일합니다: ${data.name}`);
+        }
+        if (motherId && motherId === petId) {
+          throw new Error(`모개체가 자식과 동일합니다: ${data.name}`);
+        }
+        if (fatherId && motherId && fatherId === motherId) {
+          throw new Error(
+            `부모가 동일한 개체입니다: ${data.fatherName ?? 'N/A'}`,
+          );
+        }
+
         // 3. 이미 pet_relations가 존재하는지 확인
         if (await isPetRelationExists(queryRunner, petId)) {
           console.log(
