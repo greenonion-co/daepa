@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useCallback } from "react";
 import { PetDto } from "@repo/api-client";
 import PetCard from "./PetCard";
 import Loading from "@/components/common/Loading";
-import { useIsMobile } from "@/hooks/useMobile";
+import React, { useState, useCallback } from "react";
 import { useAppRouter } from "@/hooks/useAppRouter";
+import { useIsMobile } from "@/hooks/useMobile";
 import PetDetailModal from "../[petId]/components/PetDetailModal";
 
 interface PetCardListProps {
@@ -37,6 +37,7 @@ export default function PetCardList({
     },
     [isMobile, router],
   );
+
   if (isEmpty) {
     return (
       <div className="flex min-h-[300px] flex-col items-center justify-center text-gray-500 dark:text-gray-400">
@@ -50,7 +51,7 @@ export default function PetCardList({
     <>
       <div className="space-y-2 px-2 pb-20">
         {/* 카드 그리드 */}
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(min(360px,100%),1fr))] gap-2">
           {data.map((pet) => (
             <PetCard key={pet.petId} pet={pet} onCardClick={handleCardClick} />
           ))}

@@ -13,12 +13,35 @@ import { CommonActions, useNavigation } from '@react-navigation/native';
 
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 
+type PromoSheetVariant = 'register' | 'relation';
+
 interface LoginPromoSheetProps {
   visible: boolean;
+  variant?: PromoSheetVariant;
   onClose: () => void;
 }
 
-const LoginPromoSheet = ({ visible, onClose }: LoginPromoSheetProps) => {
+const VARIANT_CONTENT: Record<
+  PromoSheetVariant,
+  { title: string; description: string; highlight: string }
+> = {
+  register: {
+    title: '내 펫을 등록해보세요',
+    description: '개체를 등록하고\n',
+    highlight: '개체 관리・혈통 인증・분양 관리',
+  },
+  relation: {
+    title: '혈통 정보를 한눈에',
+    description: '',
+    highlight: '부모, 동배, 자손',
+  },
+};
+
+const LoginPromoSheet = ({
+  visible,
+  variant = 'register',
+  onClose,
+}: LoginPromoSheetProps) => {
   const navigation = useNavigation();
   const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
   const backdropAnim = useRef(new Animated.Value(0)).current;
@@ -135,15 +158,28 @@ const LoginPromoSheet = ({ visible, onClose }: LoginPromoSheetProps) => {
           </View>
 
           {/* 제목 */}
-          <Text style={styles.title}>내 펫을 등록해보세요</Text>
+          <Text style={styles.title}>{VARIANT_CONTENT[variant].title}</Text>
 
           {/* 설명 */}
           <Text style={styles.description}>
-            펫을 등록하고{'\n'}
-            <Text style={styles.descriptionHighlight}>
-              브리딩・혈통 인증・분양 관리
-            </Text>
-            {'\n'}기능을 이용해보세요!
+            {variant === 'register' ? (
+              <>
+                개체를 등록하고{'\n'}
+                <Text style={styles.descriptionHighlight}>
+                  {VARIANT_CONTENT[variant].highlight}
+                </Text>
+                {'\n'}기능을 이용해보세요!
+              </>
+            ) : (
+              <>
+                <Text style={styles.descriptionHighlight}>
+                  {VARIANT_CONTENT[variant].highlight}
+                </Text>
+                까지{'\n'}
+                <Text style={styles.descriptionDark}>개체 관계도</Text>로 혈통을
+                쉽게 확인할 수 있어요
+              </>
+            )}
           </Text>
 
           {/* 시작하기 버튼 */}
@@ -217,6 +253,10 @@ const styles = StyleSheet.create({
   descriptionHighlight: {
     fontWeight: '600',
     color: '#1d4ed8',
+  },
+  descriptionDark: {
+    fontWeight: '600',
+    color: '#1f2937',
   },
   primaryButton: {
     width: '100%',

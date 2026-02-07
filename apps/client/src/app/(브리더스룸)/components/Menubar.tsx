@@ -25,17 +25,6 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
   const isFeedPage = pathname === "/";
   const isPetListPage = pathname === "/pet";
 
-  // 검색 입력 컴포넌트
-  const SearchInputBox = () => (
-    <div className="w-44">
-      <SearchInput
-        placeholder="개체 이름 검색"
-        value={searchKeyword}
-        onKeyDown={(value) => setSearchKeyword(value)}
-      />
-    </div>
-  );
-
   // 알림 아이콘 컴포넌트
   const NotificationIcon = () => (
     <Link href="/notifications" className="relative">
@@ -117,7 +106,15 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
 
       {/* 우측: 검색 + 알림 + 설정 */}
       <div className="flex items-center gap-2">
-        {!isMobile && (isFeedPage || isPetListPage) && <SearchInputBox />}
+        {!isMobile && (isFeedPage || isPetListPage) && (
+          <div className="w-44">
+            <SearchInput
+              placeholder="개체 이름 검색"
+              value={searchKeyword}
+              onChange={setSearchKeyword}
+            />
+          </div>
+        )}
         {isMobile && (
           <>
             <NotificationIcon />
