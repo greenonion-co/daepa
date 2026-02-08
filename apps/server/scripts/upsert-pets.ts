@@ -283,7 +283,21 @@ async function main() {
   const queryRunner = dataSource.createQueryRunner();
   await queryRunner.connect();
 
-  // 0. 에러 수집 배열
+  // 0. OWNER_ID 사용자 존재 검증
+  const [owner] = await queryRunner.query(
+    'SELECT 1 FROM users WHERE user_id = ? LIMIT 1',
+    [OWNER_ID],
+  );
+  if (!owner) {
+    console.error(
+      `ERROR: OWNER_ID(${OWNER_ID})에 해당하는 사용자가 존재하지 않습니다.`,
+    );
+    await queryRunner.release();
+    await dataSource.destroy();
+    process.exit(1);
+  }
+
+  // 에러 수집 배열
   const errors: ErrorInfo[] = [];
   let successCount = 0;
 
