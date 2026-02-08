@@ -28,6 +28,9 @@ import { CommonResponseDto } from 'src/common/response.dto';
 import { OAUTH_PROVIDER } from './auth.constants';
 import { ConfigService } from '@nestjs/config';
 
+const COOKIE_DOMAIN =
+  process.env.NODE_ENV === 'production' ? '.breedy.kr' : undefined;
+
 @Controller('/auth')
 export class AuthController {
   constructor(
@@ -66,6 +69,7 @@ export class AuthController {
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge: 180 * 24 * 60 * 60 * 1000,
+      domain: COOKIE_DOMAIN,
     });
 
     const user = await this.userService.findOne({
@@ -122,6 +126,7 @@ export class AuthController {
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge: 180 * 24 * 60 * 60 * 1000,
+      domain: COOKIE_DOMAIN,
     });
 
     let user = await this.userService.findOne({
@@ -189,6 +194,7 @@ export class AuthController {
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge: 180 * 24 * 60 * 60 * 1000,
+      domain: COOKIE_DOMAIN,
     });
 
     const user = await this.userService.findOne({
@@ -232,6 +238,7 @@ export class AuthController {
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge: 180 * 24 * 60 * 60 * 1000, // 180일
+      domain: COOKIE_DOMAIN,
     });
 
     // URL 파라미터로도 토큰 전달 (모바일 브라우저 cross-site 쿠키 차단 대응)
@@ -268,6 +275,7 @@ export class AuthController {
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge: 180 * 24 * 60 * 60 * 1000, // 180일
+      domain: COOKIE_DOMAIN,
     });
 
     // URL 파라미터로도 토큰 전달 (모바일 브라우저 cross-site 쿠키 차단 대응)
@@ -305,6 +313,7 @@ export class AuthController {
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
         maxAge: 180 * 24 * 60 * 60 * 1000, // 180일
+        domain: COOKIE_DOMAIN,
       });
     }
 
@@ -333,6 +342,7 @@ export class AuthController {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
+      domain: COOKIE_DOMAIN,
     });
 
     return {
@@ -357,6 +367,7 @@ export class AuthController {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
+      domain: COOKIE_DOMAIN,
     });
 
     return {
