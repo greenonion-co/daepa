@@ -9,8 +9,9 @@ import {
   brPetControllerFindAll,
   PetAdoptionDtoMethod,
   UserProfilePublicDto,
+  PetDto,
 } from "@repo/api-client";
-import { AxiosError } from "axios";
+import { AxiosError, AxiosResponse } from "axios";
 import FormItem from "./FormItem";
 import SingleSelect from "@/app/(브리더스룸)/components/selector/SingleSelect";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -24,7 +25,7 @@ import UserList from "@/app/(브리더스룸)/components/UserList";
 import { overlay } from "overlay-kit";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "@/lib/toast";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { InfiniteData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useIsMyPet } from "@/hooks/useIsMyPet";
 import EditActionButtons from "./EditActionButtons";
 import { useRouter } from "next/navigation";
@@ -217,11 +218,25 @@ const AdoptionInfoContent = ({
 
       await updateAdoption({ adoptionId, data: changedFields });
 
-      // 펫 목록 쿼리 갱신
-      await queryClient.invalidateQueries({ queryKey: [brPetControllerFindAll.name] });
-
-      // 판매완료인 경우, 더 이상 본인 펫이 아님
+      // 판매완료인 경우, 펫 목록 캐시에서 해당 펫 제거 (소유권 이전)
       if (adoptionData.status === PetAdoptionDtoStatus.SOLD) {
+        queryClient.setQueriesData<InfiniteData<AxiosResponse<{ data: PetDto[]; meta: unknown }>>>(
+          { queryKey: [brPetControllerFindAll.name] },
+          (oldData) => {
+            if (!oldData) return oldData;
+            return {
+              ...oldData,
+              pages: oldData.pages.map((page) => ({
+                ...page,
+                data: {
+                  ...page.data,
+                  data: page.data.data.filter((p) => p.petId !== petId),
+                },
+              })),
+            };
+          },
+        );
+
         toast.success("분양이 성공적으로 완료되었습니다!");
         // 소유권 이전으로 더 이상 수정 불가 (isProcessing 유지하여 버튼 비활성화)
         if (isMobile) {
@@ -231,6 +246,9 @@ const AdoptionInfoContent = ({
         }
         return;
       }
+
+      // 펫 목록 쿼리를 stale 처리 (백그라운드 갱신, await 하지 않아 저장 동작 차단 없음)
+      queryClient.invalidateQueries({ queryKey: [brPetControllerFindAll.name] });
 
       setIsEditMode(false);
       toast.success("분양 정보가 성공적으로 업데이트되었습니다.");

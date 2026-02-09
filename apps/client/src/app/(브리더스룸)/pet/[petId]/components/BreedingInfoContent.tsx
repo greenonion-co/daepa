@@ -115,8 +115,10 @@ const BreedingInfoContent = ({ petId, ownerId, initialPet }: BreedingInfoContent
 
       await mutateUpdatePet(changedFields);
       await refetch();
-      // 펫 목록 쿼리 갱신
-      await queryClient.invalidateQueries({ queryKey: [brPetControllerFindAll.name] });
+
+      // 펫 목록 쿼리를 stale 처리 (백그라운드 갱신, await 하지 않아 저장 동작 차단 없음)
+      queryClient.invalidateQueries({ queryKey: [brPetControllerFindAll.name] });
+
       toast.success("펫 정보 수정이 완료되었습니다.");
       setIsEditMode(false);
     } catch (error) {

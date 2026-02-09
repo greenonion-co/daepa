@@ -79,7 +79,8 @@ const PedigreeInfoContent = ({
         });
         await refetch();
 
-        await queryClient.invalidateQueries({ queryKey: [brPetControllerFindAll.name] });
+        // 펫 목록 쿼리를 stale 처리 (백그라운드 갱신, await 하지 않아 저장 동작 차단 없음)
+        queryClient.invalidateQueries({ queryKey: [brPetControllerFindAll.name] });
 
         toast.success(
           value.isMyPet ? "부모 등록이 완료되었습니다." : "부모 요청이 전송되었습니다.",
@@ -103,7 +104,10 @@ const PedigreeInfoContent = ({
       try {
         await mutateUnlinkParent({ role: label });
         await refetch();
+
+        // 펫 목록 쿼리를 stale 처리 (백그라운드 갱신, await 하지 않아 저장 동작 차단 없음)
         queryClient.invalidateQueries({ queryKey: [brPetControllerFindAll.name] });
+
         toast.success("부모 연동이 해제되었습니다.");
       } catch (error) {
         if (error instanceof AxiosError) {
