@@ -18,7 +18,7 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 
 interface ParentSearchProps {
-  sex?: PetDtoSex;
+  sex: PetDtoSex;
   species?: PetDtoSpecies;
   isOpen: boolean;
   onlySelect?: boolean;
@@ -31,7 +31,7 @@ interface ParentSearchProps {
 }
 
 const ParentSearchSelector = ({
-  sex = "F",
+  sex,
   species,
   isOpen,
   onlySelect = false,
@@ -58,6 +58,7 @@ const ParentSearchSelector = ({
         filterType: allowMyPetOnly ? PetListType.MY : petListType,
         keyword: searchQuery ?? "",
         species: species ?? undefined,
+        sex: sex ? [sex] : undefined,
       }),
     initialPageParam: 1,
     getNextPageParam: (lastPage) => {
@@ -70,8 +71,7 @@ const ParentSearchSelector = ({
       data.pages
         .flatMap((page) => page.data.data)
         .filter(
-          (pet) =>
-            (!excludePetId || pet.petId !== excludePetId) && pet.sex?.toString() === sex,
+          (pet) => (!excludePetId || pet.petId !== excludePetId) && pet.sex?.toString() === sex,
         ),
   });
 
