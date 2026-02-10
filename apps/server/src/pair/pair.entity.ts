@@ -31,6 +31,12 @@ export class PairEntity {
   @Column({ type: 'varchar', length: 500, nullable: true })
   desc: string | null; // 소개말
 
+  @Column({ default: false })
+  isDeleted: boolean;
+
+  @Column({ type: 'timestamp', nullable: true })
+  deletedAt: Date | null;
+
   @CreateDateColumn()
   createdAt: Date;
 

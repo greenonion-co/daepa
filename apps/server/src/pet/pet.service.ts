@@ -299,8 +299,8 @@ export class PetService {
       if (isSexChanged) {
         const pairExists = await entityManager.exists(PairEntity, {
           where: [
-            { ownerId: existingPet.ownerId, fatherId: petId },
-            { ownerId: existingPet.ownerId, motherId: petId },
+            { ownerId: existingPet.ownerId, fatherId: petId, isDeleted: false },
+            { ownerId: existingPet.ownerId, motherId: petId, isDeleted: false },
           ],
         });
         if (pairExists) {

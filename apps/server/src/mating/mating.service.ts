@@ -29,7 +29,7 @@ export class MatingService {
         throw new BadRequestException('최소 하나의 부모 펫을 입력해야 합니다.');
       }
 
-      // 페어가 존재하는지 확인하거나 생성
+      // 페어가 존재하는지 확인하거나 생성 (삭제된 페어 포함하여 조회)
       let pair = await entityManager.findOne(PairEntity, {
         where: {
           ownerId: userId,
@@ -46,6 +46,17 @@ export class MatingService {
           species: createMatingDto.species,
         });
         pair = await entityManager.save(PairEntity, pair);
+      } else if (pair.isDeleted) {
+        // 삭제된 페어 재활성화
+        await entityManager.update(
+          PairEntity,
+          { id: pair.id },
+          {
+            isDeleted: false,
+            deletedAt: null,
+            species: createMatingDto.species,
+          },
+        );
       }
 
       // 동일한 페어의 동일한 날짜에 메이팅이 있는지 확인
@@ -83,14 +94,13 @@ export class MatingService {
         throw new BadRequestException('메이팅 정보를 찾을 수 없습니다.');
       }
 
-      // 페어 정보 업데이트 또는 새 페어 생성
+      // 페어 정보 업데이트 또는 새 페어 생성 (삭제된 페어 포함하여 조회)
       let pair = await entityManager.findOne(PairEntity, {
         where: {
           ownerId: userId,
           fatherId: updateMatingDto.fatherId,
           motherId: updateMatingDto.motherId,
         },
-        select: ['id'],
       });
 
       if (!pair) {
@@ -100,6 +110,16 @@ export class MatingService {
           motherId: updateMatingDto.motherId,
         });
         pair = await entityManager.save(PairEntity, pair);
+      } else if (pair.isDeleted) {
+        // 삭제된 페어 재활성화
+        await entityManager.update(
+          PairEntity,
+          { id: pair.id },
+          {
+            isDeleted: false,
+            deletedAt: null,
+          },
+        );
       }
 
       const date = new Date(updateMatingDto.matingDate);

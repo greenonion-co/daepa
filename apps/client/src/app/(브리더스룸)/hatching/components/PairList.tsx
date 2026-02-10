@@ -2,11 +2,12 @@ import Loading from "@/components/common/Loading";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   matingControllerCreateMating,
+  pairControllerDeletePair,
   pairControllerGetPairList,
   PetDtoSpecies,
   UpdatePairDto,
 } from "@repo/api-client";
-import { useInfiniteQuery, useMutation } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { HelpCircle, Plus } from "lucide-react";
 import { toast } from "@/lib/toast";
 import { memo, useEffect, useState } from "react";
@@ -24,6 +25,7 @@ import PairCard from "./PairCard";
 import { overlay } from "overlay-kit";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import UpdatePairModal from "./UpdatePairModal";
+import ConfirmDialog from "../../components/Form/Dialog";
 import Image from "next/image";
 import { CalendarEventDetail, EGG_STATUS } from "./PairMiniCalendar";
 import { usePairCardTutorial } from "./PairCardTutorial";
@@ -33,6 +35,7 @@ export interface updatePairProps extends UpdatePairDto {
 }
 
 const PairList = memo(() => {
+  const queryClient = useQueryClient();
   const { ref, inView } = useInView();
   const { species, father, mother, startDate, endDate, eggStatus } = useMatingFilterStore();
   const [isOpen, setIsOpen] = useState(false);
@@ -104,6 +107,37 @@ const PairList = memo(() => {
   const { mutateAsync: createMating } = useMutation({
     mutationFn: matingControllerCreateMating,
   });
+
+  // 페어 삭제
+  const { mutateAsync: deletePair } = useMutation({
+    mutationFn: (pairId: number) => pairControllerDeletePair(pairId),
+  });
+
+  const handleDeletePair = (pairId: number) => {
+    overlay.open(({ isOpen, close, unmount }) => (
+      <ConfirmDialog
+        isOpen={isOpen}
+        onCloseAction={close}
+        onConfirmAction={async () => {
+          try {
+            await deletePair(pairId);
+            toast.success("페어가 삭제되었습니다.");
+            close();
+            queryClient.invalidateQueries({ queryKey: [pairControllerGetPairList.name] });
+          } catch (error) {
+            if (error instanceof AxiosError) {
+              toast.error(error.response?.data?.message ?? "페어 삭제에 실패했습니다.");
+            } else {
+              toast.error("페어 삭제에 실패했습니다.");
+            }
+          }
+        }}
+        onExit={unmount}
+        title="페어 삭제"
+        description={"정말로 이 페어를 삭제하시겠습니까?\n삭제 후 복구할 수 없습니다."}
+      />
+    ));
+  };
 
   const handleClickUpdateDesc = (pair: updatePairProps) => {
     if (!pair?.pairId) return toast.error("오류가 발생했습니다. 잠시후에 다시 시도해주세요.");
@@ -299,6 +333,7 @@ const PairList = memo(() => {
                   />
                 ));
               }}
+              onDelete={() => handleDeletePair(pair.pairId)}
               showTutorial={index === 0 && showTutorial}
               onCloseTutorial={closeTutorial}
             />

@@ -203,6 +203,7 @@ export class StatisticsService {
     const query = this.dataSource
       .createQueryBuilder(PairEntity, 'pair')
       .where('pair.ownerId = :userId', { userId })
+      .andWhere('pair.isDeleted = false')
       .select(['pair.id']);
 
     if (species) {

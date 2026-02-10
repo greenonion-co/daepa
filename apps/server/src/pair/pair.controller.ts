@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   ParseIntPipe,
@@ -76,6 +77,23 @@ export class PairController {
     return {
       success: true,
       message: '메이팅 정보 수정이 완료되었습니다.',
+    };
+  }
+
+  @Delete(':pairId')
+  @ApiResponse({
+    status: 200,
+    description: '페어 삭제가 완료되었습니다.',
+    type: CommonResponseDto,
+  })
+  async deletePair(
+    @Param('pairId', ParseIntPipe) pairId: number,
+    @JwtUser() token: JwtUserPayload,
+  ): Promise<CommonResponseDto> {
+    await this.pairService.deletePair(token.userId, pairId);
+    return {
+      success: true,
+      message: '페어 삭제가 완료되었습니다.',
     };
   }
 }
