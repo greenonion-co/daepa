@@ -1,5 +1,5 @@
 import { MatingByParentsDto, PetDtoEggStatus } from "@repo/api-client";
-import { StickyNote } from "lucide-react";
+import { StickyNote, Trash2 } from "lucide-react";
 import { useRef } from "react";
 
 import { updatePairProps } from "./PairList";
@@ -15,6 +15,7 @@ interface PairCardProps {
   onDateClick?: (eventData: CalendarEventDetail) => void;
   onAddMating?: (date: string) => void;
   onAddLaying?: (date: string) => void;
+  onDelete?: () => void;
   showTutorial?: boolean;
   onCloseTutorial?: () => void;
 }
@@ -26,6 +27,7 @@ const PairCard = ({
   onDateClick,
   onAddMating,
   onAddLaying,
+  onDelete,
   showTutorial,
   onCloseTutorial,
 }: PairCardProps) => {
@@ -69,7 +71,7 @@ const PairCard = ({
   return (
     <div
       ref={cardRef}
-      className="group relative flex flex-col rounded-2xl border border-gray-200/50 bg-white p-2 shadow-lg transition-all hover:border-gray-300 hover:bg-gray-100/20 hover:shadow-xl dark:border-none dark:border-gray-700 dark:bg-[#18171C]"
+      className="group relative flex flex-col rounded-2xl border border-gray-200/50 bg-white p-4 shadow-lg transition-all hover:border-gray-300 hover:bg-gray-100/20 hover:shadow-xl dark:border-none dark:border-gray-700 dark:bg-[#18171C]"
     >
       {/* 튜토리얼 오버레이 */}
       {showTutorial && onCloseTutorial && (
@@ -93,6 +95,7 @@ const PairCard = ({
             onClick();
             onDateClick?.(eventData);
           }}
+          onDetailClick={onClick}
           onAddMating={onAddMating}
           onAddLaying={onAddLaying}
         />
@@ -148,6 +151,21 @@ const PairCard = ({
           </div>
         </div>
       </div>
+
+      {/* 삭제 버튼 */}
+      {onDelete && (
+        <button
+          type="button"
+          aria-label="페어 삭제"
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete();
+          }}
+          className="absolute right-1/2 bottom-0 z-10 flex h-6 w-6 translate-x-1/2 translate-y-1/2 items-center justify-center rounded-full bg-red-100 text-red-400 transition-all hover:bg-red-200 hover:text-red-600 dark:bg-red-900/50 dark:text-red-400 dark:hover:bg-red-900/70 dark:hover:text-red-300"
+        >
+          <Trash2 className="h-3.5 w-3.5" />
+        </button>
+      )}
     </div>
   );
 };

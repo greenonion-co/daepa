@@ -3,6 +3,7 @@ import { SIDEBAR_ITEMS } from "../constants";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect } from "react";
 import { Mail, Settings } from "lucide-react";
 import { useSearchKeywordStore } from "../store/searchKeyword";
 import { useIsMobile } from "@/hooks/useMobile";
@@ -17,6 +18,11 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
   const pathname = usePathname();
   const isMobile = useIsMobile();
   const { searchKeyword, setSearchKeyword } = useSearchKeywordStore();
+
+  // 페이지 이동 시 검색어 초기화
+  useEffect(() => {
+    setSearchKeyword("");
+  }, [pathname, setSearchKeyword]);
 
   // 상태 플래그
   const isNative = isNativeApp();
@@ -133,7 +139,7 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
     <div
       className={cn(
         "dark:bg-background flex h-[52px] items-center justify-between px-2",
-        !isPetDetailPage && "bg-background sticky top-0 left-0 z-50 w-full",
+        !isPetDetailPage && "bg-background sticky top-0 left-0 z-10 w-full",
         isNative && "pr-4",
       )}
     >

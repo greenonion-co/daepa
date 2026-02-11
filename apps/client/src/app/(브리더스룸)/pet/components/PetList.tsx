@@ -104,7 +104,7 @@ export default function PetList() {
 
   return (
     <div className="min-h-screen space-y-1 bg-gray-100 dark:bg-transparent">
-      <div className="sticky top-[52px] z-40 bg-gray-100 px-2 pt-2 pb-1 dark:bg-transparent">
+      <div className="sticky top-[52px] z-[5] bg-gray-100 px-2 pt-2 pb-1 dark:bg-transparent">
         <Filters variant="light" />
       </div>
 

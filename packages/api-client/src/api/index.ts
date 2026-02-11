@@ -536,6 +536,10 @@ export const pairControllerUpdatePair = (pairId: number, updatePairDto: UpdatePa
   });
 };
 
+export const pairControllerDeletePair = (pairId: number) => {
+  return useCustomInstance<CommonResponseDto>({ url: `/api/v1/pairs/${pairId}`, method: "DELETE" });
+};
+
 /**
  * 펫 ID를 기반으로 해당 펫의 대표 이미지를 조회합니다. 이미지가 없는 경우 data가 null입니다.
  * @summary 펫 대표이미지(썸네일) 조회
@@ -781,6 +785,9 @@ export type PairControllerGetPairDetailResult = NonNullable<
 >;
 export type PairControllerUpdatePairResult = NonNullable<
   Awaited<ReturnType<typeof pairControllerUpdatePair>>
+>;
+export type PairControllerDeletePairResult = NonNullable<
+  Awaited<ReturnType<typeof pairControllerDeletePair>>
 >;
 export type PetImageControllerFindThumbnailResult = NonNullable<
   Awaited<ReturnType<typeof petImageControllerFindThumbnail>>
@@ -4187,6 +4194,14 @@ export const getPairControllerUpdatePairResponseMock = (
   ...overrideResponse,
 });
 
+export const getPairControllerDeletePairResponseMock = (
+  overrideResponse: Partial<CommonResponseDto> = {},
+): CommonResponseDto => ({
+  success: faker.datatype.boolean(),
+  message: faker.string.alpha(20),
+  ...overrideResponse,
+});
+
 export const getPetImageControllerFindThumbnailResponseMock = (
   overrideResponse: Partial<FindThumbnailResponseDto> = {},
 ): FindThumbnailResponseDto => ({
@@ -5637,6 +5652,29 @@ export const getPairControllerUpdatePairMockHandler = (
   });
 };
 
+export const getPairControllerDeletePairMockHandler = (
+  overrideResponse?:
+    | CommonResponseDto
+    | ((
+        info: Parameters<Parameters<typeof http.delete>[1]>[0],
+      ) => Promise<CommonResponseDto> | CommonResponseDto),
+) => {
+  return http.delete("*/api/v1/pairs/:pairId", async (info) => {
+    await delay(1000);
+
+    return new HttpResponse(
+      JSON.stringify(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getPairControllerDeletePairResponseMock(),
+      ),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+  });
+};
+
 export const getPetImageControllerFindThumbnailMockHandler = (
   overrideResponse?:
     | FindThumbnailResponseDto
@@ -5873,6 +5911,7 @@ export const getProjectDaepaAPIMock = () => [
   getPairControllerGetPairListMockHandler(),
   getPairControllerGetPairDetailMockHandler(),
   getPairControllerUpdatePairMockHandler(),
+  getPairControllerDeletePairMockHandler(),
   getPetImageControllerFindThumbnailMockHandler(),
   getPetImageControllerFindOneMockHandler(),
   getPetImageControllerSavePetImagesMockHandler(),

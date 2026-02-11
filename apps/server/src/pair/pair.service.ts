@@ -66,7 +66,8 @@ export class PairService {
         'matings.matingDate',
         'matings.pairId',
       ])
-      .where('pairs.ownerId = :userId', { userId });
+      .where('pairs.ownerId = :userId', { userId })
+      .andWhere('pairs.isDeleted = false');
 
     if (pageOptionsDto.species) {
       baseQb.andWhere('pairs.species = :species', {
@@ -102,6 +103,7 @@ export class PairService {
       .createQueryBuilder(PairEntity, 'pairs')
       .innerJoin(MatingEntity, 'matings', 'matings.pairId = pairs.id')
       .where('pairs.ownerId = :userId', { userId })
+      .andWhere('pairs.isDeleted = false')
       .andWhere(pageOptionsDto.species ? 'pairs.species = :species' : '1=1', {
         species: pageOptionsDto.species,
       })
@@ -403,10 +405,13 @@ export class PairService {
   ): Promise<PairDetailDto | null> {
     const queryBuilder = this.pairRepository
       .createQueryBuilder('pairs')
-      .where('pairs.id = :pairId AND pairs.ownerId = :userId', {
-        pairId,
-        userId,
-      })
+      .where(
+        'pairs.id = :pairId AND pairs.ownerId = :userId AND pairs.isDeleted = false',
+        {
+          pairId,
+          userId,
+        },
+      )
       .leftJoinAndMapMany(
         'matings',
         MatingEntity,
@@ -577,6 +582,7 @@ export class PairService {
       where: {
         id: pairId,
         ownerId: userId,
+        isDeleted: false,
       },
     });
 
@@ -589,6 +595,38 @@ export class PairService {
       { id: pairId },
       {
         desc: updatePairDto.desc,
+      },
+    );
+  }
+
+  async deletePair(userId: string, pairId: number): Promise<void> {
+    const pair = await this.pairRepository.findOne({
+      where: {
+        id: pairId,
+        ownerId: userId,
+        isDeleted: false,
+      },
+    });
+
+    if (!pair) {
+      throw new BadRequestException('페어 정보를 찾을 수 없습니다.');
+    }
+
+    const hasMating = await this.dataSource
+      .getRepository(MatingEntity)
+      .existsBy({ pairId: pair.id });
+
+    if (hasMating) {
+      throw new BadRequestException(
+        '관련된 메이팅 정보가 있어 삭제할 수 없습니다. 메이팅을 먼저 삭제해주세요.',
+      );
+    }
+
+    await this.pairRepository.update(
+      { id: pairId },
+      {
+        isDeleted: true,
+        deletedAt: new Date(),
       },
     );
   }

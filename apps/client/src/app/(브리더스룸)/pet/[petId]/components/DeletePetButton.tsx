@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { InfiniteData, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Trash2 } from "lucide-react";
 import { toast } from "@/lib/toast";
 
@@ -20,7 +20,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { brPetControllerFindAll, petControllerDeletePet } from "@repo/api-client";
+import { brPetControllerFindAll, petControllerDeletePet, PetDto } from "@repo/api-client";
+import { AxiosResponse } from "axios";
 import { useIsMobile } from "@/hooks/useMobile";
 
 interface DeletePetButtonProps {
@@ -47,7 +48,27 @@ function DeletePetButton({ petId, petName, onSuccess }: DeletePetButtonProps) {
       await mutateAsync();
       setOpen(false);
       toast.success("펫이 삭제되었습니다.");
-      queryClient.invalidateQueries({ queryKey: [brPetControllerFindAll.name] });
+
+      // 펫 목록 캐시에서 해당 펫 제거 (전체 refetch 방지)
+      queryClient.setQueriesData<
+        InfiniteData<AxiosResponse<{ data: PetDto[]; meta: { totalCount: number } }>>
+      >({ queryKey: [brPetControllerFindAll.name] }, (oldData) => {
+        if (!oldData) return oldData;
+        return {
+          ...oldData,
+          pages: oldData.pages.map((page, index) => ({
+            ...page,
+            data: {
+              ...page.data,
+              data: page.data.data.filter((p) => p.petId !== petId),
+              meta:
+                index === 0
+                  ? { ...page.data.meta, totalCount: Math.max(0, page.data.meta.totalCount - 1) }
+                  : page.data.meta,
+            },
+          })),
+        };
+      });
 
       if (isMobile) {
         router.push("/pet");
