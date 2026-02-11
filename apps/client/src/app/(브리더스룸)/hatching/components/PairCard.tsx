@@ -156,6 +156,7 @@ const PairCard = ({
       {onDelete && (
         <button
           type="button"
+          aria-label="페어 삭제"
           onClick={(e) => {
             e.stopPropagation();
             onDelete();
