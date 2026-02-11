@@ -312,8 +312,8 @@ const PairList = memo(() => {
                   setInitialLayingId(eventData.layingId ?? null);
                 }
               }}
-              onAddMating={(date) => {
-                handleAddPairClick({
+              onAddMating={async (date) => {
+                await handleAddPairClick({
                   species: pair.father?.species,
                   fatherId: pair.father?.petId,
                   motherId: pair.mother?.petId,

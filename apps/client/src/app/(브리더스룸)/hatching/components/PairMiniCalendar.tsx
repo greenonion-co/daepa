@@ -1,9 +1,9 @@
 "use client";
 
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useMemo, useState } from "react";
 import { MatingByDateDto, PetDtoEggStatus } from "@repo/api-client";
 import { DateTime } from "luxon";
-import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import { ChevronLeft, ChevronRight, Eye, Plus } from "lucide-react";
 import { cn, getIncubationDays } from "@/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
@@ -25,6 +25,7 @@ export interface CalendarEventDetail {
 interface PairMiniCalendarProps {
   matingsByDate: MatingByDateDto[];
   onDateClick?: (detail: CalendarEventDetail) => void;
+  onDetailClick?: () => void;
   onAddMating?: (date: string) => void;
   onAddLaying?: (date: string) => void;
 }
@@ -73,6 +74,7 @@ interface CalendarDayCellProps {
   isCurrentMonth: boolean;
   isToday: boolean;
   onEventClick: (event: CalendarEvent) => void;
+  onDetailClick?: () => void;
   onAddMating?: (date: string) => void;
   onAddLaying?: (date: string) => void;
 }
@@ -85,6 +87,7 @@ const CalendarDayCell = memo(function CalendarDayCell({
   isCurrentMonth,
   isToday,
   onEventClick,
+  onDetailClick,
   onAddMating,
   onAddLaying,
 }: CalendarDayCellProps) {
@@ -108,10 +111,10 @@ const CalendarDayCell = memo(function CalendarDayCell({
   const cellContent = (
     <div
       className={cn(
-        "flex h-8 w-full cursor-pointer flex-col items-center justify-center border-b border-r border-gray-100 text-[11px] dark:border-gray-700",
+        "flex h-8 w-full cursor-pointer flex-col items-center justify-center border-r border-b border-gray-100 text-[11px] dark:border-gray-700",
         !isCurrentMonth && "text-gray-200 dark:text-gray-600",
         isCurrentMonth && !hasEvent && "text-gray-800 dark:text-gray-500",
-        isToday && "font-bold ring-1 ring-inset ring-gray-400",
+        isToday && "font-bold ring-1 ring-gray-400 ring-inset",
         hasEvent && "font-[500] hover:opacity-80",
         bgClass,
       )}
@@ -154,10 +157,20 @@ const CalendarDayCell = memo(function CalendarDayCell({
         </div>
       )}
 
-      {(onAddMating || onAddLaying) &&
+      {(onDetailClick || onAddMating || onAddLaying) &&
         !eventData?.eventsByType.has(EGG_STATUS.MATING) &&
         !eventData?.eventsByType.has(EGG_STATUS.LAYING) && (
           <div className="flex flex-col gap-1 border-t border-gray-200 pt-1.5 dark:border-gray-600">
+            {onDetailClick && (
+              <button
+                type="button"
+                onClick={onDetailClick}
+                className="flex items-center gap-1.5 rounded-md px-2 py-1.5 text-left text-gray-600 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+              >
+                <Eye className="h-3 w-3" />
+                <span className="text-xs font-medium">전체 정보 보기</span>
+              </button>
+            )}
             {onAddMating && (
               <button
                 type="button"
@@ -215,6 +228,7 @@ const CalendarDayCell = memo(function CalendarDayCell({
 const PairMiniCalendar = ({
   matingsByDate,
   onDateClick,
+  onDetailClick,
   onAddMating,
   onAddLaying,
 }: PairMiniCalendarProps) => {
@@ -319,15 +333,6 @@ const PairMiniCalendar = ({
 
   // 현재 표시할 월 (마지막 달부터 시작)
   const [currentMonth, setCurrentMonth] = useState<DateTime>(DateTime.now().startOf("month"));
-  const isInitialized = useRef(false);
-
-  // dateRange가 계산되면 마지막 달로 이동
-  useEffect(() => {
-    if (dateRange?.end && !isInitialized.current) {
-      setCurrentMonth(dateRange.end.startOf("month"));
-      isInitialized.current = true;
-    }
-  }, [dateRange?.end]);
 
   // 현재 월의 달력 데이터 생성
   const calendarDays = useMemo(() => {
@@ -459,6 +464,7 @@ const PairMiniCalendar = ({
               isCurrentMonth={isCurrentMonth}
               isToday={isToday}
               onEventClick={handleEventClick}
+              onDetailClick={onDetailClick}
               onAddMating={onAddMating}
               onAddLaying={onAddLaying}
             />

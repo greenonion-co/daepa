@@ -95,6 +95,7 @@ const PairCard = ({
             onClick();
             onDateClick?.(eventData);
           }}
+          onDetailClick={onClick}
           onAddMating={onAddMating}
           onAddLaying={onAddLaying}
         />
