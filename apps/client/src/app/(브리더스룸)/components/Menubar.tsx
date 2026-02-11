@@ -3,6 +3,7 @@ import { SIDEBAR_ITEMS } from "../constants";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect } from "react";
 import { Mail, Settings } from "lucide-react";
 import { useSearchKeywordStore } from "../store/searchKeyword";
 import { useIsMobile } from "@/hooks/useMobile";
@@ -17,6 +18,11 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
   const pathname = usePathname();
   const isMobile = useIsMobile();
   const { searchKeyword, setSearchKeyword } = useSearchKeywordStore();
+
+  // 페이지 이동 시 검색어 초기화
+  useEffect(() => {
+    setSearchKeyword("");
+  }, [pathname, setSearchKeyword]);
 
   // 상태 플래그
   const isNative = isNativeApp();
