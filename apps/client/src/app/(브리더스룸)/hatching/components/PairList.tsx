@@ -123,6 +123,10 @@ const PairList = memo(() => {
             await deletePair(pairId);
             toast.success("페어가 삭제되었습니다.");
             close();
+            setIsOpen(false);
+            setSelectedPairIndex(null);
+            setInitialMatingId(null);
+            setInitialLayingId(null);
             queryClient.invalidateQueries({ queryKey: [pairControllerGetPairList.name] });
           } catch (error) {
             if (error instanceof AxiosError) {
