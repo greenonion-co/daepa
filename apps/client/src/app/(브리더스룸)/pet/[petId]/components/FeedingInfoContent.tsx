@@ -71,12 +71,12 @@ const CalendarDayCell = memo(function CalendarDayCell({
         isToday && "font-bold ring-1 ring-gray-400 ring-inset",
         hasFed &&
           !isFuture &&
-          "bg-emerald-200 font-[500] text-emerald-800 dark:bg-emerald-200 dark:text-emerald-800",
+          "bg-blue-200 font-[500] text-blue-800 dark:bg-blue-200 dark:text-blue-800",
         isClickable && "cursor-pointer hover:opacity-80",
       )}
     >
       <span>{day.day}</span>
-      {hasFed && !isFuture && <div className="h-1 w-1 rounded-full bg-emerald-600" />}
+      {hasFed && !isFuture && <div className="h-1 w-1 rounded-full bg-blue-600" />}
     </div>
   );
 });
@@ -201,7 +201,7 @@ function FeedingModal({ isOpen, onClose, petId, date, feeding, onSuccess }: Feed
               onChange={(e) => setFood(e.target.value)}
               placeholder="예: 귀뚜라미, 밀웜"
               maxLength={200}
-              className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:border-emerald-400 dark:border-gray-700 dark:bg-neutral-800 dark:text-gray-200"
+              className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:border-blue-400 dark:border-gray-700 dark:bg-neutral-800 dark:text-gray-200"
             />
           </div>
 
@@ -214,7 +214,7 @@ function FeedingModal({ isOpen, onClose, petId, date, feeding, onSuccess }: Feed
               placeholder="예: 1.5"
               step="0.1"
               min="0"
-              className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:border-emerald-400 dark:border-gray-700 dark:bg-neutral-800 dark:text-gray-200"
+              className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:border-blue-400 dark:border-gray-700 dark:bg-neutral-800 dark:text-gray-200"
             />
           </div>
 
@@ -226,7 +226,7 @@ function FeedingModal({ isOpen, onClose, petId, date, feeding, onSuccess }: Feed
               placeholder="메모를 입력하세요"
               maxLength={500}
               rows={2}
-              className="resize-none rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:border-emerald-400 dark:border-gray-700 dark:bg-neutral-800 dark:text-gray-200"
+              className="resize-none rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:border-blue-400 dark:border-gray-700 dark:bg-neutral-800 dark:text-gray-200"
             />
           </div>
 
@@ -248,7 +248,7 @@ function FeedingModal({ isOpen, onClose, petId, date, feeding, onSuccess }: Feed
               className={cn(
                 "h-10 cursor-pointer rounded-lg font-bold",
                 isEdit ? "flex-1" : "flex-1",
-                "bg-emerald-600 text-white hover:bg-emerald-700 dark:bg-emerald-700 dark:hover:bg-emerald-600",
+                "bg-blue-500 text-white hover:bg-blue-600 dark:bg-blue-500 dark:hover:bg-blue-600",
               )}
             >
               {isProcessing ? "저장 중..." : isEdit ? "수정" : "추가"}
@@ -401,7 +401,7 @@ const FeedingInfoContent = ({ petId, ownerId, initialFeedings }: FeedingInfoCont
             </span>
             {/* 범례 */}
             <div className="flex items-center gap-1 text-[10px]">
-              <div className="h-2.5 w-2.5 rounded-full bg-emerald-300" />
+              <div className="h-2.5 w-2.5 rounded-full bg-blue-300" />
               <span className="text-gray-700 dark:text-gray-400">피딩 완료</span>
             </div>
           </div>
