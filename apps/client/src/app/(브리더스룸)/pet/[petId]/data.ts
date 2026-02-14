@@ -101,7 +101,7 @@ export interface FeedingRecord {
   id: number;
   petId: string;
   feedingAt: string;
-  food?: string;
+  foods?: string[];
   amount?: number;
   memo?: string;
 }

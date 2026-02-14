@@ -99,7 +99,7 @@ export class FeedingService {
       id: entity.id,
       petId: entity.petId,
       feedingAt: String(entity.feedingAt),
-      food: entity.food,
+      foods: entity.foods ?? undefined,
       amount: entity.amount ? Number(entity.amount) : undefined,
       memo: entity.memo,
     }));

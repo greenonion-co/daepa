@@ -1,5 +1,6 @@
 import { ApiProperty, PickType } from '@nestjs/swagger';
 import {
+  IsArray,
   IsDateString,
   IsNumber,
   IsOptional,
@@ -30,13 +31,14 @@ export class FeedingBaseDto {
   feedingAt: string;
 
   @ApiProperty({
-    description: '피딩한 음식',
-    example: '귀뚜라미',
+    description: '피딩한 음식 목록',
+    example: ['귀뚜라미(생)', '판게아 인섹트'],
     required: false,
   })
-  @IsString()
+  @IsArray()
+  @IsString({ each: true })
   @IsOptional()
-  food?: string;
+  foods?: string[];
 
   @ApiProperty({
     description: '급여량',
@@ -60,7 +62,7 @@ export class FeedingBaseDto {
 export class CreateFeedingDto extends PickType(FeedingBaseDto, [
   'petId',
   'feedingAt',
-  'food',
+  'foods',
   'amount',
   'memo',
 ]) {}
@@ -76,13 +78,14 @@ export class UpdateFeedingDto {
   feedingAt?: string;
 
   @ApiProperty({
-    description: '피딩한 음식',
-    example: '귀뚜라미',
+    description: '피딩한 음식 목록',
+    example: ['귀뚜라미(생)', '판게아 인섹트'],
     required: false,
   })
-  @IsString()
+  @IsArray()
+  @IsString({ each: true })
   @IsOptional()
-  food?: string;
+  foods?: string[];
 
   @ApiProperty({
     description: '급여량',
@@ -134,7 +137,7 @@ export class FeedingDto extends PickType(FeedingBaseDto, [
   'id',
   'petId',
   'feedingAt',
-  'food',
+  'foods',
   'amount',
   'memo',
 ]) {}

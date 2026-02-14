@@ -4507,7 +4507,12 @@ export const getFeedingControllerGetListResponseMock = (
     id: faker.number.int({ min: undefined, max: undefined }),
     petId: faker.string.alpha(20),
     feedingAt: faker.string.alpha(20),
-    food: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+    foods: faker.helpers.arrayElement([
+      Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+        faker.string.alpha(20),
+      ),
+      undefined,
+    ]),
     amount: faker.helpers.arrayElement([
       faker.number.int({ min: undefined, max: undefined }),
       undefined,

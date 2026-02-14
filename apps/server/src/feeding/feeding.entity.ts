@@ -19,8 +19,8 @@ export class FeedingEntity {
   @Column({ type: 'date' })
   feedingAt: Date;
 
-  @Column({ type: 'varchar', length: 200, nullable: true })
-  food?: string;
+  @Column('json', { nullable: true })
+  foods: string[] | null;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   amount?: number;

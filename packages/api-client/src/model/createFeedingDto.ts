@@ -11,8 +11,8 @@ export interface CreateFeedingDto {
   petId: string;
   /** 피딩 날짜 */
   feedingAt: string;
-  /** 피딩한 음식 */
-  food?: string;
+  /** 피딩한 음식 목록 */
+  foods?: string[];
   /** 급여량 */
   amount?: number;
   /** 메모 */

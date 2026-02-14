@@ -18,6 +18,8 @@ import {
 import { AxiosError } from "axios";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import FormMultiSelect from "@/app/(브리더스룸)/components/FormMultiSelect";
+import { SELECTOR_CONFIGS } from "@/app/(브리더스룸)/constants";
 
 import type { FeedingRecord } from "../data";
 
@@ -95,7 +97,7 @@ interface FeedingModalProps {
 function FeedingModal({ isOpen, onClose, petId, date, feeding, onSuccess }: FeedingModalProps) {
   const isEdit = !!feeding;
 
-  const [food, setFood] = useState(feeding?.food ?? "");
+  const [foods, setFoods] = useState<string[] | undefined>(feeding?.foods ?? undefined);
   const [amount, setAmount] = useState(feeding?.amount?.toString() ?? "");
   const [feedingMemo, setFeedingMemo] = useState(feeding?.memo ?? "");
   const [isProcessing, setIsProcessing] = useState(false);
@@ -120,7 +122,7 @@ function FeedingModal({ isOpen, onClose, petId, date, feeding, onSuccess }: Feed
         await updateFeeding({
           id: feeding.id,
           dto: {
-            food: food || undefined,
+            foods: foods?.length ? foods : undefined,
             amount: amount ? Number(amount) : undefined,
             memo: feedingMemo || undefined,
           },
@@ -130,7 +132,7 @@ function FeedingModal({ isOpen, onClose, petId, date, feeding, onSuccess }: Feed
         await createFeeding({
           petId,
           feedingAt: date,
-          food: food || undefined,
+          foods: foods?.length ? foods : undefined,
           amount: amount ? Number(amount) : undefined,
           memo: feedingMemo || undefined,
         });
@@ -150,7 +152,7 @@ function FeedingModal({ isOpen, onClose, petId, date, feeding, onSuccess }: Feed
   }, [
     isEdit,
     feeding,
-    food,
+    foods,
     amount,
     feedingMemo,
     petId,
@@ -194,14 +196,14 @@ function FeedingModal({ isOpen, onClose, petId, date, feeding, onSuccess }: Feed
 
         <div className="flex flex-col gap-3">
           <div className="flex flex-col gap-1">
-            <label className="text-xs font-medium text-gray-600 dark:text-gray-400">음식</label>
-            <input
-              type="text"
-              value={food}
-              onChange={(e) => setFood(e.target.value)}
-              placeholder="예: 귀뚜라미, 밀웜"
-              maxLength={200}
-              className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:border-blue-400 dark:border-gray-700 dark:bg-neutral-800 dark:text-gray-200"
+            <label className="text-xs font-medium text-gray-600 dark:text-gray-400">먹이</label>
+            <FormMultiSelect
+              title="먹이"
+              displayMap={Object.fromEntries(
+                SELECTOR_CONFIGS.foods.selectList.map(({ key, value }) => [key, value]),
+              )}
+              initialItems={foods}
+              onSelect={(items) => setFoods(items)}
             />
           </div>
 
