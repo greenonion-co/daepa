@@ -18,12 +18,11 @@ interface NotificationHeaderProps {
 
 const NotificationHeader = ({ item, isOpen }: NotificationHeaderProps) => {
   const detailData = castDetailJson<ParentLinkDetailJson>(item.type, item?.detailJson);
-
   return (
     <div className="flex w-full items-center justify-between gap-2">
       <div className="flex items-center gap-2">
         <div className="flex flex-col gap-2">
-          <div className="h-15 w-15 relative rounded-full bg-gray-100">
+          <div className="relative h-15 w-15 rounded-full bg-gray-100">
             {detailData?.childPet?.id && (
               <PetThumbnail petId={detailData.childPet.id} maxSize={60} rounded />
             )}
@@ -41,7 +40,7 @@ const NotificationHeader = ({ item, isOpen }: NotificationHeaderProps) => {
             </div>
           )}
 
-          <span className="font-bold">{detailData?.childPet?.name}</span>
+          <span className="font-bold">{item.senderName ?? "(알 수 없음)"}</span>
           {NOTIFICATION_MESSAGE[item.type]}
           <span className="text-muted-foreground pl-1">
             {(() => {
