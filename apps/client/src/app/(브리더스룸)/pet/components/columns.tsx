@@ -26,6 +26,19 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import TooltipText from "../../components/TooltipText";
 import DeletedPetName from "../../components/DeletedPetName";
 
+const LockParentBadge = () => {
+  return (
+    <div
+      className={
+        "flex w-fit items-center gap-1 rounded-md border border-yellow-200 bg-yellow-50 px-2 py-0.5 opacity-70"
+      }
+    >
+      <Lock className="h-4 w-4 text-yellow-500 dark:text-yellow-400" />
+      <span className={"text-yellow-600 dark:text-yellow-600"}>비공개</span>
+    </div>
+  );
+};
+
 export const columns: ColumnDef<PetDto>[] = [
   {
     accessorKey: "isPublic",
@@ -207,9 +220,9 @@ export const columns: ColumnDef<PetDto>[] = [
         return (
           <Tooltip>
             <TooltipTrigger asChild>
-              <Lock className="h-5 w-5 text-gray-400 dark:text-gray-500" />
+              <LockParentBadge />
             </TooltipTrigger>
-            <TooltipContent>브리더에 의해 비공개 처리된 펫입니다</TooltipContent>
+            <TooltipContent>소유자에 의해 비공개 처리된 개체입니다</TooltipContent>
           </Tooltip>
         );
       }
@@ -256,9 +269,9 @@ export const columns: ColumnDef<PetDto>[] = [
         return (
           <Tooltip>
             <TooltipTrigger asChild>
-              <Lock className="h-5 w-5 text-gray-400 dark:text-gray-500" />
+              <LockParentBadge />
             </TooltipTrigger>
-            <TooltipContent>브리더에 의해 비공개 처리된 펫입니다</TooltipContent>
+            <TooltipContent>소유자에 의해 비공개 처리된 개체입니다</TooltipContent>
           </Tooltip>
         );
       }
