@@ -475,15 +475,6 @@ export const EGG_STATUS_KOREAN_INFO: Record<EggDetailDtoStatus, string> = {
   DEAD: "중지란",
 };
 
-export const FOOD_KOREAN_INFO: Record<string, string> = {
-  "판게아 인섹트": "판게아 인섹트",
-  "지렙 인섹트": "지렙 인섹트",
-  바이탈밀: "바이탈밀",
-  "리핀리치스 리조또": "리핀리치스 리조또",
-  귀뚜라미: "귀뚜라미",
-  냉동귀뚜라미: "냉동귀뚜라미",
-  누에: "누에",
-};
 
 export const ADOPTION_METHOD_KOREAN_INFO: Record<PetAdoptionDtoMethod, string> = {
   PICKUP: "직거래",

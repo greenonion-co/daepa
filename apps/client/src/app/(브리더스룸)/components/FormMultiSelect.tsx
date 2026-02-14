@@ -25,7 +25,7 @@ const FormMultiSelect = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const [isEntering, setIsEntering] = useState(false);
 
-  const selectList = useMemo(() => Object.keys(displayMap), [displayMap]);
+  const selectList = useMemo(() => Object.values(displayMap), [displayMap]);
 
   useEffect(() => {
     setSelectedItems(initialItems);
@@ -115,7 +115,7 @@ const FormMultiSelect = ({
       {isOpen && (
         <div
           className={cn(
-            "absolute left-0 top-[40px] z-50 w-[320px] rounded-2xl border-[1.8px] border-gray-200 bg-white p-5 shadow-lg dark:border-gray-700 dark:bg-gray-800",
+            "absolute top-[40px] left-0 z-50 w-[320px] rounded-2xl border-[1.8px] border-gray-200 bg-white p-5 shadow-lg dark:border-gray-700 dark:bg-gray-800",
             "origin-top transform transition-all duration-200 ease-out",
             isEntering
               ? "translate-y-0 scale-100 opacity-100"
@@ -127,7 +127,7 @@ const FormMultiSelect = ({
             {selectedItems?.map((item) => {
               return (
                 <div
-                  className="flex shrink-0 items-center whitespace-nowrap rounded-full bg-blue-100 px-2 py-0.5 text-[12px] text-blue-600 dark:bg-blue-900/50 dark:text-blue-400"
+                  className="flex shrink-0 items-center rounded-full bg-blue-100 px-2 py-0.5 text-[12px] whitespace-nowrap text-blue-600 dark:bg-blue-900/50 dark:text-blue-400"
                   key={item}
                 >
                   {item}

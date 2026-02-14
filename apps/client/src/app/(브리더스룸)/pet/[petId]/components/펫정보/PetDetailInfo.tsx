@@ -3,8 +3,8 @@ import FormMultiSelect from "@/app/(브리더스룸)/components/FormMultiSelect"
 import NumberField from "@/app/(브리더스룸)/components/Form/NumberField";
 import FormItem from "../FormItem";
 import {
-  FOOD_KOREAN_INFO,
   MORPH_LIST_BY_SPECIES,
+  SELECTOR_CONFIGS,
   TRAIT_LIST_BY_SPECIES,
 } from "@/app/(브리더스룸)/constants";
 import { PetDtoSpecies } from "@repo/api-client";
@@ -103,7 +103,9 @@ export const PetDetailInfo = ({ formData, isEditMode, onFieldChange }: PetDetail
           <FormMultiSelect
             disabled={!isEditMode}
             title="먹이"
-            displayMap={FOOD_KOREAN_INFO}
+            displayMap={Object.fromEntries(
+              SELECTOR_CONFIGS.foods.selectList.map(({ key, value }) => [key, value]),
+            )}
             initialItems={formData.foods}
             onSelect={(items) => onFieldChange("foods", items)}
           />
