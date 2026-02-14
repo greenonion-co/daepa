@@ -20,6 +20,7 @@ import {
   USER_NOTIFICATION_TYPE,
 } from './user_notification.constant';
 import { FcmService } from '../fcm/fcm.service';
+import { UserEntity } from '../user/user.entity';
 
 @Injectable()
 export class UserNotificationService {
@@ -129,28 +130,44 @@ export class UserNotificationService {
   async getNotificationList(
     dto: PageOptionsDto,
     userId: string,
-  ): Promise<PageDto<UserNotificationEntity>> {
-    const queryBuilder =
-      this.userNotificationRepository.createQueryBuilder('userNotification');
+  ) {
+    const baseWhere =
+      'userNotification.receiverId = :userId AND userNotification.isDeleted = :isDeleted';
+    const params = { userId, isDeleted: false };
 
-    queryBuilder
-      .where(
-        'userNotification.receiverId = :userId AND userNotification.isDeleted = :isDeleted',
-        {
-          userId,
-          isDeleted: false,
-        },
+    // COUNT 쿼리 (JOIN 불필요)
+    const countQb = this.userNotificationRepository
+      .createQueryBuilder('userNotification')
+      .where(baseWhere, params);
+
+    // 데이터 쿼리 (sender 이름 JOIN 포함)
+    const dataQb = this.userNotificationRepository
+      .createQueryBuilder('userNotification')
+      .leftJoin(
+        UserEntity,
+        'sender',
+        'sender.userId = userNotification.senderId',
       )
+      .addSelect('sender.name', 'senderName')
+      .where(baseWhere, params)
       .orderBy('userNotification.createdAt', dto.order)
       .skip(dto.skip)
       .take(dto.itemPerPage);
 
-    const totalCount = await queryBuilder.getCount();
-    const { entities } = await queryBuilder.getRawAndEntities();
+    // 병렬 실행
+    const [totalCount, { entities, raw }] = await Promise.all([
+      countQb.getCount(),
+      dataQb.getRawAndEntities(),
+    ]);
+
+    const data = entities.map((entity, i) => ({
+      ...entity,
+      senderName: raw[i]?.senderName ?? undefined,
+    }));
 
     const pageMetaDto = new PageMetaDto({ totalCount, pageOptionsDto: dto });
 
-    return new PageDto(entities, pageMetaDto);
+    return new PageDto(data, pageMetaDto);
   }
 
   async updateUserNotification(

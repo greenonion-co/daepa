@@ -27,6 +27,8 @@ export interface UserNotificationDto {
   status: UserNotificationDtoStatus;
   /** 알림 상세 정보 JSON */
   detailJson?: UserNotificationDtoDetailJson;
+  /** 알림 발신 유저 이름 */
+  senderName?: string;
   /** 알림 생성 시간 */
   createdAt: string;
   /** 알림 수정 시간 */

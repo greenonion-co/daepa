@@ -166,6 +166,15 @@ export class UserNotificationDto {
   detailJson?: DetailJson | ParentLinkDetailJson;
 
   @ApiProperty({
+    description: '알림 발신 유저 이름',
+    example: '브리더',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  senderName?: string;
+
+  @ApiProperty({
     description: '알림 생성 시간',
     example: new Date(),
   })
