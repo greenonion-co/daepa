@@ -7,7 +7,7 @@ import Header from "./Header";
 import { useIsMobile } from "@/hooks/useMobile";
 import { cn } from "@/lib/utils";
 
-type TabType = "breeding" | "adoption" | "images" | "pedigree";
+type TabType = "breeding" | "adoption" | "images" | "pedigree" | "feeding";
 
 const SMOOTH_SCROLL_DURATION_MS = 500;
 
@@ -18,6 +18,7 @@ interface PetDetailLayoutProps {
   imagesSlot: ReactNode;
   pedigreeSlot: ReactNode;
   adoptionSlot: ReactNode;
+  feedingSlot?: ReactNode;
   /** 펫 삭제 성공 시 콜백 */
   onDelete?: () => void;
 }
@@ -29,6 +30,7 @@ export default function PetDetailLayout({
   imagesSlot,
   pedigreeSlot,
   adoptionSlot,
+  feedingSlot,
   onDelete,
 }: PetDetailLayoutProps) {
   const isMyPet = useIsMyPet(pet.owner.userId);
@@ -42,6 +44,7 @@ export default function PetDetailLayout({
   const adoptionRef = useRef<HTMLDivElement>(null);
   const imagesRef = useRef<HTMLDivElement>(null);
   const pedigreeRef = useRef<HTMLDivElement>(null);
+  const feedingRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const scrollContainer = variant === "modal" ? scrollContainerRef.current : null;
@@ -61,6 +64,7 @@ export default function PetDetailLayout({
         { id: "breeding" as TabType, element: breedingRef.current },
         { id: "adoption" as TabType, element: adoptionRef.current },
         { id: "pedigree" as TabType, element: pedigreeRef.current },
+        { id: "feeding" as TabType, element: feedingRef.current },
       ];
 
       // 현재 스크롤 위치에서 가장 가까운 섹션 찾기
@@ -159,6 +163,7 @@ export default function PetDetailLayout({
     { id: "breeding", label: "개체정보", ref: breedingRef },
     ...(isMyPet ? [{ id: "adoption" as TabType, label: "분양정보", ref: adoptionRef }] : []),
     { id: "pedigree", label: "혈통정보", ref: pedigreeRef },
+    ...(isMyPet && feedingSlot ? [{ id: "feeding" as TabType, label: "피딩정보", ref: feedingRef }] : []),
   ];
 
   const content = (
@@ -211,6 +216,17 @@ export default function PetDetailLayout({
             className="flex min-h-[480px] max-w-[440px] min-w-[300px] flex-1 max-[580px]:order-3 max-[580px]:max-w-none"
           >
             {adoptionSlot}
+          </div>
+        )}
+
+        {/* 피딩 정보 */}
+        {isMyPet && feedingSlot && (
+          <div
+            ref={feedingRef}
+            data-section="feeding"
+            className="flex max-w-[440px] min-w-[300px] flex-1 max-[580px]:order-5 max-[580px]:max-w-none"
+          >
+            {feedingSlot}
           </div>
         )}
       </div>

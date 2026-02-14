@@ -14,6 +14,7 @@ import type {
   BrPetControllerGetPetsByMonthParams,
   CompleteHatchingDto,
   CreateAdoptionDto,
+  CreateFeedingDto,
   CreateInitUserInfoDto,
   CreateLayingDto,
   CreateMatingDto,
@@ -22,6 +23,7 @@ import type {
   DeletePetDto,
   DeleteUserNotificationDto,
   FcmControllerDeactivateTokenParams,
+  FeedingControllerGetListParams,
   GoogleNativeLoginRequestDto,
   KakaoNativeLoginRequestDto,
   PairControllerGetPairListParams,
@@ -38,6 +40,7 @@ import type {
   TestPushNotificationDto,
   UnlinkParentDto,
   UpdateAdoptionDto,
+  UpdateFeedingDto,
   UpdateLayingDto,
   UpdateMatingDto,
   UpdatePairDto,
@@ -64,6 +67,7 @@ import type {
   ChildPetDetailDto,
   CommonResponseDto,
   DetailJson,
+  FeedingControllerGetList200,
   FilterPetListResponseDto,
   FindPetByPetIdResponseDto,
   FindPetImagesResponseDto,
@@ -601,6 +605,36 @@ export const statisticsControllerGetAdoptionStatistics = (
   });
 };
 
+export const feedingControllerCreate = (createFeedingDto: CreateFeedingDto) => {
+  return useCustomInstance<CommonResponseDto>({
+    url: `/api/v1/feedings`,
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    data: createFeedingDto,
+  });
+};
+
+export const feedingControllerGetList = (params: FeedingControllerGetListParams) => {
+  return useCustomInstance<FeedingControllerGetList200>({
+    url: `/api/v1/feedings`,
+    method: "GET",
+    params,
+  });
+};
+
+export const feedingControllerUpdate = (id: number, updateFeedingDto: UpdateFeedingDto) => {
+  return useCustomInstance<CommonResponseDto>({
+    url: `/api/v1/feedings/${id}`,
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    data: updateFeedingDto,
+  });
+};
+
+export const feedingControllerDelete = (id: number) => {
+  return useCustomInstance<CommonResponseDto>({ url: `/api/v1/feedings/${id}`, method: "DELETE" });
+};
+
 export const fcmControllerRegisterToken = (registerFcmTokenDto: RegisterFcmTokenDto) => {
   return useCustomInstance<CommonResponseDto>({
     url: `/api/v1/fcm/token`,
@@ -803,6 +837,18 @@ export type StatisticsControllerGetPairStatisticsResult = NonNullable<
 >;
 export type StatisticsControllerGetAdoptionStatisticsResult = NonNullable<
   Awaited<ReturnType<typeof statisticsControllerGetAdoptionStatistics>>
+>;
+export type FeedingControllerCreateResult = NonNullable<
+  Awaited<ReturnType<typeof feedingControllerCreate>>
+>;
+export type FeedingControllerGetListResult = NonNullable<
+  Awaited<ReturnType<typeof feedingControllerGetList>>
+>;
+export type FeedingControllerUpdateResult = NonNullable<
+  Awaited<ReturnType<typeof feedingControllerUpdate>>
+>;
+export type FeedingControllerDeleteResult = NonNullable<
+  Awaited<ReturnType<typeof feedingControllerDelete>>
 >;
 export type FcmControllerRegisterTokenResult = NonNullable<
   Awaited<ReturnType<typeof fcmControllerRegisterToken>>
@@ -4446,6 +4492,55 @@ export const getStatisticsControllerGetAdoptionStatisticsResponseMock = (
   ...overrideResponse,
 });
 
+export const getFeedingControllerCreateResponseMock = (
+  overrideResponse: Partial<CommonResponseDto> = {},
+): CommonResponseDto => ({
+  success: faker.datatype.boolean(),
+  message: faker.string.alpha(20),
+  ...overrideResponse,
+});
+
+export const getFeedingControllerGetListResponseMock = (
+  overrideResponse: Partial<FeedingControllerGetList200> = {},
+): FeedingControllerGetList200 => ({
+  data: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+    id: faker.number.int({ min: undefined, max: undefined }),
+    petId: faker.string.alpha(20),
+    feedingAt: faker.string.alpha(20),
+    food: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+    amount: faker.helpers.arrayElement([
+      faker.number.int({ min: undefined, max: undefined }),
+      undefined,
+    ]),
+    memo: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+  })),
+  meta: {
+    page: faker.number.int({ min: undefined, max: undefined }),
+    itemPerPage: faker.number.int({ min: undefined, max: undefined }),
+    totalCount: faker.number.int({ min: undefined, max: undefined }),
+    totalPage: faker.number.int({ min: undefined, max: undefined }),
+    hasPreviousPage: faker.datatype.boolean(),
+    hasNextPage: faker.datatype.boolean(),
+  },
+  ...overrideResponse,
+});
+
+export const getFeedingControllerUpdateResponseMock = (
+  overrideResponse: Partial<CommonResponseDto> = {},
+): CommonResponseDto => ({
+  success: faker.datatype.boolean(),
+  message: faker.string.alpha(20),
+  ...overrideResponse,
+});
+
+export const getFeedingControllerDeleteResponseMock = (
+  overrideResponse: Partial<CommonResponseDto> = {},
+): CommonResponseDto => ({
+  success: faker.datatype.boolean(),
+  message: faker.string.alpha(20),
+  ...overrideResponse,
+});
+
 export const getFcmControllerRegisterTokenResponseMock = (
   overrideResponse: Partial<CommonResponseDto> = {},
 ): CommonResponseDto => ({
@@ -5790,6 +5885,98 @@ export const getStatisticsControllerGetAdoptionStatisticsMockHandler = (
   });
 };
 
+export const getFeedingControllerCreateMockHandler = (
+  overrideResponse?:
+    | CommonResponseDto
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<CommonResponseDto> | CommonResponseDto),
+) => {
+  return http.post("*/api/v1/feedings", async (info) => {
+    await delay(1000);
+
+    return new HttpResponse(
+      JSON.stringify(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getFeedingControllerCreateResponseMock(),
+      ),
+      { status: 201, headers: { "Content-Type": "application/json" } },
+    );
+  });
+};
+
+export const getFeedingControllerGetListMockHandler = (
+  overrideResponse?:
+    | FeedingControllerGetList200
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<FeedingControllerGetList200> | FeedingControllerGetList200),
+) => {
+  return http.get("*/api/v1/feedings", async (info) => {
+    await delay(1000);
+
+    return new HttpResponse(
+      JSON.stringify(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getFeedingControllerGetListResponseMock(),
+      ),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+  });
+};
+
+export const getFeedingControllerUpdateMockHandler = (
+  overrideResponse?:
+    | CommonResponseDto
+    | ((
+        info: Parameters<Parameters<typeof http.patch>[1]>[0],
+      ) => Promise<CommonResponseDto> | CommonResponseDto),
+) => {
+  return http.patch("*/api/v1/feedings/:id", async (info) => {
+    await delay(1000);
+
+    return new HttpResponse(
+      JSON.stringify(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getFeedingControllerUpdateResponseMock(),
+      ),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+  });
+};
+
+export const getFeedingControllerDeleteMockHandler = (
+  overrideResponse?:
+    | CommonResponseDto
+    | ((
+        info: Parameters<Parameters<typeof http.delete>[1]>[0],
+      ) => Promise<CommonResponseDto> | CommonResponseDto),
+) => {
+  return http.delete("*/api/v1/feedings/:id", async (info) => {
+    await delay(1000);
+
+    return new HttpResponse(
+      JSON.stringify(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getFeedingControllerDeleteResponseMock(),
+      ),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+  });
+};
+
 export const getFcmControllerRegisterTokenMockHandler = (
   overrideResponse?:
     | CommonResponseDto
@@ -5917,6 +6104,10 @@ export const getProjectDaepaAPIMock = () => [
   getPetImageControllerSavePetImagesMockHandler(),
   getStatisticsControllerGetPairStatisticsMockHandler(),
   getStatisticsControllerGetAdoptionStatisticsMockHandler(),
+  getFeedingControllerCreateMockHandler(),
+  getFeedingControllerGetListMockHandler(),
+  getFeedingControllerUpdateMockHandler(),
+  getFeedingControllerDeleteMockHandler(),
   getFcmControllerRegisterTokenMockHandler(),
   getFcmControllerDeactivateTokenMockHandler(),
   getFcmControllerSendTestPushMockHandler(),

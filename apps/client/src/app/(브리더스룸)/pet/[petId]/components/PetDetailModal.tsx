@@ -7,6 +7,7 @@ import BreedingInfoContent from "./BreedingInfoContent";
 import ImagesContent from "./ImagesContent";
 import PedigreeInfoContent from "./PedigreeInfoContent";
 import AdoptionInfoContent from "./AdoptionInfoContent";
+import FeedingInfoContent from "./FeedingInfoContent";
 
 interface PetDetailModalProps {
   isOpen: boolean;
@@ -46,6 +47,9 @@ export default function PetDetailModal({ isOpen, pet, onClose }: PetDetailModalP
               initialAdoption={null}
               onClose={onClose}
             />
+          }
+          feedingSlot={
+            <FeedingInfoContent petId={pet.petId} ownerId={pet.owner.userId ?? ""} />
           }
         />
       </DialogContent>
