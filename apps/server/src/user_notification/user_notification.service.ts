@@ -127,10 +127,7 @@ export class UserNotificationService {
     }
   }
 
-  async getNotificationList(
-    dto: PageOptionsDto,
-    userId: string,
-  ) {
+  async getNotificationList(dto: PageOptionsDto, userId: string) {
     const baseWhere =
       'userNotification.receiverId = :userId AND userNotification.isDeleted = :isDeleted';
     const params = { userId, isDeleted: false };
@@ -159,10 +156,10 @@ export class UserNotificationService {
       countQb.getCount(),
       dataQb.getRawAndEntities(),
     ]);
-
+    const rawRows = raw as { senderName?: string }[];
     const data = entities.map((entity, i) => ({
       ...entity,
-      senderName: raw[i]?.senderName ?? undefined,
+      senderName: rawRows[i]?.senderName ?? undefined,
     }));
 
     const pageMetaDto = new PageMetaDto({ totalCount, pageOptionsDto: dto });
