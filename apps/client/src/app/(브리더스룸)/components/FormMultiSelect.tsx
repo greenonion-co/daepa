@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Check, ChevronDown, X } from "lucide-react";
+import { useIsMobile } from "@/hooks/useMobile";
 
 interface FormMultiSelectProps {
   title: string;
@@ -19,6 +20,7 @@ const FormMultiSelect = ({
   initialItems,
   onSelect,
 }: FormMultiSelectProps) => {
+  const isMobile = useIsMobile();
   const [isOpen, setIsOpen] = useState(false);
   const [selectedItems, setSelectedItems] = useState<string[] | undefined>([]);
   const [tempSelectedItems, setTempSelectedItems] = useState<string[] | undefined>(initialItems);
@@ -112,14 +114,30 @@ const FormMultiSelect = ({
         )}
       </div>
 
+      {isOpen && isMobile && (
+        <div
+          className="fixed inset-0 z-40 bg-black/40"
+          onClick={() => {
+            setSelectedItems(tempSelectedItems);
+            setIsOpen(false);
+          }}
+        />
+      )}
       {isOpen && (
         <div
           className={cn(
-            "absolute top-[40px] left-0 z-50 w-[320px] rounded-2xl border-[1.8px] border-gray-200 bg-white p-5 shadow-lg dark:border-gray-700 dark:bg-gray-800",
-            "origin-top transform transition-all duration-200 ease-out",
+            "z-50 w-[320px] rounded-2xl border-[1.8px] border-gray-200 bg-white p-5 shadow-lg dark:border-gray-700 dark:bg-gray-800",
+            "transform transition-all duration-200 ease-out",
+            isMobile
+              ? "fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+              : "absolute top-[40px] left-0 origin-top",
             isEntering
-              ? "translate-y-0 scale-100 opacity-100"
-              : "-translate-y-1 scale-95 opacity-0",
+              ? isMobile
+                ? "scale-100 opacity-100"
+                : "translate-y-0 scale-100 opacity-100"
+              : isMobile
+                ? "scale-95 opacity-0"
+                : "-translate-y-1 scale-95 opacity-0",
           )}
         >
           <div className="mb-2 font-[500] dark:text-gray-100">{title}</div>
