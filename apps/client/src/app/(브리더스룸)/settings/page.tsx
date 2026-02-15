@@ -14,6 +14,9 @@ import {
   Shield,
   Mail,
   Smartphone,
+  User,
+  Phone,
+  MapPin,
 } from "lucide-react";
 import type { Theme } from "@/types/theme";
 import DeleteAccountButton from "./components/DeleteAccountButton";
@@ -21,7 +24,12 @@ import { SettingsGroup, SettingsItem } from "./components";
 import NicknameDuplicateCheckInput from "./components/NicknameDuplicateCheckInput";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { userControllerGetUserProfile, userControllerCreateInitUserInfo } from "@repo/api-client";
+import {
+  userControllerGetUserProfile,
+  userControllerCreateInitUserInfo,
+  userControllerGetUserPrivateInfo,
+  userControllerUpdateUserPrivateInfo,
+} from "@repo/api-client";
 import { toast } from "@/lib/toast";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
@@ -42,6 +50,16 @@ const SettingsPage = () => {
     (typeof DUPLICATE_CHECK_STATUS)[keyof typeof DUPLICATE_CHECK_STATUS]
   >(DUPLICATE_CHECK_STATUS.NONE);
 
+  // 신고자 정보 수정 관련 상태
+  const [isEditingPrivateInfo, setIsEditingPrivateInfo] = useState(false);
+  const [privateInfoForm, setPrivateInfoForm] = useState({
+    realName: "",
+    phone1: "",
+    phone2: "",
+    phone3: "",
+    address: "",
+  });
+
   const { data: userProfile } = useQuery({
     queryKey: [userControllerGetUserProfile.name],
     queryFn: userControllerGetUserProfile,
@@ -50,6 +68,16 @@ const SettingsPage = () => {
 
   const { mutateAsync: updateNickname, isPending: isUpdatingNickname } = useMutation({
     mutationFn: userControllerCreateInitUserInfo,
+  });
+
+  const { data: privateInfo } = useQuery({
+    queryKey: [userControllerGetUserPrivateInfo.name],
+    queryFn: userControllerGetUserPrivateInfo,
+    select: (response) => response.data.data,
+  });
+
+  const { mutateAsync: updatePrivateInfo, isPending: isUpdatingPrivateInfo } = useMutation({
+    mutationFn: userControllerUpdateUserPrivateInfo,
   });
 
   const themeOptions: Array<{ key: Theme; label: string; icon: React.ReactNode }> = [
@@ -100,6 +128,57 @@ const SettingsPage = () => {
         toast.error(errorMessage || "닉네임 변경 중 오류가 발생했습니다.");
       } else {
         toast.error("닉네임 변경 중 오류가 발생했습니다.");
+      }
+    }
+  };
+
+  // 신고자 정보 수정 시작
+  const handleStartEditPrivateInfo = () => {
+    const phoneParts = (privateInfo?.phone as string | undefined)?.split("-").map((s) => s.trim());
+    setPrivateInfoForm({
+      realName: (privateInfo?.realName as string | undefined) ?? "",
+      phone1: phoneParts?.[0] ?? "",
+      phone2: phoneParts?.[1] ?? "",
+      phone3: phoneParts?.[2] ?? "",
+      address: (privateInfo?.address as string | undefined) ?? "",
+    });
+    setIsEditingPrivateInfo(true);
+  };
+
+  // 신고자 정보 수정 취소
+  const handleCancelEditPrivateInfo = () => {
+    setIsEditingPrivateInfo(false);
+    setPrivateInfoForm({ realName: "", phone1: "", phone2: "", phone3: "", address: "" });
+  };
+
+  // 신고자 정보 저장
+  const handleSavePrivateInfo = async () => {
+    const { phone1, phone2, phone3 } = privateInfoForm;
+    const hasAnyPhone = phone1 || phone2 || phone3;
+    if (hasAnyPhone) {
+      if (!/^\d{2,3}$/.test(phone1) || !/^\d{3,4}$/.test(phone2) || !/^\d{4}$/.test(phone3)) {
+        toast.error("연락처를 올바른 형식으로 입력해주세요.");
+        return;
+      }
+    }
+
+    try {
+      const phone = hasAnyPhone ? `${phone1}-${phone2}-${phone3}` : null;
+      await updatePrivateInfo({
+        realName: (privateInfoForm.realName || null) as never,
+        phone: phone as never,
+        address: (privateInfoForm.address || null) as never,
+      });
+      queryClient.invalidateQueries({ queryKey: [userControllerGetUserPrivateInfo.name] });
+      toast.success("신고자 정보가 저장되었습니다.");
+      setIsEditingPrivateInfo(false);
+    } catch (error: unknown) {
+      if (error instanceof AxiosError) {
+        const message = error.response?.data?.message;
+        const errorMessage = Array.isArray(message) ? message[0] : message;
+        toast.error(errorMessage || "신고자 정보 저장 중 오류가 발생했습니다.");
+      } else {
+        toast.error("신고자 정보 저장 중 오류가 발생했습니다.");
       }
     }
   };
@@ -215,6 +294,137 @@ const SettingsPage = () => {
                 </Badge>
               }
             />
+          </SettingsGroup>
+
+          {/* 신고자 정보 */}
+          <SettingsGroup title="신고자 정보">
+            {isEditingPrivateInfo ? (
+              <div className="space-y-3 p-4">
+                <div className="space-y-2">
+                  <label className="text-[13px] font-medium text-gray-600 dark:text-gray-400">
+                    이름
+                  </label>
+                  <input
+                    type="text"
+                    className="h-[40px] w-full rounded-xl border border-gray-200 p-3 text-[16px] placeholder:font-[500] dark:border-neutral-600 dark:bg-neutral-700 dark:text-white"
+                    placeholder="실명을 입력하세요"
+                    value={privateInfoForm.realName}
+                    onChange={(e) =>
+                      setPrivateInfoForm((prev) => ({ ...prev, realName: e.target.value }))
+                    }
+                    autoFocus
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[13px] font-medium text-gray-600 dark:text-gray-400">
+                    연락처
+                  </label>
+                  <div className="flex items-center gap-1">
+                    <input
+                      type="tel"
+                      className="h-[40px] w-full rounded-xl border border-gray-200 p-3 text-center text-[16px] placeholder:font-[500] dark:border-neutral-600 dark:bg-neutral-700 dark:text-white"
+                      placeholder="010"
+                      maxLength={3}
+                      value={privateInfoForm.phone1}
+                      inputMode="numeric"
+                      onChange={(e) => {
+                        const v = e.target.value.replace(/\D/g, "");
+                        setPrivateInfoForm((prev) => ({ ...prev, phone1: v }));
+                      }}
+                    />
+                    <span className="text-gray-400">-</span>
+                    <input
+                      type="tel"
+                      className="h-[40px] w-full rounded-xl border border-gray-200 p-3 text-center text-[16px] placeholder:font-[500] dark:border-neutral-600 dark:bg-neutral-700 dark:text-white"
+                      placeholder="0000"
+                      maxLength={4}
+                      value={privateInfoForm.phone2}
+                      inputMode="numeric"
+                      onChange={(e) => {
+                        const v = e.target.value.replace(/\D/g, "");
+                        setPrivateInfoForm((prev) => ({ ...prev, phone2: v }));
+                      }}
+                    />
+                    <span className="text-gray-400">-</span>
+                    <input
+                      type="tel"
+                      className="h-[40px] w-full rounded-xl border border-gray-200 p-3 text-center text-[16px] placeholder:font-[500] dark:border-neutral-600 dark:bg-neutral-700 dark:text-white"
+                      placeholder="0000"
+                      maxLength={4}
+                      value={privateInfoForm.phone3}
+                      inputMode="numeric"
+                      onChange={(e) => {
+                        const v = e.target.value.replace(/\D/g, "");
+                        setPrivateInfoForm((prev) => ({ ...prev, phone3: v }));
+                      }}
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[13px] font-medium text-gray-600 dark:text-gray-400">
+                    주소
+                  </label>
+                  <input
+                    type="text"
+                    className="h-[40px] w-full rounded-xl border border-gray-200 p-3 text-[16px] placeholder:font-[500] dark:border-neutral-600 dark:bg-neutral-700 dark:text-white"
+                    placeholder="주소를 입력하세요"
+                    value={privateInfoForm.address}
+                    onChange={(e) =>
+                      setPrivateInfoForm((prev) => ({ ...prev, address: e.target.value }))
+                    }
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    onClick={handleCancelEditPrivateInfo}
+                    disabled={isUpdatingPrivateInfo}
+                    className="flex-1 rounded-xl"
+                  >
+                    취소
+                  </Button>
+                  <Button
+                    size="lg"
+                    onClick={handleSavePrivateInfo}
+                    disabled={isUpdatingPrivateInfo}
+                    className="flex-1 rounded-xl"
+                  >
+                    {isUpdatingPrivateInfo ? "저장중..." : "저장"}
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <SettingsItem
+                  icon={<User className="h-4 w-4" />}
+                  iconBgColor="bg-orange-100 dark:bg-orange-900/30"
+                  iconColor="text-orange-600 dark:text-orange-400"
+                  label="이름"
+                  value={String(privateInfo?.realName ?? "미설정")}
+                  onClick={handleStartEditPrivateInfo}
+                  showChevron
+                />
+                <SettingsItem
+                  icon={<Phone className="h-4 w-4" />}
+                  iconBgColor="bg-orange-100 dark:bg-orange-900/30"
+                  iconColor="text-orange-600 dark:text-orange-400"
+                  label="연락처"
+                  value={String(privateInfo?.phone ?? "미설정")}
+                  onClick={handleStartEditPrivateInfo}
+                  showChevron
+                />
+                <SettingsItem
+                  icon={<MapPin className="h-4 w-4" />}
+                  iconBgColor="bg-orange-100 dark:bg-orange-900/30"
+                  iconColor="text-orange-600 dark:text-orange-400"
+                  label="주소"
+                  value={String(privateInfo?.address ?? "미설정")}
+                  onClick={handleStartEditPrivateInfo}
+                  showChevron
+                />
+              </>
+            )}
           </SettingsGroup>
 
           {/* 앱 설정 */}

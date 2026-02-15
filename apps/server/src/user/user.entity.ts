@@ -35,6 +35,15 @@ export class UserEntity {
   })
   role: USER_ROLE;
 
+  @Column({ type: 'varchar', nullable: true })
+  realName?: string | null;
+
+  @Column({ type: 'varchar', nullable: true })
+  phone?: string | null;
+
+  @Column({ type: 'varchar', nullable: true })
+  address?: string | null;
+
   @Column({ default: false })
   isBiz: boolean;
 

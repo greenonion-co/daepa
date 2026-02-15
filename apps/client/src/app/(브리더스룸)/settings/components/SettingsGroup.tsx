@@ -13,7 +13,7 @@ export const SettingsGroup = ({ title, className, children }: SettingsGroupProps
         {title}
       </h2>
     )}
-    <div className="h-full overflow-hidden rounded-xl bg-neutral-100 dark:bg-[#18171C]">
+    <div className="h-fit overflow-hidden rounded-xl border-2 border-neutral-100 bg-white dark:bg-[#18171C]">
       {children}
     </div>
   </div>

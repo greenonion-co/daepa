@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -18,6 +18,8 @@ import { DateTime } from "luxon";
 import { generateTransferReport, type TransferReportData } from "../lib/generateTransferReport";
 import { DownloadIcon, Loader2Icon } from "lucide-react";
 import { toast } from "@/lib/toast";
+import { useQuery } from "@tanstack/react-query";
+import { userControllerGetUserPrivateInfo } from "@repo/api-client";
 
 interface TransferReportModalProps {
   isOpen: boolean;
@@ -36,6 +38,12 @@ const today = DateTime.now();
 
 const TransferReportModal = ({ isOpen, onClose }: TransferReportModalProps) => {
   const isMobile = useIsMobile();
+
+  const { data: privateInfo } = useQuery({
+    queryKey: [userControllerGetUserPrivateInfo.name],
+    queryFn: userControllerGetUserPrivateInfo,
+    select: (response) => response.data.data,
+  });
 
   const [type, setType] = useState<ReportType>("transfer");
   const [sellerName, setSellerName] = useState("");
@@ -57,6 +65,47 @@ const TransferReportModal = ({ isOpen, onClose }: TransferReportModalProps) => {
   const [day, setDay] = useState(today.toFormat("dd"));
   const [reporter, setReporter] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
+
+  useEffect(() => {
+    if (!privateInfo) return;
+
+    const isSeller = type === "transfer";
+    const phoneParts = privateInfo.phone?.split("-").map((s) => s.trim());
+
+    // 이전 자동 채움 초기화
+    if (isSeller) {
+      setBuyerName("");
+      setBuyerPhone1("010");
+      setBuyerPhone2("");
+      setBuyerPhone3("");
+      setBuyerAddress("");
+    } else {
+      setSellerName("");
+      setSellerPhone1("010");
+      setSellerPhone2("");
+      setSellerPhone3("");
+      setSellerAddress("");
+    }
+
+    const setName = isSeller ? setSellerName : setBuyerName;
+    const setPhone1 = isSeller ? setSellerPhone1 : setBuyerPhone1;
+    const setPhone2 = isSeller ? setSellerPhone2 : setBuyerPhone2;
+    const setPhone3 = isSeller ? setSellerPhone3 : setBuyerPhone3;
+    const setAddress = isSeller ? setSellerAddress : setBuyerAddress;
+
+    if (privateInfo.realName) {
+      setName(privateInfo.realName);
+      setReporter(privateInfo.realName);
+    }
+    if (phoneParts?.length === 3) {
+      setPhone1(phoneParts[0]);
+      setPhone2(phoneParts[1]);
+      setPhone3(phoneParts[2]);
+    }
+    if (privateInfo.address) {
+      setAddress(privateInfo.address);
+    }
+  }, [privateInfo, type]);
 
   const handleDownload = async () => {
     setIsGenerating(true);
@@ -122,6 +171,7 @@ const TransferReportModal = ({ isOpen, onClose }: TransferReportModalProps) => {
                 value={sellerName}
                 onChange={(e) => setSellerName(e.target.value)}
                 placeholder="성명 입력"
+                className="text-blue-500"
               />
             </div>
             <div className="space-y-2">
@@ -132,7 +182,7 @@ const TransferReportModal = ({ isOpen, onClose }: TransferReportModalProps) => {
                   onChange={(e) => setSellerPhone1(e.target.value)}
                   placeholder="010"
                   maxLength={3}
-                  className="text-center"
+                  className="text-center text-blue-500"
                 />
                 <span>-</span>
                 <Input
@@ -140,7 +190,7 @@ const TransferReportModal = ({ isOpen, onClose }: TransferReportModalProps) => {
                   onChange={(e) => setSellerPhone2(e.target.value)}
                   placeholder="0000"
                   maxLength={4}
-                  className="text-center"
+                  className="text-center text-blue-500"
                 />
                 <span>-</span>
                 <Input
@@ -148,7 +198,7 @@ const TransferReportModal = ({ isOpen, onClose }: TransferReportModalProps) => {
                   onChange={(e) => setSellerPhone3(e.target.value)}
                   placeholder="0000"
                   maxLength={4}
-                  className="text-center"
+                  className="text-center text-blue-500"
                 />
               </div>
             </div>
@@ -158,6 +208,7 @@ const TransferReportModal = ({ isOpen, onClose }: TransferReportModalProps) => {
                 value={sellerAddress}
                 onChange={(e) => setSellerAddress(e.target.value)}
                 placeholder="주소 입력"
+                className="text-blue-500"
               />
             </div>
           </fieldset>
@@ -171,6 +222,7 @@ const TransferReportModal = ({ isOpen, onClose }: TransferReportModalProps) => {
                 value={buyerName}
                 onChange={(e) => setBuyerName(e.target.value)}
                 placeholder="성명 입력"
+                className="text-blue-500"
               />
             </div>
             <div className="space-y-2">
@@ -181,7 +233,7 @@ const TransferReportModal = ({ isOpen, onClose }: TransferReportModalProps) => {
                   onChange={(e) => setBuyerPhone1(e.target.value)}
                   placeholder="010"
                   maxLength={3}
-                  className="text-center"
+                  className="text-center text-blue-500"
                 />
                 <span>-</span>
                 <Input
@@ -189,7 +241,7 @@ const TransferReportModal = ({ isOpen, onClose }: TransferReportModalProps) => {
                   onChange={(e) => setBuyerPhone2(e.target.value)}
                   placeholder="0000"
                   maxLength={4}
-                  className="text-center"
+                  className="text-center text-blue-500"
                 />
                 <span>-</span>
                 <Input
@@ -197,7 +249,7 @@ const TransferReportModal = ({ isOpen, onClose }: TransferReportModalProps) => {
                   onChange={(e) => setBuyerPhone3(e.target.value)}
                   placeholder="0000"
                   maxLength={4}
-                  className="text-center"
+                  className="text-center text-blue-500"
                 />
               </div>
             </div>
@@ -207,6 +259,7 @@ const TransferReportModal = ({ isOpen, onClose }: TransferReportModalProps) => {
                 value={buyerAddress}
                 onChange={(e) => setBuyerAddress(e.target.value)}
                 placeholder="주소 입력"
+                className="text-blue-500"
               />
             </div>
           </fieldset>
@@ -220,6 +273,7 @@ const TransferReportModal = ({ isOpen, onClose }: TransferReportModalProps) => {
                 value={scientificName}
                 onChange={(e) => setScientificName(e.target.value)}
                 placeholder="학명 입력"
+                className="text-blue-500"
               />
             </div>
             <div className="grid grid-cols-2 gap-2">
@@ -229,6 +283,7 @@ const TransferReportModal = ({ isOpen, onClose }: TransferReportModalProps) => {
                   value={quantity}
                   onChange={(e) => setQuantity(e.target.value)}
                   placeholder="수량"
+                  className="text-blue-500"
                 />
               </div>
               <div className="space-y-2">
@@ -237,6 +292,7 @@ const TransferReportModal = ({ isOpen, onClose }: TransferReportModalProps) => {
                   value={purpose}
                   onChange={(e) => setPurpose(e.target.value)}
                   placeholder="용도"
+                  className="text-blue-500"
                 />
               </div>
             </div>
@@ -247,6 +303,7 @@ const TransferReportModal = ({ isOpen, onClose }: TransferReportModalProps) => {
                 onChange={(e) => setReason(e.target.value)}
                 placeholder="사유 입력"
                 rows={3}
+                className="text-blue-500"
               />
             </div>
           </fieldset>
@@ -292,6 +349,7 @@ const TransferReportModal = ({ isOpen, onClose }: TransferReportModalProps) => {
                 value={reporter}
                 onChange={(e) => setReporter(e.target.value)}
                 placeholder="신고인 성명"
+                className="text-blue-500"
               />
             </div>
           </fieldset>

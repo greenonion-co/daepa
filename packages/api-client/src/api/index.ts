@@ -47,6 +47,7 @@ import type {
   UpdateParentRequestDto,
   UpdatePetDto,
   UpdateUserNotificationDto,
+  UpdateUserPrivateInfoDto,
   UserControllerGetUserListSimpleParams,
   UserNotificationControllerFindAllParams,
   VerifyEmailDto,
@@ -91,6 +92,7 @@ import type {
   UserNotificationControllerFindAll200,
   UserNotificationControllerGetUnreadCount200,
   UserNotificationDto,
+  UserPrivateInfoResponseDto,
   UserProfileResponseDto,
 } from "../model";
 
@@ -370,6 +372,24 @@ export const userControllerCreateInitUserInfo = (createInitUserInfoDto: CreateIn
     method: "POST",
     headers: { "Content-Type": "application/json" },
     data: createInitUserInfoDto,
+  });
+};
+
+export const userControllerGetUserPrivateInfo = () => {
+  return useCustomInstance<UserPrivateInfoResponseDto>({
+    url: `/api/v1/user/private-info`,
+    method: "GET",
+  });
+};
+
+export const userControllerUpdateUserPrivateInfo = (
+  updateUserPrivateInfoDto: UpdateUserPrivateInfoDto,
+) => {
+  return useCustomInstance<CommonResponseDto>({
+    url: `/api/v1/user/private-info`,
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    data: updateUserPrivateInfoDto,
   });
 };
 
@@ -765,6 +785,12 @@ export type UserControllerGetUserProfileResult = NonNullable<
 >;
 export type UserControllerCreateInitUserInfoResult = NonNullable<
   Awaited<ReturnType<typeof userControllerCreateInitUserInfo>>
+>;
+export type UserControllerGetUserPrivateInfoResult = NonNullable<
+  Awaited<ReturnType<typeof userControllerGetUserPrivateInfo>>
+>;
+export type UserControllerUpdateUserPrivateInfoResult = NonNullable<
+  Awaited<ReturnType<typeof userControllerUpdateUserPrivateInfo>>
 >;
 export type UserControllerVerifyNameResult = NonNullable<
   Awaited<ReturnType<typeof userControllerVerifyName>>
@@ -3432,6 +3458,29 @@ export const getUserControllerCreateInitUserInfoResponseMock = (
   ...overrideResponse,
 });
 
+export const getUserControllerGetUserPrivateInfoResponseMock = (
+  overrideResponse: Partial<UserPrivateInfoResponseDto> = {},
+): UserPrivateInfoResponseDto => ({
+  success: faker.datatype.boolean(),
+  message: faker.string.alpha(20),
+  data: {
+    ...{
+      realName: faker.helpers.arrayElement([{}, undefined]),
+      phone: faker.helpers.arrayElement([{}, undefined]),
+      address: faker.helpers.arrayElement([{}, undefined]),
+    },
+  },
+  ...overrideResponse,
+});
+
+export const getUserControllerUpdateUserPrivateInfoResponseMock = (
+  overrideResponse: Partial<CommonResponseDto> = {},
+): CommonResponseDto => ({
+  success: faker.datatype.boolean(),
+  message: faker.string.alpha(20),
+  ...overrideResponse,
+});
+
 export const getUserControllerVerifyNameResponseMock = (
   overrideResponse: Partial<CommonResponseDto> = {},
 ): CommonResponseDto => ({
@@ -5338,6 +5387,52 @@ export const getUserControllerCreateInitUserInfoMockHandler = (
   });
 };
 
+export const getUserControllerGetUserPrivateInfoMockHandler = (
+  overrideResponse?:
+    | UserPrivateInfoResponseDto
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<UserPrivateInfoResponseDto> | UserPrivateInfoResponseDto),
+) => {
+  return http.get("*/api/v1/user/private-info", async (info) => {
+    await delay(1000);
+
+    return new HttpResponse(
+      JSON.stringify(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getUserControllerGetUserPrivateInfoResponseMock(),
+      ),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+  });
+};
+
+export const getUserControllerUpdateUserPrivateInfoMockHandler = (
+  overrideResponse?:
+    | CommonResponseDto
+    | ((
+        info: Parameters<Parameters<typeof http.patch>[1]>[0],
+      ) => Promise<CommonResponseDto> | CommonResponseDto),
+) => {
+  return http.patch("*/api/v1/user/private-info", async (info) => {
+    await delay(1000);
+
+    return new HttpResponse(
+      JSON.stringify(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getUserControllerUpdateUserPrivateInfoResponseMock(),
+      ),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+  });
+};
+
 export const getUserControllerVerifyNameMockHandler = (
   overrideResponse?:
     | CommonResponseDto
@@ -6087,6 +6182,8 @@ export const getProjectDaepaAPIMock = () => [
   getUserControllerGetUserListSimpleMockHandler(),
   getUserControllerGetUserProfileMockHandler(),
   getUserControllerCreateInitUserInfoMockHandler(),
+  getUserControllerGetUserPrivateInfoMockHandler(),
+  getUserControllerUpdateUserPrivateInfoMockHandler(),
   getUserControllerVerifyNameMockHandler(),
   getUserControllerVerifyEmailMockHandler(),
   getAdoptionControllerCreateAdoptionMockHandler(),
