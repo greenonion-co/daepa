@@ -475,7 +475,6 @@ export const EGG_STATUS_KOREAN_INFO: Record<EggDetailDtoStatus, string> = {
   DEAD: "중지란",
 };
 
-
 export const ADOPTION_METHOD_KOREAN_INFO: Record<PetAdoptionDtoMethod, string> = {
   PICKUP: "직거래",
   DELIVERY: "택배",
@@ -612,10 +611,6 @@ export const SELECTOR_CONFIGS: Record<
       {
         key: "vit_chew",
         value: "바이탈밀 츄",
-      },
-      {
-        key: "vit_insect",
-        value: "바이탈밀 인섹트",
       },
       {
         key: "cri_live",

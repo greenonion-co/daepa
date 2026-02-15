@@ -145,15 +145,11 @@ const SingleSelect = ({
         <div
           ref={dropdownRef}
           className={cn(
-            "z-50 w-[320px] rounded-2xl border-[1.8px] border-gray-200 bg-white p-5 shadow-lg dark:border-gray-600 dark:bg-[#18171C]",
+            "z-50 w-80 rounded-2xl border-[1.8px] border-gray-200 bg-white p-5 shadow-lg dark:border-gray-600 dark:bg-[#18171C]",
             "transform transition-all duration-200 ease-out",
             isMobile
               ? "fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
-              : cn(
-                  "absolute top-10",
-                  dropdownPosition === "left" ? "left-0" : "right-0",
-                  isMobile && "w-48",
-                ),
+              : cn("absolute top-10", dropdownPosition === "left" ? "left-0" : "right-0"),
             isEntering
               ? isMobile
                 ? "scale-100 opacity-100"
