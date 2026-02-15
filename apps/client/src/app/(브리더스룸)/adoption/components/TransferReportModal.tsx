@@ -98,9 +98,9 @@ const TransferReportModal = ({ isOpen, onClose }: TransferReportModalProps) => {
       setReporter(privateInfo.realName);
     }
     if (phoneParts?.length === 3) {
-      setPhone1(phoneParts[0]);
-      setPhone2(phoneParts[1]);
-      setPhone3(phoneParts[2]);
+      setPhone1(phoneParts[0] ?? "");
+      setPhone2(phoneParts[1] ?? "");
+      setPhone3(phoneParts[2] ?? "");
     }
     if (privateInfo.address) {
       setAddress(privateInfo.address);
