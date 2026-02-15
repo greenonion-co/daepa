@@ -74,7 +74,6 @@ export * from "./eggDetailDto";
 export * from "./eggDetailDtoStatus";
 export * from "./eggStatisticsDto";
 export * from "./fcmControllerDeactivateTokenParams";
-export * from "./feedingBaseDto";
 export * from "./feedingControllerGetList200";
 export * from "./feedingControllerGetListOrder";
 export * from "./feedingControllerGetListParams";
