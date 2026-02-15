@@ -10,6 +10,7 @@ import Images from "./components/이미지";
 import PedigreeInfo from "./components/혈통정보";
 import AdoptionInfo from "./components/분양정보";
 import SectionSkeleton from "./components/SectionSkeleton";
+import FeedingInfo from "./components/피딩정보";
 
 interface PetPageProps {
   params: Promise<{
@@ -108,6 +109,11 @@ export default async function PetPage({ params }: PetPageProps) {
       adoptionSlot={
         <Suspense fallback={<SectionSkeleton />}>
           <AdoptionInfo pet={pet} />
+        </Suspense>
+      }
+      feedingSlot={
+        <Suspense fallback={<SectionSkeleton />}>
+          <FeedingInfo pet={pet} />
         </Suspense>
       }
     />

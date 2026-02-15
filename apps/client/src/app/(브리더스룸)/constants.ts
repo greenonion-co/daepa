@@ -475,16 +475,6 @@ export const EGG_STATUS_KOREAN_INFO: Record<EggDetailDtoStatus, string> = {
   DEAD: "중지란",
 };
 
-export const FOOD_KOREAN_INFO: Record<string, string> = {
-  "판게아 인섹트": "판게아 인섹트",
-  "지렙 인섹트": "지렙 인섹트",
-  바이탈밀: "바이탈밀",
-  "리핀리치스 리조또": "리핀리치스 리조또",
-  귀뚜라미: "귀뚜라미",
-  냉동귀뚜라미: "냉동귀뚜라미",
-  누에: "누에",
-};
-
 export const ADOPTION_METHOD_KOREAN_INFO: Record<PetAdoptionDtoMethod, string> = {
   PICKUP: "직거래",
   DELIVERY: "택배",
@@ -571,24 +561,76 @@ export const SELECTOR_CONFIGS: Record<
     title: "먹이",
     selectList: [
       {
-        key: "판게아 인섹트",
+        key: "pan_insect",
         value: "판게아 인섹트",
       },
       {
-        key: "귀뚜라미",
-        value: "귀뚜라미",
+        key: "pan_fig",
+        value: "판게아 무화과",
       },
       {
-        key: "냉동귀뚜라미",
-        value: "냉동귀뚜라미",
+        key: "pan_papaya",
+        value: "판게아 파파야",
       },
       {
-        key: "누에",
-        value: "누에",
+        key: "pan_breeding",
+        value: "판게아 브리딩포뮬러",
       },
       {
-        key: "지렙 인섹트",
+        key: "grep_insect",
         value: "지렙 인섹트",
+      },
+      {
+        key: "grep_fig",
+        value: "지렙 무화과",
+      },
+      {
+        key: "rep_grub",
+        value: "레파시 그럽앤후르츠",
+      },
+      {
+        key: "rep_mango",
+        value: "레파시 망고슈퍼블렌드",
+      },
+      {
+        key: "rep_banana",
+        value: "레파시 바나나크림파이",
+      },
+      {
+        key: "vit_insect",
+        value: "바이탈밀 인섹트",
+      },
+      {
+        key: "vit_fruits",
+        value: "바이탈밀 후르츠",
+      },
+      {
+        key: "vit_cricket",
+        value: "바이탈밀 크리켓",
+      },
+      {
+        key: "vit_chew",
+        value: "바이탈밀 츄",
+      },
+      {
+        key: "cri_live",
+        value: "귀뚜라미(생)",
+      },
+      {
+        key: "cri_frozen",
+        value: "귀뚜라미(냉동)",
+      },
+      {
+        key: "cri_powder",
+        value: "귀뚜라미(가루)",
+      },
+      {
+        key: "sil_live",
+        value: "누에(생)",
+      },
+      {
+        key: "sil_powder",
+        value: "누에(가루)",
       },
     ],
   },

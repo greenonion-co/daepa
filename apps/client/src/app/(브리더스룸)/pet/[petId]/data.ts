@@ -74,6 +74,38 @@ export const fetchAdoption = cache(async (petId: string): Promise<PetAdoptionDto
   }
 });
 
+export const fetchFeedings = cache(
+  async (petId: string): Promise<FeedingRecord[]> => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const lastDay = new Date(year, now.getMonth() + 1, 0).getDate();
+    const startDate = `${year}-${month}-01`;
+    const endDate = `${year}-${month}-${String(lastDay).padStart(2, "0")}`;
+
+    const url = `${BASE_URL}/api/v1/feedings?petId=${petId}&startDate=${startDate}&endDate=${endDate}&itemPerPage=31`;
+    const headers = await getCachedHeaders();
+
+    try {
+      const res = await fetch(url, { cache: "no-store", headers });
+      if (!res.ok) return [];
+      const data = await res.json();
+      return data.data ?? [];
+    } catch {
+      return [];
+    }
+  },
+);
+
+export interface FeedingRecord {
+  id: number;
+  petId: string;
+  feedingAt: string;
+  foods?: string[];
+  amount?: number;
+  memo?: string;
+}
+
 /**
  * 펫 상세 페이지에 필요한 모든 데이터를 병렬로 미리 요청합니다.
  *
@@ -112,6 +144,7 @@ export function preloadPetData(petId: string) {
   void fetchImages(petId);
   void fetchParents(petId);
   void fetchAdoption(petId);
+  void fetchFeedings(petId);
 }
 
 /**

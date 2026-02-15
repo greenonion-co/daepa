@@ -22,7 +22,7 @@ import {
   RECENTLY_VIEWED_STORAGE_KEY,
 } from "@/app/(브리더스룸)/components/SidebarPanel/최근본";
 
-type TabType = "breeding" | "adoption" | "images" | "pedigree";
+type TabType = "breeding" | "adoption" | "images" | "pedigree" | "feeding";
 
 interface HeaderProps {
   pet: PetDto;
