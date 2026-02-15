@@ -138,173 +138,182 @@ const SettingsPage = () => {
           </div>
         </SettingsGroup>
 
-        {/* 계정 정보 */}
-        <SettingsGroup title="계정 정보">
-          {isEditingNickname ? (
-            <div className="space-y-3 p-4">
-              <NicknameDuplicateCheckInput
-                value={newNickname}
-                onChange={setNewNickname}
-                duplicateCheckStatus={duplicateCheckStatus}
-                setDuplicateCheckStatus={setDuplicateCheckStatus}
-                currentNickname={userProfile?.name}
-              />
-              <div className="flex gap-2">
-                <Button
-                  size="lg"
-                  variant="outline"
-                  onClick={handleCancelEditNickname}
-                  disabled={isUpdatingNickname}
-                  className="flex-1 rounded-xl"
-                >
-                  취소
-                </Button>
-                <Button
-                  size="lg"
-                  onClick={handleSaveNickname}
-                  disabled={
-                    isUpdatingNickname || duplicateCheckStatus !== DUPLICATE_CHECK_STATUS.AVAILABLE
-                  }
-                  className="flex-1 rounded-xl"
-                >
-                  {isUpdatingNickname ? "저장중..." : "저장"}
-                </Button>
-              </div>
-            </div>
-          ) : (
-            <SettingsItem
-              icon={<Edit2 className="h-4 w-4" />}
-              iconBgColor="bg-blue-100 dark:bg-blue-900/30"
-              iconColor="text-blue-600 dark:text-blue-400"
-              label="닉네임"
-              value={userProfile?.name ?? "설정되지 않음"}
-              onClick={handleStartEditNickname}
-              showChevron
-            />
-          )}
-          <SettingsItem
-            icon={<Mail className="h-4 w-4" />}
-            iconBgColor="bg-gray-100 dark:bg-neutral-700"
-            iconColor="text-gray-600 dark:text-gray-400"
-            label="계정 연동"
-            value={
-              <div className="flex items-center gap-2">
-                {normalizedProviders.map((provider) => (
-                  <Image
-                    key={provider}
-                    src={providerIconMap[provider]}
-                    alt={provider}
-                    width={18}
-                    height={18}
-                    className={cn(provider === "apple" && "dark:invert")}
-                  />
-                ))}
-              </div>
-            }
-          />
-          <SettingsItem
-            icon={<Shield className="h-4 w-4" />}
-            iconBgColor="bg-green-100 dark:bg-green-900/30"
-            iconColor="text-green-600 dark:text-green-400"
-            label="계정 상태"
-            rightElement={
-              <Badge variant="secondary" className="text-[12px]">
-                정상
-              </Badge>
-            }
-          />
-        </SettingsGroup>
-
-        {/* 앱 설정 */}
-        <SettingsGroup title="앱 설정">
-          <SettingsItem
-            icon={
-              resolvedTheme === "dark" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />
-            }
-            iconBgColor={
-              resolvedTheme === "dark" ? "bg-indigo-100 dark:bg-indigo-900/30" : "bg-yellow-100"
-            }
-            iconColor={
-              resolvedTheme === "dark" ? "text-indigo-600 dark:text-indigo-400" : "text-yellow-600"
-            }
-            label="테마"
-            rightElement={
-              <div className="flex items-center gap-1 rounded-lg bg-gray-100 p-0.5 dark:bg-neutral-700">
-                {themeOptions.map((option) => (
-                  <button
-                    key={option.key}
-                    onClick={() => setTheme(option.key)}
-                    className={cn(
-                      "flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium transition-colors",
-                      theme === option.key
-                        ? "bg-white text-gray-900 shadow-sm dark:bg-neutral-600 dark:text-white"
-                        : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200",
-                    )}
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-4">
+          {/* 계정 정보 */}
+          <SettingsGroup title="계정 정보">
+            {isEditingNickname ? (
+              <div className="space-y-3 p-4">
+                <NicknameDuplicateCheckInput
+                  value={newNickname}
+                  onChange={setNewNickname}
+                  duplicateCheckStatus={duplicateCheckStatus}
+                  setDuplicateCheckStatus={setDuplicateCheckStatus}
+                  currentNickname={userProfile?.name}
+                />
+                <div className="flex gap-2">
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    onClick={handleCancelEditNickname}
+                    disabled={isUpdatingNickname}
+                    className="flex-1 rounded-xl"
                   >
-                    {option.icon}
-                    <span className="hidden sm:inline">{option.label}</span>
-                  </button>
-                ))}
+                    취소
+                  </Button>
+                  <Button
+                    size="lg"
+                    onClick={handleSaveNickname}
+                    disabled={
+                      isUpdatingNickname ||
+                      duplicateCheckStatus !== DUPLICATE_CHECK_STATUS.AVAILABLE
+                    }
+                    className="flex-1 rounded-xl"
+                  >
+                    {isUpdatingNickname ? "저장중..." : "저장"}
+                  </Button>
+                </div>
               </div>
-            }
-          />
-        </SettingsGroup>
+            ) : (
+              <SettingsItem
+                icon={<Edit2 className="h-4 w-4" />}
+                iconBgColor="bg-blue-100 dark:bg-blue-900/30"
+                iconColor="text-blue-600 dark:text-blue-400"
+                label="닉네임"
+                value={userProfile?.name ?? "설정되지 않음"}
+                onClick={handleStartEditNickname}
+                showChevron
+              />
+            )}
+            <SettingsItem
+              icon={<Mail className="h-4 w-4" />}
+              iconBgColor="bg-gray-100 dark:bg-neutral-700"
+              iconColor="text-gray-600 dark:text-gray-400"
+              label="계정 연동"
+              value={
+                <div className="flex items-center gap-2">
+                  {normalizedProviders.map((provider) => (
+                    <Image
+                      key={provider}
+                      src={providerIconMap[provider]}
+                      alt={provider}
+                      width={18}
+                      height={18}
+                      className={cn(provider === "apple" && "dark:invert")}
+                    />
+                  ))}
+                </div>
+              }
+            />
+            <SettingsItem
+              icon={<Shield className="h-4 w-4" />}
+              iconBgColor="bg-green-100 dark:bg-green-900/30"
+              iconColor="text-green-600 dark:text-green-400"
+              label="계정 상태"
+              rightElement={
+                <Badge variant="secondary" className="text-[12px]">
+                  정상
+                </Badge>
+              }
+            />
+          </SettingsGroup>
 
-        {/* 도움말 및 지원 */}
-        <SettingsGroup title="도움말">
-          <SettingsItem
-            icon={<HelpCircle className="h-4 w-4" />}
-            iconBgColor="bg-purple-100 dark:bg-purple-900/30"
-            iconColor="text-purple-600 dark:text-purple-400"
-            label="자주 묻는 질문"
-            showChevron
-            onClick={() => {}}
-          />
-          <SettingsItem
-            icon={<Mail className="h-4 w-4" />}
-            iconBgColor="bg-teal-100 dark:bg-teal-900/30"
-            iconColor="text-teal-600 dark:text-teal-400"
-            label="고객센터 문의"
-            showChevron
-            onClick={() => {}}
-          />
-          <SettingsItem
-            icon={<FileText className="h-4 w-4" />}
-            iconBgColor="bg-gray-100 dark:bg-neutral-700"
-            iconColor="text-gray-600 dark:text-gray-400"
-            label="이용약관"
-            showChevron
-            onClick={() => {}}
-          />
-          <SettingsItem
-            icon={<Shield className="h-4 w-4" />}
-            iconBgColor="bg-gray-100 dark:bg-neutral-700"
-            iconColor="text-gray-600 dark:text-gray-400"
-            label="개인정보처리방침"
-            showChevron
-            onClick={() => {}}
-          />
-        </SettingsGroup>
+          {/* 앱 설정 */}
+          {/*<SettingsGroup title="앱 설정">*/}
+          {/*  <SettingsItem*/}
+          {/*    icon={*/}
+          {/*      resolvedTheme === "dark" ? (*/}
+          {/*        <Moon className="h-4 w-4" />*/}
+          {/*      ) : (*/}
+          {/*        <Sun className="h-4 w-4" />*/}
+          {/*      )*/}
+          {/*    }*/}
+          {/*    iconBgColor={*/}
+          {/*      resolvedTheme === "dark" ? "bg-indigo-100 dark:bg-indigo-900/30" : "bg-yellow-100"*/}
+          {/*    }*/}
+          {/*    iconColor={*/}
+          {/*      resolvedTheme === "dark"*/}
+          {/*        ? "text-indigo-600 dark:text-indigo-400"*/}
+          {/*        : "text-yellow-600"*/}
+          {/*    }*/}
+          {/*    label="테마"*/}
+          {/*    rightElement={*/}
+          {/*      <div className="flex items-center gap-1 rounded-lg bg-gray-100 p-0.5 dark:bg-neutral-700">*/}
+          {/*        {themeOptions.map((option) => (*/}
+          {/*          <button*/}
+          {/*            key={option.key}*/}
+          {/*            onClick={() => setTheme(option.key)}*/}
+          {/*            className={cn(*/}
+          {/*              "flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium transition-colors",*/}
+          {/*              theme === option.key*/}
+          {/*                ? "bg-white text-gray-900 shadow-sm dark:bg-neutral-600 dark:text-white"*/}
+          {/*                : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200",*/}
+          {/*            )}*/}
+          {/*          >*/}
+          {/*            {option.icon}*/}
+          {/*            <span className="hidden sm:inline">{option.label}</span>*/}
+          {/*          </button>*/}
+          {/*        ))}*/}
+          {/*      </div>*/}
+          {/*    }*/}
+          {/*  />*/}
+          {/*</SettingsGroup>*/}
 
-        {/* 계정 관리 (위험 영역) */}
-        <SettingsGroup title="계정 관리">
-          <SettingsItem
-            icon={<LogOut className="h-4 w-4" />}
-            iconBgColor="bg-red-100 dark:bg-red-900/30"
-            iconColor="text-red-600 dark:text-red-400"
-            label="로그아웃"
-            isDestructive
-            onClick={logout}
-          />
-          <SettingsItem
-            icon={<Trash2 className="h-4 w-4" />}
-            iconBgColor="bg-red-100 dark:bg-red-900/30"
-            iconColor="text-red-600 dark:text-red-400"
-            label="회원탈퇴"
-            isDestructive
-            rightElement={<DeleteAccountButton />}
-          />
-        </SettingsGroup>
+          {/* 도움말 및 지원 */}
+          <SettingsGroup title="도움말">
+            <SettingsItem
+              icon={<HelpCircle className="h-4 w-4" />}
+              iconBgColor="bg-purple-100 dark:bg-purple-900/30"
+              iconColor="text-purple-600 dark:text-purple-400"
+              label="자주 묻는 질문"
+              showChevron
+              onClick={() => {}}
+            />
+            <SettingsItem
+              icon={<Mail className="h-4 w-4" />}
+              iconBgColor="bg-teal-100 dark:bg-teal-900/30"
+              iconColor="text-teal-600 dark:text-teal-400"
+              label="고객센터 문의"
+              showChevron
+              onClick={() => {}}
+            />
+            <SettingsItem
+              icon={<FileText className="h-4 w-4" />}
+              iconBgColor="bg-gray-100 dark:bg-neutral-700"
+              iconColor="text-gray-600 dark:text-gray-400"
+              label="이용약관"
+              showChevron
+              onClick={() => {}}
+            />
+            <SettingsItem
+              icon={<Shield className="h-4 w-4" />}
+              iconBgColor="bg-gray-100 dark:bg-neutral-700"
+              iconColor="text-gray-600 dark:text-gray-400"
+              label="개인정보처리방침"
+              showChevron
+              onClick={() => {}}
+            />
+          </SettingsGroup>
+
+          {/* 계정 관리 (위험 영역) */}
+          <SettingsGroup title="계정 관리">
+            <SettingsItem
+              icon={<LogOut className="h-4 w-4" />}
+              iconBgColor="bg-red-100 dark:bg-red-900/30"
+              iconColor="text-red-600 dark:text-red-400"
+              label="로그아웃"
+              isDestructive
+              onClick={logout}
+            />
+            <SettingsItem
+              icon={<Trash2 className="h-4 w-4" />}
+              iconBgColor="bg-red-100 dark:bg-red-900/30"
+              iconColor="text-red-600 dark:text-red-400"
+              label="회원탈퇴"
+              isDestructive
+              rightElement={<DeleteAccountButton />}
+            />
+          </SettingsGroup>
+        </div>
 
         {/* 버전 정보 */}
         <div className="mt-8 text-center">
