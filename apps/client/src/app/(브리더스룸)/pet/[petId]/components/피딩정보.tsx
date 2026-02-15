@@ -14,6 +14,7 @@ export default async function FeedingInfo({ pet }: FeedingInfoProps) {
       petId={pet.petId}
       ownerId={pet.owner.userId ?? ""}
       initialFeedings={feedings}
+      defaultFoods={pet.foods}
     />
   );
 }

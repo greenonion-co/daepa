@@ -29,6 +29,7 @@ interface FeedingInfoContentProps {
   petId: string;
   ownerId: string;
   initialFeedings?: FeedingRecord[];
+  defaultFoods?: string[];
 }
 
 interface CalendarDayCellProps {
@@ -91,13 +92,22 @@ interface FeedingModalProps {
   petId: string;
   date: string; // yyyy-MM-dd
   feeding: FeedingRecord | undefined;
+  defaultFoods?: string[];
   onSuccess: () => void;
 }
 
-function FeedingModal({ isOpen, onClose, petId, date, feeding, onSuccess }: FeedingModalProps) {
+function FeedingModal({
+  isOpen,
+  onClose,
+  petId,
+  date,
+  feeding,
+  defaultFoods,
+  onSuccess,
+}: FeedingModalProps) {
   const isEdit = !!feeding;
 
-  const [foods, setFoods] = useState<string[] | undefined>(feeding?.foods ?? undefined);
+  const [foods, setFoods] = useState<string[] | undefined>(feeding?.foods ?? defaultFoods);
   const [amount, setAmount] = useState(feeding?.amount?.toString() ?? "");
   const [feedingMemo, setFeedingMemo] = useState(feeding?.memo ?? "");
   const [isProcessing, setIsProcessing] = useState(false);
@@ -266,7 +276,12 @@ function FeedingModal({ isOpen, onClose, petId, date, feeding, onSuccess }: Feed
 
 const WEEKDAYS = ["월", "화", "수", "목", "금", "토", "일"];
 
-const FeedingInfoContent = ({ petId, ownerId, initialFeedings }: FeedingInfoContentProps) => {
+const FeedingInfoContent = ({
+  petId,
+  ownerId,
+  initialFeedings,
+  defaultFoods,
+}: FeedingInfoContentProps) => {
   const isMyPet = useIsMyPet(ownerId);
   // const queryClient = useQueryClient();
 
@@ -472,6 +487,7 @@ const FeedingInfoContent = ({ petId, ownerId, initialFeedings }: FeedingInfoCont
           petId={petId}
           date={modalState.date}
           feeding={modalState.feeding}
+          defaultFoods={defaultFoods}
           onSuccess={handleMutationSuccess}
         />
       )}

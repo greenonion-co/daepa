@@ -49,7 +49,7 @@ export default function PetDetailModal({ isOpen, pet, onClose }: PetDetailModalP
             />
           }
           feedingSlot={
-            <FeedingInfoContent petId={pet.petId} ownerId={pet.owner.userId ?? ""} />
+            <FeedingInfoContent petId={pet.petId} ownerId={pet.owner.userId ?? ""} defaultFoods={pet.foods} />
           }
         />
       </DialogContent>
