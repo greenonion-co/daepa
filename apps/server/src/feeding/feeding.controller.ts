@@ -17,7 +17,6 @@ import {
 import { FeedingService } from './feeding.service';
 import {
   CreateFeedingDto,
-  FeedingBaseDto,
   FeedingDto,
   FeedingFilterDto,
   UpdateFeedingDto,
