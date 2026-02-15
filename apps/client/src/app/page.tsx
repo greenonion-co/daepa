@@ -41,7 +41,7 @@ export default function Home() {
         <FloatingToggle
           options={[
             { label: "전체", value: PetControllerFindAllFilterType.ALL },
-            { label: "내 펫", value: PetControllerFindAllFilterType.MY },
+            { label: "MY", value: PetControllerFindAllFilterType.MY },
           ]}
           value={filterType}
           onChange={handleFilterChange}

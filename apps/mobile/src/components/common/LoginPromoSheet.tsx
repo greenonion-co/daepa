@@ -26,7 +26,7 @@ const VARIANT_CONTENT: Record<
   { title: string; description: string; highlight: string }
 > = {
   register: {
-    title: '내 펫을 등록해보세요',
+    title: '내 개체를 등록해보세요',
     description: '개체를 등록하고\n',
     highlight: '개체 관리・혈통 인증・분양 관리',
   },

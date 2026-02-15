@@ -131,7 +131,7 @@ export class ParentRequestService {
       });
       if (isPair) {
         throw new BadRequestException(
-          '내 펫의 페어를 부모로 지정할 수 없습니다.',
+          '개체의 페어를 부모로 지정할 수 없습니다.',
         );
       }
 

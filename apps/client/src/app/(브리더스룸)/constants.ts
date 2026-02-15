@@ -709,12 +709,12 @@ export const SELECTOR_CONFIGS: Record<
 
 export const SIDEBAR_ITEMS = [
   {
-    title: "마이펫",
+    title: "MY 펫",
     url: "/pet",
     icon: Home,
   },
   {
-    title: "해칭룸",
+    title: "브리딩룸",
     url: "/hatching",
     icon: Bubbles,
   },
