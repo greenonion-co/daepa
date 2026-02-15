@@ -8,6 +8,5 @@
 
 /**
  * 본명
- * @nullable
  */
-export type UserPrivateInfoDtoRealName = { [key: string]: unknown } | null;
+export type UserPrivateInfoDtoRealName = { [key: string]: unknown };

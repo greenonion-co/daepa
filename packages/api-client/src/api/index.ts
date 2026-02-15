@@ -3465,9 +3465,18 @@ export const getUserControllerGetUserPrivateInfoResponseMock = (
   message: faker.string.alpha(20),
   data: {
     ...{
-      realName: faker.helpers.arrayElement([{}, undefined]),
-      phone: faker.helpers.arrayElement([{}, undefined]),
-      address: faker.helpers.arrayElement([{}, undefined]),
+      realName: faker.helpers.arrayElement([
+        faker.helpers.arrayElement([faker.string.alpha(20), null]),
+        undefined,
+      ]),
+      phone: faker.helpers.arrayElement([
+        faker.helpers.arrayElement([faker.string.alpha(20), null]),
+        undefined,
+      ]),
+      address: faker.helpers.arrayElement([
+        faker.helpers.arrayElement([faker.string.alpha(20), null]),
+        undefined,
+      ]),
     },
   },
   ...overrideResponse,

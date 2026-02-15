@@ -8,6 +8,5 @@
 
 /**
  * 주소
- * @nullable
  */
-export type UserPrivateInfoDtoAddress = { [key: string]: unknown } | null;
+export type UserPrivateInfoDtoAddress = { [key: string]: unknown };

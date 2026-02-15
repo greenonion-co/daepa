@@ -5,24 +5,21 @@
  * Project Daepa API description
  * OpenAPI spec version: 1.0
  */
-import type { UpdateUserPrivateInfoDtoRealName } from "./updateUserPrivateInfoDtoRealName";
-import type { UpdateUserPrivateInfoDtoPhone } from "./updateUserPrivateInfoDtoPhone";
-import type { UpdateUserPrivateInfoDtoAddress } from "./updateUserPrivateInfoDtoAddress";
 
 export interface UpdateUserPrivateInfoDto {
   /**
    * 본명
    * @nullable
    */
-  realName?: UpdateUserPrivateInfoDtoRealName;
+  realName?: string | null;
   /**
    * 전화번호
    * @nullable
    */
-  phone?: UpdateUserPrivateInfoDtoPhone;
+  phone?: string | null;
   /**
    * 주소
    * @nullable
    */
-  address?: UpdateUserPrivateInfoDtoAddress;
+  address?: string | null;
 }

@@ -214,6 +214,7 @@ export class UserProfilePublicDto extends PickType(UserBaseDto, ['status']) {
 export class UserPrivateInfoDto {
   @ApiProperty({
     description: '본명',
+    type: 'string',
     nullable: true,
     required: false,
   })
@@ -223,6 +224,7 @@ export class UserPrivateInfoDto {
 
   @ApiProperty({
     description: '전화번호',
+    type: 'string',
     nullable: true,
     required: false,
   })
@@ -232,6 +234,7 @@ export class UserPrivateInfoDto {
 
   @ApiProperty({
     description: '주소',
+    type: 'string',
     nullable: true,
     required: false,
   })
@@ -251,6 +254,7 @@ export class UserPrivateInfoResponseDto extends CommonResponseDto {
 export class UpdateUserPrivateInfoDto {
   @ApiProperty({
     description: '본명',
+    type: 'string',
     nullable: true,
     required: false,
   })
@@ -260,6 +264,7 @@ export class UpdateUserPrivateInfoDto {
 
   @ApiProperty({
     description: '전화번호',
+    type: 'string',
     nullable: true,
     required: false,
   })
@@ -269,6 +274,7 @@ export class UpdateUserPrivateInfoDto {
 
   @ApiProperty({
     description: '주소',
+    type: 'string',
     nullable: true,
     required: false,
   })

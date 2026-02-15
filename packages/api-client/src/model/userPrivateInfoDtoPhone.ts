@@ -8,6 +8,5 @@
 
 /**
  * 전화번호
- * @nullable
  */
-export type UserPrivateInfoDtoPhone = { [key: string]: unknown } | null;
+export type UserPrivateInfoDtoPhone = { [key: string]: unknown };
