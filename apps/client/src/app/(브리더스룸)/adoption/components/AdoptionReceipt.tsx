@@ -7,8 +7,9 @@ import {
 } from "@repo/api-client";
 import { DateTime } from "luxon";
 import { useState, memo, useCallback, useMemo } from "react";
-import { PencilIcon } from "lucide-react";
+import { FileTextIcon, PencilIcon } from "lucide-react";
 import AdoptionDetailModal from "@/app/(브리더스룸)/adoption/components/AdoptionDetailModal";
+import TransferReportModal from "@/app/(브리더스룸)/adoption/components/TransferReportModal";
 import { overlay } from "overlay-kit";
 import { useQueryClient } from "@tanstack/react-query";
 import { isNotNil } from "es-toolkit";
@@ -60,6 +61,12 @@ const AdoptionReceipt = memo(({ adoption, isEditable = true }: AdoptionReceiptPr
       />
     ));
   }, [adoption, queryClient]);
+
+  const handleOpenTransferReport = useCallback(() => {
+    overlay.open(({ isOpen, close }) => (
+      <TransferReportModal isOpen={isOpen} onClose={close} />
+    ));
+  }, []);
 
   return (
     <div className="pb-4 pt-4">
@@ -189,9 +196,28 @@ const AdoptionReceipt = memo(({ adoption, isEditable = true }: AdoptionReceiptPr
           </div>
         ) : null}
 
+        {adoption?.status === PetAdoptionDtoStatus.SOLD && (
+          <div
+            className={`mt-4 ${isReceiptVisible ? "animate-fade-in-up" : ""}`}
+            style={{ animationDelay }}
+          >
+            <button
+              onClick={handleOpenTransferReport}
+              className="flex w-full items-center justify-center gap-2 rounded-md border border-dashed border-gray-400 py-2 text-sm text-gray-600 transition-colors hover:border-blue-400 hover:text-blue-500 dark:border-gray-500 dark:text-gray-400 dark:hover:border-blue-400 dark:hover:text-blue-400"
+            >
+              <FileTextIcon className="h-4 w-4" />
+              양도·양수·보관 신고서 작성
+            </button>
+          </div>
+        )}
+
         <div
           className={`mt-4 text-center ${isReceiptVisible ? "animate-fade-in-up" : ""}`}
-          style={{ animationDelay }}
+          style={{
+            animationDelay: adoption?.status === PetAdoptionDtoStatus.SOLD
+              ? `${parseFloat(animationDelay) + 0.2}s`
+              : animationDelay,
+          }}
         >
           <div className="text-xs text-gray-500 dark:text-gray-400">
             ※ 문의 사항은 고객센터로 문의해주세요.
