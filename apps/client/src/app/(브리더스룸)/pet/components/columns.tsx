@@ -24,13 +24,14 @@ import LinkButton from "../../components/LinkButton";
 import { DateTime } from "luxon";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import TooltipText from "../../components/TooltipText";
+import AdoptionStatusBadge from "../../components/AdoptionStatusBadge";
 import DeletedPetName from "../../components/DeletedPetName";
 import HiddenPetBadge from "@/components/common/HiddenPetBadge";
 
 export const columns: ColumnDef<PetDto>[] = [
   {
     accessorKey: "isPublic",
-    size: 60,
+    size: 40,
     header: () => {
       return (
         <TooltipText
@@ -74,36 +75,49 @@ export const columns: ColumnDef<PetDto>[] = [
     header: TABLE_HEADER.adoption_status,
     cell: ({ cell }) => {
       const adoptionData = cell.getValue() as AdoptionDto;
+      const adoptionStatus = adoptionData?.status;
 
-      if (!adoptionData?.status) return <span className="text-gray-500 dark:text-gray-400">-</span>;
+      if (!adoptionStatus || adoptionStatus === PetAdoptionDtoStatus.NONE) {
+        return null;
+      }
 
-      if (adoptionData?.status === PetAdoptionDtoStatus.NFS)
-        return <div className="w-fit rounded-md bg-pink-500 px-2 text-white">NFS</div>;
+      const adoptionLabel = SALE_STATUS_KOREAN_INFO[adoptionStatus];
+      const badge = <AdoptionStatusBadge status={adoptionStatus} />;
 
-      if (adoptionData?.status === PetAdoptionDtoStatus.NONE)
-        return <span className="text-gray-500 dark:text-gray-400">-</span>;
+      // NFS는 툴팁 없음
+      if (adoptionStatus === PetAdoptionDtoStatus.NFS) return badge;
+
       return (
-        <TooltipText
-          title={SALE_STATUS_KOREAN_INFO[adoptionData?.status]}
-          text={SALE_STATUS_KOREAN_INFO[adoptionData?.status] ?? "미정"}
-          description={adoptionData?.memo ?? ""}
-          content={
-            <div className="capitalize">
-              <div>
-                가격・{adoptionData?.price ? `${adoptionData?.price?.toLocaleString()}원` : "미정"}
+        <Tooltip>
+          <TooltipTrigger asChild>{badge}</TooltipTrigger>
+          <TooltipContent className="max-w-[300px] min-w-[200px] rounded-2xl border border-gray-300 bg-white p-5 font-[500] shadow-lg dark:border-gray-600 dark:bg-gray-700">
+            <div className="text-[16px] font-[600] text-gray-800 dark:text-gray-100">
+              {adoptionLabel}
+            </div>
+            {adoptionData?.memo && (
+              <div className="pb-2 text-[12px] text-gray-500 dark:text-gray-400">
+                {adoptionData.memo}
               </div>
-              <div>
-                분양 날짜・
-                {adoptionData?.adoptionDate
-                  ? (() => {
-                      const d = DateTime.fromISO(adoptionData.adoptionDate);
-                      return d.isValid ? d.toFormat("yy년 M월 d일") : "미정";
-                    })()
-                  : "미정"}
+            )}
+            <div className="text-[14px] break-keep whitespace-pre-wrap text-gray-800 dark:text-gray-200">
+              <div className="capitalize">
+                <div>
+                  가격・
+                  {adoptionData?.price ? `${adoptionData?.price?.toLocaleString()}원` : "미정"}
+                </div>
+                <div>
+                  분양 날짜・
+                  {adoptionData?.adoptionDate
+                    ? (() => {
+                        const d = DateTime.fromISO(adoptionData.adoptionDate);
+                        return d.isValid ? d.toFormat("yy년 M월 d일") : "미정";
+                      })()
+                    : "미정"}
+                </div>
               </div>
             </div>
-          }
-        />
+          </TooltipContent>
+        </Tooltip>
       );
     },
   },

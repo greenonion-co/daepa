@@ -1,11 +1,12 @@
 "use client";
 
 import { Lock } from "lucide-react";
-import { PetDto, PetDtoGrowth, PetAdoptionDtoStatus } from "@repo/api-client";
+import { PetDto, PetDtoGrowth } from "@repo/api-client";
 import { cn } from "@/lib/utils";
 import PetThumbnail from "@/components/common/PetThumbnail";
-import { GROWTH_KOREAN_INFO, SALE_STATUS_KOREAN_INFO } from "../../constants";
+import { GROWTH_KOREAN_INFO } from "../../constants";
 import BadgeList from "../../components/BadgeList";
+import AdoptionStatusBadge from "../../components/AdoptionStatusBadge";
 import { useAppRouter } from "@/hooks/useAppRouter";
 import { DateTime } from "luxon";
 import { getSexIcon } from "@/lib/sex-icon";
@@ -18,58 +19,36 @@ interface PetCardProps {
 export default function PetCard({ pet, onCardClick }: PetCardProps) {
   const router = useAppRouter();
   const adoptionStatus = pet.adoption?.status;
-  const adoptionLabel = adoptionStatus ? SALE_STATUS_KOREAN_INFO[adoptionStatus] : null;
   const sexLabel = getSexIcon(pet.sex, { size: "xs" });
 
   return (
     <div
-      className="relative cursor-pointer overflow-hidden rounded-lg bg-white transition-all duration-150 hover:shadow-md active:scale-[0.98] dark:bg-[#18171C] dark:active:bg-gray-800"
+      className="relative flex cursor-pointer flex-col gap-1 rounded-lg bg-white p-2 transition-all duration-150 hover:shadow-md active:scale-[0.98] dark:bg-[#18171C] dark:active:bg-gray-800"
       onClick={() => onCardClick(pet)}
     >
-      <div className="flex gap-2 p-2">
-        {/* 이미지 + 성별 */}
-        <div className="flex shrink-0 flex-col items-center gap-0.5 self-center">
-          <div className="relative h-15 w-15">
-            <PetThumbnail
-              petId={pet.petId}
-              maxSize={160}
-              className="h-full w-full rounded-xl"
-              objectFit="cover"
-            />
-            {/* 공개/비공개 뱃지 */}
-            <div className="absolute -bottom-1 -left-1">
-              {!pet.isPublic && (
-                <div className="rounded-full bg-white p-1 shadow-sm dark:bg-gray-700">
-                  <Lock className="h-3 w-3 text-yellow-500" />
-                </div>
-              )}
-            </div>
-            {/* 분양 상태 뱃지 */}
-            {adoptionStatus && adoptionStatus !== PetAdoptionDtoStatus.NONE && (
-              <div className="absolute -top-2 -right-1">
-                <span
-                  className={cn(
-                    "rounded-md px-1.5 py-0.5 text-[10px] font-semibold shadow-sm",
-                    adoptionStatus === PetAdoptionDtoStatus.NFS
-                      ? "bg-pink-500 text-white"
-                      : adoptionStatus === PetAdoptionDtoStatus.ON_SALE
-                        ? "bg-green-500 text-white"
-                        : adoptionStatus === PetAdoptionDtoStatus.ON_RESERVATION
-                          ? "bg-yellow-500 text-white"
-                          : "bg-blue-500 text-white",
-                  )}
-                >
-                  {adoptionLabel}
-                </span>
-              </div>
-            )}
+      {/* 공개/비공개 뱃지 */}
+      <div className="absolute top-0 left-0 z-10 -translate-x-1/4 -translate-y-1/4">
+        {!pet.isPublic && (
+          <div className="rounded-full bg-yellow-500 p-1 shadow-sm dark:bg-gray-700">
+            <Lock className="h-3 w-3 bg-yellow-500 text-white dark:bg-transparent dark:text-yellow-500" />
           </div>
+        )}
+      </div>
+
+      <div className="flex gap-2">
+        {/* 이미지 */}
+        <div className="relative flex h-15 w-15 shrink-0 flex-col items-center gap-0.5 self-center">
+          <PetThumbnail
+            petId={pet.petId}
+            maxSize={160}
+            className="h-full w-full rounded-xl"
+            objectFit="cover"
+          />
         </div>
 
         {/* 컨텐츠 */}
         <div className="min-w-0 flex-1 items-center justify-center space-y-0.5">
-          {/* 이름 + 성장단계 + 해칭일 */}
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-2">
             <h3 className="truncate text-sm font-bold text-gray-900 dark:text-gray-100">
               {pet.name ?? "이름 없음"}
             </h3>
@@ -100,6 +79,10 @@ export default function PetCard({ pet, onCardClick }: PetCardProps) {
               >
                 {sexLabel}
               </span>
+            )}
+            {/* 분양 상태 뱃지 */}
+            {adoptionStatus && (
+              <AdoptionStatusBadge status={adoptionStatus} className="ml-auto" />
             )}
           </div>
 
