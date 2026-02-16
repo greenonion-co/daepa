@@ -21,13 +21,13 @@ export function getSexIcon(sex: string | undefined | null, options: SexIconOptio
   const sizeClass = SIZE_CLASSES[size];
 
   if (sex === "M") {
-    return <Mars className={cn(sizeClass, "stroke-3 text-blue-300", className)} />;
+    return <Mars className={cn(sizeClass, "stroke-2 text-blue-500", className)} />;
   }
 
   if (sex === "F") {
-    return <Venus className={cn(sizeClass, "stroke-3 text-red-300", className)} />;
+    return <Venus className={cn(sizeClass, "stroke-2 text-red-500", className)} />;
   }
 
   // 미구분
-  return <CircleHelp className={cn(sizeClass, "stroke-3 text-neutral-300", className)} />;
+  return <CircleHelp className={cn(sizeClass, "stroke-2 text-neutral-500", className)} />;
 }
