@@ -16,11 +16,12 @@ import {
 } from "../../constants";
 import { isNotNil } from "es-toolkit";
 import LinkButton from "../../components/LinkButton";
-import { BadgeCheck } from "lucide-react";
+import { CircleSmall } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import BadgeList from "../../components/BadgeList";
 import DeletedPetName from "../../components/DeletedPetName";
 import { getSexIcon } from "@/lib/sex-icon";
+import HiddenPetBadge from "@/components/common/HiddenPetBadge";
 
 export const columns: ColumnDef<AdoptionDto>[] = [
   {
@@ -134,10 +135,10 @@ export const columns: ColumnDef<AdoptionDto>[] = [
         return (
           <Tooltip>
             <TooltipTrigger asChild>
-              <span className={"text-gray-500"}>비공개</span>
+              <HiddenPetBadge />
             </TooltipTrigger>
             <TooltipContent>
-              <p>숨김 처리된 개체입니다</p>
+              <p>소유자에 의해 비공개 처리된 개체입니다</p>
             </TooltipContent>
           </Tooltip>
         );
@@ -155,13 +156,12 @@ export const columns: ColumnDef<AdoptionDto>[] = [
         <LinkButton
           href={`/pet/${fatherExist.petId}`}
           label={fatherExist.name ?? ""}
-          tooltip="펫 상세 페이지로 이동"
-          className={`${STATUS_MAP[status].color} hover:text-accent/80 font-semibold text-white`}
-          icon={
-            status === UpdateParentRequestDtoStatus.APPROVED ? (
-              <BadgeCheck className="h-4 w-4 text-gray-100" />
-            ) : null
+          tooltip={
+            (status === "approved" && "혈통 인증 완료") ||
+            (status === "pending" && "혈통 인증 대기 중") ||
+            ""
           }
+          icon={<CircleSmall className={`h-3 w-3 ${STATUS_MAP[status].color}`} />}
         />
       );
     },
@@ -180,10 +180,10 @@ export const columns: ColumnDef<AdoptionDto>[] = [
         return (
           <Tooltip>
             <TooltipTrigger asChild>
-              <span className={"text-gray-500"}>비공개</span>
+              <HiddenPetBadge />
             </TooltipTrigger>
             <TooltipContent>
-              <p>숨김 처리된 개체입니다</p>
+              <p>소유자에 의해 비공개 처리된 개체입니다</p>
             </TooltipContent>
           </Tooltip>
         );
@@ -201,13 +201,12 @@ export const columns: ColumnDef<AdoptionDto>[] = [
         <LinkButton
           href={`/pet/${motherExist.petId}`}
           label={motherExist.name ?? ""}
-          tooltip="펫 상세 페이지로 이동"
-          className={`${STATUS_MAP[status].color} hover:text-accent/80 font-semibold text-white`}
-          icon={
-            status === UpdateParentRequestDtoStatus.APPROVED ? (
-              <BadgeCheck className="h-4 w-4 text-gray-100" />
-            ) : null
+          tooltip={
+            (status === "approved" && "혈통 인증 완료") ||
+            (status === "pending" && "혈통 인증 대기 중") ||
+            ""
           }
+          icon={<CircleSmall className={`h-3 w-3 ${STATUS_MAP[status].color}`} />}
         />
       );
     },

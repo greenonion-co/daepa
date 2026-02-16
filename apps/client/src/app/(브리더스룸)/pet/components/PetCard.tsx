@@ -23,7 +23,7 @@ export default function PetCard({ pet, onCardClick }: PetCardProps) {
 
   return (
     <div
-      className="relative flex cursor-pointer flex-col gap-1 rounded-lg bg-white p-2 transition-all duration-150 hover:shadow-md active:scale-[0.98] dark:bg-[#18171C] dark:active:bg-gray-800"
+      className="relative flex cursor-pointer flex-col gap-1 rounded-lg bg-neutral-50 p-2 transition-all duration-150 hover:shadow-md active:scale-[0.98] dark:bg-[#18171C] dark:active:bg-gray-800"
       onClick={() => onCardClick(pet)}
     >
       {/* 공개/비공개 뱃지 */}
@@ -68,20 +68,9 @@ export default function PetCard({ pet, onCardClick }: PetCardProps) {
               </p>
             )}
             {/* 성별 */}
-            {sexLabel && (
-              <span
-                className={cn(
-                  "text-[10px] font-[500]",
-                  (pet.sex === "M" && "text-blue-500") ||
-                    (pet.sex === "F" && "text-red-500") ||
-                    "text-amber-500",
-                )}
-              >
-                {sexLabel}
-              </span>
-            )}
+            {sexLabel}
             {/* 분양 상태 뱃지 */}
-            {adoptionStatus && <AdoptionStatusBadge status={adoptionStatus} className="ml-auto" />}
+            {adoptionStatus && <AdoptionStatusBadge status={adoptionStatus} />}
           </div>
 
           {/* 부모 정보 */}

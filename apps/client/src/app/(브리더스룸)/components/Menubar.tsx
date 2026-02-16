@@ -132,7 +132,7 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
     <div
       className={cn(
         "dark:bg-background flex h-[52px] items-center justify-between px-2",
-        !isPetDetailPage && "bg-background sticky top-0 left-0 z-10 w-full",
+        !isPetDetailPage && "bg-background sticky top-0 left-0 z-20 w-full",
         isNative && "pr-4",
       )}
     >

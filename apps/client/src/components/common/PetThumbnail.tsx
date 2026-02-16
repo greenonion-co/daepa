@@ -109,7 +109,7 @@ const PetThumbnail = ({
         />
       ) : (
         <div className="flex h-full w-full items-center justify-center opacity-50">
-          <SmilePlus className="h-1/3 w-1/3" />
+          <SmilePlus className="h-1/3 w-1/3 opacity-40" />
         </div>
       )}
     </div>

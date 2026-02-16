@@ -103,9 +103,9 @@ export default function PetList() {
   if (isLoading) return <Loading />;
 
   return (
-    <div className="min-h-screen space-y-1 bg-gray-100 dark:bg-transparent">
-      <div className="sticky top-[52px] z-[5] bg-gray-100 px-2 pt-2 pb-1 dark:bg-transparent">
-        <Filters variant="light" />
+    <div className="dark:bg-background min-h-screen space-y-1">
+      <div className="dark:bg-background sticky top-[52px] z-20 bg-white px-2 pt-2 pb-1">
+        <Filters variant="default" />
       </div>
 
       {/* 헤더: 검색 결과 + 삭제된 펫 보기 */}

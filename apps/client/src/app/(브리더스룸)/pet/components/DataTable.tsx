@@ -121,8 +121,8 @@ export const DataTable = ({
                     className={cn(
                       "cursor-pointer",
                       "isPublic" in row.original && row.original.isPublic
-                        ? "bg-blue-50/40 hover:bg-blue-100 dark:bg-[#101012] dark:hover:bg-blue-900/30"
-                        : "bg-amber-50/40 hover:bg-amber-100 dark:bg-zinc-900 dark:hover:bg-zinc-800",
+                        ? "bg-blue-50/80 hover:bg-blue-100 dark:bg-[#101012] dark:hover:bg-blue-900/30"
+                        : "dark:bg-zinc-900 dark:hover:bg-zinc-800",
                     )}
                     onClick={(e) => handleRowClick({ e, pet: row.original })}
                   >

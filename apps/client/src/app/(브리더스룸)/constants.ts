@@ -755,23 +755,23 @@ export const NOTIFICATION_TYPE: Record<UserNotificationDtoType, { label: string;
 export const STATUS_MAP = {
   pending: {
     label: "대기중",
-    color: "bg-yellow-600 ",
+    color: "fill-amber-400 stroke-amber-400",
   },
   rejected: {
     label: "거절됨",
-    color: "bg-red-700",
+    color: "fill-red-400 stroke-red-400",
   },
   approved: {
     label: "연동됨",
-    color: "bg-green-700",
+    color: "fill-green-400 stroke-green-400",
   },
   deleted: {
     label: "삭제됨",
-    color: "bg-red-700",
+    color: "fill-red-400 stroke-red-400",
   },
   cancelled: {
     label: "취소됨",
-    color: "bg-gray-600",
+    color: "fill-gray-400 stroke-gray-400",
   },
 };
 
