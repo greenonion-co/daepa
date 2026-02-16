@@ -45,7 +45,7 @@ function AddPetButton() {
         onPressOut={handlePressOut}
         style={styles.container}
         accessibilityRole="button"
-        accessibilityLabel="펫 추가하기"
+        accessibilityLabel="개체 추가하기"
       >
         <Animated.View style={[styles.inner, { transform: [{ scale }] }]}>
           <Plus size={28} color="#fff" strokeWidth={2.5} />

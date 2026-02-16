@@ -118,8 +118,8 @@ export default function PetList({ filterType, isVisible }: PetListProps) {
         <div className="flex flex-col gap-1">
           <p className="text-lg font-[600] text-gray-900 dark:text-gray-300">
             {filterType === PetControllerFindAllFilterType.ALL
-              ? "아직 공개된 펫이 없어요"
-              : "등록된 내 펫이 없어요"}
+              ? "아직 공개된 개체가 없어요"
+              : "등록된 내 개체가 없어요"}
           </p>
           <p className="text-[14px] font-[500] text-gray-500 dark:text-gray-400">
             나만의 반려동물을 등록하고

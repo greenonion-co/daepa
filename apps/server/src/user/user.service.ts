@@ -9,8 +9,10 @@ import { DataSource, FindOptionsWhere, Not, Repository } from 'typeorm';
 import { UserEntity } from './user.entity';
 import {
   CreateInitUserInfoDto,
+  UpdateUserPrivateInfoDto,
   UserDto,
   UserFilterDto,
+  UserPrivateInfoDto,
   UserProfilePublicDto,
 } from './user.dto';
 import { ProviderInfo } from 'src/auth/auth.types';
@@ -223,6 +225,29 @@ export class UserService {
         return await run(entityManager);
       },
     );
+  }
+
+  async findPrivateInfo(userId: string): Promise<UserPrivateInfoDto> {
+    const userEntity = await this.userRepository.findOneBy({ userId });
+    if (!userEntity) {
+      throw new NotFoundException('사용자를 찾을 수 없습니다.');
+    }
+    return {
+      realName: userEntity.realName,
+      phone: userEntity.phone,
+      address: userEntity.address,
+    };
+  }
+
+  async updatePrivateInfo(
+    userId: string,
+    dto: UpdateUserPrivateInfoDto,
+  ): Promise<void> {
+    const userEntity = await this.userRepository.findOneBy({ userId });
+    if (!userEntity) {
+      throw new NotFoundException('사용자를 찾을 수 없습니다.');
+    }
+    await this.userRepository.update({ userId }, dto);
   }
 
   async getUserListSimple(

@@ -3,13 +3,16 @@ import {
   ConflictException,
   Controller,
   Get,
+  Patch,
   Post,
   Query,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import {
   CreateInitUserInfoDto,
+  UpdateUserPrivateInfoDto,
   UserFilterDto,
+  UserPrivateInfoResponseDto,
   UserProfileResponseDto,
   VerifyNameDto,
   UserProfilePublicDto,
@@ -83,6 +86,40 @@ export class UserController {
     return {
       success: true,
       message: '사용자명이 성공적으로 등록되었습니다.',
+    };
+  }
+
+  @Get('/private-info')
+  @ApiResponse({
+    status: 200,
+    description: '사용자 개인정보 조회 성공',
+    type: UserPrivateInfoResponseDto,
+  })
+  async getUserPrivateInfo(
+    @JwtUser() token: JwtUserPayload,
+  ): Promise<UserPrivateInfoResponseDto> {
+    const privateInfo = await this.userService.findPrivateInfo(token.userId);
+    return {
+      success: true,
+      message: '사용자 개인정보 조회 성공',
+      data: privateInfo,
+    };
+  }
+
+  @Patch('/private-info')
+  @ApiResponse({
+    status: 200,
+    description: '사용자 개인정보 수정 성공',
+    type: CommonResponseDto,
+  })
+  async updateUserPrivateInfo(
+    @JwtUser() token: JwtUserPayload,
+    @Body() dto: UpdateUserPrivateInfoDto,
+  ): Promise<CommonResponseDto> {
+    await this.userService.updatePrivateInfo(token.userId, dto);
+    return {
+      success: true,
+      message: '사용자 개인정보가 수정되었습니다.',
     };
   }
 

@@ -211,6 +211,78 @@ export class UserProfilePublicDto extends PickType(UserBaseDto, ['status']) {
   declare createdAt?: Date;
 }
 
+export class UserPrivateInfoDto {
+  @ApiProperty({
+    description: '본명',
+    type: 'string',
+    nullable: true,
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  realName?: string | null;
+
+  @ApiProperty({
+    description: '전화번호',
+    type: 'string',
+    nullable: true,
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  phone?: string | null;
+
+  @ApiProperty({
+    description: '주소',
+    type: 'string',
+    nullable: true,
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  address?: string | null;
+}
+
+export class UserPrivateInfoResponseDto extends CommonResponseDto {
+  @ApiProperty({
+    description: '사용자 개인정보',
+    type: UserPrivateInfoDto,
+  })
+  data: UserPrivateInfoDto;
+}
+
+export class UpdateUserPrivateInfoDto {
+  @ApiProperty({
+    description: '본명',
+    type: 'string',
+    nullable: true,
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  realName?: string | null;
+
+  @ApiProperty({
+    description: '전화번호',
+    type: 'string',
+    nullable: true,
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  phone?: string | null;
+
+  @ApiProperty({
+    description: '주소',
+    type: 'string',
+    nullable: true,
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  address?: string | null;
+}
+
 export class VerifyNameDto {
   @ApiProperty({
     description: '닉네임',

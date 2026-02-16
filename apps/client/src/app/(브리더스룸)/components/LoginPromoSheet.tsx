@@ -87,7 +87,7 @@ export const openLoginPromoSheet = () => {
     <LoginPromoSheet
       isOpen={isOpen}
       onOpenChange={(open) => !open && close()}
-      title="내 펫을 등록해보세요"
+      title="내 개체를 등록해보세요"
       description={
         <>
           <span className="text-gray-800">개체를 등록</span>하면
