@@ -62,11 +62,24 @@ const ReporterInfoSection = () => {
       }
     }
 
+    const newPhone = hasAnyPhone ? `${phone1}-${phone2}-${phone3}` : null;
+    const currentRealName = privateInfo?.realName ?? "";
+    const currentPhone = privateInfo?.phone ?? "";
+    const currentAddress = privateInfo?.address ?? "";
+
+    if (
+      form.realName === currentRealName &&
+      (newPhone ?? "") === currentPhone &&
+      form.address === currentAddress
+    ) {
+      setIsEditing(false);
+      return;
+    }
+
     try {
-      const phone = hasAnyPhone ? `${phone1}-${phone2}-${phone3}` : null;
       await updatePrivateInfo({
         realName: (form.realName || null) as never,
-        phone: phone as never,
+        phone: newPhone as never,
         address: (form.address || null) as never,
       });
       queryClient.invalidateQueries({ queryKey: [userControllerGetUserPrivateInfo.name] });
