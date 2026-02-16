@@ -81,9 +81,7 @@ export default function PetCard({ pet, onCardClick }: PetCardProps) {
               </span>
             )}
             {/* 분양 상태 뱃지 */}
-            {adoptionStatus && (
-              <AdoptionStatusBadge status={adoptionStatus} className="ml-auto" />
-            )}
+            {adoptionStatus && <AdoptionStatusBadge status={adoptionStatus} className="ml-auto" />}
           </div>
 
           {/* 부모 정보 */}
@@ -119,8 +117,8 @@ export default function PetCard({ pet, onCardClick }: PetCardProps) {
 
           {/* 모프 & 특성 */}
           <div className="flex flex-col gap-0.5">
-            <BadgeList items={pet.morphs} maxDisplay={4} badgeSize="sm" />
-            <BadgeList items={pet.traits} maxDisplay={4} variant="outline" badgeSize="sm" />
+            <BadgeList variant={"outline"} items={pet.morphs} maxDisplay={4} badgeSize="sm" />
+            <BadgeList items={pet.traits} maxDisplay={4} variant="secondary" badgeSize="sm" />
           </div>
         </div>
       </div>

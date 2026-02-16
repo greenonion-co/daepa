@@ -141,12 +141,8 @@ const HatchingPetCard = ({ date, pets, tab, isSelected }: PetCardProps) => {
                       )}
                     </div>
 
-                    <BadgeList items={pet.morphs} />
-                    <BadgeList
-                      items={pet.traits}
-                      variant="outline"
-                      badgeClassName="bg-white text-black dark:bg-gray-800 dark:text-gray-200"
-                    />
+                    <BadgeList variant={"outline"} items={pet.morphs} />
+                    <BadgeList items={pet.traits} variant="secondary" />
 
                     {pet?.desc && (
                       <div className="text-gray-800 dark:text-gray-200">{pet.desc}</div>

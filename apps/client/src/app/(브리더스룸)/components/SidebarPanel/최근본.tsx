@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-import { SPECIES_KOREAN_INFO } from "../../constants";
+// import { SPECIES_KOREAN_INFO } from "../../constants";
 import { PetDtoSpecies } from "@repo/api-client";
 import { useParams } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -100,15 +100,12 @@ const RecentlyViewedList = () => {
                     <span className="truncate font-bold dark:text-gray-100">{item.name}</span>
                   </div>
                   <div className="flex-1">
-                    {item.species && (
-                      <span className="text-muted-foreground truncate text-xs dark:text-gray-400">
-                        {SPECIES_KOREAN_INFO[item.species]}
-                      </span>
-                    )}
-                    <BadgeList
-                      items={item.morphs}
-                      badgeClassName="dark:bg-gray-700 dark:text-gray-200"
-                    />
+                    {/*{item.species && (*/}
+                    {/*  <span className="text-muted-foreground truncate text-xs dark:text-gray-400">*/}
+                    {/*    {SPECIES_KOREAN_INFO[item.species]}*/}
+                    {/*  </span>*/}
+                    {/*)}*/}
+                    <BadgeList variant={"outline"} maxDisplay={1} items={item.morphs} />
                   </div>
                 </div>
               </Link>

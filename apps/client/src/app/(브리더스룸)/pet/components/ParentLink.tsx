@@ -263,12 +263,8 @@ const ParentLink = ({
           </span>
 
           <div className="mt-2 flex flex-col gap-1">
-            <BadgeList items={parent.morphs} badgeClassName="dark:bg-gray-800 dark:text-gray-200" />
-            <BadgeList
-              items={parent.traits}
-              variant="outline"
-              badgeClassName="bg-white text-black dark:bg-gray-700 dark:text-gray-200"
-            />
+            <BadgeList variant={"outline"} items={parent.morphs} />
+            <BadgeList items={parent.traits} variant="secondary" />
           </div>
         </Link>
       </div>

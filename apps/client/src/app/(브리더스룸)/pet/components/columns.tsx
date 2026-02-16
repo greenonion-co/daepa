@@ -26,7 +26,6 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import TooltipText from "../../components/TooltipText";
 import AdoptionStatusBadge from "../../components/AdoptionStatusBadge";
 import DeletedPetName from "../../components/DeletedPetName";
-import HiddenPetBadge from "@/components/common/HiddenPetBadge";
 
 export const columns: ColumnDef<PetDto>[] = [
   {
@@ -139,10 +138,8 @@ export const columns: ColumnDef<PetDto>[] = [
     header: TABLE_HEADER.morphs,
     cell: ({ row }) =>
       row.original.morphs && row.original.morphs.length > 0 ? (
-        <BadgeList items={row.original.morphs} />
-      ) : (
-        <span className="text-gray-400">-</span>
-      ),
+        <BadgeList variant={"outline"} items={row.original.morphs} />
+      ) : null,
   },
   {
     accessorKey: "traits",
@@ -152,7 +149,7 @@ export const columns: ColumnDef<PetDto>[] = [
       row.original.traits && row.original.traits.length > 0 ? (
         <BadgeList
           items={row.original.traits}
-          variant="outline"
+          variant="secondary"
           badgeClassName="bg-white text-black dark:bg-gray-700 dark:text-gray-200"
         />
       ) : (
@@ -161,7 +158,7 @@ export const columns: ColumnDef<PetDto>[] = [
   },
   {
     accessorKey: "sex",
-    size: 50,
+    size: 60,
     header: TABLE_HEADER.sex,
     cell: ({ row }) => getSexIcon(row.getValue("sex") as string, { size: "sm" }),
   },
@@ -179,13 +176,7 @@ export const columns: ColumnDef<PetDto>[] = [
     header: TABLE_HEADER.weight,
     size: 60,
     cell: ({ row }) => (
-      <div className="capitalize">
-        {row.original.weight ? (
-          row.getValue("weight") + "g"
-        ) : (
-          <span className={"text-gray-400"}>-</span>
-        )}
-      </div>
+      <div className="capitalize">{row.original.weight ? row.getValue("weight") + "g" : null}</div>
     ),
   },
   {
@@ -194,15 +185,11 @@ export const columns: ColumnDef<PetDto>[] = [
     header: TABLE_HEADER.hatchingDate,
     cell: ({ row }) => {
       const hatchingDateRaw = row.getValue("hatchingDate") as string | undefined;
-      if (!hatchingDateRaw) return <div className="text-gray-400">-</div>;
+      if (!hatchingDateRaw) return null;
       const hatchingDate = DateTime.fromISO(hatchingDateRaw);
       return (
         <div className="capitalize">
-          {hatchingDate.isValid ? (
-            hatchingDate.toFormat("yy.MM.dd")
-          ) : (
-            <span className={"text-gray-400"}>-</span>
-          )}
+          {hatchingDate.isValid ? hatchingDate.toFormat("yy.MM.dd") : null}
         </div>
       );
     },
@@ -212,7 +199,7 @@ export const columns: ColumnDef<PetDto>[] = [
     header: TABLE_HEADER.father,
     cell: ({ row }) => {
       if (!row.original.father) {
-        return <span className={"text-gray-400"}>-</span>;
+        return null;
       }
 
       if (
@@ -222,7 +209,7 @@ export const columns: ColumnDef<PetDto>[] = [
         return (
           <Tooltip>
             <TooltipTrigger asChild>
-              <HiddenPetBadge />
+              <span className={"text-gray-500"}>비공개</span>
             </TooltipTrigger>
             <TooltipContent>소유자에 의해 비공개 처리된 개체입니다</TooltipContent>
           </Tooltip>
@@ -261,7 +248,7 @@ export const columns: ColumnDef<PetDto>[] = [
     header: TABLE_HEADER.mother,
     cell: ({ row }) => {
       if (!row.original.mother) {
-        return <span className={"text-gray-400"}>-</span>;
+        return null;
       }
 
       if (
@@ -271,7 +258,7 @@ export const columns: ColumnDef<PetDto>[] = [
         return (
           <Tooltip>
             <TooltipTrigger asChild>
-              <HiddenPetBadge />
+              <span className={"text-gray-500"}>비공개</span>
             </TooltipTrigger>
             <TooltipContent>소유자에 의해 비공개 처리된 개체입니다</TooltipContent>
           </Tooltip>

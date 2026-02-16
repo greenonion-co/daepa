@@ -92,16 +92,12 @@ const FormMultiSelect = ({
       >
         {disabled ? (
           selectedItems && selectedItems.length > 0 ? (
-            // <div>{selectedItems?.join(" | ")}</div>
             <BadgeList
               items={selectedItems}
               badgeSize={"md"}
               maxDisplay={isMobile ? 3 : 4}
               variant={
-                (title === "모프" && "default") ||
-                (title === "형질" && "outline") ||
-                (title === "먹이" && "secondary") ||
-                "secondary"
+                (title === "모프" && "outline") || (title === "형질" && "secondary") || "secondary"
               }
             />
           ) : (

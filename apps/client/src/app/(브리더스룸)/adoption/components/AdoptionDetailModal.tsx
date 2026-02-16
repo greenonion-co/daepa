@@ -88,13 +88,8 @@ const PetInfoCard = ({
               isMobile ? "text-xs" : "text-sm",
             )}
           >
-            <BadgeList items={morphs} badgeSize={isMobile ? "sm" : "md"} />
-            <BadgeList
-              items={traits}
-              variant="outline"
-              badgeSize={isMobile ? "sm" : "md"}
-              badgeClassName="bg-white text-black dark:bg-gray-700 dark:text-gray-200"
-            />
+            <BadgeList variant={"outline"} items={morphs} badgeSize={isMobile ? "sm" : "md"} />
+            <BadgeList items={traits} variant="secondary" badgeSize={isMobile ? "sm" : "md"} />
             {hatchingDate && (
               <p className="font-[600] text-blue-600">
                 {DateTime.fromFormat(hatchingDate, "yyyy-MM-dd").toFormat("yy.M.d")}

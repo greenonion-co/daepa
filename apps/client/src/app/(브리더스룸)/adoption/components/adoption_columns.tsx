@@ -11,18 +11,16 @@ import {
 import {
   ADOPTION_METHOD_KOREAN_INFO,
   GROWTH_KOREAN_INFO,
-  SPECIES_KOREAN_ALIAS_INFO,
   STATUS_MAP,
   TABLE_HEADER,
 } from "../../constants";
 import { isNotNil } from "es-toolkit";
 import LinkButton from "../../components/LinkButton";
-import { BadgeCheck, Lock } from "lucide-react";
+import { BadgeCheck } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import BadgeList from "../../components/BadgeList";
 import DeletedPetName from "../../components/DeletedPetName";
 import { getSexIcon } from "@/lib/sex-icon";
-import HiddenPetBadge from "@/components/common/HiddenPetBadge";
 
 export const columns: ColumnDef<AdoptionDto>[] = [
   {
@@ -65,7 +63,7 @@ export const columns: ColumnDef<AdoptionDto>[] = [
     cell: ({ row }) => {
       const morphs = row.original.pet.morphs;
 
-      return <BadgeList items={morphs} />;
+      return <BadgeList variant={"outline"} items={morphs} />;
     },
   },
   {
@@ -74,7 +72,7 @@ export const columns: ColumnDef<AdoptionDto>[] = [
     cell: ({ row }) => {
       const traits = row.original.pet.traits;
 
-      return <BadgeList items={traits} variant="outline" badgeClassName="bg-white text-black" />;
+      return <BadgeList items={traits} variant="secondary" badgeClassName="bg-white text-black" />;
     },
   },
   {
@@ -128,7 +126,7 @@ export const columns: ColumnDef<AdoptionDto>[] = [
     accessorFn: (row) => row.pet.father,
     cell: ({ row }) => {
       const father = row.original.pet.father;
-      if (!father) return <div className="text-sm text-gray-400">-</div>;
+      if (!father) return null;
       if (
         "hiddenStatus" in father &&
         father.hiddenStatus === PetHiddenStatusDtoHiddenStatus.SECRET
@@ -136,7 +134,7 @@ export const columns: ColumnDef<AdoptionDto>[] = [
         return (
           <Tooltip>
             <TooltipTrigger asChild>
-              <HiddenPetBadge />
+              <span className={"text-gray-500"}>비공개</span>
             </TooltipTrigger>
             <TooltipContent>
               <p>숨김 처리된 개체입니다</p>
@@ -174,7 +172,7 @@ export const columns: ColumnDef<AdoptionDto>[] = [
     header: "모개체",
     cell: ({ row }) => {
       const mother = row.original.pet.mother;
-      if (!mother) return <div className="text-sm text-gray-400">-</div>;
+      if (!mother) return null;
       if (
         "hiddenStatus" in mother &&
         mother.hiddenStatus === PetHiddenStatusDtoHiddenStatus.SECRET
@@ -182,7 +180,7 @@ export const columns: ColumnDef<AdoptionDto>[] = [
         return (
           <Tooltip>
             <TooltipTrigger asChild>
-              <HiddenPetBadge />
+              <span className={"text-gray-500"}>비공개</span>
             </TooltipTrigger>
             <TooltipContent>
               <p>숨김 처리된 개체입니다</p>
@@ -219,7 +217,7 @@ export const columns: ColumnDef<AdoptionDto>[] = [
     header: "메모",
     cell: ({ row }) => {
       const memo = row.original.memo;
-      return <div className="text-sm text-gray-600">{memo || "-"}</div>;
+      return <div className="text-sm text-gray-600">{memo}</div>;
     },
   },
 ];

@@ -139,12 +139,8 @@ export default function SiblingPetCard({
           )}
         </div>
 
-        <BadgeList items={pet.morphs} />
-        <BadgeList
-          items={pet.traits}
-          variant="outline"
-          badgeClassName="bg-white text-black dark:bg-gray-700 dark:text-gray-200"
-        />
+        <BadgeList variant={"outline"} items={pet.morphs} />
+        <BadgeList items={pet.traits} variant={"secondary"} />
 
         {pet.hatchingDate && (
           <span className="mt-2 text-[11px] font-[600] text-gray-500 dark:text-gray-400">
