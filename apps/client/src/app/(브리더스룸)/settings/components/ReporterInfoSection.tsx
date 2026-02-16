@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { User, Phone, MapPin } from "lucide-react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   userControllerGetUserPrivateInfo,
   userControllerUpdateUserPrivateInfo,
@@ -14,8 +14,6 @@ import { SettingsGroup } from "./SettingsGroup";
 import { SettingsItem } from "./SettingsItem";
 
 const ReporterInfoSection = () => {
-  const queryClient = useQueryClient();
-
   const [isEditing, setIsEditing] = useState(false);
   const [form, setForm] = useState({
     realName: "",
@@ -25,7 +23,7 @@ const ReporterInfoSection = () => {
     address: "",
   });
 
-  const { data: privateInfo } = useQuery({
+  const { data: privateInfo, refetch } = useQuery({
     queryKey: [userControllerGetUserPrivateInfo.name],
     queryFn: userControllerGetUserPrivateInfo,
     select: (response) => response.data.data,
@@ -82,7 +80,7 @@ const ReporterInfoSection = () => {
         phone: newPhone as never,
         address: (form.address || null) as never,
       });
-      queryClient.invalidateQueries({ queryKey: [userControllerGetUserPrivateInfo.name] });
+      await refetch();
       toast.success("신고자 정보가 저장되었습니다.");
       setIsEditing(false);
     } catch (error: unknown) {
@@ -101,7 +99,9 @@ const ReporterInfoSection = () => {
       {isEditing ? (
         <div className="space-y-3 p-4">
           <div className="space-y-2">
-            <label className="text-[13px] font-medium text-gray-600 dark:text-gray-400">이름</label>
+            <label className="text-[13px] font-medium text-gray-600 dark:text-gray-400">
+              성명(상호)
+            </label>
             <input
               type="text"
               className="h-[40px] w-full rounded-xl border border-gray-200 p-3 text-[16px] placeholder:font-[500] dark:border-neutral-600 dark:bg-neutral-700 dark:text-white"
@@ -192,7 +192,7 @@ const ReporterInfoSection = () => {
             icon={<User className="h-4 w-4" />}
             iconBgColor="bg-orange-100 dark:bg-orange-900/30"
             iconColor="text-orange-600 dark:text-orange-400"
-            label="이름"
+            label="성명(상호)"
             value={String(privateInfo?.realName ?? "미설정")}
             onClick={handleStartEdit}
             showChevron
