@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import Loading from "./Loading";
 import { IMAGE_TRANSFORMS } from "@/app/constants";
+import { SmilePlus } from "lucide-react";
 
 /** maxSize 기준으로 적절한 transform 선택 */
 const getTransform = (maxSize: number) => {
@@ -108,12 +109,7 @@ const PetThumbnail = ({
         />
       ) : (
         <div className="flex h-full w-full items-center justify-center opacity-50">
-          <Image
-            src="/assets/lizard.png"
-            alt="기본 펫 이미지"
-            fill
-            className="object-contain p-1"
-          />
+          <SmilePlus className="h-1/3 w-1/3" />
         </div>
       )}
     </div>
