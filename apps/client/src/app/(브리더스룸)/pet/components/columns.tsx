@@ -58,9 +58,9 @@ export const columns: ColumnDef<PetDto>[] = [
       return (
         <div className="text-center">
           {isPublic ? (
-            <LockOpen className="h-4 w-4 text-blue-500 dark:text-neutral-200" />
+            <LockOpen className="h-4 w-4 stroke-3 text-blue-500 dark:text-neutral-200" />
           ) : (
-            <Lock className="h-4 w-4 text-yellow-500 dark:text-yellow-400" />
+            <Lock className="h-4 w-4 stroke-3 text-yellow-500 dark:text-yellow-400" />
           )}
         </div>
       );
