@@ -64,19 +64,6 @@ export default function PetCard({ pet, onCardClick }: PetCardProps) {
               </div>
             )}
           </div>
-          {/* 성별 */}
-          {sexLabel && (
-            <span
-              className={cn(
-                "text-[10px] font-[500]",
-                (pet.sex === "M" && "text-blue-500") ||
-                  (pet.sex === "F" && "text-red-500") ||
-                  "text-amber-500",
-              )}
-            >
-              {sexLabel}
-            </span>
-          )}
         </div>
 
         {/* 컨텐츠 */}
@@ -89,7 +76,7 @@ export default function PetCard({ pet, onCardClick }: PetCardProps) {
             {/* 성장단계 */}
             {pet.growth && (
               <p className="text-xs font-[500] text-gray-400 dark:text-gray-400">
-                | {GROWTH_KOREAN_INFO[pet.growth as PetDtoGrowth]}
+                {GROWTH_KOREAN_INFO[pet.growth as PetDtoGrowth]}
               </p>
             )}
             {/* 해칭일 */}
@@ -100,6 +87,19 @@ export default function PetCard({ pet, onCardClick }: PetCardProps) {
                   return dt.isValid ? dt.toFormat("yy.MM.dd") : "-";
                 })()}
               </p>
+            )}
+            {/* 성별 */}
+            {sexLabel && (
+              <span
+                className={cn(
+                  "text-[10px] font-[500]",
+                  (pet.sex === "M" && "text-blue-500") ||
+                    (pet.sex === "F" && "text-red-500") ||
+                    "text-amber-500",
+                )}
+              >
+                {sexLabel}
+              </span>
             )}
           </div>
 
@@ -118,7 +118,7 @@ export default function PetCard({ pet, onCardClick }: PetCardProps) {
                   {pet.father.name}
                 </button>
               )}
-              {pet.father && pet.mother && " × "}
+              {pet.father && "name" in pet.father && pet.mother && "name" in pet.mother && " × "}
               {pet.mother && "name" in pet.mother && "petId" in pet.mother && (
                 <button
                   type="button"
@@ -140,7 +140,6 @@ export default function PetCard({ pet, onCardClick }: PetCardProps) {
             <BadgeList items={pet.traits} maxDisplay={3} variant="outline" badgeSize="sm" />
           </div>
         </div>
-
       </div>
     </div>
   );
