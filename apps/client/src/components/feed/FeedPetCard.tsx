@@ -1,6 +1,6 @@
 "use client";
 
-import { PetDto, PetDtoSex } from "@repo/api-client";
+import { PetDto } from "@repo/api-client";
 import Link from "next/link";
 import { DateTime } from "luxon";
 import PetThumbnail from "@/components/common/PetThumbnail";
@@ -12,12 +12,8 @@ interface FeedPetCardProps {
   pet: PetDto;
 }
 
-function isMale(sex?: PetDtoSex) {
-  return sex === PetDtoSex.MALE;
-}
-
 export default function FeedPetCard({ pet }: FeedPetCardProps) {
-  const sexLabel = getSexIcon(pet.sex, { size: "sm" });
+  const sexLabel = getSexIcon(pet.sex, { size: "xs" });
 
   return (
     <Link href={`/pet/${pet.petId}`} className="block">
@@ -71,7 +67,9 @@ export default function FeedPetCard({ pet }: FeedPetCardProps) {
               <span
                 className={cn(
                   "text-base font-bold",
-                  isMale(pet.sex) ? "text-blue-500" : "text-pink-500",
+                  (pet.sex === "M" && "text-blue-500") ||
+                    (pet.sex === "F" && "text-pink-500") ||
+                    "text-amber-500",
                 )}
               >
                 {sexLabel}

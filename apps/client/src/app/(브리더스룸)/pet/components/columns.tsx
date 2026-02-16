@@ -163,7 +163,7 @@ export const columns: ColumnDef<PetDto>[] = [
     accessorKey: "sex",
     size: 50,
     header: TABLE_HEADER.sex,
-    cell: ({ row }) => getSexIcon(row.getValue("sex") as string),
+    cell: ({ row }) => getSexIcon(row.getValue("sex") as string, { size: "sm" }),
   },
   {
     accessorKey: "growth",
