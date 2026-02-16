@@ -406,9 +406,9 @@ export const TRAIT_LIST_BY_SPECIES: Record<PetDtoSpecies, Record<string, string>
 export const SALE_STATUS_KOREAN_INFO = {
   NONE: "미지정",
   NFS: "NFS",
-  ON_SALE: "분양 중",
-  ON_RESERVATION: "예약 중",
-  SOLD: "분양 완료",
+  ON_SALE: "분양중",
+  ON_RESERVATION: "예약중",
+  SOLD: "분양완료",
 };
 
 export const TABLE_HEADER = {
@@ -660,7 +660,7 @@ export const SELECTOR_CONFIGS: Record<
     selectList: [
       {
         key: "NONE",
-        value: "-",
+        value: "미지정",
       },
       {
         key: "NFS",
@@ -668,15 +668,15 @@ export const SELECTOR_CONFIGS: Record<
       },
       {
         key: "ON_SALE",
-        value: "분양 중",
+        value: "분양중",
       },
       {
         key: "ON_RESERVATION",
-        value: "예약 중",
+        value: "예약중",
       },
       {
         key: "SOLD",
-        value: "분양 완료",
+        value: "분양완료",
       },
     ],
   },
