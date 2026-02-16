@@ -36,13 +36,13 @@ const ReporterInfoSection = () => {
   });
 
   const handleStartEdit = () => {
-    const phoneParts = (privateInfo?.phone as string | undefined)?.split("-").map((s) => s.trim());
+    const phoneParts = privateInfo?.phone?.split("-")?.map((s) => s.trim());
     setForm({
-      realName: (privateInfo?.realName as string | undefined) ?? "",
+      realName: privateInfo?.realName ?? "",
       phone1: phoneParts?.[0] ?? "",
       phone2: phoneParts?.[1] ?? "",
       phone3: phoneParts?.[2] ?? "",
-      address: (privateInfo?.address as string | undefined) ?? "",
+      address: privateInfo?.address ?? "",
     });
     setIsEditing(true);
   };
@@ -88,9 +88,7 @@ const ReporterInfoSection = () => {
       {isEditing ? (
         <div className="space-y-3 p-4">
           <div className="space-y-2">
-            <label className="text-[13px] font-medium text-gray-600 dark:text-gray-400">
-              이름
-            </label>
+            <label className="text-[13px] font-medium text-gray-600 dark:text-gray-400">이름</label>
             <input
               type="text"
               className="h-[40px] w-full rounded-xl border border-gray-200 p-3 text-[16px] placeholder:font-[500] dark:border-neutral-600 dark:bg-neutral-700 dark:text-white"
@@ -146,9 +144,7 @@ const ReporterInfoSection = () => {
             </div>
           </div>
           <div className="space-y-2">
-            <label className="text-[13px] font-medium text-gray-600 dark:text-gray-400">
-              주소
-            </label>
+            <label className="text-[13px] font-medium text-gray-600 dark:text-gray-400">주소</label>
             <input
               type="text"
               className="h-[40px] w-full rounded-xl border border-gray-200 p-3 text-[16px] placeholder:font-[500] dark:border-neutral-600 dark:bg-neutral-700 dark:text-white"
