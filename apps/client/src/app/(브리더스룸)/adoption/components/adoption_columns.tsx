@@ -10,7 +10,6 @@ import {
 } from "@repo/api-client";
 import {
   ADOPTION_METHOD_KOREAN_INFO,
-  GENDER_KOREAN_INFO,
   GROWTH_KOREAN_INFO,
   SPECIES_KOREAN_ALIAS_INFO,
   STATUS_MAP,
@@ -22,6 +21,8 @@ import { BadgeCheck, Lock } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import BadgeList from "../../components/BadgeList";
 import DeletedPetName from "../../components/DeletedPetName";
+import { getSexIcon } from "@/lib/sex-icon";
+import HiddenPetBadge from "@/components/common/HiddenPetBadge";
 
 export const columns: ColumnDef<AdoptionDto>[] = [
   {
@@ -36,15 +37,14 @@ export const columns: ColumnDef<AdoptionDto>[] = [
       );
     },
   },
-  {
-    accessorKey: "pet.species",
-    header: TABLE_HEADER.species,
-    cell: ({ row }) => {
-      const species = row.original.pet.species;
-      return <div className="capitalize">{SPECIES_KOREAN_ALIAS_INFO[species]}</div>;
-    },
-  },
-
+  // {
+  //   accessorKey: "pet.species",
+  //   header: TABLE_HEADER.species,
+  //   cell: ({ row }) => {
+  //     const species = row.original.pet.species;
+  //     return <div className="capitalize">{SPECIES_KOREAN_ALIAS_INFO[species]}</div>;
+  //   },
+  // },
   {
     accessorKey: "pet.name",
     header: TABLE_HEADER.name,
@@ -82,7 +82,7 @@ export const columns: ColumnDef<AdoptionDto>[] = [
     header: "성별",
     cell: ({ row }) => {
       const sex = row.original.pet.sex;
-      return <div className="capitalize">{sex ? GENDER_KOREAN_INFO[sex] : "-"}</div>;
+      return getSexIcon(sex, { size: "sm" });
     },
   },
   {
@@ -136,10 +136,7 @@ export const columns: ColumnDef<AdoptionDto>[] = [
         return (
           <Tooltip>
             <TooltipTrigger asChild>
-              <div className="flex cursor-help items-center gap-1 text-sm text-gray-400">
-                <Lock className="h-3 w-3" />
-                비공개
-              </div>
+              <HiddenPetBadge />
             </TooltipTrigger>
             <TooltipContent>
               <p>숨김 처리된 개체입니다</p>
@@ -185,10 +182,7 @@ export const columns: ColumnDef<AdoptionDto>[] = [
         return (
           <Tooltip>
             <TooltipTrigger asChild>
-              <div className="flex cursor-help items-center gap-1 text-sm text-gray-400">
-                <Lock className="h-3 w-3" />
-                비공개
-              </div>
+              <HiddenPetBadge />
             </TooltipTrigger>
             <TooltipContent>
               <p>숨김 처리된 개체입니다</p>

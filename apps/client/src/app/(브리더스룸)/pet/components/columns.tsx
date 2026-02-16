@@ -25,19 +25,7 @@ import { DateTime } from "luxon";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import TooltipText from "../../components/TooltipText";
 import DeletedPetName from "../../components/DeletedPetName";
-
-const LockParentBadge = () => {
-  return (
-    <div
-      className={
-        "flex w-fit items-center gap-1 rounded-md border border-yellow-200 bg-yellow-50 px-2 py-0.5 opacity-70"
-      }
-    >
-      <Lock className="h-4 w-4 text-yellow-500 dark:text-yellow-400" />
-      <span className={"text-yellow-600 dark:text-yellow-600"}>비공개</span>
-    </div>
-  );
-};
+import HiddenPetBadge from "@/components/common/HiddenPetBadge";
 
 export const columns: ColumnDef<PetDto>[] = [
   {
@@ -220,7 +208,7 @@ export const columns: ColumnDef<PetDto>[] = [
         return (
           <Tooltip>
             <TooltipTrigger asChild>
-              <LockParentBadge />
+              <HiddenPetBadge />
             </TooltipTrigger>
             <TooltipContent>소유자에 의해 비공개 처리된 개체입니다</TooltipContent>
           </Tooltip>
@@ -269,7 +257,7 @@ export const columns: ColumnDef<PetDto>[] = [
         return (
           <Tooltip>
             <TooltipTrigger asChild>
-              <LockParentBadge />
+              <HiddenPetBadge />
             </TooltipTrigger>
             <TooltipContent>소유자에 의해 비공개 처리된 개체입니다</TooltipContent>
           </Tooltip>
