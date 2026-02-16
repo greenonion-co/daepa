@@ -136,8 +136,8 @@ export default function PetCard({ pet, onCardClick }: PetCardProps) {
 
           {/* 모프 & 특성 */}
           <div className="flex flex-col gap-0.5">
-            <BadgeList items={pet.morphs} maxDisplay={3} badgeSize="sm" />
-            <BadgeList items={pet.traits} maxDisplay={3} variant="outline" badgeSize="sm" />
+            <BadgeList items={pet.morphs} maxDisplay={4} badgeSize="sm" />
+            <BadgeList items={pet.traits} maxDisplay={4} variant="outline" badgeSize="sm" />
           </div>
         </div>
       </div>
