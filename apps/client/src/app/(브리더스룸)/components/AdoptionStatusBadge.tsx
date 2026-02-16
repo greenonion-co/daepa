@@ -4,10 +4,10 @@ import { cn } from "@/lib/utils";
 import { SALE_STATUS_KOREAN_INFO } from "../constants";
 
 const STATUS_STYLE: Record<string, string> = {
-  [PetAdoptionDtoStatus.NFS]: "border border-pink-500 text-pink-500",
-  [PetAdoptionDtoStatus.ON_SALE]: "border border-green-500 text-green-500",
-  [PetAdoptionDtoStatus.ON_RESERVATION]: "border border-yellow-500 text-yellow-500",
-  [PetAdoptionDtoStatus.SOLD]: "border border-blue-500 text-blue-500",
+  [PetAdoptionDtoStatus.NFS]: "bg-pink-300",
+  [PetAdoptionDtoStatus.ON_SALE]: "bg-blue-300",
+  [PetAdoptionDtoStatus.ON_RESERVATION]: "bg-yellow-300",
+  [PetAdoptionDtoStatus.SOLD]: "bg-gray-300",
 };
 
 const AdoptionStatusBadge = forwardRef<
