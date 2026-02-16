@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Check, ChevronDown, X } from "lucide-react";
 import { useIsMobile } from "@/hooks/useMobile";
+import BadgeList from "@/app/(브리더스룸)/components/BadgeList";
 
 interface FormMultiSelectProps {
   title: string;
@@ -91,7 +92,18 @@ const FormMultiSelect = ({
       >
         {disabled ? (
           selectedItems && selectedItems.length > 0 ? (
-            <div>{selectedItems?.join(" | ")}</div>
+            // <div>{selectedItems?.join(" | ")}</div>
+            <BadgeList
+              items={selectedItems}
+              badgeSize={"md"}
+              maxDisplay={isMobile ? 3 : 4}
+              variant={
+                (title === "모프" && "default") ||
+                (title === "형질" && "outline") ||
+                (title === "먹이" && "secondary") ||
+                "secondary"
+              }
+            />
           ) : (
             <div>-</div>
           )
