@@ -69,12 +69,20 @@ const REPORTER = { x: 395, y: 364 } as const;
 export async function generateTransferReport(data: TransferReportData): Promise<void> {
   // 1. Load existing PDF template
   const pdfResponse = await fetch("/files/양도양수보관신고서.pdf");
+  if (!pdfResponse.ok) {
+    throw new Error("양도양수보관신고서 PDF 템플릿을 불러오지 못했습니다.");
+  }
+
   const pdfBytes = await pdfResponse.arrayBuffer();
   const pdfDoc = await PDFDocument.load(pdfBytes);
 
   // 2. Register fontkit & embed Korean font
   pdfDoc.registerFontkit(fontkit);
   const fontResponse = await fetch("/fonts/PretendardVariable.ttf");
+  if (!fontResponse.ok) {
+    throw new Error("PDF 폰트를 불러오지 못했습니다.");
+  }
+
   const fontBytes = await fontResponse.arrayBuffer();
   const font = await pdfDoc.embedFont(fontBytes);
 
