@@ -18,7 +18,6 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/lib/toast";
 import { AxiosError } from "axios";
 import { cn } from "@/lib/utils";
-import Image from "next/image";
 import { TUTORIAL_TARGETS } from "./MatingDetailDialogTutorial";
 import TutorialMockLayingItem from "./TutorialMockLayingItem";
 
