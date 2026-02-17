@@ -406,9 +406,9 @@ export const TRAIT_LIST_BY_SPECIES: Record<PetDtoSpecies, Record<string, string>
 export const SALE_STATUS_KOREAN_INFO = {
   NONE: "미지정",
   NFS: "NFS",
-  ON_SALE: "분양 중",
-  ON_RESERVATION: "예약 중",
-  SOLD: "분양 완료",
+  ON_SALE: "분양중",
+  ON_RESERVATION: "예약중",
+  SOLD: "분양완료",
 };
 
 export const TABLE_HEADER = {
@@ -660,7 +660,7 @@ export const SELECTOR_CONFIGS: Record<
     selectList: [
       {
         key: "NONE",
-        value: "-",
+        value: "미지정",
       },
       {
         key: "NFS",
@@ -668,15 +668,15 @@ export const SELECTOR_CONFIGS: Record<
       },
       {
         key: "ON_SALE",
-        value: "분양 중",
+        value: "분양중",
       },
       {
         key: "ON_RESERVATION",
-        value: "예약 중",
+        value: "예약중",
       },
       {
         key: "SOLD",
-        value: "분양 완료",
+        value: "분양완료",
       },
     ],
   },
@@ -709,7 +709,7 @@ export const SELECTOR_CONFIGS: Record<
 
 export const SIDEBAR_ITEMS = [
   {
-    title: "MY 펫",
+    title: "MY개체",
     url: "/pet",
     icon: Home,
   },
@@ -755,23 +755,28 @@ export const NOTIFICATION_TYPE: Record<UserNotificationDtoType, { label: string;
 export const STATUS_MAP = {
   pending: {
     label: "대기중",
-    color: "bg-yellow-600 ",
+    color: "bg-amber-400 text-white border-none",
+    icon: "fill-amber-400 stroke-amber-400",
   },
   rejected: {
     label: "거절됨",
-    color: "bg-red-700",
+    color: "bg-red-400 text-white border-none",
+    icon: "fill-red-400 stroke-red-400",
   },
   approved: {
     label: "연동됨",
-    color: "bg-green-700",
+    color: "bg-green-400 text-white border-none",
+    icon: "fill-green-400 stroke-green-400",
   },
   deleted: {
     label: "삭제됨",
-    color: "bg-red-700",
+    color: "bg-red-400 text-white border-none",
+    icon: "fill-red-400 stroke-red-400",
   },
   cancelled: {
     label: "취소됨",
-    color: "bg-gray-600",
+    color: "bg-gray-400 text-white border-none",
+    icon: "fill-gray-400 stroke-gray-400",
   },
 };
 

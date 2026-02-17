@@ -1,4 +1,3 @@
-import { Mars, Venus, CircleHelp } from "lucide-react";
 import { cn } from "./utils";
 
 type SexIconSize = "xs" | "sm" | "md" | "lg" | "xl";
@@ -8,26 +7,28 @@ interface SexIconOptions {
   className?: string;
 }
 
-const SIZE_CLASSES: Record<SexIconSize, string> = {
-  xs: "w-3",
-  sm: "w-4",
-  md: "w-5",
-  lg: "w-6",
-  xl: "w-8",
+const TEXT_SIZE_CLASSES: Record<SexIconSize, string> = {
+  xs: "text-xs",
+  sm: "text-sm",
+  md: "text-base",
+  lg: "text-lg",
+  xl: "text-xl",
 };
 
 export function getSexIcon(sex: string | undefined | null, options: SexIconOptions = {}) {
+  if (!sex) return null;
+
   const { size = "md", className } = options;
-  const sizeClass = SIZE_CLASSES[size];
+  const textSizeClass = TEXT_SIZE_CLASSES[size];
 
   if (sex === "M") {
-    return <Mars className={cn(sizeClass, "stroke-3 text-blue-300", className)} />;
+    return <div className={cn(textSizeClass, "text-blue-500", className)}>수컷</div>;
   }
 
   if (sex === "F") {
-    return <Venus className={cn(sizeClass, "stroke-3 text-red-300", className)} />;
+    return <div className={cn(textSizeClass, "text-red-500", className)}>암컷</div>;
   }
 
   // 미구분
-  return <CircleHelp className={cn(sizeClass, "stroke-3 text-neutral-300", className)} />;
+  return <div className={cn(textSizeClass, "text-gray-500", className)}>미구분</div>;
 }

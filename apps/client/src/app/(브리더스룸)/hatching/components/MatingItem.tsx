@@ -9,6 +9,7 @@ import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { orderBy } from "es-toolkit";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import CreateLayingModal from "./CreateLayingModal";
+import { CircleAlert } from "lucide-react";
 
 import LayingItem from "./LayingItem";
 import { DateTime } from "luxon";
@@ -17,7 +18,6 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/lib/toast";
 import { AxiosError } from "axios";
 import { cn } from "@/lib/utils";
-import Image from "next/image";
 import { TUTORIAL_TARGETS } from "./MatingDetailDialogTutorial";
 import TutorialMockLayingItem from "./TutorialMockLayingItem";
 
@@ -171,7 +171,7 @@ const MatingItem = ({ mating, father, mother, initialLayingId, showTutorial }: M
   );
 
   return (
-    <div className="relative flex h-[calc(100vh-300px)] w-full flex-col">
+    <div className="relative flex h-[calc(100vh-200px)] w-full flex-col">
       <div className="flex flex-col justify-center gap-1">
         <div
           data-tutorial={TUTORIAL_TARGETS.CLUTCH_TABS}
@@ -220,7 +220,7 @@ const MatingItem = ({ mating, father, mother, initialLayingId, showTutorial }: M
         </div>
       </div>
 
-      <ScrollArea className="relative flex h-[calc(100vh-350px)] w-full flex-col px-2">
+      <ScrollArea className="relative flex max-h-[90%] w-full flex-col px-2">
         {sortedLayingsByDate && sortedLayingsByDate.length > 0 ? (
           sortedLayingsByDate.map((layingData) => (
             <div
@@ -280,7 +280,7 @@ const MatingItem = ({ mating, father, mother, initialLayingId, showTutorial }: M
           <TutorialMockLayingItem />
         ) : (
           <div className="flex h-full w-full flex-col items-center justify-center py-5 text-center text-[14px] text-gray-700 dark:text-gray-400">
-            <Image src="/assets/lizard.png" alt="산란 데이터 없음" width={150} height={150} />
+            <CircleAlert className={"my-4 opacity-40"} width={60} height={60} />
             산란된 알이 없습니다.
           </div>
         )}

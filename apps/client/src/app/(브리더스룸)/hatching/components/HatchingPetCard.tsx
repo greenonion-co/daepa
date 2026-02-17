@@ -1,16 +1,11 @@
 "use client";
 import { DateTime } from "luxon";
-import {
-  EGG_STATUS_KOREAN_INFO,
-  GENDER_KOREAN_INFO,
-  SPECIES_KOREAN_ALIAS_INFO,
-} from "../../constants";
+import { EGG_STATUS_KOREAN_INFO } from "../../constants";
 import {
   PetDto,
   PetDtoEggStatus,
   PetDtoFather,
   PetDtoMother,
-  PetDtoSex,
   PetDtoType,
   PetHiddenStatusDtoHiddenStatus,
 } from "@repo/api-client";
@@ -20,6 +15,7 @@ import TooltipText from "../../components/TooltipText";
 import { useEffect, useRef } from "react";
 import BadgeList from "../../components/BadgeList";
 import Link from "next/link";
+import { getSexIcon } from "@/lib/sex-icon";
 
 interface PetCardProps {
   date: string;
@@ -88,12 +84,10 @@ const HatchingPetCard = ({ date, pets, tab, isSelected }: PetCardProps) => {
                       {pet.type === PetDtoType.PET ? (
                         <div className="flex items-center gap-1">
                           <div className="text-gray-800 dark:text-gray-300">{pet?.name}</div>
-                          <div className="text-[12px] text-gray-500 dark:text-gray-400">
-                            | {SPECIES_KOREAN_ALIAS_INFO[pet.species]}
-                          </div>
-                          <div className="text-[12px] text-gray-500 dark:text-gray-400">
-                            | {GENDER_KOREAN_INFO[pet.sex ?? PetDtoSex.NON]}
-                          </div>
+                          {/*<div className="text-[12px] text-gray-500 dark:text-gray-400">*/}
+                          {/*  | {SPECIES_KOREAN_ALIAS_INFO[pet.species]}*/}
+                          {/*</div>*/}
+                          {getSexIcon(pet.sex, { size: "xs" })}
                         </div>
                       ) : (
                         <div className="flex gap-1">
@@ -141,12 +135,8 @@ const HatchingPetCard = ({ date, pets, tab, isSelected }: PetCardProps) => {
                       )}
                     </div>
 
-                    <BadgeList items={pet.morphs} />
-                    <BadgeList
-                      items={pet.traits}
-                      variant="outline"
-                      badgeClassName="bg-white text-black dark:bg-gray-800 dark:text-gray-200"
-                    />
+                    <BadgeList variant={"outline"} items={pet.morphs} />
+                    <BadgeList items={pet.traits} variant="secondary" />
 
                     {pet?.desc && (
                       <div className="text-gray-800 dark:text-gray-200">{pet.desc}</div>
@@ -156,7 +146,7 @@ const HatchingPetCard = ({ date, pets, tab, isSelected }: PetCardProps) => {
 
                 <div
                   className={cn(
-                    "font-[600] text-gray-600 dark:text-gray-400",
+                    "text-gray-600 dark:text-gray-400",
                     pet.type === PetDtoType.PET && "text-blue-700 dark:text-blue-300",
                   )}
                 >
@@ -196,7 +186,7 @@ const HatchingPetCard = ({ date, pets, tab, isSelected }: PetCardProps) => {
                       })()
                     : (() => {
                         const d = DateTime.fromISO(pet.hatchingDate ?? "");
-                        return d.isValid ? `${d.toFormat("MM/dd")} 해칭` : "";
+                        return d.isValid ? `${d.toFormat("MM/dd")} 해칭 완료` : "";
                       })()}
                 </div>
               </div>

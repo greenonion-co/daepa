@@ -1,23 +1,18 @@
 "use client";
 
-import { PetDto, PetDtoSex } from "@repo/api-client";
+import { PetDto } from "@repo/api-client";
 import Link from "next/link";
 import { DateTime } from "luxon";
 import PetThumbnail from "@/components/common/PetThumbnail";
 import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
 import { getSexIcon } from "@/lib/sex-icon";
 
 interface FeedPetCardProps {
   pet: PetDto;
 }
 
-function isMale(sex?: PetDtoSex) {
-  return sex === PetDtoSex.MALE;
-}
-
 export default function FeedPetCard({ pet }: FeedPetCardProps) {
-  const sexLabel = getSexIcon(pet.sex, { size: "sm" });
+  const sexLabel = getSexIcon(pet.sex, { size: "xs" });
 
   return (
     <Link href={`/pet/${pet.petId}`} className="block">
@@ -67,16 +62,7 @@ export default function FeedPetCard({ pet }: FeedPetCardProps) {
             <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">
               {pet.name || "이름 없음"}
             </h3>
-            {sexLabel && (
-              <span
-                className={cn(
-                  "text-base font-bold",
-                  isMale(pet.sex) ? "text-blue-500" : "text-pink-500",
-                )}
-              >
-                {sexLabel}
-              </span>
-            )}
+            {sexLabel}
           </div>
 
           {/* 모프 & 형질 */}

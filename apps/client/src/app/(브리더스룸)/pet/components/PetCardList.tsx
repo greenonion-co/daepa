@@ -41,8 +41,8 @@ export default function PetCardList({
   if (isEmpty) {
     return (
       <div className="flex min-h-[300px] flex-col items-center justify-center text-gray-500 dark:text-gray-400">
-        <p className="text-lg">등록된 펫이 없습니다</p>
-        <p className="mt-1 text-sm">새로운 펫을 등록해보세요</p>
+        <p className="text-lg">등록된 개체 없습니다</p>
+        <p className="mt-1 text-sm">새로운 개체를 등록해보세요</p>
       </div>
     );
   }

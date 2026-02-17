@@ -32,11 +32,11 @@ export default function PetList() {
   const router = useRouter();
   const itemPerPage = 10;
 
-  // 404 에러 처리 (펫을 찾을 수 없는 경우)
+  // 404 에러 처리 (개체를 찾을 수 없는 경우)
   useEffect(() => {
     const error = searchParams.get("error");
     if (error === "pet-not-found") {
-      toast.error("펫을 찾을 수 없습니다");
+      toast.error("개체를 찾을 수 없습니다");
       router.replace("/pet");
     }
   }, [searchParams, router]);
@@ -103,9 +103,9 @@ export default function PetList() {
   if (isLoading) return <Loading />;
 
   return (
-    <div className="min-h-screen space-y-1 bg-gray-100 dark:bg-transparent">
-      <div className="sticky top-[52px] z-[5] bg-gray-100 px-2 pt-2 pb-1 dark:bg-transparent">
-        <Filters variant="light" />
+    <div className="dark:bg-background min-h-screen space-y-1">
+      <div className="dark:bg-background sticky top-[52px] z-20 bg-white px-2 pt-2 pb-1">
+        <Filters variant="default" />
       </div>
 
       {/* 헤더: 검색 결과 + 삭제된 펫 보기 */}
@@ -126,7 +126,7 @@ export default function PetList() {
           }}
           className="flex w-fit items-center gap-1 rounded-lg px-2 py-1 text-[12px] text-gray-600 hover:bg-blue-100 hover:text-blue-700 dark:text-gray-400 dark:hover:bg-blue-900/30 dark:hover:text-blue-400"
         >
-          검색된 펫・{totalCount}마리
+          검색된 개체・{totalCount}마리
           <RefreshCcw className={cn("h-3 w-3", isRefreshing && "animate-spin")} />
         </button>
 
@@ -135,7 +135,7 @@ export default function PetList() {
             href="/pet/deleted"
             className="cursor-pointer rounded-lg px-2 py-1 text-xs text-red-600 underline hover:bg-red-100 dark:text-red-400 dark:hover:bg-red-900/30"
           >
-            삭제된 펫 보기
+            삭제된 개체 보기
           </Link>
           <ViewModeToggle />
         </div>

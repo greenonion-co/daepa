@@ -3,7 +3,7 @@
 import { Lock, LockOpen } from "lucide-react";
 import { getSexIcon } from "@/lib/sex-icon";
 import { ColumnDef } from "@tanstack/react-table";
-import { BadgeCheck } from "lucide-react";
+import { CircleSmall } from "lucide-react";
 import BadgeList from "../../components/BadgeList";
 import {
   GROWTH_KOREAN_INFO,
@@ -12,7 +12,6 @@ import {
   TABLE_HEADER,
 } from "../../constants";
 import {
-  UpdateParentRequestDtoStatus,
   PetDto,
   PetDtoGrowth,
   PetParentDto,
@@ -24,25 +23,14 @@ import LinkButton from "../../components/LinkButton";
 import { DateTime } from "luxon";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import TooltipText from "../../components/TooltipText";
+import AdoptionStatusBadge from "../../components/AdoptionStatusBadge";
 import DeletedPetName from "../../components/DeletedPetName";
-
-const LockParentBadge = () => {
-  return (
-    <div
-      className={
-        "flex w-fit items-center gap-1 rounded-md border border-yellow-200 bg-yellow-50 px-2 py-0.5 opacity-70"
-      }
-    >
-      <Lock className="h-4 w-4 text-yellow-500 dark:text-yellow-400" />
-      <span className={"text-yellow-600 dark:text-yellow-600"}>비공개</span>
-    </div>
-  );
-};
+import HiddenPetBadge from "@/components/common/HiddenPetBadge";
 
 export const columns: ColumnDef<PetDto>[] = [
   {
     accessorKey: "isPublic",
-    size: 60,
+    size: 40,
     header: () => {
       return (
         <TooltipText
@@ -58,9 +46,9 @@ export const columns: ColumnDef<PetDto>[] = [
       return (
         <div className="text-center">
           {isPublic ? (
-            <LockOpen className="h-4 w-4 text-blue-500 dark:text-neutral-200" />
+            <LockOpen className="h-4 w-4 stroke-3 text-blue-500 dark:text-neutral-200" />
           ) : (
-            <Lock className="h-4 w-4 text-yellow-500 dark:text-yellow-400" />
+            <Lock className="h-4 w-4 stroke-3 text-yellow-500 dark:text-yellow-400" />
           )}
         </div>
       );
@@ -86,36 +74,49 @@ export const columns: ColumnDef<PetDto>[] = [
     header: TABLE_HEADER.adoption_status,
     cell: ({ cell }) => {
       const adoptionData = cell.getValue() as AdoptionDto;
+      const adoptionStatus = adoptionData?.status;
 
-      if (!adoptionData?.status) return <span className="text-gray-500 dark:text-gray-400">-</span>;
+      if (!adoptionStatus || adoptionStatus === PetAdoptionDtoStatus.NONE) {
+        return null;
+      }
 
-      if (adoptionData?.status === PetAdoptionDtoStatus.NFS)
-        return <div className="w-fit rounded-md bg-pink-500 px-2 text-white">NFS</div>;
+      const adoptionLabel = SALE_STATUS_KOREAN_INFO[adoptionStatus];
+      const badge = <AdoptionStatusBadge status={adoptionStatus} />;
 
-      if (adoptionData?.status === PetAdoptionDtoStatus.NONE)
-        return <span className="text-gray-500 dark:text-gray-400">-</span>;
+      // NFS는 툴팁 없음
+      if (adoptionStatus === PetAdoptionDtoStatus.NFS) return badge;
+
       return (
-        <TooltipText
-          title={SALE_STATUS_KOREAN_INFO[adoptionData?.status]}
-          text={SALE_STATUS_KOREAN_INFO[adoptionData?.status] ?? "미정"}
-          description={adoptionData?.memo ?? ""}
-          content={
-            <div className="capitalize">
-              <div>
-                가격・{adoptionData?.price ? `${adoptionData?.price?.toLocaleString()}원` : "미정"}
+        <Tooltip>
+          <TooltipTrigger asChild>{badge}</TooltipTrigger>
+          <TooltipContent className="max-w-[300px] min-w-[200px] rounded-2xl border border-gray-300 bg-white p-5 font-[500] shadow-lg dark:border-gray-600 dark:bg-gray-700">
+            <div className="text-[16px] font-[600] text-gray-800 dark:text-gray-100">
+              {adoptionLabel}
+            </div>
+            {adoptionData?.memo && (
+              <div className="pb-2 text-[12px] text-gray-500 dark:text-gray-400">
+                {adoptionData.memo}
               </div>
-              <div>
-                분양 날짜・
-                {adoptionData?.adoptionDate
-                  ? (() => {
-                      const d = DateTime.fromISO(adoptionData.adoptionDate);
-                      return d.isValid ? d.toFormat("yy년 M월 d일") : "미정";
-                    })()
-                  : "미정"}
+            )}
+            <div className="text-[14px] break-keep whitespace-pre-wrap text-gray-800 dark:text-gray-200">
+              <div className="capitalize">
+                <div>
+                  가격・
+                  {adoptionData?.price ? `${adoptionData?.price?.toLocaleString()}원` : "미정"}
+                </div>
+                <div>
+                  분양 날짜・
+                  {adoptionData?.adoptionDate
+                    ? (() => {
+                        const d = DateTime.fromISO(adoptionData.adoptionDate);
+                        return d.isValid ? d.toFormat("yy년 M월 d일") : "미정";
+                      })()
+                    : "미정"}
+                </div>
               </div>
             </div>
-          }
-        />
+          </TooltipContent>
+        </Tooltip>
       );
     },
   },
@@ -137,10 +138,8 @@ export const columns: ColumnDef<PetDto>[] = [
     header: TABLE_HEADER.morphs,
     cell: ({ row }) =>
       row.original.morphs && row.original.morphs.length > 0 ? (
-        <BadgeList items={row.original.morphs} />
-      ) : (
-        <span className="text-gray-400">-</span>
-      ),
+        <BadgeList variant={"outline"} items={row.original.morphs} />
+      ) : null,
   },
   {
     accessorKey: "traits",
@@ -150,7 +149,7 @@ export const columns: ColumnDef<PetDto>[] = [
       row.original.traits && row.original.traits.length > 0 ? (
         <BadgeList
           items={row.original.traits}
-          variant="outline"
+          variant="secondary"
           badgeClassName="bg-white text-black dark:bg-gray-700 dark:text-gray-200"
         />
       ) : (
@@ -159,9 +158,9 @@ export const columns: ColumnDef<PetDto>[] = [
   },
   {
     accessorKey: "sex",
-    size: 50,
+    size: 60,
     header: TABLE_HEADER.sex,
-    cell: ({ row }) => getSexIcon(row.getValue("sex") as string),
+    cell: ({ row }) => getSexIcon(row.getValue("sex") as string, { size: "sm" }),
   },
   {
     accessorKey: "growth",
@@ -177,13 +176,7 @@ export const columns: ColumnDef<PetDto>[] = [
     header: TABLE_HEADER.weight,
     size: 60,
     cell: ({ row }) => (
-      <div className="capitalize">
-        {row.original.weight ? (
-          row.getValue("weight") + "g"
-        ) : (
-          <span className={"text-gray-400"}>-</span>
-        )}
-      </div>
+      <div className="capitalize">{row.original.weight ? row.getValue("weight") + "g" : null}</div>
     ),
   },
   {
@@ -192,15 +185,11 @@ export const columns: ColumnDef<PetDto>[] = [
     header: TABLE_HEADER.hatchingDate,
     cell: ({ row }) => {
       const hatchingDateRaw = row.getValue("hatchingDate") as string | undefined;
-      if (!hatchingDateRaw) return <div className="text-gray-400">-</div>;
+      if (!hatchingDateRaw) return null;
       const hatchingDate = DateTime.fromISO(hatchingDateRaw);
       return (
         <div className="capitalize">
-          {hatchingDate.isValid ? (
-            hatchingDate.toFormat("yy.MM.dd")
-          ) : (
-            <span className={"text-gray-400"}>-</span>
-          )}
+          {hatchingDate.isValid ? hatchingDate.toFormat("yy.MM.dd") : null}
         </div>
       );
     },
@@ -210,7 +199,7 @@ export const columns: ColumnDef<PetDto>[] = [
     header: TABLE_HEADER.father,
     cell: ({ row }) => {
       if (!row.original.father) {
-        return <span className={"text-gray-400"}>-</span>;
+        return null;
       }
 
       if (
@@ -220,7 +209,7 @@ export const columns: ColumnDef<PetDto>[] = [
         return (
           <Tooltip>
             <TooltipTrigger asChild>
-              <LockParentBadge />
+              <HiddenPetBadge />
             </TooltipTrigger>
             <TooltipContent>소유자에 의해 비공개 처리된 개체입니다</TooltipContent>
           </Tooltip>
@@ -228,7 +217,7 @@ export const columns: ColumnDef<PetDto>[] = [
       }
 
       const father = row.original.father as PetParentDto;
-      const status = father?.status ?? "approved";
+      const status = father?.status;
       const isDeleted = father.isDeleted;
 
       if (isDeleted) {
@@ -243,13 +232,12 @@ export const columns: ColumnDef<PetDto>[] = [
         <LinkButton
           href={`/pet/${father.petId}`}
           label={truncatedName}
-          tooltip={father.name ?? "펫 상세 페이지로 이동"}
-          className={`${STATUS_MAP[status].color} hover:text-accent/80 font-semibold text-white`}
-          icon={
-            status === UpdateParentRequestDtoStatus.APPROVED ? (
-              <BadgeCheck className="h-4 w-4 text-gray-100" />
-            ) : null
+          tooltip={
+            (status === "approved" && "혈통 인증 완료") ||
+            (status === "pending" && "혈통 인증 대기 중") ||
+            ""
           }
+          icon={<CircleSmall className={`h-3 w-3 ${STATUS_MAP[status].icon}`} />}
         />
       );
     },
@@ -259,7 +247,7 @@ export const columns: ColumnDef<PetDto>[] = [
     header: TABLE_HEADER.mother,
     cell: ({ row }) => {
       if (!row.original.mother) {
-        return <span className={"text-gray-400"}>-</span>;
+        return null;
       }
 
       if (
@@ -269,7 +257,7 @@ export const columns: ColumnDef<PetDto>[] = [
         return (
           <Tooltip>
             <TooltipTrigger asChild>
-              <LockParentBadge />
+              <HiddenPetBadge />
             </TooltipTrigger>
             <TooltipContent>소유자에 의해 비공개 처리된 개체입니다</TooltipContent>
           </Tooltip>
@@ -277,7 +265,7 @@ export const columns: ColumnDef<PetDto>[] = [
       }
 
       const mother = row.original.mother as PetParentDto;
-      const status = mother?.status ?? "approved";
+      const status = mother?.status;
       const isDeleted = mother.isDeleted;
 
       if (isDeleted) {
@@ -292,14 +280,12 @@ export const columns: ColumnDef<PetDto>[] = [
         <LinkButton
           href={`/pet/${mother.petId}`}
           label={truncatedName}
-          tooltip={mother.name ?? "펫 상세 페이지로 이동"}
-          // status가 없으면 내 펫
-          className={`${STATUS_MAP[status].color} hover:text-accent/80 font-semibold text-white`}
-          icon={
-            status === UpdateParentRequestDtoStatus.APPROVED ? (
-              <BadgeCheck className="h-4 w-4 text-gray-100" />
-            ) : null
+          tooltip={
+            (status === "approved" && "혈통 인증 완료") ||
+            (status === "pending" && "혈통 인증 대기 중") ||
+            ""
           }
+          icon={<CircleSmall className={`h-3 w-3 ${STATUS_MAP[status].icon}`} />}
         />
       );
     },

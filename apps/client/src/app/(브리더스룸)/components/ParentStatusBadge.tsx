@@ -10,7 +10,7 @@ const ParentStatusBadge = ({ status }: { status: string }) => {
       variant="outline"
       className={cn(
         STATUS_MAP[status as keyof typeof STATUS_MAP].color,
-        "rounded-full font-semibold text-gray-100",
+        "rounded-full font-semibold",
       )}
     >
       {status === UpdateParentRequestDtoStatus.APPROVED && (

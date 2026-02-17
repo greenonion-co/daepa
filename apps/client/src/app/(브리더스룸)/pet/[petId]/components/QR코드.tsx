@@ -13,7 +13,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { cn, generateQRCode } from "@/lib/utils";
 import { useEffect, useState, useCallback } from "react";
 import { PetDto } from "@repo/api-client";
-import { SPECIES_KOREAN_ALIAS_INFO, GENDER_KOREAN_INFO } from "@/app/(브리더스룸)/constants";
+import { GENDER_KOREAN_INFO } from "@/app/(브리더스룸)/constants";
 import { DateTime } from "luxon";
 import { useIsMyPet } from "@/hooks/useIsMyPet";
 
@@ -31,39 +31,56 @@ type PetInfoOption = {
 type sizeOption = {
   id: "small" | "medium" | "large";
   label: "S" | "M" | "L";
-  qrSize: number;
+  width: number;
+  height: number;
   padding: number;
   lineHeight: number;
   fontSize: number;
 };
 
 const SIZE_OPTIONS: sizeOption[] = [
-  { id: "small", label: "S", qrSize: 150, padding: 16, lineHeight: 22, fontSize: 14 },
-  { id: "medium", label: "M", qrSize: 200, padding: 20, lineHeight: 26, fontSize: 16 },
-  { id: "large", label: "L", qrSize: 280, padding: 24, lineHeight: 32, fontSize: 20 },
+  { id: "small", label: "S", width: 240, height: 70, padding: 5, lineHeight: 14, fontSize: 10 },
+  { id: "medium", label: "M", width: 340, height: 120, padding: 8, lineHeight: 22, fontSize: 16 },
+  { id: "large", label: "L", width: 520, height: 200, padding: 20, lineHeight: 36, fontSize: 24 },
 ];
 
 const PET_INFO_OPTIONS: PetInfoOption[] = [
+  // {
+  //   id: "species",
+  //   label: "종",
+  //   getValue: (pet) => SPECIES_KOREAN_ALIAS_INFO[pet.species] || null,
+  // },
   { id: "name", label: "이름", getValue: (pet) => pet.name || null },
   {
-    id: "species",
-    label: "종",
-    getValue: (pet) => SPECIES_KOREAN_ALIAS_INFO[pet.species] || null,
+    id: "hatchingDate",
+    label: "해칭일",
+    getValue: (pet) =>
+      pet.hatchingDate ? DateTime.fromISO(pet.hatchingDate).toFormat("yy.MM.dd") : null,
   },
-  { id: "morphs", label: "모프", getValue: (pet) => pet.morphs?.slice(0, 3).join(" ") || null },
-  { id: "traits", label: "형질", getValue: (pet) => pet.traits?.slice(0, 3).join(" ") || null },
-  { id: "foods", label: "먹이", getValue: (pet) => pet.foods?.slice(0, 3).join(" ") || null },
   {
     id: "sex",
     label: "성별",
     getValue: (pet) => (pet.sex ? GENDER_KOREAN_INFO[pet.sex] : null),
   },
   {
-    id: "hatchingDate",
-    label: "해칭일",
+    id: "father",
+    label: "부개체",
     getValue: (pet) =>
-      pet.hatchingDate ? DateTime.fromISO(pet.hatchingDate).toFormat("yyyy.MM.dd") : null,
+      pet.father && "name" in pet.father && pet.father.status === "approved" && pet.father.name
+        ? pet.father.name
+        : null,
   },
+  {
+    id: "mother",
+    label: "모개체",
+    getValue: (pet) =>
+      pet.mother && "name" in pet.mother && pet.mother.status === "approved" && pet.mother.name
+        ? pet.mother.name
+        : null,
+  },
+  { id: "morphs", label: "모프", getValue: (pet) => pet.morphs?.slice(0, 3).join(" ") || null },
+  { id: "traits", label: "형질", getValue: (pet) => pet.traits?.slice(0, 3).join(" ") || null },
+  // { id: "foods", label: "먹이", getValue: (pet) => pet.foods?.slice(0, 3).join(" | ") || null },
 ];
 
 const QRCode = ({ pet, isScrolled }: QRCodeProps) => {
@@ -71,7 +88,9 @@ const QRCode = ({ pet, isScrolled }: QRCodeProps) => {
   const [qrOpen, setQrOpen] = useState(false);
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string>("");
   const [previewDataUrl, setPreviewDataUrl] = useState<string>("");
-  const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
+  const [selectedOptions, setSelectedOptions] = useState<string[]>(
+    PET_INFO_OPTIONS.filter((opt) => opt.getValue(pet)).map((opt) => opt.id),
+  );
   const [selectedSize, setSelectedSize] = useState<string>("medium");
   const [isDownloading, setIsDownloading] = useState(false);
   const [qrError, setQrError] = useState(false);
@@ -113,16 +132,66 @@ const QRCode = ({ pet, isScrolled }: QRCodeProps) => {
     }
 
     const sizeConfig = SIZE_OPTIONS.find((s) => s.id === selectedSize) ?? SIZE_OPTIONS[1]!;
-    const { qrSize, padding, lineHeight, fontSize } = sizeConfig;
+    const { width, height, padding, lineHeight, fontSize } = sizeConfig;
+    const qrSize = height - padding * 2;
+    const fontFamily = `-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
 
     // 선택된 정보 필터링 (id 포함)
     const selectedInfo = PET_INFO_OPTIONS.filter(
       (opt) => selectedOptions.includes(opt.id) && opt.getValue(pet),
     ).map((opt) => ({ id: opt.id, label: opt.label, value: opt.getValue(pet)! }));
 
-    const infoHeight = selectedInfo.length > 0 ? selectedInfo.length * lineHeight + padding : 0;
-    const totalHeight = qrSize + padding * 2 + infoHeight;
-    const totalWidth = qrSize + padding * 2;
+    // 같은 줄로 합칠 그룹 정의
+    const INLINE_GROUPS = [
+      { ids: new Set(["name", "hatchingDate", "sex"]), separator: "  ", bold: true },
+      { ids: new Set(["father", "mother"]), separator: " x ", bold: false },
+    ];
+
+    // 줄 단위 텍스트 구성: [{text, bold}]
+    const infoLines: { text: string; bold: boolean }[] = [];
+    const usedIds = new Set<string>();
+
+    for (const group of INLINE_GROUPS) {
+      const groupItems = selectedInfo.filter((i) => group.ids.has(i.id));
+      if (groupItems.length > 0) {
+        groupItems.forEach((i) => {
+          usedIds.add(i.id);
+        });
+        infoLines.push({
+          text: groupItems.map((i) => i.value).join(group.separator),
+          bold: group.bold,
+        });
+      }
+    }
+    for (const item of selectedInfo.filter((i) => !usedIds.has(i.id))) {
+      infoLines.push({ text: item.value, bold: false });
+    }
+
+    const hasInfo = infoLines.length > 0;
+    const totalWidth = hasInfo ? width : qrSize + padding * 2;
+    const totalHeight = height;
+    const infoMaxWidth = totalWidth - qrSize - padding * 3;
+
+    // 텍스트 줄바꿈 계산 (임시 캔버스 크기 설정)
+    const wrappedLines: { text: string; bold: boolean }[] = [];
+    if (hasInfo) {
+      canvas.width = 1000;
+      canvas.height = 1000;
+      for (const line of infoLines) {
+        ctx.font = `${line.bold ? "bold" : "normal"} ${fontSize}px ${fontFamily}`;
+        let currentLine = "";
+        for (const char of line.text) {
+          const testLine = currentLine + char;
+          if (ctx.measureText(testLine).width > infoMaxWidth && currentLine.length > 0) {
+            wrappedLines.push({ text: currentLine, bold: line.bold });
+            currentLine = char;
+          } else {
+            currentLine = testLine;
+          }
+        }
+        if (currentLine) wrappedLines.push({ text: currentLine, bold: line.bold });
+      }
+    }
 
     canvas.width = totalWidth;
     canvas.height = totalHeight;
@@ -131,20 +200,20 @@ const QRCode = ({ pet, isScrolled }: QRCodeProps) => {
     ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, totalWidth, totalHeight);
 
-    // QR 코드
+    // QR 코드 (세로 중앙 정렬)
     ctx.drawImage(qrImage, padding, padding, qrSize, qrSize);
 
-    // 펫 정보
-    if (selectedInfo.length > 0) {
+    // 펫 정보 (QR 우측, 세로 중앙 정렬)
+    if (hasInfo) {
+      const infoHeight = wrappedLines.length * lineHeight;
       ctx.fillStyle = "#333333";
-      ctx.textAlign = "center";
+      ctx.textAlign = "left";
+      const infoX = qrSize + padding * 2;
+      const infoStartY = (totalHeight - infoHeight) / 2;
 
-      selectedInfo.forEach((info, index) => {
-        // 이름은 bold 처리
-        const fontWeight = info.id === "name" ? "bold" : "normal";
-        ctx.font = `${fontWeight} ${fontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
-        const y = qrSize + padding * 1.5 + index * lineHeight + fontSize;
-        ctx.fillText(info.value, totalWidth / 2, y);
+      wrappedLines.forEach((line, index) => {
+        ctx.font = `${line.bold ? "bold" : "normal"} ${fontSize}px ${fontFamily}`;
+        ctx.fillText(line.text, infoX, infoStartY + index * lineHeight + fontSize);
       });
     }
 
@@ -187,15 +256,15 @@ const QRCode = ({ pet, isScrolled }: QRCodeProps) => {
 
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>{pet.name ? `${pet.name}의 QR 코드` : "펫 프로필 QR 코드"}</DialogTitle>
+            <DialogTitle>QR CODE</DialogTitle>
           </DialogHeader>
 
-          <div className={cn("flex items-center gap-4", !isMyPet && "flex-col")}>
+          <div className={cn("flex flex-col items-center gap-4", !isMyPet && "flex-col")}>
             {/* QR 코드 미리보기 */}
             <div
               className={cn(
-                "flex items-center justify-center rounded-lg bg-white p-2",
-                isMyPet && "border",
+                "flex w-full items-center justify-center rounded-lg bg-white p-2",
+                isMyPet && "",
               )}
             >
               {qrError ? (
@@ -213,7 +282,7 @@ const QRCode = ({ pet, isScrolled }: QRCodeProps) => {
             </div>
 
             {isMyPet && (
-              <div className="flex w-fit flex-col gap-3">
+              <div className="flex w-full flex-col gap-3">
                 {/* 크기 선택 */}
                 <div className="rounded-lg bg-gray-50 p-3 dark:bg-neutral-800">
                   <p className="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">크기</p>
@@ -236,11 +305,11 @@ const QRCode = ({ pet, isScrolled }: QRCodeProps) => {
                 </div>
 
                 {/* 포함할 정보 */}
-                <div className="rounded-lg bg-gray-50 p-3 dark:bg-neutral-800">
+                <div className="w-full rounded-lg bg-gray-50 p-3 dark:bg-neutral-800">
                   <p className="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                    포함할 정보
+                    포함 정보
                   </p>
-                  <div className="grid grid-cols-2 gap-1">
+                  <div className={cn("flex flex-wrap justify-between gap-1")}>
                     {PET_INFO_OPTIONS.map((option) => {
                       const value = option.getValue(pet);
                       if (!value) return null;
@@ -254,7 +323,7 @@ const QRCode = ({ pet, isScrolled }: QRCodeProps) => {
                             checked={selectedOptions.includes(option.id)}
                             onCheckedChange={() => toggleOption(option.id)}
                           />
-                          <span className="text-sm text-gray-600 dark:text-gray-400">
+                          <span className="text-sm whitespace-nowrap text-gray-600 dark:text-gray-400">
                             {option.label}
                           </span>
                         </label>
@@ -268,7 +337,10 @@ const QRCode = ({ pet, isScrolled }: QRCodeProps) => {
 
           <DialogFooter className="gap-2 sm:gap-0">
             {isMyPet && (
-              <Button onClick={downloadImage} disabled={isDownloading || !previewDataUrl || qrError}>
+              <Button
+                onClick={downloadImage}
+                disabled={isDownloading || !previewDataUrl || qrError}
+              >
                 {isDownloading ? "생성 중..." : "다운로드"}
               </Button>
             )}

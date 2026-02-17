@@ -3,12 +3,11 @@
 import { useEffect, useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-import { SPECIES_KOREAN_INFO } from "../../constants";
+// import { SPECIES_KOREAN_INFO } from "../../constants";
 import { PetDtoSpecies } from "@repo/api-client";
 import { useParams } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Cookie, Info } from "lucide-react";
-import Image from "next/image";
 import PetThumbnail from "@/components/common/PetThumbnail";
 import BadgeList from "../BadgeList";
 import Link from "next/link";
@@ -86,29 +85,20 @@ const RecentlyViewedList = () => {
                   item.petId === petId && "bg-gray-50 shadow-lg dark:bg-neutral-800",
                 )}
               >
-                {item.photoUrl ? (
-                  <div className="h-10 w-10 flex-shrink-0">
-                    <PetThumbnail petId={item.petId} alt={item.name} maxSize={40} />
-                  </div>
-                ) : (
-                  <div className="relative h-10 w-10 rounded-xl bg-white">
-                    <Image src="/assets/lizard.png" alt="최근본 기본 펫 이미지" fill />
-                  </div>
-                )}
+                <div className="h-10 w-10 flex-shrink-0">
+                  <PetThumbnail petId={item.petId} alt={item.name} maxSize={40} />
+                </div>
                 <div className="flex flex-1 justify-between gap-2 overflow-hidden">
                   <div className="flex w-20 max-w-20 items-center justify-between gap-2">
                     <span className="truncate font-bold dark:text-gray-100">{item.name}</span>
                   </div>
                   <div className="flex-1">
-                    {item.species && (
-                      <span className="text-muted-foreground truncate text-xs dark:text-gray-400">
-                        {SPECIES_KOREAN_INFO[item.species]}
-                      </span>
-                    )}
-                    <BadgeList
-                      items={item.morphs}
-                      badgeClassName="dark:bg-gray-700 dark:text-gray-200"
-                    />
+                    {/*{item.species && (*/}
+                    {/*  <span className="text-muted-foreground truncate text-xs dark:text-gray-400">*/}
+                    {/*    {SPECIES_KOREAN_INFO[item.species]}*/}
+                    {/*  </span>*/}
+                    {/*)}*/}
+                    <BadgeList variant={"outline"} maxDisplay={1} items={item.morphs} />
                   </div>
                 </div>
               </Link>

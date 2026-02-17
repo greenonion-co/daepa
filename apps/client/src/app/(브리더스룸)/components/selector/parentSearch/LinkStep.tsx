@@ -45,8 +45,13 @@ const LinkStep = ({ selectedPet, onSelect, onClose }: LinkStepProps) => {
             <div className="flex-1">
               <div className="mb-1">
                 <div className="flex items-center gap-2">
-                  <span className="text-[16px] font-bold dark:text-gray-100">{selectedPet.name}</span>
-                  <Badge variant="outline" className="bg-blue-50 text-black dark:bg-blue-900/50 dark:text-blue-300">
+                  <span className="text-[16px] font-bold dark:text-gray-100">
+                    {selectedPet.name}
+                  </span>
+                  <Badge
+                    variant="outline"
+                    className="bg-blue-50 text-black dark:bg-blue-900/50 dark:text-blue-300"
+                  >
                     {selectedPet.sex?.toString() === PetDtoSex.MALE ? "수컷" : "암컷"}
                   </Badge>
                 </div>
@@ -60,23 +65,17 @@ const LinkStep = ({ selectedPet, onSelect, onClose }: LinkStepProps) => {
 
               <div className="space-y-1">
                 <div>
-                  <h4 className="mb-1.5 text-[12px] font-medium text-gray-500 dark:text-gray-400">모프</h4>
-                  <BadgeList items={selectedPet.morphs} />
+                  <h4 className="mb-1.5 text-[12px] font-medium text-gray-500 dark:text-gray-400">
+                    모프
+                  </h4>
+                  <BadgeList variant={"outline"} items={selectedPet.morphs} />
                 </div>
 
                 <div>
-                  <h4 className="mb-1.5 text-[12px] font-medium text-gray-500 dark:text-gray-400">특성</h4>
-                  <div className="flex flex-wrap gap-1">
-                    {selectedPet.traits?.map((trait) => (
-                      <Badge
-                        variant="outline"
-                        key={trait}
-                        className="bg-white text-black dark:bg-gray-700 dark:text-gray-200"
-                      >
-                        {trait}
-                      </Badge>
-                    ))}
-                  </div>
+                  <h4 className="mb-1.5 text-[12px] font-medium text-gray-500 dark:text-gray-400">
+                    특성
+                  </h4>
+                  <BadgeList variant={"secondary"} items={selectedPet.traits} />
                 </div>
               </div>
             </div>

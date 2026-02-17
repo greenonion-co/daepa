@@ -22,7 +22,7 @@ import useTableStore from "../store/table";
 import { PetDto } from "@repo/api-client";
 import Loading from "@/components/common/Loading";
 import { cn } from "@/lib/utils";
-import Image from "next/image";
+import { CircleAlert } from "lucide-react";
 import { useAppRouter } from "@/hooks/useAppRouter";
 import PetDetailModal from "../[petId]/components/PetDetailModal";
 import { useIsMobile } from "@/hooks/useMobile";
@@ -121,8 +121,8 @@ export const DataTable = ({
                     className={cn(
                       "cursor-pointer",
                       "isPublic" in row.original && row.original.isPublic
-                        ? "bg-blue-50 hover:bg-blue-100 dark:bg-[#101012] dark:hover:bg-blue-900/30"
-                        : "bg-amber-50/50 hover:bg-amber-100 dark:bg-zinc-900 dark:hover:bg-zinc-800",
+                        ? "bg-blue-50/80 hover:bg-blue-100 dark:bg-[#101012] dark:hover:bg-blue-900/30"
+                        : "dark:bg-zinc-900 dark:hover:bg-zinc-800",
                     )}
                     onClick={(e) => handleRowClick({ e, pet: row.original })}
                   >
@@ -164,7 +164,7 @@ export const DataTable = ({
                       isEmpty && "cursor-pointer",
                     )}
                   >
-                    <Image src="/assets/lizard.png" alt="빈 펫 목록" width={200} height={200} />
+                    <CircleAlert className={"my-4 opacity-40"} width={60} height={60} />
                     개체가 없습니다.
                     {isEmpty && (
                       <div className="font-semibold text-blue-500 dark:text-blue-400">

@@ -8,7 +8,6 @@ import { Mail, Settings } from "lucide-react";
 import { useSearchKeywordStore } from "../store/searchKeyword";
 import { useIsMobile } from "@/hooks/useMobile";
 import SearchInput from "./SearchInput";
-import Image from "next/image";
 import { useIsLoggedIn } from "@/hooks/useAuth";
 import { isNativeApp } from "@/lib/native-bridge";
 import AddPetButton from "@/app/(브리더스룸)/components/AddPetButton";
@@ -45,26 +44,20 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
 
   // 로고 컴포넌트
   const Logo = ({ withLink = false }: { withLink?: boolean }) => {
-    const logo = <Image src="/assets/logo.png" alt="브리디 로그인 로고" width={60} height={60} />;
+    const logo = (
+      <h1 className={cn("pr-4 text-2xl font-bold", isMobile && "px-1 text-lg")}>BREEDY</h1>
+    );
 
     if (isNative && withLink) {
       return (
-        <button
-          type="button"
-          className="mr-5 font-bold"
-          onClick={() => window.scrollTo({ top: 0, behavior: "instant" })}
-        >
+        <button type="button" onClick={() => window.scrollTo({ top: 0, behavior: "instant" })}>
           {logo}
         </button>
       );
     }
 
     if (withLink) {
-      return (
-        <Link href="/" className="mr-5 font-bold">
-          {logo}
-        </Link>
-      );
+      return <Link href="/">{logo}</Link>;
     }
 
     return logo;
@@ -79,9 +72,9 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
           href={item.url}
           className={cn(
             item.url === pathname
-              ? "font-bold text-black dark:text-white"
-              : "font-semibold text-gray-500 dark:text-gray-400",
-            isMobile ? "px-1.5" : "px-3 py-1.5",
+              ? "font-semibold text-blue-500 underline"
+              : "font-semibold text-gray-500 hover:text-blue-500 hover:underline dark:text-gray-400",
+            isMobile ? "my-auto px-1.5" : "px-3 py-1.5",
           )}
         >
           {item.title}
@@ -103,7 +96,7 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
   const renderMemberView = () => (
     <>
       {/* 좌측: 로고 + 네비게이션 + 펫 추가 */}
-      <div className="flex items-center gap-1">
+      <div className="flex gap-1">
         <Logo withLink />
         {!isNative && <NavLinks />}
         {/* 웹에서만 메뉴바에 렌더링 */}
@@ -139,7 +132,7 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
     <div
       className={cn(
         "dark:bg-background flex h-[52px] items-center justify-between px-2",
-        !isPetDetailPage && "bg-background sticky top-0 left-0 z-10 w-full",
+        !isPetDetailPage && "bg-background sticky top-0 left-0 z-20 w-full",
         isNative && "pr-4",
       )}
     >
