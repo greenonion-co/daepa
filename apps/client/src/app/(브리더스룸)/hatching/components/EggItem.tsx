@@ -64,7 +64,9 @@ const EggItem = ({
               {pet?.name ?? `${pet.clutch ?? "@"}차-${pet.clutchOrder ?? "@"}`}
             </div>
             {pet.temperature && (
-              <span className="text-[12px] font-[500] text-gray-600 dark:text-gray-400">| {pet.temperature}℃</span>
+              <span className="text-[12px] font-[500] text-gray-600 dark:text-gray-400">
+                | {pet.temperature}℃
+              </span>
             )}
 
             {pet.sex && (
@@ -93,7 +95,9 @@ const EggItem = ({
                 ? "bg-yellow-700/80 text-yellow-100 border-none font-[600]"
                 : "font-[600] text-gray-700 dark:text-gray-300"
             }
-            iconClassName={pet.eggStatus === "FERTILIZED" ? "text-white" : "text-black dark:text-white"}
+            iconClassName={
+              pet.eggStatus === "FERTILIZED" ? "text-white" : "text-black dark:text-white"
+            }
           />
 
           {/* 수정/삭제 드롭다운 */}
@@ -122,8 +126,10 @@ const EggItem = ({
           </div>
         </div>
       ) : (
-        <div className="font-[600] text-blue-700 dark:text-blue-400">
-          {pet.hatchingDate ? DateTime.fromISO(pet.hatchingDate).toFormat("M/d 해칭") : "해칭 완료"}
+        <div className="font-medium text-blue-700 dark:text-blue-400">
+          {pet.hatchingDate
+            ? DateTime.fromISO(pet.hatchingDate).toFormat("M/d 해칭 완료")
+            : "해칭 완료"}
         </div>
       )}
     </>

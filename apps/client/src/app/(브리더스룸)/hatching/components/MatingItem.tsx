@@ -171,7 +171,7 @@ const MatingItem = ({ mating, father, mother, initialLayingId, showTutorial }: M
   );
 
   return (
-    <div className="relative flex h-[calc(100vh-300px)] w-full flex-col">
+    <div className="relative flex h-[calc(100vh-200px)] w-full flex-col">
       <div className="flex flex-col justify-center gap-1">
         <div
           data-tutorial={TUTORIAL_TARGETS.CLUTCH_TABS}
@@ -220,7 +220,7 @@ const MatingItem = ({ mating, father, mother, initialLayingId, showTutorial }: M
         </div>
       </div>
 
-      <ScrollArea className="relative flex h-[calc(100vh-350px)] w-full flex-col px-2">
+      <ScrollArea className="relative flex max-h-[90%] w-full flex-col px-2">
         {sortedLayingsByDate && sortedLayingsByDate.length > 0 ? (
           sortedLayingsByDate.map((layingData) => (
             <div

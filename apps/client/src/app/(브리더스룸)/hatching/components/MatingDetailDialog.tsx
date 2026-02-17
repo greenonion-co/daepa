@@ -169,7 +169,7 @@ const MatingDetailDialog = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent
         ref={dialogContentRef}
-        className={cn("flex w-full flex-col rounded-3xl p-13 sm:max-w-[860px]", isMobile && "p-4")}
+        className={cn("flex w-full flex-col rounded-3xl", isMobile && "h-[95%] p-4")}
       >
         {/* 튜토리얼 오버레이 */}
         {showTutorial && (
