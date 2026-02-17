@@ -270,6 +270,19 @@ export default function DndImagePicker({
               draggable={false}
               priority={false}
             />
+            {/* [SAMPLE_WATERMARK] 베타테스트용 워터마크 - 출시 시 삭제 */}
+            <span
+              className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center select-none"
+              aria-hidden="true"
+            >
+              <span
+                className="rounded-sm border-2 border-white px-3 py-1 text-3xl font-bold tracking-widest text-white opacity-80"
+                style={{ transform: "rotate(-30deg)", textShadow: "0 1px 4px rgba(0,0,0,0.5)" }}
+              >
+                SAMPLE
+              </span>
+            </span>
+            {/* [/SAMPLE_WATERMARK] */}
             <button
               type="button"
               onClick={() => {
@@ -285,7 +298,7 @@ export default function DndImagePicker({
                   />
                 ));
               }}
-              className="absolute bottom-2 right-2 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white transition-colors hover:bg-black/70"
+              className="absolute right-2 bottom-2 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white transition-colors hover:bg-black/70"
               aria-label="전체화면으로 보기"
             >
               <Maximize2 className="h-4 w-4" />
@@ -331,7 +344,7 @@ function SortableThumb({
       style={style}
       className={cn(
         "relative h-24 w-full select-none",
-        isDragging && "z-50 rotate-3 scale-105 shadow-xl", // 드래그 중 스타일
+        isDragging && "z-50 scale-105 rotate-3 shadow-xl", // 드래그 중 스타일
       )}
     >
       <div
@@ -361,14 +374,29 @@ function SortableThumb({
             <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
           </div>
         ) : (
-          <Image
-            src={buildR2TransformedUrl(src)}
-            alt={`image_${id}`}
-            fill
-            className="cursor-pointer object-cover"
-            // 이미지 드래그 방지
-            draggable={false}
-          />
+          <>
+            <Image
+              src={buildR2TransformedUrl(src)}
+              alt={`image_${id}`}
+              fill
+              className="cursor-pointer object-cover"
+              // 이미지 드래그 방지
+              draggable={false}
+            />
+            {/* [SAMPLE_WATERMARK] 베타테스트용 워터마크 - 출시 시 삭제 */}
+            <span
+              className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center select-none"
+              aria-hidden="true"
+            >
+              <span
+                className="rounded-sm border-2 border-white px-1 py-0.5 text-[0.5rem] font-bold tracking-widest text-white opacity-80"
+                style={{ transform: "rotate(-40deg)", textShadow: "0 1px 4px rgba(0,0,0,0.5)" }}
+              >
+                SAMPLE
+              </span>
+            </span>
+            {/* [/SAMPLE_WATERMARK] */}
+          </>
         )}
       </div>
 
@@ -377,7 +405,7 @@ function SortableThumb({
           type="button"
           onClick={onDelete}
           className={cn(
-            "absolute right-1 top-1 z-10 inline-flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-red-500 text-white shadow-sm transition-all duration-200",
+            "absolute top-1 right-1 z-10 inline-flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-red-500 text-white shadow-sm transition-all duration-200",
             "hover:bg-red-600 active:scale-95",
             isDragging && "opacity-0", // 드래그 중에는 삭제 버튼 숨김
           )}

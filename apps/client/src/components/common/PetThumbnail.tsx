@@ -100,13 +100,28 @@ const PetThumbnail = ({
       {isLoading ? (
         <Loading />
       ) : imageUrl ? (
-        <Image
-          src={imageUrl}
-          alt={alt}
-          fill
-          sizes={`${maxSize}px`}
-          className={objectFit === "cover" ? "object-cover" : "object-contain"}
-        />
+        <>
+          <Image
+            src={imageUrl}
+            alt={alt}
+            fill
+            sizes={`${maxSize}px`}
+            className={objectFit === "cover" ? "object-cover" : "object-contain"}
+          />
+          {/* [SAMPLE_WATERMARK] 베타테스트용 워터마크 - 출시 시 삭제 */}
+          <span
+            className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center select-none"
+            aria-hidden="true"
+          >
+            <span
+              className={`rounded-sm border-2 border-white font-bold tracking-widest text-white opacity-80 ${maxSize > 160 ? "px-3 py-1 text-3xl" : "px-2 py-0.5 text-[0.6rem]"}`}
+              style={{ transform: "rotate(-30deg)", textShadow: "0 1px 4px rgba(0,0,0,0.5)" }}
+            >
+              SAMPLE
+            </span>
+          </span>
+          {/* [/SAMPLE_WATERMARK] */}
+        </>
       ) : (
         <div className="flex h-full w-full items-center justify-center opacity-50">
           <SmilePlus className="h-1/3 w-1/3 opacity-40" />
