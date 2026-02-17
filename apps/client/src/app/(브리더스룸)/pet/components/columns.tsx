@@ -237,7 +237,7 @@ export const columns: ColumnDef<PetDto>[] = [
             (status === "pending" && "혈통 인증 대기 중") ||
             ""
           }
-          icon={<CircleSmall className={`h-3 w-3 ${STATUS_MAP[status].color}`} />}
+          icon={<CircleSmall className={`h-3 w-3 ${STATUS_MAP[status].icon}`} />}
         />
       );
     },
@@ -285,7 +285,7 @@ export const columns: ColumnDef<PetDto>[] = [
             (status === "pending" && "혈통 인증 대기 중") ||
             ""
           }
-          icon={<CircleSmall className={`h-3 w-3 ${STATUS_MAP[status].color}`} />}
+          icon={<CircleSmall className={`h-3 w-3 ${STATUS_MAP[status].icon}`} />}
         />
       );
     },
