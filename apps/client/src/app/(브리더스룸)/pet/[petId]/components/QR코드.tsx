@@ -16,6 +16,7 @@ import { PetDto } from "@repo/api-client";
 import { SPECIES_KOREAN_ALIAS_INFO, GENDER_KOREAN_INFO } from "@/app/(브리더스룸)/constants";
 import { DateTime } from "luxon";
 import { useIsMyPet } from "@/hooks/useIsMyPet";
+import { useIsMobile } from "@/hooks/useMobile";
 
 interface QRCodeProps {
   pet: PetDto;
@@ -44,26 +45,26 @@ const SIZE_OPTIONS: sizeOption[] = [
 ];
 
 const PET_INFO_OPTIONS: PetInfoOption[] = [
-  { id: "name", label: "이름", getValue: (pet) => pet.name || null },
   {
     id: "species",
     label: "종",
     getValue: (pet) => SPECIES_KOREAN_ALIAS_INFO[pet.species] || null,
   },
-  { id: "morphs", label: "모프", getValue: (pet) => pet.morphs?.slice(0, 3).join(" ") || null },
-  { id: "traits", label: "형질", getValue: (pet) => pet.traits?.slice(0, 3).join(" ") || null },
-  { id: "foods", label: "먹이", getValue: (pet) => pet.foods?.slice(0, 3).join(" ") || null },
-  {
-    id: "sex",
-    label: "성별",
-    getValue: (pet) => (pet.sex ? GENDER_KOREAN_INFO[pet.sex] : null),
-  },
+  { id: "name", label: "이름", getValue: (pet) => pet.name || null },
   {
     id: "hatchingDate",
     label: "해칭일",
     getValue: (pet) =>
       pet.hatchingDate ? DateTime.fromISO(pet.hatchingDate).toFormat("yyyy.MM.dd") : null,
   },
+  {
+    id: "sex",
+    label: "성별",
+    getValue: (pet) => (pet.sex ? GENDER_KOREAN_INFO[pet.sex] : null),
+  },
+  { id: "morphs", label: "모프", getValue: (pet) => pet.morphs?.slice(0, 3).join(" | ") || null },
+  { id: "traits", label: "형질", getValue: (pet) => pet.traits?.slice(0, 3).join(" | ") || null },
+  { id: "foods", label: "먹이", getValue: (pet) => pet.foods?.slice(0, 3).join(" | ") || null },
 ];
 
 const QRCode = ({ pet, isScrolled }: QRCodeProps) => {
@@ -75,6 +76,8 @@ const QRCode = ({ pet, isScrolled }: QRCodeProps) => {
   const [selectedSize, setSelectedSize] = useState<string>("medium");
   const [isDownloading, setIsDownloading] = useState(false);
   const [qrError, setQrError] = useState(false);
+
+  const isMobile = useIsMobile();
 
   // QR 코드 생성
   useEffect(() => {
@@ -190,7 +193,7 @@ const QRCode = ({ pet, isScrolled }: QRCodeProps) => {
             <DialogTitle>{pet.name ? `${pet.name}의 QR 코드` : "펫 프로필 QR 코드"}</DialogTitle>
           </DialogHeader>
 
-          <div className={cn("flex items-center gap-4", !isMyPet && "flex-col")}>
+          <div className={cn("flex flex-col items-center gap-4", !isMyPet && "flex-col")}>
             {/* QR 코드 미리보기 */}
             <div
               className={cn(
@@ -240,7 +243,9 @@ const QRCode = ({ pet, isScrolled }: QRCodeProps) => {
                   <p className="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                     포함할 정보
                   </p>
-                  <div className="grid grid-cols-2 gap-1">
+                  <div
+                    className={cn("grid grid-cols-6 flex-wrap gap-1", isMobile && "grid-cols-4")}
+                  >
                     {PET_INFO_OPTIONS.map((option) => {
                       const value = option.getValue(pet);
                       if (!value) return null;
@@ -268,7 +273,10 @@ const QRCode = ({ pet, isScrolled }: QRCodeProps) => {
 
           <DialogFooter className="gap-2 sm:gap-0">
             {isMyPet && (
-              <Button onClick={downloadImage} disabled={isDownloading || !previewDataUrl || qrError}>
+              <Button
+                onClick={downloadImage}
+                disabled={isDownloading || !previewDataUrl || qrError}
+              >
                 {isDownloading ? "생성 중..." : "다운로드"}
               </Button>
             )}
