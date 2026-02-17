@@ -1,16 +1,11 @@
 "use client";
 import { DateTime } from "luxon";
-import {
-  EGG_STATUS_KOREAN_INFO,
-  GENDER_KOREAN_INFO,
-  SPECIES_KOREAN_ALIAS_INFO,
-} from "../../constants";
+import { EGG_STATUS_KOREAN_INFO } from "../../constants";
 import {
   PetDto,
   PetDtoEggStatus,
   PetDtoFather,
   PetDtoMother,
-  PetDtoSex,
   PetDtoType,
   PetHiddenStatusDtoHiddenStatus,
 } from "@repo/api-client";
