@@ -2,7 +2,6 @@
 
 import { Lock } from "lucide-react";
 import { PetDto, PetDtoGrowth } from "@repo/api-client";
-import { cn } from "@/lib/utils";
 import PetThumbnail from "@/components/common/PetThumbnail";
 import { GROWTH_KOREAN_INFO } from "../../constants";
 import BadgeList from "../../components/BadgeList";
