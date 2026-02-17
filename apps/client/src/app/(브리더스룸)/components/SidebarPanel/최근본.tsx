@@ -8,7 +8,6 @@ import { PetDtoSpecies } from "@repo/api-client";
 import { useParams } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Cookie, Info } from "lucide-react";
-import Image from "next/image";
 import PetThumbnail from "@/components/common/PetThumbnail";
 import BadgeList from "../BadgeList";
 import Link from "next/link";
