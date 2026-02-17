@@ -13,7 +13,7 @@ import { Calendar } from "./Calendar";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/useMobile";
 import { DateTime } from "luxon";
-import Image from "next/image";
+import { CircleAlert } from "lucide-react";
 import { isNativeApp } from "@/lib/native-bridge";
 
 const MonthlyCalendar = memo(() => {
@@ -259,12 +259,7 @@ const MonthlyCalendar = memo(() => {
               <Loading />
             ) : weeklyGroups.length === 0 ? (
               <div className="flex flex-col items-center justify-center pt-10 text-[14px] text-gray-700 dark:text-gray-300">
-                <Image
-                  src="/assets/lizard.png"
-                  alt="해칭 캘린더 도마뱀 이미지"
-                  width={150}
-                  height={150}
-                />
+                <CircleAlert className={"my-4 opacity-40"} width={60} height={60} />
                 <span className="font-semibold text-black dark:text-gray-100">
                   {currentMonth.getFullYear()}년 {currentMonth.getMonth() + 1}월
                 </span>

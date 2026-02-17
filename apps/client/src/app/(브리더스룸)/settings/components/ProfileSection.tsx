@@ -2,7 +2,7 @@
 
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import Image from "next/image";
+import { CircleAlert } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { userControllerGetUserProfile } from "@repo/api-client";
 import { SettingsGroup } from "./SettingsGroup";
@@ -18,7 +18,7 @@ const ProfileSection = () => {
     <SettingsGroup className="px-2">
       <div className="flex items-center gap-4 bg-neutral-100 p-2 px-4 dark:bg-[#18171C]">
         <div className="relative flex h-16 w-16 items-center justify-center">
-          <Image src="/assets/lizard.png" alt="조회된 펫 없음" fill />
+          <CircleAlert className={"my-4 opacity-40"} width={60} height={60} />
         </div>
         {userProfile?.userId && (
           <div className="flex-1">

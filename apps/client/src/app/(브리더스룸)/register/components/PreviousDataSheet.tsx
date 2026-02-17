@@ -3,7 +3,7 @@
 import BottomSheet from "@/components/common/BottomSheet";
 import { GENDER_KOREAN_INFO, GROWTH_KOREAN_INFO, SPECIES_KOREAN_INFO } from "../../constants";
 import { BaseFormData } from "../../pet/store/base";
-import Image from "next/image";
+import { CircleAlert } from "lucide-react";
 
 interface PreviousDataSheetProps {
   isOpen: boolean;
@@ -32,7 +32,7 @@ export default function PreviousDataSheet({
         <h3 className="mb-3 text-xl font-bold">이어서 진행할까요?</h3>
 
         <div className="mb-3 flex flex-col items-center rounded-xl border border-gray-100 bg-gray-100/50 p-5 text-center dark:bg-gray-800">
-          <Image src="/assets/lizard.png" alt="작성중인 데이터 있음" width={150} height={150} />
+          <CircleAlert className={"my-4 opacity-40"} width={60} height={60} />
           <ul className="space-y-1 text-sm font-[600]">
             {formData.species && (
               <li>{SPECIES_KOREAN_INFO[formData.species as keyof typeof SPECIES_KOREAN_INFO]}</li>

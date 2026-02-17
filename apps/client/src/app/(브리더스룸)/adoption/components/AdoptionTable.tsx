@@ -15,7 +15,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { RefreshCcw } from "lucide-react";
+import { CircleAlert, RefreshCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { overlay } from "overlay-kit";
 import Loading from "@/components/common/Loading";
@@ -30,7 +30,6 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { AdoptionFilters } from "./AdoptionFilters";
 import { columns } from "./adoption_columns";
 import { brAdoptionControllerGetAllAdoptions } from "@repo/api-client";
-import Image from "next/image";
 // import ParentSearchSelector from "../../components/selector/parentSearch";
 
 const AdoptionTable = () => {
@@ -224,12 +223,7 @@ const AdoptionTable = () => {
               <TableRow>
                 <TableCell colSpan={columns.length}>
                   <div className="flex h-full w-full flex-col items-center justify-center py-5 text-center text-gray-700">
-                    <Image
-                      src="/assets/lizard.png"
-                      alt="분양 테이블 정보 없음"
-                      width={200}
-                      height={200}
-                    />
+                    <CircleAlert className={"my-4 opacity-40"} width={60} height={60} />
                     분양 정보가 없습니다.
                   </div>
                 </TableCell>

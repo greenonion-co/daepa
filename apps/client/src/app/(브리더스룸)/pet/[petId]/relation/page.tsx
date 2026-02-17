@@ -13,7 +13,7 @@ import SiblingPetCard from "./components/SiblingPetCard";
 import HorizontalScrollSection from "./components/HorizontalScrollSection";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/useMobile";
-import Image from "next/image";
+import { CircleAlert } from "lucide-react";
 import Loading from "@/components/common/Loading";
 
 interface PetDetailPageProps {
@@ -159,7 +159,7 @@ function SiblingsPage({ params }: PetDetailPageProps) {
   if (isError) {
     return (
       <div className="flex h-[calc(100vh-52px)] flex-1 flex-col items-center justify-center gap-1">
-        <Image src="/assets/lizard.png" alt="관계도 에러 펫" width={150} height={150} />
+        <CircleAlert className={"my-4 opacity-40"} width={60} height={60} />
         <p className="text-lg font-semibold text-gray-700">
           펫 정보를 불러오는 중 오류가 발생했습니다
         </p>
@@ -189,7 +189,7 @@ function SiblingsPage({ params }: PetDetailPageProps) {
         </section>
       ) : (
         <div className="flex h-full w-full flex-col items-center justify-center py-5 text-center text-[14px] text-gray-700">
-          <Image src="/assets/lizard.png" alt="통계 데이터 없음" width={200} height={200} />
+          <CircleAlert className={"my-4 opacity-40"} width={60} height={60} />
           등록된 부/모 정보가 없습니다.
           <br />
           부/모를 등록해 펫의 관계도를 확인해보세요!

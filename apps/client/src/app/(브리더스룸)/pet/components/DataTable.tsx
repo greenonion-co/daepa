@@ -22,7 +22,7 @@ import useTableStore from "../store/table";
 import { PetDto } from "@repo/api-client";
 import Loading from "@/components/common/Loading";
 import { cn } from "@/lib/utils";
-import Image from "next/image";
+import { CircleAlert } from "lucide-react";
 import { useAppRouter } from "@/hooks/useAppRouter";
 import PetDetailModal from "../[petId]/components/PetDetailModal";
 import { useIsMobile } from "@/hooks/useMobile";
@@ -164,7 +164,7 @@ export const DataTable = ({
                       isEmpty && "cursor-pointer",
                     )}
                   >
-                    <Image src="/assets/lizard.png" alt="빈 펫 목록" width={200} height={200} />
+                    <CircleAlert className={"my-4 opacity-40"} width={60} height={60} />
                     개체가 없습니다.
                     {isEmpty && (
                       <div className="font-semibold text-blue-500 dark:text-blue-400">

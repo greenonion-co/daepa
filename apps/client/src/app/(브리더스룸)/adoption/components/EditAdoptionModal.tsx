@@ -26,7 +26,7 @@ import { toast } from "@/lib/toast";
 import PetItem from "../../components/selector/PetItem";
 import Loading from "@/components/common/Loading";
 import SingleSelect from "../../components/selector/SingleSelect";
-import Image from "next/image";
+import { CircleAlert } from "lucide-react";
 
 const CREATE_ADOPTION_MODAL_STEP = {
   PET_SELECT: 1,
@@ -155,7 +155,7 @@ const EditAdoptionModal = ({
             <ScrollArea className="h-[400px]">
               {pets?.filter((pet) => pet.sex === tab).length === 0 ? (
                 <div className="flex h-[300px] flex-col items-center justify-center text-sm text-gray-500">
-                  <Image src="/assets/lizard.png" alt="조회된 펫 없음" width={200} height={200} />
+                  <CircleAlert className={"my-4 opacity-40"} width={60} height={60} />
                   조회된 펫이 없습니다.
                 </div>
               ) : (
