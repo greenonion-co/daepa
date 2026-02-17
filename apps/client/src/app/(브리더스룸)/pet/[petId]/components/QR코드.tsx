@@ -94,7 +94,7 @@ const QRCode = ({ pet, isScrolled }: QRCodeProps) => {
   const [selectedSize, setSelectedSize] = useState<string>("medium");
   const [isDownloading, setIsDownloading] = useState(false);
   const [qrError, setQrError] = useState(false);
-  console.log(pet);
+
   // QR 코드 생성
   useEffect(() => {
     const fetchQrCode = async () => {
