@@ -154,7 +154,9 @@ const QRCode = ({ pet, isScrolled }: QRCodeProps) => {
     for (const group of INLINE_GROUPS) {
       const groupItems = selectedInfo.filter((i) => group.ids.has(i.id));
       if (groupItems.length > 0) {
-        groupItems.forEach((i) => usedIds.add(i.id));
+        groupItems.forEach((i) => {
+          usedIds.add(i.id);
+        });
         infoLines.push({
           text: groupItems.map((i) => i.value).join(group.separator),
           bold: group.bold,
