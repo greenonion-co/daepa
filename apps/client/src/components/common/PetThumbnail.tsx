@@ -123,8 +123,9 @@ const PetThumbnail = ({
           {/* [/SAMPLE_WATERMARK] */}
         </>
       ) : (
-        <div className="flex h-full w-full items-center justify-center opacity-50">
-          <SmilePlus className="h-1/3 w-1/3 opacity-40" />
+        <div className="flex h-full w-full items-center justify-center opacity-30">
+          <SmilePlus className="h-1/3 w-1/3" aria-hidden="true" />
+          <span className="sr-only">{alt}</span>
         </div>
       )}
     </div>
