@@ -7,6 +7,7 @@ import { buildR2TransformedUrl } from "@/lib/utils";
 import Image from "next/image";
 import { getPetThumbnailQueryKey } from "@/components/common/PetThumbnail";
 import { IMAGE_TRANSFORMS } from "@/app/constants";
+import { useState } from "react";
 
 interface PetHoverPreviewProps {
   petId: string;
@@ -17,6 +18,8 @@ const PREVIEW_SIZE = 200;
 const OFFSET = 16;
 
 const PetHoverPreview = ({ petId, mousePos }: PetHoverPreviewProps) => {
+  const [isLoaded, setIsLoaded] = useState(false);
+
   const { data: thumbnail } = useQuery({
     queryKey: getPetThumbnailQueryKey(petId),
     queryFn: () => petImageControllerFindThumbnail(petId),
@@ -38,7 +41,7 @@ const PetHoverPreview = ({ petId, mousePos }: PetHoverPreviewProps) => {
   return createPortal(
     <div
       className="pointer-events-none fixed z-50 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl dark:border-gray-700 dark:bg-zinc-900"
-      style={{ left, top, width: PREVIEW_SIZE, height: PREVIEW_SIZE }}
+      style={{ left, top, width: PREVIEW_SIZE, height: PREVIEW_SIZE, opacity: isLoaded ? 1 : 0 }}
     >
       <Image
         src={imageUrl}
@@ -46,6 +49,7 @@ const PetHoverPreview = ({ petId, mousePos }: PetHoverPreviewProps) => {
         fill
         sizes={`${PREVIEW_SIZE}px`}
         className="object-cover"
+        onLoad={() => setIsLoaded(true)}
       />
     </div>,
     document.body,

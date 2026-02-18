@@ -77,7 +77,7 @@ const PetThumbnail = ({
   className = "",
   rounded = false,
   enabled = true,
-  objectFit = "contain",
+  objectFit = "cover",
 }: PetThumbnailProps) => {
   const { data: thumbnail, isLoading } = useQuery({
     queryKey: getPetThumbnailQueryKey(petId ?? ""),

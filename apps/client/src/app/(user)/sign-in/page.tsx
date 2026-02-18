@@ -21,14 +21,14 @@ const SignInPage = () => {
   }, [router]);
 
   return (
-    <div className="flex min-h-screen w-full items-center justify-center bg-gradient-to-b from-[#e5cf94] to-white dark:bg-black">
+    <div className="flex min-h-screen w-full items-center justify-center dark:bg-black">
       <div className="w-[90vw] max-w-md">
         {/* 메인 카드 */}
-        <div className="mb-5 text-center text-3xl font-bold text-gray-800/90 dark:text-white">
+        <div className="mb-10 text-center text-3xl font-bold text-gray-800/90 dark:text-white">
           로그인
         </div>
 
-        <div className="rounded-3xl bg-gradient-to-b from-white to-gray-50 p-5 dark:border dark:border-gray-700 dark:bg-gray-800/80">
+        <div className="rounded-3xl">
           <div>
             <AppleLoginButton />
             <a

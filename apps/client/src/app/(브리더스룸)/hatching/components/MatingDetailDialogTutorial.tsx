@@ -209,7 +209,7 @@ export function MatingDetailDialogTutorialOverlay({
   if (!spotlightRect || !tooltipPosition) return null;
 
   return (
-    <div className="absolute inset-0 z-50 overflow-hidden rounded-3xl">
+    <div className="absolute inset-0 z-[60] overflow-hidden rounded-3xl">
       {/* 배경 오버레이 (스포트라이트 구멍 제외) */}
       <svg className="absolute inset-0 h-full w-full">
         <defs>

@@ -24,7 +24,7 @@ const ParentCard = ({ parent }: { parent?: PetSummaryLayingDto }) => {
     >
       <div className="flex h-full w-full flex-col items-center gap-1 rounded-2xl bg-white dark:bg-[#18171C]">
         <div className="relative w-full">
-          <PetThumbnail petId={parent.petId} alt={parent.name} maxSize={180} />
+          <PetThumbnail petId={parent.petId} alt={parent.name} maxSize={180} objectFit="cover" />
           {parent.isDeleted && (
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/30">
               <Ban className="h-5 w-5 text-red-600" />

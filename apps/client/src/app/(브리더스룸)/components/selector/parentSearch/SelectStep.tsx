@@ -12,6 +12,7 @@ const SelectStep = ({
   hasMore,
   isFetchingMore,
   isLoading,
+  isFetching,
   searchType,
   loaderRefAction,
 }: {
@@ -20,6 +21,7 @@ const SelectStep = ({
   hasMore: boolean;
   isFetchingMore: boolean;
   isLoading: boolean;
+  isFetching: boolean;
   searchType: PetListType;
   loaderRefAction: (node?: Element | null) => void;
 }) => {
@@ -30,7 +32,7 @@ const SelectStep = ({
       : pet.owner?.userId !== user?.userId,
   );
 
-  if (isLoading)
+  if (isLoading || (isFetching && !petList?.length) || !user)
     return (
       <div className="h-[calc(100vh-200px)]">
         <Loading />

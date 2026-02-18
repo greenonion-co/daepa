@@ -48,7 +48,7 @@ const ParentSearchSelector = ({
   const contentRef = useRef<HTMLDivElement>(null);
   const { ref, inView } = useInView();
   const itemPerPage = 10;
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useInfiniteQuery({
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isFetching } = useInfiniteQuery({
     queryKey: [petControllerFindAll.name, petListType, searchQuery, species],
     queryFn: ({ pageParam = 1 }) =>
       petControllerFindAll({
@@ -124,6 +124,7 @@ const ParentSearchSelector = ({
                 hasMore={hasNextPage}
                 isFetchingMore={isFetchingNextPage}
                 isLoading={isLoading}
+                isFetching={isFetching}
                 loaderRefAction={ref}
                 searchType={petListType}
               />
