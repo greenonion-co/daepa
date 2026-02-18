@@ -101,6 +101,30 @@ const PairStatisticsDashboard = memo(() => {
     enabled: canQueryStatistics,
   });
 
+  // 월별 차트용 연간 통계 (월 선택 시에도 연간 monthlyStats를 표시하기 위해 별도 조회)
+  const { data: yearlyStatistics } = useQuery({
+    queryKey: [
+      statisticsControllerGetPairStatistics.name,
+      species,
+      father?.petId,
+      mother?.petId,
+      selectedYear,
+      "all",
+    ],
+    queryFn: () =>
+      statisticsControllerGetPairStatistics({
+        species: species ?? undefined,
+        fatherId: father?.petId,
+        motherId: mother?.petId,
+        year: selectedYear !== "all" ? Number(selectedYear) : undefined,
+        month: undefined,
+      }),
+    select: (data) => data.data,
+    enabled: canQueryStatistics && selectedYear !== "all" && selectedMonth !== "all",
+  });
+
+  const monthlyStatsData = statistics?.monthlyStats ?? yearlyStatistics?.monthlyStats;
+
   // 부모 선택 셀렉터 열기
   const openParentSearchSelector = (sex: PetDtoSex) =>
     overlay.open(({ isOpen, close, unmount }) => (
@@ -219,7 +243,6 @@ const PairStatisticsDashboard = memo(() => {
           onClose={() => setMother(undefined)}
           onClick={() => openParentSearchSelector(PetDtoSex.FEMALE)}
         />
-
         <CustomSelect
           title="연도"
           options={yearOptions}
@@ -257,23 +280,23 @@ const PairStatisticsDashboard = memo(() => {
             />
             <StatCard
               label="유정란 비율"
-              value={`${statistics.egg.fertilizedRate.toFixed(1)}%`}
+              value={`${parseFloat(statistics.egg.fertilizedRate.toFixed(1))}%`}
               valueClassName="text-[#ff9900ff]"
             />
             <StatCard
               label="부화 성공률"
-              value={`${statistics.egg.hatchingRate.toFixed(1)}%`}
+              value={`${parseFloat(statistics.egg.hatchingRate.toFixed(1))}%`}
               valueClassName="text-[#1b9648ff]"
             />
             <StatCard label="메이팅 횟수" value={statistics.meta.totalMatings} />
             <StatCard label="산란 횟수" value={statistics.meta.totalLayings} />
           </div>
 
-          {/* 월별 통계 차트 (연도만 선택된 경우) */}
-          {selectedYear !== "all" && selectedMonth === "all" && statistics.monthlyStats && (
+          {/* 월별 통계 차트 (연도 선택 + 월 미선택: 분포 차트 위) */}
+          {selectedYear !== "all" && selectedMonth === "all" && monthlyStatsData && (
             <div className="mb-6">
               <ChartCard title={`${selectedYear}년 월별 통계`}>
-                <MonthlyStatsChart data={statistics.monthlyStats} />
+                <MonthlyStatsChart data={monthlyStatsData} />
               </ChartCard>
             </div>
           )}
@@ -324,6 +347,15 @@ const PairStatisticsDashboard = memo(() => {
               </ChartCard>
             )}
           </div>
+
+          {/* 월별 통계 차트 (연도 + 월 선택: 분포 차트 아래) */}
+          {selectedYear !== "all" && selectedMonth !== "all" && monthlyStatsData && (
+            <div className="mt-6">
+              <ChartCard title={`${selectedYear}년 월별 통계`}>
+                <MonthlyStatsChart data={monthlyStatsData} />
+              </ChartCard>
+            </div>
+          )}
         </div>
       ) : (
         <div className="text-muted-foreground mt-6 flex flex-col items-center text-sm">

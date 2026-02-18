@@ -137,7 +137,7 @@ const PairCard = ({
       >
         <div className="flex items-center gap-2">
           <StickyNote className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-600 dark:text-amber-500" />
-          <div className="flex-1 py-3">
+          <div className="flex-1 py-3 leading-tight">
             {pair.desc ? (
               <TooltipText text={pair.desc} className="w-full text-sm" displayTextLength={50} />
             ) : (

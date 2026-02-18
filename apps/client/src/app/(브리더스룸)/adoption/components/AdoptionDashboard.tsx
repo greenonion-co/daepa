@@ -110,7 +110,7 @@ const AdoptionDashboard = memo(() => {
   );
   const [father, setFather] = useState<PetParentDto | undefined>(undefined);
   const [mother, setMother] = useState<PetParentDto | undefined>(undefined);
-  const [selectedYear, setSelectedYear] = useState<string>("all");
+  const [selectedYear, setSelectedYear] = useState<string>(String(new Date().getFullYear()));
   const [selectedMonth, setSelectedMonth] = useState<string>("all");
   const [selectedPriceRange, setSelectedPriceRange] = useState<PriceRangeItemDto | null>(null);
   const [isParentSectionOpen, setIsParentSectionOpen] = useState(false);
