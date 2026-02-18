@@ -35,6 +35,9 @@ const PetItem = ({
             <span className="relative text-center font-semibold after:absolute after:-bottom-[1px] after:left-1 after:h-[12px] after:w-full after:bg-transparent after:opacity-40 after:content-[''] group-hover:after:bg-[#247DFE] dark:text-gray-100">
               {item.name}
             </span>
+            {item.owner?.name && (
+              <p className="text-xs text-gray-600 dark:text-gray-500">@{item.owner.name}</p>
+            )}
           </div>
 
           <BadgeList variant={"outline"} items={item.morphs} badgeSize={"sm"} maxDisplay={3} />

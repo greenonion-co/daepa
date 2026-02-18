@@ -26,6 +26,7 @@ import { CircleAlert } from "lucide-react";
 import { useAppRouter } from "@/hooks/useAppRouter";
 import PetDetailModal from "../[petId]/components/PetDetailModal";
 import { useIsMobile } from "@/hooks/useMobile";
+import PetHoverPreview from "./PetHoverPreview";
 
 interface DataTableProps<TData> {
   columns: ColumnDef<TData>[];
@@ -51,6 +52,12 @@ export const DataTable = ({
 
   const router = useAppRouter();
   const [selectedPet, setSelectedPet] = useState<PetDto | null>(null);
+  const [hoveredPetId, setHoveredPetId] = useState<string | null>(null);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    setMousePos({ x: e.clientX, y: e.clientY });
+  }, []);
 
   const table = useReactTable({
     data,
@@ -88,7 +95,7 @@ export const DataTable = ({
   );
 
   return (
-    <div className="w-full">
+    <div className="w-full" onMouseMove={!isMobile ? handleMouseMove : undefined}>
       <div className="rounded-md">
         <Table className="bg-white dark:bg-[#101012]">
           <TableHeader>
@@ -125,6 +132,8 @@ export const DataTable = ({
                         : "dark:bg-zinc-900 dark:hover:bg-zinc-800",
                     )}
                     onClick={(e) => handleRowClick({ e, pet: row.original })}
+                    onMouseEnter={!isMobile ? () => setHoveredPetId(row.original.petId) : undefined}
+                    onMouseLeave={!isMobile ? () => setHoveredPetId(null) : undefined}
                   >
                     {row.getVisibleCells().map((cell) => {
                       const size = cell.column.getSize();
@@ -185,6 +194,10 @@ export const DataTable = ({
           pet={selectedPet}
           onClose={() => setSelectedPet(null)}
         />
+      )}
+
+      {hoveredPetId && (
+        <PetHoverPreview petId={hoveredPetId} mousePos={mousePos} />
       )}
     </div>
   );

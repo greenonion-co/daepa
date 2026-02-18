@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import useTableStore from "../../pet/store/table";
 import {
   Table,
@@ -30,6 +30,8 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { AdoptionFilters } from "./AdoptionFilters";
 import { columns } from "./adoption_columns";
 import { brAdoptionControllerGetAllAdoptions } from "@repo/api-client";
+import { useIsMobile } from "@/hooks/useMobile";
+import PetHoverPreview from "../../pet/components/PetHoverPreview";
 // import ParentSearchSelector from "../../components/selector/parentSearch";
 
 const AdoptionTable = () => {
@@ -39,7 +41,14 @@ const AdoptionTable = () => {
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const { sorting, rowSelection, setSorting, setRowSelection } = useTableStore();
 
+  const isMobile = useIsMobile();
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [hoveredPetId, setHoveredPetId] = useState<string | null>(null);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    setMousePos({ x: e.clientX, y: e.clientY });
+  }, []);
 
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage, refetch } =
     useInfiniteQuery({
@@ -124,7 +133,7 @@ const AdoptionTable = () => {
   //   );
 
   return (
-    <div className="relative w-full">
+    <div className="relative w-full" onMouseMove={!isMobile ? handleMouseMove : undefined}>
       {/* 헤더 영역 */}
 
       {/* <div className={cn("flex w-fit items-center rounded-lg px-2 py-1 hover:bg-gray-100")}>
@@ -192,6 +201,8 @@ const AdoptionTable = () => {
                       "cursor-pointer",
                       "hover:bg-purple-50 dark:bg-[#18171C] dark:hover:bg-purple-900/30",
                     )}
+                    onMouseEnter={!isMobile ? () => setHoveredPetId(row.original.petId) : undefined}
+                    onMouseLeave={!isMobile ? () => setHoveredPetId(null) : undefined}
                     onClick={() => {
                       overlay.open(({ isOpen, close }) => (
                         <AdoptionDetailModal
@@ -232,6 +243,10 @@ const AdoptionTable = () => {
           </TableBody>
         </Table>
       </div>
+
+      {hoveredPetId && (
+        <PetHoverPreview petId={hoveredPetId} mousePos={mousePos} />
+      )}
     </div>
   );
 };

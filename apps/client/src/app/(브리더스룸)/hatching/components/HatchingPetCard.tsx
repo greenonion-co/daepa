@@ -69,7 +69,7 @@ const HatchingPetCard = ({ date, pets, tab, isSelected }: PetCardProps) => {
               <div
                 className={cn(
                   "flex w-full flex-1 items-center justify-between p-2 text-[14px]",
-                  !isEgg && "hover:rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800",
+                  "hover:rounded-xl hover:bg-gray-100/50 dark:hover:bg-gray-800",
                 )}
               >
                 <div className="flex">
