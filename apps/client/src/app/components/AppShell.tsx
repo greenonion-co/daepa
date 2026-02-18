@@ -16,6 +16,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const isPetDetail = pathname?.startsWith("/pet/") ?? false;
+  const isIntroPage = pathname === "/intro";
   const isMobile = useIsMobile();
 
   // 네이티브 앱에서 TopBar를 사용하는 경우 Menubar 숨김
@@ -27,6 +28,10 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     select: (response) => response.data.count,
     enabled: !!user,
   });
+
+  if (isIntroPage) {
+    return <>{children}</>;
+  }
 
   return (
     <main
