@@ -7,165 +7,22 @@ import {
   ValidateNested,
   IsArray,
 } from 'class-validator';
-import { ApiProperty, PickType } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
 import { UserProfilePublicDto } from '../user/user.dto';
-
 import { PetSummaryAdoptionDto } from '../pet/pet.dto';
 import {
-  ADOPTION_SALE_STATUS,
   PET_ADOPTION_METHOD,
   PET_GROWTH,
   PET_SEX,
   PET_SPECIES,
 } from 'src/pet/pet.constants';
-import { CommonResponseDto } from 'src/common/response.dto';
 import { PageOptionsDto } from 'src/common/page.dto';
 
-export class AdoptionBaseDto {
+// 분양완료 처리 요청 DTO
+export class CompleteAdoptionDto {
   @ApiProperty({
-    description: '분양정보 ID',
-    example: 'XXXXXXXX',
-  })
-  @IsString()
-  adoptionId: string;
-
-  @ApiProperty({
-    description: '펫 ID',
-    example: 'XXXXXXXX',
-  })
-  @IsString()
-  petId: string;
-
-  @ApiProperty({
-    description: '분양 가격',
-    example: 50000,
-    required: false,
-  })
-  @IsOptional()
-  @IsNumber()
-  price?: number;
-
-  @ApiProperty({
-    description: '분양 날짜',
-    example: '2024-01-15',
-    required: false,
-  })
-  @IsOptional()
-  @IsDate()
-  adoptionDate?: Date;
-
-  @ApiProperty({
-    description: '메모',
-    example: '건강한 개체입니다.',
-    required: false,
-  })
-  @IsOptional()
-  @IsString()
-  memo?: string;
-
-  @ApiProperty({
-    description: '분양 방식',
-    example: 'DELIVERY',
-    enum: PET_ADOPTION_METHOD,
-    'x-enumNames': Object.keys(PET_ADOPTION_METHOD),
-    required: false,
-  })
-  @IsOptional()
-  @IsEnum(PET_ADOPTION_METHOD)
-  method?: PET_ADOPTION_METHOD;
-
-  @ApiProperty({
-    description: '생성일',
-  })
-  createdAt: Date;
-
-  @ApiProperty({
-    description: '수정일',
-  })
-  updatedAt: Date;
-
-  @ApiProperty({
-    description: '펫 판매 상태',
-    example: 'NONE',
-    enum: ADOPTION_SALE_STATUS,
-    'x-enumNames': Object.keys(ADOPTION_SALE_STATUS),
-  })
-  @IsEnum(ADOPTION_SALE_STATUS)
-  status: ADOPTION_SALE_STATUS;
-}
-
-export class CreateAdoptionDto {
-  @ApiProperty({
-    description: '펫 ID',
-    example: 'XXXXXXXX',
-  })
-  @IsString()
-  petId: string;
-
-  @ApiProperty({
-    description: '분양 가격',
-    example: 50000,
-    required: false,
-  })
-  @IsOptional()
-  @IsNumber()
-  price?: number;
-
-  @ApiProperty({
-    description: '분양 날짜',
-    example: '2024-01-15',
-    required: false,
-  })
-  @Type(() => Date)
-  @IsOptional()
-  @IsDate()
-  adoptionDate?: Date;
-
-  @ApiProperty({
-    description: '입양자 ID',
-    example: 'XXXXXXXX',
-    required: false,
-  })
-  @IsOptional()
-  @IsString()
-  buyerId?: string;
-
-  @ApiProperty({
-    description: '메모',
-    example: '건강한 개체입니다.',
-    required: false,
-  })
-  @IsOptional()
-  @IsString()
-  memo?: string;
-
-  @ApiProperty({
-    description: '분양 방식',
-    example: 'DELIVERY',
-    enum: PET_ADOPTION_METHOD,
-    'x-enumNames': Object.keys(PET_ADOPTION_METHOD),
-    required: false,
-  })
-  @IsOptional()
-  @IsEnum(PET_ADOPTION_METHOD)
-  method?: PET_ADOPTION_METHOD;
-
-  @ApiProperty({
-    description: '판매 상태',
-    example: 'ON_SALE',
-    enum: ADOPTION_SALE_STATUS,
-    'x-enumNames': Object.keys(ADOPTION_SALE_STATUS),
-    required: false,
-  })
-  @IsOptional()
-  @IsEnum(ADOPTION_SALE_STATUS)
-  status?: ADOPTION_SALE_STATUS;
-}
-
-export class UpdateAdoptionDto {
-  @ApiProperty({
-    description: '분양 가격',
+    description: '거래가',
     example: 50000,
     required: false,
     nullable: true,
@@ -174,6 +31,17 @@ export class UpdateAdoptionDto {
   @IsOptional()
   @IsNumber()
   price?: number | null;
+
+  @ApiProperty({
+    description: '입양자 ID',
+    example: 'USER_XXXXXXXX',
+    required: false,
+    nullable: true,
+    type: 'string',
+  })
+  @IsOptional()
+  @IsString()
+  buyerId?: string | null;
 
   @ApiProperty({
     description: '분양 날짜',
@@ -189,29 +57,7 @@ export class UpdateAdoptionDto {
   adoptionDate?: Date | null;
 
   @ApiProperty({
-    description: '입양자 ID',
-    example: 'USER_XXXXXXXX',
-    required: false,
-    nullable: true,
-    type: 'string',
-  })
-  @IsOptional()
-  @IsString()
-  buyerId?: string | null;
-
-  @ApiProperty({
-    description: '메모',
-    example: '건강한 개체입니다.',
-    required: false,
-    nullable: true,
-    type: 'string',
-  })
-  @IsOptional()
-  @IsString()
-  memo?: string | null;
-
-  @ApiProperty({
-    description: '분양 방식',
+    description: '거래 방식',
     example: 'DELIVERY',
     enum: PET_ADOPTION_METHOD,
     'x-enumNames': Object.keys(PET_ADOPTION_METHOD),
@@ -223,58 +69,62 @@ export class UpdateAdoptionDto {
   method?: PET_ADOPTION_METHOD | null;
 
   @ApiProperty({
-    description: '판매 상태',
-    example: 'ON_SALE',
-    enum: ADOPTION_SALE_STATUS,
-    'x-enumNames': Object.keys(ADOPTION_SALE_STATUS),
+    description: '메모',
+    example: '건강한 개체입니다.',
     required: false,
     nullable: true,
+    type: 'string',
   })
   @IsOptional()
-  @IsEnum(ADOPTION_SALE_STATUS)
-  status?: ADOPTION_SALE_STATUS | null;
+  @IsString()
+  memo?: string | null;
 }
 
-export class AdoptionDto extends PickType(AdoptionBaseDto, [
-  'adoptionId',
-  'petId',
-  'price',
-  'adoptionDate',
-  'memo',
-  'method',
-  'status',
-] as const) {
+// 분양 이력 (판매완료 기록) 조회용 DTO
+export class AdoptionHistoryDto {
+  @ApiProperty({ description: '펫 ID' })
+  @IsString()
+  petId: string;
+
+  @ApiProperty({ description: '거래가', required: false })
+  @IsOptional()
+  @IsNumber()
+  price?: number;
+
+  @ApiProperty({ description: '분양 날짜', required: false })
+  @IsOptional()
+  @IsDate()
+  adoptionDate?: Date;
+
+  @ApiProperty({ description: '메모', required: false })
+  @IsOptional()
+  @IsString()
+  memo?: string;
+
   @ApiProperty({
-    description: '분양자 정보',
+    description: '거래 방식',
+    enum: PET_ADOPTION_METHOD,
+    required: false,
   })
+  @IsOptional()
+  @IsEnum(PET_ADOPTION_METHOD)
+  method?: PET_ADOPTION_METHOD;
+
+  @ApiProperty({ description: '생성일' })
+  createdAt: Date;
+
+  @ApiProperty({ description: '분양자 정보', required: false })
   @IsOptional()
   seller?: UserProfilePublicDto;
 
-  @ApiProperty({
-    description: '입양자 정보',
-    required: false,
-  })
+  @ApiProperty({ description: '입양자 정보', required: false })
   @IsOptional()
   buyer?: UserProfilePublicDto;
 
-  @ApiProperty({
-    description: '펫 정보',
-    type: PetSummaryAdoptionDto,
-  })
+  @ApiProperty({ description: '펫 정보', type: PetSummaryAdoptionDto })
   @ValidateNested()
   @Type(() => PetSummaryAdoptionDto)
   pet: PetSummaryAdoptionDto;
-}
-
-export class AdoptionDetailResponseDto extends CommonResponseDto {
-  @ApiProperty({
-    description: '분양 정보 (없을 수 있음)',
-    type: AdoptionDto,
-    nullable: true,
-    required: false,
-  })
-  @Type(() => AdoptionDto)
-  data: AdoptionDto | null;
 }
 
 export class AdoptionFilterDto extends PageOptionsDto {
@@ -469,17 +319,6 @@ export class AdoptionFilterDto extends PageOptionsDto {
   @IsArray()
   @IsEnum(PET_GROWTH, { each: true })
   growth?: PET_GROWTH[]; // 크기 검색
-
-  @ApiProperty({
-    description: '펫 판매 상태',
-    example: 'ON_SALE',
-    enum: ADOPTION_SALE_STATUS,
-    'x-enumNames': Object.keys(ADOPTION_SALE_STATUS),
-    required: false,
-  })
-  @IsOptional()
-  @IsEnum(ADOPTION_SALE_STATUS)
-  status?: ADOPTION_SALE_STATUS;
 
   @ApiProperty({
     description: '분양 방식',

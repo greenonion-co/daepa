@@ -13,9 +13,7 @@ export type PetAdoptionDtoStatus = (typeof PetAdoptionDtoStatus)[keyof typeof Pe
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const PetAdoptionDtoStatus = {
-  NONE: "NONE",
   NFS: "NFS",
   ON_SALE: "ON_SALE",
   ON_RESERVATION: "ON_RESERVATION",
-  SOLD: "SOLD",
 } as const;

@@ -5,11 +5,11 @@
  * Project Daepa API description
  * OpenAPI spec version: 1.0
  */
-import type { UpdateAdoptionDtoStatus } from "./updateAdoptionDtoStatus";
+import type { CompleteAdoptionDtoMethod } from "./completeAdoptionDtoMethod";
 
-export interface UpdateAdoptionDto {
+export interface CompleteAdoptionDto {
   /**
-   * 희망 분양가
+   * 거래가
    * @nullable
    */
   price?: number | null;
@@ -19,13 +19,18 @@ export interface UpdateAdoptionDto {
    */
   buyerId?: string | null;
   /**
+   * 분양 날짜
+   * @nullable
+   */
+  adoptionDate?: string | null;
+  /**
+   * 거래 방식
+   * @nullable
+   */
+  method?: CompleteAdoptionDtoMethod;
+  /**
    * 메모
    * @nullable
    */
   memo?: string | null;
-  /**
-   * 분양 상태
-   * @nullable
-   */
-  status?: UpdateAdoptionDtoStatus;
 }

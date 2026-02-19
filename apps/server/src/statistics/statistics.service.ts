@@ -8,11 +8,11 @@ import { LayingEntity } from 'src/laying/laying.entity';
 import { PetEntity } from 'src/pet/pet.entity';
 import { EggDetailEntity } from 'src/egg_detail/egg_detail.entity';
 import { PetDetailEntity } from 'src/pet_detail/pet_detail.entity';
-import { AdoptionEntity } from 'src/adoption/adoption.entity';
+import { AdoptionHistoryEntity } from 'src/adoption_history/adoption_history.entity';
 import { PetRelationEntity } from 'src/pet_relation/pet_relation.entity';
 import { UserEntity } from 'src/user/user.entity';
 import { EGG_STATUS } from 'src/egg_detail/egg_detail.constants';
-import { ADOPTION_SALE_STATUS, PET_SEX } from 'src/pet/pet.constants';
+import { PET_SEX } from 'src/pet/pet.constants';
 import {
   ParentStatisticsDto,
   StatisticsPeriodType,
@@ -542,9 +542,9 @@ export class StatisticsService {
     fatherId?: string,
     motherId?: string,
   ): Promise<AdoptionStatisticsDto> {
-    // 1) 분양 완료된 데이터 조회
+    // 1) 분양 완료된 데이터 조회 (adoption_histories 테이블)
     let query = this.dataSource
-      .createQueryBuilder(AdoptionEntity, 'adoption')
+      .createQueryBuilder(AdoptionHistoryEntity, 'adoption')
       .leftJoinAndMapOne(
         'adoption.pet',
         PetEntity,
@@ -563,12 +563,8 @@ export class StatisticsService {
         'petRelation.petId = adoption.petId',
       )
       .where('adoption.sellerId = :userId', { userId })
-      .andWhere('adoption.status = :status', {
-        status: ADOPTION_SALE_STATUS.SOLD,
-      })
-      .andWhere('adoption.isDeleted = false')
       .select([
-        'adoption.adoptionId',
+        'adoption.id',
         'adoption.price',
         'adoption.adoptionDate',
         'adoption.method',
@@ -613,7 +609,7 @@ export class StatisticsService {
    * 분양 통계 데이터 생성
    */
   private async buildAdoptionStatistics(
-    adoptions: AdoptionEntity[],
+    adoptions: AdoptionHistoryEntity[],
     year?: number,
     month?: number,
   ): Promise<AdoptionStatisticsDto> {
@@ -725,20 +721,20 @@ export class StatisticsService {
    * 분양 성별 통계 생성
    */
   private buildAdoptionSexStatistics(
-    adoptions: AdoptionEntity[],
+    adoptions: AdoptionHistoryEntity[],
   ): AdoptionSexItemDto[] {
     const sexConfig = [
       {
         key: 'male',
-        filter: (a: AdoptionEntity) => a.petDetail?.sex === PET_SEX.MALE,
+        filter: (a: AdoptionHistoryEntity) => a.petDetail?.sex === PET_SEX.MALE,
       },
       {
         key: 'female',
-        filter: (a: AdoptionEntity) => a.petDetail?.sex === PET_SEX.FEMALE,
+        filter: (a: AdoptionHistoryEntity) => a.petDetail?.sex === PET_SEX.FEMALE,
       },
       {
         key: 'unknown',
-        filter: (a: AdoptionEntity) =>
+        filter: (a: AdoptionHistoryEntity) =>
           !a.petDetail?.sex || a.petDetail?.sex === PET_SEX.NON,
       },
     ];
@@ -766,8 +762,8 @@ export class StatisticsService {
    * 분양 분포 통계 생성
    */
   private buildAdoptionDistribution(
-    adoptions: AdoptionEntity[],
-    getItems: (adoption: AdoptionEntity) => string[] | null,
+    adoptions: AdoptionHistoryEntity[],
+    getItems: (adoption: AdoptionHistoryEntity) => string[] | null,
   ): AdoptionDistributionItemDto[] {
     const statsMap = new Map<string, { count: number; revenue: number }>();
     let total = 0;
@@ -804,7 +800,7 @@ export class StatisticsService {
    * 분양 방식 분포 생성
    */
   private buildMethodDistribution(
-    adoptions: AdoptionEntity[],
+    adoptions: AdoptionHistoryEntity[],
   ): AdoptionDistributionItemDto[] {
     const statsMap = new Map<string, { count: number; revenue: number }>();
     const total = adoptions.length;
@@ -835,7 +831,7 @@ export class StatisticsService {
    * 분양 월별 통계 생성
    */
   private buildAdoptionMonthlyStatistics(
-    adoptions: AdoptionEntity[],
+    adoptions: AdoptionHistoryEntity[],
   ): AdoptionMonthlyItemDto[] {
     const monthlyData = new Map<number, { count: number; revenue: number }>();
 
@@ -871,7 +867,7 @@ export class StatisticsService {
    * 요일별 분양 통계 생성
    */
   private buildDayOfWeekStatistics(
-    adoptions: AdoptionEntity[],
+    adoptions: AdoptionHistoryEntity[],
   ): AdoptionDayOfWeekItemDto[] {
     const dayOfWeekData = new Map<number, { count: number; revenue: number }>();
 
@@ -906,7 +902,7 @@ export class StatisticsService {
    * 고객 분석 통계 생성
    */
   private async buildCustomerAnalysis(
-    adoptions: AdoptionEntity[],
+    adoptions: AdoptionHistoryEntity[],
   ): Promise<CustomerAnalysisDto> {
     // buyerId별 구매 횟수와 총 금액 집계
     const customerStats = new Map<
@@ -1009,7 +1005,7 @@ export class StatisticsService {
    * 가격대별 분양 통계 생성
    */
   private buildPriceRangeStatistics(
-    adoptions: AdoptionEntity[],
+    adoptions: AdoptionHistoryEntity[],
   ): PriceRangeItemDto[] {
     // 가격대 정의 (단위: 원)
     const priceRanges = [
@@ -1034,7 +1030,7 @@ export class StatisticsService {
 
         const count = filtered.length;
         const revenue = filtered.reduce((sum, a) => sum + (a.price ?? 0), 0);
-        const adoptionIds = filtered.map((a) => a.adoptionId);
+        const adoptionIds = filtered.map((a) => a.id);
 
         return plainToInstance(PriceRangeItemDto, {
           label,

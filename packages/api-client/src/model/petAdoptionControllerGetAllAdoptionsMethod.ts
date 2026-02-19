@@ -6,16 +6,11 @@
  * OpenAPI spec version: 1.0
  */
 
-/**
- * 분양 방식 (판매완료 시 사용)
- * @nullable
- */
-export type UpdateAdoptionDtoMethod =
-  | (typeof UpdateAdoptionDtoMethod)[keyof typeof UpdateAdoptionDtoMethod]
-  | null;
+export type PetAdoptionControllerGetAllAdoptionsMethod =
+  (typeof PetAdoptionControllerGetAllAdoptionsMethod)[keyof typeof PetAdoptionControllerGetAllAdoptionsMethod];
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const UpdateAdoptionDtoMethod = {
+export const PetAdoptionControllerGetAllAdoptionsMethod = {
   PICKUP: "PICKUP",
   DELIVERY: "DELIVERY",
   WHOLESALE: "WHOLESALE",

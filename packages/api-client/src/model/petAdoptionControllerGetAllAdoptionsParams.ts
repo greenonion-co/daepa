@@ -5,17 +5,17 @@
  * Project Daepa API description
  * OpenAPI spec version: 1.0
  */
-import type { BrAdoptionControllerGetAllAdoptionsOrder } from "./brAdoptionControllerGetAllAdoptionsOrder";
-import type { BrAdoptionControllerGetAllAdoptionsSpecies } from "./brAdoptionControllerGetAllAdoptionsSpecies";
-import type { BrAdoptionControllerGetAllAdoptionsSexItem } from "./brAdoptionControllerGetAllAdoptionsSexItem";
-import type { BrAdoptionControllerGetAllAdoptionsGrowthItem } from "./brAdoptionControllerGetAllAdoptionsGrowthItem";
-import type { BrAdoptionControllerGetAllAdoptionsMethod } from "./brAdoptionControllerGetAllAdoptionsMethod";
+import type { PetAdoptionControllerGetAllAdoptionsOrder } from "./petAdoptionControllerGetAllAdoptionsOrder";
+import type { PetAdoptionControllerGetAllAdoptionsSpecies } from "./petAdoptionControllerGetAllAdoptionsSpecies";
+import type { PetAdoptionControllerGetAllAdoptionsSexItem } from "./petAdoptionControllerGetAllAdoptionsSexItem";
+import type { PetAdoptionControllerGetAllAdoptionsGrowthItem } from "./petAdoptionControllerGetAllAdoptionsGrowthItem";
+import type { PetAdoptionControllerGetAllAdoptionsMethod } from "./petAdoptionControllerGetAllAdoptionsMethod";
 
-export type BrAdoptionControllerGetAllAdoptionsParams = {
+export type PetAdoptionControllerGetAllAdoptionsParams = {
   /**
    * 정렬 순서
    */
-  order?: BrAdoptionControllerGetAllAdoptionsOrder;
+  order?: PetAdoptionControllerGetAllAdoptionsOrder;
   /**
    * 페이지 번호
    */
@@ -31,7 +31,7 @@ export type BrAdoptionControllerGetAllAdoptionsParams = {
   /**
    * 펫 종
    */
-  species?: BrAdoptionControllerGetAllAdoptionsSpecies;
+  species?: PetAdoptionControllerGetAllAdoptionsSpecies;
   /**
    * 펫 모프
    */
@@ -43,15 +43,15 @@ export type BrAdoptionControllerGetAllAdoptionsParams = {
   /**
    * 펫 성별
    */
-  sex?: BrAdoptionControllerGetAllAdoptionsSexItem[];
+  sex?: PetAdoptionControllerGetAllAdoptionsSexItem[];
   /**
    * 펫 성장단계
    */
-  growth?: BrAdoptionControllerGetAllAdoptionsGrowthItem[];
+  growth?: PetAdoptionControllerGetAllAdoptionsGrowthItem[];
   /**
    * 분양 방식
    */
-  method?: BrAdoptionControllerGetAllAdoptionsMethod;
+  method?: PetAdoptionControllerGetAllAdoptionsMethod;
   /**
    * 최소 분양 가격
    */

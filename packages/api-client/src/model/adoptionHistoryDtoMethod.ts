@@ -7,15 +7,13 @@
  */
 
 /**
- * 분양 방식 (판매완료 시 사용)
- * @nullable
+ * 거래 방식
  */
-export type UpdateAdoptionDtoMethod =
-  | (typeof UpdateAdoptionDtoMethod)[keyof typeof UpdateAdoptionDtoMethod]
-  | null;
+export type AdoptionHistoryDtoMethod =
+  (typeof AdoptionHistoryDtoMethod)[keyof typeof AdoptionHistoryDtoMethod];
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const UpdateAdoptionDtoMethod = {
+export const AdoptionHistoryDtoMethod = {
   PICKUP: "PICKUP",
   DELIVERY: "DELIVERY",
   WHOLESALE: "WHOLESALE",

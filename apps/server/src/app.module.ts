@@ -26,9 +26,12 @@ import { HttpModule } from '@nestjs/axios';
 import { OauthService } from './auth/oauth/oauth.service';
 import { UserController } from './user/user.controller';
 import { OauthEntity } from './auth/oauth/oauth.entity';
-import { AdoptionEntity } from './adoption/adoption.entity';
-import { AdoptionController } from './adoption/adoption.controller';
-import { AdoptionService } from './adoption/adoption.service';
+import { PetAdoptionEntity } from './pet_adoption/pet_adoption.entity';
+import { AdoptionHistoryEntity } from './adoption_history/adoption_history.entity';
+import { PetAdoptionController } from './pet_adoption/pet_adoption.controller';
+import { PetAdoptionService } from './pet_adoption/pet_adoption.service';
+import { AdoptionHistoryController } from './adoption_history/adoption_history.controller';
+import { AdoptionHistoryService } from './adoption_history/adoption_history.service';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import { MatingController } from './mating/mating.controller';
 import { MatingService } from './mating/mating.service';
@@ -48,7 +51,6 @@ import { EggDetailEntity } from './egg_detail/egg_detail.entity';
 import { PetDetailEntity } from './pet_detail/pet_detail.entity';
 import { PairController } from './pair/pair.controller';
 import { PairService } from './pair/pair.service';
-import { BrAdoptionController } from './adoption/br/br.adoption.controller';
 import { PetRelationEntity } from './pet_relation/pet_relation.entity';
 import { PetRelationService } from './pet_relation/pet_relation.service';
 import { StatisticsController } from './statistics/statistics.controller';
@@ -64,7 +66,8 @@ const ENTITIES = [
   OauthEntity,
   PetEntity,
   UserNotificationEntity,
-  AdoptionEntity,
+  PetAdoptionEntity,
+  AdoptionHistoryEntity,
   MatingEntity,
   ParentRequestEntity,
   LayingEntity,
@@ -113,8 +116,8 @@ const ENTITIES = [
     BrPetController,
     AuthController,
     UserController,
-    AdoptionController,
-    BrAdoptionController,
+    PetAdoptionController,
+    AdoptionHistoryController,
     MatingController,
     ParentRequestController,
     LayingController,
@@ -133,7 +136,8 @@ const ENTITIES = [
     KakaoStrategy,
     GoogleStrategy,
     JwtStrategy,
-    AdoptionService,
+    PetAdoptionService,
+    AdoptionHistoryService,
     MatingService,
     ParentRequestService,
     LayingService,

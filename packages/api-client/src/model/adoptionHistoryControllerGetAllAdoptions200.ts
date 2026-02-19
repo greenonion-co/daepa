@@ -8,7 +8,7 @@
 import type { AdoptionHistoryDto } from "./adoptionHistoryDto";
 import type { PageMetaDto } from "./pageMetaDto";
 
-export type BrAdoptionControllerGetAllAdoptions200 = {
+export type AdoptionHistoryControllerGetAllAdoptions200 = {
   data: AdoptionHistoryDto[];
   meta: PageMetaDto;
 };

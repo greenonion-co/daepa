@@ -18,12 +18,10 @@ export enum PET_SPECIES {
   GARGO = 'GG', // 가고일게코
 }
 
-export enum ADOPTION_SALE_STATUS {
-  NONE = 'NONE', // 미정
+export enum PET_ADOPTION_STATUS {
   NFS = 'NFS', // 판매 안함
   ON_SALE = 'ON_SALE', // 판매 중
   ON_RESERVATION = 'ON_RESERVATION', // 예약 중
-  SOLD = 'SOLD', // 판매 완료
 }
 
 export enum PET_ADOPTION_METHOD {

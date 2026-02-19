@@ -3,13 +3,11 @@ import {
   CreateDateColumn,
   Entity,
   Index,
-  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Exclude } from 'class-transformer';
 import { USER_ROLE, USER_STATUS } from './user.constant';
-import { AdoptionEntity } from 'src/adoption/adoption.entity';
 
 @Entity({ name: 'users' })
 @Index('UNIQUE_USER_ID', ['userId'], { unique: true })
@@ -65,9 +63,4 @@ export class UserEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @OneToOne(() => AdoptionEntity, (adoption) => adoption.seller)
-  sellerAdoption: AdoptionEntity;
-
-  @OneToOne(() => AdoptionEntity, (adoption) => adoption.buyer)
-  buyerAdoption: AdoptionEntity;
 }
