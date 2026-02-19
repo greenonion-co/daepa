@@ -3,7 +3,7 @@
 import { ColumnDef } from "@tanstack/react-table";
 
 import {
-  AdoptionDto,
+  AdoptionHistoryDto,
   PetHiddenStatusDtoHiddenStatus,
   PetParentDto,
   UpdateParentRequestDtoStatus,
@@ -23,7 +23,7 @@ import DeletedPetName from "../../components/DeletedPetName";
 import { getSexIcon } from "@/lib/sex-icon";
 import HiddenPetBadge from "@/components/common/HiddenPetBadge";
 
-export const columns: ColumnDef<AdoptionDto>[] = [
+export const columns: ColumnDef<AdoptionHistoryDto>[] = [
   {
     accessorKey: "adoptionDate",
     header: "분양 날짜",
