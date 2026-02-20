@@ -335,11 +335,11 @@ export class AdoptionHistoryService {
       }
 
       // 3. 부모 요청 확인
-      const hasPendingRequest =
-        await this.parentRequestService.hasPendingRequestsByPetId(petId, em);
-      if (hasPendingRequest) {
+      const pendingCount =
+        await this.parentRequestService.getPendingRequestCount(petId, em);
+      if (pendingCount > 0) {
         throw new BadRequestException(
-          '이 펫과 관련된 부모 요청을 모두 처리한 후 다시 시도해주세요.',
+          `이 펫과 관련된 부모 요청(${pendingCount}건)을 모두 처리한 후 다시 시도해주세요.`,
         );
       }
 
@@ -364,10 +364,8 @@ export class AdoptionHistoryService {
       adoptionEntity.buyerId = null;
       await em.save(PetAdoptionEntity, adoptionEntity);
 
-      // 6. 입양자가 있는 경우에만 펫 소유권 이전
-      if (finalBuyerId) {
-        await em.update('pets', { petId }, { ownerId: finalBuyerId });
-      }
+      // 6. 펫 소유권 이전 (입양자가 없으면 소유권 박탈)
+      await em.update('pets', { petId }, { ownerId: finalBuyerId ?? null });
     });
   }
 }

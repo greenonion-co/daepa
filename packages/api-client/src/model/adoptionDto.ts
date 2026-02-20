@@ -6,8 +6,6 @@
  * OpenAPI spec version: 1.0
  */
 import type { AdoptionDtoStatus } from "./adoptionDtoStatus";
-import type { UserProfilePublicDto } from "./userProfilePublicDto";
-import type { PetSummaryAdoptionDto } from "./petSummaryAdoptionDto";
 
 export interface AdoptionDto {
   /** 펫 ID */
@@ -16,15 +14,11 @@ export interface AdoptionDto {
   price?: number;
   /** 메모 */
   memo?: string;
+  /** 생성일 */
+  createdAt: string;
   /**
    * 분양 상태 (null이면 미지정)
    * @nullable
    */
   status: AdoptionDtoStatus;
-  /** 분양자 정보 */
-  seller: UserProfilePublicDto;
-  /** 입양자 정보 */
-  buyer?: UserProfilePublicDto;
-  /** 펫 정보 */
-  pet: PetSummaryAdoptionDto;
 }

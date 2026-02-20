@@ -127,6 +127,7 @@ export * from "./parentLinkDetailJson";
 export * from "./parentLinkDetailJsonRole";
 export * from "./parentLinkDetailJsonStatus";
 export * from "./parentStatisticsDto";
+export * from "./pendingRequestCountResponseDto";
 export * from "./petAdoptionControllerGetAllAdoptions200";
 export * from "./petAdoptionControllerGetAllAdoptionsGrowthItem";
 export * from "./petAdoptionControllerGetAllAdoptionsMethod";

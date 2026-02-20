@@ -1,15 +1,7 @@
-import {
-  IsString,
-  IsNumber,
-  IsOptional,
-  IsEnum,
-  ValidateNested,
-} from 'class-validator';
+import { IsString, IsNumber, IsOptional, IsEnum } from 'class-validator';
 import { ApiProperty, PickType } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { UserProfilePublicDto } from '../user/user.dto';
 
-import { PetSummaryAdoptionDto } from '../pet/pet.dto';
 import { PET_ADOPTION_STATUS } from 'src/pet/pet.constants';
 import { CommonResponseDto } from 'src/common/response.dto';
 
@@ -151,28 +143,8 @@ export class AdoptionDto extends PickType(PetAdoptionBaseDto, [
   'price',
   'memo',
   'status',
-] as const) {
-  @ApiProperty({
-    description: '분양자 정보',
-  })
-  @IsOptional()
-  seller?: UserProfilePublicDto;
-
-  @ApiProperty({
-    description: '입양자 정보',
-    required: false,
-  })
-  @IsOptional()
-  buyer?: UserProfilePublicDto;
-
-  @ApiProperty({
-    description: '펫 정보',
-    type: PetSummaryAdoptionDto,
-  })
-  @ValidateNested()
-  @Type(() => PetSummaryAdoptionDto)
-  pet: PetSummaryAdoptionDto;
-}
+  'createdAt',
+] as const) {}
 
 export class AdoptionDetailResponseDto extends CommonResponseDto {
   @ApiProperty({

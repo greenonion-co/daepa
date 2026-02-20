@@ -1,5 +1,6 @@
 import {
   Controller,
+  Get,
   Put,
   Param,
   Body,
@@ -10,6 +11,7 @@ import {
 import { ParentRequestService } from './parent_request.service';
 import {
   CreateParentDto,
+  PendingRequestCountResponseDto,
   UnlinkParentDto,
   UpdateParentRequestDto,
 } from './parent_request.dto';
@@ -22,6 +24,25 @@ import { CommonResponseDto } from 'src/common/response.dto';
 @UseGuards(JwtAuthGuard)
 export class ParentRequestController {
   constructor(private readonly parentRequestService: ParentRequestService) {}
+
+  @Get(':petId/pending-count')
+  @ApiParam({
+    name: 'petId',
+    description: '펫 아이디',
+    example: 'XXXXXXXX',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '처리 중인 부모 요청 수',
+    type: PendingRequestCountResponseDto,
+  })
+  async getPendingRequestCount(
+    @Param('petId') petId: string,
+  ): Promise<PendingRequestCountResponseDto> {
+    const count =
+      await this.parentRequestService.getPendingRequestCount(petId);
+    return { count };
+  }
 
   @Post(':petId')
   @ApiParam({

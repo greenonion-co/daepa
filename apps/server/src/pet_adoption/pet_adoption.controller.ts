@@ -6,14 +6,8 @@ import {
   AdoptionDetailResponseDto,
   CreateAdoptionDto,
 } from './pet_adoption.dto';
-import {
-  JwtUser,
-  OptionalJwtUser,
-  Public,
-  OptionalJwtAuthGuard,
-} from '../auth/auth.decorator';
+import { JwtUser, Public } from '../auth/auth.decorator';
 import { JwtUserPayload } from '../auth/strategies/jwt.strategy';
-import { UseGuards } from '@nestjs/common';
 import { CommonResponseDto } from 'src/common/response.dto';
 
 @ApiTags('개체 분양 정보')
@@ -43,7 +37,6 @@ export class PetAdoptionController {
 
   @Get('/:petId')
   @Public()
-  @UseGuards(OptionalJwtAuthGuard)
   @ApiResponse({
     status: 200,
     description: '펫별 분양 정보 조회 성공 (없으면 data가 null)',
@@ -51,9 +44,8 @@ export class PetAdoptionController {
   })
   async getPetAdoption(
     @Param('petId') petId: string,
-    @OptionalJwtUser() token: JwtUserPayload | null,
   ): Promise<AdoptionDetailResponseDto> {
-    const data = await this.petAdoptionService.findOne(petId, token?.userId);
+    const data = await this.petAdoptionService.findOne(petId);
     return {
       success: true,
       message: '펫별 분양 정보 조회 성공',

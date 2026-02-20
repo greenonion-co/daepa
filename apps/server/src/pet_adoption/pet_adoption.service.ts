@@ -12,163 +12,36 @@ import {
   UpdateAdoptionDto,
 } from './pet_adoption.dto';
 import { PET_ADOPTION_STATUS } from 'src/pet/pet.constants';
-import { isNil, isUndefined, omitBy } from 'es-toolkit';
+import { isUndefined, omitBy } from 'es-toolkit';
 import { PetEntity } from 'src/pet/pet.entity';
 import { UserEntity } from 'src/user/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { USER_STATUS } from 'src/user/user.constant';
-import { ParentRequestService } from '../parent_request/parent_request.service';
-import { replaceParentPublicSafe } from '../common/utils/pet-parent.helper';
-import { extractOriginalPetName } from '../common/utils/pet-name.helper';
 
 @Injectable()
 export class PetAdoptionService {
   constructor(
     @InjectRepository(PetAdoptionEntity)
     private readonly petAdoptionRepository: Repository<PetAdoptionEntity>,
-    private readonly parentRequestService: ParentRequestService,
     private readonly dataSource: DataSource,
   ) {}
 
-  private async toAdoptionDtoOptimized(
-    entity: PetAdoptionEntity,
-    userId?: string,
-  ): Promise<AdoptionDto> {
-    if (!entity.pet) {
-      throw new Error('Pet information is required for adoption');
-    }
+  async findOne(petId: string): Promise<AdoptionDto | null> {
+    const adoptionEntity = await this.petAdoptionRepository.findOne({
+      where: { petId },
+      select: ['id', 'petId', 'price', 'memo', 'status', 'createdAt'],
+    });
 
-    const { pet, petDetail, seller, buyer, ...adoptionData } = entity;
-
-    const { father, mother } =
-      await this.parentRequestService.getParentsWithRequestStatus(pet.petId);
-
-    const fatherDisplayable = replaceParentPublicSafe(
-      father,
-      pet.ownerId,
-      userId,
-    );
-    const motherDisplayable = replaceParentPublicSafe(
-      mother,
-      pet.ownerId,
-      userId,
-    );
-
-    const petName = pet.isDeleted ? extractOriginalPetName(pet.name) : pet.name;
-
-    return {
-      ...adoptionData,
-      price: adoptionData.price ?? undefined,
-      status: adoptionData.status,
-      memo: adoptionData.memo ?? undefined,
-      pet: {
-        petId: pet.petId,
-        type: pet.type,
-        species: pet.species,
-        isDeleted: pet.isDeleted,
-        ...omitBy(
-          {
-            name: petName ?? undefined,
-            hatchingDate: pet.hatchingDate ?? undefined,
-            sex: petDetail?.sex ?? undefined,
-            morphs: petDetail?.morphs ?? undefined,
-            traits: petDetail?.traits ?? undefined,
-            growth: petDetail?.growth ?? undefined,
-            father: fatherDisplayable ?? undefined,
-            mother: motherDisplayable ?? undefined,
-          },
-          isNil,
-        ),
-      },
-      ...omitBy(
-        {
-          seller:
-            seller?.status === USER_STATUS.DELETED
-              ? {
-                  status: seller.status,
-                }
-              : seller,
-          buyer:
-            buyer?.status === USER_STATUS.DELETED
-              ? {
-                  status: buyer.status,
-                }
-              : buyer,
-        },
-        isNil,
-      ),
-    };
-  }
-
-  private createPetAdoptionQueryBuilder() {
-    return this.petAdoptionRepository
-      .createQueryBuilder('pet_adoptions')
-      .innerJoinAndMapOne(
-        'pet_adoptions.pet',
-        'pets',
-        'pets',
-        'pets.petId = pet_adoptions.petId',
-      )
-      .innerJoinAndMapOne(
-        'pet_adoptions.petDetail',
-        'pet_details',
-        'pet_details',
-        'pet_details.petId = pets.petId',
-      )
-      .leftJoinAndMapOne(
-        'pet_adoptions.seller',
-        'users',
-        'seller',
-        'seller.userId = pet_adoptions.sellerId',
-      )
-      .leftJoinAndMapOne(
-        'pet_adoptions.buyer',
-        'users',
-        'buyer',
-        'buyer.userId = pet_adoptions.buyerId',
-      )
-      .select([
-        'pet_adoptions.id',
-        'pet_adoptions.petId',
-        'pet_adoptions.price',
-        'pet_adoptions.memo',
-        'pet_adoptions.status',
-        'pet_adoptions.createdAt',
-        'pets.petId',
-        'pets.type',
-        'pets.name',
-        'pets.species',
-        'pets.hatchingDate',
-        'pets.isDeleted',
-        'pet_details.sex',
-        'pet_details.morphs',
-        'pet_details.traits',
-        'pet_details.growth',
-        'seller.userId',
-        'seller.name',
-        'seller.role',
-        'seller.isBiz',
-        'seller.status',
-        'buyer.userId',
-        'buyer.name',
-        'buyer.role',
-        'buyer.isBiz',
-        'buyer.status',
-      ]);
-  }
-
-  async findOne(petId: string, userId?: string): Promise<AdoptionDto | null> {
-    const qb = this.createPetAdoptionQueryBuilder().where(
-      'pet_adoptions.petId = :petId',
-      { petId },
-    );
-
-    const adoptionEntity = await qb.getOne();
     if (!adoptionEntity) {
       return null;
     }
 
-    return await this.toAdoptionDtoOptimized(adoptionEntity, userId);
+    return {
+      petId: adoptionEntity.petId,
+      status: adoptionEntity.status,
+      price: adoptionEntity.price ?? undefined,
+      memo: adoptionEntity.memo ?? undefined,
+      createdAt: adoptionEntity.createdAt,
+    };
   }
 
   async createAdoption(
@@ -236,17 +109,19 @@ export class PetAdoptionService {
 
       // 입양자 검증
       if (updateAdoptionDto.buyerId !== undefined) {
-        const finalStatus = updateAdoptionDto.status ?? adoptionEntity.status;
-        const isReservation =
-          finalStatus === PET_ADOPTION_STATUS.ON_RESERVATION;
+        if (updateAdoptionDto.buyerId === null) {
+          adoptionEntity.buyerId = null;
+        } else {
+          const finalStatus = updateAdoptionDto.status ?? adoptionEntity.status;
+          const isReservation =
+            finalStatus === PET_ADOPTION_STATUS.ON_RESERVATION;
 
-        if (!isReservation) {
-          throw new BadRequestException(
-            '예약중 상태일 때만 입양자 정보를 입력할 수 있습니다.',
-          );
-        }
+          if (!isReservation) {
+            throw new BadRequestException(
+              '예약중 상태일 때만 입양자 정보를 입력할 수 있습니다.',
+            );
+          }
 
-        if (updateAdoptionDto.buyerId) {
           const buyer = await em.findOne(UserEntity, {
             where: { userId: updateAdoptionDto.buyerId },
           });
