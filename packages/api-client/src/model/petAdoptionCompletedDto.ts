@@ -20,8 +20,6 @@ export interface PetAdoptionCompletedDto {
   name?: string;
   /** 펫 종 */
   species: PetAdoptionCompletedDtoSpecies;
-  /** 펫 출생일 */
-  hatchingDate?: string;
   /** 펫 삭제 여부 */
   isDeleted?: boolean;
   /** 펫 성별(수컷, 암컷, 미구분) */
@@ -32,6 +30,8 @@ export interface PetAdoptionCompletedDto {
   traits?: string[];
   /** 펫 성장단계 */
   growth?: PetAdoptionCompletedDtoGrowth;
+  /** 해칭일 (yyyy-MM-dd) */
+  hatchingDate?: string;
   /** 아빠 개체 정보 */
   father?: PetSnapshotParentDto;
   /** 엄마 개체 정보 */

@@ -27,6 +27,7 @@ import { InfiniteData, useMutation, useQueryClient } from "@tanstack/react-query
 import { toast } from "@/lib/toast";
 import { Textarea } from "@/components/ui/textarea";
 import { AxiosError, AxiosResponse } from "axios";
+import { getSexIcon } from "@/lib/sex-icon";
 
 interface AdoptionReceiptModalProps {
   isOpen: boolean;
@@ -84,12 +85,13 @@ const PetInfoCard = ({
               name
             )}
 
-            <div className={cn("text-muted-foreground", isMobile ? "text-xs" : "text-sm")}>
-              | {(SPECIES_KOREAN_INFO as Record<string, string>)[species] || "미분류"}
-            </div>
+            {hatchingDate && <p className="text-sm font-normal text-gray-500">{hatchingDate}</p>}
+            {/*<div className={cn("text-muted-foreground", isMobile ? "text-xs" : "text-sm")}>*/}
+            {/*  | {(SPECIES_KOREAN_INFO as Record<string, string>)[species] || "미분류"}*/}
+            {/*</div>*/}
             {sex && (
               <p className={cn("text-blue-500", isMobile ? "text-xs" : "text-sm")}>
-                | {(GENDER_KOREAN_INFO as Record<string, string>)[sex]}
+                {getSexIcon(sex, { size: "xs" })}
               </p>
             )}
           </div>
@@ -101,11 +103,6 @@ const PetInfoCard = ({
           >
             <BadgeList variant={"outline"} items={morphs} badgeSize={isMobile ? "sm" : "md"} />
             <BadgeList items={traits} variant="secondary" badgeSize={isMobile ? "sm" : "md"} />
-            {hatchingDate && (
-              <p className="font-[600] text-blue-600">
-                {DateTime.fromFormat(hatchingDate, "yyyy-MM-dd").toFormat("yy.M.d")}
-              </p>
-            )}
           </div>
         </div>
       </div>
@@ -253,7 +250,6 @@ const AdoptionReceiptModal = ({ isOpen, adoption, onClose }: AdoptionReceiptModa
                     {!isEditingMemo && (
                       <button
                         onClick={() => {
-                          setMemoValue(adoption.memo ?? "");
                           setIsEditingMemo(true);
                         }}
                         className="text-gray-400 hover:text-blue-500"
@@ -268,7 +264,7 @@ const AdoptionReceiptModal = ({ isOpen, adoption, onClose }: AdoptionReceiptModa
                         value={memoValue}
                         onChange={(e) => setMemoValue(e.target.value)}
                         placeholder="메모를 입력하세요"
-                        className="min-h-[80px] resize-none text-sm"
+                        className="min-h-[80px] w-full text-sm"
                         autoFocus
                       />
                       <div className="flex justify-end gap-2">

@@ -5,12 +5,11 @@
  * Project Daepa API description
  * OpenAPI spec version: 1.0
  */
-import type { UpdateAdoptionHistoryDtoMemo } from "./updateAdoptionHistoryDtoMemo";
 
 export interface UpdateAdoptionHistoryDto {
   /**
    * 메모
    * @nullable
    */
-  memo?: UpdateAdoptionHistoryDtoMemo;
+  memo?: string | null;
 }

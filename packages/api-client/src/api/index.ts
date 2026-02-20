@@ -3597,10 +3597,6 @@ export const getAdoptionHistoryControllerGetAllAdoptionsResponseMock = (
         ]),
         name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
         species: faker.helpers.arrayElement(["CR", "LE", "FT", "KN", "LC", "GG"] as const),
-        hatchingDate: faker.helpers.arrayElement([
-          faker.date.past().toISOString().split("T")[0],
-          undefined,
-        ]),
         isDeleted: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
         sex: faker.helpers.arrayElement([
           faker.helpers.arrayElement(["M", "F", "N"] as const),
@@ -3622,6 +3618,7 @@ export const getAdoptionHistoryControllerGetAllAdoptionsResponseMock = (
           faker.helpers.arrayElement(["BABY", "JUVENILE", "PRE_ADULT", "ADULT", "DEAD"] as const),
           undefined,
         ]),
+        hatchingDate: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
         father: faker.helpers.arrayElement([
           {
             ...{

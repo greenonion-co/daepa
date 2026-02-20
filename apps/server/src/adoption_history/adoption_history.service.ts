@@ -69,9 +69,7 @@ export class AdoptionHistoryService {
             growth: petSnapshot.growth as PET_GROWTH,
             morphs: petSnapshot.morphs,
             traits: petSnapshot.traits,
-            hatchingDate: petSnapshot.hatchingDate
-              ? new Date(petSnapshot.hatchingDate)
-              : undefined,
+            hatchingDate: petSnapshot.hatchingDate,
             isDeleted: petSnapshot.isDeleted,
             father: petSnapshot.father ?? undefined,
             mother: petSnapshot.mother ?? undefined,
@@ -344,11 +342,7 @@ export class AdoptionHistoryService {
         growth: petDetail?.growth ?? undefined,
         morphs: petDetail?.morphs ?? undefined,
         traits: petDetail?.traits ?? undefined,
-        hatchingDate: pet.hatchingDate
-          ? pet.hatchingDate instanceof Date
-            ? pet.hatchingDate.toISOString().split('T')[0]
-            : String(pet.hatchingDate)
-          : undefined,
+        hatchingDate: pet.hatchingDate?.toString() ?? undefined,
         isDeleted: pet.isDeleted || undefined,
         father: father ? { petId: father.petId, name: father.name } : null,
         mother: mother ? { petId: mother.petId, name: mother.name } : null,

@@ -118,9 +118,18 @@ export class PetAdoptionCompletedDto extends PickType(PetSummaryDto, [
   'growth',
   'morphs',
   'traits',
-  'hatchingDate',
   'isDeleted',
 ]) {
+  @ApiProperty({
+    description: '해칭일 (yyyy-MM-dd)',
+    type: 'string',
+    example: '2024-01-15',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  hatchingDate?: string;
+
   @ApiProperty({
     description: '아빠 개체 정보',
     type: PetSnapshotParentDto,
