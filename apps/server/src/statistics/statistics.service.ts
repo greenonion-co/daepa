@@ -730,7 +730,8 @@ export class StatisticsService {
       },
       {
         key: 'female',
-        filter: (a: AdoptionHistoryEntity) => a.petDetail?.sex === PET_SEX.FEMALE,
+        filter: (a: AdoptionHistoryEntity) =>
+          a.petDetail?.sex === PET_SEX.FEMALE,
       },
       {
         key: 'unknown',

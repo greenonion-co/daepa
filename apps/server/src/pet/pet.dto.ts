@@ -1303,9 +1303,7 @@ export class PetFilterDto extends PageOptionsDto {
         (v): v is PET_ADOPTION_STATUS =>
           typeof v === 'string' &&
           v.trim().length > 0 &&
-          Object.values(PET_ADOPTION_STATUS).includes(
-            v as PET_ADOPTION_STATUS,
-          ),
+          Object.values(PET_ADOPTION_STATUS).includes(v as PET_ADOPTION_STATUS),
       );
     }
     if (typeof value === 'string') {

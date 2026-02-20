@@ -39,8 +39,7 @@ export class ParentRequestController {
   async getPendingRequestCount(
     @Param('petId') petId: string,
   ): Promise<PendingRequestCountResponseDto> {
-    const count =
-      await this.parentRequestService.getPendingRequestCount(petId);
+    const count = await this.parentRequestService.getPendingRequestCount(petId);
     return { count };
   }
 
