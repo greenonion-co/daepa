@@ -6,11 +6,7 @@ import {
   adoptionHistoryControllerGetAllAdoptions,
   adoptionHistoryControllerUpdate,
 } from "@repo/api-client";
-import {
-  ADOPTION_METHOD_KOREAN_INFO,
-  GENDER_KOREAN_INFO,
-  SPECIES_KOREAN_INFO,
-} from "../../constants";
+import { ADOPTION_METHOD_KOREAN_INFO } from "../../constants";
 import { cn } from "@/lib/utils";
 import PetThumbnail from "@/components/common/PetThumbnail";
 import BadgeList from "../../components/BadgeList";
@@ -49,7 +45,7 @@ interface PetInfoCardProps {
 
 const PetInfoCard = ({
   name,
-  species,
+  // species,
   sex,
   morphs,
   traits,
