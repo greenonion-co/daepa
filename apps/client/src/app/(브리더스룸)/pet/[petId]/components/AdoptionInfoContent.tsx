@@ -33,6 +33,7 @@ import { useIsMyPet } from "@/hooks/useIsMyPet";
 import EditActionButtons from "./EditActionButtons";
 import CompleteAdoptionModal from "./CompleteAdoptionModal";
 import { useIsMobile } from "@/hooks/useMobile";
+import router from "next/router";
 
 interface AdoptionInfoContentProps {
   petId: string;
@@ -265,7 +266,12 @@ const AdoptionInfoContent = ({
                 })),
               };
             });
-            onClose?.();
+
+            if (isMobile) {
+              router.replace("/pet");
+            } else {
+              onClose?.();
+            }
           } catch (error: unknown) {
             if (error instanceof AxiosError) {
               const message = error.response?.data?.message;
@@ -280,7 +286,7 @@ const AdoptionInfoContent = ({
         }}
       />
     ));
-  }, [adoptionData, petId, completeAdoption, queryClient, onClose]);
+  }, [adoptionData, petId, completeAdoption, queryClient, onClose, isMobile]);
 
   const showAdoptionInfo = useMemo(() => {
     return !(isNil(adoption) && !isEditMode);

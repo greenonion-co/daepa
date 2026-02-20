@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
@@ -190,7 +189,6 @@ export default function IntroPage() {
 
       {/* ── 기능 섹션 ── */}
       {features.map((f) => {
-        const Icon = f.icon;
         const bg = f.dark ? "bg-black border-t border-white/[0.06]" : "bg-white";
         const textPrimary = f.dark ? "text-white" : "text-gray-900";
         const textSecondary = f.dark ? "text-white/50" : "text-gray-500";
