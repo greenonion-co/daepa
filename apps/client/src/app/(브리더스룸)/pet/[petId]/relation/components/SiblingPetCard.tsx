@@ -1,6 +1,10 @@
 "use client";
 
-import { PetHiddenStatusDto, PetHiddenStatusDtoHiddenStatus } from "@repo/api-client";
+import {
+  PetAdoptionCompletedDto,
+  PetHiddenStatusDto,
+  PetHiddenStatusDtoHiddenStatus,
+} from "@repo/api-client";
 import { DateTime } from "luxon";
 import { EyeOff, Lock, ScanFace } from "lucide-react";
 import Link from "next/link";
@@ -26,7 +30,7 @@ interface PetWithOwner extends BasePetInfo {
   owner: { userId: string; name: string };
 }
 
-type PetData = PetHiddenStatusDto | PetWithOwner | BasePetInfo;
+type PetData = PetHiddenStatusDto | PetWithOwner | BasePetInfo | PetAdoptionCompletedDto;
 
 type CardVariant = "vertical" | "horizontal";
 

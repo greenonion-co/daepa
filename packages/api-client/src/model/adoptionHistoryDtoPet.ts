@@ -8,7 +8,6 @@
 import type { PetAdoptionCompletedDto } from "./petAdoptionCompletedDto";
 
 /**
- * 펫 정보 (스냅샷이 없으면 null)
- * @nullable
+ * 펫 정보 (스냅샷이 없으면 {})
  */
-export type AdoptionHistoryDtoPet = PetAdoptionCompletedDto | null;
+export type AdoptionHistoryDtoPet = PetAdoptionCompletedDto;
