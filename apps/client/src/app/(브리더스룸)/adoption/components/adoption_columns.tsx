@@ -27,8 +27,8 @@ export const columns: ColumnDef<AdoptionHistoryDto>[] = [
     accessorKey: "pet.name",
     header: TABLE_HEADER.name,
     cell: ({ row }) => {
-      const petName = row.original.pet?.name;
-      const isDeleted = row.original.pet?.isDeleted;
+      const petName = row.original.pet.name;
+      const isDeleted = row.original.pet.isDeleted;
 
       return isDeleted ? (
         <DeletedPetName name={petName} />
@@ -41,7 +41,7 @@ export const columns: ColumnDef<AdoptionHistoryDto>[] = [
     accessorKey: "pet.morphs",
     header: "모프",
     cell: ({ row }) => {
-      const morphs = row.original.pet?.morphs;
+      const morphs = row.original.pet.morphs;
 
       return <BadgeList variant={"outline"} items={morphs} />;
     },
@@ -50,7 +50,7 @@ export const columns: ColumnDef<AdoptionHistoryDto>[] = [
     accessorKey: "pet.traits",
     header: "형질",
     cell: ({ row }) => {
-      const traits = row.original.pet?.traits;
+      const traits = row.original.pet.traits;
 
       return <BadgeList items={traits} variant="secondary" badgeClassName="bg-white text-black" />;
     },
@@ -59,7 +59,7 @@ export const columns: ColumnDef<AdoptionHistoryDto>[] = [
     accessorKey: "pet.sex",
     header: "성별",
     cell: ({ row }) => {
-      const sex = row.original.pet?.sex;
+      const sex = row.original.pet.sex;
       return getSexIcon(sex, { size: "sm" });
     },
   },
@@ -67,7 +67,7 @@ export const columns: ColumnDef<AdoptionHistoryDto>[] = [
     accessorKey: "pet.growth",
     header: "크기",
     cell: ({ row }) => {
-      const growth = row.original.pet?.growth;
+      const growth = row.original.pet.growth;
       return <div className="capitalize">{growth ? GROWTH_KOREAN_INFO[growth] : "-"}</div>;
     },
   },
@@ -103,9 +103,9 @@ export const columns: ColumnDef<AdoptionHistoryDto>[] = [
   {
     id: "father",
     header: "부개체",
-    accessorFn: (row) => row.pet?.father,
+    accessorFn: (row) => row.pet.father,
     cell: ({ row }) => {
-      const father = row.original.pet?.father;
+      const father = row.original.pet.father;
       if (!father) return null;
 
       return <LinkButton href={`/pet/${father.petId}`} label={father.name ?? ""} />;
@@ -113,10 +113,10 @@ export const columns: ColumnDef<AdoptionHistoryDto>[] = [
   },
   {
     id: "mother",
-    accessorFn: (row) => row.pet?.mother,
+    accessorFn: (row) => row.pet.mother,
     header: "모개체",
     cell: ({ row }) => {
-      const mother = row.original.pet?.mother;
+      const mother = row.original.pet.mother;
       if (!mother) return null;
 
       return <LinkButton href={`/pet/${mother.petId}`} label={mother.name ?? ""} />;

@@ -16,6 +16,7 @@ import {
   AdoptionFilterDto,
   CompleteAdoptionDto,
   PetSnapshotData,
+  PetAdoptionCompletedDto,
 } from './adoption_history.dto';
 import { PageMetaDto, PageDto } from 'src/common/page.dto';
 import {
@@ -73,7 +74,7 @@ export class AdoptionHistoryService {
             father: petSnapshot.father ?? undefined,
             mother: petSnapshot.mother ?? undefined,
           }
-        : null,
+        : ({} as PetAdoptionCompletedDto),
       ...omitBy(
         {
           seller:

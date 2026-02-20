@@ -189,13 +189,12 @@ export class AdoptionHistoryDto {
   buyer?: UserProfilePublicDto;
 
   @ApiProperty({
-    description: '펫 정보 (스냅샷이 없으면 null)',
+    description: '펫 정보 (스냅샷이 없으면 {})',
     type: PetAdoptionCompletedDto,
-    nullable: true,
   })
   @ValidateNested()
   @Type(() => PetAdoptionCompletedDto)
-  pet: PetAdoptionCompletedDto | null;
+  pet: PetAdoptionCompletedDto;
 }
 
 export class AdoptionFilterDto extends PageOptionsDto {

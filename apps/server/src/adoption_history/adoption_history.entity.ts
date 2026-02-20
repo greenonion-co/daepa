@@ -43,8 +43,8 @@ export class AdoptionHistoryEntity {
   @Column({ type: 'text', nullable: true })
   memo?: string | null;
 
-  @Column({ type: 'json', nullable: true })
-  petSnapshot?: PetSnapshotData | null;
+  @Column({ type: 'json' })
+  petSnapshot: PetSnapshotData;
 
   @CreateDateColumn()
   createdAt: Date;
