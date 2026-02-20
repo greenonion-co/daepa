@@ -147,8 +147,26 @@ export class PetAdoptionCompletedDto extends PickType(PetSummaryDto, [
   declare updatedAt?: Date;
 }
 
+// 분양 이력 수정 DTO (현재 memo만 수정 가능)
+export class UpdateAdoptionHistoryDto {
+  @ApiProperty({
+    description: '메모',
+    example: '건강한 개체입니다.',
+    type: 'string',
+    required: false,
+    nullable: true,
+  })
+  @IsOptional()
+  @IsString()
+  memo?: string | null;
+}
+
 // 분양 이력 (판매완료 기록) 조회용 DTO
 export class AdoptionHistoryDto {
+  @ApiProperty({ description: '분양 이력 ID' })
+  @IsNumber()
+  id: number;
+
   @ApiProperty({ description: '펫 ID' })
   @IsString()
   petId: string;

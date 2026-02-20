@@ -290,3 +290,5 @@ export * from "./userProfileResponseDto";
 export * from "./verifyEmailDto";
 export * from "./verifyNameDto";
 export * from "./verifyPetNameDto";
+export * from "./updateAdoptionHistoryDto";
+export * from "./updateAdoptionHistoryDtoMemo";

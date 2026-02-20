@@ -43,6 +43,14 @@ const AdoptionTable = () => {
 
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     setMousePos({ x: e.clientX, y: e.clientY });
+    const cell = (e.target as HTMLElement).closest("td[data-column-id]");
+    if (cell?.getAttribute("data-column-id") === "memo") {
+      setHoveredPetId(null);
+    } else {
+      const row = (e.target as HTMLElement).closest("tr[data-pet-id]");
+      const petId = row?.getAttribute("data-pet-id");
+      if (petId) setHoveredPetId(petId);
+    }
   }, []);
 
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage, refetch } =
@@ -146,6 +154,7 @@ const AdoptionTable = () => {
                   <TableRow
                     key={row.id}
                     data-state={row.getIsSelected() && "selected"}
+                    data-pet-id={row.original.petId}
                     className={cn(
                       "cursor-pointer",
                       "hover:bg-purple-50 dark:bg-[#18171C] dark:hover:bg-purple-900/30",
@@ -163,7 +172,7 @@ const AdoptionTable = () => {
                     }}
                   >
                     {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
+                      <TableCell key={cell.id} data-column-id={cell.column.id}>
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       </TableCell>
                     ))}

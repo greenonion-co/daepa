@@ -15,6 +15,7 @@ import {
   AdoptionHistoryDto,
   AdoptionFilterDto,
   CompleteAdoptionDto,
+  UpdateAdoptionHistoryDto,
   PetSnapshotData,
   PetAdoptionCompletedDto,
 } from './adoption_history.dto';
@@ -51,6 +52,7 @@ export class AdoptionHistoryService {
     const { seller, buyer, petSnapshot } = entity;
 
     return {
+      id: entity.id,
       petId: entity.petId,
       price: entity.price ?? undefined,
       adoptionDate: entity.adoptionDate ?? undefined,
@@ -377,5 +379,35 @@ export class AdoptionHistoryService {
       // 7. 펫 소유권 이전 (입양자가 없으면 소유권 박탈)
       await em.update('pets', { petId }, { ownerId: finalBuyerId ?? null });
     });
+  }
+
+  /** 수정 가능한 필드 목록 */
+  private static readonly UPDATABLE_FIELDS: (keyof UpdateAdoptionHistoryDto)[] =
+    ['memo'];
+
+  async update(
+    id: number,
+    dto: UpdateAdoptionHistoryDto,
+    userId: string,
+  ): Promise<void> {
+    const history = await this.adoptionHistoryRepository.findOne({
+      where: { id },
+    });
+
+    if (!history) {
+      throw new NotFoundException('분양 이력을 찾을 수 없습니다.');
+    }
+
+    if (history.sellerId !== userId) {
+      throw new ForbiddenException('분양 이력의 소유자가 아닙니다.');
+    }
+
+    for (const field of AdoptionHistoryService.UPDATABLE_FIELDS) {
+      if (field in dto) {
+        history[field] = dto[field] ?? null;
+      }
+    }
+
+    await this.adoptionHistoryRepository.save(history);
   }
 }

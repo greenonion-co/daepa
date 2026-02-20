@@ -40,6 +40,7 @@ import type {
   TestPushNotificationDto,
   UnlinkParentDto,
   UpdateAdoptionDto,
+  UpdateAdoptionHistoryDto,
   UpdateFeedingDto,
   UpdateLayingDto,
   UpdateMatingDto,
@@ -462,6 +463,18 @@ export const adoptionHistoryControllerCompleteAdoption = (
   });
 };
 
+export const adoptionHistoryControllerUpdate = (
+  id: number,
+  updateAdoptionHistoryDto: UpdateAdoptionHistoryDto,
+) => {
+  return useCustomInstance<void>({
+    url: `/api/v1/adoption-history/${id}`,
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    data: updateAdoptionHistoryDto,
+  });
+};
+
 export const matingControllerCreateMating = (createMatingDto: CreateMatingDto) => {
   return useCustomInstance<CommonResponseDto>({
     url: `/api/v1/mating`,
@@ -828,6 +841,9 @@ export type AdoptionHistoryControllerGetAllAdoptionsResult = NonNullable<
 >;
 export type AdoptionHistoryControllerCompleteAdoptionResult = NonNullable<
   Awaited<ReturnType<typeof adoptionHistoryControllerCompleteAdoption>>
+>;
+export type AdoptionHistoryControllerUpdateResult = NonNullable<
+  Awaited<ReturnType<typeof adoptionHistoryControllerUpdate>>
 >;
 export type MatingControllerCreateMatingResult = NonNullable<
   Awaited<ReturnType<typeof matingControllerCreateMating>>
@@ -3514,6 +3530,7 @@ export const getAdoptionHistoryControllerGetAllAdoptionsResponseMock = (
   overrideResponse: Partial<AdoptionHistoryControllerGetAllAdoptions200> = {},
 ): AdoptionHistoryControllerGetAllAdoptions200 => ({
   data: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+    id: faker.number.int({ min: undefined, max: undefined }),
     petId: faker.string.alpha(20),
     price: faker.helpers.arrayElement([
       faker.number.int({ min: undefined, max: undefined }),
@@ -5323,6 +5340,20 @@ export const getAdoptionHistoryControllerCompleteAdoptionMockHandler = (
   });
 };
 
+export const getAdoptionHistoryControllerUpdateMockHandler = (
+  overrideResponse?:
+    | void
+    | ((info: Parameters<Parameters<typeof http.patch>[1]>[0]) => Promise<void> | void),
+) => {
+  return http.patch("*/api/v1/adoption-history/:id", async (info) => {
+    await delay(1000);
+    if (typeof overrideResponse === "function") {
+      await overrideResponse(info);
+    }
+    return new HttpResponse(null, { status: 200 });
+  });
+};
+
 export const getMatingControllerCreateMatingMockHandler = (
   overrideResponse?:
     | CommonResponseDto
@@ -5964,6 +5995,7 @@ export const getProjectDaepaAPIMock = () => [
   getPetAdoptionControllerUpdatePetAdoptionMockHandler(),
   getAdoptionHistoryControllerGetAllAdoptionsMockHandler(),
   getAdoptionHistoryControllerCompleteAdoptionMockHandler(),
+  getAdoptionHistoryControllerUpdateMockHandler(),
   getMatingControllerCreateMatingMockHandler(),
   getMatingControllerUpdateMatingMockHandler(),
   getMatingControllerDeleteMatingMockHandler(),

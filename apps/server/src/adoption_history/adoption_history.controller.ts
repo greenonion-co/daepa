@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+} from '@nestjs/common';
 import {
   ApiExtraModels,
   ApiParam,
@@ -11,6 +19,7 @@ import {
   AdoptionHistoryDto,
   AdoptionFilterDto,
   CompleteAdoptionDto,
+  UpdateAdoptionHistoryDto,
 } from './adoption_history.dto';
 import { JwtUser } from '../auth/auth.decorator';
 import { JwtUserPayload } from '../auth/strategies/jwt.strategy';
@@ -63,5 +72,19 @@ export class AdoptionHistoryController {
       completeAdoptionDto,
       token.userId,
     );
+  }
+
+  @Patch('/:id')
+  @ApiParam({ name: 'id', description: '분양 이력 ID', type: 'number' })
+  @ApiResponse({
+    status: 200,
+    description: '분양 이력 수정 성공',
+  })
+  async update(
+    @Param('id') id: number,
+    @Body() dto: UpdateAdoptionHistoryDto,
+    @JwtUser() token: JwtUserPayload,
+  ): Promise<void> {
+    await this.adoptionHistoryService.update(id, dto, token.userId);
   }
 }

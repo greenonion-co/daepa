@@ -9,6 +9,7 @@ import LinkButton from "../../components/LinkButton";
 import BadgeList from "../../components/BadgeList";
 import DeletedPetName from "../../components/DeletedPetName";
 import { getSexIcon } from "@/lib/sex-icon";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 export const columns: ColumnDef<AdoptionHistoryDto>[] = [
   {
@@ -127,7 +128,25 @@ export const columns: ColumnDef<AdoptionHistoryDto>[] = [
     header: "메모",
     cell: ({ row }) => {
       const memo = row.original.memo;
-      return <div className="text-sm text-gray-600">{memo}</div>;
+      if (!memo) return null;
+
+      const truncated = memo.length > 10;
+      const displayText = truncated ? `${memo.slice(0, 10)}…` : memo;
+
+      if (!truncated) {
+        return <div className="text-sm text-gray-600">{displayText}</div>;
+      }
+
+      return (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="cursor-default text-sm text-gray-600">{displayText}</div>
+          </TooltipTrigger>
+          <TooltipContent className="max-w-[300px] whitespace-pre-wrap">
+            {memo}
+          </TooltipContent>
+        </Tooltip>
+      );
     },
   },
 ];

@@ -10,6 +10,8 @@ import type { UserProfilePublicDto } from "./userProfilePublicDto";
 import type { PetAdoptionCompletedDto } from "./petAdoptionCompletedDto";
 
 export interface AdoptionHistoryDto {
+  /** 분양 이력 ID */
+  id: number;
   /** 펫 ID */
   petId: string;
   /** 거래가 */
