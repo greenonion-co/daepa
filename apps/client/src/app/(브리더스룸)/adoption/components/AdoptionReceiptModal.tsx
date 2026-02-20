@@ -2,7 +2,11 @@
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AdoptionHistoryDto } from "@repo/api-client";
-import { ADOPTION_METHOD_KOREAN_INFO, GENDER_KOREAN_INFO, SPECIES_KOREAN_INFO } from "../../constants";
+import {
+  ADOPTION_METHOD_KOREAN_INFO,
+  GENDER_KOREAN_INFO,
+  SPECIES_KOREAN_INFO,
+} from "../../constants";
 import { cn } from "@/lib/utils";
 import PetThumbnail from "@/components/common/PetThumbnail";
 import BadgeList from "../../components/BadgeList";
@@ -113,8 +117,8 @@ const PetInfoCard = ({
 
 const AdoptionReceiptModal = ({ isOpen, adoption, onClose }: AdoptionReceiptModalProps) => {
   const isMobile = useIsMobile();
-  const { pet: petSummary } = adoption;
-  const { name, species, hatchingDate, sex, morphs, traits, isDeleted } = petSummary;
+  const { pet } = adoption;
+  const { name, species, hatchingDate, sex, morphs, traits, isDeleted } = pet ?? {};
 
   const adoptionDateText = useMemo(() => {
     if (!adoption?.adoptionDate) return "미정";
@@ -136,7 +140,7 @@ const AdoptionReceiptModal = ({ isOpen, adoption, onClose }: AdoptionReceiptModa
         <div className="space-y-4">
           <PetInfoCard
             name={name}
-            species={species}
+            species={species ?? ""}
             sex={sex}
             morphs={morphs}
             traits={traits}
