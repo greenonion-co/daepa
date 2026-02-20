@@ -7,10 +7,10 @@ import {
   ValidateNested,
   IsArray,
 } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
-import { Transform, Type } from 'class-transformer';
+import { ApiProperty, PickType } from '@nestjs/swagger';
+import { Exclude, Transform, Type } from 'class-transformer';
 import { UserProfilePublicDto } from '../user/user.dto';
-import { PetSummaryAdoptionDto } from '../pet/pet.dto';
+import { PetSummaryDto } from '../pet/pet.dto';
 import {
   PET_ADOPTION_METHOD,
   PET_GROWTH,
@@ -18,6 +18,22 @@ import {
   PET_SPECIES,
 } from 'src/pet/pet.constants';
 import { PageOptionsDto } from 'src/common/page.dto';
+
+// completeAdoption 시점에 JSON으로 저장되는 펫 스냅샷
+export interface PetSnapshotData {
+  petId: string;
+  type?: string;
+  name?: string;
+  species: string;
+  sex?: string;
+  growth?: string;
+  morphs?: string[];
+  traits?: string[];
+  hatchingDate?: string;
+  isDeleted?: boolean;
+  father?: { petId: string; name?: string } | null;
+  mother?: { petId: string; name?: string } | null;
+}
 
 // 분양완료 처리 요청 DTO
 export class CompleteAdoptionDto {
@@ -80,6 +96,57 @@ export class CompleteAdoptionDto {
   memo?: string | null;
 }
 
+// 분양 완료 시점의 부/모 개체 스냅샷
+export class PetSnapshotParentDto {
+  @ApiProperty({ description: '부/모 개체 ID' })
+  @IsString()
+  petId: string;
+
+  @ApiProperty({ description: '부/모 개체 이름', required: false })
+  @IsOptional()
+  @IsString()
+  name?: string;
+}
+
+// 분양 완료 시점의 펫 스냅샷
+export class PetAdoptionCompletedDto extends PickType(PetSummaryDto, [
+  'petId',
+  'type',
+  'name',
+  'species',
+  'sex',
+  'growth',
+  'morphs',
+  'traits',
+  'hatchingDate',
+  'isDeleted',
+]) {
+  @ApiProperty({
+    description: '아빠 개체 정보',
+    type: PetSnapshotParentDto,
+    required: false,
+  })
+  @IsOptional()
+  father?: PetSnapshotParentDto;
+
+  @ApiProperty({
+    description: '엄마 개체 정보',
+    type: PetSnapshotParentDto,
+    required: false,
+  })
+  @IsOptional()
+  mother?: PetSnapshotParentDto;
+
+  @Exclude()
+  declare desc?: string;
+
+  @Exclude()
+  declare createdAt?: Date;
+
+  @Exclude()
+  declare updatedAt?: Date;
+}
+
 // 분양 이력 (판매완료 기록) 조회용 DTO
 export class AdoptionHistoryDto {
   @ApiProperty({ description: '펫 ID' })
@@ -121,10 +188,14 @@ export class AdoptionHistoryDto {
   @IsOptional()
   buyer?: UserProfilePublicDto;
 
-  @ApiProperty({ description: '펫 정보', type: PetSummaryAdoptionDto })
+  @ApiProperty({
+    description: '펫 정보 (스냅샷이 없으면 null)',
+    type: PetAdoptionCompletedDto,
+    nullable: true,
+  })
   @ValidateNested()
-  @Type(() => PetSummaryAdoptionDto)
-  pet: PetSummaryAdoptionDto;
+  @Type(() => PetAdoptionCompletedDto)
+  pet: PetAdoptionCompletedDto | null;
 }
 
 export class AdoptionFilterDto extends PageOptionsDto {

@@ -11,6 +11,7 @@ import {
 import { PetDetailEntity } from 'src/pet_detail/pet_detail.entity';
 import { PetEntity } from 'src/pet/pet.entity';
 import { UserEntity } from 'src/user/user.entity';
+import { PetSnapshotData } from './adoption_history.dto';
 
 @Entity({ name: 'adoption_histories' })
 @Index('UNIQUE_ADOPTION_HISTORY', ['petId', 'sellerId', 'adoptionDate'], {
@@ -41,6 +42,9 @@ export class AdoptionHistoryEntity {
 
   @Column({ type: 'text', nullable: true })
   memo?: string | null;
+
+  @Column({ type: 'json', nullable: true })
+  petSnapshot?: PetSnapshotData | null;
 
   @CreateDateColumn()
   createdAt: Date;

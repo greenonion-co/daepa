@@ -7,7 +7,7 @@
  */
 import type { AdoptionHistoryDtoMethod } from "./adoptionHistoryDtoMethod";
 import type { UserProfilePublicDto } from "./userProfilePublicDto";
-import type { PetSummaryAdoptionDto } from "./petSummaryAdoptionDto";
+import type { AdoptionHistoryDtoPet } from "./adoptionHistoryDtoPet";
 
 export interface AdoptionHistoryDto {
   /** 펫 ID */
@@ -26,6 +26,9 @@ export interface AdoptionHistoryDto {
   seller?: UserProfilePublicDto;
   /** 입양자 정보 */
   buyer?: UserProfilePublicDto;
-  /** 펫 정보 */
-  pet: PetSummaryAdoptionDto;
+  /**
+   * 펫 정보 (스냅샷이 없으면 null)
+   * @nullable
+   */
+  pet: AdoptionHistoryDtoPet;
 }

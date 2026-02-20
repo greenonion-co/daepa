@@ -5,33 +5,33 @@
  * Project Daepa API description
  * OpenAPI spec version: 1.0
  */
-import type { PetSummaryAdoptionDtoType } from "./petSummaryAdoptionDtoType";
-import type { PetSummaryAdoptionDtoSpecies } from "./petSummaryAdoptionDtoSpecies";
-import type { PetSummaryAdoptionDtoSex } from "./petSummaryAdoptionDtoSex";
-import type { PetSummaryAdoptionDtoGrowth } from "./petSummaryAdoptionDtoGrowth";
+import type { PetAdoptionCompletedDtoType } from "./petAdoptionCompletedDtoType";
+import type { PetAdoptionCompletedDtoSpecies } from "./petAdoptionCompletedDtoSpecies";
+import type { PetAdoptionCompletedDtoSex } from "./petAdoptionCompletedDtoSex";
+import type { PetAdoptionCompletedDtoGrowth } from "./petAdoptionCompletedDtoGrowth";
 import type { PetSnapshotParentDto } from "./petSnapshotParentDto";
 
-export interface PetSummaryAdoptionDto {
+export interface PetAdoptionCompletedDto {
   /** 펫 아이디 */
   petId: string;
   /** 펫 타입(egg/pet) */
-  type?: PetSummaryAdoptionDtoType;
+  type?: PetAdoptionCompletedDtoType;
   /** 펫 이름 */
   name?: string;
   /** 펫 종 */
-  species: PetSummaryAdoptionDtoSpecies;
+  species: PetAdoptionCompletedDtoSpecies;
   /** 펫 출생일 */
   hatchingDate?: string;
   /** 펫 삭제 여부 */
   isDeleted?: boolean;
   /** 펫 성별(수컷, 암컷, 미구분) */
-  sex?: PetSummaryAdoptionDtoSex;
+  sex?: PetAdoptionCompletedDtoSex;
   /** 펫 모프 */
   morphs?: string[];
   /** 펫 형질 */
   traits?: string[];
   /** 펫 성장단계 */
-  growth?: PetSummaryAdoptionDtoGrowth;
+  growth?: PetAdoptionCompletedDtoGrowth;
   /** 아빠 개체 정보 */
   father?: PetSnapshotParentDto;
   /** 엄마 개체 정보 */

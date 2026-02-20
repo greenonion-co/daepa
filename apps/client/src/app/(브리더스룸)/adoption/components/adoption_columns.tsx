@@ -2,26 +2,13 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 
-import {
-  AdoptionHistoryDto,
-  PetHiddenStatusDtoHiddenStatus,
-  PetParentDto,
-  UpdateParentRequestDtoStatus,
-} from "@repo/api-client";
-import {
-  ADOPTION_METHOD_KOREAN_INFO,
-  GROWTH_KOREAN_INFO,
-  STATUS_MAP,
-  TABLE_HEADER,
-} from "../../constants";
+import { AdoptionHistoryDto } from "@repo/api-client";
+import { ADOPTION_METHOD_KOREAN_INFO, GROWTH_KOREAN_INFO, TABLE_HEADER } from "../../constants";
 import { isNotNil } from "es-toolkit";
 import LinkButton from "../../components/LinkButton";
-import { CircleSmall } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import BadgeList from "../../components/BadgeList";
 import DeletedPetName from "../../components/DeletedPetName";
 import { getSexIcon } from "@/lib/sex-icon";
-import HiddenPetBadge from "@/components/common/HiddenPetBadge";
 
 export const columns: ColumnDef<AdoptionHistoryDto>[] = [
   {
@@ -36,20 +23,12 @@ export const columns: ColumnDef<AdoptionHistoryDto>[] = [
       );
     },
   },
-  // {
-  //   accessorKey: "pet.species",
-  //   header: TABLE_HEADER.species,
-  //   cell: ({ row }) => {
-  //     const species = row.original.pet.species;
-  //     return <div className="capitalize">{SPECIES_KOREAN_ALIAS_INFO[species]}</div>;
-  //   },
-  // },
   {
     accessorKey: "pet.name",
     header: TABLE_HEADER.name,
     cell: ({ row }) => {
-      const petName = row.original.pet.name;
-      const isDeleted = row.original.pet.isDeleted;
+      const petName = row.original.pet?.name;
+      const isDeleted = row.original.pet?.isDeleted;
 
       return isDeleted ? (
         <DeletedPetName name={petName} />
@@ -62,7 +41,7 @@ export const columns: ColumnDef<AdoptionHistoryDto>[] = [
     accessorKey: "pet.morphs",
     header: "모프",
     cell: ({ row }) => {
-      const morphs = row.original.pet.morphs;
+      const morphs = row.original.pet?.morphs;
 
       return <BadgeList variant={"outline"} items={morphs} />;
     },
@@ -71,7 +50,7 @@ export const columns: ColumnDef<AdoptionHistoryDto>[] = [
     accessorKey: "pet.traits",
     header: "형질",
     cell: ({ row }) => {
-      const traits = row.original.pet.traits;
+      const traits = row.original.pet?.traits;
 
       return <BadgeList items={traits} variant="secondary" badgeClassName="bg-white text-black" />;
     },
@@ -80,7 +59,7 @@ export const columns: ColumnDef<AdoptionHistoryDto>[] = [
     accessorKey: "pet.sex",
     header: "성별",
     cell: ({ row }) => {
-      const sex = row.original.pet.sex;
+      const sex = row.original.pet?.sex;
       return getSexIcon(sex, { size: "sm" });
     },
   },
@@ -88,7 +67,7 @@ export const columns: ColumnDef<AdoptionHistoryDto>[] = [
     accessorKey: "pet.growth",
     header: "크기",
     cell: ({ row }) => {
-      const growth = row.original.pet.growth;
+      const growth = row.original.pet?.growth;
       return <div className="capitalize">{growth ? GROWTH_KOREAN_INFO[growth] : "-"}</div>;
     },
   },
@@ -124,91 +103,23 @@ export const columns: ColumnDef<AdoptionHistoryDto>[] = [
   {
     id: "father",
     header: "부개체",
-    accessorFn: (row) => row.pet.father,
+    accessorFn: (row) => row.pet?.father,
     cell: ({ row }) => {
-      const father = row.original.pet.father;
+      const father = row.original.pet?.father;
       if (!father) return null;
-      if (
-        "hiddenStatus" in father &&
-        father.hiddenStatus === PetHiddenStatusDtoHiddenStatus.SECRET
-      ) {
-        return (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <HiddenPetBadge />
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>소유자에 의해 비공개 처리된 개체입니다</p>
-            </TooltipContent>
-          </Tooltip>
-        );
-      }
 
-      const fatherExist = father as PetParentDto;
-      const status = fatherExist?.status ?? UpdateParentRequestDtoStatus.APPROVED;
-      const isDeleted = fatherExist.isDeleted ?? false;
-
-      if (isDeleted) {
-        return <DeletedPetName name={fatherExist.name} />;
-      }
-
-      return (
-        <LinkButton
-          href={`/pet/${fatherExist.petId}`}
-          label={fatherExist.name ?? ""}
-          tooltip={
-            (status === "approved" && "혈통 인증 완료") ||
-            (status === "pending" && "혈통 인증 대기 중") ||
-            ""
-          }
-          icon={<CircleSmall className={`h-3 w-3 ${STATUS_MAP[status].icon}`} />}
-        />
-      );
+      return <LinkButton href={`/pet/${father.petId}`} label={father.name ?? ""} />;
     },
   },
   {
     id: "mother",
-    accessorFn: (row) => row.pet.mother,
+    accessorFn: (row) => row.pet?.mother,
     header: "모개체",
     cell: ({ row }) => {
-      const mother = row.original.pet.mother;
+      const mother = row.original.pet?.mother;
       if (!mother) return null;
-      if (
-        "hiddenStatus" in mother &&
-        mother.hiddenStatus === PetHiddenStatusDtoHiddenStatus.SECRET
-      ) {
-        return (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <HiddenPetBadge />
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>소유자에 의해 비공개 처리된 개체입니다</p>
-            </TooltipContent>
-          </Tooltip>
-        );
-      }
 
-      const motherExist = mother as PetParentDto;
-      const status = motherExist?.status ?? UpdateParentRequestDtoStatus.APPROVED;
-      const isDeleted = motherExist.isDeleted ?? false;
-
-      if (isDeleted) {
-        return <DeletedPetName name={motherExist.name} />;
-      }
-
-      return (
-        <LinkButton
-          href={`/pet/${motherExist.petId}`}
-          label={motherExist.name ?? ""}
-          tooltip={
-            (status === "approved" && "혈통 인증 완료") ||
-            (status === "pending" && "혈통 인증 대기 중") ||
-            ""
-          }
-          icon={<CircleSmall className={`h-3 w-3 ${STATUS_MAP[status].icon}`} />}
-        />
-      );
+      return <LinkButton href={`/pet/${mother.petId}`} label={mother.name ?? ""} />;
     },
   },
   {

@@ -15,18 +15,25 @@ import {
   AdoptionHistoryDto,
   AdoptionFilterDto,
   CompleteAdoptionDto,
+  PetSnapshotData,
 } from './adoption_history.dto';
 import { PageMetaDto, PageDto } from 'src/common/page.dto';
-import { isNil } from 'es-toolkit';
+import {
+  PET_GROWTH,
+  PET_SEX,
+  PET_SPECIES,
+  PET_TYPE,
+} from 'src/pet/pet.constants';
+import { isNil, omitBy } from 'es-toolkit';
 import { InjectRepository } from '@nestjs/typeorm';
 import { USER_STATUS } from 'src/user/user.constant';
 import { ParentRequestService } from '../parent_request/parent_request.service';
-import { replaceParentPublicSafe } from '../common/utils/pet-parent.helper';
 import { extractOriginalPetName } from '../common/utils/pet-name.helper';
-import { omitBy } from 'es-toolkit';
 import { PetAdoptionEntity } from '../pet_adoption/pet_adoption.entity';
 import { PetEntity } from '../pet/pet.entity';
+import { PetDetailEntity } from '../pet_detail/pet_detail.entity';
 import { UserEntity } from '../user/user.entity';
+import { PARENT_STATUS } from '../parent_request/parent_request.constants';
 
 @Injectable()
 export class AdoptionHistoryService {
@@ -37,31 +44,10 @@ export class AdoptionHistoryService {
     private readonly dataSource: DataSource,
   ) {}
 
-  private async toAdoptionHistoryDtoOptimized(
+  private toAdoptionHistoryDto(
     entity: AdoptionHistoryEntity,
-    userId?: string,
-  ): Promise<AdoptionHistoryDto> {
-    const { pet, petDetail, seller, buyer } = entity;
-
-    if (!pet) {
-      throw new Error('Pet information is required for adoption history');
-    }
-
-    const { father, mother } =
-      await this.parentRequestService.getParentsWithRequestStatus(pet.petId);
-
-    const fatherDisplayable = replaceParentPublicSafe(
-      father,
-      pet.ownerId,
-      userId,
-    );
-    const motherDisplayable = replaceParentPublicSafe(
-      mother,
-      pet.ownerId,
-      userId,
-    );
-
-    const petName = pet.isDeleted ? extractOriginalPetName(pet.name) : pet.name;
+  ): AdoptionHistoryDto {
+    const { seller, buyer, petSnapshot } = entity;
 
     return {
       petId: entity.petId,
@@ -70,25 +56,24 @@ export class AdoptionHistoryService {
       method: entity.method ?? undefined,
       memo: entity.memo ?? undefined,
       createdAt: entity.createdAt,
-      pet: {
-        petId: pet.petId,
-        type: pet.type,
-        species: pet.species,
-        isDeleted: pet.isDeleted,
-        ...omitBy(
-          {
-            name: petName ?? undefined,
-            hatchingDate: pet.hatchingDate ?? undefined,
-            sex: petDetail?.sex ?? undefined,
-            morphs: petDetail?.morphs ?? undefined,
-            traits: petDetail?.traits ?? undefined,
-            growth: petDetail?.growth ?? undefined,
-            father: fatherDisplayable ?? undefined,
-            mother: motherDisplayable ?? undefined,
-          },
-          isNil,
-        ),
-      },
+      pet: petSnapshot
+        ? {
+            petId: petSnapshot.petId,
+            type: petSnapshot.type as PET_TYPE,
+            name: petSnapshot.name,
+            species: petSnapshot.species as PET_SPECIES,
+            sex: petSnapshot.sex as PET_SEX,
+            growth: petSnapshot.growth as PET_GROWTH,
+            morphs: petSnapshot.morphs,
+            traits: petSnapshot.traits,
+            hatchingDate: petSnapshot.hatchingDate
+              ? new Date(petSnapshot.hatchingDate)
+              : undefined,
+            isDeleted: petSnapshot.isDeleted,
+            father: petSnapshot.father ?? undefined,
+            mother: petSnapshot.mother ?? undefined,
+          }
+        : null,
       ...omitBy(
         {
           seller:
@@ -108,18 +93,6 @@ export class AdoptionHistoryService {
   private createHistoryQueryBuilder() {
     return this.adoptionHistoryRepository
       .createQueryBuilder('histories')
-      .innerJoinAndMapOne(
-        'histories.pet',
-        'pets',
-        'pets',
-        'pets.petId = histories.petId',
-      )
-      .innerJoinAndMapOne(
-        'histories.petDetail',
-        'pet_details',
-        'pet_details',
-        'pet_details.petId = pets.petId',
-      )
       .leftJoinAndMapOne(
         'histories.seller',
         'users',
@@ -135,21 +108,12 @@ export class AdoptionHistoryService {
       .select([
         'histories.id',
         'histories.petId',
+        'histories.petSnapshot',
         'histories.price',
         'histories.adoptionDate',
         'histories.memo',
         'histories.method',
         'histories.createdAt',
-        'pets.petId',
-        'pets.type',
-        'pets.name',
-        'pets.species',
-        'pets.hatchingDate',
-        'pets.isDeleted',
-        'pet_details.sex',
-        'pet_details.morphs',
-        'pet_details.traits',
-        'pet_details.growth',
         'seller.userId',
         'seller.name',
         'seller.role',
@@ -180,10 +144,8 @@ export class AdoptionHistoryService {
 
     const [historyEntities, totalCount] = await qb.getManyAndCount();
 
-    const historyDtos = await Promise.all(
-      historyEntities.map((entity) =>
-        this.toAdoptionHistoryDtoOptimized(entity, userId),
-      ),
+    const historyDtos = historyEntities.map((entity) =>
+      this.toAdoptionHistoryDto(entity),
     );
 
     const pageMetaDto = new PageMetaDto({ totalCount, pageOptionsDto });
@@ -196,46 +158,52 @@ export class AdoptionHistoryService {
   ) {
     // 키워드 검색
     if (pageOptionsDto.keyword) {
-      queryBuilder.andWhere('pets.name LIKE :keyword', {
-        keyword: `%${pageOptionsDto.keyword}%`,
-      });
+      queryBuilder.andWhere(
+        `JSON_UNQUOTE(JSON_EXTRACT(histories.pet_snapshot, '$.name')) LIKE :keyword`,
+        { keyword: `%${pageOptionsDto.keyword}%` },
+      );
     }
 
     // 종 필터링
     if (pageOptionsDto.species) {
-      queryBuilder.andWhere('pets.species = :species', {
-        species: pageOptionsDto.species,
-      });
+      queryBuilder.andWhere(
+        `JSON_UNQUOTE(JSON_EXTRACT(histories.pet_snapshot, '$.species')) = :species`,
+        { species: pageOptionsDto.species },
+      );
     }
 
     // 모프 필터링
     if (pageOptionsDto.morphs && pageOptionsDto.morphs.length > 0) {
       const morphsJson = JSON.stringify(pageOptionsDto.morphs);
-      queryBuilder.andWhere(`JSON_OVERLAPS(pet_details.morphs, :morphs)`, {
-        morphs: morphsJson,
-      });
+      queryBuilder.andWhere(
+        `JSON_OVERLAPS(JSON_EXTRACT(histories.pet_snapshot, '$.morphs'), :morphs)`,
+        { morphs: morphsJson },
+      );
     }
 
     // 형질 필터링
     if (pageOptionsDto.traits && pageOptionsDto.traits.length > 0) {
       const traitsJson = JSON.stringify(pageOptionsDto.traits);
-      queryBuilder.andWhere(`JSON_OVERLAPS(pet_details.traits, :traits)`, {
-        traits: traitsJson,
-      });
+      queryBuilder.andWhere(
+        `JSON_OVERLAPS(JSON_EXTRACT(histories.pet_snapshot, '$.traits'), :traits)`,
+        { traits: traitsJson },
+      );
     }
 
     // 성별 필터링
     if (pageOptionsDto.sex && pageOptionsDto.sex.length > 0) {
-      queryBuilder.andWhere('pet_details.sex IN (:...sex)', {
-        sex: pageOptionsDto.sex,
-      });
+      queryBuilder.andWhere(
+        `JSON_UNQUOTE(JSON_EXTRACT(histories.pet_snapshot, '$.sex')) IN (:...sex)`,
+        { sex: pageOptionsDto.sex },
+      );
     }
 
     // 성장단계 필터링
     if (pageOptionsDto.growth && pageOptionsDto.growth.length > 0) {
-      queryBuilder.andWhere('pet_details.growth IN (:...growth)', {
-        growth: pageOptionsDto.growth,
-      });
+      queryBuilder.andWhere(
+        `JSON_UNQUOTE(JSON_EXTRACT(histories.pet_snapshot, '$.growth')) IN (:...growth)`,
+        { growth: pageOptionsDto.growth },
+      );
     }
 
     // 분양 방식 필터링
@@ -259,7 +227,7 @@ export class AdoptionHistoryService {
       });
     }
 
-    // 최소 분양 날짜 필터링 (date 컬럼이므로 문자열로 비교하여 타임존 이슈 방지)
+    // 최소 분양 날짜 필터링
     if (pageOptionsDto.startDate) {
       queryBuilder.andWhere('histories.adoptionDate >= :startDate', {
         startDate: pageOptionsDto.startDate.toISOString().split('T')[0],
@@ -276,13 +244,7 @@ export class AdoptionHistoryService {
     // 부 개체 필터링
     if (pageOptionsDto.fatherId) {
       queryBuilder.andWhere(
-        `EXISTS (
-          SELECT 1 FROM parent_requests
-          WHERE parent_requests.child_pet_id = pets.pet_id
-            AND parent_requests.parent_pet_id = :fatherId
-            AND parent_requests.role = 'father'
-            AND parent_requests.status = 'approved'
-        )`,
+        `JSON_UNQUOTE(JSON_EXTRACT(histories.pet_snapshot, '$.father.petId')) = :fatherId`,
         { fatherId: pageOptionsDto.fatherId },
       );
     }
@@ -290,13 +252,7 @@ export class AdoptionHistoryService {
     // 모 개체 필터링
     if (pageOptionsDto.motherId) {
       queryBuilder.andWhere(
-        `EXISTS (
-          SELECT 1 FROM parent_requests
-          WHERE parent_requests.child_pet_id = pets.pet_id
-            AND parent_requests.parent_pet_id = :motherId
-            AND parent_requests.role = 'mother'
-            AND parent_requests.status = 'approved'
-        )`,
+        `JSON_UNQUOTE(JSON_EXTRACT(histories.pet_snapshot, '$.mother.petId')) = :motherId`,
         { motherId: pageOptionsDto.motherId },
       );
     }
@@ -343,7 +299,59 @@ export class AdoptionHistoryService {
         );
       }
 
-      // 4. adoption_histories에 INSERT
+      // 4. 펫 스냅샷 생성
+      const pet = await em.findOne(PetEntity, {
+        where: { petId },
+        select: [
+          'petId',
+          'type',
+          'name',
+          'species',
+          'hatchingDate',
+          'isDeleted',
+        ],
+      });
+
+      if (!pet) {
+        throw new NotFoundException('펫 정보를 찾을 수 없습니다.');
+      }
+
+      const petDetail = await em.findOne(PetDetailEntity, {
+        where: { petId },
+        select: ['sex', 'growth', 'morphs', 'traits'],
+      });
+
+      const { father, mother } =
+        await this.parentRequestService.getParentsWithRequestStatus(
+          petId,
+          { statuses: [PARENT_STATUS.APPROVED] },
+          em,
+        );
+
+      const petName = pet.isDeleted
+        ? extractOriginalPetName(pet.name)
+        : pet.name;
+
+      const petSnapshot: PetSnapshotData = {
+        petId: pet.petId,
+        type: pet.type,
+        name: petName ?? undefined,
+        species: pet.species,
+        sex: petDetail?.sex ?? undefined,
+        growth: petDetail?.growth ?? undefined,
+        morphs: petDetail?.morphs ?? undefined,
+        traits: petDetail?.traits ?? undefined,
+        hatchingDate: pet.hatchingDate
+          ? pet.hatchingDate instanceof Date
+            ? pet.hatchingDate.toISOString().split('T')[0]
+            : String(pet.hatchingDate)
+          : undefined,
+        isDeleted: pet.isDeleted || undefined,
+        father: father ? { petId: father.petId, name: father.name } : null,
+        mother: mother ? { petId: mother.petId, name: mother.name } : null,
+      };
+
+      // 5. adoption_histories에 INSERT
       const historyEntity = new AdoptionHistoryEntity();
       Object.assign(historyEntity, {
         petId,
@@ -353,10 +361,11 @@ export class AdoptionHistoryService {
         price: completeAdoptionDto.price,
         method: completeAdoptionDto.method,
         memo: completeAdoptionDto.memo,
+        petSnapshot,
       });
       await em.save(AdoptionHistoryEntity, historyEntity);
 
-      // 5. pet_adoption 리셋
+      // 6. pet_adoption 리셋
       adoptionEntity.sellerId = finalBuyerId ?? adoptionEntity.sellerId;
       adoptionEntity.status = null;
       adoptionEntity.price = null;
@@ -364,7 +373,7 @@ export class AdoptionHistoryService {
       adoptionEntity.buyerId = null;
       await em.save(PetAdoptionEntity, adoptionEntity);
 
-      // 6. 펫 소유권 이전 (입양자가 없으면 소유권 박탈)
+      // 7. 펫 소유권 이전 (입양자가 없으면 소유권 박탈)
       await em.update('pets', { petId }, { ownerId: finalBuyerId ?? null });
     });
   }
