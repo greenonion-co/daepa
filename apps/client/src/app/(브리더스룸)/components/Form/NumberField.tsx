@@ -29,6 +29,13 @@ const NumberField = ({
   max,
   onBlur,
 }: NumberFieldProps) => {
+  const precision = Math.max(
+    0,
+    (stepAmount.toString().split(".")[1] || "").length,
+  );
+
+  const round = (n: number) => parseFloat(n.toFixed(precision));
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = e.target.value;
     if (inputValue === "" || /^\d*\.?\d*$/.test(inputValue)) {
@@ -82,7 +89,7 @@ const NumberField = ({
                 : "cursor-pointer hover:bg-gray-200",
             )}
             onClick={() => {
-              const newValue = Number(value) - stepAmount;
+              const newValue = round(Number(value) - stepAmount);
               if (min !== undefined && newValue < min) return;
               if (newValue < 0) return;
               setValue({ type: field.name, value: String(newValue) });
@@ -100,7 +107,7 @@ const NumberField = ({
                 : "cursor-pointer hover:bg-gray-200",
             )}
             onClick={() => {
-              const newValue = Number(value) + stepAmount;
+              const newValue = round(Number(value) + stepAmount);
               if (max !== undefined && newValue > max) return;
               setValue({ type: field.name, value: String(newValue) });
               onBlur?.();

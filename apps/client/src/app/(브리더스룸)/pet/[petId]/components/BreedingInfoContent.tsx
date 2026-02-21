@@ -10,7 +10,8 @@ import {
   PetDtoType,
   PetDto,
 } from "@repo/api-client";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { InfiniteData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { AxiosResponse } from "axios";
 import { toast } from "@/lib/toast";
 import { useNameStore } from "@/app/(브리더스룸)/store/name";
 import { DUPLICATE_CHECK_STATUS } from "@/app/(브리더스룸)/constants";
@@ -54,6 +55,9 @@ const BreedingInfoContent = ({ petId, ownerId, initialPet }: BreedingInfoContent
 
   const isEgg = useMemo(() => pet?.type === PetDtoType.EGG, [pet?.type]);
 
+  // 실제 저장 성공한 필드만 추적 (언마운트 시 리스트 캐시 patch용)
+  const dirtyFieldsRef = useRef<Set<string>>(new Set());
+
   // 펫 업데이트 mutation
   const { mutateAsync: mutateUpdatePet } = useMutation({
     mutationFn: (updateData: UpdatePetDto) => {
@@ -71,6 +75,8 @@ const BreedingInfoContent = ({ petId, ownerId, initialPet }: BreedingInfoContent
         if (petRef.current) {
           petRef.current = { ...petRef.current, ...updateData } as PetDto;
         }
+        // 변경된 필드 추적
+        Object.keys(updateData).forEach((key) => dirtyFieldsRef.current.add(key));
         // 헤더 동기화 (공개여부, 이름)
         if ("isPublic" in updateData || "name" in updateData) {
           const updated = petRef.current;
@@ -150,10 +156,36 @@ const BreedingInfoContent = ({ petId, ownerId, initialPet }: BreedingInfoContent
     }
   }, [duplicateCheckStatus, formName, autoSave]);
 
-  // 상세 페이지를 벗어날 때 펫 리스트 한 번만 갱신
+  // 상세 페이지를 벗어날 때 변경된 필드만 리스트 캐시에 반영
   useEffect(() => {
     return () => {
-      queryClient.invalidateQueries({ queryKey: [brPetControllerFindAll.name] });
+      const latest = petRef.current;
+      const dirty = dirtyFieldsRef.current;
+      if (!latest || dirty.size === 0) return;
+
+      // 실제 변경된 필드만 추출
+      const patch: Partial<PetDto> = {};
+      dirty.forEach((key) => {
+        (patch as any)[key] = (latest as any)[key];
+      });
+
+      queryClient.setQueriesData<
+        InfiniteData<AxiosResponse<{ data: PetDto[]; meta: unknown }>>
+      >({ queryKey: [brPetControllerFindAll.name] }, (oldData) => {
+        if (!oldData) return oldData;
+        return {
+          ...oldData,
+          pages: oldData.pages.map((page) => ({
+            ...page,
+            data: {
+              ...page.data,
+              data: page.data.data.map((p) =>
+                p.petId === latest.petId ? { ...p, ...patch } : p,
+              ),
+            },
+          })),
+        };
+      });
     };
   }, [queryClient]);
 

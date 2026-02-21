@@ -2,7 +2,7 @@
 
 import { memo, useCallback, useMemo, useState } from "react";
 import { DateTime } from "luxon";
-import { ChevronLeft, ChevronRight, Trash2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useIsMyPet } from "@/hooks/useIsMyPet";
 import { toast } from "@/lib/toast";
@@ -19,6 +19,7 @@ import { AxiosError } from "axios";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import FormMultiSelect from "@/app/(브리더스룸)/components/FormMultiSelect";
+import NumberField from "@/app/(브리더스룸)/components/Form/NumberField";
 import { SELECTOR_CONFIGS } from "@/app/(브리더스룸)/constants";
 
 import type { FeedingRecord } from "../data";
@@ -205,8 +206,8 @@ function FeedingModal({
         </DialogTitle>
 
         <div className="flex flex-col gap-3">
-          <div className="flex flex-col gap-1">
-            <label className="text-xs font-medium text-gray-600 dark:text-gray-400">먹이</label>
+          <div className="flex w-fit flex-col gap-1">
+            <label className="text-[13px] font-[500] text-gray-600 dark:text-gray-400">먹이</label>
             <FormMultiSelect
               title="먹이"
               displayMap={Object.fromEntries(
@@ -218,27 +219,29 @@ function FeedingModal({
           </div>
 
           <div className="flex flex-col gap-1">
-            <label className="text-xs font-medium text-gray-600 dark:text-gray-400">급여량</label>
-            <input
-              type="number"
+            <label className="text-[13px] font-[500] text-gray-600 dark:text-gray-400">
+              급여량
+            </label>
+            <NumberField
               value={amount}
-              onChange={(e) => setAmount(e.target.value)}
+              setValue={(value) => setAmount(value.value)}
               placeholder="예: 1.5"
-              step="0.1"
-              min="0"
-              className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:border-blue-400 dark:border-gray-700 dark:bg-neutral-800 dark:text-gray-200"
+              stepAmount={0.1}
+              min={0}
+              inputClassName="h-[32px] w-full rounded-md border border-gray-200 p-2 text-sm font-[500] placeholder:font-[500] dark:border-gray-700"
+              field={{ name: "weight", type: "number", unit: "개" }}
             />
           </div>
 
           <div className="flex flex-col gap-1">
-            <label className="text-xs font-medium text-gray-600 dark:text-gray-400">메모</label>
+            <label className="text-[13px] font-[500] text-gray-600 dark:text-gray-400">메모</label>
             <textarea
               value={feedingMemo}
               onChange={(e) => setFeedingMemo(e.target.value)}
               placeholder="메모를 입력하세요"
               maxLength={500}
               rows={2}
-              className="resize-none rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:border-blue-400 dark:border-gray-700 dark:bg-neutral-800 dark:text-gray-200"
+              className="min-h-[60px] resize-none rounded-md border border-gray-200 p-2 text-sm font-[500] placeholder:font-[500] focus:outline-none dark:border-gray-700 dark:bg-transparent dark:text-gray-200"
             />
           </div>
 
@@ -248,7 +251,7 @@ function FeedingModal({
                 variant="outline"
                 disabled={isProcessing}
                 onClick={handleDelete}
-                className="h-10 flex-1 cursor-pointer rounded-lg text-red-500 hover:text-red-600"
+                className="h-10 flex-1 cursor-pointer rounded-xl text-red-500 hover:text-red-600"
               >
                 <Trash2 className="mr-1 h-4 w-4" />
                 삭제
@@ -257,13 +260,15 @@ function FeedingModal({
             <Button
               disabled={isProcessing}
               onClick={handleSave}
-              className={cn(
-                "h-10 cursor-pointer rounded-lg font-bold",
-                isEdit ? "flex-1" : "flex-1",
-                "bg-blue-500 text-white hover:bg-blue-600 dark:bg-blue-500 dark:hover:bg-blue-600",
-              )}
+              className="h-10 flex-1 cursor-pointer rounded-xl bg-blue-500 font-bold text-white hover:bg-blue-600"
             >
-              {isProcessing ? "저장 중..." : isEdit ? "수정" : "추가"}
+              {isProcessing ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : isEdit ? (
+                "수정"
+              ) : (
+                "추가"
+              )}
             </Button>
           </div>
         </div>
@@ -404,8 +409,10 @@ const FeedingInfoContent = ({
   return (
     <div className="flex flex-1 flex-col gap-2 rounded-2xl bg-white p-3 shadow-xs dark:bg-neutral-900">
       <div className="flex items-center justify-between">
-        <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">피딩 정보</span>
-        <span className="text-xs text-gray-500 dark:text-gray-400">이번 달 {feedingCount}회</span>
+        <span className="text-[14px] font-[600] text-gray-600 dark:text-gray-300">피딩 정보</span>
+        <span className="text-xs font-bold text-blue-600 dark:text-gray-400">
+          이번 달 {feedingCount}회
+        </span>
       </div>
 
       {/* 캘린더 */}
@@ -413,7 +420,7 @@ const FeedingInfoContent = ({
         {/* 헤더 */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+            <span className="text-[14px] font-[600] text-gray-600 dark:text-gray-300">
               {currentMonth.toFormat("yyyy년 M월")}
             </span>
             {/* 범례 */}
@@ -427,28 +434,35 @@ const FeedingInfoContent = ({
             <button
               type="button"
               onClick={handlePrevMonth}
-              className="rounded p-1 hover:bg-gray-100 dark:hover:bg-gray-700"
+              className="cursor-pointer rounded-lg p-1 hover:bg-gray-100 dark:hover:bg-gray-700"
             >
-              <ChevronLeft className="h-4 w-4" />
+              <ChevronLeft className="h-4 w-4 text-gray-600 dark:text-gray-400" />
             </button>
             <button
               type="button"
               onClick={handleNextMonth}
               disabled={isCurrentMonthNow}
               className={cn(
-                "rounded p-1",
+                "rounded-lg p-1",
                 isCurrentMonthNow
                   ? "cursor-not-allowed text-gray-300 dark:text-gray-600"
-                  : "hover:bg-gray-100 dark:hover:bg-gray-700",
+                  : "cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700",
               )}
             >
-              <ChevronRight className="h-4 w-4" />
+              <ChevronRight
+                className={cn(
+                  "h-4 w-4",
+                  isCurrentMonthNow
+                    ? "text-gray-300 dark:text-gray-600"
+                    : "text-gray-600 dark:text-gray-400",
+                )}
+              />
             </button>
           </div>
         </div>
 
         {/* 달력 테이블 */}
-        <div className="overflow-hidden border border-gray-200 dark:border-gray-700">
+        <div className="overflow-hidden rounded-md border border-gray-200 dark:border-gray-700">
           {/* 요일 헤더 */}
           <div className="grid grid-cols-7 border-b border-gray-200 bg-gray-50 text-center text-[10px] text-gray-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400">
             {WEEKDAYS.map((day) => (
