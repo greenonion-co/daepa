@@ -89,6 +89,7 @@ const ImagesContent = ({ pet, initialImages }: ImagesContentProps) => {
         </div>
       )}
       <DndImagePicker
+        petId={pet.petId}
         disabled={!isViewingMyPet}
         isSaving={isSaving}
         images={localPhotos}

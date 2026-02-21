@@ -31,6 +31,7 @@ type PhotoItem = {
 };
 
 interface DndImagePickerProps {
+  petId?: string;
   max?: number;
   disabled?: boolean;
   isSaving?: boolean;
@@ -41,6 +42,7 @@ interface DndImagePickerProps {
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
 export default function DndImagePicker({
+  petId = "PENDING",
   max = 3,
   disabled,
   isSaving = false,
@@ -102,35 +104,44 @@ export default function DndImagePicker({
 
       setIsLoading(true);
       try {
-        const uploadedPendingFiles = await Promise.all(
+        const uploadedFiles = await Promise.all(
           targetFiles.map(async (file) => {
-            const formData = new FormData();
-            formData.append("file", file);
-            formData.append("petId", "PENDING");
-
-            const response = await fetch("/api/upload/image", {
+            // 1. Presigned URL 발급
+            const presignedRes = await fetch("/api/upload/presigned-url", {
               method: "POST",
               headers: {
+                "Content-Type": "application/json",
                 Authorization: `Bearer ${tokenStorage.getToken()}`,
               },
-              body: formData,
+              body: JSON.stringify({
+                petId,
+                mimeType: file.type,
+                size: file.size,
+              }),
             });
 
-            if (!response.ok) {
+            if (!presignedRes.ok) {
+              throw new Error(`Presigned URL 발급 실패: ${file.name}`);
+            }
+
+            const { presignedUrl, fileName, url, mimeType, size } = await presignedRes.json();
+
+            // 2. R2에 직접 업로드
+            const uploadRes = await fetch(presignedUrl, {
+              method: "PUT",
+              headers: { "Content-Type": file.type },
+              body: file,
+            });
+
+            if (!uploadRes.ok) {
               throw new Error(`Upload failed for file ${file.name}`);
             }
 
-            return response.json();
+            return { url, fileName, size, mimeType };
           }),
         );
-        const addedPhotos = uploadedPendingFiles.map(({ url, fileName, size, mimeType }) => ({
-          url,
-          fileName,
-          size,
-          mimeType,
-        }));
 
-        onChange([...images, ...addedPhotos]);
+        onChange([...images, ...uploadedFiles]);
       } catch (error) {
         console.error("Image upload failed:", error);
         toast.error("이미지 업로드에 실패했습니다.");
@@ -138,7 +149,7 @@ export default function DndImagePicker({
         setIsLoading(false);
       }
     },
-    [images, max, isBusy, onChange],
+    [images, max, isBusy, onChange, petId],
   );
 
   const onDragEnd = (event: DragEndEvent) => {
@@ -233,7 +244,6 @@ export default function DndImagePicker({
                   src={photo.url}
                   disabled={disabled}
                   isBusy={isBusy}
-                  isUploading={isLoading}
                   onDelete={() => handleDelete(index)}
                   selected={selectedIndex === index}
                   onSelect={() => {
