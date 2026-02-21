@@ -18,7 +18,7 @@ import {
 import { AxiosError, AxiosResponse } from "axios";
 import FormItem from "./FormItem";
 import SingleSelect from "@/app/(브리더스룸)/components/selector/SingleSelect";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useAdoptionStore } from "@/app/(브리더스룸)/pet/store/adoption";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
