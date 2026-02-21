@@ -15,7 +15,7 @@ import Image from "next/image";
 import { buildR2TransformedUrl, cn, compressImageFile } from "@/lib/utils";
 import { toast } from "@/lib/toast";
 import { X, Plus, Loader2, Info, Maximize2 } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { isNil, range, remove } from "es-toolkit";
 import { ACCEPT_IMAGE_FORMATS } from "../../constants";
 import { tokenStorage } from "@/lib/tokenStorage";
@@ -41,6 +41,37 @@ interface DndImagePickerProps {
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
+// fetch API는 업로드 진행률 이벤트를 지원하지 않으므로 XMLHttpRequest를 사용한다.
+// 둘 다 동일한 브라우저 네트워크 스택을 사용하므로 성능 차이는 없다.
+function uploadWithProgress(
+  url: string,
+  file: File,
+  onProgress: (percent: number) => void,
+): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("PUT", url);
+    xhr.setRequestHeader("Content-Type", file.type);
+
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable) {
+        onProgress(Math.round((e.loaded / e.total) * 100));
+      }
+    };
+
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        resolve();
+      } else {
+        reject(new Error(`Upload failed: ${xhr.status}`));
+      }
+    };
+
+    xhr.onerror = () => reject(new Error("Upload network error"));
+    xhr.send(file);
+  });
+}
+
 export default function DndImagePicker({
   petId = "PENDING",
   max = 3,
@@ -50,6 +81,8 @@ export default function DndImagePicker({
   onChange = () => {},
 }: DndImagePickerProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const fileProgressRef = useRef<number[]>([]);
   const isBusy = isLoading || isSaving;
   const imageNamesInOrder = images.map(({ fileName }) => fileName);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(images.length > 0 ? 0 : null);
@@ -103,9 +136,12 @@ export default function DndImagePicker({
       if (targetFiles.length === 0) return;
 
       setIsLoading(true);
+      setUploadProgress(0);
+      fileProgressRef.current = targetFiles.map(() => 0);
+
       try {
         const uploadedFiles = await Promise.all(
-          targetFiles.map(async (file) => {
+          targetFiles.map(async (file, fileIndex) => {
             // 1. 클라이언트 압축 (최대 1600px, WebP 변환)
             const compressed = await compressImageFile(file);
 
@@ -129,16 +165,12 @@ export default function DndImagePicker({
 
             const { presignedUrl, fileName, url } = await presignedRes.json();
 
-            // 3. R2에 직접 업로드
-            const uploadRes = await fetch(presignedUrl, {
-              method: "PUT",
-              headers: { "Content-Type": compressed.type },
-              body: compressed,
+            // 3. R2에 직접 업로드 (진행률 추적)
+            await uploadWithProgress(presignedUrl, compressed, (percent) => {
+              fileProgressRef.current[fileIndex] = percent;
+              const total = fileProgressRef.current.reduce((a, b) => a + b, 0);
+              setUploadProgress(Math.round(total / fileProgressRef.current.length));
             });
-
-            if (!uploadRes.ok) {
-              throw new Error(`Upload failed for file ${file.name}`);
-            }
 
             return { url, fileName, size: compressed.size, mimeType: compressed.type };
           }),
@@ -258,8 +290,14 @@ export default function DndImagePicker({
               {!disabled &&
                 images.length < max &&
                 (isLoading ? (
-                  <div className="flex h-24 w-full items-center justify-center rounded-xl border border-dashed border-gray-300 text-gray-500">
-                    <Loader2 className="h-5 w-5 animate-spin" />
+                  <div className="flex h-24 w-full flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-gray-300 text-gray-500">
+                    <span className="text-xs font-medium">{uploadProgress}%</span>
+                    <div className="h-1.5 w-3/4 overflow-hidden rounded-full bg-gray-200">
+                      <div
+                        className="h-full rounded-full bg-blue-500 transition-all duration-200"
+                        style={{ width: `${uploadProgress}%` }}
+                      />
+                    </div>
                   </div>
                 ) : (
                   <button
