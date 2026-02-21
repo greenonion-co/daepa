@@ -9,7 +9,7 @@ import type { AdoptionHistoryControllerGetAllAdoptionsOrder } from "./adoptionHi
 import type { AdoptionHistoryControllerGetAllAdoptionsSpecies } from "./adoptionHistoryControllerGetAllAdoptionsSpecies";
 import type { AdoptionHistoryControllerGetAllAdoptionsSexItem } from "./adoptionHistoryControllerGetAllAdoptionsSexItem";
 import type { AdoptionHistoryControllerGetAllAdoptionsGrowthItem } from "./adoptionHistoryControllerGetAllAdoptionsGrowthItem";
-import type { AdoptionHistoryControllerGetAllAdoptionsMethod } from "./adoptionHistoryControllerGetAllAdoptionsMethod";
+import type { AdoptionHistoryControllerGetAllAdoptionsMethodItem } from "./adoptionHistoryControllerGetAllAdoptionsMethodItem";
 
 export type AdoptionHistoryControllerGetAllAdoptionsParams = {
   /**
@@ -51,7 +51,7 @@ export type AdoptionHistoryControllerGetAllAdoptionsParams = {
   /**
    * 분양 방식
    */
-  method?: AdoptionHistoryControllerGetAllAdoptionsMethod;
+  method?: AdoptionHistoryControllerGetAllAdoptionsMethodItem[];
   /**
    * 최소 분양 가격
    */

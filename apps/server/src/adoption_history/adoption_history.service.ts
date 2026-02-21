@@ -208,8 +208,8 @@ export class AdoptionHistoryService {
     }
 
     // 분양 방식 필터링
-    if (pageOptionsDto.method) {
-      queryBuilder.andWhere('histories.method = :method', {
+    if (pageOptionsDto.method && pageOptionsDto.method.length > 0) {
+      queryBuilder.andWhere('histories.method IN (:...method)', {
         method: pageOptionsDto.method,
       });
     }

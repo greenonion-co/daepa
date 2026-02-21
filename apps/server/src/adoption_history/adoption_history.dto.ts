@@ -419,14 +419,59 @@ export class AdoptionFilterDto extends PageOptionsDto {
 
   @ApiProperty({
     description: '분양 방식',
-    example: 'PICKUP',
-    enum: PET_ADOPTION_METHOD,
-    'x-enumNames': Object.keys(PET_ADOPTION_METHOD),
+    example: ['PICKUP', 'DELIVERY'],
+    type: 'array',
+    items: {
+      enum: Object.values(PET_ADOPTION_METHOD),
+      type: 'string',
+      'x-enumNames': Object.keys(PET_ADOPTION_METHOD),
+    },
     required: false,
   })
   @IsOptional()
-  @IsEnum(PET_ADOPTION_METHOD)
-  method?: PET_ADOPTION_METHOD;
+  @Transform(({ value }) => {
+    if (Array.isArray(value)) {
+      return value.filter(
+        (v): v is PET_ADOPTION_METHOD =>
+          typeof v === 'string' &&
+          v.trim().length > 0 &&
+          Object.values(PET_ADOPTION_METHOD).includes(v as PET_ADOPTION_METHOD),
+      );
+    }
+    if (typeof value === 'string') {
+      const trimmed = value.trim();
+      if (trimmed.length === 0) return undefined;
+      try {
+        const parsed: unknown = JSON.parse(trimmed);
+        if (Array.isArray(parsed)) {
+          return parsed.filter(
+            (v): v is PET_ADOPTION_METHOD =>
+              typeof v === 'string' &&
+              v.trim().length > 0 &&
+              Object.values(PET_ADOPTION_METHOD).includes(
+                v as PET_ADOPTION_METHOD,
+              ),
+          );
+        }
+      } catch {
+        // ignore parse error and fallback to comma-split
+      }
+      return trimmed
+        .split(',')
+        .map((v) => v.trim())
+        .filter(
+          (v): v is PET_ADOPTION_METHOD =>
+            v.length > 0 &&
+            Object.values(PET_ADOPTION_METHOD).includes(
+              v as PET_ADOPTION_METHOD,
+            ),
+        );
+    }
+    return undefined;
+  })
+  @IsArray()
+  @IsEnum(PET_ADOPTION_METHOD, { each: true })
+  method?: PET_ADOPTION_METHOD[];
 
   @ApiProperty({
     description: '최소 분양 가격',

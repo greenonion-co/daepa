@@ -7,7 +7,7 @@ import { Check, ChevronDown, X } from "lucide-react";
 import { useIsMobile } from "@/hooks/useMobile";
 
 interface AdoptionMultiSelectFilterProps {
-  type: "morphs" | "traits" | "growth" | "sex";
+  type: "morphs" | "traits" | "growth" | "sex" | "method";
   title: string;
   disabled?: boolean;
   displayMap: Record<string, string>; // key -> display label 매핑 (UI 표시용, 있으면 내부적으로 Object.keys(displayMap)을 selectList로 사용)
