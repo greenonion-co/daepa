@@ -126,7 +126,7 @@ export default function PetList() {
           }}
           className="flex w-fit items-center gap-1 rounded-lg px-2 py-1 text-[12px] text-gray-600 hover:bg-blue-100 hover:text-blue-700 dark:text-gray-400 dark:hover:bg-blue-900/30 dark:hover:text-blue-400"
         >
-          검색된 개체・{totalCount}마리
+          보유 개체・{totalCount}마리
           <RefreshCcw className={cn("h-3 w-3", isRefreshing && "animate-spin")} />
         </button>
 
