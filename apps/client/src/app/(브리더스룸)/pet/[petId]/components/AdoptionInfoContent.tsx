@@ -33,7 +33,7 @@ import { useIsMyPet } from "@/hooks/useIsMyPet";
 import EditActionButtons from "./EditActionButtons";
 import CompleteAdoptionModal from "./CompleteAdoptionModal";
 import { useIsMobile } from "@/hooks/useMobile";
-import router from "next/router";
+import { useRouter } from "next/navigation";
 
 interface AdoptionInfoContentProps {
   petId: string;
@@ -50,6 +50,7 @@ const AdoptionInfoContent = ({
   onClose,
 }: AdoptionInfoContentProps) => {
   const queryClient = useQueryClient();
+  const router = useRouter();
   const { setAdoption } = useAdoptionStore();
   const [isEditMode, setIsEditMode] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -286,7 +287,7 @@ const AdoptionInfoContent = ({
         }}
       />
     ));
-  }, [adoptionData, petId, completeAdoption, queryClient, onClose, isMobile]);
+  }, [adoptionData, petId, completeAdoption, queryClient, onClose, isMobile, router]);
 
   const showAdoptionInfo = useMemo(() => {
     return !(isNil(adoption) && !isEditMode);
