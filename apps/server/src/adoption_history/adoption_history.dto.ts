@@ -65,7 +65,7 @@ export class CompleteAdoptionDto {
     required: false,
     nullable: true,
     type: 'string',
-    format: 'date-time',
+    format: 'date',
   })
   @Type(() => Date)
   @IsOptional()
