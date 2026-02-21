@@ -12,7 +12,7 @@ import { SortableContext, useSortable, arrayMove, rectSortingStrategy } from "@d
 import { CSS } from "@dnd-kit/utilities";
 import { useDropzone } from "react-dropzone";
 import Image from "next/image";
-import { buildR2TransformedUrl, cn } from "@/lib/utils";
+import { buildR2TransformedUrl, cn, compressImageFile } from "@/lib/utils";
 import { toast } from "@/lib/toast";
 import { X, Plus, Loader2, Info, Maximize2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
@@ -39,7 +39,7 @@ interface DndImagePickerProps {
   onChange?: (images: PhotoItem[]) => void;
 }
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024;
+const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
 export default function DndImagePicker({
   petId = "PENDING",
@@ -106,7 +106,10 @@ export default function DndImagePicker({
       try {
         const uploadedFiles = await Promise.all(
           targetFiles.map(async (file) => {
-            // 1. Presigned URL 발급
+            // 1. 클라이언트 압축 (최대 1600px, WebP 변환)
+            const compressed = await compressImageFile(file);
+
+            // 2. Presigned URL 발급
             const presignedRes = await fetch("/api/upload/presigned-url", {
               method: "POST",
               headers: {
@@ -115,8 +118,8 @@ export default function DndImagePicker({
               },
               body: JSON.stringify({
                 petId,
-                mimeType: file.type,
-                size: file.size,
+                mimeType: compressed.type,
+                size: compressed.size,
               }),
             });
 
@@ -124,20 +127,20 @@ export default function DndImagePicker({
               throw new Error(`Presigned URL 발급 실패: ${file.name}`);
             }
 
-            const { presignedUrl, fileName, url, mimeType, size } = await presignedRes.json();
+            const { presignedUrl, fileName, url } = await presignedRes.json();
 
-            // 2. R2에 직접 업로드
+            // 3. R2에 직접 업로드
             const uploadRes = await fetch(presignedUrl, {
               method: "PUT",
-              headers: { "Content-Type": file.type },
-              body: file,
+              headers: { "Content-Type": compressed.type },
+              body: compressed,
             });
 
             if (!uploadRes.ok) {
               throw new Error(`Upload failed for file ${file.name}`);
             }
 
-            return { url, fileName, size, mimeType };
+            return { url, fileName, size: compressed.size, mimeType: compressed.type };
           }),
         );
 
