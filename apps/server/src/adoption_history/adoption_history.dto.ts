@@ -198,6 +198,7 @@ export class AdoptionHistoryDto {
   @ApiProperty({
     description: '거래 방식',
     enum: PET_ADOPTION_METHOD,
+    'x-enumNames': Object.keys(PET_ADOPTION_METHOD),
     required: false,
   })
   @IsOptional()

@@ -577,7 +577,7 @@ export class PetAdoptionDto {
   })
   @IsOptional()
   @IsObject()
-  buyer?: UserProfilePublicDto;
+  reservedUser?: UserProfilePublicDto;
 
   @ApiProperty({
     description: '분양 펫 아이디',

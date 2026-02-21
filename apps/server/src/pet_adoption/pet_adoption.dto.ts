@@ -4,6 +4,7 @@ import { Type } from 'class-transformer';
 
 import { PET_ADOPTION_STATUS } from 'src/pet/pet.constants';
 import { CommonResponseDto } from 'src/common/response.dto';
+import { UserProfilePublicDto } from 'src/user/user.dto';
 
 export class PetAdoptionBaseDto {
   @ApiProperty({
@@ -30,6 +31,15 @@ export class PetAdoptionBaseDto {
   @IsOptional()
   @IsString()
   memo?: string;
+
+  @ApiProperty({
+    description: '예약자 ID',
+    example: 'XXXXXXXX',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  reservedUserId?: string;
 
   @ApiProperty({
     description: '생성일',
@@ -144,7 +154,17 @@ export class AdoptionDto extends PickType(PetAdoptionBaseDto, [
   'memo',
   'status',
   'createdAt',
-] as const) {}
+] as const) {
+  @ApiProperty({
+    description: '예약자 정보',
+    type: UserProfilePublicDto,
+    required: false,
+    nullable: true,
+  })
+  @IsOptional()
+  @Type(() => UserProfilePublicDto)
+  reservedUser?: UserProfilePublicDto | null;
+}
 
 export class AdoptionDetailResponseDto extends CommonResponseDto {
   @ApiProperty({

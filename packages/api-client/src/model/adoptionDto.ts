@@ -6,6 +6,7 @@
  * OpenAPI spec version: 1.0
  */
 import type { AdoptionDtoStatus } from "./adoptionDtoStatus";
+import type { AdoptionDtoReservedUser } from "./adoptionDtoReservedUser";
 
 export interface AdoptionDto {
   /** 펫 ID */
@@ -21,4 +22,9 @@ export interface AdoptionDto {
    * @nullable
    */
   status: AdoptionDtoStatus;
+  /**
+   * 예약자 정보
+   * @nullable
+   */
+  reservedUser?: AdoptionDtoReservedUser;
 }

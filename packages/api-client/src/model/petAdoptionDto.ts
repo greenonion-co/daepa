@@ -16,7 +16,7 @@ export interface PetAdoptionDto {
   /** 메모 */
   memo: string;
   /** 분양 구매자 */
-  buyer?: UserProfilePublicDto;
+  reservedUser?: UserProfilePublicDto;
   /** 분양 펫 아이디 */
   petId: string;
 }

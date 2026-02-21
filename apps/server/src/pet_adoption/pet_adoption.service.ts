@@ -28,11 +28,36 @@ export class PetAdoptionService {
   async findOne(petId: string): Promise<AdoptionDto | null> {
     const adoptionEntity = await this.petAdoptionRepository.findOne({
       where: { petId },
-      select: ['id', 'petId', 'price', 'memo', 'status', 'createdAt'],
+      select: [
+        'id',
+        'petId',
+        'price',
+        'memo',
+        'status',
+        'reservedUserId',
+        'createdAt',
+      ],
     });
 
     if (!adoptionEntity) {
       return null;
+    }
+
+    let reservedUser: AdoptionDto['reservedUser'] = null;
+    if (adoptionEntity.reservedUserId) {
+      const user = await this.dataSource.getRepository(UserEntity).findOne({
+        where: { userId: adoptionEntity.reservedUserId },
+        select: ['userId', 'name', 'role', 'isBiz', 'status'],
+      });
+      if (user) {
+        reservedUser = {
+          userId: user.userId,
+          name: user.name,
+          role: user.role,
+          isBiz: user.isBiz,
+          status: user.status,
+        };
+      }
     }
 
     return {
@@ -41,7 +66,8 @@ export class PetAdoptionService {
       price: adoptionEntity.price ?? undefined,
       memo: adoptionEntity.memo ?? undefined,
       createdAt: adoptionEntity.createdAt,
-    };
+      reservedUser,
+    } as AdoptionDto;
   }
 
   async createAdoption(
@@ -134,7 +160,6 @@ export class PetAdoptionService {
               '예약중 상태일 때만 입양자 정보를 입력할 수 있습니다.',
             );
           }
-          console.log(updateAdoptionDto.reservedUserId);
           const buyer = await em.findOne(UserEntity, {
             where: { userId: updateAdoptionDto.reservedUserId },
           });

@@ -105,7 +105,7 @@ const AdoptionInfoContent = ({
           {
             price: current.price ? Number(current.price) : undefined,
             memo: current.memo,
-            buyerId: current.buyer?.userId,
+            reservedUserId: current.reservedUser?.userId,
             status: current.status,
           },
           isUndefined,
@@ -116,15 +116,15 @@ const AdoptionInfoContent = ({
         original as unknown as Record<string, unknown>,
         current as unknown as Record<string, unknown>,
         {
-          fields: ["price", "memo", "status", "buyer"],
+          fields: ["price", "memo", "status", "reservedUser"],
           convertUndefinedToNull: true,
         },
       );
 
-      if ("buyer" in changedFields) {
-        const buyer = changedFields["buyer"] as UserProfilePublicDto | null;
-        changedFields["buyerId"] = buyer?.userId ?? null;
-        delete changedFields["buyer"];
+      if ("reservedUser" in changedFields) {
+        const reservedUser = changedFields["reservedUser"] as UserProfilePublicDto | null;
+        changedFields["reservedUserId"] = reservedUser?.userId ?? null;
+        delete changedFields["reservedUser"];
       }
 
       return changedFields;
@@ -196,11 +196,11 @@ const AdoptionInfoContent = ({
             입양자를 선택해주세요.
           </DialogTitle>
           <UserList
-            selectedUserId={adoptionData.buyer?.userId}
+            selectedUserId={adoptionData.reservedUser?.userId}
             onSelect={(user) => {
               setAdoptionData((prev) => ({
                 ...prev,
-                buyer: user,
+                reservedUser: user,
               }));
               close();
             }}
@@ -208,7 +208,7 @@ const AdoptionInfoContent = ({
         </DialogContent>
       </Dialog>
     ));
-  }, [adoptionData.buyer?.userId, isEditMode]);
+  }, [adoptionData.reservedUser?.userId, isEditMode]);
 
   const handleCompleteAdoption = useCallback(async () => {
     try {
@@ -224,9 +224,9 @@ const AdoptionInfoContent = ({
       return;
     }
 
-    const defaultBuyer =
-      adoptionData.status === UpdateAdoptionDtoStatus.ON_RESERVATION && adoptionData.buyer
-        ? adoptionData.buyer
+    const reservedUser =
+      adoptionData.status === UpdateAdoptionDtoStatus.ON_RESERVATION && adoptionData.reservedUser
+        ? adoptionData.reservedUser
         : undefined;
 
     overlay.open(({ isOpen, close }) => (
@@ -234,7 +234,7 @@ const AdoptionInfoContent = ({
         isOpen={isOpen}
         onClose={close}
         defaultPrice={adoptionData.price}
-        defaultBuyer={defaultBuyer}
+        defaultBuyer={reservedUser}
         defaultMemo={adoptionData.memo ?? undefined}
         onConfirm={async (data) => {
           try {
@@ -327,7 +327,7 @@ const AdoptionInfoContent = ({
                       return {
                         ...prev,
                         status: nextStatus as PetAdoptionDtoStatus | null,
-                        buyer: isNextReservation ? prev.buyer : undefined,
+                        reservedUser: isNextReservation ? prev.reservedUser : undefined,
                       };
                     });
                   }}
@@ -341,19 +341,21 @@ const AdoptionInfoContent = ({
               label="예약자"
               content={
                 <>
-                  {!(isNil(adoptionData.buyer?.userId) && isEditMode) && (
+                  {!(isNil(adoptionData.reservedUser?.userId) && isEditMode) && (
                     <div
                       className={cn(
                         "mr-1 flex h-[32px] w-fit items-center gap-1 rounded-lg px-2 py-1 text-[14px] font-[500]",
-                        adoptionData.buyer?.userId
+                        adoptionData.reservedUser?.userId
                           ? "bg-blue-100 text-blue-600 dark:bg-blue-900/50 dark:text-blue-400"
                           : "",
                       )}
                     >
-                      {isNil(adoptionData.buyer?.userId) ? (
+                      {isNil(adoptionData.reservedUser?.userId) ? (
                         "-"
                       ) : (
-                        <div className="flex items-center gap-1">{adoptionData.buyer?.name}</div>
+                        <div className="flex items-center gap-1">
+                          {adoptionData.reservedUser?.name}
+                        </div>
                       )}
                     </div>
                   )}
@@ -364,16 +366,16 @@ const AdoptionInfoContent = ({
                         className="h-8 cursor-pointer rounded-lg px-2 text-[12px] font-[600] text-white dark:bg-neutral-800/70"
                         onClick={handleSelectBuyer}
                       >
-                        {isNil(adoptionData.buyer?.userId) ? "예약자 선택" : "변경"}
+                        {isNil(adoptionData.reservedUser?.userId) ? "예약자 선택" : "변경"}
                       </Button>
-                      {isNotNil(adoptionData.buyer?.userId) && (
+                      {isNotNil(adoptionData.reservedUser?.userId) && (
                         <Button
                           variant="outline"
                           className="h-8 cursor-pointer rounded-lg px-2 text-[12px] font-[600]"
                           onClick={() =>
                             setAdoptionData((prev) => ({
                               ...prev,
-                              buyer: undefined,
+                              reservedUser: undefined,
                             }))
                           }
                         >
