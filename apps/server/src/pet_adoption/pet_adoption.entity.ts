@@ -20,9 +20,6 @@ export class PetAdoptionEntity {
   @Column()
   petId: string;
 
-  @Column()
-  sellerId: string;
-
   @Column({
     type: 'enum',
     enum: PET_ADOPTION_STATUS,
@@ -38,7 +35,7 @@ export class PetAdoptionEntity {
   memo?: string | null;
 
   @Column({ type: 'varchar', nullable: true })
-  buyerId?: string | null; // 예약 시 입양자 ID
+  reservedUserId?: string | null; // 예약 시 예약자 ID
 
   @CreateDateColumn()
   createdAt: Date;

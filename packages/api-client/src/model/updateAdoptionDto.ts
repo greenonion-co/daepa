@@ -14,10 +14,10 @@ export interface UpdateAdoptionDto {
    */
   price?: number | null;
   /**
-   * 입양자 ID
+   * 예약자 ID
    * @nullable
    */
-  buyerId?: string | null;
+  reservedUserId?: string | null;
   /**
    * 메모
    * @nullable

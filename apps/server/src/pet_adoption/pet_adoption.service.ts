@@ -45,7 +45,7 @@ export class PetAdoptionService {
   }
 
   async createAdoption(
-    sellerId: string,
+    userId: string,
     createAdoptionDto: CreateAdoptionDto,
     entityManager?: EntityManager,
   ): Promise<void> {
@@ -58,7 +58,7 @@ export class PetAdoptionService {
       if (!pet) {
         throw new NotFoundException('펫을 찾을 수 없습니다.');
       }
-      if (pet.ownerId !== sellerId) {
+      if (pet.ownerId !== userId) {
         throw new ForbiddenException('펫의 소유자가 아닙니다.');
       }
 
@@ -74,7 +74,6 @@ export class PetAdoptionService {
       const adoptionEntity = new PetAdoptionEntity();
       Object.assign(adoptionEntity, {
         petId: createAdoptionDto.petId,
-        sellerId,
         status: createAdoptionDto.status ?? null,
         price: createAdoptionDto.price,
         memo: createAdoptionDto.memo,
@@ -95,7 +94,7 @@ export class PetAdoptionService {
   async updateAdoption(
     petId: string,
     updateAdoptionDto: UpdateAdoptionDto,
-    sellerId?: string,
+    userId?: string,
     entityManager?: EntityManager,
   ): Promise<void> {
     const run = async (em: EntityManager) => {
@@ -109,10 +108,16 @@ export class PetAdoptionService {
       }
 
       // 2. 요청자 소유 펫인지 확인
-      if (sellerId && adoptionEntity.sellerId !== sellerId) {
-        throw new ForbiddenException(
-          '펫의 소유자만 분양 정보를 수정할 수 있습니다.',
-        );
+      if (userId) {
+        const pet = await em.findOne(PetEntity, {
+          where: { petId },
+          select: ['ownerId'],
+        });
+        if (!pet || pet.ownerId !== userId) {
+          throw new ForbiddenException(
+            '펫의 소유자만 분양 정보를 수정할 수 있습니다.',
+          );
+        }
       }
 
       // 최종 상태 결정
@@ -120,18 +125,18 @@ export class PetAdoptionService {
       const isReservation = finalStatus === PET_ADOPTION_STATUS.ON_RESERVATION;
 
       // 입양자 검증
-      if (updateAdoptionDto.buyerId !== undefined) {
-        if (updateAdoptionDto.buyerId === null) {
-          adoptionEntity.buyerId = null;
+      if (updateAdoptionDto.reservedUserId !== undefined) {
+        if (updateAdoptionDto.reservedUserId === null) {
+          adoptionEntity.reservedUserId = null;
         } else {
           if (!isReservation) {
             throw new BadRequestException(
               '예약중 상태일 때만 입양자 정보를 입력할 수 있습니다.',
             );
           }
-
+          console.log(updateAdoptionDto.reservedUserId);
           const buyer = await em.findOne(UserEntity, {
-            where: { userId: updateAdoptionDto.buyerId },
+            where: { userId: updateAdoptionDto.reservedUserId },
           });
           if (!buyer) {
             throw new NotFoundException('입양자를 찾을 수 없습니다.');
@@ -139,9 +144,9 @@ export class PetAdoptionService {
         }
       }
 
-      // 예약 중이 아닌 상태로 변경 시 buyerId 자동 초기화
-      if (!isReservation && adoptionEntity.buyerId) {
-        adoptionEntity.buyerId = null;
+      // 예약 중이 아닌 상태로 변경 시 reservedUserId 자동 초기화
+      if (!isReservation && adoptionEntity.reservedUserId) {
+        adoptionEntity.reservedUserId = null;
       }
 
       // pet_adoptions 업데이트
@@ -149,7 +154,7 @@ export class PetAdoptionService {
         {
           price: updateAdoptionDto.price,
           memo: updateAdoptionDto.memo,
-          buyerId: updateAdoptionDto.buyerId,
+          reservedUserId: updateAdoptionDto.reservedUserId,
           status: updateAdoptionDto.status,
         },
         isUndefined,

@@ -104,7 +104,7 @@ export class UpdateAdoptionDto {
   price?: number | null;
 
   @ApiProperty({
-    description: '입양자 ID',
+    description: '예약자 ID',
     example: 'USER_XXXXXXXX',
     required: false,
     nullable: true,
@@ -112,7 +112,7 @@ export class UpdateAdoptionDto {
   })
   @IsOptional()
   @IsString()
-  buyerId?: string | null;
+  reservedUserId?: string | null;
 
   @ApiProperty({
     description: '메모',

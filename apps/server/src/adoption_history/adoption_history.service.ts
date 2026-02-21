@@ -274,37 +274,12 @@ export class AdoptionHistoryService {
         throw new NotFoundException('분양 정보를 찾을 수 없습니다.');
       }
 
-      if (adoptionEntity.sellerId !== userId) {
-        throw new ForbiddenException('분양 정보의 소유자가 아닙니다.');
-      }
-
-      // 2. 입양자가 있는 경우 존재 확인
-      const finalBuyerId =
-        completeAdoptionDto.buyerId ?? adoptionEntity.buyerId ?? null;
-
-      if (finalBuyerId) {
-        const buyer = await em.findOne(UserEntity, {
-          where: { userId: finalBuyerId },
-        });
-        if (!buyer) {
-          throw new NotFoundException('입양자를 찾을 수 없습니다.');
-        }
-      }
-
-      // 3. 부모 요청 확인
-      const pendingCount =
-        await this.parentRequestService.getPendingRequestCount(petId, em);
-      if (pendingCount > 0) {
-        throw new BadRequestException(
-          `이 펫과 관련된 부모 요청(${pendingCount}건)을 모두 처리한 후 다시 시도해주세요.`,
-        );
-      }
-
-      // 4. 펫 스냅샷 생성
+      // 2. 펫 정보 조회 및 소유자 확인
       const pet = await em.findOne(PetEntity, {
         where: { petId },
         select: [
           'petId',
+          'ownerId',
           'type',
           'name',
           'species',
@@ -317,6 +292,32 @@ export class AdoptionHistoryService {
         throw new NotFoundException('펫 정보를 찾을 수 없습니다.');
       }
 
+      if (pet.ownerId !== userId) {
+        throw new ForbiddenException('분양 정보의 소유자가 아닙니다.');
+      }
+
+      // 3. 입양자가 있는 경우 존재 확인
+      const finalBuyerId = completeAdoptionDto.buyerId ?? null;
+
+      if (finalBuyerId) {
+        const buyer = await em.findOne(UserEntity, {
+          where: { userId: finalBuyerId },
+        });
+        if (!buyer) {
+          throw new NotFoundException('입양자를 찾을 수 없습니다.');
+        }
+      }
+
+      // 4. 부모 요청 확인
+      const pendingCount =
+        await this.parentRequestService.getPendingRequestCount(petId, em);
+      if (pendingCount > 0) {
+        throw new BadRequestException(
+          `이 펫과 관련된 부모 요청(${pendingCount}건)을 모두 처리한 후 다시 시도해주세요.`,
+        );
+      }
+
+      // 5. 펫 스냅샷 생성
       const petDetail = await em.findOne(PetDetailEntity, {
         where: { petId },
         select: ['sex', 'growth', 'morphs', 'traits'],
@@ -348,11 +349,11 @@ export class AdoptionHistoryService {
         mother: mother ? { petId: mother.petId, name: mother.name } : null,
       };
 
-      // 5. adoption_histories에 INSERT
+      // 6. adoption_histories에 INSERT
       const historyEntity = new AdoptionHistoryEntity();
       Object.assign(historyEntity, {
         petId,
-        sellerId: adoptionEntity.sellerId,
+        sellerId: pet.ownerId,
         adoptionDate: completeAdoptionDto.adoptionDate,
         buyerId: finalBuyerId,
         price: completeAdoptionDto.price,
@@ -362,15 +363,14 @@ export class AdoptionHistoryService {
       });
       await em.save(AdoptionHistoryEntity, historyEntity);
 
-      // 6. pet_adoption 리셋
-      adoptionEntity.sellerId = finalBuyerId ?? adoptionEntity.sellerId;
+      // 7. pet_adoption 리셋
       adoptionEntity.status = null;
       adoptionEntity.price = null;
       adoptionEntity.memo = null;
-      adoptionEntity.buyerId = null;
+      adoptionEntity.reservedUserId = null;
       await em.save(PetAdoptionEntity, adoptionEntity);
 
-      // 7. 펫 소유권 이전 (입양자가 없으면 소유권 박탈)
+      // 8. 펫 소유권 이전 (입양자가 없으면 소유권 박탈)
       await em.update('pets', { petId }, { ownerId: finalBuyerId ?? null });
     });
   }
