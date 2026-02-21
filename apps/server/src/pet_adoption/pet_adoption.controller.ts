@@ -62,8 +62,13 @@ export class PetAdoptionController {
   async updatePetAdoption(
     @Param('petId') petId: string,
     @Body() updateAdoptionDto: UpdateAdoptionDto,
+    @JwtUser() token: JwtUserPayload,
   ): Promise<CommonResponseDto> {
-    await this.petAdoptionService.updateAdoption(petId, updateAdoptionDto);
+    await this.petAdoptionService.updateAdoption(
+      petId,
+      updateAdoptionDto,
+      token.userId,
+    );
     return {
       success: true,
       message: '분양 정보 수정 성공',

@@ -95,6 +95,7 @@ export class PetAdoptionService {
   async updateAdoption(
     petId: string,
     updateAdoptionDto: UpdateAdoptionDto,
+    sellerId?: string,
     entityManager?: EntityManager,
   ): Promise<void> {
     const run = async (em: EntityManager) => {
@@ -105,6 +106,13 @@ export class PetAdoptionService {
 
       if (!adoptionEntity) {
         throw new NotFoundException('분양 정보를 찾을 수 없습니다.');
+      }
+
+      // 2. 요청자 소유 펫인지 확인
+      if (sellerId && adoptionEntity.sellerId !== sellerId) {
+        throw new ForbiddenException(
+          '펫의 소유자만 분양 정보를 수정할 수 있습니다.',
+        );
       }
 
       // 입양자 검증
