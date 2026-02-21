@@ -10,7 +10,6 @@ import {
   CompleteAdoptionDto,
   petAdoptionControllerGetPetAdoption,
   brPetControllerFindAll,
-  PetAdoptionDtoMethod,
   UserProfilePublicDto,
   parentRequestControllerGetPendingRequestCount,
   PetDto,
@@ -55,10 +54,9 @@ const AdoptionInfoContent = ({
   const [isEditMode, setIsEditMode] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [adoptionData, setAdoptionData] = useState<
-    Omit<Partial<PetAdoptionDto>, "status"> & {
+    Omit<Partial<PetAdoptionDto>, "status" | "reservedUser"> & {
       status?: PetAdoptionDtoStatus | null;
-      adoptionDate?: string;
-      method?: PetAdoptionDtoMethod;
+      reservedUser?: UserProfilePublicDto | null;
     }
   >({});
 
