@@ -160,7 +160,7 @@ export class AdoptionHistoryService {
     // 키워드 검색
     if (pageOptionsDto.keyword) {
       queryBuilder.andWhere(
-        `JSON_UNQUOTE(JSON_EXTRACT(histories.pet_snapshot, '$.name')) LIKE :keyword`,
+        `JSON_UNQUOTE(JSON_EXTRACT(histories.petSnapshot, '$.name')) LIKE :keyword`,
         { keyword: `%${pageOptionsDto.keyword}%` },
       );
     }
@@ -168,7 +168,7 @@ export class AdoptionHistoryService {
     // 종 필터링
     if (pageOptionsDto.species) {
       queryBuilder.andWhere(
-        `JSON_UNQUOTE(JSON_EXTRACT(histories.pet_snapshot, '$.species')) = :species`,
+        `JSON_UNQUOTE(JSON_EXTRACT(histories.petSnapshot, '$.species')) = :species`,
         { species: pageOptionsDto.species },
       );
     }
@@ -177,7 +177,7 @@ export class AdoptionHistoryService {
     if (pageOptionsDto.morphs && pageOptionsDto.morphs.length > 0) {
       const morphsJson = JSON.stringify(pageOptionsDto.morphs);
       queryBuilder.andWhere(
-        `JSON_OVERLAPS(JSON_EXTRACT(histories.pet_snapshot, '$.morphs'), :morphs)`,
+        `JSON_OVERLAPS(JSON_EXTRACT(histories.petSnapshot, '$.morphs'), :morphs)`,
         { morphs: morphsJson },
       );
     }
@@ -186,7 +186,7 @@ export class AdoptionHistoryService {
     if (pageOptionsDto.traits && pageOptionsDto.traits.length > 0) {
       const traitsJson = JSON.stringify(pageOptionsDto.traits);
       queryBuilder.andWhere(
-        `JSON_OVERLAPS(JSON_EXTRACT(histories.pet_snapshot, '$.traits'), :traits)`,
+        `JSON_OVERLAPS(JSON_EXTRACT(histories.petSnapshot, '$.traits'), :traits)`,
         { traits: traitsJson },
       );
     }
@@ -194,7 +194,7 @@ export class AdoptionHistoryService {
     // 성별 필터링
     if (pageOptionsDto.sex && pageOptionsDto.sex.length > 0) {
       queryBuilder.andWhere(
-        `JSON_UNQUOTE(JSON_EXTRACT(histories.pet_snapshot, '$.sex')) IN (:...sex)`,
+        `JSON_UNQUOTE(JSON_EXTRACT(histories.petSnapshot, '$.sex')) IN (:...sex)`,
         { sex: pageOptionsDto.sex },
       );
     }
@@ -202,7 +202,7 @@ export class AdoptionHistoryService {
     // 성장단계 필터링
     if (pageOptionsDto.growth && pageOptionsDto.growth.length > 0) {
       queryBuilder.andWhere(
-        `JSON_UNQUOTE(JSON_EXTRACT(histories.pet_snapshot, '$.growth')) IN (:...growth)`,
+        `JSON_UNQUOTE(JSON_EXTRACT(histories.petSnapshot, '$.growth')) IN (:...growth)`,
         { growth: pageOptionsDto.growth },
       );
     }
@@ -245,7 +245,7 @@ export class AdoptionHistoryService {
     // 부 개체 필터링
     if (pageOptionsDto.fatherId) {
       queryBuilder.andWhere(
-        `JSON_UNQUOTE(JSON_EXTRACT(histories.pet_snapshot, '$.father.petId')) = :fatherId`,
+        `JSON_UNQUOTE(JSON_EXTRACT(histories.petSnapshot, '$.father.petId')) = :fatherId`,
         { fatherId: pageOptionsDto.fatherId },
       );
     }
@@ -253,7 +253,7 @@ export class AdoptionHistoryService {
     // 모 개체 필터링
     if (pageOptionsDto.motherId) {
       queryBuilder.andWhere(
-        `JSON_UNQUOTE(JSON_EXTRACT(histories.pet_snapshot, '$.mother.petId')) = :motherId`,
+        `JSON_UNQUOTE(JSON_EXTRACT(histories.petSnapshot, '$.mother.petId')) = :motherId`,
         { motherId: pageOptionsDto.motherId },
       );
     }
