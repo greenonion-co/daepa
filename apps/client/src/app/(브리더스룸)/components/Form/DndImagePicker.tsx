@@ -127,7 +127,7 @@ export default function DndImagePicker({
 
       const targetFiles = picked.filter((f) => {
         if (f.size > MAX_FILE_SIZE) {
-          toast.error(`이미지 용량이 너무 큽니다 (최대 5MB): ${f.name}`);
+          toast.error(`이미지 용량이 너무 큽니다 (최대 10MB): ${f.name}`);
           return false;
         }
         return true;
