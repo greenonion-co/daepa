@@ -1,6 +1,5 @@
 import { Exclude } from 'class-transformer';
 import { PET_ADOPTION_STATUS } from 'src/pet/pet.constants';
-import { PetEntity } from 'src/pet/pet.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -8,10 +7,8 @@ import {
   Index,
   CreateDateColumn,
   UpdateDateColumn,
-  OneToOne,
 } from 'typeorm';
 import { PetDetailEntity } from 'src/pet_detail/pet_detail.entity';
-import { UserEntity } from 'src/user/user.entity';
 
 @Entity({ name: 'pet_adoptions' })
 @Index('UNIQUE_PET_ADOPTION_PET_ID', ['petId'], { unique: true })
@@ -49,18 +46,6 @@ export class PetAdoptionEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  // 펫과의 관계
-  @OneToOne(() => PetEntity, (pet) => pet.adoption)
-  pet: PetEntity;
-
   // petDetail을 위한 임시 속성 (쿼리에서만 사용)
   petDetail?: Partial<PetDetailEntity>;
-
-  // 판매자와의 관계
-  @OneToOne(() => UserEntity)
-  seller: UserEntity;
-
-  // 구매자와의 관계 (예약 시)
-  @OneToOne(() => UserEntity, { nullable: true })
-  buyer: UserEntity;
 }
