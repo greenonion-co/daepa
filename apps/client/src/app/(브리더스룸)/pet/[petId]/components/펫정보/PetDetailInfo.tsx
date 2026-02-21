@@ -23,9 +23,19 @@ interface PetDetailInfoProps {
   };
   isEditMode: boolean;
   onFieldChange: (field: string, value: any) => void;
+  onFieldInput?: (field: string, value: any) => void;
+  onFieldBlur?: (field: string) => void;
 }
 
-export const PetDetailInfo = ({ formData, isEditMode, onFieldChange }: PetDetailInfoProps) => {
+export const PetDetailInfo = ({
+  formData,
+  isEditMode,
+  onFieldChange,
+  onFieldInput,
+  onFieldBlur,
+}: PetDetailInfoProps) => {
+  const handleInput = onFieldInput ?? onFieldChange;
+
   return (
     <>
       <FormItem
@@ -61,7 +71,8 @@ export const PetDetailInfo = ({ formData, isEditMode, onFieldChange }: PetDetail
             disabled={!isEditMode}
             field={{ name: "weight", type: "number", unit: "g" }}
             value={String(formData.weight ?? "")}
-            setValue={(value) => onFieldChange("weight", value.value)}
+            setValue={(value) => handleInput("weight", value.value)}
+            onBlur={() => onFieldBlur?.("weight")}
             placeholder={isEditMode ? "" : "-"}
             inputClassName={cn(
               "h-[32px] w-full rounded-md border font-[500] border-gray-200 p-2 placeholder:font-[500]",
@@ -119,7 +130,8 @@ export const PetDetailInfo = ({ formData, isEditMode, onFieldChange }: PetDetail
             <textarea
               disabled={!isEditMode}
               value={formData.desc ?? ""}
-              onChange={(e) => onFieldChange("desc", e.target.value)}
+              onChange={(e) => handleInput("desc", e.target.value)}
+              onBlur={() => onFieldBlur?.("desc")}
               maxLength={100}
               placeholder={isEditMode ? "펫 설명을 입력하세요" : "-"}
               className={cn(

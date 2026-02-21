@@ -13,6 +13,7 @@ interface NumberFieldProps {
   readOnly?: boolean; // 키보드 입력 비활성화, 버튼으로만 조절 가능
   min?: number;
   max?: number;
+  onBlur?: () => void;
 }
 
 const NumberField = ({
@@ -26,6 +27,7 @@ const NumberField = ({
   readOnly = false,
   min,
   max,
+  onBlur,
 }: NumberFieldProps) => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = e.target.value;
@@ -62,6 +64,7 @@ const NumberField = ({
           readOnly={readOnly}
           onChange={readOnly ? undefined : handleChange}
           onKeyPress={readOnly ? undefined : handleKeyPress}
+          onBlur={onBlur}
           min={min ?? 0}
           max={max}
           placeholder={placeholder}
@@ -83,6 +86,7 @@ const NumberField = ({
               if (min !== undefined && newValue < min) return;
               if (newValue < 0) return;
               setValue({ type: field.name, value: String(newValue) });
+              onBlur?.();
             }}
           >
             <Minus className="h-4 w-4" />
@@ -99,6 +103,7 @@ const NumberField = ({
               const newValue = Number(value) + stepAmount;
               if (max !== undefined && newValue > max) return;
               setValue({ type: field.name, value: String(newValue) });
+              onBlur?.();
             }}
           >
             <Plus className="h-4 w-4" />

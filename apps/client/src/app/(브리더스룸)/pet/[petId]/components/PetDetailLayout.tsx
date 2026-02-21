@@ -163,7 +163,9 @@ export default function PetDetailLayout({
     { id: "breeding", label: "개체정보", ref: breedingRef },
     ...(isMyPet ? [{ id: "adoption" as TabType, label: "분양정보", ref: adoptionRef }] : []),
     { id: "pedigree", label: "혈통정보", ref: pedigreeRef },
-    ...(isMyPet && feedingSlot ? [{ id: "feeding" as TabType, label: "피딩정보", ref: feedingRef }] : []),
+    ...(isMyPet && feedingSlot
+      ? [{ id: "feeding" as TabType, label: "피딩정보", ref: feedingRef }]
+      : []),
   ];
 
   const content = (
@@ -203,30 +205,22 @@ export default function PetDetailLayout({
         <div
           ref={pedigreeRef}
           data-section="pedigree"
-          className="flex max-w-[440px] min-w-[300px] flex-1 max-[580px]:order-4 max-[580px]:max-w-none"
+          className="flex max-w-[440px] min-w-[300px] flex-1 max-[580px]:order-3 max-[580px]:max-w-none"
         >
           {pedigreeSlot}
         </div>
 
-        {/* 분양 정보 */}
+        {/* 분양 정보 + 피딩 정보 */}
         {isMyPet && (
-          <div
-            ref={adoptionRef}
-            data-section="adoption"
-            className="flex min-h-[480px] max-w-[440px] min-w-[300px] flex-1 max-[580px]:order-3 max-[580px]:max-w-none"
-          >
-            {adoptionSlot}
-          </div>
-        )}
-
-        {/* 피딩 정보 */}
-        {isMyPet && feedingSlot && (
-          <div
-            ref={feedingRef}
-            data-section="feeding"
-            className="flex max-w-[440px] min-w-[300px] flex-1 max-[580px]:order-5 max-[580px]:max-w-none"
-          >
-            {feedingSlot}
+          <div className="flex max-w-[440px] min-w-[300px] flex-1 flex-col gap-3 max-[580px]:order-4 max-[580px]:max-w-none">
+            <div ref={adoptionRef} data-section="adoption" className="flex">
+              {adoptionSlot}
+            </div>
+            {feedingSlot && (
+              <div ref={feedingRef} data-section="feeding" className="flex">
+                {feedingSlot}
+              </div>
+            )}
           </div>
         )}
       </div>

@@ -1,7 +1,6 @@
 "use client";
 
 import DndImagePicker from "@/app/(브리더스룸)/components/Form/DndImagePicker";
-import EditActionButtons from "./EditActionButtons";
 import {
   petImageControllerFindOne,
   PetImageItem,
@@ -10,9 +9,8 @@ import {
 } from "@repo/api-client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getPetThumbnailQueryKey } from "@/components/common/PetThumbnail";
-import { isEqual } from "es-toolkit";
 import { toast } from "@/lib/toast";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useIsMyPet } from "@/hooks/useIsMyPet";
 import { isEmpty } from "es-toolkit/compat";
 
@@ -23,99 +21,78 @@ interface ImagesContentProps {
 
 const ImagesContent = ({ pet, initialImages }: ImagesContentProps) => {
   const queryClient = useQueryClient();
-  const [isEditMode, setIsEditMode] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
-  // 편집 중일 때만 임시 상태 사용 (null이면 photos 사용)
-  const [editingImages, setEditingImages] = useState<PetImageItem[] | null>(null);
   const ownerId = pet.owner.userId ?? "";
-
   const isViewingMyPet = useIsMyPet(ownerId);
+  const [isSaving, setIsSaving] = useState(false);
+  const [localPhotos, setLocalPhotos] = useState<PetImageItem[]>(initialImages ?? []);
+  const photosRef = useRef<PetImageItem[]>(initialImages ?? []);
 
-  const { data: queryPhotos, refetch } = useQuery({
+  const { data: queryPhotos } = useQuery({
     queryKey: [petImageControllerFindOne.name, pet.petId],
     queryFn: () => petImageControllerFindOne(pet.petId),
     select: (response) => response.data.data,
     enabled: isEmpty(initialImages),
   });
 
-  // 서버에서 받은 초기 데이터 또는 React Query 데이터 사용
-  const photos = useMemo(() => queryPhotos ?? initialImages ?? [], [initialImages, queryPhotos]);
-
-  // 현재 표시할 이미지 (편집 중이면 editingImages, 아니면 photos)
-  const displayImages = editingImages ?? photos;
+  // 서버 데이터가 변경되면 로컬 상태 동기화
+  useEffect(() => {
+    if (queryPhotos) {
+      setLocalPhotos(queryPhotos);
+      photosRef.current = queryPhotos;
+    }
+  }, [queryPhotos]);
 
   const { mutateAsync: mutateSaveImages } = useMutation({
     mutationFn: (updateFiles: PetImageItem[]) =>
       petImageControllerSavePetImages(pet.petId, { files: updateFiles }),
   });
 
-  const handleSave = useCallback(async () => {
-    try {
-      setIsProcessing(true);
+  // 이미지 변경 시 즉시 UI 반영 + 서버 저장
+  const handleImagesChange = useCallback(
+    async (newImages: PetImageItem[]) => {
+      const prevPhotos = photosRef.current;
+      const isThumbnailChanged = prevPhotos[0]?.fileName !== newImages[0]?.fileName;
 
-      // fileName만 비교하여 변경 여부 확인
-      const originalFileNames = photos.map((p) => p.fileName);
-      const currentFileNames = displayImages.map((p) => p.fileName);
+      // 낙관적 업데이트: UI 먼저 반영
+      setLocalPhotos(newImages);
+      photosRef.current = newImages;
 
-      if (isEqual(originalFileNames, currentFileNames)) {
-        toast.info("변경된 사항이 없습니다.");
-        setEditingImages(null);
-        setIsEditMode(false);
-        return;
+      setIsSaving(true);
+      try {
+        await mutateSaveImages(newImages);
+
+        if (isThumbnailChanged) {
+          await queryClient.invalidateQueries({
+            queryKey: getPetThumbnailQueryKey(pet.petId),
+          });
+        }
+      } catch (error) {
+        console.error("이미지 저장 실패:", error);
+        toast.error("이미지 저장에 실패했습니다.");
+        // 실패 시 롤백
+        setLocalPhotos(prevPhotos);
+        photosRef.current = prevPhotos;
+      } finally {
+        setIsSaving(false);
       }
-
-      // 첫 번째 이미지(썸네일) 변경 여부 확인
-      const isThumbnailChanged = photos[0]?.fileName !== displayImages[0]?.fileName;
-
-      await mutateSaveImages(displayImages);
-      await refetch();
-
-      // 썸네일이 변경된 경우 썸네일 쿼리 무효화
-      if (isThumbnailChanged) {
-        await queryClient.invalidateQueries({
-          queryKey: getPetThumbnailQueryKey(pet.petId),
-        });
-      }
-
-      toast.success("이미지 수정이 완료되었습니다.");
-      setEditingImages(null);
-      setIsEditMode(false);
-    } catch (error) {
-      console.error("이미지 수정 실패:", error);
-      toast.error("이미지 수정에 실패했습니다.");
-    } finally {
-      setIsProcessing(false);
-    }
-  }, [mutateSaveImages, displayImages, photos, refetch, queryClient, pet.petId]);
+    },
+    [mutateSaveImages, queryClient, pet.petId],
+  );
 
   return (
     <div className="shadow-xs flex flex-1 flex-col gap-2 rounded-2xl bg-white p-3 dark:bg-neutral-900">
       <div className="text-[14px] font-[600] text-gray-600 dark:text-gray-300">이미지</div>
 
-      {!isEditMode && photos.length === 0 && (
+      {!isViewingMyPet && localPhotos.length === 0 && (
         <div className="flex h-full flex-col items-center justify-center text-[14px] text-gray-500">
           등록된 이미지가 없습니다.
         </div>
       )}
-      <DndImagePicker disabled={!isEditMode} images={displayImages} onChange={setEditingImages} />
-
-      <EditActionButtons
-        isVisible={isViewingMyPet}
-        isEditMode={isEditMode}
-        isProcessing={isProcessing}
-        onCancel={() => {
-          setEditingImages(null);
-          setIsEditMode(false);
-        }}
-        onSubmit={async () => {
-          if (isEditMode) {
-            await handleSave();
-          } else {
-            setEditingImages([...photos]);
-            setIsEditMode(true);
-          }
-        }}
-        defaultLabel={photos.length === 0 ? "이미지 등록" : "이미지 수정"}
+      <DndImagePicker
+        disabled={!isViewingMyPet}
+        isSaving={isSaving}
+        images={localPhotos}
+        onChange={handleImagesChange}
       />
     </div>
   );

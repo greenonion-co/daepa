@@ -33,6 +33,7 @@ type PhotoItem = {
 interface DndImagePickerProps {
   max?: number;
   disabled?: boolean;
+  isSaving?: boolean;
   images?: PhotoItem[];
   onChange?: (images: PhotoItem[]) => void;
 }
@@ -42,10 +43,12 @@ const MAX_FILE_SIZE = 5 * 1024 * 1024;
 export default function DndImagePicker({
   max = 3,
   disabled,
+  isSaving = false,
   images = [],
   onChange = () => {},
 }: DndImagePickerProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const isBusy = isLoading || isSaving;
   const imageNamesInOrder = images.map(({ fileName }) => fileName);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(images.length > 0 ? 0 : null);
 
@@ -82,7 +85,7 @@ export default function DndImagePicker({
 
   const onAdd = useCallback(
     async (files: File[]) => {
-      if (!files || files.length === 0 || isLoading) return;
+      if (!files || files.length === 0 || isBusy) return;
 
       const remain = Math.max(0, max - images.length);
       const picked = files.slice(0, remain);
@@ -135,11 +138,11 @@ export default function DndImagePicker({
         setIsLoading(false);
       }
     },
-    [images, max, isLoading, onChange],
+    [images, max, isBusy, onChange],
   );
 
   const onDragEnd = (event: DragEndEvent) => {
-    if (disabled || isLoading) return;
+    if (disabled || isBusy) return;
 
     const { active, over } = event;
     if (isNil(over) || active.id === over.id) return;
@@ -157,23 +160,23 @@ export default function DndImagePicker({
 
   const onReorder = useCallback(
     (order: number[]) => {
-      if (disabled || isLoading) return;
+      if (disabled || isBusy) return;
 
       const prevPhotos = [...images];
       const nextPhotos = order.map((i) => prevPhotos[i]!);
 
       onChange(nextPhotos);
     },
-    [disabled, isLoading, images, onChange],
+    [disabled, isBusy, images, onChange],
   );
 
   const { getRootProps, getInputProps, open, isDragActive } = useDropzone({
     accept: ACCEPT_IMAGE_FORMATS,
     multiple: true,
     noClick: true,
-    disabled: disabled || isLoading,
+    disabled: disabled || isBusy,
     onDropAccepted: async (accepted) => {
-      if (disabled || isLoading) return;
+      if (disabled || isBusy) return;
 
       const remain = max - images.length;
       if (remain < accepted.length) {
@@ -182,7 +185,7 @@ export default function DndImagePicker({
       await onAdd(accepted.slice(0, remain));
     },
     onDropRejected: (rejections) => {
-      if (disabled || isLoading) return;
+      if (disabled || isBusy) return;
 
       const names = rejections.map((r) => r.file.name).join(", ");
       toast.error(`허용되지 않는 이미지 형식입니다: ${names}`);
@@ -229,29 +232,31 @@ export default function DndImagePicker({
                   id={String(imageNamesInOrder[index])}
                   src={photo.url}
                   disabled={disabled}
-                  isLoading={isLoading}
+                  isBusy={isBusy}
+                  isUploading={isLoading}
                   onDelete={() => handleDelete(index)}
                   selected={selectedIndex === index}
                   onSelect={() => {
-                    if (isLoading) return;
+                    if (isBusy) return;
                     setSelectedIndex(index);
                   }}
                 />
               ))}
               {!disabled &&
                 images.length < max &&
-                (!isLoading ? (
-                  <button
-                    type="button"
-                    onClick={open}
-                    className="flex h-24 w-full cursor-pointer items-center justify-center rounded-xl border border-dashed border-gray-300 text-gray-500 transition-colors hover:bg-gray-50 active:bg-gray-100"
-                  >
-                    <Plus className="h-5 w-5" />
-                  </button>
-                ) : (
+                (isLoading ? (
                   <div className="flex h-24 w-full items-center justify-center rounded-xl border border-dashed border-gray-300 text-gray-500">
                     <Loader2 className="h-5 w-5 animate-spin" />
                   </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={open}
+                    disabled={isBusy}
+                    className="flex h-24 w-full cursor-pointer items-center justify-center rounded-xl border border-dashed border-gray-300 text-gray-500 transition-colors hover:bg-gray-50 active:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <Plus className="h-5 w-5" />
+                  </button>
                 ))}
             </div>
           </SortableContext>
@@ -314,7 +319,8 @@ function SortableThumb({
   id,
   src,
   disabled,
-  isLoading,
+  isBusy,
+  isUploading,
   onDelete,
   selected,
   onSelect,
@@ -322,15 +328,17 @@ function SortableThumb({
   id: string;
   src: string;
   disabled?: boolean;
-  isLoading?: boolean;
+  /** 조작 비활성화 (업로드 중 or 저장 중) */
+  isBusy?: boolean;
+  /** CDN 업로드 중 (이미지가 아직 없으므로 스피너 표시) */
+  isUploading?: boolean;
   onDelete: () => void;
   selected?: boolean;
   onSelect: () => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id,
-    // 드래그 중일 때 다른 스타일 적용을 위해
-    disabled: disabled || isLoading,
+    disabled: disabled || isBusy,
   });
 
   const style = {
@@ -344,7 +352,7 @@ function SortableThumb({
       style={style}
       className={cn(
         "relative h-24 w-full select-none",
-        isDragging && "z-50 scale-105 rotate-3 shadow-xl", // 드래그 중 스타일
+        isDragging && "z-50 scale-105 rotate-3 shadow-xl",
       )}
     >
       <div
@@ -359,17 +367,16 @@ function SortableThumb({
                 selected && "border-blue-400 hover:border-blue-500",
               ),
         )}
-        // 터치 이벤트 최적화
         style={{
-          touchAction: "none", // 브라우저의 기본 터치 동작 방지
+          touchAction: "none",
         }}
         onClick={(e) => {
           e.stopPropagation();
-          if (isLoading || isDragging) return;
+          if (isBusy || isDragging) return;
           onSelect();
         }}
       >
-        {isLoading ? (
+        {isUploading ? (
           <div className="flex h-full w-full items-center justify-center bg-gray-50">
             <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
           </div>
@@ -380,7 +387,6 @@ function SortableThumb({
               alt={`image_${id}`}
               fill
               className="cursor-pointer object-cover"
-              // 이미지 드래그 방지
               draggable={false}
             />
             {/* [SAMPLE_WATERMARK] 베타테스트용 워터마크 - 출시 시 삭제 */}
@@ -400,14 +406,14 @@ function SortableThumb({
         )}
       </div>
 
-      {!disabled && !isLoading && (
+      {!disabled && !isBusy && (
         <button
           type="button"
           onClick={onDelete}
           className={cn(
             "absolute top-1 right-1 z-10 inline-flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-red-500 text-white shadow-sm transition-all duration-200",
             "hover:bg-red-600 active:scale-95",
-            isDragging && "opacity-0", // 드래그 중에는 삭제 버튼 숨김
+            isDragging && "opacity-0",
           )}
           aria-label="사진 삭제"
         >

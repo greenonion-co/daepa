@@ -5,6 +5,7 @@ import {
   adoptionHistoryControllerCompleteAdoption,
   PetAdoptionDto,
   PetAdoptionDtoStatus,
+  AdoptionDtoStatus,
   UpdateAdoptionDtoStatus,
   UpdateAdoptionDto,
   CompleteAdoptionDto,
@@ -17,19 +18,18 @@ import {
 import { AxiosError, AxiosResponse } from "axios";
 import FormItem from "./FormItem";
 import SingleSelect from "@/app/(브리더스룸)/components/selector/SingleSelect";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useAdoptionStore } from "@/app/(브리더스룸)/pet/store/adoption";
-import { cn, getChangedFields } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import NumberField from "@/app/(브리더스룸)/components/Form/NumberField";
-import { isNil, isNotNil, isUndefined, omitBy } from "es-toolkit";
+import { isNil, isNotNil } from "es-toolkit";
 import UserList from "@/app/(브리더스룸)/components/UserList";
 import { overlay } from "overlay-kit";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "@/lib/toast";
 import { InfiniteData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useIsMyPet } from "@/hooks/useIsMyPet";
-import EditActionButtons from "./EditActionButtons";
 import CompleteAdoptionModal from "./CompleteAdoptionModal";
 import { useIsMobile } from "@/hooks/useMobile";
 import { useRouter } from "next/navigation";
@@ -51,7 +51,6 @@ const AdoptionInfoContent = ({
   const queryClient = useQueryClient();
   const router = useRouter();
   const { setAdoption } = useAdoptionStore();
-  const [isEditMode, setIsEditMode] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [adoptionData, setAdoptionData] = useState<
     Omit<Partial<PetAdoptionDto>, "status" | "reservedUser"> & {
@@ -61,8 +60,9 @@ const AdoptionInfoContent = ({
   >({});
 
   const isMobile = useIsMobile();
-
   const isViewingMyPet = useIsMyPet(ownerId);
+  const adoptionDataRef = useRef(adoptionData);
+  adoptionDataRef.current = adoptionData;
 
   const { data: queryAdoption } = useQuery({
     queryKey: [petAdoptionControllerGetPetAdoption.name, petId],
@@ -73,6 +73,10 @@ const AdoptionInfoContent = ({
 
   // 서버에서 받은 초기 데이터 또는 React Query 데이터 사용
   const adoption = queryAdoption ?? initialAdoption;
+  const adoptionRef = useRef(adoption);
+  useEffect(() => {
+    if (adoption) adoptionRef.current = adoption;
+  }, [adoption]);
 
   useEffect(() => {
     if (adoption) {
@@ -94,43 +98,7 @@ const AdoptionInfoContent = ({
       adoptionHistoryControllerCompleteAdoption(petId, data),
   });
 
-  // 변경된 필드 추출을 위한 설정
-  const getChangedFieldsForAdoption = useCallback(
-    (original: typeof adoption, current: typeof adoptionData): UpdateAdoptionDto => {
-      if (!original) {
-        // 기존 데이터가 없으면 현재 데이터 전체를 변경된 것으로 간주
-        return omitBy(
-          {
-            price: current.price ? Number(current.price) : undefined,
-            memo: current.memo,
-            reservedUserId: current.reservedUser?.userId,
-            status: current.status,
-          },
-          isUndefined,
-        );
-      }
-
-      const changedFields = getChangedFields(
-        original as unknown as Record<string, unknown>,
-        current as unknown as Record<string, unknown>,
-        {
-          fields: ["price", "memo", "status", "reservedUser"],
-          convertUndefinedToNull: true,
-        },
-      );
-
-      if ("reservedUser" in changedFields) {
-        const reservedUser = changedFields["reservedUser"] as UserProfilePublicDto | null;
-        changedFields["reservedUserId"] = reservedUser?.userId ?? null;
-        delete changedFields["reservedUser"];
-      }
-
-      return changedFields;
-    },
-    [],
-  );
-
-  const resetAdoption = useCallback(() => {
+  useEffect(() => {
     if (isNil(adoption)) {
       setAdoptionData({
         status: UpdateAdoptionDtoStatus.ON_SALE,
@@ -142,51 +110,57 @@ const AdoptionInfoContent = ({
     }
   }, [adoption]);
 
-  useEffect(() => {
-    resetAdoption();
-  }, [resetAdoption]);
-
-  const handleSave = useCallback(async () => {
-    if (!petId) {
-      toast.error("펫 정보를 찾을 수 없습니다. 다시 선택해주세요.");
-      return;
-    }
-
-    try {
-      setIsProcessing(true);
-
-      const changedFields = getChangedFieldsForAdoption(adoption, adoptionData);
-
-      if (Object.keys(changedFields).length === 0) {
-        toast.info("변경된 사항이 없습니다.");
-        setIsEditMode(false);
-        return;
+  // 단일 필드 자동 저장
+  const autoSave = useCallback(
+    async (data: UpdateAdoptionDto) => {
+      if (!petId) return;
+      try {
+        await updateAdoption({ petId, data });
+        // 저장 성공 시 로컬 ref 업데이트 (불필요한 재조회 방지)
+        if (adoptionRef.current) {
+          adoptionRef.current = { ...adoptionRef.current, ...data } as PetAdoptionDto;
+        }
+        // 헤더 분양정보 동기화
+        if ("status" in data || "price" in data) {
+          setAdoption({
+            petId,
+            status: ("status" in data ? data.status : adoptionRef.current?.status) as
+              | AdoptionDtoStatus
+              | undefined,
+            price: ("price" in data ? data.price : adoptionRef.current?.price) ?? undefined,
+          });
+        }
+      } catch (error: unknown) {
+        console.error("분양 정보 수정 실패:", error);
+        if (error instanceof AxiosError) {
+          const message = error.response?.data?.message;
+          const errorMessage = Array.isArray(message) ? message[0] : message;
+          toast.error(errorMessage || "저장에 실패했습니다.");
+        } else {
+          toast.error("저장에 실패했습니다.");
+        }
       }
+    },
+    [petId, updateAdoption, queryClient, setAdoption],
+  );
 
-      await updateAdoption({ petId, data: changedFields });
+  // 분양 상태 변경 (즉시 저장)
+  const handleStatusChange = useCallback(
+    (item: string | number) => {
+      const nextStatus = item === "NONE" ? null : (item as string);
+      const isNextReservation = nextStatus === UpdateAdoptionDtoStatus.ON_RESERVATION;
+      setAdoptionData((prev) => ({
+        ...prev,
+        status: nextStatus as PetAdoptionDtoStatus | null,
+        reservedUser: isNextReservation ? prev.reservedUser : undefined,
+      }));
+      autoSave({ status: nextStatus as UpdateAdoptionDtoStatus });
+    },
+    [autoSave],
+  );
 
-      queryClient.invalidateQueries({ queryKey: [brPetControllerFindAll.name] });
-
-      setIsEditMode(false);
-      toast.success("분양 정보가 성공적으로 업데이트되었습니다.");
-    } catch (error: unknown) {
-      console.error("분양 정보 수정 실패:", error);
-
-      if (error instanceof AxiosError) {
-        const message = error.response?.data?.message;
-        const errorMessage = Array.isArray(message) ? message[0] : message;
-        toast.error(errorMessage || "분양 정보 수정에 실패했습니다. 다시 시도해주세요.");
-      } else {
-        toast.error("분양 정보 수정에 실패했습니다. 다시 시도해주세요.");
-      }
-    } finally {
-      setIsProcessing(false);
-    }
-  }, [queryClient, updateAdoption, adoptionData, petId, adoption, getChangedFieldsForAdoption]);
-
+  // 예약자 선택 (즉시 저장)
   const handleSelectBuyer = useCallback(() => {
-    if (!isEditMode) return;
-
     overlay.open(({ isOpen, close }) => (
       <Dialog open={isOpen} onOpenChange={close}>
         <DialogContent className="rounded-3xl p-4 dark:bg-neutral-900">
@@ -194,19 +168,48 @@ const AdoptionInfoContent = ({
             입양자를 선택해주세요.
           </DialogTitle>
           <UserList
-            selectedUserId={adoptionData.reservedUser?.userId}
+            selectedUserId={adoptionDataRef.current.reservedUser?.userId}
             onSelect={(user) => {
-              setAdoptionData((prev) => ({
-                ...prev,
-                reservedUser: user,
-              }));
+              setAdoptionData((prev) => ({ ...prev, reservedUser: user }));
+              autoSave({ reservedUserId: user.userId });
               close();
             }}
           />
         </DialogContent>
       </Dialog>
     ));
-  }, [adoptionData.reservedUser?.userId, isEditMode]);
+  }, [autoSave]);
+
+  // 예약자 삭제 (즉시 저장)
+  const handleDeleteBuyer = useCallback(() => {
+    setAdoptionData((prev) => ({ ...prev, reservedUser: undefined }));
+    autoSave({ reservedUserId: null });
+  }, [autoSave]);
+
+  // blur 시 저장 (가격, 메모)
+  // 연속 변경(+/- 버튼 연타 등)은 디바운스로 마지막 값만 저장
+  const blurTimersRef = useRef<Record<string, NodeJS.Timeout>>({});
+  const handleBlurSave = useCallback(
+    (field: "price" | "memo") => {
+      clearTimeout(blurTimersRef.current[field]);
+      blurTimersRef.current[field] = setTimeout(() => {
+        const current = adoptionDataRef.current;
+        const original = adoptionRef.current;
+
+        const currentValue = current[field];
+        const originalValue = original?.[field];
+
+        if (currentValue === originalValue) return;
+
+        if (field === "price") {
+          autoSave({ price: currentValue ? Number(currentValue) : 0 });
+        } else {
+          autoSave({ memo: (currentValue as string) ?? null });
+        }
+      }, 500);
+    },
+    [autoSave],
+  );
 
   const handleCompleteAdoption = useCallback(async () => {
     try {
@@ -287,191 +290,147 @@ const AdoptionInfoContent = ({
     ));
   }, [adoptionData, petId, completeAdoption, queryClient, onClose, isMobile, router]);
 
-  const showAdoptionInfo = useMemo(() => {
-    return !(isNil(adoption) && !isEditMode);
-  }, [adoption, isEditMode]);
-
   if (!adoption) return null;
 
   return (
     <div className="flex flex-1 flex-col gap-2 rounded-2xl bg-white p-3 shadow-xs dark:bg-neutral-900">
       <div className="text-[14px] font-[600] text-gray-600 dark:text-gray-300">분양 정보</div>
 
-      {!showAdoptionInfo && (
-        <div className="flex h-full items-center justify-center text-[14px] text-gray-600 dark:text-gray-400">
-          분양 정보를 등록해 관리를 시작해보세요!
-        </div>
-      )}
-
-      {showAdoptionInfo && (
-        <>
-          {/* 분양 상태, 가격, 날짜, 입양자, 거래 방식, 메모 */}
-          <FormItem
-            label="분양 상태"
-            content={
-              <div className="flex items-center gap-2">
-                <SingleSelect
-                  saveASAP
-                  disabled={!isEditMode}
-                  type="adoptionStatus"
-                  initialItem={
-                    !isEditMode && isNil(adoption) ? undefined : (adoptionData.status ?? "NONE")
-                  }
-                  onSelect={(item) => {
-                    setAdoptionData((prev) => {
-                      const nextStatus = item === "NONE" ? null : (item as string);
-                      const isNextReservation =
-                        nextStatus === UpdateAdoptionDtoStatus.ON_RESERVATION;
-                      return {
-                        ...prev,
-                        status: nextStatus as PetAdoptionDtoStatus | null,
-                        reservedUser: isNextReservation ? prev.reservedUser : undefined,
-                      };
-                    });
-                  }}
-                />
-              </div>
-            }
-          />
-
-          {adoptionData.status === UpdateAdoptionDtoStatus.ON_RESERVATION && (
-            <FormItem
-              label="예약자"
-              content={
-                <>
-                  {!(isNil(adoptionData.reservedUser?.userId) && isEditMode) && (
-                    <div
-                      className={cn(
-                        "mr-1 flex h-[32px] w-fit items-center gap-1 rounded-lg px-2 py-1 text-[14px] font-[500]",
-                        adoptionData.reservedUser?.userId
-                          ? "bg-blue-100 text-blue-600 dark:bg-blue-900/50 dark:text-blue-400"
-                          : "",
-                      )}
-                    >
-                      {isNil(adoptionData.reservedUser?.userId) ? (
-                        "-"
-                      ) : (
-                        <div className="flex items-center gap-1">
-                          {adoptionData.reservedUser?.name}
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {isEditMode && (
-                    <div className="flex gap-1">
-                      <Button
-                        className="h-8 cursor-pointer rounded-lg px-2 text-[12px] font-[600] text-white dark:bg-neutral-800/70"
-                        onClick={handleSelectBuyer}
-                      >
-                        {isNil(adoptionData.reservedUser?.userId) ? "예약자 선택" : "변경"}
-                      </Button>
-                      {isNotNil(adoptionData.reservedUser?.userId) && (
-                        <Button
-                          variant="outline"
-                          className="h-8 cursor-pointer rounded-lg px-2 text-[12px] font-[600]"
-                          onClick={() =>
-                            setAdoptionData((prev) => ({
-                              ...prev,
-                              reservedUser: undefined,
-                            }))
-                          }
-                        >
-                          삭제
-                        </Button>
-                      )}
-                    </div>
-                  )}
-                </>
-              }
+      {/* 분양 상태 */}
+      <FormItem
+        label="분양 상태"
+        content={
+          <div className="flex items-center gap-2">
+            <SingleSelect
+              saveASAP
+              disabled={!isViewingMyPet}
+              type="adoptionStatus"
+              initialItem={adoptionData.status ?? "NONE"}
+              onSelect={handleStatusChange}
             />
-          )}
-
-          <FormItem
-            label="가격"
-            content={
-              <NumberField
-                disabled={!isEditMode}
-                value={
-                  isNotNil(adoptionData.price)
-                    ? isEditMode
-                      ? String(adoptionData.price)
-                      : adoptionData.price.toLocaleString()
-                    : isEditMode
-                      ? ""
-                      : "-"
-                }
-                setValue={(value) => {
-                  setAdoptionData((prev) => ({
-                    ...prev,
-                    price: value.value === "" ? undefined : Number(value.value),
-                  }));
-                }}
-                inputClassName={cn(
-                  " h-[32px] font-[600] w-full rounded-md border border-gray-200 dark:border-gray-700 placeholder:font-[500] pl-2",
-                  !isEditMode && "border-none",
-                )}
-                field={{ name: "adoption.price", unit: "원", type: "number" }}
-                stepAmount={10000}
-              />
-            }
-          />
-
-          <FormItem
-            label="메모"
-            content={
-              <div className="relative w-full pt-2">
-                <textarea
-                  className={cn(
-                    `min-h-[100px] w-full rounded-xl bg-gray-100 p-3 text-left text-[14px] focus:ring-0 focus:outline-none dark:bg-neutral-800 dark:text-white`,
-                    !isEditMode && "dark:bg-neutral-900",
-                  )}
-                  value={String(adoptionData.memo || "")}
-                  maxLength={500}
-                  onChange={(e) =>
-                    setAdoptionData((prev) => ({
-                      ...prev,
-                      memo: e.target.value,
-                    }))
-                  }
-                  disabled={!isEditMode}
-                  style={{ height: "auto" }}
-                  onInput={(e) => {
-                    const target = e.target as HTMLTextAreaElement;
-                    target.style.height = "auto";
-                    target.style.height = `${target.scrollHeight}px`;
-                  }}
-                />
-                {isEditMode && (
-                  <div className="absolute right-4 bottom-4 text-[12px] text-gray-500 dark:text-gray-400">
-                    {adoptionData.memo?.length ?? 0}/{500}
-                  </div>
-                )}
-              </div>
-            }
-          />
-        </>
-      )}
-
-      <EditActionButtons
-        isVisible={isViewingMyPet}
-        isEditMode={isEditMode}
-        isProcessing={isProcessing}
-        onCancel={() => {
-          resetAdoption();
-          setIsEditMode(false);
-        }}
-        onSubmit={() => (isEditMode ? handleSave() : setIsEditMode(true))}
-        defaultLabel={!showAdoptionInfo ? "분양 정보 등록" : "수정하기"}
+          </div>
+        }
       />
 
-      {isViewingMyPet && adoption && !isEditMode && (
+      {adoptionData.status === UpdateAdoptionDtoStatus.ON_RESERVATION && (
+        <FormItem
+          label="예약자"
+          content={
+            <>
+              {!(isNil(adoptionData.reservedUser?.userId) && isViewingMyPet) && (
+                <div
+                  className={cn(
+                    "mr-1 flex h-[32px] w-fit items-center gap-1 rounded-lg px-2 py-1 text-[14px] font-[500]",
+                    adoptionData.reservedUser?.userId
+                      ? "bg-blue-100 text-blue-600 dark:bg-blue-900/50 dark:text-blue-400"
+                      : "",
+                  )}
+                >
+                  {isNil(adoptionData.reservedUser?.userId) ? (
+                    "-"
+                  ) : (
+                    <div className="flex items-center gap-1">{adoptionData.reservedUser?.name}</div>
+                  )}
+                </div>
+              )}
+
+              {isViewingMyPet && (
+                <div className="flex gap-1">
+                  <Button
+                    className="h-8 cursor-pointer rounded-lg px-2 text-[12px] font-[600] text-white dark:bg-neutral-800/70"
+                    onClick={handleSelectBuyer}
+                  >
+                    {isNil(adoptionData.reservedUser?.userId) ? "예약자 선택" : "변경"}
+                  </Button>
+                  {isNotNil(adoptionData.reservedUser?.userId) && (
+                    <Button
+                      variant="outline"
+                      className="h-8 cursor-pointer rounded-lg px-2 text-[12px] font-[600]"
+                      onClick={handleDeleteBuyer}
+                    >
+                      삭제
+                    </Button>
+                  )}
+                </div>
+              )}
+            </>
+          }
+        />
+      )}
+
+      <FormItem
+        label="가격"
+        content={
+          <NumberField
+            disabled={!isViewingMyPet}
+            value={
+              isNotNil(adoptionData.price)
+                ? isViewingMyPet
+                  ? String(adoptionData.price)
+                  : adoptionData.price.toLocaleString()
+                : isViewingMyPet
+                  ? ""
+                  : "-"
+            }
+            setValue={(value) => {
+              setAdoptionData((prev) => ({
+                ...prev,
+                price: value.value === "" ? undefined : Number(value.value),
+              }));
+            }}
+            onBlur={() => handleBlurSave("price")}
+            inputClassName={cn(
+              " h-[32px] font-[600] w-full rounded-md border border-gray-200 dark:border-gray-700 placeholder:font-[500] pl-2",
+              !isViewingMyPet && "border-none",
+            )}
+            field={{ name: "adoption.price", unit: "원", type: "number" }}
+            stepAmount={10000}
+          />
+        }
+      />
+
+      <FormItem
+        label="메모"
+        content={
+          <div className="relative w-full pt-2">
+            <textarea
+              className={cn(
+                `min-h-[100px] w-full rounded-xl bg-gray-100 p-3 text-left text-[14px] focus:ring-0 focus:outline-none dark:bg-neutral-800 dark:text-white`,
+                !isViewingMyPet && "dark:bg-neutral-900",
+              )}
+              value={String(adoptionData.memo || "")}
+              maxLength={500}
+              onChange={(e) =>
+                setAdoptionData((prev) => ({
+                  ...prev,
+                  memo: e.target.value,
+                }))
+              }
+              onBlur={() => handleBlurSave("memo")}
+              disabled={!isViewingMyPet}
+              style={{ height: "auto" }}
+              onInput={(e) => {
+                const target = e.target as HTMLTextAreaElement;
+                target.style.height = "auto";
+                target.style.height = `${target.scrollHeight}px`;
+              }}
+            />
+            {isViewingMyPet && (
+              <div className="absolute right-4 bottom-4 text-[12px] text-gray-500 dark:text-gray-400">
+                {adoptionData.memo?.length ?? 0}/{500}
+              </div>
+            )}
+          </div>
+        }
+      />
+
+      {isViewingMyPet && adoption && (
         <Button
-          className="w-full cursor-pointer rounded-xl bg-green-600 text-white hover:bg-green-700"
+          className="h-10 w-full cursor-pointer rounded-xl bg-green-600 text-[15px] font-bold text-white hover:bg-green-700"
           disabled={isProcessing}
           onClick={handleCompleteAdoption}
         >
-          개체 분양
+          분양 완료하기
         </Button>
       )}
     </div>
