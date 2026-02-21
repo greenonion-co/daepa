@@ -5,30 +5,26 @@
  * Project Daepa API description
  * OpenAPI spec version: 1.0
  */
-import type { AdoptionDtoMethod } from "./adoptionDtoMethod";
 import type { AdoptionDtoStatus } from "./adoptionDtoStatus";
-import type { UserProfilePublicDto } from "./userProfilePublicDto";
-import type { PetSummaryAdoptionDto } from "./petSummaryAdoptionDto";
+import type { AdoptionDtoReservedUser } from "./adoptionDtoReservedUser";
 
 export interface AdoptionDto {
-  /** 분양정보 ID */
-  adoptionId: string;
   /** 펫 ID */
   petId: string;
-  /** 분양 가격 */
+  /** 희망 분양가 */
   price?: number;
-  /** 분양 날짜 */
-  adoptionDate?: string;
   /** 메모 */
   memo?: string;
-  /** 분양 방식 */
-  method?: AdoptionDtoMethod;
-  /** 펫 판매 상태 */
+  /** 생성일 */
+  createdAt: string;
+  /**
+   * 분양 상태 (null이면 미지정)
+   * @nullable
+   */
   status: AdoptionDtoStatus;
-  /** 분양자 정보 */
-  seller: UserProfilePublicDto;
-  /** 입양자 정보 */
-  buyer?: UserProfilePublicDto;
-  /** 펫 정보 */
-  pet: PetSummaryAdoptionDto;
+  /**
+   * 예약자 정보
+   * @nullable
+   */
+  reservedUser?: AdoptionDtoReservedUser;
 }

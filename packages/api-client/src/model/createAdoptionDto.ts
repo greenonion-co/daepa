@@ -5,22 +5,15 @@
  * Project Daepa API description
  * OpenAPI spec version: 1.0
  */
-import type { CreateAdoptionDtoMethod } from "./createAdoptionDtoMethod";
 import type { CreateAdoptionDtoStatus } from "./createAdoptionDtoStatus";
 
 export interface CreateAdoptionDto {
   /** 펫 ID */
   petId: string;
-  /** 분양 가격 */
+  /** 희망 분양가 */
   price?: number;
-  /** 분양 날짜 */
-  adoptionDate?: string;
-  /** 입양자 ID */
-  buyerId?: string;
   /** 메모 */
   memo?: string;
-  /** 분양 방식 */
-  method?: CreateAdoptionDtoMethod;
-  /** 판매 상태 */
+  /** 분양 상태 */
   status?: CreateAdoptionDtoStatus;
 }

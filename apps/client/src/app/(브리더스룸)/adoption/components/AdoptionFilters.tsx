@@ -5,6 +5,7 @@ import {
   TRAIT_LIST_BY_SPECIES,
   GROWTH_KOREAN_INFO,
   GENDER_KOREAN_INFO,
+  ADOPTION_METHOD_KOREAN_INFO,
 } from "../../constants";
 import SelectFilter from "../../components/selector/SingleSelect";
 import AdoptionMultiSelectFilter from "./AdoptionMultiSelectFilter";
@@ -78,6 +79,7 @@ export function AdoptionFilters() {
       )}
       <AdoptionMultiSelectFilter type="sex" title="성별" displayMap={GENDER_KOREAN_INFO} />
       <AdoptionMultiSelectFilter type="growth" title="크기" displayMap={GROWTH_KOREAN_INFO} />
+      <AdoptionMultiSelectFilter type="method" title="분양 방식" displayMap={ADOPTION_METHOD_KOREAN_INFO} />
       <AdoptionPriceRangeFilter />
       <AdoptionDateRangeFilter />
 

@@ -6,10 +6,9 @@ import {
   Index,
   CreateDateColumn,
   UpdateDateColumn,
-  OneToOne,
 } from 'typeorm';
 import { PET_SPECIES, PET_TYPE } from './pet.constants';
-import { AdoptionEntity } from '../adoption/adoption.entity';
+import { PetAdoptionEntity } from '../pet_adoption/pet_adoption.entity';
 import { PetDetailEntity } from 'src/pet_detail/pet_detail.entity';
 import { EggDetailEntity } from 'src/egg_detail/egg_detail.entity';
 import { LayingEntity } from 'src/laying/laying.entity';
@@ -71,21 +70,8 @@ export class PetEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  // 분양 관계 정의
-  @OneToOne(() => AdoptionEntity, (adoption) => adoption.pet, {
-    nullable: true,
-  })
-  adoption: AdoptionEntity | null;
-
-  @OneToOne(() => PetDetailEntity, (petDetail) => petDetail.petId, {
-    nullable: true,
-  })
+  adoption: PetAdoptionEntity | null;
   petDetail: PetDetailEntity | null;
-
-  @OneToOne(() => EggDetailEntity, (eggDetail) => eggDetail.petId, {
-    nullable: true,
-  })
   eggDetail: EggDetailEntity | null;
-
   laying: LayingEntity | null;
 }

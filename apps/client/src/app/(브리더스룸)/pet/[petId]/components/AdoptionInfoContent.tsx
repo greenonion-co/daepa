@@ -1,14 +1,17 @@
 "use client";
 
 import {
-  adoptionControllerUpdate,
+  petAdoptionControllerUpdatePetAdoption,
+  adoptionHistoryControllerCompleteAdoption,
   PetAdoptionDto,
   PetAdoptionDtoStatus,
+  UpdateAdoptionDtoStatus,
   UpdateAdoptionDto,
-  adoptionControllerGetAdoptionByPetId,
+  CompleteAdoptionDto,
+  petAdoptionControllerGetPetAdoption,
   brPetControllerFindAll,
-  PetAdoptionDtoMethod,
   UserProfilePublicDto,
+  parentRequestControllerGetPendingRequestCount,
   PetDto,
 } from "@repo/api-client";
 import { AxiosError, AxiosResponse } from "axios";
@@ -19,7 +22,6 @@ import { useAdoptionStore } from "@/app/(브리더스룸)/pet/store/adoption";
 import { cn, getChangedFields } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import NumberField from "@/app/(브리더스룸)/components/Form/NumberField";
-import CalendarInput from "@/app/(브리더스룸)/hatching/components/CalendarInput";
 import { isNil, isNotNil, isUndefined, omitBy } from "es-toolkit";
 import UserList from "@/app/(브리더스룸)/components/UserList";
 import { overlay } from "overlay-kit";
@@ -28,8 +30,9 @@ import { toast } from "@/lib/toast";
 import { InfiniteData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useIsMyPet } from "@/hooks/useIsMyPet";
 import EditActionButtons from "./EditActionButtons";
-import { useRouter } from "next/navigation";
+import CompleteAdoptionModal from "./CompleteAdoptionModal";
 import { useIsMobile } from "@/hooks/useMobile";
+import { useRouter } from "next/navigation";
 
 interface AdoptionInfoContentProps {
   petId: string;
@@ -45,20 +48,25 @@ const AdoptionInfoContent = ({
   initialAdoption,
   onClose,
 }: AdoptionInfoContentProps) => {
-  const router = useRouter();
   const queryClient = useQueryClient();
+  const router = useRouter();
   const { setAdoption } = useAdoptionStore();
   const [isEditMode, setIsEditMode] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [adoptionData, setAdoptionData] = useState<Partial<PetAdoptionDto>>({});
+  const [adoptionData, setAdoptionData] = useState<
+    Omit<Partial<PetAdoptionDto>, "status" | "reservedUser"> & {
+      status?: PetAdoptionDtoStatus | null;
+      reservedUser?: UserProfilePublicDto | null;
+    }
+  >({});
 
   const isMobile = useIsMobile();
 
   const isViewingMyPet = useIsMyPet(ownerId);
 
   const { data: queryAdoption } = useQuery({
-    queryKey: [adoptionControllerGetAdoptionByPetId.name, petId],
-    queryFn: () => adoptionControllerGetAdoptionByPetId(petId),
+    queryKey: [petAdoptionControllerGetPetAdoption.name, petId],
+    queryFn: () => petAdoptionControllerGetPetAdoption(petId),
     enabled: !!petId && !initialAdoption,
     select: (response) => response.data.data,
   });
@@ -77,8 +85,13 @@ const AdoptionInfoContent = ({
   }, [adoption, setAdoption]);
 
   const { mutateAsync: updateAdoption } = useMutation({
-    mutationFn: ({ adoptionId, data }: { adoptionId: string; data: UpdateAdoptionDto }) =>
-      adoptionControllerUpdate(adoptionId, data),
+    mutationFn: ({ petId, data }: { petId: string; data: UpdateAdoptionDto }) =>
+      petAdoptionControllerUpdatePetAdoption(petId, data),
+  });
+
+  const { mutateAsync: completeAdoption } = useMutation({
+    mutationFn: ({ petId, data }: { petId: string; data: CompleteAdoptionDto }) =>
+      adoptionHistoryControllerCompleteAdoption(petId, data),
   });
 
   // 변경된 필드 추출을 위한 설정
@@ -89,10 +102,8 @@ const AdoptionInfoContent = ({
         return omitBy(
           {
             price: current.price ? Number(current.price) : undefined,
-            adoptionDate: current.adoptionDate,
             memo: current.memo,
-            method: current.method,
-            buyerId: current.buyer?.userId,
+            reservedUserId: current.reservedUser?.userId,
             status: current.status,
           },
           isUndefined,
@@ -103,15 +114,15 @@ const AdoptionInfoContent = ({
         original as unknown as Record<string, unknown>,
         current as unknown as Record<string, unknown>,
         {
-          fields: ["price", "adoptionDate", "memo", "method", "status", "buyer"],
-          convertUndefinedToNull: true, // undefined를 null로 변환하여 서버에서 업데이트되도록 함
+          fields: ["price", "memo", "status", "reservedUser"],
+          convertUndefinedToNull: true,
         },
       );
 
-      if ("buyer" in changedFields) {
-        const buyer = changedFields["buyer"] as UserProfilePublicDto | null;
-        changedFields["buyerId"] = buyer?.userId ?? null;
-        delete changedFields["buyer"];
+      if ("reservedUser" in changedFields) {
+        const reservedUser = changedFields["reservedUser"] as UserProfilePublicDto | null;
+        changedFields["reservedUserId"] = reservedUser?.userId ?? null;
+        delete changedFields["reservedUser"];
       }
 
       return changedFields;
@@ -122,10 +133,8 @@ const AdoptionInfoContent = ({
   const resetAdoption = useCallback(() => {
     if (isNil(adoption)) {
       setAdoptionData({
-        status: PetAdoptionDtoStatus.ON_SALE,
-        method: PetAdoptionDtoMethod.PICKUP,
+        status: UpdateAdoptionDtoStatus.ON_SALE,
         price: 0,
-        adoptionDate: new Date().toISOString(),
         memo: "",
       });
     } else {
@@ -143,111 +152,19 @@ const AdoptionInfoContent = ({
       return;
     }
 
-    const adoptionId = adoptionData.adoptionId;
-    if (!adoptionId) return toast.error("분양할 수 없는 개체입니다. 관리자에게 문의해 주세요.");
-
     try {
       setIsProcessing(true);
 
-      // 업데이트 경우: 변경된 필드만 추출
       const changedFields = getChangedFieldsForAdoption(adoption, adoptionData);
 
-      // 변경사항이 없으면 API 호출하지 않음
       if (Object.keys(changedFields).length === 0) {
         toast.info("변경된 사항이 없습니다.");
         setIsEditMode(false);
         return;
       }
 
-      if (adoptionData.status === PetAdoptionDtoStatus.SOLD) {
-        // 판매완료 확인 모달
-        const confirmed = await new Promise<boolean>((resolve) => {
-          overlay.open(({ isOpen, close }) => (
-            <Dialog
-              open={isOpen}
-              onOpenChange={() => {
-                resolve(false);
-                close();
-              }}
-            >
-              <DialogContent className="rounded-3xl p-6 dark:bg-neutral-900">
-                <DialogTitle className="text-sm font-semibold text-red-500">주의!</DialogTitle>
-                <div className="flex flex-col py-2 text-gray-600 dark:text-gray-400">
-                  <span className={"font-semibold"}>정말 분양완료 처리하시겠습니까?</span>
-                  <span className={"text-sm"}>
-                    - 분양완료 후에는 개체의 소유권이 완전히 이전됩니다.
-                  </span>
-                  <span className={"text-sm"}>
-                    - 더이상 개체 정보를 수정하거나 삭제할 수 없습니다.
-                  </span>
-                  <span className={"text-sm text-red-500 underline"}>
-                    - 이 펫과 관련된 처리되지 않은 부모 요청이 있는 경우, 완료 처리가 불가능합니다.
-                  </span>
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    className="flex-1"
-                    variant="outline"
-                    onClick={() => {
-                      resolve(false);
-                      close();
-                    }}
-                  >
-                    취소
-                  </Button>
-                  <Button
-                    className="flex-1 bg-red-600 hover:bg-red-700"
-                    onClick={() => {
-                      resolve(true);
-                      close();
-                    }}
-                  >
-                    확인
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
-          ));
-        });
+      await updateAdoption({ petId, data: changedFields });
 
-        if (!confirmed) {
-          setIsProcessing(false);
-          return;
-        }
-      }
-
-      await updateAdoption({ adoptionId, data: changedFields });
-
-      // 판매완료인 경우, 펫 목록 캐시에서 해당 펫 제거 (소유권 이전)
-      if (adoptionData.status === PetAdoptionDtoStatus.SOLD) {
-        queryClient.setQueriesData<InfiniteData<AxiosResponse<{ data: PetDto[]; meta: unknown }>>>(
-          { queryKey: [brPetControllerFindAll.name] },
-          (oldData) => {
-            if (!oldData) return oldData;
-            return {
-              ...oldData,
-              pages: oldData.pages.map((page) => ({
-                ...page,
-                data: {
-                  ...page.data,
-                  data: page.data.data.filter((p) => p.petId !== petId),
-                },
-              })),
-            };
-          },
-        );
-
-        toast.success("분양이 성공적으로 완료되었습니다!");
-        // 소유권 이전으로 더 이상 수정 불가 (isProcessing 유지하여 버튼 비활성화)
-        if (isMobile) {
-          router.replace("/pet");
-        } else {
-          onClose?.();
-        }
-        return;
-      }
-
-      // 펫 목록 쿼리를 stale 처리 (백그라운드 갱신, await 하지 않아 저장 동작 차단 없음)
       queryClient.invalidateQueries({ queryKey: [brPetControllerFindAll.name] });
 
       setIsEditMode(false);
@@ -265,17 +182,7 @@ const AdoptionInfoContent = ({
     } finally {
       setIsProcessing(false);
     }
-  }, [
-    queryClient,
-    updateAdoption,
-    adoptionData,
-    petId,
-    router,
-    adoption,
-    getChangedFieldsForAdoption,
-    isMobile,
-    onClose,
-  ]);
+  }, [queryClient, updateAdoption, adoptionData, petId, adoption, getChangedFieldsForAdoption]);
 
   const handleSelectBuyer = useCallback(() => {
     if (!isEditMode) return;
@@ -287,11 +194,11 @@ const AdoptionInfoContent = ({
             입양자를 선택해주세요.
           </DialogTitle>
           <UserList
-            selectedUserId={adoptionData.buyer?.userId}
+            selectedUserId={adoptionData.reservedUser?.userId}
             onSelect={(user) => {
               setAdoptionData((prev) => ({
                 ...prev,
-                buyer: user,
+                reservedUser: user,
               }));
               close();
             }}
@@ -299,20 +206,92 @@ const AdoptionInfoContent = ({
         </DialogContent>
       </Dialog>
     ));
-  }, [adoptionData.buyer?.userId, isEditMode]);
+  }, [adoptionData.reservedUser?.userId, isEditMode]);
+
+  const handleCompleteAdoption = useCallback(async () => {
+    try {
+      const { data } = await parentRequestControllerGetPendingRequestCount(petId);
+      if (data.count > 0) {
+        toast.error(
+          `처리되지 않은 부모 요청(${data.count}건)이 있습니다. 모든 부모 요청을 처리한 후 다시 시도해주세요.`,
+        );
+        return;
+      }
+    } catch {
+      toast.error("분양 가능 여부를 확인할 수 없습니다. 다시 시도해주세요.");
+      return;
+    }
+
+    const reservedUser =
+      adoptionData.status === UpdateAdoptionDtoStatus.ON_RESERVATION && adoptionData.reservedUser
+        ? adoptionData.reservedUser
+        : undefined;
+
+    overlay.open(({ isOpen, close }) => (
+      <CompleteAdoptionModal
+        isOpen={isOpen}
+        onClose={close}
+        defaultPrice={adoptionData.price}
+        defaultBuyer={reservedUser}
+        defaultMemo={adoptionData.memo ?? undefined}
+        onConfirm={async (data) => {
+          try {
+            setIsProcessing(true);
+            await completeAdoption({
+              petId,
+              data: {
+                adoptionDate: data.adoptionDate,
+                method: data.method as CompleteAdoptionDto["method"],
+                price: data.price,
+                buyerId: data.buyerId,
+                memo: data.memo,
+              },
+            });
+            close();
+            toast.success("분양이 완료되었습니다.");
+            // 펫 목록 캐시에서 해당 펫 제거 (소유권 이전)
+            queryClient.setQueriesData<
+              InfiniteData<AxiosResponse<{ data: PetDto[]; meta: unknown }>>
+            >({ queryKey: [brPetControllerFindAll.name] }, (oldData) => {
+              if (!oldData) return oldData;
+              return {
+                ...oldData,
+                pages: oldData.pages.map((page) => ({
+                  ...page,
+                  data: {
+                    ...page.data,
+                    data: page.data.data.filter((p) => p.petId !== petId),
+                  },
+                })),
+              };
+            });
+
+            if (isMobile) {
+              router.replace("/pet");
+            } else {
+              onClose?.();
+            }
+          } catch (error: unknown) {
+            if (error instanceof AxiosError) {
+              const message = error.response?.data?.message;
+              const errorMessage = Array.isArray(message) ? message[0] : message;
+              toast.error(errorMessage || "분양 완료에 실패했습니다. 다시 시도해주세요.");
+            } else {
+              toast.error("분양 완료에 실패했습니다. 다시 시도해주세요.");
+            }
+          } finally {
+            setIsProcessing(false);
+          }
+        }}
+      />
+    ));
+  }, [adoptionData, petId, completeAdoption, queryClient, onClose, isMobile, router]);
 
   const showAdoptionInfo = useMemo(() => {
     return !(isNil(adoption) && !isEditMode);
   }, [adoption, isEditMode]);
 
-  const isAdoptionReservedOrSold = useMemo(() => {
-    return (
-      adoptionData.status === PetAdoptionDtoStatus.ON_RESERVATION ||
-      adoptionData.status === PetAdoptionDtoStatus.SOLD
-    );
-  }, [adoptionData.status]);
-
-  if (!adoption?.adoptionId) return null;
+  if (!adoption) return null;
 
   return (
     <div className="flex flex-1 flex-col gap-2 rounded-2xl bg-white p-3 shadow-xs dark:bg-neutral-900">
@@ -330,30 +309,83 @@ const AdoptionInfoContent = ({
           <FormItem
             label="분양 상태"
             content={
-              <SingleSelect
-                saveASAP
-                disabled={!isEditMode}
-                type="adoptionStatus"
-                initialItem={
-                  !isEditMode && isNil(adoption) ? undefined : (adoptionData.status ?? "NONE")
-                }
-                onSelect={(item) => {
-                  setAdoptionData((prev) => {
-                    const nextStatus = item as PetAdoptionDtoStatus;
-                    const isNextStatusReservedOrSold =
-                      nextStatus === PetAdoptionDtoStatus.ON_RESERVATION ||
-                      nextStatus === PetAdoptionDtoStatus.SOLD;
-                    return {
-                      ...prev,
-                      status: nextStatus,
-                      buyer: isNextStatusReservedOrSold ? prev.buyer : undefined,
-                      adoptionDate: isNextStatusReservedOrSold ? prev.adoptionDate : undefined,
-                    };
-                  });
-                }}
-              />
+              <div className="flex items-center gap-2">
+                <SingleSelect
+                  saveASAP
+                  disabled={!isEditMode}
+                  type="adoptionStatus"
+                  initialItem={
+                    !isEditMode && isNil(adoption) ? undefined : (adoptionData.status ?? "NONE")
+                  }
+                  onSelect={(item) => {
+                    setAdoptionData((prev) => {
+                      const nextStatus = item === "NONE" ? null : (item as string);
+                      const isNextReservation =
+                        nextStatus === UpdateAdoptionDtoStatus.ON_RESERVATION;
+                      return {
+                        ...prev,
+                        status: nextStatus as PetAdoptionDtoStatus | null,
+                        reservedUser: isNextReservation ? prev.reservedUser : undefined,
+                      };
+                    });
+                  }}
+                />
+              </div>
             }
           />
+
+          {adoptionData.status === UpdateAdoptionDtoStatus.ON_RESERVATION && (
+            <FormItem
+              label="예약자"
+              content={
+                <>
+                  {!(isNil(adoptionData.reservedUser?.userId) && isEditMode) && (
+                    <div
+                      className={cn(
+                        "mr-1 flex h-[32px] w-fit items-center gap-1 rounded-lg px-2 py-1 text-[14px] font-[500]",
+                        adoptionData.reservedUser?.userId
+                          ? "bg-blue-100 text-blue-600 dark:bg-blue-900/50 dark:text-blue-400"
+                          : "",
+                      )}
+                    >
+                      {isNil(adoptionData.reservedUser?.userId) ? (
+                        "-"
+                      ) : (
+                        <div className="flex items-center gap-1">
+                          {adoptionData.reservedUser?.name}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {isEditMode && (
+                    <div className="flex gap-1">
+                      <Button
+                        className="h-8 cursor-pointer rounded-lg px-2 text-[12px] font-[600] text-white dark:bg-neutral-800/70"
+                        onClick={handleSelectBuyer}
+                      >
+                        {isNil(adoptionData.reservedUser?.userId) ? "예약자 선택" : "변경"}
+                      </Button>
+                      {isNotNil(adoptionData.reservedUser?.userId) && (
+                        <Button
+                          variant="outline"
+                          className="h-8 cursor-pointer rounded-lg px-2 text-[12px] font-[600]"
+                          onClick={() =>
+                            setAdoptionData((prev) => ({
+                              ...prev,
+                              reservedUser: undefined,
+                            }))
+                          }
+                        >
+                          삭제
+                        </Button>
+                      )}
+                    </div>
+                  )}
+                </>
+              }
+            />
+          )}
 
           <FormItem
             label="가격"
@@ -381,90 +413,6 @@ const AdoptionInfoContent = ({
                 )}
                 field={{ name: "adoption.price", unit: "원", type: "number" }}
                 stepAmount={10000}
-              />
-            }
-          />
-
-          <FormItem
-            label="분양 날짜"
-            content={
-              !isEditMode || isAdoptionReservedOrSold ? (
-                <CalendarInput
-                  placeholder="-"
-                  editable={isEditMode && isAdoptionReservedOrSold}
-                  value={adoptionData.adoptionDate}
-                  onSelect={(date) => {
-                    setAdoptionData((prev) => ({
-                      ...prev,
-                      adoptionDate: date?.toISOString(),
-                    }));
-                  }}
-                />
-              ) : (
-                isEditMode && (
-                  <div className="flex h-[32px] w-fit items-center gap-1 rounded-lg bg-gray-100 px-2 py-1 text-[12px] font-[500] text-gray-400 dark:bg-gray-800 dark:text-gray-500">
-                    예약중・분양 완료 시 선택 가능
-                  </div>
-                )
-              )
-            }
-          />
-
-          <FormItem
-            label="입양자"
-            content={
-              <>
-                {!(isNil(adoptionData.buyer?.userId) && isEditMode) && (
-                  <div
-                    className={cn(
-                      "mr-1 flex h-[32px] w-fit items-center gap-1 rounded-lg px-2 py-1 text-[14px] font-[500]",
-                      adoptionData.buyer?.userId
-                        ? "bg-blue-100 text-blue-600 dark:bg-blue-900/50 dark:text-blue-400"
-                        : "",
-                    )}
-                  >
-                    {isNil(adoptionData.buyer?.userId) ? (
-                      "-"
-                    ) : (
-                      <div className="flex items-center gap-1">{adoptionData.buyer?.name}</div>
-                    )}
-                  </div>
-                )}
-
-                {isEditMode &&
-                  (adoptionData.status === PetAdoptionDtoStatus.ON_RESERVATION ||
-                  adoptionData.status === PetAdoptionDtoStatus.SOLD ? (
-                    <Button
-                      className="h-8 cursor-pointer rounded-lg px-2 text-[12px] font-[600] text-white dark:bg-neutral-800/70"
-                      onClick={handleSelectBuyer}
-                    >
-                      {isNil(adoptionData.buyer?.userId) ? "입양자 선택" : "변경"}
-                    </Button>
-                  ) : (
-                    <div className="flex h-[32px] w-fit items-center gap-1 rounded-lg bg-gray-100 px-2 py-1 text-[12px] font-[500] text-gray-400 dark:bg-gray-800 dark:text-gray-500">
-                      예약중・분양 완료 시 선택 가능
-                    </div>
-                  ))}
-              </>
-            }
-          />
-
-          <FormItem
-            label="거래 방식"
-            content={
-              <SingleSelect
-                saveASAP
-                disabled={!isEditMode}
-                type="adoptionMethod"
-                initialItem={
-                  !isEditMode && isNil(adoption) ? undefined : (adoptionData.method ?? "NONE")
-                }
-                onSelect={(item) => {
-                  setAdoptionData((prev) => ({
-                    ...prev,
-                    method: item,
-                  }));
-                }}
               />
             }
           />
@@ -516,6 +464,16 @@ const AdoptionInfoContent = ({
         onSubmit={() => (isEditMode ? handleSave() : setIsEditMode(true))}
         defaultLabel={!showAdoptionInfo ? "분양 정보 등록" : "수정하기"}
       />
+
+      {isViewingMyPet && adoption && !isEditMode && (
+        <Button
+          className="w-full cursor-pointer rounded-xl bg-green-600 text-white hover:bg-green-700"
+          disabled={isProcessing}
+          onClick={handleCompleteAdoption}
+        >
+          개체 분양
+        </Button>
+      )}
     </div>
   );
 };

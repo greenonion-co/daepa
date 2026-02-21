@@ -9,7 +9,6 @@ import type { BrAdoptionControllerGetAllAdoptionsOrder } from "./brAdoptionContr
 import type { BrAdoptionControllerGetAllAdoptionsSpecies } from "./brAdoptionControllerGetAllAdoptionsSpecies";
 import type { BrAdoptionControllerGetAllAdoptionsSexItem } from "./brAdoptionControllerGetAllAdoptionsSexItem";
 import type { BrAdoptionControllerGetAllAdoptionsGrowthItem } from "./brAdoptionControllerGetAllAdoptionsGrowthItem";
-import type { BrAdoptionControllerGetAllAdoptionsStatus } from "./brAdoptionControllerGetAllAdoptionsStatus";
 import type { BrAdoptionControllerGetAllAdoptionsMethod } from "./brAdoptionControllerGetAllAdoptionsMethod";
 
 export type BrAdoptionControllerGetAllAdoptionsParams = {
@@ -49,10 +48,6 @@ export type BrAdoptionControllerGetAllAdoptionsParams = {
    * 펫 성장단계
    */
   growth?: BrAdoptionControllerGetAllAdoptionsGrowthItem[];
-  /**
-   * 펫 판매 상태
-   */
-  status?: BrAdoptionControllerGetAllAdoptionsStatus;
   /**
    * 분양 방식
    */

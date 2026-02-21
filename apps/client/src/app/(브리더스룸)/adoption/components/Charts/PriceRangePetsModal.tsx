@@ -3,10 +3,9 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import {
-  brAdoptionControllerGetAllAdoptions,
+  adoptionHistoryControllerGetAllAdoptions,
   PriceRangeItemDto,
-  BrAdoptionControllerGetAllAdoptionsStatus,
-  BrAdoptionControllerGetAllAdoptionsSpecies,
+  AdoptionHistoryControllerGetAllAdoptionsSpecies,
 } from "@repo/api-client";
 import { cn, formatPrice } from "@/lib/utils";
 import Loading from "@/components/common/Loading";
@@ -19,7 +18,7 @@ interface PriceRangePetsModalProps {
   isOpen: boolean;
   onClose: () => void;
   priceRange: PriceRangeItemDto | null;
-  species?: BrAdoptionControllerGetAllAdoptionsSpecies;
+  species?: AdoptionHistoryControllerGetAllAdoptionsSpecies;
 }
 
 const ITEMS_PER_PAGE = 10;
@@ -34,13 +33,12 @@ const PriceRangePetsModal = ({
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
     queryKey: ["priceRangeAdoptions", priceRange?.minPrice, priceRange?.maxPrice, species],
     queryFn: ({ pageParam = 1 }) =>
-      brAdoptionControllerGetAllAdoptions({
+      adoptionHistoryControllerGetAllAdoptions({
         page: pageParam,
         itemPerPage: ITEMS_PER_PAGE,
         minPrice: priceRange?.minPrice,
         maxPrice: priceRange?.maxPrice === -1 ? undefined : priceRange?.maxPrice,
         species,
-        status: BrAdoptionControllerGetAllAdoptionsStatus.SOLD,
         order: "DESC",
       }),
     initialPageParam: 1,

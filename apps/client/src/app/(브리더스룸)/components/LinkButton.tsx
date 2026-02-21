@@ -12,10 +12,23 @@ const LinkButton = ({
 }: {
   href: string;
   label: string;
-  tooltip: string;
+  tooltip?: string;
   className?: string;
   icon?: React.ReactNode;
 }) => {
+  if (!tooltip) {
+    return (
+      <Link
+        href={href}
+        className={cn("inline-flex items-center gap-0.5 rounded-md py-0.5", className)}
+      >
+        {icon}
+        {label}
+        <SquareArrowOutUpRight className={"ml-0.5 h-2.5 w-2.5"} />
+      </Link>
+    );
+  }
+
   return (
     <Tooltip>
       <TooltipTrigger asChild>

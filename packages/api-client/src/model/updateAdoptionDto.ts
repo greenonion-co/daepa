@@ -5,37 +5,26 @@
  * Project Daepa API description
  * OpenAPI spec version: 1.0
  */
-import type { UpdateAdoptionDtoMethod } from "./updateAdoptionDtoMethod";
 import type { UpdateAdoptionDtoStatus } from "./updateAdoptionDtoStatus";
 
 export interface UpdateAdoptionDto {
   /**
-   * 분양 가격
+   * 희망 분양가
    * @nullable
    */
   price?: number | null;
   /**
-   * 분양 날짜
+   * 예약자 ID
    * @nullable
    */
-  adoptionDate?: string | null;
-  /**
-   * 입양자 ID
-   * @nullable
-   */
-  buyerId?: string | null;
+  reservedUserId?: string | null;
   /**
    * 메모
    * @nullable
    */
   memo?: string | null;
   /**
-   * 분양 방식
-   * @nullable
-   */
-  method?: UpdateAdoptionDtoMethod;
-  /**
-   * 판매 상태
+   * 분양 상태
    * @nullable
    */
   status?: UpdateAdoptionDtoStatus;

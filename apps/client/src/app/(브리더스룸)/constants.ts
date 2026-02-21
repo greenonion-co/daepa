@@ -403,8 +403,7 @@ export const TRAIT_LIST_BY_SPECIES: Record<PetDtoSpecies, Record<string, string>
   },
 };
 
-export const SALE_STATUS_KOREAN_INFO = {
-  NONE: "미지정",
+export const SALE_STATUS_KOREAN_INFO: Record<string, string> = {
   NFS: "NFS",
   ON_SALE: "분양중",
   ON_RESERVATION: "예약중",
@@ -660,7 +659,7 @@ export const SELECTOR_CONFIGS: Record<
     selectList: [
       {
         key: "NONE",
-        value: "미지정",
+        value: "미설정",
       },
       {
         key: "NFS",
@@ -674,19 +673,11 @@ export const SELECTOR_CONFIGS: Record<
         key: "ON_RESERVATION",
         value: "예약중",
       },
-      {
-        key: "SOLD",
-        value: "분양완료",
-      },
     ],
   },
   adoptionMethod: {
-    title: "거래 방식",
+    title: "분양 방식",
     selectList: [
-      {
-        key: "NONE",
-        value: "-",
-      },
       {
         key: "PICKUP",
         value: "직거래",

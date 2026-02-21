@@ -7,16 +7,14 @@
  */
 
 /**
- * 판매 상태
+ * 분양 상태
  */
 export type CreateAdoptionDtoStatus =
   (typeof CreateAdoptionDtoStatus)[keyof typeof CreateAdoptionDtoStatus];
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const CreateAdoptionDtoStatus = {
-  NONE: "NONE",
   NFS: "NFS",
   ON_SALE: "ON_SALE",
   ON_RESERVATION: "ON_RESERVATION",
-  SOLD: "SOLD",
 } as const;

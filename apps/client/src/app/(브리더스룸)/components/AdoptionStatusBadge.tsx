@@ -7,14 +7,13 @@ const STATUS_STYLE: Record<string, string> = {
   [PetAdoptionDtoStatus.NFS]: "bg-pink-300",
   [PetAdoptionDtoStatus.ON_SALE]: "bg-blue-300",
   [PetAdoptionDtoStatus.ON_RESERVATION]: "bg-yellow-300",
-  [PetAdoptionDtoStatus.SOLD]: "bg-gray-300",
 };
 
 const AdoptionStatusBadge = forwardRef<
   HTMLSpanElement,
-  { status: PetAdoptionDtoStatus; className?: string }
+  { status: PetAdoptionDtoStatus | null | undefined; className?: string }
 >(({ status, className, ...props }, ref) => {
-  if (!status || status === PetAdoptionDtoStatus.NONE) return null;
+  if (!status) return null;
 
   return (
     <span

@@ -76,7 +76,7 @@ export const columns: ColumnDef<PetDto>[] = [
       const adoptionData = cell.getValue() as AdoptionDto;
       const adoptionStatus = adoptionData?.status;
 
-      if (!adoptionStatus || adoptionStatus === PetAdoptionDtoStatus.NONE) {
+      if (!adoptionStatus) {
         return null;
       }
 
@@ -103,15 +103,6 @@ export const columns: ColumnDef<PetDto>[] = [
                 <div>
                   가격・
                   {adoptionData?.price ? `${adoptionData?.price?.toLocaleString()}원` : "미정"}
-                </div>
-                <div>
-                  분양 날짜・
-                  {adoptionData?.adoptionDate
-                    ? (() => {
-                        const d = DateTime.fromISO(adoptionData.adoptionDate);
-                        return d.isValid ? d.toFormat("yy년 M월 d일") : "미정";
-                      })()
-                    : "미정"}
                 </div>
               </div>
             </div>

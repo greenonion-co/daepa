@@ -7,15 +7,14 @@
  */
 
 /**
- * 펫 판매 상태
+ * 분양 상태 (null이면 미지정)
+ * @nullable
  */
-export type AdoptionDtoStatus = (typeof AdoptionDtoStatus)[keyof typeof AdoptionDtoStatus];
+export type AdoptionDtoStatus = (typeof AdoptionDtoStatus)[keyof typeof AdoptionDtoStatus] | null;
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const AdoptionDtoStatus = {
-  NONE: "NONE",
   NFS: "NFS",
   ON_SALE: "ON_SALE",
   ON_RESERVATION: "ON_RESERVATION",
-  SOLD: "SOLD",
 } as const;

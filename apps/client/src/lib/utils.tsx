@@ -41,7 +41,7 @@ export const generateQRCode = async (url: string) => {
   }
 };
 
-export const getStatusBadge = (status?: AdoptionDtoStatus) => {
+export const getStatusBadge = (status?: string) => {
   switch (status) {
     case AdoptionDtoStatus.NFS:
       return <Badge className="bg-pink-500">분양안함</Badge>;
@@ -49,7 +49,7 @@ export const getStatusBadge = (status?: AdoptionDtoStatus) => {
       return <Badge className="bg-blue-500">분양가능</Badge>;
     case AdoptionDtoStatus.ON_RESERVATION:
       return <Badge className="bg-yellow-500">예약중</Badge>;
-    case AdoptionDtoStatus.SOLD:
+    case "SOLD":
       return <Badge className="bg-green-500">분양완료</Badge>;
     default:
       return <Badge className="bg-gray-200 text-gray-500">미지정</Badge>;

@@ -2,28 +2,16 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 
-import {
-  AdoptionDto,
-  PetHiddenStatusDtoHiddenStatus,
-  PetParentDto,
-  UpdateParentRequestDtoStatus,
-} from "@repo/api-client";
-import {
-  ADOPTION_METHOD_KOREAN_INFO,
-  GROWTH_KOREAN_INFO,
-  STATUS_MAP,
-  TABLE_HEADER,
-} from "../../constants";
+import { AdoptionHistoryDto } from "@repo/api-client";
+import { ADOPTION_METHOD_KOREAN_INFO, GROWTH_KOREAN_INFO, TABLE_HEADER } from "../../constants";
 import { isNotNil } from "es-toolkit";
 import LinkButton from "../../components/LinkButton";
-import { CircleSmall } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import BadgeList from "../../components/BadgeList";
 import DeletedPetName from "../../components/DeletedPetName";
 import { getSexIcon } from "@/lib/sex-icon";
-import HiddenPetBadge from "@/components/common/HiddenPetBadge";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
-export const columns: ColumnDef<AdoptionDto>[] = [
+export const columns: ColumnDef<AdoptionHistoryDto>[] = [
   {
     accessorKey: "adoptionDate",
     header: "분양 날짜",
@@ -36,14 +24,6 @@ export const columns: ColumnDef<AdoptionDto>[] = [
       );
     },
   },
-  // {
-  //   accessorKey: "pet.species",
-  //   header: TABLE_HEADER.species,
-  //   cell: ({ row }) => {
-  //     const species = row.original.pet.species;
-  //     return <div className="capitalize">{SPECIES_KOREAN_ALIAS_INFO[species]}</div>;
-  //   },
-  // },
   {
     accessorKey: "pet.name",
     header: TABLE_HEADER.name,
@@ -128,42 +108,8 @@ export const columns: ColumnDef<AdoptionDto>[] = [
     cell: ({ row }) => {
       const father = row.original.pet.father;
       if (!father) return null;
-      if (
-        "hiddenStatus" in father &&
-        father.hiddenStatus === PetHiddenStatusDtoHiddenStatus.SECRET
-      ) {
-        return (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <HiddenPetBadge />
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>소유자에 의해 비공개 처리된 개체입니다</p>
-            </TooltipContent>
-          </Tooltip>
-        );
-      }
 
-      const fatherExist = father as PetParentDto;
-      const status = fatherExist?.status ?? UpdateParentRequestDtoStatus.APPROVED;
-      const isDeleted = fatherExist.isDeleted ?? false;
-
-      if (isDeleted) {
-        return <DeletedPetName name={fatherExist.name} />;
-      }
-
-      return (
-        <LinkButton
-          href={`/pet/${fatherExist.petId}`}
-          label={fatherExist.name ?? ""}
-          tooltip={
-            (status === "approved" && "혈통 인증 완료") ||
-            (status === "pending" && "혈통 인증 대기 중") ||
-            ""
-          }
-          icon={<CircleSmall className={`h-3 w-3 ${STATUS_MAP[status].icon}`} />}
-        />
-      );
+      return <LinkButton href={`/pet/${father.petId}`} label={father.name ?? ""} />;
     },
   },
   {
@@ -173,42 +119,8 @@ export const columns: ColumnDef<AdoptionDto>[] = [
     cell: ({ row }) => {
       const mother = row.original.pet.mother;
       if (!mother) return null;
-      if (
-        "hiddenStatus" in mother &&
-        mother.hiddenStatus === PetHiddenStatusDtoHiddenStatus.SECRET
-      ) {
-        return (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <HiddenPetBadge />
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>소유자에 의해 비공개 처리된 개체입니다</p>
-            </TooltipContent>
-          </Tooltip>
-        );
-      }
 
-      const motherExist = mother as PetParentDto;
-      const status = motherExist?.status ?? UpdateParentRequestDtoStatus.APPROVED;
-      const isDeleted = motherExist.isDeleted ?? false;
-
-      if (isDeleted) {
-        return <DeletedPetName name={motherExist.name} />;
-      }
-
-      return (
-        <LinkButton
-          href={`/pet/${motherExist.petId}`}
-          label={motherExist.name ?? ""}
-          tooltip={
-            (status === "approved" && "혈통 인증 완료") ||
-            (status === "pending" && "혈통 인증 대기 중") ||
-            ""
-          }
-          icon={<CircleSmall className={`h-3 w-3 ${STATUS_MAP[status].icon}`} />}
-        />
-      );
+      return <LinkButton href={`/pet/${mother.petId}`} label={mother.name ?? ""} />;
     },
   },
   {
@@ -216,7 +128,25 @@ export const columns: ColumnDef<AdoptionDto>[] = [
     header: "메모",
     cell: ({ row }) => {
       const memo = row.original.memo;
-      return <div className="text-sm text-gray-600">{memo}</div>;
+      if (!memo) return null;
+
+      const truncated = memo.length > 10;
+      const displayText = truncated ? `${memo.slice(0, 10)}…` : memo;
+
+      if (!truncated) {
+        return <div className="text-sm text-gray-600">{displayText}</div>;
+      }
+
+      return (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="cursor-default text-sm text-gray-600">{displayText}</div>
+          </TooltipTrigger>
+          <TooltipContent className="max-w-[300px] whitespace-pre-wrap">
+            {memo}
+          </TooltipContent>
+        </Tooltip>
+      );
     },
   },
 ];

@@ -7,7 +7,7 @@
  */
 
 /**
- * 분양 방식
+ * 분양 방식 (판매완료 시 사용)
  * @nullable
  */
 export type UpdateAdoptionDtoMethod =

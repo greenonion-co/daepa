@@ -71,6 +71,14 @@ export class CreateParentDto {
   message?: string;
 }
 
+export class PendingRequestCountResponseDto {
+  @ApiProperty({
+    description: '처리 중인 부모 요청 수',
+    example: 0,
+  })
+  count: number;
+}
+
 export class UnlinkParentDto {
   @ApiProperty({
     description: '부모 역할',

@@ -687,12 +687,12 @@ export class ParentRequestService {
    * @param manager - 선택적 EntityManager (외부 트랜잭션 지원)
    * @returns PENDING 요청 존재 여부
    */
-  async hasPendingRequestsByPetId(
+  async getPendingRequestCount(
     petId: string,
     manager?: EntityManager,
-  ): Promise<boolean> {
+  ): Promise<number> {
     const run = async (em: EntityManager) => {
-      return em.existsBy(ParentRequestEntity, [
+      return em.countBy(ParentRequestEntity, [
         { childPetId: petId, status: PARENT_STATUS.PENDING },
         { parentPetId: petId, status: PARENT_STATUS.PENDING },
       ]);

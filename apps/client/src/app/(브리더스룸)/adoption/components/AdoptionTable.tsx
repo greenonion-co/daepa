@@ -19,20 +19,15 @@ import { CircleAlert, RefreshCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { overlay } from "overlay-kit";
 import Loading from "@/components/common/Loading";
-// import EditAdoptionModal from "./EditAdoptionModal";
-// import { toast } from "sonner";
-import AdoptionDetailModal from "./AdoptionDetailModal";
+import AdoptionReceiptModal from "./AdoptionReceiptModal";
 import { useInView } from "react-intersection-observer";
 import { useAdoptionFilterStore } from "../../store/adoptionFilter";
 import { useInfiniteQuery } from "@tanstack/react-query";
-// import { Card } from "@/components/ui/card";
-// import { PackageSearch } from "lucide-react";
 import { AdoptionFilters } from "./AdoptionFilters";
 import { columns } from "./adoption_columns";
-import { brAdoptionControllerGetAllAdoptions } from "@repo/api-client";
+import { adoptionHistoryControllerGetAllAdoptions } from "@repo/api-client";
 import { useIsMobile } from "@/hooks/useMobile";
 import PetHoverPreview from "../../pet/components/PetHoverPreview";
-// import ParentSearchSelector from "../../components/selector/parentSearch";
 
 const AdoptionTable = () => {
   const { ref, inView } = useInView();
@@ -48,13 +43,21 @@ const AdoptionTable = () => {
 
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     setMousePos({ x: e.clientX, y: e.clientY });
+    const cell = (e.target as HTMLElement).closest("td[data-column-id]");
+    if (cell?.getAttribute("data-column-id") === "memo") {
+      setHoveredPetId(null);
+    } else {
+      const row = (e.target as HTMLElement).closest("tr[data-pet-id]");
+      const petId = row?.getAttribute("data-pet-id");
+      if (petId) setHoveredPetId(petId);
+    }
   }, []);
 
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage, refetch } =
     useInfiniteQuery({
-      queryKey: [brAdoptionControllerGetAllAdoptions.name, searchFilters],
+      queryKey: [adoptionHistoryControllerGetAllAdoptions.name, searchFilters],
       queryFn: ({ pageParam = 1 }) =>
-        brAdoptionControllerGetAllAdoptions({
+        adoptionHistoryControllerGetAllAdoptions({
           page: pageParam,
           itemPerPage,
           order: "DESC",
@@ -90,21 +93,6 @@ const AdoptionTable = () => {
     },
   });
 
-  // const handleCreateAdoption = () => {
-  //   overlay.open(({ isOpen, close }) => (
-  //     <EditAdoptionModal
-  //       isOpen={isOpen}
-  //       onClose={close}
-  //       adoptionData={data}
-  //       onSuccess={() => {
-  //         close();
-  //         refetch();
-  //         toast.success("분양이 성공적으로 생성되었습니다.");
-  //       }}
-  //     />
-  //   ));
-  // };
-
   useEffect(() => {
     return () => {
       if (timeoutRef.current) {
@@ -115,39 +103,8 @@ const AdoptionTable = () => {
 
   if (isLoading) return <Loading />;
 
-  // if (!data?.length && Object.keys(searchFilters).length === 0)
-  //   return (
-  //     <div className="container mx-auto p-6">
-  //       <Card
-  //         onClick={handleCreateAdoption}
-  //         className="flex cursor-pointer flex-col items-center justify-center bg-blue-50 p-10 hover:bg-blue-100"
-  //       >
-  //         <PackageSearch className="h-10 w-10 text-blue-500" />
-  //         <div className="text-center text-gray-600">
-  //           분양 정보를
-  //           <span className="text-blue-500">&nbsp;추가</span>하여
-  //           <div className="font-semibold text-blue-500">간편한 관리를 시작해보세요!</div>
-  //         </div>
-  //       </Card>
-  //     </div>
-  //   );
-
   return (
     <div className="relative w-full" onMouseMove={!isMobile ? handleMouseMove : undefined}>
-      {/* 헤더 영역 */}
-
-      {/* <div className={cn("flex w-fit items-center rounded-lg px-2 py-1 hover:bg-gray-100")}>
-        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-100 text-[14px] font-[500] text-blue-600">
-          <Plus className="h-3 w-3" />
-        </div>
-        <div
-          onClick={handleCreateAdoption}
-          className="flex cursor-pointer items-center gap-1 px-2 py-1 text-[14px] font-[500] text-blue-600"
-        >
-          분양 정보 추가하기
-        </div>
-      </div> */}
-
       <div className="flex items-center gap-2 pb-1 pl-2">
         <button
           type="button"
@@ -197,6 +154,7 @@ const AdoptionTable = () => {
                   <TableRow
                     key={row.id}
                     data-state={row.getIsSelected() && "selected"}
+                    data-pet-id={row.original.petId}
                     className={cn(
                       "cursor-pointer",
                       "hover:bg-purple-50 dark:bg-[#18171C] dark:hover:bg-purple-900/30",
@@ -205,17 +163,16 @@ const AdoptionTable = () => {
                     onMouseLeave={!isMobile ? () => setHoveredPetId(null) : undefined}
                     onClick={() => {
                       overlay.open(({ isOpen, close }) => (
-                        <AdoptionDetailModal
+                        <AdoptionReceiptModal
                           isOpen={isOpen}
                           onClose={close}
-                          petId={row.original.petId}
-                          onUpdate={refetch}
+                          adoption={row.original}
                         />
                       ));
                     }}
                   >
                     {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
+                      <TableCell key={cell.id} data-column-id={cell.column.id}>
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       </TableCell>
                     ))}
@@ -244,9 +201,7 @@ const AdoptionTable = () => {
         </Table>
       </div>
 
-      {hoveredPetId && (
-        <PetHoverPreview petId={hoveredPetId} mousePos={mousePos} />
-      )}
+      {hoveredPetId && <PetHoverPreview petId={hoveredPetId} mousePos={mousePos} />}
     </div>
   );
 };

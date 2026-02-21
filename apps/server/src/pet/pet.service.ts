@@ -29,7 +29,6 @@ import {
 } from './pet.dto';
 import { UserProfilePublicDto } from 'src/user/user.dto';
 import {
-  ADOPTION_SALE_STATUS,
   PET_GROWTH,
   PET_LIST_FILTER_TYPE,
   PET_SEX,
@@ -49,7 +48,7 @@ import { PetDetailEntity } from 'src/pet_detail/pet_detail.entity';
 import { isUndefined } from 'es-toolkit';
 import { PairEntity } from 'src/pair/pair.entity';
 import { DateTime } from 'luxon';
-import { AdoptionService } from 'src/adoption/adoption.service';
+import { PetAdoptionService } from 'src/pet_adoption/pet_adoption.service';
 import { replaceParentPublicSafe } from '../common/utils/pet-parent.helper';
 import { extractOriginalPetName } from '../common/utils/pet-name.helper';
 import { LayingEntity } from 'src/laying/laying.entity';
@@ -64,7 +63,7 @@ export class PetService {
     private readonly parentRequestService: ParentRequestService,
     private readonly userService: UserService,
     private readonly petImageService: PetImageService,
-    private readonly adoptionService: AdoptionService,
+    private readonly adoptionService: PetAdoptionService,
     private readonly dataSource: DataSource,
   ) {}
 
@@ -387,10 +386,9 @@ export class PetService {
       )
       .leftJoinAndMapOne(
         'pets.adoption',
-        'adoptions',
-        'adoptions',
-        'adoptions.petId = pets.petId AND adoptions.isDeleted = false AND adoptions.status != :soldStatus',
-        { soldStatus: ADOPTION_SALE_STATUS.SOLD },
+        'pet_adoptions',
+        'pet_adoptions',
+        'pet_adoptions.petId = pets.petId',
       )
       .select([
         'pets',
@@ -400,7 +398,7 @@ export class PetService {
         'users.isBiz',
         'users.status',
         'petDetail',
-        'adoptions',
+        'pet_adoptions',
       ]);
 
     if (pageOptionsDto.filterType === PET_LIST_FILTER_TYPE.MY && userId) {
@@ -1073,7 +1071,7 @@ export class PetService {
 
     // 판매 상태 필터링
     if (pageOptionsDto.status && pageOptionsDto.status.length > 0) {
-      queryBuilder.andWhere('adoptions.status IN (:...status)', {
+      queryBuilder.andWhere('pet_adoptions.status IN (:...status)', {
         status: pageOptionsDto.status,
       });
     }

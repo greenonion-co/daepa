@@ -7,7 +7,7 @@
  */
 
 /**
- * 판매 상태
+ * 분양 상태
  * @nullable
  */
 export type UpdateAdoptionDtoStatus =
@@ -16,9 +16,7 @@ export type UpdateAdoptionDtoStatus =
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const UpdateAdoptionDtoStatus = {
-  NONE: "NONE",
   NFS: "NFS",
   ON_SALE: "ON_SALE",
   ON_RESERVATION: "ON_RESERVATION",
-  SOLD: "SOLD",
 } as const;

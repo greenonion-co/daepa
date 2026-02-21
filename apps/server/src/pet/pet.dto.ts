@@ -13,8 +13,7 @@ import {
   Matches,
 } from 'class-validator';
 import {
-  PET_ADOPTION_METHOD,
-  ADOPTION_SALE_STATUS,
+  PET_ADOPTION_STATUS,
   PET_SEX,
   PET_SPECIES,
   PET_GROWTH,
@@ -542,64 +541,7 @@ export class PetParentDto extends PickType(PetSummaryDto, [
   traits?: string[];
 }
 
-@ApiExtraModels(PetParentDto, PetHiddenStatusDto)
-export class PetSummaryAdoptionDto extends PickType(PetSummaryDto, [
-  'petId',
-  'type',
-  'name',
-  'species',
-  'sex',
-  'growth',
-  'morphs',
-  'traits',
-  'hatchingDate',
-  'isDeleted',
-]) {
-  @ApiProperty({
-    description: '아빠 개체 정보',
-    example: {},
-    required: false,
-    oneOf: [
-      { $ref: getSchemaPath(PetParentDto) },
-      { $ref: getSchemaPath(PetHiddenStatusDto) },
-    ],
-  })
-  @IsOptional()
-  @IsObject()
-  father?: PetParentDto | PetHiddenStatusDto;
-
-  @ApiProperty({
-    description: '엄마 개체 정보',
-    example: {},
-    required: false,
-    oneOf: [
-      { $ref: getSchemaPath(PetParentDto) },
-      { $ref: getSchemaPath(PetHiddenStatusDto) },
-    ],
-  })
-  @IsOptional()
-  @IsObject()
-  mother?: PetParentDto | PetHiddenStatusDto;
-
-  @Exclude()
-  declare desc?: string;
-
-  @Exclude()
-  declare createdAt?: Date;
-
-  @Exclude()
-  declare updatedAt?: Date;
-}
-
 export class PetAdoptionDto {
-  @ApiProperty({
-    description: '분양 아이디',
-    example: 'XXXXXXXX',
-    required: true,
-  })
-  @IsString()
-  adoptionId: string;
-
   @ApiProperty({
     description: '분양 가격',
     example: 100000,
@@ -615,19 +557,11 @@ export class PetAdoptionDto {
   @ApiProperty({
     description: '분양 상태',
     example: 'ON_SALE',
-    enum: ADOPTION_SALE_STATUS,
-    'x-enumNames': Object.keys(ADOPTION_SALE_STATUS),
+    enum: PET_ADOPTION_STATUS,
+    'x-enumNames': Object.keys(PET_ADOPTION_STATUS),
   })
-  @IsEnum(ADOPTION_SALE_STATUS)
-  status?: ADOPTION_SALE_STATUS;
-
-  @ApiProperty({
-    description: '분양 날짜',
-    example: 20240101,
-  })
-  @IsOptional()
-  @IsDate()
-  adoptionDate?: Date;
+  @IsEnum(PET_ADOPTION_STATUS)
+  status?: PET_ADOPTION_STATUS;
 
   @ApiProperty({
     description: '메모',
@@ -637,24 +571,13 @@ export class PetAdoptionDto {
   memo?: string;
 
   @ApiProperty({
-    description: '분양 방식',
-    example: 'DELIVERY',
-    enum: PET_ADOPTION_METHOD,
-    'x-enumNames': Object.keys(PET_ADOPTION_METHOD),
-    required: false,
-  })
-  @IsOptional()
-  @IsEnum(PET_ADOPTION_METHOD)
-  method?: PET_ADOPTION_METHOD;
-
-  @ApiProperty({
     description: '분양 구매자',
     example: {},
     required: false,
   })
   @IsOptional()
   @IsObject()
-  buyer?: UserProfilePublicDto;
+  reservedUser?: UserProfilePublicDto;
 
   @ApiProperty({
     description: '분양 펫 아이디',
@@ -1367,9 +1290,9 @@ export class PetFilterDto extends PageOptionsDto {
     example: ['ON_SALE', 'NFS'],
     type: 'array',
     items: {
-      enum: Object.values(ADOPTION_SALE_STATUS),
+      enum: Object.values(PET_ADOPTION_STATUS),
       type: 'string',
-      'x-enumNames': Object.keys(ADOPTION_SALE_STATUS),
+      'x-enumNames': Object.keys(PET_ADOPTION_STATUS),
     },
     required: false,
   })
@@ -1377,12 +1300,10 @@ export class PetFilterDto extends PageOptionsDto {
   @Transform(({ value }) => {
     if (Array.isArray(value)) {
       return value.filter(
-        (v): v is ADOPTION_SALE_STATUS =>
+        (v): v is PET_ADOPTION_STATUS =>
           typeof v === 'string' &&
           v.trim().length > 0 &&
-          Object.values(ADOPTION_SALE_STATUS).includes(
-            v as ADOPTION_SALE_STATUS,
-          ),
+          Object.values(PET_ADOPTION_STATUS).includes(v as PET_ADOPTION_STATUS),
       );
     }
     if (typeof value === 'string') {
@@ -1392,11 +1313,11 @@ export class PetFilterDto extends PageOptionsDto {
         const parsed: unknown = JSON.parse(trimmed);
         if (Array.isArray(parsed)) {
           return parsed.filter(
-            (v): v is ADOPTION_SALE_STATUS =>
+            (v): v is PET_ADOPTION_STATUS =>
               typeof v === 'string' &&
               v.trim().length > 0 &&
-              Object.values(ADOPTION_SALE_STATUS).includes(
-                v as ADOPTION_SALE_STATUS,
+              Object.values(PET_ADOPTION_STATUS).includes(
+                v as PET_ADOPTION_STATUS,
               ),
           );
         }
@@ -1407,18 +1328,18 @@ export class PetFilterDto extends PageOptionsDto {
         .split(',')
         .map((v) => v.trim())
         .filter(
-          (v): v is ADOPTION_SALE_STATUS =>
+          (v): v is PET_ADOPTION_STATUS =>
             v.length > 0 &&
-            Object.values(ADOPTION_SALE_STATUS).includes(
-              v as ADOPTION_SALE_STATUS,
+            Object.values(PET_ADOPTION_STATUS).includes(
+              v as PET_ADOPTION_STATUS,
             ),
         );
     }
     return undefined;
   })
   @IsArray()
-  @IsEnum(ADOPTION_SALE_STATUS, { each: true })
-  status?: ADOPTION_SALE_STATUS[]; // 판매 상태 검색
+  @IsEnum(PET_ADOPTION_STATUS, { each: true })
+  status?: PET_ADOPTION_STATUS[]; // 판매 상태 검색
 
   @ApiProperty({
     description: '펫 성장단계',
