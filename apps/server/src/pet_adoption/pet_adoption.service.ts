@@ -115,15 +115,15 @@ export class PetAdoptionService {
         );
       }
 
+      // 최종 상태 결정
+      const finalStatus = updateAdoptionDto.status ?? adoptionEntity.status;
+      const isReservation = finalStatus === PET_ADOPTION_STATUS.ON_RESERVATION;
+
       // 입양자 검증
       if (updateAdoptionDto.buyerId !== undefined) {
         if (updateAdoptionDto.buyerId === null) {
           adoptionEntity.buyerId = null;
         } else {
-          const finalStatus = updateAdoptionDto.status ?? adoptionEntity.status;
-          const isReservation =
-            finalStatus === PET_ADOPTION_STATUS.ON_RESERVATION;
-
           if (!isReservation) {
             throw new BadRequestException(
               '예약중 상태일 때만 입양자 정보를 입력할 수 있습니다.',
@@ -137,6 +137,11 @@ export class PetAdoptionService {
             throw new NotFoundException('입양자를 찾을 수 없습니다.');
           }
         }
+      }
+
+      // 예약 중이 아닌 상태로 변경 시 buyerId 자동 초기화
+      if (!isReservation && adoptionEntity.buyerId) {
+        adoptionEntity.buyerId = null;
       }
 
       // pet_adoptions 업데이트
