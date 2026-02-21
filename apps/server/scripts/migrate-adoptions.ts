@@ -177,13 +177,13 @@ async function main() {
         const status = row.status === 'SOLD' ? 'NONE' : row.status;
         const price = row.status === 'SOLD' ? null : row.price;
         const memo = row.status === 'SOLD' ? null : row.memo;
-        const buyerId = row.status === 'SOLD' ? null : row.buyer_id;
+        const reservedUserId = row.status === 'SOLD' ? null : row.buyer_id;
 
         await queryRunner.query(
           `INSERT INTO pet_adoptions
-            (pet_id, seller_id, status, price, memo, buyer_id)
-           VALUES (?, ?, ?, ?, ?, ?)`,
-          [petId, row.seller_id, status, price, memo, buyerId],
+            (pet_id, status, price, memo, reserved_user_id)
+           VALUES (?, ?, ?, ?, ?)`,
+          [petId, status, price, memo, reservedUserId],
         );
         adoptionCount++;
       }
@@ -201,9 +201,9 @@ async function main() {
         console.log(`pet_adoptions 누락 펫 보충: ${missingPets.length}개`);
         for (const pet of missingPets) {
           await queryRunner.query(
-            `INSERT INTO pet_adoptions (pet_id, seller_id, status)
-             VALUES (?, ?, 'NONE')`,
-            [pet.pet_id, pet.owner_id],
+            `INSERT INTO pet_adoptions (pet_id, status)
+             VALUES (?, 'NONE')`,
+            [pet.pet_id],
           );
         }
         console.log(`보충 INSERT 완료\n`);
