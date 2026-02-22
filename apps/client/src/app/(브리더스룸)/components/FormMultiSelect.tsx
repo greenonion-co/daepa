@@ -138,7 +138,7 @@ const FormMultiSelect = ({
             ) : (
               <div className="text-gray-400 dark:text-gray-500">{title} 선택하기</div>
             )}
-            <ChevronDown className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+            <ChevronDown className="h-4 w-4 shrink-0 text-gray-600 dark:text-gray-400" />
           </>
         )}
       </div>

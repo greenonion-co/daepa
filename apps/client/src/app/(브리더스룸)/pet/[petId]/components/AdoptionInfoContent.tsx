@@ -148,7 +148,7 @@ const AdoptionInfoContent = ({
           if ("status" in data || "price" in data) {
             setAdoption({
               petId,
-              status: prevAdoption.status as AdoptionDtoStatus | undefined,
+              status: (prevAdoption.status ?? undefined) as AdoptionDtoStatus | undefined,
               price: prevAdoption.price ?? undefined,
             });
           }
