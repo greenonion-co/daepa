@@ -13,7 +13,7 @@ export default function NavigationProgress() {
   const pathname = usePathname();
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
-  const intervalRef = useRef<ReturnType<typeof setInterval>>();
+  const intervalRef = useRef<ReturnType<typeof setInterval>>(undefined);
 
   const start = useCallback(() => {
     setLoading(true);
@@ -51,7 +51,7 @@ export default function NavigationProgress() {
       setProgress(0);
     }, 300);
     return () => clearTimeout(timeout);
-  }, [pathname]);
+  }, [pathname, loading]);
 
   // 로딩 중 프로그레스 애니메이션
   useEffect(() => {
