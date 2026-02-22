@@ -59,7 +59,7 @@ const CalendarInput = ({
         )}
       >
         <button type="button" disabled={!editable}>
-          {!value && placeholder}
+          {!value && <span className="text-gray-400 dark:text-gray-500">{placeholder}</span>}
           {value &&
             (() => {
               const dt = DateTime.fromISO(value);

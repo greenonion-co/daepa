@@ -33,7 +33,7 @@ const FormMultiSelect = ({
   const onSelectRef = useRef(onSelect);
   onSelectRef.current = onSelect;
 
-  const selectList = useMemo(() => Object.values(displayMap), [displayMap]);
+  const selectList = useMemo(() => Object.keys(displayMap), [displayMap]);
 
   useEffect(() => {
     setSelectedItems(initialItems);
@@ -121,7 +121,7 @@ const FormMultiSelect = ({
         {disabled ? (
           selectedItems && selectedItems.length > 0 ? (
             <BadgeList
-              items={selectedItems}
+              items={selectedItems.map((item) => displayMap[item] ?? item)}
               badgeSize={"md"}
               maxDisplay={isMobile ? 3 : 4}
               variant={
@@ -134,7 +134,7 @@ const FormMultiSelect = ({
         ) : (
           <>
             {selectedItems && selectedItems.length > 0 ? (
-              <div>{selectedItems.join(" | ")}</div>
+              <div>{selectedItems.map((item) => displayMap[item] ?? item).join(" | ")}</div>
             ) : (
               <div className="text-gray-400 dark:text-gray-500">{title} 선택하기</div>
             )}
@@ -174,7 +174,7 @@ const FormMultiSelect = ({
                   className="flex shrink-0 items-center rounded-full bg-blue-100 px-2 py-0.5 text-[12px] whitespace-nowrap text-blue-600 dark:bg-blue-900/50 dark:text-blue-400"
                   key={item}
                 >
-                  {item}
+                  {displayMap[item] ?? item}
                   <button
                     className="cursor-pointer"
                     onClick={() => {
@@ -207,7 +207,7 @@ const FormMultiSelect = ({
                     });
                   }}
                 >
-                  {item}
+                  {displayMap[item] ?? item}
 
                   {selectedItems?.includes(item) && (
                     <Check className="h-4 w-4 text-blue-600 dark:text-blue-400" />

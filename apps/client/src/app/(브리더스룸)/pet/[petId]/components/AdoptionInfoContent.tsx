@@ -116,11 +116,21 @@ const AdoptionInfoContent = ({
   const autoSave = useCallback(
     async (data: UpdateAdoptionDto) => {
       if (!petId) return;
-      // 낙관적 업데이트: API 호출 전에 리스트 캐시 즉시 반영
-      if (adoptionRef.current) {
+      const prevAdoption = adoptionRef.current;
+      // 낙관적 업데이트: API 호출 전에 리스트 캐시 + 헤더 즉시 반영
+      if (prevAdoption) {
         patchPetListCache(queryClient, petId, {
-          adoption: { ...adoptionRef.current, ...data } as PetAdoptionDto,
+          adoption: { ...prevAdoption, ...data } as PetAdoptionDto,
         } as Partial<PetDto>);
+      }
+      if ("status" in data || "price" in data) {
+        setAdoption({
+          petId,
+          status: ("status" in data ? data.status : prevAdoption?.status) as
+            | AdoptionDtoStatus
+            | undefined,
+          price: ("price" in data ? data.price : prevAdoption?.price) ?? undefined,
+        });
       }
       try {
         await updateAdoption({ petId, data });
@@ -128,18 +138,19 @@ const AdoptionInfoContent = ({
         if (adoptionRef.current) {
           adoptionRef.current = { ...adoptionRef.current, ...data } as PetAdoptionDto;
         }
-        // 헤더 분양정보 동기화
-        if ("status" in data || "price" in data) {
-          setAdoption({
-            petId,
-            status: ("status" in data ? data.status : adoptionRef.current?.status) as
-              | AdoptionDtoStatus
-              | undefined,
-            price: ("price" in data ? data.price : adoptionRef.current?.price) ?? undefined,
-          });
-        }
       } catch (error: unknown) {
         console.error("분양 정보 수정 실패:", error);
+        // 실패 시 헤더 롤백
+        if (prevAdoption && ("status" in data || "price" in data)) {
+          setAdoption({
+            petId,
+            status: prevAdoption.status as AdoptionDtoStatus | undefined,
+            price: prevAdoption.price ?? undefined,
+          });
+          patchPetListCache(queryClient, petId, {
+            adoption: prevAdoption as PetAdoptionDto,
+          } as Partial<PetDto>);
+        }
         if (error instanceof AxiosError) {
           const message = error.response?.data?.message;
           const errorMessage = Array.isArray(message) ? message[0] : message;
@@ -149,7 +160,7 @@ const AdoptionInfoContent = ({
         }
       }
     },
-    [petId, updateAdoption, setAdoption],
+    [petId, updateAdoption, setAdoption, queryClient],
   );
 
   // 분양 상태 변경 (즉시 저장)
@@ -454,14 +465,15 @@ const AdoptionInfoContent = ({
       <FormItem
         label="메모"
         content={
-          <div className="relative w-full pt-2">
+          <div className="w-full">
             <textarea
               className={cn(
-                `min-h-[100px] w-full rounded-xl bg-gray-100 p-3 text-left text-[14px] focus:ring-0 focus:outline-none dark:bg-neutral-800 dark:text-white`,
-                !isViewingMyPet && "dark:bg-neutral-900",
+                "min-h-[80px] w-full resize-none rounded-md border border-gray-200 p-2 text-sm font-[500] placeholder:font-[500] disabled:bg-transparent dark:border-gray-700 dark:bg-transparent dark:text-white",
+                !isViewingMyPet && "border-none",
               )}
               value={String(adoptionData.memo || "")}
               maxLength={500}
+              placeholder={isViewingMyPet ? "메모를 입력하세요" : "-"}
               onChange={(e) =>
                 setAdoptionData((prev) => ({
                   ...prev,
@@ -470,16 +482,10 @@ const AdoptionInfoContent = ({
               }
               onBlur={() => handleBlurSave("memo")}
               disabled={!isViewingMyPet}
-              style={{ height: "auto" }}
-              onInput={(e) => {
-                const target = e.target as HTMLTextAreaElement;
-                target.style.height = "auto";
-                target.style.height = `${target.scrollHeight}px`;
-              }}
             />
             {isViewingMyPet && (
-              <div className="absolute right-4 bottom-4 text-[12px] text-gray-500 dark:text-gray-400">
-                {adoptionData.memo?.length ?? 0}/{500}
+              <div className="mt-1 text-right text-xs text-gray-400">
+                {adoptionData.memo?.length ?? 0}/500
               </div>
             )}
           </div>
