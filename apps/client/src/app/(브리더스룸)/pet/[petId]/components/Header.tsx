@@ -42,15 +42,16 @@ const Header = ({
   onTabClick = () => {},
   onDelete,
 }: HeaderProps) => {
-  const isMyPet = useIsMyPet(pet.owner.userId);
+  const isMyPet = useIsMyPet(pet?.owner?.userId);
   const isLoggedIn = useIsLoggedIn();
   const router = useAppRouter();
   const [isScrolled, setIsScrolled] = useState(size === "small");
 
   const { data: thumbnail } = useQuery({
-    queryKey: getPetThumbnailQueryKey(pet.petId),
-    queryFn: () => petImageControllerFindThumbnail(pet.petId),
+    queryKey: getPetThumbnailQueryKey(pet?.petId),
+    queryFn: () => petImageControllerFindThumbnail(pet!.petId),
     select: (response) => response.data.data,
+    enabled: !!pet,
     staleTime: Infinity,
     gcTime: Infinity,
   });
@@ -100,7 +101,7 @@ const Header = ({
   const adoptionData = adoption?.petId === pet?.petId ? adoption : null;
 
   // 저장 완료된 이름만 헤더에 반영 (중복확인 통과 후 저장된 값)
-  const displayName = breedingData?.name || pet.name;
+  const displayName = breedingData?.name || pet?.name;
 
   if (!pet) return null;
 

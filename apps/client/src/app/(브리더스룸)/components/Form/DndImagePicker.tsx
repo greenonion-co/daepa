@@ -14,7 +14,7 @@ import { useDropzone } from "react-dropzone";
 import Image from "next/image";
 import { buildR2TransformedUrl, cn, compressImageFile } from "@/lib/utils";
 import { toast } from "@/lib/toast";
-import { X, Plus, Loader2, Info, Maximize2 } from "lucide-react";
+import { X, Plus, Info, Maximize2 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { isNil, range, remove } from "es-toolkit";
 import { ACCEPT_IMAGE_FORMATS } from "../../constants";
@@ -371,7 +371,6 @@ function SortableThumb({
   src,
   disabled,
   isBusy,
-  isUploading,
   onDelete,
   selected,
   onSelect,
@@ -381,8 +380,6 @@ function SortableThumb({
   disabled?: boolean;
   /** 조작 비활성화 (업로드 중 or 저장 중) */
   isBusy?: boolean;
-  /** CDN 업로드 중 (이미지가 아직 없으므로 스피너 표시) */
-  isUploading?: boolean;
   onDelete: () => void;
   selected?: boolean;
   onSelect: () => void;
@@ -427,34 +424,26 @@ function SortableThumb({
           onSelect();
         }}
       >
-        {isUploading ? (
-          <div className="flex h-full w-full items-center justify-center bg-gray-50">
-            <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
-          </div>
-        ) : (
-          <>
-            <Image
-              src={buildR2TransformedUrl(src)}
-              alt={`image_${id}`}
-              fill
-              className="cursor-pointer object-cover"
-              draggable={false}
-            />
-            {/* [SAMPLE_WATERMARK] 베타테스트용 워터마크 - 출시 시 삭제 */}
-            <span
-              className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center select-none"
-              aria-hidden="true"
-            >
-              <span
-                className="rounded-sm border-2 border-white px-1 py-0.5 text-[0.5rem] font-bold tracking-widest text-white opacity-80"
-                style={{ transform: "rotate(-40deg)", textShadow: "0 1px 4px rgba(0,0,0,0.5)" }}
-              >
-                SAMPLE
-              </span>
-            </span>
-            {/* [/SAMPLE_WATERMARK] */}
-          </>
-        )}
+        <Image
+          src={buildR2TransformedUrl(src)}
+          alt={`image_${id}`}
+          fill
+          className="cursor-pointer object-cover"
+          draggable={false}
+        />
+        {/* [SAMPLE_WATERMARK] 베타테스트용 워터마크 - 출시 시 삭제 */}
+        <span
+          className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center select-none"
+          aria-hidden="true"
+        >
+          <span
+            className="rounded-sm border-2 border-white px-1 py-0.5 text-[0.5rem] font-bold tracking-widest text-white opacity-80"
+            style={{ transform: "rotate(-40deg)", textShadow: "0 1px 4px rgba(0,0,0,0.5)" }}
+          >
+            SAMPLE
+          </span>
+        </span>
+        {/* [/SAMPLE_WATERMARK] */}
       </div>
 
       {!disabled && !isBusy && (

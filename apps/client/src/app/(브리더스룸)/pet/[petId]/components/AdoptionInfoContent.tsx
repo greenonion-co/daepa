@@ -160,7 +160,13 @@ const AdoptionInfoContent = ({
         status: nextStatus as PetAdoptionDtoStatus | null,
         reservedUser: isNextReservation ? prev.reservedUser : undefined,
       }));
-      autoSave({ status: nextStatus as UpdateAdoptionDtoStatus });
+      const update: UpdateAdoptionDto = {
+        status: nextStatus as UpdateAdoptionDtoStatus,
+      };
+      if (nextStatus !== UpdateAdoptionDtoStatus.ON_RESERVATION) {
+        update.reservedUserId = null;
+      }
+      autoSave(update);
     },
     [autoSave],
   );
@@ -256,7 +262,11 @@ const AdoptionInfoContent = ({
 
   // 페이지 이동 등 언마운트 시 fallback
   useEffect(() => {
-    return () => flushUnsavedFields();
+    const timers = blurTimersRef.current;
+    return () => {
+      Object.values(timers).forEach(clearTimeout);
+      flushUnsavedFields();
+    };
   }, [flushUnsavedFields]);
 
   const handleCompleteAdoption = useCallback(async () => {
