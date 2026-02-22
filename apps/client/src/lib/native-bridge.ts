@@ -229,7 +229,7 @@ export const showNativeLoginPromoSheet = (): boolean => {
 };
 
 /**
- * 네이티브 앱 로그인 프로모 시트 표시 (펫 관계도 안내)
+ * 네이티브 앱 로그인 프로모 시트 표시 (개체 관계도 안내)
  */
 export const showNativeRelationPromoSheet = (): boolean => {
   return sendToNative({ type: "SHOW_LOGIN_PROMO_SHEET", variant: "relation" });
