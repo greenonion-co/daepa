@@ -1127,7 +1127,7 @@ export class PetFilterDto extends PageOptionsDto {
   sex?: PET_SEX[]; // 성별 필터
 
   @ApiProperty({
-    description: '펫 소유자 아이디',
+    description: '개체 소유자 아이디',
     example: 'XXXXXXXX',
     required: false,
   })
@@ -1136,7 +1136,7 @@ export class PetFilterDto extends PageOptionsDto {
   ownerId?: string; // 소유자별 필터
 
   @ApiProperty({
-    description: '펫 공개 여부',
+    description: '개체 공개 여부',
     example: 1,
     required: false,
   })
@@ -1145,7 +1145,7 @@ export class PetFilterDto extends PageOptionsDto {
   isPublic?: number; // 공개 여부 필터
 
   @ApiProperty({
-    description: '펫 최소 몸무게',
+    description: '개체 최소 몸무게',
     example: 1000,
     required: false,
   })
@@ -1154,7 +1154,7 @@ export class PetFilterDto extends PageOptionsDto {
   minWeight?: number; // 최소 몸무게
 
   @ApiProperty({
-    description: '펫 최대 몸무게',
+    description: '개체 최대 몸무게',
     example: 10000,
     required: false,
   })
@@ -1163,25 +1163,25 @@ export class PetFilterDto extends PageOptionsDto {
   maxWeight?: number; // 최대 몸무게
 
   @ApiProperty({
-    description: '펫 최소 생년월일',
+    description: '개체 최소 해칭일',
     example: '2024-01-01',
     required: false,
   })
   @IsOptional()
   @IsDate()
-  startYmd?: Date; // 최소 생년월일
+  startYmd?: Date; // 최소 해칭일
 
   @ApiProperty({
-    description: '펫 최대 생년월일',
+    description: '개체 최대 해칭일',
     example: '2024-01-01',
     required: false,
   })
   @IsOptional()
   @IsDate()
-  endYmd?: Date; // 최대 생년월일
+  endYmd?: Date; // 최대 해칭일
 
   @ApiProperty({
-    description: '펫 모프',
+    description: '개체 모프',
     example: ['릴리화이트', '아잔틱헷100%'],
     required: false,
   })
@@ -1216,7 +1216,7 @@ export class PetFilterDto extends PageOptionsDto {
   morphs?: string[]; // 모프 검색
 
   @ApiProperty({
-    description: '펫 형질',
+    description: '개체 형질',
     example: ['트익할', '풀핀'],
     required: false,
   })

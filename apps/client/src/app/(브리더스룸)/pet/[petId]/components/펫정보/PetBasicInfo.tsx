@@ -51,7 +51,7 @@ export const PetBasicInfo = ({
 
       {!isEgg && (
         <FormItem
-          label="생년월일"
+          label="해칭일"
           content={
             <CalendarInput
               variant="form"
