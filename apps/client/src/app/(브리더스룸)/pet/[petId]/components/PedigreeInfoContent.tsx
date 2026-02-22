@@ -10,7 +10,7 @@ import {
   GetParentsByPetIdResponseDtoData,
 } from "@repo/api-client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { AxiosError } from "axios";
 import { toast } from "@/lib/toast";
 import { useUserStore } from "@/app/(브리더스룸)/store/user";
@@ -36,6 +36,7 @@ const PedigreeInfoContent = ({
   const { user } = useUserStore();
 
   const isMyPet = useIsMyPet(userId);
+  const [loadingRole, setLoadingRole] = useState<UnlinkParentDtoRole | null>(null);
 
   const { data: queryParents, refetch } = useQuery({
     queryKey: [petControllerGetParentsByPetId.name, petId],
@@ -71,6 +72,7 @@ const PedigreeInfoContent = ({
 
   const handleParentSelect = useCallback(
     async (role: UnlinkParentDtoRole, value: PetParentDtoWithMessage) => {
+      setLoadingRole(role);
       try {
         await mutateRequestParent({
           parentId: value.petId,
@@ -91,6 +93,8 @@ const PedigreeInfoContent = ({
         } else {
           toast.error("부모 연동 요청에 실패했습니다.");
         }
+      } finally {
+        setLoadingRole(null);
       }
     },
     [mutateRequestParent, refetch, queryClient],
@@ -101,6 +105,7 @@ const PedigreeInfoContent = ({
       const parent = parents?.[label];
       if (!parent || !("petId" in parent) || !parent.petId)
         return toast.error("부모 연동 해제에 실패했습니다.");
+      setLoadingRole(label);
       try {
         await mutateUnlinkParent({ role: label });
         await refetch();
@@ -115,6 +120,8 @@ const PedigreeInfoContent = ({
         } else {
           toast.error("부모 연동 해제에 실패했습니다.");
         }
+      } finally {
+        setLoadingRole(null);
       }
     },
     [parents, mutateUnlinkParent, refetch, queryClient],
@@ -135,6 +142,7 @@ const PedigreeInfoContent = ({
           species={species}
           label="부"
           data={parents?.father}
+          isLoading={loadingRole === UnlinkParentDtoRole.FATHER}
           onSelect={(selectedPet) =>
             handleParentSelect(UnlinkParentDtoRole.FATHER, {
               ...selectedPet,
@@ -149,6 +157,7 @@ const PedigreeInfoContent = ({
           species={species}
           label="모"
           data={parents?.mother}
+          isLoading={loadingRole === UnlinkParentDtoRole.MOTHER}
           onSelect={(selectedPet) =>
             handleParentSelect(UnlinkParentDtoRole.MOTHER, {
               ...selectedPet,

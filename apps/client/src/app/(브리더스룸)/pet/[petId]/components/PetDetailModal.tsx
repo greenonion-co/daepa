@@ -1,5 +1,6 @@
 "use client";
 
+import { useCallback } from "react";
 import { PetDto } from "@repo/api-client";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import PetDetailLayout from "./PetDetailLayout";
@@ -8,6 +9,7 @@ import ImagesContent from "./ImagesContent";
 import PedigreeInfoContent from "./PedigreeInfoContent";
 import AdoptionInfoContent from "./AdoptionInfoContent";
 import FeedingInfoContent from "./FeedingInfoContent";
+import { useFlush } from "./FlushContext";
 
 interface PetDetailModalProps {
   isOpen: boolean;
@@ -16,42 +18,55 @@ interface PetDetailModalProps {
 }
 
 export default function PetDetailModal({ isOpen, pet, onClose }: PetDetailModalProps) {
+  const { flushRef, flushAll, FlushProvider } = useFlush();
+
+  const handleClose = useCallback(() => {
+    flushAll();
+    onClose();
+  }, [flushAll, onClose]);
+
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="flex h-[100dvh] max-h-[100dvh] w-full max-w-full flex-col gap-0 overflow-hidden rounded-none bg-gray-100 px-0 pt-[16px] pb-0 sm:max-w-full md:h-auto md:max-h-[90vh] md:w-[calc(100%-2rem)] md:max-w-[900px] md:rounded-2xl dark:bg-neutral-800">
         <DialogTitle className="sr-only">펫 상세 정보</DialogTitle>
-        <PetDetailLayout
-          variant="modal"
-          pet={pet}
-          onDelete={onClose}
-          breedingSlot={
-            <BreedingInfoContent
-              petId={pet.petId}
-              ownerId={pet.owner.userId ?? ""}
-              initialPet={pet}
-            />
-          }
-          imagesSlot={<ImagesContent pet={pet} initialImages={[]} />}
-          pedigreeSlot={
-            <PedigreeInfoContent
-              species={pet.species}
-              petId={pet.petId}
-              userId={pet.owner.userId ?? ""}
-              initialParents={null}
-            />
-          }
-          adoptionSlot={
-            <AdoptionInfoContent
-              petId={pet.petId}
-              ownerId={pet.owner.userId ?? ""}
-              initialAdoption={null}
-              onClose={onClose}
-            />
-          }
-          feedingSlot={
-            <FeedingInfoContent petId={pet.petId} ownerId={pet.owner.userId ?? ""} defaultFoods={pet.foods} />
-          }
-        />
+        <FlushProvider value={flushRef}>
+          <PetDetailLayout
+            variant="modal"
+            pet={pet}
+            onDelete={handleClose}
+            breedingSlot={
+              <BreedingInfoContent
+                petId={pet.petId}
+                ownerId={pet.owner.userId ?? ""}
+                initialPet={pet}
+              />
+            }
+            imagesSlot={<ImagesContent pet={pet} initialImages={[]} />}
+            pedigreeSlot={
+              <PedigreeInfoContent
+                species={pet.species}
+                petId={pet.petId}
+                userId={pet.owner.userId ?? ""}
+                initialParents={null}
+              />
+            }
+            adoptionSlot={
+              <AdoptionInfoContent
+                petId={pet.petId}
+                ownerId={pet.owner.userId ?? ""}
+                initialAdoption={null}
+                onClose={handleClose}
+              />
+            }
+            feedingSlot={
+              <FeedingInfoContent
+                petId={pet.petId}
+                ownerId={pet.owner.userId ?? ""}
+                defaultFoods={pet.foods}
+              />
+            }
+          />
+        </FlushProvider>
       </DialogContent>
     </Dialog>
   );

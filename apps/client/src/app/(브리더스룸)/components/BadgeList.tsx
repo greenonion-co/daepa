@@ -10,6 +10,8 @@ interface BadgeListProps {
   variant?: "default" | "secondary" | "outline" | "destructive";
   badgeSize?: "sm" | "md";
   badgeClassName?: string;
+  /** true이면 감싸는 div 없이 Fragment로 렌더링 (부모에서 flex-wrap 제어) */
+  inline?: boolean;
 }
 
 const BadgeList = ({
@@ -18,6 +20,7 @@ const BadgeList = ({
   variant = "default",
   badgeSize = "md",
   badgeClassName,
+  inline = false,
 }: BadgeListProps) => {
   if (!items || items.length === 0) return null;
 
@@ -25,8 +28,8 @@ const BadgeList = ({
   const remainingItems = items.slice(maxDisplay);
   const remaining = remainingItems.length;
 
-  return (
-    <div className="flex flex-wrap gap-1">
+  const content = (
+    <>
       {displayItems.map((item, index) => (
         <Badge
           key={`${item}-${index}`}
@@ -53,8 +56,12 @@ const BadgeList = ({
           </TooltipContent>
         </Tooltip>
       )}
-    </div>
+    </>
   );
+
+  if (inline) return content;
+
+  return <div className="flex flex-wrap gap-1">{content}</div>;
 };
 
 export default BadgeList;

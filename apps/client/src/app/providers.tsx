@@ -8,6 +8,7 @@ import { useEffect } from "react";
 import { setupApiClient } from "@/lib/setupApiClient";
 import { AxiosError } from "axios";
 import { AuthProvider } from "@/providers/AuthProvider";
+import NavigationProgress from "@/components/common/NavigationProgress";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -39,7 +40,10 @@ export function Providers({ children }: { children: React.ReactNode }) {
       <AuthProvider>
         <ThemeProvider>
           <SidebarProvider>
-            <OverlayProvider>{children}</OverlayProvider>
+            <OverlayProvider>
+              <NavigationProgress />
+              {children}
+            </OverlayProvider>
           </SidebarProvider>
         </ThemeProvider>
       </AuthProvider>

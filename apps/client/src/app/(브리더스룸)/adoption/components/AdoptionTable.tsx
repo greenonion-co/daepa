@@ -172,7 +172,7 @@ const AdoptionTable = () => {
                     }}
                   >
                     {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id} data-column-id={cell.column.id}>
+                      <TableCell key={cell.id} className="py-2" data-column-id={cell.column.id}>
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       </TableCell>
                     ))}

@@ -35,13 +35,15 @@ const SelectStep = ({
   if (isLoading || (isFetching && !petList?.length) || !user)
     return (
       <div className="h-[calc(100vh-200px)]">
-        <Loading />
+        <div className="h-[200px]">
+          <Loading />
+        </div>
       </div>
     );
 
   if (petList.length === 0)
     return (
-      <div className="flex h-full w-full flex-col items-center justify-center py-5 text-center text-[14px] text-gray-700 dark:text-gray-300">
+      <div className="flex h-[calc(100vh-200px)] w-full flex-col items-center pt-20 text-center text-[14px] text-gray-700 dark:text-gray-300">
         <CircleAlert className={"my-4 opacity-40"} width={60} height={60} />
         조회된 펫이 없습니다.
       </div>

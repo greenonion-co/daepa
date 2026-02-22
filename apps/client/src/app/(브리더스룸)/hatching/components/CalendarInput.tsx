@@ -18,6 +18,7 @@ interface CalendarInputProps {
   disabled?: (date: Date) => boolean;
   editable?: boolean;
   closeOnSelect?: boolean;
+  variant?: "default" | "form";
 }
 
 const CalendarInput = ({
@@ -30,7 +31,9 @@ const CalendarInput = ({
   modifiers,
   modifiersStyles,
   closeOnSelect = true,
+  variant = "default",
 }: CalendarInputProps) => {
+  const isForm = variant === "form";
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -46,7 +49,13 @@ const CalendarInput = ({
         asChild
         className={cn(
           "flex min-h-[32px] w-fit cursor-pointer items-center gap-1 whitespace-nowrap rounded-lg px-2 py-1 text-[14px] font-[500] dark:bg-gray-800",
-          editable ? "bg-blue-100 text-blue-600" : "cursor-not-allowed",
+          editable
+            ? isForm
+              ? "bg-blue-50/70 text-gray-900 dark:bg-blue-900/10 dark:text-gray-100"
+              : "bg-blue-100 text-blue-600"
+            : isForm
+              ? "cursor-not-allowed bg-blue-50/40 text-gray-900 dark:bg-blue-900/5 dark:text-gray-200"
+              : "cursor-not-allowed",
         )}
       >
         <button type="button" disabled={!editable}>
@@ -56,7 +65,11 @@ const CalendarInput = ({
               const dt = DateTime.fromISO(value);
               return dt.isValid ? dt.toFormat(formatString) : null;
             })()}
-          {editable && <ChevronDown className="h-4 w-4 text-blue-600" />}
+          {editable && (
+            <ChevronDown
+              className={cn("h-4 w-4", isForm ? "text-gray-600 dark:text-gray-400" : "text-blue-600")}
+            />
+          )}
         </button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">

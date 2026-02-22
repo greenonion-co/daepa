@@ -12,10 +12,10 @@ import { SortableContext, useSortable, arrayMove, rectSortingStrategy } from "@d
 import { CSS } from "@dnd-kit/utilities";
 import { useDropzone } from "react-dropzone";
 import Image from "next/image";
-import { buildR2TransformedUrl, cn } from "@/lib/utils";
+import { buildR2TransformedUrl, cn, compressImageFile } from "@/lib/utils";
 import { toast } from "@/lib/toast";
-import { X, Plus, Loader2, Info, Maximize2 } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { X, Plus, Info, Maximize2 } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { isNil, range, remove } from "es-toolkit";
 import { ACCEPT_IMAGE_FORMATS } from "../../constants";
 import { tokenStorage } from "@/lib/tokenStorage";
@@ -31,21 +31,59 @@ type PhotoItem = {
 };
 
 interface DndImagePickerProps {
+  petId?: string;
   max?: number;
   disabled?: boolean;
+  isSaving?: boolean;
   images?: PhotoItem[];
   onChange?: (images: PhotoItem[]) => void;
 }
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024;
+const MAX_FILE_SIZE = 10 * 1024 * 1024;
+
+// fetch API는 업로드 진행률 이벤트를 지원하지 않으므로 XMLHttpRequest를 사용한다.
+// 둘 다 동일한 브라우저 네트워크 스택을 사용하므로 성능 차이는 없다.
+function uploadWithProgress(
+  url: string,
+  file: File,
+  onProgress: (percent: number) => void,
+): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("PUT", url);
+    xhr.setRequestHeader("Content-Type", file.type);
+
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable) {
+        onProgress(Math.round((e.loaded / e.total) * 100));
+      }
+    };
+
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        resolve();
+      } else {
+        reject(new Error(`Upload failed: ${xhr.status}`));
+      }
+    };
+
+    xhr.onerror = () => reject(new Error("Upload network error"));
+    xhr.send(file);
+  });
+}
 
 export default function DndImagePicker({
+  petId = "PENDING",
   max = 3,
   disabled,
+  isSaving = false,
   images = [],
   onChange = () => {},
 }: DndImagePickerProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const fileProgressRef = useRef<number[]>([]);
+  const isBusy = isLoading || isSaving;
   const imageNamesInOrder = images.map(({ fileName }) => fileName);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(images.length > 0 ? 0 : null);
 
@@ -82,14 +120,14 @@ export default function DndImagePicker({
 
   const onAdd = useCallback(
     async (files: File[]) => {
-      if (!files || files.length === 0 || isLoading) return;
+      if (!files || files.length === 0 || isBusy) return;
 
       const remain = Math.max(0, max - images.length);
       const picked = files.slice(0, remain);
 
       const targetFiles = picked.filter((f) => {
         if (f.size > MAX_FILE_SIZE) {
-          toast.error(`이미지 용량이 너무 큽니다 (최대 5MB): ${f.name}`);
+          toast.error(`이미지 용량이 너무 큽니다 (최대 10MB): ${f.name}`);
           return false;
         }
         return true;
@@ -98,36 +136,47 @@ export default function DndImagePicker({
       if (targetFiles.length === 0) return;
 
       setIsLoading(true);
-      try {
-        const uploadedPendingFiles = await Promise.all(
-          targetFiles.map(async (file) => {
-            const formData = new FormData();
-            formData.append("file", file);
-            formData.append("petId", "PENDING");
+      setUploadProgress(0);
+      fileProgressRef.current = targetFiles.map(() => 0);
 
-            const response = await fetch("/api/upload/image", {
+      try {
+        const uploadedFiles = await Promise.all(
+          targetFiles.map(async (file, fileIndex) => {
+            // 1. 클라이언트 압축 (최대 1600px, WebP 변환)
+            const compressed = await compressImageFile(file);
+
+            // 2. Presigned URL 발급
+            const presignedRes = await fetch("/api/upload/presigned-url", {
               method: "POST",
               headers: {
+                "Content-Type": "application/json",
                 Authorization: `Bearer ${tokenStorage.getToken()}`,
               },
-              body: formData,
+              body: JSON.stringify({
+                petId,
+                mimeType: compressed.type,
+                size: compressed.size,
+              }),
             });
 
-            if (!response.ok) {
-              throw new Error(`Upload failed for file ${file.name}`);
+            if (!presignedRes.ok) {
+              throw new Error(`Presigned URL 발급 실패: ${file.name}`);
             }
 
-            return response.json();
+            const { presignedUrl, fileName, url } = await presignedRes.json();
+
+            // 3. R2에 직접 업로드 (진행률 추적)
+            await uploadWithProgress(presignedUrl, compressed, (percent) => {
+              fileProgressRef.current[fileIndex] = percent;
+              const total = fileProgressRef.current.reduce((a, b) => a + b, 0);
+              setUploadProgress(Math.round(total / fileProgressRef.current.length));
+            });
+
+            return { url, fileName, size: compressed.size, mimeType: compressed.type };
           }),
         );
-        const addedPhotos = uploadedPendingFiles.map(({ url, fileName, size, mimeType }) => ({
-          url,
-          fileName,
-          size,
-          mimeType,
-        }));
 
-        onChange([...images, ...addedPhotos]);
+        onChange([...images, ...uploadedFiles]);
       } catch (error) {
         console.error("Image upload failed:", error);
         toast.error("이미지 업로드에 실패했습니다.");
@@ -135,11 +184,11 @@ export default function DndImagePicker({
         setIsLoading(false);
       }
     },
-    [images, max, isLoading, onChange],
+    [images, max, isBusy, onChange, petId],
   );
 
   const onDragEnd = (event: DragEndEvent) => {
-    if (disabled || isLoading) return;
+    if (disabled || isBusy) return;
 
     const { active, over } = event;
     if (isNil(over) || active.id === over.id) return;
@@ -157,23 +206,23 @@ export default function DndImagePicker({
 
   const onReorder = useCallback(
     (order: number[]) => {
-      if (disabled || isLoading) return;
+      if (disabled || isBusy) return;
 
       const prevPhotos = [...images];
       const nextPhotos = order.map((i) => prevPhotos[i]!);
 
       onChange(nextPhotos);
     },
-    [disabled, isLoading, images, onChange],
+    [disabled, isBusy, images, onChange],
   );
 
   const { getRootProps, getInputProps, open, isDragActive } = useDropzone({
     accept: ACCEPT_IMAGE_FORMATS,
     multiple: true,
     noClick: true,
-    disabled: disabled || isLoading,
+    disabled: disabled || isBusy,
     onDropAccepted: async (accepted) => {
-      if (disabled || isLoading) return;
+      if (disabled || isBusy) return;
 
       const remain = max - images.length;
       if (remain < accepted.length) {
@@ -182,7 +231,7 @@ export default function DndImagePicker({
       await onAdd(accepted.slice(0, remain));
     },
     onDropRejected: (rejections) => {
-      if (disabled || isLoading) return;
+      if (disabled || isBusy) return;
 
       const names = rejections.map((r) => r.file.name).join(", ");
       toast.error(`허용되지 않는 이미지 형식입니다: ${names}`);
@@ -229,29 +278,36 @@ export default function DndImagePicker({
                   id={String(imageNamesInOrder[index])}
                   src={photo.url}
                   disabled={disabled}
-                  isLoading={isLoading}
+                  isBusy={isBusy}
                   onDelete={() => handleDelete(index)}
                   selected={selectedIndex === index}
                   onSelect={() => {
-                    if (isLoading) return;
+                    if (isBusy) return;
                     setSelectedIndex(index);
                   }}
                 />
               ))}
               {!disabled &&
                 images.length < max &&
-                (!isLoading ? (
+                (isLoading ? (
+                  <div className="flex h-24 w-full flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-gray-300 text-gray-500">
+                    <span className="text-xs font-medium">{uploadProgress}%</span>
+                    <div className="h-1.5 w-3/4 overflow-hidden rounded-full bg-gray-200">
+                      <div
+                        className="h-full rounded-full bg-blue-500 transition-all duration-200"
+                        style={{ width: `${uploadProgress}%` }}
+                      />
+                    </div>
+                  </div>
+                ) : (
                   <button
                     type="button"
                     onClick={open}
-                    className="flex h-24 w-full cursor-pointer items-center justify-center rounded-xl border border-dashed border-gray-300 text-gray-500 transition-colors hover:bg-gray-50 active:bg-gray-100"
+                    disabled={isBusy}
+                    className="flex h-24 w-full cursor-pointer items-center justify-center rounded-xl border border-dashed border-gray-300 text-gray-500 transition-colors hover:bg-gray-50 active:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     <Plus className="h-5 w-5" />
                   </button>
-                ) : (
-                  <div className="flex h-24 w-full items-center justify-center rounded-xl border border-dashed border-gray-300 text-gray-500">
-                    <Loader2 className="h-5 w-5 animate-spin" />
-                  </div>
                 ))}
             </div>
           </SortableContext>
@@ -314,7 +370,7 @@ function SortableThumb({
   id,
   src,
   disabled,
-  isLoading,
+  isBusy,
   onDelete,
   selected,
   onSelect,
@@ -322,15 +378,15 @@ function SortableThumb({
   id: string;
   src: string;
   disabled?: boolean;
-  isLoading?: boolean;
+  /** 조작 비활성화 (업로드 중 or 저장 중) */
+  isBusy?: boolean;
   onDelete: () => void;
   selected?: boolean;
   onSelect: () => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id,
-    // 드래그 중일 때 다른 스타일 적용을 위해
-    disabled: disabled || isLoading,
+    disabled: disabled || isBusy,
   });
 
   const style = {
@@ -344,7 +400,7 @@ function SortableThumb({
       style={style}
       className={cn(
         "relative h-24 w-full select-none",
-        isDragging && "z-50 scale-105 rotate-3 shadow-xl", // 드래그 중 스타일
+        isDragging && "z-50 scale-105 rotate-3 shadow-xl",
       )}
     >
       <div
@@ -359,55 +415,45 @@ function SortableThumb({
                 selected && "border-blue-400 hover:border-blue-500",
               ),
         )}
-        // 터치 이벤트 최적화
         style={{
-          touchAction: "none", // 브라우저의 기본 터치 동작 방지
+          touchAction: "none",
         }}
         onClick={(e) => {
           e.stopPropagation();
-          if (isLoading || isDragging) return;
+          if (isBusy || isDragging) return;
           onSelect();
         }}
       >
-        {isLoading ? (
-          <div className="flex h-full w-full items-center justify-center bg-gray-50">
-            <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
-          </div>
-        ) : (
-          <>
-            <Image
-              src={buildR2TransformedUrl(src)}
-              alt={`image_${id}`}
-              fill
-              className="cursor-pointer object-cover"
-              // 이미지 드래그 방지
-              draggable={false}
-            />
-            {/* [SAMPLE_WATERMARK] 베타테스트용 워터마크 - 출시 시 삭제 */}
-            <span
-              className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center select-none"
-              aria-hidden="true"
-            >
-              <span
-                className="rounded-sm border-2 border-white px-1 py-0.5 text-[0.5rem] font-bold tracking-widest text-white opacity-80"
-                style={{ transform: "rotate(-40deg)", textShadow: "0 1px 4px rgba(0,0,0,0.5)" }}
-              >
-                SAMPLE
-              </span>
-            </span>
-            {/* [/SAMPLE_WATERMARK] */}
-          </>
-        )}
+        <Image
+          src={buildR2TransformedUrl(src)}
+          alt={`image_${id}`}
+          fill
+          className="cursor-pointer object-cover"
+          draggable={false}
+        />
+        {/* [SAMPLE_WATERMARK] 베타테스트용 워터마크 - 출시 시 삭제 */}
+        <span
+          className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center select-none"
+          aria-hidden="true"
+        >
+          <span
+            className="rounded-sm border-2 border-white px-1 py-0.5 text-[0.5rem] font-bold tracking-widest text-white opacity-80"
+            style={{ transform: "rotate(-40deg)", textShadow: "0 1px 4px rgba(0,0,0,0.5)" }}
+          >
+            SAMPLE
+          </span>
+        </span>
+        {/* [/SAMPLE_WATERMARK] */}
       </div>
 
-      {!disabled && !isLoading && (
+      {!disabled && !isBusy && (
         <button
           type="button"
           onClick={onDelete}
           className={cn(
             "absolute top-1 right-1 z-10 inline-flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-red-500 text-white shadow-sm transition-all duration-200",
             "hover:bg-red-600 active:scale-95",
-            isDragging && "opacity-0", // 드래그 중에는 삭제 버튼 숨김
+            isDragging && "opacity-0",
           )}
           aria-label="사진 삭제"
         >

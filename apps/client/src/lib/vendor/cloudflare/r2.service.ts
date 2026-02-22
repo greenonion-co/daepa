@@ -1,11 +1,12 @@
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { globalS3Client } from "@/lib/vendor/aws/s3/globalS3Client";
 import { nanoid } from "nanoid";
 
 class R2Service {
-  private s3Client: S3Client;
-  private r2ImageBaseUrl: string;
-  private r2ImageBucketName: string;
+  private readonly s3Client: S3Client;
+  private readonly r2ImageBaseUrl: string;
+  private readonly r2ImageBucketName: string;
 
   private constructor(s3Client: S3Client) {
     this.s3Client = s3Client;
@@ -56,6 +57,26 @@ class R2Service {
       size: file.size,
       mimeType: file.mimeType,
       url: `${this.r2ImageBaseUrl}/${file.name}`,
+    };
+  }
+
+  async getPresignedUploadUrl({ petId, mimeType }: { petId: string; mimeType: string }) {
+    const fileName = `${petId}/${nanoid(10)}`;
+
+    const command = new PutObjectCommand({
+      Bucket: this.r2ImageBucketName,
+      Key: fileName,
+      ContentType: mimeType,
+    });
+
+    const presignedUrl = await getSignedUrl(this.s3Client, command, {
+      expiresIn: 300,
+    });
+
+    return {
+      presignedUrl,
+      fileName,
+      url: `${this.r2ImageBaseUrl}/${fileName}`,
     };
   }
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { Search, X, Lock, Ban } from "lucide-react";
+import { Search, X, Lock, Ban, Loader2 } from "lucide-react";
 
 import { overlay } from "overlay-kit";
 import ParentSearchSelector from "../../components/selector/parentSearch";
@@ -32,6 +32,7 @@ interface ParentLinkProps {
   label: "부" | "모";
   data?: GetParentsByPetIdResponseDtoDataFather | GetParentsByPetIdResponseDtoDataMother;
   editable?: boolean;
+  isLoading?: boolean;
   allowMyPetOnly?: boolean;
   onSelect?: (item: PetParentDtoWithMessage) => void;
   onUnlink?: () => void;
@@ -43,6 +44,7 @@ const ParentLink = ({
   label,
   data,
   editable = true,
+  isLoading = false,
   allowMyPetOnly = false,
   onSelect,
   onUnlink,
@@ -137,9 +139,11 @@ const ParentLink = ({
           <button
             className="relative aspect-square w-full overflow-hidden rounded-2xl bg-gray-100 transition-colors hover:bg-gray-200 dark:bg-[#18171C] dark:hover:bg-gray-700"
             onClick={handleSelect}
-            disabled={!editable}
+            disabled={!editable || isLoading}
           >
-            {editable ? (
+            {isLoading ? (
+              <Loader2 className="absolute top-1/2 left-1/2 h-6 w-6 -translate-x-1/2 -translate-y-1/2 animate-spin text-gray-400" />
+            ) : editable ? (
               <Search className="absolute top-1/2 left-1/2 h-6 w-6 -translate-x-1/2 -translate-y-1/2 text-gray-400" />
             ) : (
               <div className="text-center text-sm text-gray-400">미등록</div>
@@ -159,7 +163,12 @@ const ParentLink = ({
         </dt>
         <div className="flex flex-col items-center gap-2">
           <div className="relative aspect-square w-full overflow-hidden rounded-2xl bg-yellow-50/50 dark:bg-gray-700/50">
-            {editable && (
+            {isLoading && (
+              <div className="absolute inset-0 z-20 flex items-center justify-center rounded-2xl bg-white/60 dark:bg-black/40">
+                <Loader2 className="h-6 w-6 animate-spin text-gray-500" />
+              </div>
+            )}
+            {editable && !isLoading && (
               <Button
                 variant="ghost"
                 size="sm"
@@ -201,7 +210,12 @@ const ParentLink = ({
       </dt>
 
       <div className="group relative block h-full w-full transition-opacity hover:opacity-95">
-        {editable && (
+        {isLoading && (
+          <div className="absolute inset-0 z-20 flex items-center justify-center rounded-2xl bg-white/60 dark:bg-black/40">
+            <Loader2 className="h-6 w-6 animate-spin text-gray-500" />
+          </div>
+        )}
+        {editable && !isLoading && (
           <Button
             variant="ghost"
             size="sm"

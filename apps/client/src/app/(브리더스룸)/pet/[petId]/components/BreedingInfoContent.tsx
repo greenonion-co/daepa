@@ -1,7 +1,7 @@
 "use client";
 
 import { usePetStore } from "@/app/(브리더스룸)/pet/store/pet";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import {
   petControllerFindPetByPetId,
   petControllerUpdate,
@@ -11,8 +11,8 @@ import {
   PetDto,
 } from "@repo/api-client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getChangedFields } from "@/lib/utils";
 import { toast } from "@/lib/toast";
+import { patchPetListCache } from "../../utils/patchPetListCache";
 import { useNameStore } from "@/app/(브리더스룸)/store/name";
 import { DUPLICATE_CHECK_STATUS } from "@/app/(브리더스룸)/constants";
 import { AxiosError } from "axios";
@@ -22,8 +22,8 @@ import { PublicToggle } from "./펫정보/PublicToggle";
 import { PetBasicInfo } from "./펫정보/PetBasicInfo";
 import { PetDetailInfo } from "./펫정보/PetDetailInfo";
 import { EggInfo } from "./펫정보/EggInfo";
-import EditActionButtons from "./EditActionButtons";
 import { useBreedingInfoStore } from "../../store/breedingInfo";
+import { useRegisterFlush } from "./FlushContext";
 
 interface BreedingInfoContentProps {
   petId: string;
@@ -37,13 +37,10 @@ const BreedingInfoContent = ({ petId, ownerId, initialPet }: BreedingInfoContent
   const { duplicateCheckStatus } = useNameStore();
   const { setBreedingInfo } = useBreedingInfoStore();
 
-  const [isEditMode, setIsEditMode] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
-
   const isViewingMyPet = useIsMyPet(ownerId);
 
   // 펫 데이터 조회 (초기 데이터가 있으면 자동 fetch 하지 않음)
-  const { data: queryPet, refetch } = useQuery({
+  const { data: queryPet } = useQuery({
     queryKey: [petControllerFindPetByPetId.name, petId],
     queryFn: () => petControllerFindPetByPetId(petId),
     select: (response) => response.data.data,
@@ -52,104 +49,54 @@ const BreedingInfoContent = ({ petId, ownerId, initialPet }: BreedingInfoContent
 
   // 서버에서 받은 초기 데이터 또는 React Query 데이터 사용
   const pet = queryPet ?? initialPet;
+  const petRef = useRef(pet);
+  useEffect(() => {
+    if (pet) petRef.current = pet;
+  }, [pet]);
 
   const isEgg = useMemo(() => pet?.type === PetDtoType.EGG, [pet?.type]);
 
   // 펫 업데이트 mutation
   const { mutateAsync: mutateUpdatePet } = useMutation({
     mutationFn: (updateData: UpdatePetDto) => {
-      if (!pet?.petId) throw new Error("Pet ID is required");
-      return petControllerUpdate(pet.petId, updateData);
+      if (!petRef.current?.petId) throw new Error("Pet ID is required");
+      return petControllerUpdate(petRef.current.petId, updateData);
     },
   });
 
-  // 변경된 필드 추출
-  const getChangedFieldsForPet = useCallback(
-    (original: PetDto, current: typeof formData): UpdatePetDto => {
-      return getChangedFields(
-        original as unknown as Record<string, unknown>,
-        current as unknown as Record<string, unknown>,
-        {
-          fields: [
-            "name",
-            "species",
-            "growth",
-            "sex",
-            "desc",
-            "hatchingDate",
-            "weight",
-            "temperature",
-            "isPublic",
-            "eggStatus",
-          ],
-          arrayFields: ["morphs", "traits", "foods"],
-          convertUndefinedToNull: true,
-        },
-      );
+  // 단일 필드 자동 저장
+  const autoSave = useCallback(
+    async (updateData: UpdatePetDto) => {
+      try {
+        await mutateUpdatePet(updateData);
+        // 저장 성공 시 로컬 ref 업데이트 (불필요한 재조회 방지)
+        if (petRef.current) {
+          petRef.current = { ...petRef.current, ...updateData } as PetDto;
+          // 리스트 캐시도 즉시 반영
+          patchPetListCache(queryClient, petRef.current.petId, updateData as Partial<PetDto>);
+        }
+        // 헤더 동기화 (공개여부, 이름)
+        if ("isPublic" in updateData || "name" in updateData) {
+          const updated = petRef.current;
+          setBreedingInfo({
+            petId,
+            name: updated?.name,
+            isPublic: updated?.isPublic,
+          });
+        }
+      } catch (error) {
+        console.error("Failed to update pet:", error);
+        if (error instanceof AxiosError) {
+          toast.error(error.response?.data?.message ?? "저장에 실패했습니다.");
+        } else {
+          toast.error("저장에 실패했습니다.");
+        }
+      }
     },
-    [],
+    [mutateUpdatePet, queryClient, setBreedingInfo, petId],
   );
 
-  // 저장 핸들러
-  const handleSave = useCallback(async () => {
-    if (!pet) return;
-
-    try {
-      setIsProcessing(true);
-
-      // 이름 중복 체크
-      if (pet.name !== formData.name && duplicateCheckStatus !== DUPLICATE_CHECK_STATUS.AVAILABLE) {
-        toast.error("이름 중복확인을 완료해주세요.");
-        return;
-      }
-
-      // 변경된 필드만 추출
-      const changedFields = getChangedFieldsForPet(pet, formData);
-
-      // 변경사항이 없으면 종료
-      if (Object.keys(changedFields).length === 0) {
-        toast.info("변경된 사항이 없습니다.");
-        setIsEditMode(false);
-        return;
-      }
-
-      await mutateUpdatePet(changedFields);
-      await refetch();
-
-      // 펫 목록 쿼리를 stale 처리 (백그라운드 갱신, await 하지 않아 저장 동작 차단 없음)
-      queryClient.invalidateQueries({ queryKey: [brPetControllerFindAll.name] });
-
-      toast.success("펫 정보 수정이 완료되었습니다.");
-      setIsEditMode(false);
-    } catch (error) {
-      console.error("Failed to update pet:", error);
-      if (error instanceof AxiosError) {
-        toast.error(error.response?.data?.message ?? "펫 정보 수정에 실패했습니다.");
-      } else {
-        toast.error("펫 정보 수정에 실패했습니다. " + (error as Error).message);
-      }
-    } finally {
-      setIsProcessing(false);
-    }
-  }, [
-    formData,
-    mutateUpdatePet,
-    pet,
-    duplicateCheckStatus,
-    refetch,
-    getChangedFieldsForPet,
-    queryClient,
-  ]);
-
-  // 취소 핸들러
-  const handleCancel = useCallback(() => {
-    if (pet) {
-      setFormData(pet);
-    }
-    setIsEditMode(false);
-  }, [pet, setFormData]);
-
-  // 필드 업데이트 헬퍼
+  // 필드 업데이트 헬퍼 (로컬 상태만)
   const updateField = useCallback(
     (field: string, value: any) => {
       setFormData((prev) => ({ ...prev, [field]: value }));
@@ -157,21 +104,104 @@ const BreedingInfoContent = ({ petId, ownerId, initialPet }: BreedingInfoContent
     [setFormData],
   );
 
-  // 펫 데이터 및 브리딩 정보 초기화 (통합된 useEffect)
+  // 즉시 저장 (select, toggle, multi-select, calendar)
+  const updateFieldAndSave = useCallback(
+    (field: string, value: any) => {
+      setFormData((prev) => ({ ...prev, [field]: value }));
+      autoSave({ [field]: value ?? null });
+    },
+    [setFormData, autoSave],
+  );
+
+  // blur 시 저장 (text, number)
+  // 이름은 중복확인 완료 시 useEffect에서 자동 저장
+  // 연속 변경(+/- 버튼 연타 등)은 디바운스로 마지막 값만 저장
+  const blurTimersRef = useRef<Record<string, NodeJS.Timeout>>({});
+  const handleFieldBlur = useCallback(
+    (field: string) => {
+      if (field === "name") {
+        const currentName = (usePetStore.getState().formData as any).name;
+        const originalName = petRef.current?.name;
+        if (currentName === originalName) return;
+        // 중복확인 버튼 클릭 시 blur가 먼저 발생하므로 지연 후 상태 확인
+        setTimeout(() => {
+          const status = useNameStore.getState().duplicateCheckStatus;
+          if (status !== DUPLICATE_CHECK_STATUS.AVAILABLE && status !== DUPLICATE_CHECK_STATUS.CHECKING) {
+            toast.error("이름 중복확인을 완료해주세요.");
+          }
+        }, 150);
+        return;
+      }
+
+      clearTimeout(blurTimersRef.current[field]);
+      blurTimersRef.current[field] = setTimeout(() => {
+        const current = (usePetStore.getState().formData as any)[field] ?? null;
+        const original = (petRef.current as any)?.[field] ?? null;
+        if (current === original) return;
+        autoSave({ [field]: current });
+      }, 500);
+    },
+    [autoSave],
+  );
+
+  // 이름 중복확인 완료 시 자동 저장
+  const formName = (formData as any).name;
+  useEffect(() => {
+    if (duplicateCheckStatus !== DUPLICATE_CHECK_STATUS.AVAILABLE) return;
+    const originalName = petRef.current?.name;
+    if (formName && formName !== originalName) {
+      autoSave({ name: formName });
+    }
+  }, [duplicateCheckStatus, formName, autoSave]);
+
+  // 미저장 blur 필드를 감지하고 서버에 저장
+  const flushUnsavedFields = useCallback(() => {
+    const latest = petRef.current;
+    if (!latest) return;
+
+    // 디바운스 타이머 정리
+    Object.values(blurTimersRef.current).forEach(clearTimeout);
+
+    const BLUR_FIELDS = ["desc", "weight", "temperature"];
+    const formData = usePetStore.getState().formData as any;
+    const unsaved: Record<string, any> = {};
+    for (const field of BLUR_FIELDS) {
+      const current = formData[field] ?? null;
+      const original = (latest as any)[field] ?? null;
+      if (current !== original) {
+        unsaved[field] = current;
+      }
+    }
+    if (Object.keys(unsaved).length > 0) {
+      petControllerUpdate(latest.petId, unsaved)
+        .then(() => {
+          queryClient.invalidateQueries({ queryKey: [brPetControllerFindAll.name] });
+        })
+        .catch(() => {});
+    }
+  }, [queryClient]);
+
+  // 모달 닫힐 때 flush (언마운트 전에 호출됨)
+  useRegisterFlush(flushUnsavedFields);
+
+  // 페이지 이동 등 언마운트 시 fallback
+  useEffect(() => {
+    return () => flushUnsavedFields();
+  }, [flushUnsavedFields]);
+
+  // 펫 데이터 및 브리딩 정보 초기화
   useEffect(() => {
     if (!pet) return;
 
-    // 폼 데이터 초기화 (편집 모드가 아닐 때만)
-    if (!isEditMode) {
-      setFormData(pet);
-    }
+    setFormData(pet);
 
     // 브리딩 정보 업데이트
     setBreedingInfo({
       petId: pet.petId,
+      name: pet.name,
       isPublic: pet?.isPublic,
     });
-  }, [pet, setFormData, setBreedingInfo, isEditMode]);
+  }, [pet, setFormData, setBreedingInfo]);
 
   if (!pet || Object.keys(formData).length === 0) return null;
 
@@ -182,36 +212,42 @@ const BreedingInfoContent = ({ petId, ownerId, initialPet }: BreedingInfoContent
       {/* 공개 여부 */}
       <PublicToggle
         isPublic={!!formData.isPublic}
-        isEditMode={isEditMode}
-        onChange={(isPublic) => updateField("isPublic", isPublic)}
+        isEditMode={isViewingMyPet}
+        onChange={(isPublic) => updateFieldAndSave("isPublic", isPublic)}
       />
 
       {/* 기본 정보 */}
       <PetBasicInfo
         formData={formData}
         errors={errors}
-        isEditMode={isEditMode}
+        isEditMode={isViewingMyPet}
         isEgg={isEgg}
         onNameChange={(name) => updateField("name", name)}
-        onHatchingDateChange={(date) => updateField("hatchingDate", date)}
+        onHatchingDateChange={(date) => updateFieldAndSave("hatchingDate", date)}
+        onFieldBlur={handleFieldBlur}
       />
 
       {/* 상세 정보 (일반 펫인 경우) */}
       {!isEgg && (
-        <PetDetailInfo formData={formData} isEditMode={isEditMode} onFieldChange={updateField} />
+        <PetDetailInfo
+          formData={formData}
+          isEditMode={isViewingMyPet}
+          onFieldChange={updateFieldAndSave}
+          onFieldInput={updateField}
+          onFieldBlur={handleFieldBlur}
+        />
       )}
 
       {/* 알 정보 (알인 경우) */}
-      {isEgg && <EggInfo formData={formData} isEditMode={isEditMode} onFieldChange={updateField} />}
-
-      {/* 액션 버튼 */}
-      <EditActionButtons
-        isVisible={isViewingMyPet}
-        isEditMode={isEditMode}
-        isProcessing={isProcessing}
-        onCancel={handleCancel}
-        onSubmit={() => (isEditMode ? handleSave() : setIsEditMode(true))}
-      />
+      {isEgg && (
+        <EggInfo
+          formData={formData}
+          isEditMode={isViewingMyPet}
+          onFieldChange={updateFieldAndSave}
+          onFieldInput={updateField}
+          onFieldBlur={handleFieldBlur}
+        />
+      )}
     </div>
   );
 };

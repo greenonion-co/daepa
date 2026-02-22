@@ -21,6 +21,7 @@ interface PetBasicInfoProps {
   isEgg: boolean;
   onNameChange: (name: string) => void;
   onHatchingDateChange: (date: string) => void;
+  onFieldBlur?: (field: string) => void;
 }
 
 export const PetBasicInfo = ({
@@ -30,6 +31,7 @@ export const PetBasicInfo = ({
   isEgg,
   onNameChange,
   onHatchingDateChange,
+  onFieldBlur,
 }: PetBasicInfoProps) => {
   return (
     <>
@@ -42,6 +44,7 @@ export const PetBasicInfo = ({
             value={String(formData.name || "")}
             placeholder="미정"
             onChange={(e) => onNameChange(e.target.value)}
+            onBlur={() => onFieldBlur?.("name")}
           />
         }
       />
@@ -51,6 +54,7 @@ export const PetBasicInfo = ({
           label="생년월일"
           content={
             <CalendarInput
+              variant="form"
               editable={isEditMode}
               placeholder="-"
               value={formData.hatchingDate}

@@ -1,7 +1,6 @@
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { SquareArrowOutUpRight } from "lucide-react";
 
 const LinkButton = ({
   href,
@@ -16,15 +15,16 @@ const LinkButton = ({
   className?: string;
   icon?: React.ReactNode;
 }) => {
+  const linkClass = cn(
+    "inline-flex items-center gap-0.5 rounded-md px-1 py-0.5 underline decoration-gray-900 underline-offset-2 transition-colors hover:bg-gray-200/70 dark:decoration-gray-100 dark:hover:bg-gray-700/70",
+    className,
+  );
+
   if (!tooltip) {
     return (
-      <Link
-        href={href}
-        className={cn("inline-flex items-center gap-0.5 rounded-md py-0.5", className)}
-      >
+      <Link href={href} className={linkClass}>
         {icon}
         {label}
-        <SquareArrowOutUpRight className={"ml-0.5 h-2.5 w-2.5"} />
       </Link>
     );
   }
@@ -32,13 +32,9 @@ const LinkButton = ({
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <Link
-          href={href}
-          className={cn("inline-flex items-center gap-0.5 rounded-md py-0.5", className)}
-        >
+        <Link href={href} className={linkClass}>
           {icon}
           {label}
-          <SquareArrowOutUpRight className={"ml-0.5 h-2.5 w-2.5"} />
         </Link>
       </TooltipTrigger>
       <TooltipContent>{tooltip}</TooltipContent>

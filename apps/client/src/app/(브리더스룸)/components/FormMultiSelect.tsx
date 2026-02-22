@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Check, ChevronDown, X } from "lucide-react";
 import { useIsMobile } from "@/hooks/useMobile";
@@ -24,21 +24,51 @@ const FormMultiSelect = ({
   const isMobile = useIsMobile();
   const [isOpen, setIsOpen] = useState(false);
   const [selectedItems, setSelectedItems] = useState<string[] | undefined>([]);
-  const [tempSelectedItems, setTempSelectedItems] = useState<string[] | undefined>(initialItems);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isEntering, setIsEntering] = useState(false);
+  // 드롭다운이 열렸을 때의 초기 상태를 저장 (변경 여부 판단용)
+  const openSnapshotRef = useRef<string[] | undefined>(undefined);
+  const selectedItemsRef = useRef(selectedItems);
+  selectedItemsRef.current = selectedItems;
+  const onSelectRef = useRef(onSelect);
+  onSelectRef.current = onSelect;
 
   const selectList = useMemo(() => Object.values(displayMap), [displayMap]);
 
   useEffect(() => {
     setSelectedItems(initialItems);
-    setTempSelectedItems(initialItems);
   }, [initialItems]);
+
+  // 드롭다운 닫힐 때 변경사항이 있으면 onSelect 호출
+  const closeAndSave = useCallback(() => {
+    setIsOpen(false);
+    const snapshot = openSnapshotRef.current;
+    const current = selectedItemsRef.current;
+    const snapshotStr = JSON.stringify((snapshot ?? []).slice().sort());
+    const currentStr = JSON.stringify((current ?? []).slice().sort());
+    openSnapshotRef.current = undefined; // 저장 완료 마킹
+    if (snapshotStr !== currentStr) {
+      onSelectRef.current(current);
+    }
+  }, []);
+
+  // 컴포넌트 언마운트 시 드롭다운이 열려있고 변경사항이 있으면 저장
+  useEffect(() => {
+    return () => {
+      const snapshot = openSnapshotRef.current;
+      if (snapshot === undefined) return; // 이미 저장됨 or 드롭다운이 열린 적 없음
+      const current = selectedItemsRef.current;
+      const snapshotStr = JSON.stringify((snapshot ?? []).slice().sort());
+      const currentStr = JSON.stringify((current ?? []).slice().sort());
+      if (snapshotStr !== currentStr) {
+        onSelectRef.current(current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (isOpen) {
-      // 드롭다운이 열릴 때 현재 저장된 상태로 초기화
-      setSelectedItems(tempSelectedItems);
+      openSnapshotRef.current = selectedItemsRef.current;
     }
 
     if (!isOpen) return;
@@ -46,9 +76,7 @@ const FormMultiSelect = ({
     const handlePointerDown = (event: MouseEvent | TouchEvent) => {
       const root = containerRef.current;
       if (root && !root.contains(event.target as Node)) {
-        // 외부 클릭 시 저장하지 않고 닫히면 원래 상태로 복원
-        setSelectedItems(tempSelectedItems);
-        setIsOpen(false);
+        closeAndSave();
       }
     };
 
@@ -58,7 +86,7 @@ const FormMultiSelect = ({
       document.removeEventListener("mousedown", handlePointerDown);
       document.removeEventListener("touchstart", handlePointerDown);
     };
-  }, [isOpen, tempSelectedItems]);
+  }, [isOpen, closeAndSave]);
 
   useEffect(() => {
     if (isOpen) {
@@ -76,18 +104,18 @@ const FormMultiSelect = ({
         className={cn(
           "flex min-h-[32px] cursor-pointer items-center gap-1 rounded-lg px-2 py-1 text-[14px] font-[500]",
           selectedItems && selectedItems.length > 0
-            ? "bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400"
+            ? "bg-blue-50/70 text-gray-900 dark:bg-blue-900/10 dark:text-gray-100"
             : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200",
           disabled &&
-            "cursor-not-allowed bg-white text-black dark:bg-transparent dark:text-gray-200",
+            "cursor-not-allowed bg-blue-50/40 text-gray-900 dark:bg-blue-900/5 dark:text-gray-200",
         )}
         onClick={() => {
           if (disabled) return;
           if (isOpen) {
-            // 드롭다운을 닫을 때 저장하지 않았다면 원래 상태로 복원
-            setSelectedItems(tempSelectedItems);
+            closeAndSave();
+          } else {
+            setIsOpen(true);
           }
-          setIsOpen(!isOpen);
         }}
       >
         {disabled ? (
@@ -110,14 +138,7 @@ const FormMultiSelect = ({
             ) : (
               <div className="text-gray-400 dark:text-gray-500">{title} 선택하기</div>
             )}
-            <ChevronDown
-              className={cn(
-                "h-4 w-4 text-gray-600 dark:text-gray-400",
-                selectedItems
-                  ? "text-blue-600 dark:text-blue-400"
-                  : "text-gray-600 dark:text-gray-400",
-              )}
-            />
+            <ChevronDown className="h-4 w-4 text-gray-600 dark:text-gray-400" />
           </>
         )}
       </div>
@@ -125,10 +146,7 @@ const FormMultiSelect = ({
       {isOpen && isMobile && (
         <div
           className="fixed inset-0 z-40 bg-black/40"
-          onClick={() => {
-            setSelectedItems(tempSelectedItems);
-            setIsOpen(false);
-          }}
+          onClick={() => closeAndSave()}
         />
       )}
       {isOpen && (
@@ -199,24 +217,12 @@ const FormMultiSelect = ({
             })}
           </div>
 
-          <div className="flex justify-end gap-2">
+          <div className="flex justify-end">
             <button
-              onClick={() => {
-                setSelectedItems(undefined);
-              }}
-              className="h-[32px] cursor-pointer rounded-lg bg-gray-100 px-3 text-sm font-semibold text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
-            >
-              초기화
-            </button>
-            <button
-              onClick={() => {
-                setTempSelectedItems(selectedItems);
-                onSelect(selectedItems);
-                setIsOpen(false);
-              }}
+              onClick={() => closeAndSave()}
               className="h-[32px] cursor-pointer rounded-lg bg-blue-500 px-3 text-sm font-semibold text-white hover:bg-blue-600"
             >
-              저장
+              닫기
             </button>
           </div>
         </div>

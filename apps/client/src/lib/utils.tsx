@@ -83,6 +83,66 @@ export const buildR2TransformedUrl = (
   }
 };
 
+export const compressImageFile = (
+  file: File,
+  maxDimension = 1600,
+  quality = 0.82,
+): Promise<File> => {
+  // GIF는 애니메이션 유지를 위해 압축하지 않음
+  if (file.type === "image/gif") return Promise.resolve(file);
+
+  return new Promise((resolve) => {
+    const img = new window.Image();
+    const objectUrl = URL.createObjectURL(file);
+
+    img.onload = () => {
+      URL.revokeObjectURL(objectUrl);
+
+      // 이미 충분히 작은 이미지는 압축 불필요
+      if (
+        img.width <= maxDimension &&
+        img.height <= maxDimension &&
+        file.size <= 500 * 1024
+      ) {
+        resolve(file);
+        return;
+      }
+
+      const scale = Math.min(1, maxDimension / Math.max(img.width, img.height));
+      const targetW = Math.max(1, Math.round(img.width * scale));
+      const targetH = Math.max(1, Math.round(img.height * scale));
+
+      const canvas = document.createElement("canvas");
+      canvas.width = targetW;
+      canvas.height = targetH;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) {
+        resolve(file);
+        return;
+      }
+      ctx.drawImage(img, 0, 0, targetW, targetH);
+
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) {
+            resolve(file);
+            return;
+          }
+          resolve(new File([blob], file.name, { type: blob.type }));
+        },
+        "image/webp",
+        quality,
+      );
+    };
+
+    img.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      resolve(file);
+    };
+    img.src = objectUrl;
+  });
+};
+
 export const resizeImageFile = (file: File, maxWidth = 1280, quality = 0.82): Promise<string> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();

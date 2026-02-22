@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useCallback, useMemo } from "react";
 import { isNativeApp, navigate, requestGoBack } from "@/lib/native-bridge";
+import { startProgress } from "@/components/common/NavigationProgress";
 
 /**
  * 네이티브 앱과 웹 모두에서 동작하는 라우터 훅
@@ -18,6 +19,7 @@ export function useAppRouter() {
         navigate({ path });
         return;
       }
+      startProgress();
       router.push(path);
     },
     [router],
@@ -29,6 +31,7 @@ export function useAppRouter() {
         navigate({ path, options: { replace: true } });
         return;
       }
+      startProgress();
       router.replace(path);
     },
     [router],

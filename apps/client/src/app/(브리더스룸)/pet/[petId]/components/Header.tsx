@@ -42,15 +42,16 @@ const Header = ({
   onTabClick = () => {},
   onDelete,
 }: HeaderProps) => {
-  const isMyPet = useIsMyPet(pet.owner.userId);
+  const isMyPet = useIsMyPet(pet?.owner?.userId);
   const isLoggedIn = useIsLoggedIn();
   const router = useAppRouter();
   const [isScrolled, setIsScrolled] = useState(size === "small");
 
   const { data: thumbnail } = useQuery({
-    queryKey: getPetThumbnailQueryKey(pet.petId),
-    queryFn: () => petImageControllerFindThumbnail(pet.petId),
+    queryKey: getPetThumbnailQueryKey(pet?.petId),
+    queryFn: () => petImageControllerFindThumbnail(pet!.petId),
     select: (response) => response.data.data,
+    enabled: !!pet,
     staleTime: Infinity,
     gcTime: Infinity,
   });
@@ -99,15 +100,18 @@ const Header = ({
   const { adoption } = useAdoptionStore();
   const adoptionData = adoption?.petId === pet?.petId ? adoption : null;
 
+  // 저장 완료된 이름만 헤더에 반영 (중복확인 통과 후 저장된 값)
+  const displayName = breedingData?.name || pet?.name;
+
   if (!pet) return null;
 
   return (
     <div
       className={cn(
-        "dark:bg-background sticky top-0 z-20 flex flex-col gap-2 bg-gray-100 px-2 transition-all transition-shadow duration-200",
+        "dark:bg-background sticky top-0 z-20 flex flex-col gap-2 bg-gray-100 px-2 pb-2 transition-all transition-shadow duration-200",
         isScrolled ? "pt-2 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1)]" : "",
         size === "small" &&
-          "before:dark:bg-background top-2 before:absolute before:-top-2 before:right-0 before:left-0 before:h-2 before:bg-gray-100", // 모달에서 X 버튼 아래로 위치
+          "before:dark:bg-background top-1.5 before:absolute before:-top-2 before:right-0 before:left-0 before:h-2 before:bg-gray-100", // 모달에서 X 버튼 아래로 위치
       )}
     >
       <div className="flex items-center gap-2">
@@ -121,14 +125,14 @@ const Header = ({
         </div>
         <div className="flex flex-1 flex-col">
           <div className="flex items-center gap-2">
-            {pet.name ? (
+            {displayName ? (
               <div
                 className={cn(
                   "flex font-bold transition-all max-[480px]:text-[14px]",
                   isScrolled ? "text-[14px]" : "text-[16px]",
                 )}
               >
-                {pet.name}
+                {displayName}
               </div>
             ) : (
               <div

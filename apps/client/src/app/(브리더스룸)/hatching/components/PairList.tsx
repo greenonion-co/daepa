@@ -188,7 +188,7 @@ const PairList = memo(() => {
     return (
       <div className="flex items-center justify-center py-5 text-center">
         <div
-          className="group flex cursor-pointer flex-col items-center rounded-3xl bg-gradient-to-b from-[#e5cf94] to-[#fffcf2] p-10 pt-5 transition-all hover:scale-105 hover:shadow-xl dark:from-[#5a4a2a] dark:to-[#2a2a20]"
+          className="group flex cursor-pointer flex-col items-center rounded-3xl p-10 pt-5 transition-all hover:scale-105 hover:shadow-xl dark:from-[#5a4a2a] dark:to-[#2a2a20]"
           onClick={handleOpenCreateForm}
         >
           <CircleAlert className={"my-4 opacity-40"} width={60} height={60} />

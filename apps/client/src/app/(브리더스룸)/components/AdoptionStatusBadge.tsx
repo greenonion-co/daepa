@@ -19,7 +19,7 @@ const AdoptionStatusBadge = forwardRef<
     <span
       ref={ref}
       className={cn(
-        "rounded-md px-1.5 py-0.5 text-[10px] font-semibold shadow-sm",
+        "inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] leading-none font-semibold text-gray-900 shadow-sm",
         STATUS_STYLE[status],
         className,
       )}
