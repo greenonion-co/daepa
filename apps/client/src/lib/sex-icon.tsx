@@ -22,13 +22,13 @@ export function getSexIcon(sex: string | undefined | null, options: SexIconOptio
   const textSizeClass = TEXT_SIZE_CLASSES[size];
 
   if (sex === "M") {
-    return <div className={cn(textSizeClass, "text-blue-500", className)}>수컷</div>;
+    return <span className={cn(textSizeClass, "text-blue-500", className)}>수컷</span>;
   }
 
   if (sex === "F") {
-    return <div className={cn(textSizeClass, "text-red-500", className)}>암컷</div>;
+    return <span className={cn(textSizeClass, "text-red-500", className)}>암컷</span>;
   }
 
   // 미구분
-  return <div className={cn(textSizeClass, "text-gray-500", className)}>미구분</div>;
+  return <span className={cn(textSizeClass, "text-gray-500", className)}>미구분</span>;
 }

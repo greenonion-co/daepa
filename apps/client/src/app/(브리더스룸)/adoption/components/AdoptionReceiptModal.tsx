@@ -1,6 +1,6 @@
 "use client";
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   AdoptionHistoryDto,
   adoptionHistoryControllerGetAllAdoptions,
@@ -81,14 +81,14 @@ const PetInfoCard = ({
               name
             )}
 
-            {hatchingDate && <p className="text-sm font-normal text-gray-500">{hatchingDate}</p>}
+            {hatchingDate && <span className="text-sm font-normal text-gray-500">{hatchingDate}</span>}
             {/*<div className={cn("text-muted-foreground", isMobile ? "text-xs" : "text-sm")}>*/}
             {/*  | {(SPECIES_KOREAN_INFO as Record<string, string>)[species] || "미분류"}*/}
             {/*</div>*/}
             {sex && (
-              <p className={cn("text-blue-500", isMobile ? "text-xs" : "text-sm")}>
+              <span className={cn("text-blue-500", isMobile ? "text-xs" : "text-sm")}>
                 {getSexIcon(sex, { size: "xs" })}
-              </p>
+              </span>
             )}
           </div>
           <div
@@ -181,6 +181,7 @@ const AdoptionReceiptModal = ({ isOpen, adoption, onClose }: AdoptionReceiptModa
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>분양 상세 정보</DialogTitle>
+          <DialogDescription className="sr-only">분양 상세 정보를 확인합니다.</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">

@@ -32,7 +32,7 @@ import Loading from "@/components/common/Loading";
 import { STATISTICS_COLORS, ADOPTION_STATISTICS_COLORS } from "../../constants";
 import { cn, formatPrice } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/useMobile";
-import { AlertCircle, ChevronDown, CircleAlert } from "lucide-react";
+import { AlertCircle, ChevronDown } from "lucide-react";
 import SiblingPetCard from "../../pet/[petId]/relation/components/SiblingPetCard";
 
 // 연도 옵션 생성 (최근 5년)
@@ -255,7 +255,6 @@ const AdoptionDashboard = memo(() => {
         <SingleSelect
           showTitle
           type="species"
-          saveASAP
           initialItem={species}
           onSelect={handleSpeciesChange}
         />
@@ -341,8 +340,7 @@ const AdoptionDashboard = memo(() => {
       )}
 
       {!species ? (
-        <div className="text-muted-foreground flex h-40 flex-col items-center justify-center text-sm">
-          <CircleAlert className={"my-4 opacity-40"} width={60} height={60} />
+        <div className="flex h-40 flex-col items-center justify-center text-sm text-gray-400 dark:text-gray-500">
           종을 선택해주세요.
         </div>
       ) : isStatsLoading ? (
@@ -545,8 +543,7 @@ const AdoptionDashboard = memo(() => {
           </div>
         </div>
       ) : (
-        <div className="text-muted-foreground mt-6 flex flex-col items-center text-sm">
-          <CircleAlert className={"my-4 opacity-40"} width={60} height={60} />
+        <div className="mt-6 flex flex-col items-center text-sm text-gray-400 dark:text-gray-500">
           아직 데이터가 없습니다.
         </div>
       )}

@@ -30,8 +30,8 @@ const getParentInfo = (parent: PetDtoFather | PetDtoMother | undefined) => {
   if ("hiddenStatus" in parent) {
     return (
       (parent.hiddenStatus === PetHiddenStatusDtoHiddenStatus.SECRET &&
-        "(비공개 처리된 펫입니다.)") ||
-      (parent.hiddenStatus === PetHiddenStatusDtoHiddenStatus.DELETED && "(삭제된 펫입니다.)")
+        "(비공개 처리된 개체입니다.)") ||
+      (parent.hiddenStatus === PetHiddenStatusDtoHiddenStatus.DELETED && "(삭제된 개체입니다.)")
     );
   }
 

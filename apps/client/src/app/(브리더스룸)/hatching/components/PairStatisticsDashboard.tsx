@@ -22,7 +22,7 @@ import {
   getMorphOrTraitColor,
 } from "./Charts";
 import Loading from "@/components/common/Loading";
-import { CircleAlert } from "lucide-react";
+
 import { STATISTICS_COLORS } from "../../constants";
 
 // 연도 옵션 생성 (최근 5년)
@@ -223,7 +223,6 @@ const PairStatisticsDashboard = memo(() => {
         <SingleSelect
           showTitle
           type="species"
-          saveASAP
           initialItem={species}
           onSelect={handleSpeciesChange}
         />
@@ -262,8 +261,7 @@ const PairStatisticsDashboard = memo(() => {
       </div>
 
       {!species ? (
-        <div className="text-muted-foreground flex h-40 flex-col items-center justify-center text-sm">
-          <CircleAlert className={"my-4 opacity-40"} width={60} height={60} />
+        <div className="flex h-40 flex-col items-center justify-center text-sm text-gray-400 dark:text-gray-500">
           종을 선택해주세요.
         </div>
       ) : isStatsLoading ? (
@@ -358,8 +356,7 @@ const PairStatisticsDashboard = memo(() => {
           )}
         </div>
       ) : (
-        <div className="text-muted-foreground mt-6 flex flex-col items-center text-sm">
-          <CircleAlert className={"my-4 opacity-40"} width={60} height={60} />
+        <div className="mt-6 flex flex-col items-center text-sm text-gray-400 dark:text-gray-500">
           아직 데이터가 없습니다.
         </div>
       )}

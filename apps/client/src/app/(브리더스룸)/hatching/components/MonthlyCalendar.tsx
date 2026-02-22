@@ -13,7 +13,7 @@ import { Calendar } from "./Calendar";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/useMobile";
 import { DateTime } from "luxon";
-import { CircleAlert } from "lucide-react";
+
 import { isNativeApp } from "@/lib/native-bridge";
 
 const MonthlyCalendar = memo(() => {
@@ -193,7 +193,7 @@ const MonthlyCalendar = memo(() => {
           className={cn(
             "w-full",
             isMobile && "flex min-h-0 flex-1 flex-col",
-            isScrolled ? "mt-2" : "-mt-5",
+            isMobile && (isScrolled ? "mt-2" : "-mt-5"),
           )}
         >
           <div
@@ -258,9 +258,8 @@ const MonthlyCalendar = memo(() => {
             {monthlyIsPending || todayIsFetching ? (
               <Loading />
             ) : weeklyGroups.length === 0 ? (
-              <div className="flex flex-col items-center justify-center pt-10 text-[14px] text-gray-700 dark:text-gray-300">
-                <CircleAlert className={"my-4 opacity-40"} width={60} height={60} />
-                <span className="font-semibold text-black dark:text-gray-100">
+              <div className="flex flex-col items-center justify-center pt-10 text-sm text-gray-400 dark:text-gray-500">
+                <span className="font-medium text-gray-500 dark:text-gray-400">
                   {currentMonth.getFullYear()}년 {currentMonth.getMonth() + 1}월
                 </span>
                 아직 데이터가 없습니다.

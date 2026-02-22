@@ -293,7 +293,7 @@ export default function RegisterPage({ params }: { params: Promise<{ funnel: str
             title: funnel === REGISTER_PAGE.SECOND ? "완료" : "다음",
             onClick: () => goNext(),
           }}
-          className={cn(!isMobile && "mr-[55px]")}
+          className={cn(!isMobile && "mr-(--right-sidebar-width)")}
         />
       </form>
 

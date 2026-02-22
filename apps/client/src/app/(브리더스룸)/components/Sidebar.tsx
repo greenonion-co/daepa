@@ -36,7 +36,7 @@ const Sidebar = ({ unreadCount }: { unreadCount: number }) => {
 
   return (
     <div ref={sidebarRef}>
-      <div className="fixed right-0 z-30 flex h-full w-[55px] flex-col items-center gap-2 bg-gray-100 dark:bg-black">
+      <div className="fixed right-0 z-30 flex h-full w-(--right-sidebar-width) flex-col items-center gap-2 bg-gray-100 dark:bg-black">
         <SidebarItem
           icon={
             <ChevronsLeft

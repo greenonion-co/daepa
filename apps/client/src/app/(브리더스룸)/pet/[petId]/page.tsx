@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { CircleAlert } from "lucide-react";
+
 import { Metadata } from "next";
 import { DateTime } from "luxon";
 import { SPECIES_KOREAN_INFO } from "../../constants";
@@ -25,14 +25,14 @@ export async function generateMetadata({ params }: PetPageProps): Promise<Metada
 
   if (!pet) {
     return {
-      title: "펫을 찾을 수 없습니다",
+      title: "개체를 찾을 수 없습니다",
     };
   }
 
   // 비공개 펫은 검색엔진 인덱싱 방지
   if (!pet.isPublic) {
     return {
-      title: "비공개 펫",
+      title: "비공개 개체",
       robots: {
         index: false,
         follow: false,
@@ -45,10 +45,10 @@ export async function generateMetadata({ params }: PetPageProps): Promise<Metada
   const description = `${speciesKorean} ${pet.name || ""}${morphsText ? ` - ${morphsText}` : ""}`;
 
   return {
-    title: pet.name ? `${pet.name} | 펫 상세` : `${speciesKorean} | 펫 상세`,
+    title: pet.name ? `${pet.name} | 개체 상세` : `${speciesKorean} | 개체 상세`,
     description,
     openGraph: {
-      title: pet.name ? `${pet.name} | 펫 상세` : `${speciesKorean} | 펫 상세`,
+      title: pet.name ? `${pet.name} | 개체 상세` : `${speciesKorean} | 개체 상세`,
       description,
     },
   };
@@ -63,17 +63,13 @@ export default async function PetPage({ params }: PetPageProps) {
     return (
       <div className="flex h-[calc(100vh-52px)] flex-1 items-center justify-center">
         <div className="flex flex-col items-center gap-2 text-center">
-          <CircleAlert className={"my-4 opacity-40"} width={60} height={60} />
-
-          <div>
-            <h1 className="text-[16px] font-[500] text-gray-900 dark:text-gray-100">
-              삭제된 펫입니다
-            </h1>
-            <p className="text-[14px] text-gray-500 dark:text-gray-400">
-              <span className="font-semibold">{pet.name}</span>은(는) 삭제되어 더 이상 조회할 수
-              없습니다.
-            </p>
-          </div>
+          <h1 className="text-[15px] font-medium text-gray-500 dark:text-gray-400">
+            삭제된 개체입니다
+          </h1>
+          <p className="text-sm text-gray-400 dark:text-gray-500">
+            <span className="font-semibold">{pet.name}</span>은(는) 삭제되어 더 이상 조회할 수
+            없습니다.
+          </p>
 
           {pet.deletedAt && (
             <div className="text-xs font-[600] text-red-400">
@@ -90,11 +86,7 @@ export default async function PetPage({ params }: PetPageProps) {
     <PetDetailLayout
       pet={pet}
       breedingSlot={
-        <BreedingInfoContent
-          petId={pet.petId}
-          ownerId={pet.owner.userId ?? ""}
-          initialPet={pet}
-        />
+        <BreedingInfoContent petId={pet.petId} ownerId={pet.owner.userId ?? ""} initialPet={pet} />
       }
       imagesSlot={
         <Suspense fallback={<SectionSkeleton />}>

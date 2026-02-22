@@ -40,13 +40,13 @@ export function RestorePetButton({ petId, petName }: RestorePetButtonProps) {
       return petControllerRestorePet(petId);
     },
     onSuccess: () => {
-      toast.success("펫이 복구되었습니다.");
+      toast.success("개체가 복구되었습니다.");
       queryClient.invalidateQueries({ queryKey: [petControllerGetDeletedPets.name] });
       queryClient.invalidateQueries({ queryKey: [brPetControllerFindAll.name] });
       setOpen(false);
     },
     onError: (error: any) => {
-      const message = error?.response?.data?.message || "펫 복구 중 오류가 발생했습니다.";
+      const message = error?.response?.data?.message || "개체 복구 중 오류가 발생했습니다.";
       toast.error(message);
     },
   });
@@ -70,9 +70,9 @@ export function RestorePetButton({ petId, petName }: RestorePetButtonProps) {
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>펫을 복구하시겠습니까?</AlertDialogTitle>
+          <AlertDialogTitle>개체를 복구하시겠습니까?</AlertDialogTitle>
           <AlertDialogDescription>
-            {petName ? `"${petName}"` : "이 펫"}을 복구하면 다시 펫 목록에 표시됩니다.
+            {petName ? `"${petName}"` : "이 개체"}을 복구하면 다시 개체 목록에 표시됩니다.
             <br />
             삭제 전 상태로 복구됩니다.
           </AlertDialogDescription>

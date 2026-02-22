@@ -81,7 +81,8 @@ const NumberField = ({
 
       {!disabled && (
         <div className="flex h-[32px] items-center gap-1 rounded-lg bg-gray-100 p-1 text-gray-500">
-          <div
+          <button
+            type="button"
             className={cn(
               "rounded-md p-1",
               min !== undefined && Number(value) <= min
@@ -97,9 +98,10 @@ const NumberField = ({
             }}
           >
             <Minus className="h-4 w-4" />
-          </div>
+          </button>
           <div className="h-4 w-[1px] bg-gray-200" />
-          <div
+          <button
+            type="button"
             className={cn(
               "rounded-md p-1",
               max !== undefined && Number(value) >= max
@@ -114,7 +116,7 @@ const NumberField = ({
             }}
           >
             <Plus className="h-4 w-4" />
-          </div>
+          </button>
         </div>
       )}
     </div>

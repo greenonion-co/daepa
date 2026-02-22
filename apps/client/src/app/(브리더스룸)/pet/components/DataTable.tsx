@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useCallback } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   ColumnDef,
   flexRender,
@@ -19,10 +20,19 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import useTableStore from "../store/table";
-import { PetDto } from "@repo/api-client";
+import {
+  PetDto,
+  PetDtoGrowth,
+  AdoptionDto,
+  UpdateAdoptionDtoStatus,
+  petControllerUpdate,
+  petAdoptionControllerCreatePetAdoption,
+  petAdoptionControllerUpdatePetAdoption,
+} from "@repo/api-client";
+import { patchPetListCache } from "../utils/patchPetListCache";
 import Loading from "@/components/common/Loading";
 import { cn } from "@/lib/utils";
-import { CircleAlert } from "lucide-react";
+
 import { useAppRouter } from "@/hooks/useAppRouter";
 import PetDetailModal from "../[petId]/components/PetDetailModal";
 import { useIsMobile } from "@/hooks/useMobile";
@@ -50,14 +60,70 @@ export const DataTable = ({
   const isMobile = useIsMobile();
   const { sorting, rowSelection, setSorting, setRowSelection } = useTableStore();
 
+  const queryClient = useQueryClient();
   const router = useAppRouter();
   const [selectedPet, setSelectedPet] = useState<PetDto | null>(null);
   const [hoveredPetId, setHoveredPetId] = useState<string | null>(null);
+  const [previewOverride, setPreviewOverride] = useState<{ petId: string; name?: string; status?: string } | null>(null);
+  const [previewSuppressed, setPreviewSuppressed] = useState(false);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     setMousePos({ x: e.clientX, y: e.clientY });
   }, []);
+
+  const handleTogglePublic = useCallback(
+    async (petId: string, currentIsPublic: boolean) => {
+      const newIsPublic = !currentIsPublic;
+      // 낙관적 업데이트
+      patchPetListCache(queryClient, petId, { isPublic: newIsPublic });
+      try {
+        await petControllerUpdate(petId, { isPublic: newIsPublic });
+      } catch {
+        // 실패 시 롤백
+        patchPetListCache(queryClient, petId, { isPublic: currentIsPublic });
+      }
+    },
+    [queryClient],
+  );
+
+  const handleChangeGrowth = useCallback(
+    async (petId: string, currentGrowth: PetDtoGrowth, newGrowth: PetDtoGrowth) => {
+      patchPetListCache(queryClient, petId, { growth: newGrowth });
+      try {
+        await petControllerUpdate(petId, { growth: newGrowth });
+      } catch {
+        patchPetListCache(queryClient, petId, { growth: currentGrowth });
+      }
+    },
+    [queryClient],
+  );
+
+  const handleChangeAdoptionStatus = useCallback(
+    async (
+      petId: string,
+      currentAdoption: AdoptionDto | null | undefined,
+      newStatus: UpdateAdoptionDtoStatus | null,
+    ) => {
+      const oldAdoption = currentAdoption ?? null;
+      // 낙관적 업데이트 (adoption 객체는 유지하고 status만 변경)
+      const base = oldAdoption ?? { petId, createdAt: new Date().toISOString() };
+      const optimisticAdoption = { ...base, status: newStatus };
+      patchPetListCache(queryClient, petId, { adoption: optimisticAdoption as PetDto["adoption"] });
+
+      try {
+        if (oldAdoption) {
+          await petAdoptionControllerUpdatePetAdoption(petId, { status: newStatus as UpdateAdoptionDtoStatus });
+        } else if (newStatus) {
+          await petAdoptionControllerCreatePetAdoption({ petId, status: newStatus });
+        }
+      } catch {
+        // 실패 시 롤백
+        patchPetListCache(queryClient, petId, { adoption: oldAdoption as PetDto["adoption"] });
+      }
+    },
+    [queryClient],
+  );
 
   const table = useReactTable({
     data,
@@ -70,6 +136,13 @@ export const DataTable = ({
     state: {
       sorting,
       rowSelection,
+    },
+    meta: {
+      setPreviewOverride,
+      setPreviewSuppressed,
+      togglePublic: handleTogglePublic,
+      changeAdoptionStatus: handleChangeAdoptionStatus,
+      changeGrowth: handleChangeGrowth,
     },
   });
 
@@ -140,7 +213,7 @@ export const DataTable = ({
                       return (
                         <TableCell
                           key={cell.id}
-                          className="py-2"
+                          className="py-1.5"
                           style={size ? { width: size, maxWidth: size } : undefined}
                         >
                           {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -160,26 +233,28 @@ export const DataTable = ({
               </>
             ) : (
               <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  onClick={() => {
-                    if (!isEmpty) return;
-
-                    router.push("/register/1");
-                  }}
-                >
-                  <div
-                    className={cn(
-                      "flex h-full w-full flex-col items-center justify-center py-5 text-center text-gray-700 dark:text-gray-300",
-                      isEmpty && "cursor-pointer",
-                    )}
-                  >
-                    <CircleAlert className={"my-4 opacity-40"} width={60} height={60} />
-                    개체가 없습니다.
-                    {isEmpty && (
-                      <div className="font-semibold text-blue-500 dark:text-blue-400">
-                        개체를 추가해 관리를 시작해보세요!
-                      </div>
+                <TableCell colSpan={columns.length}>
+                  <div className="flex flex-col items-center justify-center py-12 text-center">
+                    {isEmpty ? (
+                      <>
+                        <h2 className="bg-gradient-to-r from-[#4285F4] via-[#9B72CB] to-[#D96570] bg-clip-text text-2xl font-semibold text-transparent dark:from-[#8AB4F8] dark:via-[#C58AF9] dark:to-[#F28B82]">
+                          개체 관리를 시작해보세요
+                        </h2>
+                        <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                          첫 개체를 등록하고 체계적으로 관리할 수 있어요.
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => router.push("/register/1")}
+                          className="mt-5 rounded-full border border-gray-200 bg-white px-5 py-2 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
+                        >
+                          개체 등록하기
+                        </button>
+                      </>
+                    ) : (
+                      <p className="text-sm text-gray-400 dark:text-gray-500">
+                        조건에 맞는 개체가 없습니다.
+                      </p>
                     )}
                   </div>
                 </TableCell>
@@ -197,7 +272,14 @@ export const DataTable = ({
         />
       )}
 
-      {hoveredPetId && <PetHoverPreview petId={hoveredPetId} mousePos={mousePos} />}
+      {!previewSuppressed && (previewOverride || hoveredPetId) && (
+        <PetHoverPreview
+          petId={previewOverride?.petId || hoveredPetId!}
+          mousePos={mousePos}
+          name={previewOverride?.name}
+          parentStatus={previewOverride?.status}
+        />
+      )}
     </div>
   );
 };

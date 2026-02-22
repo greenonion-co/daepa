@@ -10,6 +10,11 @@ import BadgeList from "../../components/BadgeList";
 import DeletedPetName from "../../components/DeletedPetName";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
+type TableMeta = {
+  setPreviewOverridePetId?: (id: string | null) => void;
+  setPreviewSuppressed?: (suppressed: boolean) => void;
+};
+
 export const columns: ColumnDef<AdoptionHistoryDto>[] = [
   {
     accessorKey: "adoptionDate",
@@ -32,9 +37,9 @@ export const columns: ColumnDef<AdoptionHistoryDto>[] = [
       const sex = row.original.pet.sex;
       const dotColor =
         sex === "M"
-          ? "bg-blue-500"
+          ? "bg-[#2383E2] dark:bg-[#529CCA]"
           : sex === "F"
-            ? "bg-red-500"
+            ? "bg-[#E03E3E] dark:bg-[#FF7369]"
             : "bg-gray-300";
 
       return (
@@ -108,30 +113,47 @@ export const columns: ColumnDef<AdoptionHistoryDto>[] = [
     id: "father",
     header: "부개체",
     accessorFn: (row) => row.pet.father,
-    cell: ({ row }) => {
+    cell: ({ row, table }) => {
       const father = row.original.pet.father;
       if (!father) return null;
+      const setPreview = (table.options.meta as TableMeta)?.setPreviewOverridePetId;
 
-      return <LinkButton href={`/pet/${father.petId}`} label={father.name ?? ""} />;
+      return (
+        <span
+          onMouseEnter={() => setPreview?.(father.petId)}
+          onMouseLeave={() => setPreview?.(null)}
+        >
+          <LinkButton href={`/pet/${father.petId}`} label={father.name ?? ""} />
+        </span>
+      );
     },
   },
   {
     id: "mother",
     accessorFn: (row) => row.pet.mother,
     header: "모개체",
-    cell: ({ row }) => {
+    cell: ({ row, table }) => {
       const mother = row.original.pet.mother;
       if (!mother) return null;
+      const setPreview = (table.options.meta as TableMeta)?.setPreviewOverridePetId;
 
-      return <LinkButton href={`/pet/${mother.petId}`} label={mother.name ?? ""} />;
+      return (
+        <span
+          onMouseEnter={() => setPreview?.(mother.petId)}
+          onMouseLeave={() => setPreview?.(null)}
+        >
+          <LinkButton href={`/pet/${mother.petId}`} label={mother.name ?? ""} />
+        </span>
+      );
     },
   },
   {
     accessorKey: "memo",
     header: "메모",
-    cell: ({ row }) => {
+    cell: ({ row, table }) => {
       const memo = row.original.memo;
       if (!memo) return null;
+      const setSuppressed = (table.options.meta as TableMeta)?.setPreviewSuppressed;
 
       const truncated = memo.length > 10;
       const displayText = truncated ? `${memo.slice(0, 10)}…` : memo;
@@ -141,14 +163,16 @@ export const columns: ColumnDef<AdoptionHistoryDto>[] = [
       }
 
       return (
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <div className="cursor-default text-sm text-gray-600">{displayText}</div>
-          </TooltipTrigger>
-          <TooltipContent className="max-w-[300px] whitespace-pre-wrap">
-            {memo}
-          </TooltipContent>
-        </Tooltip>
+        <span onMouseEnter={() => setSuppressed?.(true)} onMouseLeave={() => setSuppressed?.(false)}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="cursor-default text-sm text-gray-600">{displayText}</div>
+            </TooltipTrigger>
+            <TooltipContent className="max-w-[300px] whitespace-pre-wrap">
+              {memo}
+            </TooltipContent>
+          </Tooltip>
+        </span>
       );
     },
   },

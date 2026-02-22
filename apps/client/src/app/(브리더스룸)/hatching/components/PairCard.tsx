@@ -139,7 +139,7 @@ const PairCard = ({
           <StickyNote className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-600 dark:text-amber-500" />
           <div className="flex-1 py-3 leading-tight">
             {pair.desc ? (
-              <TooltipText text={pair.desc} className="w-full text-sm" displayTextLength={50} />
+              <TooltipText text={pair.desc} className="line-clamp-2 w-full text-sm" displayTextLength={50} />
             ) : (
               <p className="text-sm text-gray-400 dark:text-gray-500">
                 메모를 추가하려면 클릭하세요

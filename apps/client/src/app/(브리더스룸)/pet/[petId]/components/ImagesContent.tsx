@@ -13,6 +13,7 @@ import { toast } from "@/lib/toast";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useIsMyPet } from "@/hooks/useIsMyPet";
 import { isEmpty } from "es-toolkit/compat";
+import { ImageOff } from "lucide-react";
 
 interface ImagesContentProps {
   pet: PetDto;
@@ -80,21 +81,23 @@ const ImagesContent = ({ pet, initialImages }: ImagesContentProps) => {
   );
 
   return (
-    <div className="shadow-xs flex flex-1 flex-col gap-2 rounded-2xl bg-white p-3 dark:bg-neutral-900">
+    <div className="flex flex-1 flex-col gap-2 rounded-2xl bg-white p-3 shadow-xs dark:bg-neutral-900">
       <div className="text-[14px] font-[600] text-gray-600 dark:text-gray-300">이미지</div>
 
-      {!isViewingMyPet && localPhotos.length === 0 && (
-        <div className="flex h-full flex-col items-center justify-center text-[14px] text-gray-500">
-          등록된 이미지가 없습니다.
+      {!isViewingMyPet && localPhotos.length === 0 ? (
+        <div className="flex flex-col items-center justify-center gap-2 py-8 text-gray-400 dark:text-gray-500">
+          <ImageOff className="h-8 w-8" />
+          <span className="text-[14px]">등록된 이미지가 없습니다.</span>
         </div>
+      ) : (
+        <DndImagePicker
+          petId={pet.petId}
+          disabled={!isViewingMyPet}
+          isSaving={isSaving}
+          images={localPhotos}
+          onChange={handleImagesChange}
+        />
       )}
-      <DndImagePicker
-        petId={pet.petId}
-        disabled={!isViewingMyPet}
-        isSaving={isSaving}
-        images={localPhotos}
-        onChange={handleImagesChange}
-      />
     </div>
   );
 };

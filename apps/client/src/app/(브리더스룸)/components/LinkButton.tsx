@@ -16,7 +16,7 @@ const LinkButton = ({
   icon?: React.ReactNode;
 }) => {
   const linkClass = cn(
-    "inline-flex items-center gap-0.5 rounded-md px-1 py-0.5 underline decoration-gray-900 underline-offset-2 transition-colors hover:bg-gray-200/70 dark:decoration-gray-100 dark:hover:bg-gray-700/70",
+    "inline-flex items-center gap-0.5 rounded-md px-1 py-0.5 font-semibold text-[#1264A3] no-underline transition-colors hover:underline hover:decoration-[#1264A3] dark:text-[#1D9BD1] dark:hover:decoration-[#1D9BD1]",
     className,
   );
 

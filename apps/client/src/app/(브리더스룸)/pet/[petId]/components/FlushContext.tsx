@@ -2,7 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useRef } from "react";
 
-type FlushCallback = () => void;
+type FlushCallback = () => Promise<void> | void;
 
 const FlushContext = createContext<React.MutableRefObject<FlushCallback[]> | null>(null);
 
@@ -32,7 +32,7 @@ export function useFlush() {
   const flushRef = useRef<FlushCallback[]>([]);
 
   const flushAll = useCallback(() => {
-    flushRef.current.forEach((cb) => cb());
+    return Promise.all(flushRef.current.map((cb) => cb())).then(() => {});
   }, []);
 
   return { flushRef, flushAll, FlushProvider: FlushContext.Provider };

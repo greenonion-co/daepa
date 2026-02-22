@@ -27,8 +27,8 @@ interface TutorialStep {
 const TUTORIAL_STEPS: TutorialStep[] = [
   {
     targetId: TUTORIAL_TARGETS.PARENT_LINKS,
-    title: "부모 펫 상세 보기",
-    description: "부모 이름을 클릭하면 해당 펫의 상세 페이지로 이동해요",
+    title: "부모 개체 상세 보기",
+    description: "부모 이름을 클릭하면 해당 개체의 상세 페이지로 이동해요",
     position: "bottom",
   },
   {
@@ -249,7 +249,7 @@ export function MatingDetailDialogTutorialOverlay({
       {/* 닫기 버튼 */}
       <button
         onClick={handleClose}
-        className="absolute right-3 top-3 z-10 rounded-full bg-white/10 p-1.5 text-white/70 backdrop-blur-sm hover:bg-white/20 hover:text-white"
+        className="absolute top-3 right-3 z-10 rounded-full bg-white/10 p-1.5 text-white/70 backdrop-blur-sm hover:bg-white/20 hover:text-white"
       >
         <X className="h-5 w-5" />
       </button>
@@ -281,7 +281,7 @@ export function MatingDetailDialogTutorialOverlay({
         <h4 className="mb-1 text-sm font-bold text-gray-900 dark:text-white">
           {currentStepData?.title}
         </h4>
-        <p className="mb-3 text-xs font-[500] leading-relaxed text-gray-600 dark:text-gray-300">
+        <p className="mb-3 text-xs leading-relaxed font-[500] text-gray-600 dark:text-gray-300">
           {currentStepData?.description}
         </p>
 

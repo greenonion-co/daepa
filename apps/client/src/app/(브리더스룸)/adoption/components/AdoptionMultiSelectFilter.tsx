@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useAdoptionFilterStore } from "../../store/adoptionFilter";
 import { cn } from "@/lib/utils";
 import { Check, ChevronDown, X } from "lucide-react";
@@ -30,6 +30,23 @@ const AdoptionMultiSelectFilter = ({
   const [dropdownPosition, setDropdownPosition] = useState<"left" | "right">("right");
 
   const selectList = useMemo(() => Object.keys(displayMap), [displayMap]);
+  const selectedItemRef = useRef(selectedItem);
+  selectedItemRef.current = selectedItem;
+
+  const closeAndSave = useCallback(() => {
+    setIsOpen(false);
+    const current = selectedItemRef.current || [];
+    setSearchFilters((prev) => {
+      const saved = (prev as Record<string, string[] | undefined>)[type] || [];
+      const currentSet = new Set(current);
+      const savedSet = new Set(saved);
+      const changed =
+        current.length !== saved.length ||
+        [...currentSet].some((item) => !savedSet.has(item));
+      if (!changed) return prev;
+      return { ...prev, [type]: selectedItemRef.current };
+    });
+  }, [type, setSearchFilters]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -37,7 +54,7 @@ const AdoptionMultiSelectFilter = ({
     const handlePointerDown = (event: MouseEvent | TouchEvent) => {
       const root = containerRef.current;
       if (root && !root.contains(event.target as Node)) {
-        setIsOpen(false);
+        closeAndSave();
       }
     };
 
@@ -47,7 +64,7 @@ const AdoptionMultiSelectFilter = ({
       document.removeEventListener("mousedown", handlePointerDown);
       document.removeEventListener("touchstart", handlePointerDown);
     };
-  }, [isOpen]);
+  }, [isOpen, closeAndSave]);
 
   useEffect(() => {
     if (isOpen) {
@@ -94,7 +111,11 @@ const AdoptionMultiSelectFilter = ({
         aria-haspopup="listbox"
         onClick={() => {
           if (disabled) return;
-          setIsOpen(!isOpen);
+          if (isOpen) {
+            closeAndSave();
+          } else {
+            setIsOpen(true);
+          }
         }}
       >
         {disabled ? (
@@ -191,30 +212,6 @@ const AdoptionMultiSelectFilter = ({
             })}
           </div>
 
-          <div className="flex justify-end gap-2">
-            <button
-              type="button"
-              onClick={() => {
-                setSelectedItem(undefined);
-              }}
-              className="h-[32px] cursor-pointer rounded-lg bg-gray-100 px-3 text-sm font-semibold text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
-            >
-              초기화
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setSearchFilters({
-                  ...searchFilters,
-                  [type]: selectedItem,
-                });
-                setIsOpen(false);
-              }}
-              className="h-[32px] cursor-pointer rounded-lg bg-blue-500 px-3 text-sm font-semibold text-white hover:bg-blue-600"
-            >
-              저장
-            </button>
-          </div>
         </div>
       )}
     </div>

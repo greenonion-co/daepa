@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { Lock } from "lucide-react";
 import {
   PetDto,
@@ -10,7 +10,6 @@ import {
 } from "@repo/api-client";
 import PetThumbnail from "@/components/common/PetThumbnail";
 import { GROWTH_KOREAN_INFO } from "../../constants";
-import ParentStatusIcon from "../../components/ParentStatusIcon";
 import BadgeList from "../../components/BadgeList";
 import AdoptionStatusBadge from "../../components/AdoptionStatusBadge";
 import LinkButton from "../../components/LinkButton";
@@ -18,13 +17,19 @@ import DeletedPetName from "../../components/DeletedPetName";
 import HiddenPetBadge from "@/components/common/HiddenPetBadge";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { DateTime } from "luxon";
+import PetHoverPreview from "./PetHoverPreview";
 
 interface PetCardProps {
   pet: PetDto;
   onCardClick: (pet: PetDto) => void;
 }
 
-const renderParent = (parent: PetDto["father"] | PetDto["mother"]) => {
+type HoveredParent = { petId: string; name?: string; status?: string } | null;
+
+const renderParent = (
+  parent: PetDto["father"] | PetDto["mother"],
+  onHover: (info: HoveredParent) => void,
+) => {
   if (!parent) return null;
 
   if ("hiddenStatus" in parent && parent.hiddenStatus === PetHiddenStatusDtoHiddenStatus.SECRET) {
@@ -47,18 +52,36 @@ const renderParent = (parent: PetDto["father"] | PetDto["mother"]) => {
   const truncatedName = p.name && p.name.length > 6 ? `${p.name.slice(0, 6)}...` : (p.name ?? "");
 
   return (
-    <LinkButton
-      href={`/pet/${p.petId}`}
-      label={truncatedName}
-      icon={<ParentStatusIcon status={p.status} />}
-    />
+    <span
+      onMouseEnter={() => onHover({ petId: p.petId, name: p.name, status: p.status })}
+      onMouseLeave={() => onHover(null)}
+    >
+      <LinkButton
+        href={`/pet/${p.petId}`}
+        label={truncatedName}
+        className={
+          p.status === "approved"
+            ? "text-[#0F7B6C] hover:decoration-[#0F7B6C] dark:text-[#4DAB9A] dark:hover:decoration-[#4DAB9A]"
+            : p.status === "pending"
+              ? "text-[#D9730D] hover:decoration-[#D9730D] dark:text-[#FFA344] dark:hover:decoration-[#FFA344]"
+              : undefined
+        }
+      />
+    </span>
   );
 };
 
 export default function PetCard({ pet, onCardClick }: PetCardProps) {
   const adoptionStatus = pet.adoption?.status;
-  const dotColor = pet.sex === "M" ? "bg-blue-500" : pet.sex === "F" ? "bg-red-500" : "bg-gray-300";
+  const dotColor =
+    pet.sex === "M"
+      ? "bg-[#2383E2] dark:bg-[#529CCA]"
+      : pet.sex === "F"
+        ? "bg-[#E03E3E] dark:bg-[#FF7369]"
+        : "bg-gray-300";
   const [pressed, setPressed] = useState(false);
+  const [hoveredParent, setHoveredParent] = useState<HoveredParent>(null);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
   return (
     <div
@@ -68,15 +91,6 @@ export default function PetCard({ pet, onCardClick }: PetCardProps) {
       onPointerUp={() => setPressed(false)}
       onPointerLeave={() => setPressed(false)}
     >
-      {/* 공개/비공개 뱃지 */}
-      <div className="absolute top-0 left-0 z-10 -translate-x-1/4 -translate-y-1/4">
-        {!pet.isPublic && (
-          <div className="rounded-full bg-yellow-500 p-1 shadow-sm dark:bg-gray-700">
-            <Lock className="h-3 w-3 bg-yellow-500 text-white dark:bg-transparent dark:text-yellow-500" />
-          </div>
-        )}
-      </div>
-
       <div className="flex gap-2">
         {/* 이미지 */}
         <div className="relative flex h-20 w-20 shrink-0 flex-col items-center gap-0.5 self-center">
@@ -86,6 +100,11 @@ export default function PetCard({ pet, onCardClick }: PetCardProps) {
             className="h-full w-full rounded-xl"
             objectFit="cover"
           />
+          {!pet.isPublic && (
+            <div className="absolute top-1 left-1 rounded-md bg-black/50 px-1 py-0.5 backdrop-blur-sm">
+              <Lock className="h-2.5 w-2.5 text-white" />
+            </div>
+          )}
         </div>
 
         {/* 컨텐츠 */}
@@ -93,14 +112,14 @@ export default function PetCard({ pet, onCardClick }: PetCardProps) {
           {/* 이름 + 분양 상태 */}
           <div className="flex items-center gap-1">
             <span className={`h-2 w-2 shrink-0 rounded-full ${dotColor}`} />
-            <h3 className="min-w-0 truncate text-sm font-bold text-gray-900 dark:text-gray-100">
+            <h3 className="min-w-0 truncate text-sm font-semibold text-gray-900 dark:text-gray-100">
               {pet.name ?? "이름 없음"}
             </h3>
             {adoptionStatus && <AdoptionStatusBadge status={adoptionStatus} />}
           </div>
 
           {/* 성장단계 + 해칭일 */}
-          <div className="flex items-center gap-2 text-xs">
+          <div className="flex items-center gap-3 text-xs">
             {pet.growth && (
               <div className="flex items-center gap-0.5">
                 <span className="text-gray-400">성장</span>
@@ -127,20 +146,50 @@ export default function PetCard({ pet, onCardClick }: PetCardProps) {
             className="flex items-center gap-1 truncate text-xs"
             onClick={(e) => e.stopPropagation()}
             onPointerDown={(e) => e.stopPropagation()}
+            onMouseMove={(e) => setMousePos({ x: e.clientX, y: e.clientY })}
           >
             <span className="shrink-0 text-gray-400">부모</span>
-            {pet.father ? renderParent(pet.father) : <span className="text-gray-400">미등록</span>}
+            {pet.father ? (
+              renderParent(pet.father, setHoveredParent)
+            ) : (
+              <span className="text-gray-400">미등록</span>
+            )}
             <span className="text-gray-400">×</span>
-            {pet.mother ? renderParent(pet.mother) : <span className="text-gray-400">미등록</span>}
+            {pet.mother ? (
+              renderParent(pet.mother, setHoveredParent)
+            ) : (
+              <span className="text-gray-400">미등록</span>
+            )}
           </div>
 
           {/* 모프 & 특성 */}
           <div className="flex flex-wrap gap-1">
-            <BadgeList variant={"outline"} items={pet.morphs} maxDisplay={4} badgeSize="sm" inline />
-            <BadgeList items={pet.traits} maxDisplay={4} variant="secondary" badgeSize="sm" inline />
+            <BadgeList
+              variant={"outline"}
+              items={pet.morphs}
+              maxDisplay={4}
+              badgeSize="sm"
+              inline
+            />
+            <BadgeList
+              items={pet.traits}
+              maxDisplay={4}
+              variant="secondary"
+              badgeSize="sm"
+              inline
+            />
           </div>
         </div>
       </div>
+
+      {hoveredParent && (
+        <PetHoverPreview
+          petId={hoveredParent.petId}
+          mousePos={mousePos}
+          name={hoveredParent.name}
+          parentStatus={hoveredParent.status}
+        />
+      )}
     </div>
   );
 }

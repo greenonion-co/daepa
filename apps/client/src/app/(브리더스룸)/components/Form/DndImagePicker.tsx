@@ -14,7 +14,7 @@ import { useDropzone } from "react-dropzone";
 import Image from "next/image";
 import { buildR2TransformedUrl, cn, compressImageFile } from "@/lib/utils";
 import { toast } from "@/lib/toast";
-import { X, Plus, Info, Maximize2 } from "lucide-react";
+import { X, Plus, Info, Maximize2, ImageOff } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { isNil, range, remove } from "es-toolkit";
 import { ACCEPT_IMAGE_FORMATS } from "../../constants";
@@ -315,7 +315,7 @@ export default function DndImagePicker({
       </div>
 
       {/* 선택한 이미지 미리보기 */}
-      {selectedIndex !== null && images[selectedIndex] && (
+      {selectedIndex !== null && images[selectedIndex] ? (
         <div className="mt-3 overflow-hidden rounded-xl border border-gray-200">
           <div className="relative aspect-[4/3] w-full">
             <Image
@@ -361,6 +361,13 @@ export default function DndImagePicker({
             </button>
           </div>
         </div>
+      ) : (
+        images.length === 0 && (
+          <div className="mt-3 flex aspect-[4/3] w-full flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-gray-200 text-gray-400 dark:border-gray-700 dark:text-gray-500">
+            <ImageOff className="h-8 w-8" />
+            <span className="text-[14px]">등록된 이미지가 없습니다.</span>
+          </div>
+        )
       )}
     </div>
   );

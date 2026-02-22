@@ -31,7 +31,7 @@ const ParentCard = ({ parent }: { parent?: PetSummaryLayingDto }) => {
               <span
                 className={cn("mt-2 text-sm font-medium text-red-600", isMobile && "mt-1 text-xs")}
               >
-                삭제된 펫입니다.
+                삭제된 개체입니다.
               </span>
             </div>
           )}

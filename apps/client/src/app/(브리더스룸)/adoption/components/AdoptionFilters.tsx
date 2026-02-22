@@ -47,7 +47,6 @@ export function AdoptionFilters() {
         showSelectAll
         showTitle
         type="species"
-        saveASAP
         initialItem={searchFilters.species}
         onSelect={(item) => {
           if (item === searchFilters.species) return;

@@ -13,7 +13,7 @@ import SiblingPetCard from "./components/SiblingPetCard";
 import HorizontalScrollSection from "./components/HorizontalScrollSection";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/useMobile";
-import { CircleAlert } from "lucide-react";
+
 import Loading from "@/components/common/Loading";
 
 interface PetDetailPageProps {
@@ -159,11 +159,10 @@ function SiblingsPage({ params }: PetDetailPageProps) {
   if (isError) {
     return (
       <div className="flex h-[calc(100vh-52px)] flex-1 flex-col items-center justify-center gap-1">
-        <CircleAlert className={"my-4 opacity-40"} width={60} height={60} />
-        <p className="text-lg font-semibold text-gray-700">
-          펫 정보를 불러오는 중 오류가 발생했습니다
+        <p className="text-[15px] font-medium text-gray-500 dark:text-gray-400">
+          개체 정보를 불러오는 중 오류가 발생했습니다
         </p>
-        <p className="text-sm text-gray-500">잠시 후 다시 시도해주세요 </p>
+        <p className="text-sm text-gray-400 dark:text-gray-500">잠시 후 다시 시도해주세요</p>
       </div>
     );
   }
@@ -188,11 +187,11 @@ function SiblingsPage({ params }: PetDetailPageProps) {
           </HorizontalScrollSection>
         </section>
       ) : (
-        <div className="flex h-full w-full flex-col items-center justify-center py-5 text-center text-[14px] text-gray-700">
-          <CircleAlert className={"my-4 opacity-40"} width={60} height={60} />
-          등록된 부/모 정보가 없습니다.
-          <br />
-          부/모를 등록해 펫의 관계도를 확인해보세요!
+        <div className="flex flex-col items-center justify-center py-12 text-center">
+          <p className="text-sm text-gray-400 dark:text-gray-500">등록된 부/모 정보가 없습니다.</p>
+          <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
+            부/모를 등록해 관계도를 확인해보세요.
+          </p>
         </div>
       )}
       <div className="flex gap-4">
