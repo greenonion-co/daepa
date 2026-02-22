@@ -193,7 +193,7 @@ const MonthlyCalendar = memo(() => {
           className={cn(
             "w-full",
             isMobile && "flex min-h-0 flex-1 flex-col",
-            isScrolled ? "mt-2" : "-mt-5",
+            isMobile && (isScrolled ? "mt-2" : "-mt-5"),
           )}
         >
           <div
