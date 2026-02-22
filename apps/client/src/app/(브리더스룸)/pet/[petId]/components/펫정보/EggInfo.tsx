@@ -29,6 +29,7 @@ export const EggInfo = ({
         label="알 상태"
         content={
           <SingleSelect
+            variant="form"
             disabled={!isEditMode}
             type="eggStatus"
             initialItem={formData.eggStatus}

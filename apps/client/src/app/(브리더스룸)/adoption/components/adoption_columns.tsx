@@ -8,7 +8,6 @@ import { isNotNil } from "es-toolkit";
 import LinkButton from "../../components/LinkButton";
 import BadgeList from "../../components/BadgeList";
 import DeletedPetName from "../../components/DeletedPetName";
-import { getSexIcon } from "@/lib/sex-icon";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 export const columns: ColumnDef<AdoptionHistoryDto>[] = [
@@ -30,11 +29,23 @@ export const columns: ColumnDef<AdoptionHistoryDto>[] = [
     cell: ({ row }) => {
       const petName = row.original.pet.name;
       const isDeleted = row.original.pet.isDeleted;
+      const sex = row.original.pet.sex;
+      const dotColor =
+        sex === "M"
+          ? "bg-blue-500"
+          : sex === "F"
+            ? "bg-red-500"
+            : "bg-gray-300";
 
-      return isDeleted ? (
-        <DeletedPetName name={petName} />
-      ) : (
-        <span className="font-semibold">{petName ?? "-"}</span>
+      return (
+        <div className="flex items-center gap-1.5">
+          <span className={`h-2 w-2 shrink-0 rounded-full ${dotColor}`} />
+          {isDeleted ? (
+            <DeletedPetName name={petName} />
+          ) : (
+            <span className="font-semibold">{petName ?? "-"}</span>
+          )}
+        </div>
       );
     },
   },
@@ -54,14 +65,6 @@ export const columns: ColumnDef<AdoptionHistoryDto>[] = [
       const traits = row.original.pet.traits;
 
       return <BadgeList items={traits} variant="secondary" badgeClassName="bg-white text-black" />;
-    },
-  },
-  {
-    accessorKey: "pet.sex",
-    header: "성별",
-    cell: ({ row }) => {
-      const sex = row.original.pet.sex;
-      return getSexIcon(sex, { size: "sm" });
     },
   },
   {

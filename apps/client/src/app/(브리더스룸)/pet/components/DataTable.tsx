@@ -140,6 +140,7 @@ export const DataTable = ({
                       return (
                         <TableCell
                           key={cell.id}
+                          className="py-2"
                           style={size ? { width: size, maxWidth: size } : undefined}
                         >
                           {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -196,9 +197,7 @@ export const DataTable = ({
         />
       )}
 
-      {hoveredPetId && (
-        <PetHoverPreview petId={hoveredPetId} mousePos={mousePos} />
-      )}
+      {hoveredPetId && <PetHoverPreview petId={hoveredPetId} mousePos={mousePos} />}
     </div>
   );
 };

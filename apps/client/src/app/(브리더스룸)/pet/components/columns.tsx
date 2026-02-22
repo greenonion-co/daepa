@@ -1,7 +1,6 @@
 "use client";
 
 import { Lock, LockOpen } from "lucide-react";
-import { getSexIcon } from "@/lib/sex-icon";
 import { ColumnDef } from "@tanstack/react-table";
 import { CircleSmall } from "lucide-react";
 import BadgeList from "../../components/BadgeList";
@@ -116,8 +115,16 @@ export const columns: ColumnDef<PetDto>[] = [
     header: TABLE_HEADER.name,
     cell: ({ row }) => {
       const name = row.getValue("name") as string;
+      const sex = row.original.sex;
+      const dotColor =
+        sex === "M"
+          ? "bg-blue-500"
+          : sex === "F"
+            ? "bg-red-500"
+            : "bg-gray-300";
       return (
-        <div className="max-w-[70px] break-words">
+        <div className="flex max-w-[90px] items-center gap-1.5 break-words">
+          <span className={`h-2 w-2 shrink-0 rounded-full ${dotColor}`} />
           <TooltipText title="이름" text={name} displayTextLength={10} className="font-semibold" />
         </div>
       );
@@ -146,12 +153,6 @@ export const columns: ColumnDef<PetDto>[] = [
       ) : (
         <span className="text-gray-400">-</span>
       ),
-  },
-  {
-    accessorKey: "sex",
-    size: 60,
-    header: TABLE_HEADER.sex,
-    cell: ({ row }) => getSexIcon(row.getValue("sex") as string, { size: "sm" }),
   },
   {
     accessorKey: "growth",

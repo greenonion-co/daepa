@@ -54,6 +54,7 @@ export const PetBasicInfo = ({
           label="생년월일"
           content={
             <CalendarInput
+              variant="form"
               editable={isEditMode}
               placeholder="-"
               value={formData.hatchingDate}

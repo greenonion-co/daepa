@@ -29,10 +29,12 @@ import { overlay } from "overlay-kit";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "@/lib/toast";
 import { InfiniteData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { patchPetListCache } from "../../utils/patchPetListCache";
 import { useIsMyPet } from "@/hooks/useIsMyPet";
 import CompleteAdoptionModal from "./CompleteAdoptionModal";
 import { useIsMobile } from "@/hooks/useMobile";
 import { useRouter } from "next/navigation";
+import { useRegisterFlush } from "./FlushContext";
 
 interface AdoptionInfoContentProps {
   petId: string;
@@ -119,6 +121,10 @@ const AdoptionInfoContent = ({
         // 저장 성공 시 로컬 ref 업데이트 (불필요한 재조회 방지)
         if (adoptionRef.current) {
           adoptionRef.current = { ...adoptionRef.current, ...data } as PetAdoptionDto;
+          // 리스트 캐시에도 즉시 반영
+          patchPetListCache(queryClient, petId, {
+            adoption: adoptionRef.current,
+          } as Partial<PetDto>);
         }
         // 헤더 분양정보 동기화
         if ("status" in data || "price" in data) {
@@ -210,6 +216,48 @@ const AdoptionInfoContent = ({
     },
     [autoSave],
   );
+
+  // 미저장 blur 필드(price, memo)를 감지하고 서버에 저장
+  const flushUnsavedFields = useCallback(() => {
+    const latest = adoptionRef.current;
+    if (!latest || !petId) return;
+
+    // 디바운스 타이머 정리
+    Object.values(blurTimersRef.current).forEach(clearTimeout);
+
+    const current = adoptionDataRef.current;
+    const unsaved: UpdateAdoptionDto = {};
+
+    // price 비교
+    const currentPrice = current.price;
+    const originalPrice = latest.price;
+    if (currentPrice !== originalPrice) {
+      unsaved.price = currentPrice ? Number(currentPrice) : 0;
+    }
+
+    // memo 비교
+    const currentMemo = current.memo ?? null;
+    const originalMemo = latest.memo ?? null;
+    if (currentMemo !== originalMemo) {
+      unsaved.memo = currentMemo;
+    }
+
+    if (Object.keys(unsaved).length > 0) {
+      petAdoptionControllerUpdatePetAdoption(petId, unsaved)
+        .then(() => {
+          queryClient.invalidateQueries({ queryKey: [brPetControllerFindAll.name] });
+        })
+        .catch(() => {});
+    }
+  }, [queryClient, petId]);
+
+  // 모달 닫힐 때 flush (언마운트 전에 호출됨)
+  useRegisterFlush(flushUnsavedFields);
+
+  // 페이지 이동 등 언마운트 시 fallback
+  useEffect(() => {
+    return () => flushUnsavedFields();
+  }, [flushUnsavedFields]);
 
   const handleCompleteAdoption = useCallback(async () => {
     try {
@@ -303,6 +351,7 @@ const AdoptionInfoContent = ({
           <div className="flex items-center gap-2">
             <SingleSelect
               saveASAP
+              variant="form"
               disabled={!isViewingMyPet}
               type="adoptionStatus"
               initialItem={adoptionData.status ?? "NONE"}

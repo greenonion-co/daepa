@@ -15,7 +15,7 @@ interface SingleSelectProps {
   showTitle?: boolean;
   showSelectAll?: boolean; // 전체 선택 항목 표시
   saveASAP?: boolean; // 즉시 반영
-  variant?: "default" | "light";
+  variant?: "default" | "light" | "form";
 }
 
 const SingleSelect = ({
@@ -29,6 +29,7 @@ const SingleSelect = ({
   variant = "default",
 }: SingleSelectProps) => {
   const isLight = variant === "light";
+  const isForm = variant === "form";
   const isMobile = useIsMobile();
   const [isOpen, setIsOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<any>(initialItem);
@@ -94,12 +95,16 @@ const SingleSelect = ({
         className={cn(
           "flex h-[32px] w-fit cursor-pointer items-center gap-1 rounded-lg px-2 py-1 text-[14px] font-[500]",
           initialItem
-            ? "bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400"
+            ? isForm
+              ? "bg-blue-50/70 text-gray-900 dark:bg-blue-900/10 dark:text-gray-100"
+              : "bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400"
             : isLight
               ? "bg-white text-gray-800 shadow-sm dark:bg-gray-700 dark:text-gray-200"
               : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200",
           disabled &&
-            "cursor-not-allowed bg-white text-black dark:bg-neutral-900 dark:text-gray-200",
+            (isForm
+              ? "cursor-not-allowed bg-blue-50/40 text-gray-900 dark:bg-blue-900/5 dark:text-gray-200"
+              : "cursor-not-allowed bg-white text-black dark:bg-neutral-900 dark:text-gray-200"),
         )}
         onClick={() => {
           if (disabled) return;
@@ -123,7 +128,7 @@ const SingleSelect = ({
             <ChevronDown
               className={cn(
                 "h-4 w-4 text-gray-600 dark:text-gray-400",
-                initialItem
+                initialItem && !isForm
                   ? "text-blue-600 dark:text-blue-400"
                   : "text-gray-600 dark:text-gray-400",
               )}

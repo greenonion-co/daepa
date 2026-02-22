@@ -61,6 +61,22 @@ export default function BottomSheet({
     };
   }, [isVisible]);
 
+  // 뒤로가기 시 바텀시트 닫기
+  useEffect(() => {
+    if (!isOpen) return;
+
+    history.pushState({ bottomSheet: true }, "");
+
+    const handlePopState = () => {
+      onClose();
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, [isOpen, onClose]);
+
   if (!isVisible) return null;
 
   return (

@@ -108,7 +108,7 @@ export default function DataTable({
                       className="bg-gray-50 opacity-70 hover:bg-gray-100 hover:opacity-100 dark:bg-gray-800/50 dark:hover:bg-gray-700"
                     >
                       {row.getVisibleCells().map((cell) => (
-                        <TableCell key={cell.id}>
+                        <TableCell key={cell.id} className="py-2">
                           {flexRender(cell.column.columnDef.cell, cell.getContext())}
                         </TableCell>
                       ))}

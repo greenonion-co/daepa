@@ -46,9 +46,24 @@ const FormMultiSelect = ({
     const current = selectedItemsRef.current;
     const snapshotStr = JSON.stringify((snapshot ?? []).slice().sort());
     const currentStr = JSON.stringify((current ?? []).slice().sort());
+    openSnapshotRef.current = undefined; // 저장 완료 마킹
     if (snapshotStr !== currentStr) {
       onSelectRef.current(current);
     }
+  }, []);
+
+  // 컴포넌트 언마운트 시 드롭다운이 열려있고 변경사항이 있으면 저장
+  useEffect(() => {
+    return () => {
+      const snapshot = openSnapshotRef.current;
+      if (snapshot === undefined) return; // 이미 저장됨 or 드롭다운이 열린 적 없음
+      const current = selectedItemsRef.current;
+      const snapshotStr = JSON.stringify((snapshot ?? []).slice().sort());
+      const currentStr = JSON.stringify((current ?? []).slice().sort());
+      if (snapshotStr !== currentStr) {
+        onSelectRef.current(current);
+      }
+    };
   }, []);
 
   useEffect(() => {
@@ -89,10 +104,10 @@ const FormMultiSelect = ({
         className={cn(
           "flex min-h-[32px] cursor-pointer items-center gap-1 rounded-lg px-2 py-1 text-[14px] font-[500]",
           selectedItems && selectedItems.length > 0
-            ? "bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400"
+            ? "bg-blue-50/70 text-gray-900 dark:bg-blue-900/10 dark:text-gray-100"
             : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200",
           disabled &&
-            "cursor-not-allowed bg-white text-black dark:bg-transparent dark:text-gray-200",
+            "cursor-not-allowed bg-blue-50/40 text-gray-900 dark:bg-blue-900/5 dark:text-gray-200",
         )}
         onClick={() => {
           if (disabled) return;
@@ -123,14 +138,7 @@ const FormMultiSelect = ({
             ) : (
               <div className="text-gray-400 dark:text-gray-500">{title} 선택하기</div>
             )}
-            <ChevronDown
-              className={cn(
-                "h-4 w-4 text-gray-600 dark:text-gray-400",
-                selectedItems
-                  ? "text-blue-600 dark:text-blue-400"
-                  : "text-gray-600 dark:text-gray-400",
-              )}
-            />
+            <ChevronDown className="h-4 w-4 text-gray-600 dark:text-gray-400" />
           </>
         )}
       </div>

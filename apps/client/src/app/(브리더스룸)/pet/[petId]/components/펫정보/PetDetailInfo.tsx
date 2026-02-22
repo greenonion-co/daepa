@@ -43,6 +43,7 @@ export const PetDetailInfo = ({
         content={
           <SingleSelect
             saveASAP
+            variant="form"
             disabled={!isEditMode}
             type="sex"
             initialItem={formData.sex}
@@ -56,6 +57,7 @@ export const PetDetailInfo = ({
         content={
           <SingleSelect
             saveASAP
+            variant="form"
             disabled={!isEditMode}
             type="growth"
             initialItem={formData.growth}
