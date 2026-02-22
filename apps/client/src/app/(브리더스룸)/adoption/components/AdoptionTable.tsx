@@ -15,7 +15,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { CircleAlert, RefreshCcw } from "lucide-react";
+import { RefreshCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { overlay } from "overlay-kit";
 import Loading from "@/components/common/Loading";
@@ -39,6 +39,8 @@ const AdoptionTable = () => {
   const isMobile = useIsMobile();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [hoveredPetId, setHoveredPetId] = useState<string | null>(null);
+  const [previewOverridePetId, setPreviewOverridePetId] = useState<string | null>(null);
+  const [previewSuppressed, setPreviewSuppressed] = useState(false);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
@@ -90,6 +92,10 @@ const AdoptionTable = () => {
     state: {
       sorting,
       rowSelection,
+    },
+    meta: {
+      setPreviewOverridePetId,
+      setPreviewSuppressed,
     },
   });
 
@@ -190,9 +196,10 @@ const AdoptionTable = () => {
             ) : (
               <TableRow>
                 <TableCell colSpan={columns.length}>
-                  <div className="flex h-full w-full flex-col items-center justify-center py-5 text-center text-gray-700">
-                    <CircleAlert className={"my-4 opacity-40"} width={60} height={60} />
-                    분양 정보가 없습니다.
+                  <div className="flex flex-col items-center justify-center py-12 text-center">
+                    <p className="text-sm text-gray-400 dark:text-gray-500">
+                      분양 정보가 없습니다.
+                    </p>
                   </div>
                 </TableCell>
               </TableRow>
@@ -201,7 +208,9 @@ const AdoptionTable = () => {
         </Table>
       </div>
 
-      {hoveredPetId && <PetHoverPreview petId={hoveredPetId} mousePos={mousePos} />}
+      {!previewSuppressed && (previewOverridePetId || hoveredPetId) && (
+        <PetHoverPreview petId={(previewOverridePetId || hoveredPetId)!} mousePos={mousePos} />
+      )}
     </div>
   );
 };

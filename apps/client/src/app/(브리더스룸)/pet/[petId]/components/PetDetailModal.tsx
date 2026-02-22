@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback } from "react";
-import { PetDto } from "@repo/api-client";
+import { useQueryClient } from "@tanstack/react-query";
+import { PetDto, brPetControllerFindAll } from "@repo/api-client";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import PetDetailLayout from "./PetDetailLayout";
 import BreedingInfoContent from "./BreedingInfoContent";
@@ -18,12 +19,15 @@ interface PetDetailModalProps {
 }
 
 export default function PetDetailModal({ isOpen, pet, onClose }: PetDetailModalProps) {
+  const queryClient = useQueryClient();
   const { flushRef, flushAll, FlushProvider } = useFlush();
 
   const handleClose = useCallback(() => {
-    flushAll();
     onClose();
-  }, [flushAll, onClose]);
+    flushAll().then(() => {
+      queryClient.invalidateQueries({ queryKey: [brPetControllerFindAll.name] });
+    });
+  }, [flushAll, onClose, queryClient]);
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>

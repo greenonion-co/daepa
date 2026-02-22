@@ -77,9 +77,9 @@ export default function DeletedPetsPage() {
       </div>
 
       {isEmpty ? (
-        <div className="mt-6 text-center text-gray-600 dark:text-gray-400">
-          <div className="font-semibold">삭제된 펫이 없습니다</div>
-          <div className="mt-1 text-sm">삭제한 펫이 있으면 여기에 표시됩니다</div>
+        <div className="mt-6 text-center">
+          <p className="text-[15px] font-medium text-gray-500 dark:text-gray-400">삭제된 펫이 없습니다</p>
+          <p className="mt-1 text-sm text-gray-400 dark:text-gray-500">삭제한 펫이 있으면 여기에 표시됩니다</p>
         </div>
       ) : (
         <DataTable

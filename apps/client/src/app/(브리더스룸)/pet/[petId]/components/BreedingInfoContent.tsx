@@ -5,7 +5,6 @@ import { useCallback, useEffect, useMemo, useRef } from "react";
 import {
   petControllerFindPetByPetId,
   petControllerUpdate,
-  brPetControllerFindAll,
   UpdatePetDto,
   PetDtoType,
   PetDto,
@@ -67,13 +66,15 @@ const BreedingInfoContent = ({ petId, ownerId, initialPet }: BreedingInfoContent
   // 단일 필드 자동 저장
   const autoSave = useCallback(
     async (updateData: UpdatePetDto) => {
+      // 낙관적 업데이트: API 호출 전에 리스트 캐시 즉시 반영
+      if (petRef.current) {
+        patchPetListCache(queryClient, petRef.current.petId, updateData as Partial<PetDto>);
+      }
       try {
         await mutateUpdatePet(updateData);
         // 저장 성공 시 로컬 ref 업데이트 (불필요한 재조회 방지)
         if (petRef.current) {
           petRef.current = { ...petRef.current, ...updateData } as PetDto;
-          // 리스트 캐시도 즉시 반영
-          patchPetListCache(queryClient, petRef.current.petId, updateData as Partial<PetDto>);
         }
         // 헤더 동기화 (공개여부, 이름)
         if ("isPublic" in updateData || "name" in updateData) {
@@ -173,10 +174,9 @@ const BreedingInfoContent = ({ petId, ownerId, initialPet }: BreedingInfoContent
       }
     }
     if (Object.keys(unsaved).length > 0) {
-      petControllerUpdate(latest.petId, unsaved)
-        .then(() => {
-          queryClient.invalidateQueries({ queryKey: [brPetControllerFindAll.name] });
-        })
+      patchPetListCache(queryClient, latest.petId, unsaved);
+      return petControllerUpdate(latest.petId, unsaved)
+        .then(() => {})
         .catch(() => {});
     }
   }, [queryClient]);
@@ -186,7 +186,7 @@ const BreedingInfoContent = ({ petId, ownerId, initialPet }: BreedingInfoContent
 
   // 페이지 이동 등 언마운트 시 fallback
   useEffect(() => {
-    return () => flushUnsavedFields();
+    return () => { flushUnsavedFields(); };
   }, [flushUnsavedFields]);
 
   // 펫 데이터 및 브리딩 정보 초기화

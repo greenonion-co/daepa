@@ -116,15 +116,17 @@ const AdoptionInfoContent = ({
   const autoSave = useCallback(
     async (data: UpdateAdoptionDto) => {
       if (!petId) return;
+      // 낙관적 업데이트: API 호출 전에 리스트 캐시 즉시 반영
+      if (adoptionRef.current) {
+        patchPetListCache(queryClient, petId, {
+          adoption: { ...adoptionRef.current, ...data } as PetAdoptionDto,
+        } as Partial<PetDto>);
+      }
       try {
         await updateAdoption({ petId, data });
         // 저장 성공 시 로컬 ref 업데이트 (불필요한 재조회 방지)
         if (adoptionRef.current) {
           adoptionRef.current = { ...adoptionRef.current, ...data } as PetAdoptionDto;
-          // 리스트 캐시에도 즉시 반영
-          patchPetListCache(queryClient, petId, {
-            adoption: adoptionRef.current,
-          } as Partial<PetDto>);
         }
         // 헤더 분양정보 동기화
         if ("status" in data || "price" in data) {
@@ -243,10 +245,9 @@ const AdoptionInfoContent = ({
     }
 
     if (Object.keys(unsaved).length > 0) {
-      petAdoptionControllerUpdatePetAdoption(petId, unsaved)
-        .then(() => {
-          queryClient.invalidateQueries({ queryKey: [brPetControllerFindAll.name] });
-        })
+      patchPetListCache(queryClient, petId, { adoption: { ...latest, ...unsaved } as PetAdoptionDto });
+      return petAdoptionControllerUpdatePetAdoption(petId, unsaved)
+        .then(() => {})
         .catch(() => {});
     }
   }, [queryClient, petId]);
@@ -256,7 +257,7 @@ const AdoptionInfoContent = ({
 
   // 페이지 이동 등 언마운트 시 fallback
   useEffect(() => {
-    return () => flushUnsavedFields();
+    return () => { flushUnsavedFields(); };
   }, [flushUnsavedFields]);
 
   const handleCompleteAdoption = useCallback(async () => {

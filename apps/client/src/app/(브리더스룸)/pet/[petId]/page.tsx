@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { CircleAlert } from "lucide-react";
+
 import { Metadata } from "next";
 import { DateTime } from "luxon";
 import { SPECIES_KOREAN_INFO } from "../../constants";
@@ -63,17 +63,13 @@ export default async function PetPage({ params }: PetPageProps) {
     return (
       <div className="flex h-[calc(100vh-52px)] flex-1 items-center justify-center">
         <div className="flex flex-col items-center gap-2 text-center">
-          <CircleAlert className={"my-4 opacity-40"} width={60} height={60} />
-
-          <div>
-            <h1 className="text-[16px] font-[500] text-gray-900 dark:text-gray-100">
-              삭제된 펫입니다
-            </h1>
-            <p className="text-[14px] text-gray-500 dark:text-gray-400">
-              <span className="font-semibold">{pet.name}</span>은(는) 삭제되어 더 이상 조회할 수
-              없습니다.
-            </p>
-          </div>
+          <h1 className="text-[15px] font-medium text-gray-500 dark:text-gray-400">
+            삭제된 펫입니다
+          </h1>
+          <p className="text-sm text-gray-400 dark:text-gray-500">
+            <span className="font-semibold">{pet.name}</span>은(는) 삭제되어 더 이상 조회할 수
+            없습니다.
+          </p>
 
           {pet.deletedAt && (
             <div className="text-xs font-[600] text-red-400">

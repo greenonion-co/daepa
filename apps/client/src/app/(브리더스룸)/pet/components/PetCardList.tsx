@@ -51,7 +51,7 @@ export default function PetCardList({
     <>
       <div className="space-y-2 px-2 pb-20">
         {/* 카드 그리드 */}
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(min(360px,100%),1fr))] gap-2">
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(min(270px,100%),1fr))] gap-2">
           {data.map((pet) => (
             <PetCard key={pet.petId} pet={pet} onCardClick={handleCardClick} />
           ))}

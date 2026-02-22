@@ -8,7 +8,7 @@ import {
   UpdatePairDto,
 } from "@repo/api-client";
 import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { CircleAlert, HelpCircle, Plus } from "lucide-react";
+import { HelpCircle, Plus } from "lucide-react";
 import { toast } from "@/lib/toast";
 import { memo, useEffect, useState } from "react";
 import CreateMatingForm from "./CreateMatingForm";
@@ -186,18 +186,21 @@ const PairList = memo(() => {
 
   if (data?.items && data.items.length === 0 && !hasFilter) {
     return (
-      <div className="flex items-center justify-center py-5 text-center">
-        <div
-          className="group flex cursor-pointer flex-col items-center rounded-3xl p-10 pt-5 transition-all hover:scale-105 hover:shadow-xl dark:from-[#5a4a2a] dark:to-[#2a2a20]"
+      <div className="flex flex-col items-center justify-center px-4 py-20">
+        <h1 className="bg-gradient-to-r from-[#4285F4] via-[#9B72CB] to-[#D96570] bg-clip-text text-3xl font-semibold text-transparent dark:from-[#8AB4F8] dark:via-[#C58AF9] dark:to-[#F28B82]">
+          번식 관리를 시작해보세요
+        </h1>
+        <p className="mt-3 text-[15px] text-gray-500 dark:text-gray-400">
+          페어를 등록하고 메이팅・산란・해칭까지 한눈에 관리할 수 있어요.
+        </p>
+        <button
+          type="button"
           onClick={handleOpenCreateForm}
+          className="mt-6 flex items-center gap-2 rounded-full border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
         >
-          <CircleAlert className={"my-4 opacity-40"} width={60} height={60} />
-          <div className="text-gray-600 dark:text-gray-300">개체를 추가해 관리를 시작해보세요!</div>
-          <div className="mt-3 flex items-center gap-1.5 rounded-full bg-[#c4a86a] px-4 py-2 text-sm font-semibold text-white transition-all group-hover:bg-[#a8904f] dark:bg-[#8a7a4a] dark:group-hover:bg-[#6a5a3a]">
-            <Plus className="h-4 w-4" />
-            페어 추가하기
-          </div>
-        </div>
+          <Plus className="h-4 w-4" />
+          첫 페어 추가하기
+        </button>
       </div>
     );
   }

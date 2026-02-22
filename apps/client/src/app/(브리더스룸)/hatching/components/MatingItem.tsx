@@ -9,7 +9,6 @@ import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { orderBy } from "es-toolkit";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import CreateLayingModal from "./CreateLayingModal";
-import { CircleAlert } from "lucide-react";
 
 import LayingItem from "./LayingItem";
 import { DateTime } from "luxon";
@@ -279,8 +278,7 @@ const MatingItem = ({ mating, father, mother, initialLayingId, showTutorial }: M
         ) : showTutorial ? (
           <TutorialMockLayingItem />
         ) : (
-          <div className="flex h-full w-full flex-col items-center justify-center py-5 text-center text-[14px] text-gray-700 dark:text-gray-400">
-            <CircleAlert className={"my-4 opacity-40"} width={60} height={60} />
+          <div className="flex h-full w-full flex-col items-center justify-center py-5 text-center text-sm text-gray-400 dark:text-gray-500">
             산란된 알이 없습니다.
           </div>
         )}

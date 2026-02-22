@@ -4,7 +4,6 @@ import Loading from "@/components/common/Loading";
 import { PetParentDtoWithMessage } from "@/app/(브리더스룸)/pet/store/parentLink";
 import { useUserStore } from "@/app/(브리더스룸)/store/user";
 import { PetControllerFindAllFilterType as PetListType } from "@repo/api-client";
-import { CircleAlert } from "lucide-react";
 
 const SelectStep = ({
   pets,
@@ -43,8 +42,7 @@ const SelectStep = ({
 
   if (petList.length === 0)
     return (
-      <div className="flex h-[calc(100vh-200px)] w-full flex-col items-center pt-20 text-center text-[14px] text-gray-700 dark:text-gray-300">
-        <CircleAlert className={"my-4 opacity-40"} width={60} height={60} />
+      <div className="flex h-[calc(100vh-200px)] w-full flex-col items-center justify-center text-center text-sm text-gray-400 dark:text-gray-500">
         조회된 펫이 없습니다.
       </div>
     );
