@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { SELECTOR_CONFIGS } from "../../constants";
 import { ChevronDown } from "lucide-react";
@@ -14,7 +14,6 @@ interface SingleSelectProps {
   disabled?: boolean;
   showTitle?: boolean;
   showSelectAll?: boolean; // 전체 선택 항목 표시
-  saveASAP?: boolean; // 즉시 반영
   variant?: "default" | "light" | "form";
 }
 
@@ -25,7 +24,6 @@ const SingleSelect = ({
   disabled = false,
   showTitle = false,
   showSelectAll = false,
-  saveASAP = false,
   variant = "default",
 }: SingleSelectProps) => {
   const isLight = variant === "light";
@@ -37,6 +35,15 @@ const SingleSelect = ({
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [isEntering, setIsEntering] = useState(false);
   const [dropdownPosition, setDropdownPosition] = useState<"left" | "right">("right");
+  const selectedItemRef = useRef(selectedItem);
+  selectedItemRef.current = selectedItem;
+
+  const closeAndSave = useCallback(() => {
+    setIsOpen(false);
+    if (selectedItemRef.current !== initialItem) {
+      onSelect?.(selectedItemRef.current);
+    }
+  }, [initialItem, onSelect]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -44,8 +51,7 @@ const SingleSelect = ({
     const handlePointerDown = (event: MouseEvent | TouchEvent) => {
       const root = containerRef.current;
       if (root && !root.contains(event.target as Node)) {
-        setSelectedItem(initialItem);
-        setIsOpen(false);
+        closeAndSave();
       }
     };
 
@@ -55,7 +61,7 @@ const SingleSelect = ({
       document.removeEventListener("mousedown", handlePointerDown);
       document.removeEventListener("touchstart", handlePointerDown);
     };
-  }, [isOpen, initialItem]);
+  }, [isOpen, closeAndSave]);
 
   useEffect(() => {
     setSelectedItem(initialItem);
@@ -108,7 +114,11 @@ const SingleSelect = ({
         )}
         onClick={() => {
           if (disabled) return;
-          setIsOpen((prev) => !prev);
+          if (isOpen) {
+            closeAndSave();
+          } else {
+            setIsOpen(true);
+          }
         }}
       >
         {disabled ? (
@@ -140,10 +150,7 @@ const SingleSelect = ({
       {isOpen && isMobile && (
         <div
           className="fixed inset-0 z-40 bg-black/40"
-          onClick={() => {
-            setSelectedItem(initialItem);
-            setIsOpen(false);
-          }}
+          onClick={() => closeAndSave()}
         />
       )}
       {isOpen && (
@@ -186,38 +193,13 @@ const SingleSelect = ({
                 item={item}
                 isSelected={selectedItem === item.key}
                 onClick={() => {
-                  if (saveASAP) {
-                    onSelect?.(item.key);
-                    setIsOpen(false);
-                  } else {
-                    setSelectedItem(item.key);
-                  }
+                  onSelect?.(item.key);
+                  setIsOpen(false);
                 }}
               />
             ))}
           </div>
 
-          {!saveASAP && (
-            <div className="flex justify-end gap-2">
-              <button
-                onClick={() => {
-                  setSelectedItem(undefined);
-                }}
-                className="h-[32px] cursor-pointer rounded-lg bg-gray-100 px-3 text-sm font-semibold text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
-              >
-                초기화
-              </button>
-              <button
-                onClick={() => {
-                  onSelect?.(selectedItem);
-                  setIsOpen(false);
-                }}
-                className="h-[32px] cursor-pointer rounded-lg bg-blue-500 px-3 text-sm font-semibold text-white hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700"
-              >
-                저장
-              </button>
-            </div>
-          )}
         </div>
       )}
     </div>

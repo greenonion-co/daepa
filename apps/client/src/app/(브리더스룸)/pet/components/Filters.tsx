@@ -118,7 +118,6 @@ export function Filters({ showPublicFilter = true, variant = "default" }: Filter
         showSelectAll
         type="species"
         initialItem={searchFilters.species}
-        saveASAP
         variant={variant}
         onSelect={(item) => {
           if (item === searchFilters.species) return;

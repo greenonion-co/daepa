@@ -374,7 +374,6 @@ const AdoptionInfoContent = ({
         content={
           <div className="flex items-center gap-2">
             <SingleSelect
-              saveASAP
               variant="form"
               disabled={!isViewingMyPet}
               type="adoptionStatus"

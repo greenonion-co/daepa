@@ -54,7 +54,6 @@ const Filters = ({ variant = "default" }: FiltersProps) => {
         showTitle
         showSelectAll
         type="species"
-        saveASAP
         initialItem={species}
         variant={variant}
         onSelect={(item) => {

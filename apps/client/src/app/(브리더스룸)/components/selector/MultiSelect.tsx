@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useFilterStore } from "../../store/filter";
 import { cn } from "@/lib/utils";
 import { ChevronDown, X } from "lucide-react";
@@ -34,6 +34,25 @@ const MultiSelectFilter = ({
   const [dropdownPosition, setDropdownPosition] = useState<"left" | "right">("right");
 
   const selectList = useMemo(() => Object.keys(displayMap), [displayMap]);
+  const selectedItemRef = useRef(selectedItem);
+  selectedItemRef.current = selectedItem;
+
+  const closeAndSave = useCallback(() => {
+    setIsOpen(false);
+    const current = selectedItemRef.current || [];
+    const saved = searchFilters[type] || [];
+    const currentSet = new Set(current);
+    const savedSet = new Set(saved);
+    const changed =
+      current.length !== saved.length ||
+      [...currentSet].some((item) => !savedSet.has(item));
+    if (changed) {
+      setSearchFilters({
+        ...searchFilters,
+        [type]: selectedItemRef.current,
+      });
+    }
+  }, [searchFilters, type, setSearchFilters]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -41,7 +60,7 @@ const MultiSelectFilter = ({
     const handlePointerDown = (event: MouseEvent | TouchEvent) => {
       const root = containerRef.current;
       if (root && !root.contains(event.target as Node)) {
-        setIsOpen(false);
+        closeAndSave();
       }
     };
 
@@ -51,7 +70,7 @@ const MultiSelectFilter = ({
       document.removeEventListener("mousedown", handlePointerDown);
       document.removeEventListener("touchstart", handlePointerDown);
     };
-  }, [isOpen]);
+  }, [isOpen, closeAndSave]);
 
   useEffect(() => {
     if (isOpen) {
@@ -84,23 +103,6 @@ const MultiSelectFilter = ({
 
   const currentFilterValue = useMemo(() => searchFilters[type], [searchFilters, type]);
 
-  // 수정사항이 있는지 확인
-  const hasChanges = useMemo(() => {
-    const current = searchFilters[type] || [];
-    const selected = selectedItem || [];
-
-    if (current.length !== selected.length) return true;
-
-    // 순서 상관없이 같은 요소를 가지고 있는지 확인
-    const currentSet = new Set(current);
-    const selectedSet = new Set(selected);
-
-    for (const item of currentSet) {
-      if (!selectedSet.has(item)) return true;
-    }
-
-    return false;
-  }, [searchFilters, type, selectedItem]);
 
   return (
     <div ref={containerRef} className="relative">
@@ -118,7 +120,11 @@ const MultiSelectFilter = ({
         aria-haspopup="listbox"
         onClick={() => {
           if (disabled) return;
-          setIsOpen(!isOpen);
+          if (isOpen) {
+            closeAndSave();
+          } else {
+            setIsOpen(true);
+          }
         }}
       >
         {disabled ? (
@@ -214,42 +220,6 @@ const MultiSelectFilter = ({
             })}
           </div>
 
-          <div className="flex justify-end gap-2">
-            <button
-              type="button"
-              onClick={() => {
-                setSelectedItem(undefined);
-              }}
-              disabled={!hasChanges}
-              className={cn(
-                "h-[32px] rounded-lg px-3 text-sm font-semibold",
-                hasChanges
-                  ? "cursor-pointer bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
-                  : "cursor-not-allowed bg-gray-50 text-gray-400 dark:bg-gray-700/50 dark:text-gray-500",
-              )}
-            >
-              초기화
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setSearchFilters({
-                  ...searchFilters,
-                  [type]: selectedItem,
-                });
-                setIsOpen(false);
-              }}
-              disabled={!hasChanges}
-              className={cn(
-                "h-[32px] rounded-lg px-3 text-sm font-semibold",
-                hasChanges
-                  ? "cursor-pointer bg-blue-500 text-white hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700"
-                  : "cursor-not-allowed bg-gray-200 text-gray-400 dark:bg-gray-700 dark:text-gray-500",
-              )}
-            >
-              저장
-            </button>
-          </div>
         </div>
       )}
     </div>

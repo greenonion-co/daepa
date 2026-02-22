@@ -223,7 +223,6 @@ const PairStatisticsDashboard = memo(() => {
         <SingleSelect
           showTitle
           type="species"
-          saveASAP
           initialItem={species}
           onSelect={handleSpeciesChange}
         />
