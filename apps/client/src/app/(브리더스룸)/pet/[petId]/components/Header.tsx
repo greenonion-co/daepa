@@ -3,7 +3,6 @@
 import QRCode from "./QR코드";
 import { cn } from "@/lib/utils";
 import { PetDto } from "@repo/api-client";
-import { SPECIES_KOREAN_ALIAS_INFO } from "@/app/(브리더스룸)/constants";
 import Link from "next/link";
 import DeletePetButton from "./DeletePetButton";
 import { useAdoptionStore } from "@/app/(브리더스룸)/pet/store/adoption";
