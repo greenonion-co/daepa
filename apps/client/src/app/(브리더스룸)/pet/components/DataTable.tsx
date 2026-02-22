@@ -106,10 +106,9 @@ export const DataTable = ({
       newStatus: UpdateAdoptionDtoStatus | null,
     ) => {
       const oldAdoption = currentAdoption ?? null;
-      // 낙관적 업데이트
-      const optimisticAdoption = newStatus
-        ? { ...(oldAdoption ?? { petId, createdAt: new Date().toISOString() }), status: newStatus }
-        : null;
+      // 낙관적 업데이트 (adoption 객체는 유지하고 status만 변경)
+      const base = oldAdoption ?? { petId, createdAt: new Date().toISOString() };
+      const optimisticAdoption = { ...base, status: newStatus };
       patchPetListCache(queryClient, petId, { adoption: optimisticAdoption as PetDto["adoption"] });
 
       try {
