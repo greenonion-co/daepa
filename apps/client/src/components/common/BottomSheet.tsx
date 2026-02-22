@@ -92,7 +92,7 @@ export default function BottomSheet({
         aria-modal="true"
         tabIndex={-1}
         onKeyDown={(e) => e.key === "Escape" && onClose()}
-        className={`fixed bottom-4 left-1/2 z-[70] max-h-[90vh] min-h-[40vh] w-[calc(100%-24px)] max-w-2xl -translate-x-1/2 overflow-y-auto rounded-3xl border border-gray-200 bg-white p-3 shadow-md transition-transform duration-300 ease-out dark:border-gray-700 dark:bg-[#18171C] ${isClosing ? "translate-y-full" : "animate-[slideUp_0.3s_ease-out]"} ${buttonText ? "pb-[calc(env(safe-area-inset-bottom)+80px)]" : "pb-[calc(env(safe-area-inset-bottom)+1rem)]"}`}
+        className={`fixed bottom-4 left-1/2 z-[70] max-h-[90vh] min-h-[40vh] w-[calc(100%-24px)] max-w-2xl -translate-x-1/2 overflow-y-auto rounded-3xl border border-gray-200 bg-white p-3 shadow-md transition-transform duration-300 ease-out md:left-[calc(50%-27.5px)] dark:border-gray-700 dark:bg-[#18171C] ${isClosing ? "translate-y-full" : "animate-[slideUp_0.3s_ease-out]"} ${buttonText ? "pb-[calc(env(safe-area-inset-bottom)+80px)]" : "pb-[calc(env(safe-area-inset-bottom)+1rem)]"}`}
       >
         <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-gray-200 dark:bg-[#101012]" />
         {children}

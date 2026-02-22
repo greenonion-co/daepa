@@ -7,6 +7,7 @@ import {
   EGG_STATUS_KOREAN_INFO,
   GENDER_KOREAN_INFO,
   GROWTH_KOREAN_INFO,
+  SELECTOR_CONFIGS,
   SPECIES_KOREAN_INFO,
 } from "../../constants";
 import { toast } from "@/lib/toast";
@@ -57,6 +58,10 @@ export const FormField = ({
   const isRegister = usePathname().includes("register");
 
   const error = errors?.[name];
+
+  const foodDisplayMap: Record<string, string> = Object.fromEntries(
+    SELECTOR_CONFIGS.foods.selectList.map(({ key, value }) => [key, value]),
+  );
 
   const inputClassName = cn(
     `text-[16px] w-full h-9 pr-1 text-left focus:outline-none focus:ring-0 text-gray-400 dark:text-gray-200
@@ -207,7 +212,7 @@ export const FormField = ({
                     )}
                     key={item}
                   >
-                    <span>{item}</span>
+                    <span>{foodDisplayMap[item] ?? item}</span>
                     {!disabled && (
                       <button
                         type="button"
