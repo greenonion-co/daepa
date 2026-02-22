@@ -110,7 +110,7 @@ export const DataTable = ({
       const optimisticAdoption = newStatus
         ? { ...(oldAdoption ?? { petId, createdAt: new Date().toISOString() }), status: newStatus }
         : null;
-      patchPetListCache(queryClient, petId, { adoption: optimisticAdoption as AdoptionDto });
+      patchPetListCache(queryClient, petId, { adoption: optimisticAdoption as PetDto["adoption"] });
 
       try {
         if (oldAdoption) {
@@ -120,7 +120,7 @@ export const DataTable = ({
         }
       } catch {
         // 실패 시 롤백
-        patchPetListCache(queryClient, petId, { adoption: oldAdoption as AdoptionDto });
+        patchPetListCache(queryClient, petId, { adoption: oldAdoption as PetDto["adoption"] });
       }
     },
     [queryClient],
