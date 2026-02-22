@@ -24,7 +24,7 @@ import {
   PetDto,
   PetDtoGrowth,
   AdoptionDto,
-  PetAdoptionDtoStatus,
+  UpdateAdoptionDtoStatus,
   petControllerUpdate,
   petAdoptionControllerCreatePetAdoption,
   petAdoptionControllerUpdatePetAdoption,
@@ -103,7 +103,7 @@ export const DataTable = ({
     async (
       petId: string,
       currentAdoption: AdoptionDto | null | undefined,
-      newStatus: PetAdoptionDtoStatus | null,
+      newStatus: UpdateAdoptionDtoStatus | null,
     ) => {
       const oldAdoption = currentAdoption ?? null;
       // 낙관적 업데이트
@@ -114,9 +114,9 @@ export const DataTable = ({
 
       try {
         if (oldAdoption) {
-          await petAdoptionControllerUpdatePetAdoption(petId, { status: newStatus as PetAdoptionDtoStatus });
-        } else {
-          await petAdoptionControllerCreatePetAdoption({ petId, status: newStatus as PetAdoptionDtoStatus });
+          await petAdoptionControllerUpdatePetAdoption(petId, { status: newStatus as UpdateAdoptionDtoStatus });
+        } else if (newStatus) {
+          await petAdoptionControllerCreatePetAdoption({ petId, status: newStatus });
         }
       } catch {
         // 실패 시 롤백

@@ -10,7 +10,7 @@ import {
   PetParentDto,
   PetHiddenStatusDtoHiddenStatus,
   AdoptionDto,
-  PetAdoptionDtoStatus,
+  UpdateAdoptionDtoStatus,
 } from "@repo/api-client";
 import LinkButton from "../../components/LinkButton";
 import { DateTime } from "luxon";
@@ -31,7 +31,7 @@ export type TableMeta = {
   changeAdoptionStatus?: (
     petId: string,
     currentAdoption: AdoptionDto | null | undefined,
-    newStatus: PetAdoptionDtoStatus | null,
+    newStatus: UpdateAdoptionDtoStatus | null,
   ) => void;
   changeGrowth?: (petId: string, currentGrowth: PetDtoGrowth, newGrowth: PetDtoGrowth) => void;
 };
@@ -98,11 +98,11 @@ export const columns: ColumnDef<PetDto>[] = [
       const setSuppressed = meta?.setPreviewSuppressed;
       const changeAdoptionStatus = meta?.changeAdoptionStatus;
 
-      const statusOptions: { value: PetAdoptionDtoStatus | null; label: string }[] = [
+      const statusOptions: { value: UpdateAdoptionDtoStatus | null; label: string }[] = [
         { value: null, label: "미설정" },
-        { value: PetAdoptionDtoStatus.NFS, label: "NFS" },
-        { value: PetAdoptionDtoStatus.ON_SALE, label: "분양중" },
-        { value: PetAdoptionDtoStatus.ON_RESERVATION, label: "예약중" },
+        { value: UpdateAdoptionDtoStatus.NFS, label: "NFS" },
+        { value: UpdateAdoptionDtoStatus.ON_SALE, label: "분양중" },
+        { value: UpdateAdoptionDtoStatus.ON_RESERVATION, label: "예약중" },
       ];
 
       return (
