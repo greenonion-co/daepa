@@ -56,7 +56,7 @@ export const PetBasicInfo = ({
             <CalendarInput
               variant="form"
               editable={isEditMode}
-              placeholder="-"
+              placeholder={isEditMode ? "선택하기" : "미등록"}
               value={formData.hatchingDate}
               onSelect={(date) => {
                 if (!date) return;
