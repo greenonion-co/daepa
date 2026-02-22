@@ -221,8 +221,8 @@ const Header = ({
           )}
         >
           <TooltipText
-            text="펫 관계도"
-            title="펫 관계도"
+            text="개체 관계도"
+            title="개체 관계도"
             className="text-blue-600"
             content="혈통 관계가 있는 펫들을 확인합니다."
           />

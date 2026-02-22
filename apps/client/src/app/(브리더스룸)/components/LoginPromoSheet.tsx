@@ -37,7 +37,7 @@ const LoginPromoSheet = ({ isOpen, onOpenChange, title, description }: LoginProm
       >
         <SheetHeader className="flex items-center">
           <Image
-            alt="펫 관계도 바텀시트 이미지"
+            alt="개체 관계도 바텀시트 이미지"
             src="/assets/lizard_face.png"
             width={100}
             height={100}

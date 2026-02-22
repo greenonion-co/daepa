@@ -1032,7 +1032,7 @@ export class PetService {
       });
     }
 
-    // 생년월일 범위 필터링
+    // 해칭일 범위 필터링
     if (pageOptionsDto.startYmd !== undefined) {
       queryBuilder.andWhere('pets.hatchingDate >= :startYmd', {
         startYmd: pageOptionsDto.startYmd,

@@ -32,7 +32,7 @@ export const FIELD_LABELS: Record<string, string> = {
   weight: '몸무게',
   mother: '모',
   father: '부',
-  hatchingDate: '생년월일',
+  hatchingDate: '해칭일',
   desc: '설명',
   foods: '먹이',
   isPublic: '공개 여부',
