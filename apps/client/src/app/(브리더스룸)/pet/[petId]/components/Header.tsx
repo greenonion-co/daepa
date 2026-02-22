@@ -2,7 +2,7 @@
 
 import QRCode from "./QR코드";
 import { cn } from "@/lib/utils";
-import { PetAdoptionDtoStatus, PetDto } from "@repo/api-client";
+import { PetDto } from "@repo/api-client";
 import { SPECIES_KOREAN_ALIAS_INFO } from "@/app/(브리더스룸)/constants";
 import Link from "next/link";
 import DeletePetButton from "./DeletePetButton";
@@ -17,6 +17,7 @@ import { useIsMyPet } from "@/hooks/useIsMyPet";
 import { openRelationPromoSheet } from "@/app/(브리더스룸)/components/LoginPromoSheet";
 import { useAppRouter } from "@/hooks/useAppRouter";
 import { useBreedingInfoStore } from "../../store/breedingInfo";
+import AdoptionStatusBadge from "@/app/(브리더스룸)/components/AdoptionStatusBadge";
 import {
   RECENTLY_VIEWED_MAX_ITEMS,
   RECENTLY_VIEWED_STORAGE_KEY,
@@ -100,18 +101,25 @@ const Header = ({
   const { adoption } = useAdoptionStore();
   const adoptionData = adoption?.petId === pet?.petId ? adoption : null;
 
-  // 저장 완료된 이름만 헤더에 반영 (중복확인 통과 후 저장된 값)
+  // 저장 완료된 값만 헤더에 반영 (중복확인 통과 후 저장된 값)
   const displayName = breedingData?.name || pet?.name;
+  const displaySex = breedingData?.sex ?? pet?.sex;
+  const dotColor =
+    displaySex === "M"
+      ? "bg-[#2383E2] dark:bg-[#529CCA]"
+      : displaySex === "F"
+        ? "bg-[#E03E3E] dark:bg-[#FF7369]"
+        : "bg-gray-300";
 
   if (!pet) return null;
 
   return (
     <div
       className={cn(
-        "dark:bg-background sticky top-0 z-20 flex flex-col gap-2 bg-gray-100 px-2 pb-2 transition-all transition-shadow duration-200",
-        isScrolled ? "pt-2 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1)]" : "",
+        "dark:bg-background sticky top-0 z-20 flex flex-col gap-2 bg-gray-100 px-2 transition-all transition-shadow duration-200",
+        isScrolled ? "pt-2 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1)] min-[581px]:pb-2" : "",
         size === "small" &&
-          "before:dark:bg-background top-1.5 before:absolute before:-top-2 before:right-0 before:left-0 before:h-2 before:bg-gray-100", // 모달에서 X 버튼 아래로 위치
+          "before:dark:bg-background top-1.5 pb-2 before:absolute before:-top-2 before:right-0 before:left-0 before:h-2 before:bg-gray-100", // 모달에서 X 버튼 아래로 위치
       )}
     >
       <div className="flex items-center gap-2">
@@ -164,36 +172,30 @@ const Header = ({
                 )}
               </div>
             )}
-            <div
+            <span className={`h-2 w-2 shrink-0 rounded-full ${dotColor}`} />
+
+            {/* <div
               className={cn(
                 "flex-1 text-gray-500 transition-all max-[480px]:text-xs dark:text-gray-400",
                 isScrolled ? "text-xs" : "text-sm",
               )}
             >
               {SPECIES_KOREAN_ALIAS_INFO[pet.species]}
-            </div>
+            </div> */}
           </div>
 
           <div className="flex items-center gap-1">
-            <div
+            <span
               className={cn(
-                "flex w-fit items-center justify-center rounded-md px-2 font-semibold text-white transition-all max-[480px]:h-[22px] max-[480px]:text-xs",
-                isScrolled ? "h-[22px] text-xs" : "h-[26px] text-sm",
-                breedingData?.isPublic ? "bg-neutral-800" : "bg-yellow-500 text-neutral-700",
+                "inline-flex items-center rounded-full px-2 py-0.5 text-[11px] leading-none font-medium",
+                breedingData?.isPublic
+                  ? "bg-[#35B0AB] text-white dark:bg-[#2B9A94]"
+                  : "bg-[#D5D5D4] text-[#55534E] dark:bg-[#3F3F3F] dark:text-[#9B9A97]",
               )}
             >
               {breedingData?.isPublic ? "공개" : "비공개"}
-            </div>
-            {adoptionData?.status === PetAdoptionDtoStatus.NFS && (
-              <div
-                className={cn(
-                  "flex w-fit items-center justify-center rounded-md bg-pink-500 px-2 font-semibold text-white transition-all max-[480px]:h-[22px] max-[480px]:text-xs",
-                  isScrolled ? "h-[22px] text-xs" : "h-[26px] text-sm",
-                )}
-              >
-                NFS
-              </div>
-            )}
+            </span>
+            {adoptionData?.status && <AdoptionStatusBadge status={adoptionData.status} />}
           </div>
 
           <div

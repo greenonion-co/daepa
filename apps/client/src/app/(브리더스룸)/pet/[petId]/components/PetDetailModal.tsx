@@ -11,6 +11,8 @@ import PedigreeInfoContent from "./PedigreeInfoContent";
 import AdoptionInfoContent from "./AdoptionInfoContent";
 import FeedingInfoContent from "./FeedingInfoContent";
 import { useFlush } from "./FlushContext";
+import { useNameStore } from "@/app/(브리더스룸)/store/name";
+import { DUPLICATE_CHECK_STATUS } from "@/app/(브리더스룸)/constants";
 
 interface PetDetailModalProps {
   isOpen: boolean;
@@ -22,12 +24,15 @@ export default function PetDetailModal({ isOpen, pet, onClose }: PetDetailModalP
   const queryClient = useQueryClient();
   const { flushRef, flushAll, FlushProvider } = useFlush();
 
+  const setDuplicateCheckStatus = useNameStore((s) => s.setDuplicateCheckStatus);
+
   const handleClose = useCallback(() => {
+    setDuplicateCheckStatus(DUPLICATE_CHECK_STATUS.NONE);
     onClose();
     flushAll().then(() => {
       queryClient.invalidateQueries({ queryKey: [brPetControllerFindAll.name] });
     });
-  }, [flushAll, onClose, queryClient]);
+  }, [flushAll, onClose, queryClient, setDuplicateCheckStatus]);
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>

@@ -76,12 +76,13 @@ const BreedingInfoContent = ({ petId, ownerId, initialPet }: BreedingInfoContent
         if (petRef.current) {
           petRef.current = { ...petRef.current, ...updateData } as PetDto;
         }
-        // 헤더 동기화 (공개여부, 이름)
-        if ("isPublic" in updateData || "name" in updateData) {
+        // 헤더 동기화 (공개여부, 이름, 성별)
+        if ("isPublic" in updateData || "name" in updateData || "sex" in updateData) {
           const updated = petRef.current;
           setBreedingInfo({
             petId,
             name: updated?.name,
+            sex: updated?.sex,
             isPublic: updated?.isPublic,
           });
         }
@@ -206,6 +207,7 @@ const BreedingInfoContent = ({ petId, ownerId, initialPet }: BreedingInfoContent
     setBreedingInfo({
       petId: pet.petId,
       name: pet.name,
+      sex: pet.sex,
       isPublic: pet?.isPublic,
     });
   }, [pet, setFormData, setBreedingInfo]);

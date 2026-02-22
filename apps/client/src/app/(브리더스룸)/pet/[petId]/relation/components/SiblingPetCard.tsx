@@ -12,7 +12,6 @@ import { useUserStore } from "@/app/(브리더스룸)/store/user";
 import { cn, formatPrice } from "@/lib/utils";
 import BadgeList from "@/app/(브리더스룸)/components/BadgeList";
 import PetThumbnail from "@/components/common/PetThumbnail";
-import { getSexIcon } from "@/lib/sex-icon";
 
 /** 기본 펫 정보 인터페이스 */
 interface BasePetInfo {
@@ -54,10 +53,6 @@ function hasOwner(pet: PetData): pet is PetWithOwner {
   return "owner" in pet && pet.owner !== undefined;
 }
 
-function isMale(sex?: string) {
-  return sex === "MALE";
-}
-
 export default function SiblingPetCard({
   pet,
   variant = "vertical",
@@ -96,7 +91,12 @@ export default function SiblingPetCard({
     );
   }
 
-  const sexLabel = getSexIcon(pet.sex, { size: "xs" });
+  const dotColor =
+    pet.sex === "M"
+      ? "bg-[#2383E2] dark:bg-[#529CCA]"
+      : pet.sex === "F"
+        ? "bg-[#E03E3E] dark:bg-[#FF7369]"
+        : "bg-gray-300";
   const isMyPet = hasOwner(pet) && pet.owner.userId === user?.userId;
   const ownerName = hasOwner(pet) ? pet.owner.name : null;
   const isDeleted = pet.isDeleted;
@@ -118,29 +118,25 @@ export default function SiblingPetCard({
           </div>
         ) : null}
       </div>
-      {!isMyPet && ownerName ? (
-        <div className="flex items-center justify-center">
-          <span className="text-[11px] font-semibold text-gray-500/90 dark:text-gray-400">
-            @ {ownerName}
-          </span>
-        </div>
-      ) : null}
+      <div className="flex items-center justify-center">
+        <span
+          className={cn(
+            "text-[11px] font-semibold",
+            isMyPet
+              ? "text-purple-500 dark:text-purple-400"
+              : "text-gray-500/90 dark:text-gray-400",
+          )}
+        >
+          {isMyPet ? "내 개체" : ownerName ? `@ ${ownerName}` : null}
+        </span>
+      </div>
 
       <div className="flex flex-col gap-0.5 px-1">
         <div className="flex items-center gap-1">
+          <span className={`h-2 w-2 shrink-0 rounded-full ${dotColor}`} />
           <span className="min-w-0 truncate text-[13px] font-[600] text-gray-600 dark:text-gray-200">
             {pet.name ?? "이름 없음"}
           </span>
-          {sexLabel && (
-            <span
-              className={cn(
-                "shrink-0 text-[13px] font-bold",
-                isMale(pet.sex) ? "text-blue-600" : "text-red-600",
-              )}
-            >
-              {sexLabel}
-            </span>
-          )}
         </div>
 
         <BadgeList variant={"outline"} items={pet.morphs} />
@@ -177,25 +173,20 @@ export default function SiblingPetCard({
 
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1.5">
+          <span className={`h-2 w-2 shrink-0 rounded-full ${dotColor}`} />
           <span className="min-w-0 truncate text-[14px] font-semibold text-gray-800 dark:text-gray-100">
             {pet.name ?? "이름 없음"}
           </span>
-          {sexLabel && (
-            <span
-              className={cn(
-                "shrink-0 text-[13px] font-bold",
-                isMale(pet.sex) ? "text-blue-500" : "text-red-500",
-              )}
-            >
-              {sexLabel}
+          {isMyPet ? (
+            <span className="rounded bg-purple-50 px-1.5 py-0.5 text-[10px] font-medium text-purple-600 dark:bg-purple-900/50 dark:text-purple-400">
+              내 개체
             </span>
-          )}
-          {ownerName && !isMyPet && (
+          ) : ownerName ? (
             <span className="flex items-center gap-0.5 rounded bg-blue-50 px-1.5 py-0.5 text-[10px] font-medium text-blue-600 dark:bg-blue-900/50 dark:text-blue-400">
               <ScanFace className="h-3 w-3" />
               {ownerName}
             </span>
-          )}
+          ) : null}
         </div>
 
         <BadgeList items={pet.morphs} />
@@ -226,28 +217,13 @@ export default function SiblingPetCard({
 
   const cardContent = variant === "vertical" ? verticalCardContent : horizontalCardContent;
 
-  // isMyPet인 경우 그라데이션 border wrapper 적용
-  const wrappedContent =
-    isMyPet && variant === "vertical" ? (
-      <div
-        className="h-full rounded-xl p-[1.5px]"
-        style={{
-          background: "linear-gradient(90deg, #60a5fa, #c084fc)",
-        }}
-      >
-        {cardContent}
-      </div>
-    ) : (
-      cardContent
-    );
-
   if (isDeleted) {
-    return <div className="pointer-events-none">{wrappedContent}</div>;
+    return <div className="pointer-events-none">{cardContent}</div>;
   }
 
   return (
     <Link href={`/pet/${pet.petId}`} className="cursor-pointer">
-      {wrappedContent}
+      {cardContent}
     </Link>
   );
 }

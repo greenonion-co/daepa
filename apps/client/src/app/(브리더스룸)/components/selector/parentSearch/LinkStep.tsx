@@ -1,6 +1,5 @@
 import { PetParentDtoWithMessage } from "@/app/(브리더스룸)/pet/store/parentLink";
 import { useUserStore } from "@/app/(브리더스룸)/store/user";
-import { Badge } from "@/components/ui/badge";
 import { PetDtoSex } from "@repo/api-client";
 import { Send } from "lucide-react";
 import { useState } from "react";
@@ -43,24 +42,25 @@ const LinkStep = ({ selectedPet, onSelect, onClose }: LinkStepProps) => {
             </div>
 
             <div className="flex-1">
-              <div className="mb-1">
-                <div className="flex items-center gap-2">
+              <div className="mb-2">
+                <div className="flex items-center gap-1.5">
+                  <span
+                    className={`h-2 w-2 shrink-0 rounded-full ${
+                      selectedPet.sex?.toString() === PetDtoSex.MALE
+                        ? "bg-[#2383E2] dark:bg-[#529CCA]"
+                        : "bg-[#E03E3E] dark:bg-[#FF7369]"
+                    }`}
+                  />
                   <span className="text-[16px] font-bold dark:text-gray-100">
                     {selectedPet.name}
                   </span>
-                  <Badge
-                    variant="outline"
-                    className="bg-blue-50 text-black dark:bg-blue-900/50 dark:text-blue-300"
-                  >
-                    {selectedPet.sex?.toString() === PetDtoSex.MALE ? "수컷" : "암컷"}
-                  </Badge>
                 </div>
-                <p className="text-[14px] font-[500] text-gray-800 dark:text-gray-200">
-                  소유자:{" "}
-                  <span className="decoration-1px font-[700] text-blue-500 underline decoration-gray-400">
-                    {selectedPet.owner?.name}
-                  </span>
-                </p>
+
+                {selectedPet.owner?.name && (
+                  <p className="text-xs text-gray-600 dark:text-gray-500">
+                    @{selectedPet.owner.name}
+                  </p>
+                )}
               </div>
 
               <div className="space-y-1">

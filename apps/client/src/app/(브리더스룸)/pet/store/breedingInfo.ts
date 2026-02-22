@@ -3,6 +3,7 @@ import { create } from "zustand";
 interface BreedingInfo {
   petId?: string;
   name?: string;
+  sex?: string;
   isPublic?: boolean;
 }
 
