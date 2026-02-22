@@ -76,12 +76,12 @@ const ParentLink = ({
       if ("hiddenStatus" in data) {
         title = "부모 연동 해제";
         description =
-          "부모 연동을 해제하시겠습니까? \n 타인의 펫인 경우, 해제 시 연동 절차를 다시 진행해야 합니다.";
+          "부모 연동을 해제하시겠습니까? \n 타인의 개체인 경우, 해제 시 연동 절차를 다시 진행해야 합니다.";
       } else {
         title = data?.status === PetParentDtoStatus.APPROVED ? "부모 연동 해제" : "부모 요청 취소";
         description =
           data?.status === PetParentDtoStatus.APPROVED
-            ? "부모 연동을 해제하시겠습니까? \n 타인의 펫인 경우, 해제 시 연동 절차를 다시 진행해야 합니다."
+            ? "부모 연동을 해제하시겠습니까? \n 타인의 개체인 경우, 해제 시 연동 절차를 다시 진행해야 합니다."
             : "부모 연동 요청을 취소하시겠습니까? \n 부모 개체 주인에게 취소 알림이 발송됩니다.";
       }
 
@@ -262,7 +262,7 @@ const ParentLink = ({
             {isDeleted && (
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 rounded-2xl bg-white/70">
                 <Ban className="h-6 w-6 text-red-600" />
-                <span className="text-sm font-medium text-red-600">삭제된 펫입니다.</span>
+                <span className="text-sm font-medium text-red-600">삭제된 개체입니다.</span>
               </div>
             )}
           </div>
