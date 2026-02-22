@@ -44,14 +44,14 @@ const LoginPromoSheet = ({ isOpen, onOpenChange, title, description }: LoginProm
           />
 
           <SheetTitle className="text-center text-lg">{title}</SheetTitle>
-          <SheetDescription className="text-center text-sm leading-relaxed text-neutral-600">
+          <SheetDescription className="text-center text-sm leading-relaxed text-neutral-600 dark:text-neutral-400">
             {description}
           </SheetDescription>
         </SheetHeader>
 
         <SheetFooter className="flex-col gap-2 p-0">
           <Button
-            className="w-full rounded-xl bg-neutral-800 py-6 text-base font-semibold hover:bg-black"
+            className="w-full rounded-xl bg-neutral-800 py-6 text-base font-semibold hover:bg-black dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200"
             onClick={() => {
               onOpenChange(false);
               if (isNativeApp()) {
@@ -64,7 +64,7 @@ const LoginPromoSheet = ({ isOpen, onOpenChange, title, description }: LoginProm
             시작하기
           </Button>
           <button
-            className="pt-2 text-sm text-neutral-500 hover:text-neutral-700"
+            className="pt-2 text-sm text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-300"
             onClick={() => onOpenChange(false)}
           >
             다음에 할게요
@@ -90,9 +90,9 @@ export const openLoginPromoSheet = () => {
       title="내 개체를 등록해보세요"
       description={
         <>
-          <span className="text-gray-800">개체를 등록</span>하면
+          <span className="text-gray-800 dark:text-white">개체를 등록</span>하면
           <br />
-          <span className="font-semibold text-blue-700">개체 관리・혈통 인증・분양 관리</span>가
+          <span className="font-semibold text-blue-700 dark:text-blue-400">개체 관리・혈통 인증・분양 관리</span>가
           가능해요!
         </>
       }
@@ -115,9 +115,9 @@ export const openRelationPromoSheet = () => {
       title="혈통 정보를 한눈에"
       description={
         <>
-          <span className="font-semibold text-blue-700">부모, 동배, 자손</span>까지
+          <span className="font-semibold text-blue-700 dark:text-blue-400">부모, 동배, 자손</span>까지
           <br />
-          <span className="font-semibold text-gray-800">개체 관계도</span>로 혈통을 쉽게 확인할 수
+          <span className="font-semibold text-gray-800 dark:text-gray-200">개체 관계도</span>로 혈통을 쉽게 확인할 수
           있어요
         </>
       }
