@@ -40,19 +40,17 @@ const MultiSelectFilter = ({
   const closeAndSave = useCallback(() => {
     setIsOpen(false);
     const current = selectedItemRef.current || [];
-    const saved = searchFilters[type] || [];
-    const currentSet = new Set(current);
-    const savedSet = new Set(saved);
-    const changed =
-      current.length !== saved.length ||
-      [...currentSet].some((item) => !savedSet.has(item));
-    if (changed) {
-      setSearchFilters({
-        ...searchFilters,
-        [type]: selectedItemRef.current,
-      });
-    }
-  }, [searchFilters, type, setSearchFilters]);
+    setSearchFilters((prev) => {
+      const saved = prev[type] || [];
+      const currentSet = new Set(current);
+      const savedSet = new Set(saved);
+      const changed =
+        current.length !== saved.length ||
+        [...currentSet].some((item) => !savedSet.has(item));
+      if (!changed) return prev;
+      return { ...prev, [type]: selectedItemRef.current };
+    });
+  }, [type, setSearchFilters]);
 
   useEffect(() => {
     if (!isOpen) return;

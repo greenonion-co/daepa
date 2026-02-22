@@ -3,7 +3,11 @@ import { PetControllerFindAllParams } from "@repo/api-client";
 
 export interface FilterStore<PetControllerFindAllParams> {
   searchFilters: Partial<PetControllerFindAllParams>;
-  setSearchFilters: (filters: Partial<PetControllerFindAllParams>) => void;
+  setSearchFilters: (
+    filters:
+      | Partial<PetControllerFindAllParams>
+      | ((prev: Partial<PetControllerFindAllParams>) => Partial<PetControllerFindAllParams>),
+  ) => void;
   resetFilters: () => void;
 }
 
@@ -13,7 +17,10 @@ export const useFilterStore = create<FilterStore<PetControllerFindAllParams>>()(
   },
 
   // Actions
-  setSearchFilters: (filters) => set({ searchFilters: filters }),
+  setSearchFilters: (filters) =>
+    set((state) => ({
+      searchFilters: typeof filters === "function" ? filters(state.searchFilters) : filters,
+    })),
   resetFilters: () =>
     set({
       searchFilters: {
