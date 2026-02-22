@@ -141,7 +141,7 @@ const AdoptionInfoContent = ({
         }
       }
     },
-    [petId, updateAdoption, queryClient, setAdoption],
+    [petId, updateAdoption, setAdoption],
   );
 
   // 분양 상태 변경 (즉시 저장)
