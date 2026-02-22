@@ -174,10 +174,17 @@ const BreedingInfoContent = ({ petId, ownerId, initialPet }: BreedingInfoContent
       }
     }
     if (Object.keys(unsaved).length > 0) {
+      // 롤백용 원본 값 저장
+      const rollback: Record<string, any> = {};
+      for (const field of Object.keys(unsaved)) {
+        rollback[field] = (latest as any)[field] ?? null;
+      }
       patchPetListCache(queryClient, latest.petId, unsaved);
       return petControllerUpdate(latest.petId, unsaved)
         .then(() => {})
-        .catch(() => {});
+        .catch(() => {
+          patchPetListCache(queryClient, latest.petId, rollback);
+        });
     }
   }, [queryClient]);
 

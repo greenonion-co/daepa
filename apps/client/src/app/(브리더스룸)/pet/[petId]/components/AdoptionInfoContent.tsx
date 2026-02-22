@@ -140,16 +140,18 @@ const AdoptionInfoContent = ({
         }
       } catch (error: unknown) {
         console.error("분양 정보 수정 실패:", error);
-        // 실패 시 헤더 롤백
-        if (prevAdoption && ("status" in data || "price" in data)) {
-          setAdoption({
-            petId,
-            status: prevAdoption.status as AdoptionDtoStatus | undefined,
-            price: prevAdoption.price ?? undefined,
-          });
+        // 실패 시 롤백
+        if (prevAdoption) {
           patchPetListCache(queryClient, petId, {
             adoption: prevAdoption as PetAdoptionDto,
           } as Partial<PetDto>);
+          if ("status" in data || "price" in data) {
+            setAdoption({
+              petId,
+              status: prevAdoption.status as AdoptionDtoStatus | undefined,
+              price: prevAdoption.price ?? undefined,
+            });
+          }
         }
         if (error instanceof AxiosError) {
           const message = error.response?.data?.message;
@@ -267,7 +269,11 @@ const AdoptionInfoContent = ({
       });
       return petAdoptionControllerUpdatePetAdoption(petId, unsaved)
         .then(() => {})
-        .catch(() => {});
+        .catch(() => {
+          patchPetListCache(queryClient, petId, {
+            adoption: latest as PetAdoptionDto,
+          } as Partial<PetDto>);
+        });
     }
   }, [queryClient, petId]);
 
