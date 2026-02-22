@@ -10,7 +10,7 @@ export default function NotFound() {
 
         <div>
           <h1 className="text-[16px] font-[500] text-gray-700 dark:text-gray-100">
-            존재하지 않는 펫입니다
+            존재하지 않거나 비공개 상태인 개체입니다.
           </h1>
         </div>
       </div>
