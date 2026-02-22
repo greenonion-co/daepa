@@ -37,7 +37,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     <main
       className={`relative mx-auto flex min-h-screen w-full ${isPetDetail ? "dark:bg-background bg-gray-100" : ""}`}
     >
-      <div className={cn("w-full", !isMobile && "max-w-[calc(100%-55px)]")}>
+      <div className={cn("w-full", !isMobile && "max-w-[calc(100%-var(--right-sidebar-width))]")}>
         {!hasNativeTopBar && <Menubar unreadCount={unreadCount} />}
         <div className={cn(isNativeApp() && "pb-[80px]")}>{children}</div>
       </div>
