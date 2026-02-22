@@ -69,7 +69,7 @@ const RecentlyViewedList = () => {
         <div className="flex items-center gap-2 pl-4 text-red-500 dark:text-red-400">
           <Info size={14} />
           <div className="text-[14px]">
-            최대 {RECENTLY_VIEWED_MAX_ITEMS}개의 펫을 확인 가능합니다.
+            최대 {RECENTLY_VIEWED_MAX_ITEMS}개의 개체를 확인 가능합니다.
           </div>
         </div>
       )}
@@ -107,7 +107,7 @@ const RecentlyViewedList = () => {
         ) : (
           <div className="flex flex-col items-center justify-center gap-4 p-8 text-center">
             <Cookie />
-            <div className="mb-2 text-sm text-gray-800">최근 본 펫이 없습니다.</div>
+            <div className="mb-2 text-sm text-gray-800">최근 본 개체가 없습니다.</div>
           </div>
         )}
       </ScrollArea>

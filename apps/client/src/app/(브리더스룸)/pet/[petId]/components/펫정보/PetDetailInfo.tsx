@@ -9,6 +9,7 @@ import {
 } from "@/app/(브리더스룸)/constants";
 import { PetDtoSpecies } from "@repo/api-client";
 import { cn } from "@/lib/utils";
+import { Info } from "lucide-react";
 
 interface PetDetailInfoProps {
   formData: {
@@ -48,6 +49,16 @@ export const PetDetailInfo = ({
             initialItem={formData.sex}
             onSelect={(item) => onFieldChange("sex", item)}
           />
+        }
+        subContent={
+          isEditMode ? (
+            <div className="mt-1 flex items-center gap-1">
+              <Info size={14} className="text-gray-400 dark:text-gray-500" />
+              <span className="text-xs text-gray-400 dark:text-gray-500">
+                페어 또는 부모로 등록된 경우 성별을 변경할 수 없습니다.
+              </span>
+            </div>
+          ) : null
         }
       />
 
@@ -133,7 +144,7 @@ export const PetDetailInfo = ({
               onChange={(e) => handleInput("desc", e.target.value)}
               onBlur={() => onFieldBlur?.("desc")}
               maxLength={100}
-              placeholder={isEditMode ? "펫 설명을 입력하세요" : "-"}
+              placeholder={isEditMode ? "개채 설명을 입력하세요" : "-"}
               className={cn(
                 "min-h-[80px] w-full resize-none rounded-md border border-gray-200 p-2 text-sm font-[500] placeholder:font-[500] disabled:bg-transparent dark:border-gray-700 dark:bg-transparent dark:text-white",
                 !isEditMode && "border-none",

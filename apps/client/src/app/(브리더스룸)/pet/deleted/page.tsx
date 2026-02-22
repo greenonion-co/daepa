@@ -56,7 +56,7 @@ export default function DeletedPetsPage() {
     <div className="space-y-4 px-2">
       <div className="flex flex-col gap-3">
         <div className="flex items-center gap-2">
-          <h1 className="text-[16px] text-gray-900 dark:text-blue-200">삭제된 펫 목록</h1>
+          <h1 className="text-[16px] text-gray-900 dark:text-blue-200">삭제된 개체 목록</h1>
         </div>
 
         <Alert
@@ -67,19 +67,23 @@ export default function DeletedPetsPage() {
           }}
         >
           <AlertCircle className="h-4 w-4" />
-          <AlertTitle>펫 복구 안내</AlertTitle>
+          <AlertTitle>개체 복구 안내</AlertTitle>
           <AlertDescription className="text-blue-700 dark:text-blue-500">
-            삭제된 펫을 복구하시려면 운영자에게 문의해주세요.
+            삭제된 개체를 복구하시려면 운영자에게 문의해주세요.
             <br />
-            삭제된 펫 정보는 보관되며, 운영자 승인 후 복구가 가능합니다.
+            삭제된 개체 정보는 보관되며, 운영자 승인 후 복구가 가능합니다.
           </AlertDescription>
         </Alert>
       </div>
 
       {isEmpty ? (
         <div className="mt-6 text-center">
-          <p className="text-[15px] font-medium text-gray-500 dark:text-gray-400">삭제된 펫이 없습니다</p>
-          <p className="mt-1 text-sm text-gray-400 dark:text-gray-500">삭제한 펫이 있으면 여기에 표시됩니다</p>
+          <p className="text-[15px] font-medium text-gray-500 dark:text-gray-400">
+            삭제된 개체가 없습니다
+          </p>
+          <p className="mt-1 text-sm text-gray-400 dark:text-gray-500">
+            삭제한 개체가 있으면 여기에 표시됩니다
+          </p>
         </div>
       ) : (
         <DataTable

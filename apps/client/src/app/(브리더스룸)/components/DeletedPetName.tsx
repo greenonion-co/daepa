@@ -37,7 +37,7 @@ const DeletedPetName = ({ name, className, deletedClassName, maxLength }: Delete
           </span>
         </div>
       </TooltipTrigger>
-      <TooltipContent>삭제된 펫입니다</TooltipContent>
+      <TooltipContent>삭제된 개체입니다</TooltipContent>
     </Tooltip>
   );
 };

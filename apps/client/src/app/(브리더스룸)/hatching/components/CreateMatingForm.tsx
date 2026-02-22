@@ -183,7 +183,7 @@ const CreateMatingForm = ({ onClose }: CreateMatingFormProps) => {
           <Label className="text-[14px] font-semibold">
             부모 개체 선택
             <span className="text-sm text-green-600 dark:text-blue-400">
-              * 나의 펫만 선택 가능합니다.
+              * 나의 개체만 선택 가능합니다.
             </span>
           </Label>
 

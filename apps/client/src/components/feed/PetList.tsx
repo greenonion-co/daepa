@@ -132,7 +132,7 @@ export default function PetList({ filterType, isVisible }: PetListProps) {
           onClick={handleRegisterClick}
           className="mt-2 w-full rounded-xl bg-black py-3 text-sm font-semibold text-white transition-opacity hover:opacity-80"
         >
-          펫 등록하기
+          개체 등록하기
         </button>
       </div>
     );
@@ -146,7 +146,7 @@ export default function PetList({ filterType, isVisible }: PetListProps) {
       <div ref={loadMoreRef} className="flex justify-center py-4 pb-20">
         {isFetchingNextPage && <Loading />}
         {!hasNextPage && allPets.length > 0 && (
-          <p className="text-sm text-gray-400">모든 펫을 불러왔습니다</p>
+          <p className="text-sm text-gray-400">모든 개체를 불러왔습니다</p>
         )}
       </div>
     </div>

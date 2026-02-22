@@ -160,7 +160,7 @@ function SiblingsPage({ params }: PetDetailPageProps) {
     return (
       <div className="flex h-[calc(100vh-52px)] flex-1 flex-col items-center justify-center gap-1">
         <p className="text-[15px] font-medium text-gray-500 dark:text-gray-400">
-          펫 정보를 불러오는 중 오류가 발생했습니다
+          개체 정보를 불러오는 중 오류가 발생했습니다
         </p>
         <p className="text-sm text-gray-400 dark:text-gray-500">잠시 후 다시 시도해주세요</p>
       </div>
@@ -188,9 +188,7 @@ function SiblingsPage({ params }: PetDetailPageProps) {
         </section>
       ) : (
         <div className="flex flex-col items-center justify-center py-12 text-center">
-          <p className="text-sm text-gray-400 dark:text-gray-500">
-            등록된 부/모 정보가 없습니다.
-          </p>
+          <p className="text-sm text-gray-400 dark:text-gray-500">등록된 부/모 정보가 없습니다.</p>
           <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
             부/모를 등록해 관계도를 확인해보세요.
           </p>

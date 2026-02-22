@@ -45,7 +45,7 @@ const Header = ({
           개체 검색
           {step === 1 && allowMyPetOnly && (
             <span className="ml-1 text-xs font-[500] text-red-600 dark:text-red-400">
-              * 나의 펫만 선택 가능합니다.
+              * 나의 개체만 선택 가능합니다.
             </span>
           )}
         </button>
@@ -61,9 +61,9 @@ const Header = ({
         <div className={cn("flex items-center gap-2", isMobile && "flex-col items-start")}>
           <div className="flex gap-1">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500 dark:text-gray-400" />
+              <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-500 dark:text-gray-400" />
               <Input
-                placeholder="펫 이름으로 검색하세요"
+                placeholder="개체 이름으로 검색하세요"
                 className="h-8 rounded-lg bg-gray-100 pl-9 dark:bg-gray-800 dark:text-gray-200 dark:placeholder:text-gray-500"
                 value={keyword}
                 onChange={(e) => setKeyword(e.target.value)}

@@ -131,7 +131,7 @@ const AdoptionTable = () => {
           분양 정보 ・{data?.length ?? "?"}개
           <RefreshCcw className={cn("h-3 w-3", isRefreshing && "animate-spin")} />
         </button>
-        <span className="text-[11px] text-blue-600">분양 완료된 펫만 표시됩니다</span>
+        <span className="text-[11px] text-blue-600">분양 완료된 개체만 표시됩니다</span>
       </div>
 
       <AdoptionFilters />

@@ -45,8 +45,8 @@ export const columns: ColumnDef<PetDto>[] = [
         <TooltipText
           text="공개"
           title="공개 여부"
-          description="펫의 공개 여부를 나타냅니다."
-          content="비공개 펫은 다른 브리더에게 공개되지 않습니다."
+          description="개체의 공개 여부를 나타냅니다."
+          content="비공개 개체는 다른 브리더에게 공개되지 않습니다."
         />
       );
     },
@@ -57,6 +57,9 @@ export const columns: ColumnDef<PetDto>[] = [
         <div className="flex justify-center">
           <button
             type="button"
+            role="switch"
+            aria-checked={isPublic}
+            aria-label={`${row.original.name} 공개 여부`}
             onClick={(e) => {
               e.stopPropagation();
               togglePublic?.(row.original.petId, isPublic);
@@ -466,7 +469,7 @@ export const columns: ColumnDef<PetDto>[] = [
           onMouseEnter={() => setSuppressed?.(true)}
           onMouseLeave={() => setSuppressed?.(false)}
         >
-          <TooltipText title="설명" description="펫의 설명입니다." text={desc} />
+          <TooltipText title="설명" description="개체의 설명입니다." text={desc} />
         </span>
       );
     },

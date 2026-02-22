@@ -75,8 +75,8 @@ interface TutorialStep {
 const TUTORIAL_STEPS: TutorialStep[] = [
   {
     targetId: PAIR_CARD_TUTORIAL_TARGETS.PARENT_CARDS,
-    title: "부모 펫 정보",
-    description: "부모 이미지를 클릭하면 해당 펫의 상세 페이지로 이동해요",
+    title: "부모 개체 정보",
+    description: "부모 이미지를 클릭하면 해당 개체의 상세 페이지로 이동해요",
     position: "bottom",
   },
   {

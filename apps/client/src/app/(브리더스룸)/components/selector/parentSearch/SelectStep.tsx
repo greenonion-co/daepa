@@ -43,7 +43,7 @@ const SelectStep = ({
   if (petList.length === 0)
     return (
       <div className="flex h-[calc(100vh-200px)] w-full flex-col items-center justify-center text-center text-sm text-gray-400 dark:text-gray-500">
-        조회된 펫이 없습니다.
+        조회된 개체가 없습니다.
       </div>
     );
 
