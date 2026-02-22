@@ -133,8 +133,8 @@ const FormMultiSelect = ({
           )
         ) : (
           <>
-            {selectedItems && selectedItems.length > 0 ? (
-              <div>{selectedItems.map((item) => displayMap[item] ?? item).join(" | ")}</div>
+            {initialItems && initialItems.length > 0 ? (
+              <div>{initialItems.map((item) => displayMap[item] ?? item).join(" | ")}</div>
             ) : (
               <div className="text-gray-400 dark:text-gray-500">{title} 선택하기</div>
             )}
