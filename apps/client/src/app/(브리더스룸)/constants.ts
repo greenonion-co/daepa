@@ -88,12 +88,12 @@ export const OPTION_STEPS: FormStep[] = [
     },
   },
   {
-    title: "생년월일",
+    title: "해칭일",
     field: {
       name: "hatchingDate",
       type: "date",
       required: true,
-      placeholder: "생년월일을 입력해주세요",
+      placeholder: "해칭일을 입력해주세요",
       validation: (value) => value.length > 0,
     },
   },
@@ -421,7 +421,7 @@ export const TABLE_HEADER = {
   father: "부개체",
   mother: "모개체",
   hatchingDate: "해칭일",
-  desc: "설명",
+  desc: "소개",
   foods: "먹이",
   isPublic: "공개",
   adoption_status: "분양",
