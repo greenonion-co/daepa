@@ -18,12 +18,14 @@ const NAME_MIN_LENGTH = 2;
 interface NameInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   errorMessage?: string;
   buttonClassName?: string;
+  originalValue?: string;
 }
 const NameDuplicateCheckInput = ({
   value,
   onChange,
   errorMessage,
   disabled,
+  originalValue,
   ...props
 }: NameInputProps) => {
   const { mutateAsync: mutateVerifyName, isPending: isVerifyPending } = useMutation({
@@ -31,10 +33,12 @@ const NameDuplicateCheckInput = ({
   });
   const { errors, setErrors } = usePetStore();
   const { duplicateCheckStatus, setDuplicateCheckStatus } = useNameStore();
+  const isNameUnchanged = originalValue !== undefined && value === originalValue;
   const isDuplicateCheckDisabled =
     !value ||
     !!errorMessage ||
     isVerifyPending ||
+    isNameUnchanged ||
     duplicateCheckStatus !== DUPLICATE_CHECK_STATUS.NONE;
 
   // 중복확인 함수

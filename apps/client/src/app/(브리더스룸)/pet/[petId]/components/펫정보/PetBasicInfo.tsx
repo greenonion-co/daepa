@@ -19,6 +19,7 @@ interface PetBasicInfoProps {
   };
   isEditMode: boolean;
   isEgg: boolean;
+  originalName?: string;
   onNameChange: (name: string) => void;
   onHatchingDateChange: (date: string) => void;
   onFieldBlur?: (field: string) => void;
@@ -29,6 +30,7 @@ export const PetBasicInfo = ({
   errors,
   isEditMode,
   isEgg,
+  originalName,
   onNameChange,
   onHatchingDateChange,
   onFieldBlur,
@@ -42,6 +44,7 @@ export const PetBasicInfo = ({
             errorMessage={errors.name || ""}
             disabled={!isEditMode}
             value={String(formData.name || "")}
+            originalValue={originalName}
             placeholder="미정"
             onChange={(e) => onNameChange(e.target.value)}
             onBlur={() => onFieldBlur?.("name")}
@@ -74,7 +77,9 @@ export const PetBasicInfo = ({
           isEditMode ? (
             <div className="mt-1 flex items-center gap-1">
               <Info size={14} className="text-gray-400 dark:text-gray-500" />
-              <span className="text-xs text-gray-400 dark:text-gray-500">종은 수정 불가능합니다.</span>
+              <span className="text-xs text-gray-400 dark:text-gray-500">
+                종은 수정 불가능합니다.
+              </span>
             </div>
           ) : null
         }

@@ -2,18 +2,11 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateMatingDto } from './mating.dto';
 import { MatingEntity } from './mating.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import {
-  Repository,
-  EntityManager,
-  DataSource,
-  FindOptionsWhere,
-  Raw,
-} from 'typeorm';
+import { Repository, EntityManager, DataSource, Not, Raw } from 'typeorm';
 
 import { LayingEntity } from 'src/laying/laying.entity';
 import { UpdateMatingDto } from './mating.dto';
 import { PairEntity } from 'src/pair/pair.entity';
-import { Not } from 'typeorm';
 
 @Injectable()
 export class MatingService {
@@ -72,9 +65,18 @@ export class MatingService {
         throw new BadRequestException('이미 존재하는 메이팅 정보입니다.');
       }
 
+      // season 정합성 검증
+      await this.validateSeasonConsistency(
+        entityManager,
+        pair.id,
+        ymd,
+        createMatingDto.season,
+      );
+
       const matingEntity = entityManager.create(MatingEntity, {
         pairId: pair.id,
         matingDate: ymd,
+        season: createMatingDto.season,
       });
       await entityManager.save(MatingEntity, matingEntity);
     });
@@ -136,12 +138,22 @@ export class MatingService {
         throw new BadRequestException('이미 존재하는 메이팅 정보입니다.');
       }
 
+      // season 정합성 검증
+      await this.validateSeasonConsistency(
+        entityManager,
+        pair.id,
+        ymd,
+        updateMatingDto.season,
+        matingId,
+      );
+
       await entityManager.update(
         MatingEntity,
         { id: matingId },
         {
           pairId: pair.id,
           matingDate: updateMatingDto.matingDate,
+          season: updateMatingDto.season,
         },
       );
     });
@@ -181,8 +193,60 @@ export class MatingService {
     });
   }
 
-  async isMatingExist(criteria: FindOptionsWhere<MatingEntity>) {
-    const isExist = await this.matingRepository.existsBy(criteria);
-    return isExist;
+  /**
+   * season과 matingDate의 정합성을 검증한다.
+   * - 동일 pairId 내에서 season 값은 중복될 수 없다.
+   * - matingDate가 더 최신이면 season이 기존보다 낮을 수 없다.
+   * - matingDate가 더 오래됐으면 season이 기존보다 높을 수 없다.
+   */
+  private async validateSeasonConsistency(
+    entityManager: EntityManager,
+    pairId: number,
+    matingDate: string,
+    season: number,
+    excludeMatingId?: number,
+  ) {
+    let query = entityManager
+      .createQueryBuilder(MatingEntity, 'm')
+      .where('m.pairId = :pairId', { pairId });
+
+    if (excludeMatingId) {
+      query = query.andWhere('m.id != :excludeId', {
+        excludeId: excludeMatingId,
+      });
+    }
+
+    const siblings = await query
+      .select(['m.id', 'm.matingDate', 'm.season'])
+      .getMany();
+
+    // 1) season 중복 검사
+    const duplicateSeason = siblings.find((s) => s.season === season);
+    if (duplicateSeason) {
+      throw new BadRequestException(`이미 ${season}시즌이 존재합니다.`);
+    }
+
+    // 2) 날짜-시즌 순서 정합성 검사
+    const currentDate = new Date(matingDate).getTime();
+
+    for (const sibling of siblings) {
+      if (!sibling.matingDate) continue;
+
+      const siblingDate = new Date(sibling.matingDate).getTime();
+
+      // 현재 날짜가 더 최신인데 season이 기존보다 낮은 경우
+      if (currentDate > siblingDate && season < sibling.season) {
+        throw new BadRequestException(
+          `날짜가 ${sibling.season}시즌보다 이후이므로 시즌 값이 ${sibling.season}보다 낮을 수 없습니다.`,
+        );
+      }
+
+      // 현재 날짜가 더 오래됐는데 season이 기존보다 높은 경우
+      if (currentDate < siblingDate && season > sibling.season) {
+        throw new BadRequestException(
+          `날짜가 ${sibling.season}시즌보다 이전이므로 시즌 값이 ${sibling.season}보다 높을 수 없습니다.`,
+        );
+      }
+    }
   }
 }

@@ -25,6 +25,7 @@ const getInitialFormData = () => ({
   mother: undefined,
   matingDate: DateTime.now().toFormat("yyyy-MM-dd"),
   species: PetDtoSpecies.CRESTED,
+  season: 1,
 });
 
 interface CreateMatingFormProps {
@@ -38,6 +39,7 @@ const CreateMatingForm = ({ onClose }: CreateMatingFormProps) => {
     father?: PetParentDto;
     mother?: PetParentDto;
     matingDate: string;
+    season: number | undefined;
   }>(() => getInitialFormData());
 
   const { mutateAsync: createMating, isPending } = useMutation({
@@ -65,6 +67,11 @@ const CreateMatingForm = ({ onClose }: CreateMatingFormProps) => {
       return false;
     }
 
+    if (!formData.season || formData.season < 1) {
+      toast.error("시즌은 1 이상이어야 합니다.");
+      return false;
+    }
+
     return true;
   };
 
@@ -78,6 +85,7 @@ const CreateMatingForm = ({ onClose }: CreateMatingFormProps) => {
         matingDate,
         fatherId: father!.petId,
         motherId: mother!.petId,
+        season: formData.season!,
       });
 
       toast.success("메이팅이 추가되었습니다.");
@@ -175,6 +183,24 @@ const CreateMatingForm = ({ onClose }: CreateMatingFormProps) => {
                 matingDate: DateTime.fromJSDate(date).toFormat("yyyy-MM-dd"),
               }));
             }}
+          />
+        </div>
+
+        {/* 시즌 (몇 차) */}
+        <div className="space-y-1">
+          <Label className="text-[14px] font-semibold">시즌 (몇 차)</Label>
+          <input
+            type="number"
+            min={1}
+            className="h-[32px] w-full rounded-md border border-gray-200 p-2 text-sm"
+            placeholder="시즌을 입력해주세요"
+            value={formData.season ?? ""}
+            onChange={(e) =>
+              setFormData((prev) => ({
+                ...prev,
+                season: e.target.value ? Number(e.target.value) : undefined,
+              }))
+            }
           />
         </div>
 

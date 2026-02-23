@@ -28,6 +28,7 @@ import UpdatePairModal from "./UpdatePairModal";
 import ConfirmDialog from "../../components/Form/Dialog";
 import { CalendarEventDetail, EGG_STATUS } from "./PairMiniCalendar";
 import { usePairCardTutorial } from "./PairCardTutorial";
+import AddMatingModal from "./AddMatingModal";
 
 export interface updatePairProps extends UpdatePairDto {
   pairId: number;
@@ -169,12 +170,7 @@ const PairList = memo(() => {
   const handleOpenCreateForm = () => {
     overlay.open(({ isOpen, close }) => (
       <Dialog open={isOpen} onOpenChange={close}>
-        <DialogContent
-          className="max-h-[90vh] overflow-y-auto"
-          onInteractOutside={(e) => {
-            e.preventDefault();
-          }}
-        >
+        <DialogContent className="max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>새 페어 추가</DialogTitle>
           </DialogHeader>
@@ -209,11 +205,13 @@ const PairList = memo(() => {
     fatherId,
     motherId,
     matingDate,
+    season,
   }: {
     species?: PetDtoSpecies;
     fatherId?: string;
     motherId?: string;
     matingDate: string;
+    season: number;
   }) => {
     if (!species) {
       toast.error("종을 선택해주세요.");
@@ -231,6 +229,7 @@ const PairList = memo(() => {
         matingDate,
         fatherId,
         motherId,
+        season,
       });
 
       toast.success("페어 정보가 추가되었습니다.");
@@ -252,6 +251,7 @@ const PairList = memo(() => {
       } else {
         toast.error("페어 정보 추가에 실패했습니다.");
       }
+      throw error;
     }
   };
 
@@ -317,13 +317,29 @@ const PairList = memo(() => {
                   setInitialLayingId(eventData.layingId ?? null);
                 }
               }}
-              onAddMating={async (date) => {
-                await handleAddPairClick({
-                  species: pair.father?.species,
-                  fatherId: pair.father?.petId,
-                  motherId: pair.mother?.petId,
-                  matingDate: date,
-                });
+              onAddMating={(date) => {
+                overlay.open(({ isOpen, close }) => (
+                  <AddMatingModal
+                    isOpen={isOpen}
+                    onClose={close}
+                    matingDate={date}
+                    latestSeason={(() => {
+                      const seasons = (pair.matingsByDate ?? [])
+                        .map((m) => m.season)
+                        .filter((s): s is number => s != null);
+                      return seasons.length > 0 ? Math.max(...seasons) : undefined;
+                    })()}
+                    onConfirm={async (matingDate, season) => {
+                      await handleAddPairClick({
+                        species: pair.father?.species,
+                        fatherId: pair.father?.petId,
+                        motherId: pair.mother?.petId,
+                        matingDate,
+                        season,
+                      });
+                    }}
+                  />
+                ));
               }}
               onAddLaying={(date) => {
                 overlay.open(({ isOpen, close }) => (
@@ -363,7 +379,7 @@ const PairList = memo(() => {
         matingGroup={pair}
         initialMatingId={initialMatingId}
         initialLayingId={initialLayingId}
-        onConfirmAdd={async (matingDate) => {
+        onConfirmAdd={async (matingDate, season) => {
           if (!pair?.father || !pair?.mother) {
             toast.error("부모 개체가 없습니다.");
             return;
@@ -373,6 +389,7 @@ const PairList = memo(() => {
             fatherId: pair.father?.petId,
             motherId: pair.mother?.petId,
             matingDate,
+            season,
           });
         }}
       />

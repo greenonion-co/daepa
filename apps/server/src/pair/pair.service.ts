@@ -334,6 +334,7 @@ export class PairService {
           return {
             id: mating.id,
             matingDate: mating.matingDate,
+            season: mating.season,
             layingsByDate,
           };
         })
@@ -430,6 +431,7 @@ export class PairService {
         'pairs.motherId as motherId',
         'matings.id as matingId',
         'matings.matingDate as matingDate',
+        'matings.season as season',
         'layings.id as layingId',
         'layings.layingDate as layingDate',
         'layings.clutch as clutch',
@@ -441,6 +443,7 @@ export class PairService {
       motherId: string;
       matingId: number;
       matingDate: Date;
+      season: number;
       layingId: number;
       layingDate: Date;
       clutch: number;
@@ -638,6 +641,7 @@ export class PairService {
       motherId: string;
       matingId: number;
       matingDate: Date;
+      season: number;
       layingId: number;
       layingDate: Date;
       clutch: number;
@@ -652,6 +656,7 @@ export class PairService {
       {
         matingId: number;
         matingDate: string;
+        season: number;
         layings?: {
           layingId: number;
           layingDate: string;
@@ -661,7 +666,8 @@ export class PairService {
     >();
 
     for (const row of raw) {
-      const { matingId, matingDate, layingId, layingDate, clutch } = row;
+      const { matingId, matingDate, season, layingId, layingDate, clutch } =
+        row;
 
       if (!matingId) continue;
 
@@ -669,6 +675,7 @@ export class PairService {
         matingsMap.set(matingId, {
           matingId,
           matingDate: format(matingDate, 'yyyy-MM-dd'),
+          season,
         });
       }
 
@@ -684,6 +691,7 @@ export class PairService {
         matingsMap.set(matingId, {
           matingId,
           matingDate: format(matingDate, 'yyyy-MM-dd'),
+          season,
           layings,
         });
       }

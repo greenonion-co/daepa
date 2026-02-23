@@ -14,6 +14,8 @@ export interface CreateMatingDto {
   motherId?: string;
   /** 메이팅 날짜 */
   matingDate: string;
+  /** 메이팅 시즌 (몇 차) */
+  season: number;
   /** 종 */
   species: CreateMatingDtoSpecies;
 }

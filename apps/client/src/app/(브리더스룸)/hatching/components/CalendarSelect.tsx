@@ -14,7 +14,9 @@ interface CalendarSelectProps {
   initialDate?: string;
   triggerTextClassName?: string;
   disabled?: (date: Date) => boolean;
-  onConfirm: (matingDate: string) => void;
+  showSeasonInput?: boolean;
+  latestSeason?: number;
+  onConfirm: (matingDate: string, season?: number) => void | Promise<void>;
 }
 
 const CalendarSelect = ({
@@ -26,9 +28,13 @@ const CalendarSelect = ({
   initialDate,
   disabled,
   triggerTextClassName,
+  showSeasonInput,
+  latestSeason,
 }: CalendarSelectProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [matingDate, setMatingDate] = useState<string | undefined>(initialDate);
+  const [season, setSeason] = useState<number | undefined>(undefined);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
@@ -90,16 +96,48 @@ const CalendarSelect = ({
           initialFocus
         />
 
+        {showSeasonInput && (
+          <div className="flex items-center gap-2 border-t border-gray-100 px-3 py-2">
+            <label htmlFor="calendar-season" className="text-xs font-semibold text-gray-600">
+              시즌
+            </label>
+            <input
+              id="calendar-season"
+              type="number"
+              min={1}
+              className="h-7 w-16 rounded-md border border-gray-200 px-2 text-sm"
+              placeholder="몇 차"
+              value={season ?? ""}
+              onChange={(e) => setSeason(e.target.value ? Number(e.target.value) : undefined)}
+            />
+            {latestSeason != null && (
+              <span className="rounded bg-blue-50 px-1.5 py-0.5 text-xs font-medium text-blue-600 dark:bg-blue-900/40 dark:text-blue-300">
+                *이 페어의 직전 시즌은 [{latestSeason}]입니다.
+              </span>
+            )}
+          </div>
+        )}
+
         <button
-          onClick={() => {
+          disabled={isSubmitting}
+          onClick={async () => {
             if (!matingDate) {
               toast.error("날짜를 선택해주세요.");
               return;
             }
-            onConfirm(matingDate);
-            setIsOpen(false);
+            if (showSeasonInput && (!season || season < 1)) {
+              toast.error("시즌은 1 이상이어야 합니다.");
+              return;
+            }
+            setIsSubmitting(true);
+            try {
+              await onConfirm(matingDate, season);
+              setIsOpen(false);
+            } finally {
+              setIsSubmitting(false);
+            }
           }}
-          className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-b-2xl bg-gray-800 p-2 text-sm font-semibold text-white transition-colors hover:bg-black dark:bg-blue-700 dark:hover:bg-blue-600"
+          className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-b-2xl bg-gray-800 p-2 text-sm font-semibold text-white transition-colors hover:bg-black disabled:cursor-not-allowed disabled:opacity-50 dark:bg-blue-700 dark:hover:bg-blue-600"
         >
           {matingDate ? DateTime.fromISO(matingDate).toFormat("yyyy년 MM월 dd일") : ""}{" "}
           {confirmButtonText}

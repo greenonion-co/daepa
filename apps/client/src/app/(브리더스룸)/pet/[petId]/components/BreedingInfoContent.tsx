@@ -231,6 +231,7 @@ const BreedingInfoContent = ({ petId, ownerId, initialPet }: BreedingInfoContent
         errors={errors}
         isEditMode={isViewingMyPet}
         isEgg={isEgg}
+        originalName={pet?.name}
         onNameChange={(name) => updateField("name", name)}
         onHatchingDateChange={(date) => updateFieldAndSave("hatchingDate", date)}
         onFieldBlur={handleFieldBlur}

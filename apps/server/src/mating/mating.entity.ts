@@ -13,6 +13,9 @@ import { PairEntity } from '../pair/pair.entity';
 @Index('UNIQUE_MATING', ['pairId', 'matingDate'], {
   unique: true,
 })
+@Index('UNIQUE_PAIR_SEASON', ['pairId', 'season'], {
+  unique: true,
+})
 export class MatingEntity {
   @PrimaryGeneratedColumn()
   id: number;
@@ -22,6 +25,9 @@ export class MatingEntity {
 
   @Column({ type: 'date', nullable: true })
   matingDate?: Date;
+
+  @Column({ type: 'int' })
+  season: number;
 
   @CreateDateColumn()
   createdAt: Date;

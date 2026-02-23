@@ -6,6 +6,7 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  Min,
 } from 'class-validator';
 
 import { PET_SPECIES } from 'src/pet/pet.constants';
@@ -49,6 +50,14 @@ export class MatingBaseDto {
   matingDate: string;
 
   @ApiProperty({
+    description: '메이팅 시즌 (몇 차)',
+    example: 1,
+  })
+  @IsNumber()
+  @Min(1, { message: '시즌은 1 이상이어야 합니다.' })
+  season: number;
+
+  @ApiProperty({
     description: '생성일',
   })
   @IsDate()
@@ -65,6 +74,7 @@ export class CreateMatingDto extends PickType(MatingBaseDto, [
   'fatherId',
   'motherId',
   'matingDate',
+  'season',
 ]) {
   @ApiProperty({
     description: '종',
@@ -80,6 +90,7 @@ export class UpdateMatingDto extends PickType(MatingBaseDto, [
   'fatherId',
   'motherId',
   'matingDate',
+  'season',
 ]) {
   @ApiProperty({
     description: '해칭 메모',

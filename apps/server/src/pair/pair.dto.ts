@@ -124,6 +124,13 @@ class MatingWithLayingsDto {
   matingDate?: string;
 
   @ApiProperty({
+    description: '메이팅 시즌 (몇 차)',
+    example: 1,
+  })
+  @IsNumber()
+  season: number;
+
+  @ApiProperty({
     description: '산란 정보',
     required: false,
     type: [LayingWithPetsDto],
@@ -246,6 +253,13 @@ class MatingByDateDto {
   @IsOptional()
   @IsDateString()
   matingDate?: string;
+
+  @ApiProperty({
+    description: '메이팅 시즌 (몇 차)',
+    example: 1,
+  })
+  @IsNumber()
+  season: number;
 
   @ApiProperty({
     description: '산란 정보',
