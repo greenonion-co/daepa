@@ -18,6 +18,7 @@ interface EditMatingModalProps {
     fatherId?: string;
     motherId?: string;
     matingDate: string;
+    season?: number;
   };
   matingDates?: string[];
 }
@@ -34,6 +35,7 @@ const EditMatingModal = ({
     fatherId: currentData.fatherId || "",
     motherId: currentData.motherId || "",
     matingDate: currentData.matingDate,
+    season: currentData.season,
   });
 
   const { mutateAsync: updateMating, isPending } = useMutation({
@@ -48,6 +50,7 @@ const EditMatingModal = ({
         fatherId: formData.fatherId || undefined,
         motherId: formData.motherId || undefined,
         matingDate: formData.matingDate,
+        season: formData.season,
       });
 
       toast.success("메이팅 정보가 수정되었습니다.");
@@ -102,6 +105,24 @@ const EditMatingModal = ({
                   fontWeight: "bold",
                 },
               }}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="season">시즌 (몇 차)</Label>
+            <input
+              id="season"
+              type="number"
+              min={1}
+              className="h-[32px] w-full rounded-md border border-gray-200 p-2 text-sm"
+              placeholder="미지정"
+              value={formData.season ?? ""}
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  season: e.target.value ? Number(e.target.value) : undefined,
+                }))
+              }
             />
           </div>
 

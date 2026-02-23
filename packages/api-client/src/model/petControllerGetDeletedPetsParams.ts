@@ -38,35 +38,35 @@ export type PetControllerGetDeletedPetsParams = {
    */
   sex?: PetControllerGetDeletedPetsSexItem[];
   /**
-   * 펫 소유자 아이디
+   * 개체 소유자 아이디
    */
   ownerId?: string;
   /**
-   * 펫 공개 여부
+   * 개체 공개 여부
    */
   isPublic?: number;
   /**
-   * 펫 최소 몸무게
+   * 개체 최소 몸무게
    */
   minWeight?: number;
   /**
-   * 펫 최대 몸무게
+   * 개체 최대 몸무게
    */
   maxWeight?: number;
   /**
-   * 펫 최소 생년월일
+   * 개체 최소 해칭일
    */
   startYmd?: string;
   /**
-   * 펫 최대 생년월일
+   * 개체 최대 해칭일
    */
   endYmd?: string;
   /**
-   * 펫 모프
+   * 개체 모프
    */
   morphs?: string[];
   /**
-   * 펫 형질
+   * 개체 형질
    */
   traits?: string[];
   /**

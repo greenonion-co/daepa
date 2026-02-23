@@ -14,7 +14,8 @@ interface CalendarSelectProps {
   initialDate?: string;
   triggerTextClassName?: string;
   disabled?: (date: Date) => boolean;
-  onConfirm: (matingDate: string) => void;
+  showSeasonInput?: boolean;
+  onConfirm: (matingDate: string, season?: number) => void | Promise<void>;
 }
 
 const CalendarSelect = ({
@@ -26,9 +27,12 @@ const CalendarSelect = ({
   initialDate,
   disabled,
   triggerTextClassName,
+  showSeasonInput,
 }: CalendarSelectProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [matingDate, setMatingDate] = useState<string | undefined>(initialDate);
+  const [season, setSeason] = useState<number | undefined>(undefined);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
@@ -90,16 +94,39 @@ const CalendarSelect = ({
           initialFocus
         />
 
+        {showSeasonInput && (
+          <div className="flex items-center gap-2 border-t border-gray-100 px-3 py-2">
+            <label htmlFor="calendar-season" className="text-xs font-semibold text-gray-600">
+              시즌
+            </label>
+            <input
+              id="calendar-season"
+              type="number"
+              min={1}
+              className="h-7 w-20 rounded-md border border-gray-200 px-2 text-sm"
+              placeholder="자동"
+              value={season ?? ""}
+              onChange={(e) => setSeason(e.target.value ? Number(e.target.value) : undefined)}
+            />
+          </div>
+        )}
+
         <button
-          onClick={() => {
+          disabled={isSubmitting}
+          onClick={async () => {
             if (!matingDate) {
               toast.error("날짜를 선택해주세요.");
               return;
             }
-            onConfirm(matingDate);
-            setIsOpen(false);
+            setIsSubmitting(true);
+            try {
+              await onConfirm(matingDate, season);
+              setIsOpen(false);
+            } finally {
+              setIsSubmitting(false);
+            }
           }}
-          className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-b-2xl bg-gray-800 p-2 text-sm font-semibold text-white transition-colors hover:bg-black dark:bg-blue-700 dark:hover:bg-blue-600"
+          className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-b-2xl bg-gray-800 p-2 text-sm font-semibold text-white transition-colors hover:bg-black disabled:cursor-not-allowed disabled:opacity-50 dark:bg-blue-700 dark:hover:bg-blue-600"
         >
           {matingDate ? DateTime.fromISO(matingDate).toFormat("yyyy년 MM월 dd일") : ""}{" "}
           {confirmButtonText}

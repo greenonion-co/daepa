@@ -49,6 +49,15 @@ export class MatingBaseDto {
   matingDate: string;
 
   @ApiProperty({
+    description: '메이팅 시즌 (몇 차)',
+    example: 1,
+    required: false,
+  })
+  @IsOptional()
+  @IsNumber()
+  season?: number;
+
+  @ApiProperty({
     description: '생성일',
   })
   @IsDate()
@@ -65,6 +74,7 @@ export class CreateMatingDto extends PickType(MatingBaseDto, [
   'fatherId',
   'motherId',
   'matingDate',
+  'season',
 ]) {
   @ApiProperty({
     description: '종',
@@ -80,6 +90,7 @@ export class UpdateMatingDto extends PickType(MatingBaseDto, [
   'fatherId',
   'motherId',
   'matingDate',
+  'season',
 ]) {
   @ApiProperty({
     description: '해칭 메모',

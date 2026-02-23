@@ -3883,6 +3883,10 @@ export const getPairControllerGetPairListResponseMock = (
     ).map(() => ({
       id: faker.number.int({ min: undefined, max: undefined }),
       matingDate: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+      season: faker.helpers.arrayElement([
+        faker.number.int({ min: undefined, max: undefined }),
+        undefined,
+      ]),
       layingsByDate: faker.helpers.arrayElement([
         Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
           layingId: faker.number.int({ min: undefined, max: undefined }),
@@ -3975,6 +3979,10 @@ export const getPairControllerGetPairDetailResponseMock = (
       matingId: faker.number.int({ min: undefined, max: undefined }),
       matingDate: faker.helpers.arrayElement([
         faker.date.past().toISOString().split("T")[0],
+        undefined,
+      ]),
+      season: faker.helpers.arrayElement([
+        faker.number.int({ min: undefined, max: undefined }),
         undefined,
       ]),
       layings: faker.helpers.arrayElement([
