@@ -170,12 +170,7 @@ const PairList = memo(() => {
   const handleOpenCreateForm = () => {
     overlay.open(({ isOpen, close }) => (
       <Dialog open={isOpen} onOpenChange={close}>
-        <DialogContent
-          className="max-h-[90vh] overflow-y-auto"
-          onInteractOutside={(e) => {
-            e.preventDefault();
-          }}
-        >
+        <DialogContent className="max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>새 페어 추가</DialogTitle>
           </DialogHeader>
