@@ -125,8 +125,8 @@ const CalendarSelect = ({
               toast.error("날짜를 선택해주세요.");
               return;
             }
-            if (showSeasonInput && !season) {
-              toast.error("시즌을 입력해주세요.");
+            if (showSeasonInput && (!season || season < 1)) {
+              toast.error("시즌은 1 이상이어야 합니다.");
               return;
             }
             setIsSubmitting(true);

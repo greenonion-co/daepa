@@ -67,8 +67,8 @@ const CreateMatingForm = ({ onClose }: CreateMatingFormProps) => {
       return false;
     }
 
-    if (!formData.season) {
-      toast.error("시즌을 입력해주세요.");
+    if (!formData.season || formData.season < 1) {
+      toast.error("시즌은 1 이상이어야 합니다.");
       return false;
     }
 

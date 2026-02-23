@@ -6,6 +6,7 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  Min,
 } from 'class-validator';
 
 import { PET_SPECIES } from 'src/pet/pet.constants';
@@ -53,6 +54,7 @@ export class MatingBaseDto {
     example: 1,
   })
   @IsNumber()
+  @Min(1, { message: '시즌은 1 이상이어야 합니다.' })
   season: number;
 
   @ApiProperty({

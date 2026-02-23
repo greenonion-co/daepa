@@ -23,8 +23,8 @@ const AddMatingModal = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!season) {
-      toast.error("시즌을 입력해주세요.");
+    if (!season || season < 1) {
+      toast.error("시즌은 1 이상이어야 합니다.");
       return;
     }
     setIsSubmitting(true);
