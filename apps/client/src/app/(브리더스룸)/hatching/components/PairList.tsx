@@ -211,7 +211,7 @@ const PairList = memo(() => {
     fatherId?: string;
     motherId?: string;
     matingDate: string;
-    season?: number;
+    season: number;
   }) => {
     if (!species) {
       toast.error("종을 선택해주세요.");

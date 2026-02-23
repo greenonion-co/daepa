@@ -30,7 +30,7 @@ interface MatingDetailDialogProps {
   isOpen: boolean;
   onClose: () => void;
   matingGroup: MatingByParentsDto | null;
-  onConfirmAdd: (matingDate: string, season?: number) => void | Promise<void>;
+  onConfirmAdd: (matingDate: string, season: number) => void | Promise<void>;
   initialMatingId?: number | null;
   initialLayingId?: number | null;
 }
@@ -265,14 +265,11 @@ const MatingDetailDialog = ({
                                 (m) => m.id === selectedMatingId,
                               );
                               const selectedMating = matingGroup.matingsByDate[selectedIndex];
-                              const season =
-                                selectedMating?.season ??
-                                matingGroup.matingsByDate.length - selectedIndex;
 
                               return (
                                 <>
                                   <span className="rounded-lg bg-gray-100 p-1 px-2 text-[12px] text-gray-700 dark:bg-gray-700 dark:text-gray-300">
-                                    {season}시즌
+                                    {selectedMating?.season}시즌
                                   </span>
                                   {selectedMating?.matingDate
                                     ? DateTime.fromFormat(
@@ -289,15 +286,14 @@ const MatingDetailDialog = ({
                         )}
                       </SelectTrigger>
                       <SelectContent className="rounded-2xl">
-                        {matingGroup.matingsByDate.map((mating, index) => {
-                          const season = mating.season ?? matingGroup.matingsByDate.length - index;
+                        {matingGroup.matingsByDate.map((mating) => {
                           return (
                             <SelectItem
                               key={mating.id}
                               value={String(mating.id)}
                               className="rounded-xl text-[16px]"
                             >
-                              <span className="mr-1 text-[12px] text-gray-500">{season}시즌</span>
+                              <span className="mr-1 text-[12px] text-gray-500">{mating.season}시즌</span>
                               {mating.matingDate
                                 ? DateTime.fromFormat(mating.matingDate, "yyyy-MM-dd").toFormat(
                                     "M월 d일",
@@ -343,7 +339,7 @@ const MatingDetailDialog = ({
                       disabledDates={matingDates}
                       showSeasonInput
                       latestSeason={latestSeason}
-                      onConfirm={(matingDate, season) => onConfirmAdd(matingDate, season)}
+                      onConfirm={(matingDate, season) => onConfirmAdd(matingDate, season!)}
                     />
                   </div>
                 )}

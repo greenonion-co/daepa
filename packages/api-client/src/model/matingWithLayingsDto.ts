@@ -13,7 +13,7 @@ export interface MatingWithLayingsDto {
   /** 메이팅 날짜 */
   matingDate?: string;
   /** 메이팅 시즌 (몇 차) */
-  season?: number;
+  season: number;
   /** 산란 정보 */
   layings?: LayingWithPetsDto[];
 }

@@ -66,14 +66,12 @@ export class MatingService {
       }
 
       // season 정합성 검증
-      if (createMatingDto.season != null) {
-        await this.validateSeasonConsistency(
-          entityManager,
-          pair.id,
-          ymd,
-          createMatingDto.season,
-        );
-      }
+      await this.validateSeasonConsistency(
+        entityManager,
+        pair.id,
+        ymd,
+        createMatingDto.season,
+      );
 
       const matingEntity = entityManager.create(MatingEntity, {
         pairId: pair.id,
@@ -141,15 +139,13 @@ export class MatingService {
       }
 
       // season 정합성 검증
-      if (updateMatingDto.season != null) {
-        await this.validateSeasonConsistency(
-          entityManager,
-          pair.id,
-          ymd,
-          updateMatingDto.season,
-          matingId,
-        );
-      }
+      await this.validateSeasonConsistency(
+        entityManager,
+        pair.id,
+        ymd,
+        updateMatingDto.season,
+        matingId,
+      );
 
       await entityManager.update(
         MatingEntity,
@@ -157,7 +153,7 @@ export class MatingService {
         {
           pairId: pair.id,
           matingDate: updateMatingDto.matingDate,
-          season: (updateMatingDto.season ?? null) as number | undefined,
+          season: updateMatingDto.season,
         },
       );
     });
@@ -212,8 +208,7 @@ export class MatingService {
   ) {
     let query = entityManager
       .createQueryBuilder(MatingEntity, 'm')
-      .where('m.pairId = :pairId', { pairId })
-      .andWhere('m.season IS NOT NULL');
+      .where('m.pairId = :pairId', { pairId });
 
     if (excludeMatingId) {
       query = query.andWhere('m.id != :excludeId', {
@@ -235,7 +230,7 @@ export class MatingService {
     const currentDate = new Date(matingDate).getTime();
 
     for (const sibling of siblings) {
-      if (!sibling.matingDate || sibling.season == null) continue;
+      if (!sibling.matingDate) continue;
 
       const siblingDate = new Date(sibling.matingDate).getTime();
 

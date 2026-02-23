@@ -39,7 +39,7 @@ const CreateMatingForm = ({ onClose }: CreateMatingFormProps) => {
     father?: PetParentDto;
     mother?: PetParentDto;
     matingDate: string;
-    season?: number;
+    season: number | undefined;
   }>(() => getInitialFormData());
 
   const { mutateAsync: createMating, isPending } = useMutation({
@@ -67,6 +67,11 @@ const CreateMatingForm = ({ onClose }: CreateMatingFormProps) => {
       return false;
     }
 
+    if (!formData.season) {
+      toast.error("시즌을 입력해주세요.");
+      return false;
+    }
+
     return true;
   };
 
@@ -80,7 +85,7 @@ const CreateMatingForm = ({ onClose }: CreateMatingFormProps) => {
         matingDate,
         fatherId: father!.petId,
         motherId: mother!.petId,
-        season: formData.season,
+        season: formData.season!,
       });
 
       toast.success("메이팅이 추가되었습니다.");
@@ -188,7 +193,7 @@ const CreateMatingForm = ({ onClose }: CreateMatingFormProps) => {
             type="number"
             min={1}
             className="h-[32px] w-full rounded-md border border-gray-200 p-2 text-sm"
-            placeholder="미지정 (자동 계산)"
+            placeholder="시즌을 입력해주세요"
             value={formData.season ?? ""}
             onChange={(e) =>
               setFormData((prev) => ({

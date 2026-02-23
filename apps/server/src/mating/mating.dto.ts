@@ -51,11 +51,9 @@ export class MatingBaseDto {
   @ApiProperty({
     description: '메이팅 시즌 (몇 차)',
     example: 1,
-    required: false,
   })
-  @IsOptional()
   @IsNumber()
-  season?: number;
+  season: number;
 
   @ApiProperty({
     description: '생성일',

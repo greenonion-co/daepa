@@ -1,13 +1,14 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useState } from "react";
 import { DateTime } from "luxon";
+import { toast } from "@/lib/toast";
 
 interface AddMatingModalProps {
   isOpen: boolean;
   onClose: () => void;
   matingDate: string;
   latestSeason?: number;
-  onConfirm: (matingDate: string, season?: number) => Promise<void>;
+  onConfirm: (matingDate: string, season: number) => Promise<void>;
 }
 
 const AddMatingModal = ({
@@ -22,6 +23,10 @@ const AddMatingModal = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!season) {
+      toast.error("시즌을 입력해주세요.");
+      return;
+    }
     setIsSubmitting(true);
     try {
       await onConfirm(matingDate, season);

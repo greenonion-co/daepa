@@ -26,8 +26,8 @@ export class MatingEntity {
   @Column({ type: 'date', nullable: true })
   matingDate?: Date;
 
-  @Column({ type: 'int', nullable: true })
-  season?: number | null;
+  @Column({ type: 'int' })
+  season: number;
 
   @CreateDateColumn()
   createdAt: Date;

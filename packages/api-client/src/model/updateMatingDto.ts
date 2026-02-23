@@ -14,7 +14,7 @@ export interface UpdateMatingDto {
   /** 메이팅 날짜 */
   matingDate: string;
   /** 메이팅 시즌 (몇 차) */
-  season?: number;
+  season: number;
   /** 해칭 메모 */
   desc?: string;
 }

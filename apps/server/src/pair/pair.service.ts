@@ -443,7 +443,7 @@ export class PairService {
       motherId: string;
       matingId: number;
       matingDate: Date;
-      season: number | null;
+      season: number;
       layingId: number;
       layingDate: Date;
       clutch: number;
@@ -641,7 +641,7 @@ export class PairService {
       motherId: string;
       matingId: number;
       matingDate: Date;
-      season: number | null;
+      season: number;
       layingId: number;
       layingDate: Date;
       clutch: number;
@@ -656,7 +656,7 @@ export class PairService {
       {
         matingId: number;
         matingDate: string;
-        season?: number;
+        season: number;
         layings?: {
           layingId: number;
           layingDate: string;
@@ -675,7 +675,7 @@ export class PairService {
         matingsMap.set(matingId, {
           matingId,
           matingDate: format(matingDate, 'yyyy-MM-dd'),
-          season: season ?? undefined,
+          season,
         });
       }
 
@@ -691,7 +691,7 @@ export class PairService {
         matingsMap.set(matingId, {
           matingId,
           matingDate: format(matingDate, 'yyyy-MM-dd'),
-          season: season ?? undefined,
+          season,
           layings,
         });
       }

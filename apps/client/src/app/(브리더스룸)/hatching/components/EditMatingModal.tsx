@@ -18,7 +18,7 @@ interface EditMatingModalProps {
     fatherId?: string;
     motherId?: string;
     matingDate: string;
-    season?: number;
+    season: number;
   };
   matingDates?: string[];
 }
@@ -31,7 +31,12 @@ const EditMatingModal = ({
   matingDates,
 }: EditMatingModalProps) => {
   const queryClient = useQueryClient();
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    fatherId: string;
+    motherId: string;
+    matingDate: string;
+    season: number | undefined;
+  }>({
     fatherId: currentData.fatherId || "",
     motherId: currentData.motherId || "",
     matingDate: currentData.matingDate,
@@ -45,12 +50,17 @@ const EditMatingModal = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!formData.season) {
+      toast.error("시즌을 입력해주세요.");
+      return;
+    }
+
     try {
       await updateMating({
         fatherId: formData.fatherId || undefined,
         motherId: formData.motherId || undefined,
         matingDate: formData.matingDate,
-        season: formData.season,
+        season: formData.season!,
       });
 
       toast.success("메이팅 정보가 수정되었습니다.");
@@ -115,7 +125,7 @@ const EditMatingModal = ({
               type="number"
               min={1}
               className="h-[32px] w-full rounded-md border border-gray-200 p-2 text-sm"
-              placeholder="미지정"
+              placeholder="시즌을 입력해주세요"
               value={formData.season ?? ""}
               onChange={(e) =>
                 setFormData((prev) => ({

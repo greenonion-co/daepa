@@ -125,6 +125,10 @@ const CalendarSelect = ({
               toast.error("날짜를 선택해주세요.");
               return;
             }
+            if (showSeasonInput && !season) {
+              toast.error("시즌을 입력해주세요.");
+              return;
+            }
             setIsSubmitting(true);
             try {
               await onConfirm(matingDate, season);
