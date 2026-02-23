@@ -25,7 +25,7 @@ const getInitialFormData = () => ({
   mother: undefined,
   matingDate: DateTime.now().toFormat("yyyy-MM-dd"),
   species: PetDtoSpecies.CRESTED,
-  season: undefined as number | undefined,
+  season: 1,
 });
 
 interface CreateMatingFormProps {
