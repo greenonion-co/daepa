@@ -59,6 +59,14 @@ const MatingDetailDialog = ({
     [matingGroup?.matingsByDate, getMatingDates],
   );
 
+  const latestSeason = useMemo(() => {
+    const seasons = (matingGroup?.matingsByDate ?? [])
+      .map((m) => m.season)
+      .filter((s): s is number => s != null);
+    if (seasons.length === 0) return undefined;
+    return Math.max(...seasons);
+  }, [matingGroup?.matingsByDate]);
+
   const [selectedMatingId, setSelectedMatingId] = useState<number | null>(null);
   const prevMatingIdsRef = useRef<Set<number>>(new Set());
   const isInitializedRef = useRef<boolean>(false);
@@ -334,6 +342,7 @@ const MatingDetailDialog = ({
                       confirmButtonText="메이팅 추가"
                       disabledDates={matingDates}
                       showSeasonInput
+                      latestSeason={latestSeason}
                       onConfirm={(matingDate, season) => onConfirmAdd(matingDate, season)}
                     />
                   </div>

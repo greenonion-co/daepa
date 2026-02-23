@@ -6,10 +6,17 @@ interface AddMatingModalProps {
   isOpen: boolean;
   onClose: () => void;
   matingDate: string;
+  latestSeason?: number;
   onConfirm: (matingDate: string, season?: number) => Promise<void>;
 }
 
-const AddMatingModal = ({ isOpen, onClose, matingDate, onConfirm }: AddMatingModalProps) => {
+const AddMatingModal = ({
+  isOpen,
+  onClose,
+  matingDate,
+  latestSeason,
+  onConfirm,
+}: AddMatingModalProps) => {
   const [season, setSeason] = useState<number | undefined>(undefined);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -40,17 +47,22 @@ const AddMatingModal = ({ isOpen, onClose, matingDate, onConfirm }: AddMatingMod
 
           <div className="space-y-2">
             <label htmlFor="add-mating-season" className="text-sm font-medium">
-              시즌 (몇 차)
+              시즌
             </label>
             <input
               id="add-mating-season"
               type="number"
               min={1}
               className="h-[32px] w-full rounded-md border border-gray-200 p-2 text-sm dark:border-gray-700 dark:bg-gray-800"
-              placeholder="미지정 (자동 계산)"
+              placeholder="몇 차"
               value={season ?? ""}
               onChange={(e) => setSeason(e.target.value ? Number(e.target.value) : undefined)}
             />
+            {latestSeason != null && (
+              <p className="mt-1 text-xs font-medium text-blue-600 dark:text-blue-400">
+                *이 페어의 직전 시즌은 [{latestSeason}]입니다.
+              </p>
+            )}
           </div>
 
           <div className="flex justify-end space-x-2">

@@ -15,6 +15,7 @@ interface CalendarSelectProps {
   triggerTextClassName?: string;
   disabled?: (date: Date) => boolean;
   showSeasonInput?: boolean;
+  latestSeason?: number;
   onConfirm: (matingDate: string, season?: number) => void | Promise<void>;
 }
 
@@ -28,6 +29,7 @@ const CalendarSelect = ({
   disabled,
   triggerTextClassName,
   showSeasonInput,
+  latestSeason,
 }: CalendarSelectProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [matingDate, setMatingDate] = useState<string | undefined>(initialDate);
@@ -103,11 +105,16 @@ const CalendarSelect = ({
               id="calendar-season"
               type="number"
               min={1}
-              className="h-7 w-20 rounded-md border border-gray-200 px-2 text-sm"
-              placeholder="자동"
+              className="h-7 w-16 rounded-md border border-gray-200 px-2 text-sm"
+              placeholder="몇 차"
               value={season ?? ""}
               onChange={(e) => setSeason(e.target.value ? Number(e.target.value) : undefined)}
             />
+            {latestSeason != null && (
+              <span className="rounded bg-blue-50 px-1.5 py-0.5 text-xs font-medium text-blue-600 dark:bg-blue-900/40 dark:text-blue-300">
+                *이 페어의 직전 시즌은 [{latestSeason}]입니다.
+              </span>
+            )}
           </div>
         )}
 

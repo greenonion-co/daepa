@@ -323,6 +323,12 @@ const PairList = memo(() => {
                     isOpen={isOpen}
                     onClose={close}
                     matingDate={date}
+                    latestSeason={(() => {
+                      const seasons = (pair.matingsByDate ?? [])
+                        .map((m) => m.season)
+                        .filter((s): s is number => s != null);
+                      return seasons.length > 0 ? Math.max(...seasons) : undefined;
+                    })()}
                     onConfirm={async (matingDate, season) => {
                       await handleAddPairClick({
                         species: pair.father?.species,
