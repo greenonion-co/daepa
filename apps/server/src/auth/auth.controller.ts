@@ -220,7 +220,7 @@ export class AuthController {
     description: '카카오 로그인 성공',
     type: UserDto,
   })
-  async kakaoLogin(
+  kakaoLogin(
     @PassportValidatedUser() validatedUser: ValidatedUser,
     @Res() res: Response,
   ) {
@@ -245,7 +245,7 @@ export class AuthController {
     description: '구글 로그인 성공',
     type: UserDto,
   })
-  async googleLogin(
+  googleLogin(
     @PassportValidatedUser() validatedUser: ValidatedUser,
     @Res() res: Response,
   ) {
