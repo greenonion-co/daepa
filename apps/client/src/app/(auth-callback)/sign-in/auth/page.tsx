@@ -3,7 +3,11 @@
 import LoadingScreen from "@/app/loading";
 import { tokenStorage } from "@/lib/tokenStorage";
 import { useUserStore } from "@/app/(브리더스룸)/store/user";
-import { UserDtoStatus, authControllerGetToken } from "@repo/api-client";
+import {
+  UserDtoStatus,
+  authControllerGetToken,
+  AXIOS_INSTANCE,
+} from "@repo/api-client";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef } from "react";
@@ -13,13 +17,22 @@ const AuthPage = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const userStatus = searchParams.get("status");
+  const urlToken = searchParams.get("token");
 
   const onLoginSuccess = useUserStore((state) => state.onLoginSuccess);
   const isProcessed = useRef(false);
 
   const { data } = useQuery({
-    queryKey: [authControllerGetToken.name],
-    queryFn: () => authControllerGetToken(),
+    queryKey: ["authGetToken", urlToken],
+    queryFn: () => {
+      // 모바일 브라우저 cross-site 쿠키 차단 대응: URL의 token을 query param으로 전달
+      if (urlToken) {
+        return AXIOS_INSTANCE.get<{ token: string }>("/api/auth/token", {
+          params: { token: urlToken },
+        });
+      }
+      return authControllerGetToken();
+    },
     select: (response) => response.data,
   });
 
