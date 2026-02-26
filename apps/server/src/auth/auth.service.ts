@@ -41,6 +41,12 @@ export class AuthService {
 
   private readonly logger = new Logger(AuthService.name);
 
+  // 동일 유저의 동시 refresh 요청을 중복 제거하여 rotation race condition 방지
+  private readonly refreshPromises = new Map<
+    string,
+    Promise<{ newAccessToken: string; newRefreshToken?: string }>
+  >();
+
   async validateAppleNativeAndGetUser({
     identityToken,
     email,
@@ -267,11 +273,33 @@ export class AuthService {
   }
 
   async refresh(refreshToken: string) {
-    try {
-      const tokenPayload = this.jwtService.verify<JwtPayload>(refreshToken, {
-        secret: process.env.JWT_REFRESH_SECRET ?? '',
-      });
+    const tokenPayload = this.jwtService.verify<JwtPayload>(refreshToken, {
+      secret: process.env.JWT_REFRESH_SECRET ?? '',
+    });
+    const userId = tokenPayload.sub;
 
+    // 동일 유저에 대한 refresh가 이미 진행 중이면 해당 Promise를 반환하여
+    // SSR/CSR 동시 요청 시 rotation race condition 방지
+    const existing = this.refreshPromises.get(userId);
+    if (existing) {
+      return existing;
+    }
+
+    const promise = this.performRefresh(refreshToken, tokenPayload).finally(
+      () => {
+        this.refreshPromises.delete(userId);
+      },
+    );
+
+    this.refreshPromises.set(userId, promise);
+    return promise;
+  }
+
+  private async performRefresh(
+    refreshToken: string,
+    tokenPayload: JwtPayload,
+  ) {
+    try {
       const user = await this.userService.findOne({
         userId: tokenPayload.sub,
       });
@@ -315,7 +343,6 @@ export class AuthService {
         user.refreshTokenExpiresAt &&
         user.refreshTokenExpiresAt <= oneWeekFromNow
       ) {
-        // TODO: 짧은 기간으로 설정하여 테스트해볼것
         newRefreshToken = await this.createJwtRefreshToken(user.userId);
       }
 
