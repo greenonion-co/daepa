@@ -245,7 +245,7 @@ export class AuthController {
     const clientBaseUrl =
       this.configService.getOrThrow<string>('CLIENT_BASE_URL');
     return res.redirect(
-      `${clientBaseUrl}/sign-in/auth?status=${validatedUser.userStatus}`,
+      `${clientBaseUrl}/sign-in/auth?status=${validatedUser.userStatus}&token=${encodeURIComponent(refreshToken)}`,
     );
   }
 
