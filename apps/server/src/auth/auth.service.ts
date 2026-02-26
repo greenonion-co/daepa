@@ -371,7 +371,7 @@ export class AuthService {
     // refresh token 해싱
     const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
 
-    const expiresAt = DateTime.now().plus({ years: 1 }).endOf('day').toJSDate();
+    const expiresAt = DateTime.now().plus({ days: 180 }).endOf('day').toJSDate();
 
     await this.userService.update(user.userId, {
       refreshToken: hashedRefreshToken,
