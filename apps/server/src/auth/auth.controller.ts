@@ -323,6 +323,7 @@ export class AuthController {
   }
 
   @Post('sign-out')
+  @Public()
   @ApiResponse({
     status: 200,
     description: '로그아웃 성공',
