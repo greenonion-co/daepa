@@ -271,7 +271,7 @@ export class AuthController {
   })
   async getToken(
     @Req()
-    req: RequestWithCookies & { query: { token?: string; code?: string } },
+    req: RequestWithCookies & { query: { code?: string } },
     @Res({ passthrough: true }) res: Response,
   ) {
     // 1. auth code로 토큰 교환 (OAuth redirect 후 모바일/웹 공통)
@@ -291,8 +291,8 @@ export class AuthController {
       return { token: newAccessToken };
     }
 
-    // 2. 기존 refresh token으로 access token 갱신
-    const refreshToken = req.cookies.refreshToken || req.query.token;
+    // 2. HttpOnly 쿠키의 refresh token으로 access token 갱신
+    const refreshToken = req.cookies.refreshToken;
 
     if (!refreshToken || typeof refreshToken !== 'string') {
       throw new UnauthorizedException('Refresh token이 유효하지 않습니다.');
