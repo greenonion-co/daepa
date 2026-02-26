@@ -228,24 +228,12 @@ export class AuthController {
       throw new UnauthorizedException('로그인 실패');
     }
 
-    const refreshToken = await this.authService.createJwtRefreshToken(
-      validatedUser.userId,
-    );
-
-    // 쿠키 설정 (PC 브라우저용 - 호환성 유지)
-    res.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 180 * 24 * 60 * 60 * 1000, // 180일
-      domain: COOKIE_DOMAIN,
-    });
-
-    // URL 파라미터로도 토큰 전달 (모바일 브라우저 cross-site 쿠키 차단 대응)
+    // 단기 auth code를 URL에 포함 (refresh token 직접 노출 방지)
+    const authCode = this.authService.createAuthCode(validatedUser.userId);
     const clientBaseUrl =
       this.configService.getOrThrow<string>('CLIENT_BASE_URL');
     return res.redirect(
-      `${clientBaseUrl}/sign-in/auth?status=${validatedUser.userStatus}&token=${encodeURIComponent(refreshToken)}`,
+      `${clientBaseUrl}/sign-in/auth?status=${validatedUser.userStatus}&code=${encodeURIComponent(authCode)}`,
     );
   }
 
@@ -265,24 +253,12 @@ export class AuthController {
       throw new UnauthorizedException('로그인 실패');
     }
 
-    const refreshToken = await this.authService.createJwtRefreshToken(
-      validatedUser.userId,
-    );
-
-    // 쿠키 설정 (PC 브라우저용 - 호환성 유지)
-    res.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 180 * 24 * 60 * 60 * 1000, // 180일
-      domain: COOKIE_DOMAIN,
-    });
-
-    // URL 파라미터로도 토큰 전달 (모바일 브라우저 cross-site 쿠키 차단 대응)
+    // 단기 auth code를 URL에 포함 (refresh token 직접 노출 방지)
+    const authCode = this.authService.createAuthCode(validatedUser.userId);
     const clientBaseUrl =
       this.configService.getOrThrow<string>('CLIENT_BASE_URL');
     return res.redirect(
-      `${clientBaseUrl}/sign-in/auth?status=${validatedUser.userStatus}&token=${encodeURIComponent(refreshToken)}`,
+      `${clientBaseUrl}/sign-in/auth?status=${validatedUser.userStatus}&code=${encodeURIComponent(authCode)}`,
     );
   }
 
@@ -294,10 +270,28 @@ export class AuthController {
     type: TokenResponseDto,
   })
   async getToken(
-    @Req() req: RequestWithCookies & { query: { token?: string } },
+    @Req()
+    req: RequestWithCookies & { query: { token?: string; code?: string } },
     @Res({ passthrough: true }) res: Response,
   ) {
-    // 쿠키 또는 쿼리 파라미터에서 refreshToken 가져오기 (모바일 cross-site 쿠키 차단 대응)
+    // 1. auth code로 토큰 교환 (OAuth redirect 후 모바일/웹 공통)
+    const authCode = req.query.code;
+    if (authCode && typeof authCode === 'string') {
+      const { newAccessToken, newRefreshToken } =
+        await this.authService.exchangeAuthCode(authCode);
+
+      res.cookie('refreshToken', newRefreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 180 * 24 * 60 * 60 * 1000,
+        domain: COOKIE_DOMAIN,
+      });
+
+      return { token: newAccessToken };
+    }
+
+    // 2. 기존 refresh token으로 access token 갱신
     const refreshToken = req.cookies.refreshToken || req.query.token;
 
     if (!refreshToken || typeof refreshToken !== 'string') {
@@ -312,7 +306,7 @@ export class AuthController {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
-        maxAge: 180 * 24 * 60 * 60 * 1000, // 180일
+        maxAge: 180 * 24 * 60 * 60 * 1000,
         domain: COOKIE_DOMAIN,
       });
     }

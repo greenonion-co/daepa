@@ -255,6 +255,51 @@ export class AuthService {
     return accessToken;
   }
 
+  /**
+   * OAuth 콜백 후 redirect URL에 포함할 단기 auth code 생성 (30초 유효).
+   * refresh token을 URL에 직접 노출하지 않기 위해 사용.
+   */
+  createAuthCode(userId: string): string {
+    return this.jwtService.sign(
+      { sub: userId, type: 'auth_code' },
+      { expiresIn: '30s' },
+    );
+  }
+
+  /**
+   * auth code를 검증하고 해당 유저의 access token + refresh token을 발급.
+   */
+  async exchangeAuthCode(code: string) {
+    try {
+      const payload = this.jwtService.verify<{
+        sub: string;
+        type: string;
+      }>(code);
+
+      if (payload.type !== 'auth_code') {
+        throw new UnauthorizedException('유효하지 않은 auth code입니다.');
+      }
+
+      const user = await this.userService.findOne({ userId: payload.sub });
+      if (!user) {
+        throw new UnauthorizedException('사용자를 찾을 수 없습니다.');
+      }
+
+      const newAccessToken = this.createJwtAccessToken({
+        userId: user.userId,
+        role: user.role,
+      });
+      const newRefreshToken = await this.createJwtRefreshToken(user.userId);
+
+      return { newAccessToken, newRefreshToken };
+    } catch (error) {
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+      throw new UnauthorizedException('auth code 검증에 실패했습니다.');
+    }
+  }
+
   async createJwtRefreshToken(userId: string) {
     const refreshToken = this.jwtService.sign(
       {

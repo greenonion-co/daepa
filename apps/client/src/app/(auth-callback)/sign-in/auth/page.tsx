@@ -17,18 +17,18 @@ const AuthPage = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const userStatus = searchParams.get("status");
-  const urlToken = searchParams.get("token");
+  const authCode = searchParams.get("code");
 
   const onLoginSuccess = useUserStore((state) => state.onLoginSuccess);
   const isProcessed = useRef(false);
 
   const { data } = useQuery({
-    queryKey: ["authGetToken", urlToken],
+    queryKey: ["authGetToken", authCode],
     queryFn: () => {
-      // 모바일 브라우저 cross-site 쿠키 차단 대응: URL의 token을 query param으로 전달
-      if (urlToken) {
+      // auth code가 있으면 토큰 교환, 없으면 cookie 기반 refresh
+      if (authCode) {
         return AXIOS_INSTANCE.get<{ token: string }>("/api/auth/token", {
-          params: { token: urlToken },
+          params: { code: authCode },
         });
       }
       return authControllerGetToken();
