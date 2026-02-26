@@ -97,11 +97,14 @@ const user = useUser();              // state.user 추상화
 ```
 [로그인 페이지 (/sign-in)]
     ↓ OAuth 리다이렉트 (Kakao/Google/Apple)
-    ↓ 서버에서 refreshToken 쿠키 설정
+    ↓ 서버에서 OAuth 인증 완료
+    ↓ 30초 유효 auth code(JWT) 생성
+    ↓ /sign-in/auth?status={status}&code={authCode} 로 리다이렉트
     ↓
 [/sign-in/auth 페이지]
-    ↓ authControllerGetToken() 호출 (refreshToken 쿠키 자동 전송)
-    ↓ accessToken 응답 수신
+    ↓ URL에서 auth code 추출
+    ↓ /api/auth/token?code={authCode} 호출
+    ↓ 서버: auth code 검증 → accessToken + refreshToken(쿠키) 발급
     ↓
 [onLoginSuccess(token)]
     ↓ tokenStorage.setToken(token) → localStorage에 저장
@@ -111,13 +114,15 @@ const user = useUser();              // state.user 추상화
     ↓ 홈으로 리다이렉트
 ```
 
+**참고:**
+- redirect URL에는 단기 auth code만 포함 (refresh token 직접 노출 방지)
+- auth code가 없는 경우 (기존 쿠키 기반) fallback으로 `authControllerGetToken()` 호출
+- `/sign-in/auth` 페이지는 `(auth-callback)` 라우트 그룹에 위치하여 `(user)` 레이아웃의 리다이렉트 로직 영향을 받지 않음
+
 **관련 파일:**
 
 - `apps/client/src/app/(auth-callback)/sign-in/auth/page.tsx`
 - `apps/client/src/app/(브리더스룸)/store/user.ts`
-
-**참고:** `/sign-in/auth` 페이지는 `(auth-callback)` 라우트 그룹에 위치하여
-`(user)` 레이아웃의 리다이렉트 로직 영향을 받지 않음
 
 ### B. 앱 시작 시 자동 유저 정보 갱신
 
@@ -184,6 +189,7 @@ export const getServerRequestHeaders = cache(async () => {
 **특징:**
 - `cache()`로 감싸서 같은 렌더링 사이클 내 중복 요청 방지
 - refreshToken 쿠키로 accessToken 획득 후 Authorization 헤더 반환
+- 서버 측에서 동일 유저의 동시 refresh 요청을 in-memory deduplication으로 처리하여 SSR/CSR 간 rotation race condition 방지
 
 ### 게스트 전용 페이지 보호
 
@@ -218,6 +224,8 @@ export default async function UserLayout({ children }) {
         ↓ set({ user: null })
         ↓ (네이티브 앱인 경우) sendToNative({ type: "LOGOUT" })
 ```
+
+**참고:** sign-out 엔드포인트는 `@Public()`으로 설정되어 access token 만료 상태에서도 로그아웃 가능
 
 **관련 파일:**
 
@@ -354,6 +362,9 @@ export default async function UserLayout({ children }) {
 3. **자동 토큰 갱신**: 401 에러 시 자동으로 refreshToken으로 갱신
 4. **무한루프 방지**: `/sign-in/*` 경로에서는 로그인 리다이렉트 제외
 5. **SSR 인증 분리**: 서버 컴포넌트는 refreshToken으로 별도 인증
+6. **Auth code 패턴**: OAuth redirect URL에 refresh token 대신 30초 유효 auth code 사용하여 URL 노출 방지
+7. **사용자 상태 검증**: token refresh 시 ACTIVE 상태가 아닌 사용자(SUSPENDED/INACTIVE) 차단
+8. **토큰 만료 정합성**: JWT 만료(180일)와 DB `refreshTokenExpiresAt`(180일) 동일하게 유지
 
 ### 토큰 갱신 큐
 
@@ -361,3 +372,8 @@ export default async function UserLayout({ children }) {
 - 첫 번째 요청만 토큰 갱신 수행
 - 나머지 요청은 큐에서 대기
 - 갱신 완료 후 큐의 모든 요청 재시도
+
+### 서버 측 토큰 갱신 보호
+
+- **Rotation race condition 방지**: 동일 유저의 동시 refresh 요청을 in-memory deduplication으로 하나만 실행
+- **Sign-out 접근성**: `@Public()` 데코레이터로 access token 만료 상태에서도 로그아웃 가능

@@ -300,3 +300,8 @@ const user = useUser();              // state.user 추상화
 3. **토큰 노출 최소화**: accessToken은 쿠키에 저장하지 않음
 4. **자동 로그아웃**: 토큰 갱신 실패 시 즉시 로그아웃 처리
 5. **무한루프 방지**: `/sign-in/*` 경로에서는 리다이렉트 제외
+6. **Auth code 패턴**: 웹 OAuth redirect URL에 refresh token 대신 30초 유효 auth code 사용하여 URL 노출 방지
+7. **사용자 상태 검증**: token refresh 시 ACTIVE 상태가 아닌 사용자(SUSPENDED/INACTIVE) 차단
+8. **Rotation race condition 방지**: 동일 유저의 동시 refresh 요청을 서버에서 in-memory deduplication으로 처리
+9. **토큰 만료 정합성**: JWT 만료(180일)와 DB `refreshTokenExpiresAt`(180일) 동일하게 유지
+10. **Sign-out 접근성**: `@Public()` 데코레이터로 access token 만료 상태에서도 로그아웃 가능
