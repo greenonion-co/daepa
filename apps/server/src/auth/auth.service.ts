@@ -308,6 +308,10 @@ export class AuthService {
         throw new UnauthorizedException('사용자를 찾을 수 없습니다.');
       }
 
+      if (user.status !== USER_STATUS.ACTIVE) {
+        throw new UnauthorizedException('비활성화된 계정입니다.');
+      }
+
       const isRefreshTokenValid = await bcrypt.compare(
         refreshToken,
         user.refreshToken ?? '',
