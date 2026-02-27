@@ -36,12 +36,12 @@ const LoginPromoSheet = ({ isOpen, onOpenChange, title, description }: LoginProm
         className="mx-5 mb-5 max-w-[700px] rounded-3xl px-6 pt-6 pb-8 sm:mx-auto"
       >
         <SheetHeader className="flex items-center">
-          <Image
-            alt="개체 관계도 바텀시트 이미지"
-            src="/assets/lizard_face.png"
-            width={100}
-            height={100}
-          />
+          {/*<Image*/}
+          {/*  alt="개체 관계도 바텀시트 이미지"*/}
+          {/*  src="/assets/lizard_face.png"*/}
+          {/*  width={100}*/}
+          {/*  height={100}*/}
+          {/*/>*/}
 
           <SheetTitle className="text-center text-lg">{title}</SheetTitle>
           <SheetDescription className="text-center text-sm leading-relaxed text-neutral-600 dark:text-neutral-400">
@@ -87,13 +87,15 @@ export const openLoginPromoSheet = () => {
     <LoginPromoSheet
       isOpen={isOpen}
       onOpenChange={(open) => !open && close()}
-      title="내 개체를 등록해보세요"
+      title="내 개체를 등록해보세요!"
       description={
         <>
-          <span className="text-gray-800 dark:text-white">개체를 등록</span>하면
+          <span className="font-semibold text-blue-700 dark:text-blue-400">
+            개체 정보 관리・혈통 인증・메이팅 관리
+          </span>
+          등
           <br />
-          <span className="font-semibold text-blue-700 dark:text-blue-400">개체 관리・혈통 인증・분양 관리</span>가
-          가능해요!
+          다양한 기능을 사용해보세요
         </>
       }
     />
@@ -115,10 +117,11 @@ export const openRelationPromoSheet = () => {
       title="혈통 정보를 한눈에"
       description={
         <>
-          <span className="font-semibold text-blue-700 dark:text-blue-400">부모, 동배, 자손</span>까지
+          <span className="font-semibold text-blue-700 dark:text-blue-400">부모, 동배, 자손</span>
+          까지
           <br />
-          <span className="font-semibold text-gray-800 dark:text-gray-200">개체 관계도</span>로 혈통을 쉽게 확인할 수
-          있어요
+          <span className="font-semibold text-gray-800 dark:text-gray-200">개체 관계도</span>로
+          혈통을 쉽게 확인할 수 있어요
         </>
       }
     />
