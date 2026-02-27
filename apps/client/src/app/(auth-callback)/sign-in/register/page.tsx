@@ -21,7 +21,7 @@ import { useNameStore } from "@/app/(브리더스룸)/store/name";
 import { isNativeApp, requestResetToHome, setNativeAccessToken } from "@/lib/native-bridge";
 import { tokenStorage } from "@/lib/tokenStorage";
 import { useUserStore } from "@/app/(브리더스룸)/store/user";
-import { ChevronDown } from "lucide-react";
+import { Info } from "lucide-react";
 
 const NICKNAME_MAX_LENGTH = 15;
 const NICKNAME_MIN_LENGTH = 2;
@@ -289,6 +289,12 @@ const RegisterPage = () => {
                     <span className="h-1 w-1 rounded-full bg-red-500"></span>
                     {errors.isSeller.message}
                   </div>
+                )}
+                {isSeller && (
+                  <p className="flex items-center gap-1 text-end text-xs text-amber-600 dark:text-amber-400">
+                    <Info className="h-3.5 w-3.5 shrink-0" />
+                    로그인 후 마이페이지에서 사업자 인증을 완료해주세요.
+                  </p>
                 )}
               </div>
 
