@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import AppleLoginButton from "./AppleLoginButton";
+// import AppleLoginButton from "./AppleLoginButton";
 import { providerIconMap } from "../constants";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -30,7 +30,7 @@ const SignInPage = () => {
 
         <div className="rounded-3xl">
           <div>
-            <AppleLoginButton />
+            {/*<AppleLoginButton />*/}
             <a
               className="mb-2 flex h-[46px] w-full items-center justify-center gap-3 rounded-[12px] bg-[#F2F2F2]"
               href={`${process.env.NEXT_PUBLIC_SERVER_BASE_URL}/api/auth/sign-in/${UserProfileDtoProviderItem.google}`}
