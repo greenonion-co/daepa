@@ -18,7 +18,7 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 
 interface ParentSearchProps {
-  sex: PetDtoSex;
+  sex?: PetDtoSex;
   species?: PetDtoSpecies;
   isOpen: boolean;
   onlySelect?: boolean;
@@ -71,7 +71,9 @@ const ParentSearchSelector = ({
       data.pages
         .flatMap((page) => page.data.data)
         .filter(
-          (pet) => (!excludePetId || pet.petId !== excludePetId) && pet.sex?.toString() === sex,
+          (pet) =>
+            (!excludePetId || pet.petId !== excludePetId) &&
+            (!sex || pet.sex?.toString() === sex),
         ),
   });
 

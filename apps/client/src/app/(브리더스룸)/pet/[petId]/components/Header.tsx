@@ -207,27 +207,50 @@ const Header = ({
           </div>
         </div>
 
-        <button
-          type="button"
-          onClick={() => {
-            if (isLoggedIn) {
-              router.push(`/pet/${pet.petId}/relation`);
-            } else {
-              openRelationPromoSheet();
-            }
-          }}
-          className={cn(
-            "flex items-center gap-0.5 rounded-lg bg-blue-100 px-2 font-[700] text-white transition-colors hover:bg-blue-200 dark:bg-blue-900/40 dark:hover:bg-blue-800/40",
-            isScrolled ? "h-8 text-xs" : "h-8 text-sm",
-          )}
-        >
-          <TooltipText
-            text="개체 관계도"
-            title="개체 관계도"
-            className="text-blue-600"
-            content="혈통 관계가 있는 개체들을 확인합니다."
-          />
-        </button>
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={() => {
+              if (isLoggedIn) {
+                router.push(`/pet/${pet.petId}/relation`);
+              } else {
+                openRelationPromoSheet();
+              }
+            }}
+            className={cn(
+              "flex items-center gap-0.5 rounded-lg bg-blue-100 px-2 font-[700] text-white transition-colors hover:bg-blue-200 dark:bg-blue-900/40 dark:hover:bg-blue-800/40",
+              isScrolled ? "h-8 text-xs" : "h-8 text-sm",
+            )}
+          >
+            <TooltipText
+              text="관계도"
+              title="개체 관계도"
+              className="text-blue-600"
+              content="혈통 관계가 있는 개체들을 확인합니다."
+            />
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              if (isLoggedIn) {
+                router.push(`/pet/${pet.petId}/family-tree`);
+              } else {
+                openRelationPromoSheet();
+              }
+            }}
+            className={cn(
+              "flex items-center gap-0.5 rounded-lg bg-green-100 px-2 font-[700] text-white transition-colors hover:bg-green-200 dark:bg-green-900/40 dark:hover:bg-green-800/40",
+              isScrolled ? "h-8 text-xs" : "h-8 text-sm",
+            )}
+          >
+            <TooltipText
+              text="가계도"
+              title="가계도"
+              className="text-green-600"
+              content="가족 관계를 트리 구조로 확인합니다."
+            />
+          </button>
+        </div>
 
         <div className="flex items-center gap-1">
           <QRCode pet={pet} isScrolled={isScrolled} />

@@ -15,6 +15,8 @@ interface SingleSelectProps {
   showTitle?: boolean;
   showSelectAll?: boolean; // 전체 선택 항목 표시
   variant?: "default" | "light" | "form";
+  /** 데스크탑에서도 화면 중앙 모달로 표시 */
+  forceCenter?: boolean;
 }
 
 const SingleSelect = ({
@@ -25,6 +27,7 @@ const SingleSelect = ({
   showTitle = false,
   showSelectAll = false,
   variant = "default",
+  forceCenter,
 }: SingleSelectProps) => {
   const isLight = variant === "light";
   const isForm = variant === "form";
@@ -147,7 +150,7 @@ const SingleSelect = ({
         )}
       </button>
 
-      {isOpen && isMobile && (
+      {isOpen && (isMobile || forceCenter) && (
         <div
           className="fixed inset-0 z-40 bg-black/40"
           onClick={() => closeAndSave()}
@@ -159,14 +162,14 @@ const SingleSelect = ({
           className={cn(
             "z-50 w-80 rounded-2xl border-[1.8px] border-gray-200 bg-white p-5 shadow-lg dark:border-gray-600 dark:bg-[#18171C]",
             "transform transition-all duration-200 ease-out",
-            isMobile
+            isMobile || forceCenter
               ? "fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
               : cn("absolute top-10", dropdownPosition === "left" ? "left-0" : "right-0"),
             isEntering
-              ? isMobile
+              ? isMobile || forceCenter
                 ? "scale-100 opacity-100"
                 : "translate-y-0 scale-100 opacity-100"
-              : isMobile
+              : isMobile || forceCenter
                 ? "scale-95 opacity-0"
                 : "-translate-y-1 scale-95 opacity-0",
           )}
