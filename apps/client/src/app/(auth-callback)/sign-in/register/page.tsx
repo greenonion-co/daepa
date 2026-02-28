@@ -140,8 +140,6 @@ const RegisterPage = () => {
           }
         }
 
-        toast.success(response.data.message);
-
         // 네이티브 앱인 경우 토큰 동기화 후 홈 탭으로 이동
         if (isNativeApp()) {
           const token = tokenStorage.getToken();
@@ -176,7 +174,7 @@ const RegisterPage = () => {
           router.replace("/pet");
         }
 
-        toast.success("로그인에 성공했습니다.");
+        toast.success(response.data.message || "로그인에 성공했습니다.");
       }
     } catch (error: unknown) {
       console.error("회원정보 등록 실패:", error);
