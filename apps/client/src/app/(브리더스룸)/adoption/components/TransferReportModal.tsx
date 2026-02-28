@@ -20,6 +20,7 @@ import { DownloadIcon, Loader2Icon } from "lucide-react";
 import { toast } from "@/lib/toast";
 import { useQuery } from "@tanstack/react-query";
 import { userControllerGetUserPrivateInfo } from "@repo/api-client";
+import AddressSearch from "@/components/common/AddressSearch";
 
 interface TransferReportModalProps {
   isOpen: boolean;
@@ -47,12 +48,12 @@ const TransferReportModal = ({ isOpen, onClose }: TransferReportModalProps) => {
 
   const [type, setType] = useState<ReportType>("transfer");
   const [sellerName, setSellerName] = useState("");
-  const [sellerPhone1, setSellerPhone1] = useState("010");
+  const [sellerPhone1, setSellerPhone1] = useState("");
   const [sellerPhone2, setSellerPhone2] = useState("");
   const [sellerPhone3, setSellerPhone3] = useState("");
   const [sellerAddress, setSellerAddress] = useState("");
   const [buyerName, setBuyerName] = useState("");
-  const [buyerPhone1, setBuyerPhone1] = useState("010");
+  const [buyerPhone1, setBuyerPhone1] = useState("");
   const [buyerPhone2, setBuyerPhone2] = useState("");
   const [buyerPhone3, setBuyerPhone3] = useState("");
   const [buyerAddress, setBuyerAddress] = useState("");
@@ -75,7 +76,7 @@ const TransferReportModal = ({ isOpen, onClose }: TransferReportModalProps) => {
     // 이전 자동 채움 초기화
     if (isSeller) {
       setBuyerName("");
-      setBuyerPhone1("010");
+      setBuyerPhone1("");
       setBuyerPhone2("");
       setBuyerPhone3("");
       setBuyerAddress("");
@@ -142,6 +143,11 @@ const TransferReportModal = ({ isOpen, onClose }: TransferReportModalProps) => {
       >
         <DialogHeader>
           <DialogTitle>양도·양수·보관 신고서 작성</DialogTitle>
+          {privateInfo && !privateInfo.realName && !privateInfo.phone && !privateInfo.address && (
+            <p className="text-xs text-blue-500 dark:text-gray-400">
+              *[내 정보]에서 실명 정보를 추가하여 편하게 사용하세요!
+            </p>
+          )}
         </DialogHeader>
 
         <div className="space-y-5">
@@ -180,7 +186,7 @@ const TransferReportModal = ({ isOpen, onClose }: TransferReportModalProps) => {
                 <Input
                   value={sellerPhone1}
                   onChange={(e) => setSellerPhone1(e.target.value)}
-                  placeholder="010"
+                  placeholder="00"
                   maxLength={3}
                   className="text-center text-blue-500"
                 />
@@ -204,11 +210,11 @@ const TransferReportModal = ({ isOpen, onClose }: TransferReportModalProps) => {
             </div>
             <div className="space-y-2">
               <Label>주소</Label>
-              <Input
+              <AddressSearch
                 value={sellerAddress}
-                onChange={(e) => setSellerAddress(e.target.value)}
-                placeholder="주소 입력"
-                className="text-blue-500"
+                onChange={(address) => setSellerAddress(address)}
+                placeholder="주소 검색"
+                className="flex h-10 w-full min-w-0 rounded-md border border-input bg-transparent px-3 py-1 text-base text-blue-500 shadow-xs outline-none placeholder:text-muted-foreground dark:bg-input/30 md:text-sm"
               />
             </div>
           </fieldset>
@@ -231,7 +237,7 @@ const TransferReportModal = ({ isOpen, onClose }: TransferReportModalProps) => {
                 <Input
                   value={buyerPhone1}
                   onChange={(e) => setBuyerPhone1(e.target.value)}
-                  placeholder="010"
+                  placeholder="00"
                   maxLength={3}
                   className="text-center text-blue-500"
                 />
@@ -255,11 +261,11 @@ const TransferReportModal = ({ isOpen, onClose }: TransferReportModalProps) => {
             </div>
             <div className="space-y-2">
               <Label>주소</Label>
-              <Input
+              <AddressSearch
                 value={buyerAddress}
-                onChange={(e) => setBuyerAddress(e.target.value)}
-                placeholder="주소 입력"
-                className="text-blue-500"
+                onChange={(address) => setBuyerAddress(address)}
+                placeholder="주소 검색"
+                className="flex h-10 w-full min-w-0 rounded-md border border-input bg-transparent px-3 py-1 text-base text-blue-500 shadow-xs outline-none placeholder:text-muted-foreground dark:bg-input/30 md:text-sm"
               />
             </div>
           </fieldset>

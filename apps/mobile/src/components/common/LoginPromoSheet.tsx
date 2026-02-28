@@ -28,12 +28,12 @@ const VARIANT_CONTENT: Record<
   register: {
     title: '내 개체를 등록해보세요',
     description: '개체를 등록하고\n',
-    highlight: '개체 관리・혈통 인증・분양 관리',
+    highlight: '개체 정보 관리・혈통 인증・메이팅 관리',
   },
   relation: {
     title: '혈통 정보를 한눈에',
     description: '',
-    highlight: '부모, 동배, 자손',
+    highlight: '부모, 동배, 라인 정보',
   },
 };
 

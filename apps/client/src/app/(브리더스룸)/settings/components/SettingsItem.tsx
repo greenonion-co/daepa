@@ -16,8 +16,8 @@ interface SettingsItemProps {
 
 export const SettingsItem = ({
   icon,
-  iconColor = "text-gray-600",
-  iconBgColor = "bg-gray-100",
+  iconColor,
+  iconBgColor,
   label,
   value,
   onClick,
@@ -28,18 +28,21 @@ export const SettingsItem = ({
 }: SettingsItemProps) => {
   const content = (
     <>
-      {icon && (
-        <div
-          className={cn(
-            "flex h-8 w-8 items-center justify-center rounded-lg",
-            iconBgColor,
-            iconColor,
-          )}
-        >
-          {icon}
-        </div>
-      )}
-      <div className="min-w-0 flex-1">
+      {icon &&
+        (iconBgColor ? (
+          <div
+            className={cn(
+              "flex h-8 w-8 items-center justify-center rounded-lg",
+              iconBgColor,
+              iconColor,
+            )}
+          >
+            {icon}
+          </div>
+        ) : (
+          <div className={cn("flex h-8 w-8 items-center justify-center", iconColor)}>{icon}</div>
+        ))}
+      <div className="">
         <span
           className={cn(
             "text-[15px] whitespace-nowrap",
@@ -49,12 +52,16 @@ export const SettingsItem = ({
           {label}
         </span>
       </div>
-      {typeof value === "string" && (
-        <p className="truncate text-[13px] font-[600] text-gray-700 dark:text-gray-400">{value}</p>
-      )}
-      {typeof value !== "string" && value}
-      {rightElement}
-      {showChevron && <ChevronRight className="h-5 w-5 text-gray-400" />}
+      <div className="ml-auto flex min-w-0 items-center gap-3">
+        {typeof value === "string" && (
+          <p className="truncate text-[13px] font-[600] text-gray-700 dark:text-gray-400">
+            {value}
+          </p>
+        )}
+        {typeof value !== "string" && value}
+        {rightElement && <div className="shrink-0">{rightElement}</div>}
+        {showChevron && <ChevronRight className="h-5 w-5 shrink-0 text-gray-400" />}
+      </div>
     </>
   );
 
