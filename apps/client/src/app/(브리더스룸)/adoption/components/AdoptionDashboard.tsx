@@ -7,8 +7,10 @@ import {
   StatisticsControllerGetPairStatisticsSpecies,
   PetParentDto,
   PetDtoSex,
+  PetDto,
 } from "@repo/api-client";
 import { overlay } from "overlay-kit";
+import { useRouter } from "next/navigation";
 import FilterItem from "../../hatching/components/Filters/FilterItem";
 import ParentSearchSelector from "../../components/selector/parentSearch";
 import { ChartConfig } from "@/components/ui/chart";
@@ -33,7 +35,7 @@ import { STATISTICS_COLORS, ADOPTION_STATISTICS_COLORS } from "../../constants";
 import { cn, formatPrice } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/useMobile";
 import { AlertCircle, ChevronDown } from "lucide-react";
-import SiblingPetCard from "../../pet/[petId]/relation/components/SiblingPetCard";
+import PetCard from "../../pet/components/PetCard";
 
 // 연도 옵션 생성 (최근 5년)
 const generateYearOptions = (): CustomSelectOption[] => {
@@ -105,6 +107,7 @@ const getMethodColor = (method: string): string => {
 
 const AdoptionDashboard = memo(() => {
   const isMobile = useIsMobile();
+  const router = useRouter();
   const [species, setSpecies] = useState<StatisticsControllerGetPairStatisticsSpecies>(
     StatisticsControllerGetPairStatisticsSpecies.CR,
   );
@@ -113,7 +116,7 @@ const AdoptionDashboard = memo(() => {
   const [selectedYear, setSelectedYear] = useState<string>(String(new Date().getFullYear()));
   const [selectedMonth, setSelectedMonth] = useState<string>("all");
   const [selectedPriceRange, setSelectedPriceRange] = useState<PriceRangeItemDto | null>(null);
-  const [isParentSectionOpen, setIsParentSectionOpen] = useState(false);
+  const [isParentSectionOpen, setIsParentSectionOpen] = useState(!isMobile);
 
   const yearOptions = useMemo(() => generateYearOptions(), []);
 
@@ -322,16 +325,17 @@ const AdoptionDashboard = memo(() => {
             <div
               className={cn(
                 "relative grid transition-all duration-200",
-                isParentSectionOpen
-                  ? "mt-4 grid-rows-[1fr] opacity-100"
-                  : "grid-rows-[0fr] opacity-0",
+                isParentSectionOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0",
               )}
             >
               <div className="overflow-hidden">
-                <div className="flex flex-wrap items-stretch justify-center gap-3 pt-2">
-                  {father && <SiblingPetCard pet={father} width={140} />}
-
-                  {mother && <SiblingPetCard pet={mother} width={140} />}
+                <div className="grid grid-cols-1 gap-3 px-3 pt-2 sm:grid-cols-2">
+                  {father && (
+                    <PetCard pet={father} onCardClick={(pet) => router.push(`/pet/${pet.petId}`)} />
+                  )}
+                  {mother && (
+                    <PetCard pet={mother} onCardClick={(pet) => router.push(`/pet/${pet.petId}`)} />
+                  )}
                 </div>
               </div>
             </div>
@@ -387,7 +391,9 @@ const AdoptionDashboard = memo(() => {
               {statistics.dayOfWeekStats && statistics.dayOfWeekStats.some((d) => d.count > 0) ? (
                 <DayOfWeekChart data={statistics.dayOfWeekStats} />
               ) : (
-                <p className="flex h-32 items-center justify-center text-sm text-gray-400 dark:text-gray-500">요일별 분양 통계가 없습니다.</p>
+                <p className="flex h-32 items-center justify-center text-sm text-gray-400 dark:text-gray-500">
+                  요일별 분양 통계가 없습니다.
+                </p>
               )}
             </ChartCard>
 
@@ -396,7 +402,9 @@ const AdoptionDashboard = memo(() => {
               <CustomerAnalysisCard data={statistics.customerAnalysis} />
             ) : (
               <ChartCard title="고객 분석">
-                <p className="flex h-32 items-center justify-center text-sm text-gray-400 dark:text-gray-500">고객 분석 데이터가 없습니다.</p>
+                <p className="flex h-32 items-center justify-center text-sm text-gray-400 dark:text-gray-500">
+                  고객 분석 데이터가 없습니다.
+                </p>
               </ChartCard>
             )}
 
@@ -423,7 +431,9 @@ const AdoptionDashboard = memo(() => {
                   onRangeClick={setSelectedPriceRange}
                 />
               ) : (
-                <p className="flex h-32 items-center justify-center text-sm text-gray-400 dark:text-gray-500">가격대별 분양 데이터가 없습니다.</p>
+                <p className="flex h-32 items-center justify-center text-sm text-gray-400 dark:text-gray-500">
+                  가격대별 분양 데이터가 없습니다.
+                </p>
               )}
             </ChartCard>
 
@@ -467,7 +477,9 @@ const AdoptionDashboard = memo(() => {
               {sexChartData.length > 0 ? (
                 <StatsPieChart data={sexChartData} config={sexChartConfig} format={formatPrice} />
               ) : (
-                <p className="flex h-32 items-center justify-center text-sm text-gray-400 dark:text-gray-500">성별 분포 데이터가 없습니다.</p>
+                <p className="flex h-32 items-center justify-center text-sm text-gray-400 dark:text-gray-500">
+                  성별 분포 데이터가 없습니다.
+                </p>
               )}
             </ChartCard>
 
@@ -503,7 +515,9 @@ const AdoptionDashboard = memo(() => {
                   format={formatPrice}
                 />
               ) : (
-                <p className="flex h-32 items-center justify-center text-sm text-gray-400 dark:text-gray-500">분양 방식 데이터가 없습니다.</p>
+                <p className="flex h-32 items-center justify-center text-sm text-gray-400 dark:text-gray-500">
+                  분양 방식 데이터가 없습니다.
+                </p>
               )}
             </ChartCard>
 
@@ -533,7 +547,9 @@ const AdoptionDashboard = memo(() => {
               {morphChartData.length > 0 ? (
                 <StatsBarChart data={morphChartData} mode="revenue" />
               ) : (
-                <p className="flex h-32 items-center justify-center text-sm text-gray-400 dark:text-gray-500">모프 분포 데이터가 없습니다.</p>
+                <p className="flex h-32 items-center justify-center text-sm text-gray-400 dark:text-gray-500">
+                  모프 분포 데이터가 없습니다.
+                </p>
               )}
             </ChartCard>
 
@@ -563,7 +579,9 @@ const AdoptionDashboard = memo(() => {
               {traitChartData.length > 0 ? (
                 <StatsBarChart data={traitChartData} mode="revenue" />
               ) : (
-                <p className="flex h-32 items-center justify-center text-sm text-gray-400 dark:text-gray-500">형질 분포 데이터가 없습니다.</p>
+                <p className="flex h-32 items-center justify-center text-sm text-gray-400 dark:text-gray-500">
+                  형질 분포 데이터가 없습니다.
+                </p>
               )}
             </ChartCard>
           </div>
