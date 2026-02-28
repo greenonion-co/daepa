@@ -285,6 +285,26 @@ export class ParentStatisticsDto extends StatisticsBaseDto {
   motherId?: string;
 }
 
+export class PairSummaryDto {
+  @ApiProperty({ description: '총 메이팅 횟수', example: 2 })
+  @IsNumber()
+  totalMatings: number;
+
+  @ApiProperty({ description: '총 산란 횟수', example: 1 })
+  @IsNumber()
+  totalLayings: number;
+
+  @ApiProperty({ description: '알 통계', type: EggStatisticsDto })
+  @IsObject()
+  @Type(() => EggStatisticsDto)
+  egg: EggStatisticsDto;
+
+  @ApiProperty({ description: '모프 분포', type: [DistributionItemDto] })
+  @IsArray()
+  @Type(() => DistributionItemDto)
+  morphs: DistributionItemDto[];
+}
+
 // ============================================
 // Query DTOs
 // ============================================

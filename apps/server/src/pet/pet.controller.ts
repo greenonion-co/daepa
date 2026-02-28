@@ -48,6 +48,8 @@ import {
   GetClutchMatesResponseDto,
   GetSiblingsQueryDto,
   GetClutchMatesQueryDto,
+  GetFamilyTreeResponseDto,
+  GetFamilyTreeQueryDto,
 } from 'src/pet_relation/pet_relation.dto';
 import { PetHiddenStatusDto } from './pet.dto';
 
@@ -151,6 +153,35 @@ export class PetController {
     } else {
       throw new ConflictException('이미 사용중인 닉네임입니다.');
     }
+  }
+
+  @Get('/family-tree/:petId')
+  @Public()
+  @UseGuards(OptionalJwtAuthGuard)
+  @ApiParam({
+    name: 'petId',
+    description: '중심 펫 아이디',
+    example: 'XXXXXXXX',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '가계도 조회 성공',
+    type: GetFamilyTreeResponseDto,
+  })
+  @ApiResponse({ status: 404, description: '펫을 찾을 수 없습니다.' })
+  async getFamilyTree(
+    @Param('petId') petId: string,
+    @Query() queryDto: GetFamilyTreeQueryDto,
+    @OptionalJwtUser() token: JwtUserPayload | null,
+  ): Promise<GetFamilyTreeResponseDto> {
+    const maxDepth = Math.min(queryDto.depth ?? 5, 7);
+    const maxAncestorDepth = Math.min(Number(queryDto.ancestorDepth ?? 2), 5);
+    return this.petRelationService.getFamilyTree(
+      petId,
+      token?.userId ?? null,
+      maxDepth,
+      maxAncestorDepth,
+    );
   }
 
   @Get('/parents/:petId')
