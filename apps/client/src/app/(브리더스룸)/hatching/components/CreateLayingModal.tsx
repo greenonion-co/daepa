@@ -1,6 +1,6 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   pairControllerGetPairList,
   LayingByDateDto,
@@ -118,6 +118,10 @@ const CreateLayingModal = ({
     temperature: "25",
     clutch: String(maxClutch + 1),
   });
+
+  useEffect(() => {
+    setFormData((prev) => ({ ...prev, clutch: String(maxClutch + 1) }));
+  }, [maxClutch]);
 
   const handleSubmit = async () => {
     // 선택 모드에서 메이팅이 선택되지 않은 경우
