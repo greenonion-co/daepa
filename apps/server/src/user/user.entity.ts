@@ -45,6 +45,15 @@ export class UserEntity {
   @Column({ default: false })
   isBiz: boolean;
 
+  @Column({ default: false })
+  isRealNamePublic: boolean;
+
+  @Column({ default: false })
+  isPhonePublic: boolean;
+
+  @Column({ default: false })
+  isAddressPublic: boolean;
+
   @Column({ type: 'varchar', nullable: true })
   refreshToken?: string | null;
 

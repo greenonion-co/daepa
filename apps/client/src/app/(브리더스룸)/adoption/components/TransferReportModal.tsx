@@ -144,7 +144,7 @@ const TransferReportModal = ({ isOpen, onClose }: TransferReportModalProps) => {
           <DialogTitle>양도·양수·보관 신고서 작성</DialogTitle>
           {privateInfo && !privateInfo.realName && !privateInfo.phone && !privateInfo.address && (
             <p className="text-xs text-blue-500 dark:text-gray-400">
-              *[내 정보]에 신고자 정보를 추가하여 편하게 사용하세요!
+              *[내 정보]에서 실명 정보를 추가하여 편하게 사용하세요!
             </p>
           )}
         </DialogHeader>

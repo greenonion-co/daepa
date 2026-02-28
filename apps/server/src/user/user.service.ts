@@ -236,6 +236,9 @@ export class UserService {
       realName: userEntity.realName,
       phone: userEntity.phone,
       address: userEntity.address,
+      isRealNamePublic: userEntity.isRealNamePublic,
+      isPhonePublic: userEntity.isPhonePublic,
+      isAddressPublic: userEntity.isAddressPublic,
     };
   }
 

@@ -22,4 +22,10 @@ export interface UserPrivateInfoDto {
    * @nullable
    */
   address?: string | null;
+  /** 본명 공개 여부 */
+  isRealNamePublic: boolean;
+  /** 전화번호 공개 여부 */
+  isPhonePublic: boolean;
+  /** 주소 공개 여부 */
+  isAddressPublic: boolean;
 }
