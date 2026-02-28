@@ -40,7 +40,7 @@ export const SettingsItem = ({
             {icon}
           </div>
         ) : (
-          <div className="flex h-8 w-8 items-center justify-center">{icon}</div>
+          <div className={cn("flex h-8 w-8 items-center justify-center", iconColor)}>{icon}</div>
         ))}
       <div className="min-w-0">
         <span
