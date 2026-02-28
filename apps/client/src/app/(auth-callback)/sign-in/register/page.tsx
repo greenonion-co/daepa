@@ -129,9 +129,9 @@ const RegisterPage = () => {
         if (hasPrivateInfo) {
           try {
             await mutatePrivateInfo({
-              realName: (data.realName || null) as never,
-              phone: phone as never,
-              address: (data.address || null) as never,
+              realName: data.realName,
+              phone: phone,
+              address: data.address,
             });
           } catch (error) {
             console.error("신고자 정보 저장 실패:", error);

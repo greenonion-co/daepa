@@ -25,7 +25,7 @@ const AccountInfoSection = () => {
     (typeof DUPLICATE_CHECK_STATUS)[keyof typeof DUPLICATE_CHECK_STATUS]
   >(DUPLICATE_CHECK_STATUS.NONE);
 
-  const { data: userProfile } = useQuery({
+  const { data: userProfile, isFetching } = useQuery({
     queryKey: [userControllerGetUserProfile.name],
     queryFn: userControllerGetUserProfile,
     select: (response) => response.data.data,
@@ -134,8 +134,8 @@ const AccountInfoSection = () => {
                 key={provider}
                 src={providerIconMap[provider]}
                 alt={provider}
-                width={18}
-                height={18}
+                width={22}
+                height={22}
                 className={cn(provider === "apple" && "dark:invert")}
               />
             ))}
@@ -148,7 +148,8 @@ const AccountInfoSection = () => {
         iconColor="text-blue-600 dark:text-blue-400"
         label="회원 유형"
         rightElement={
-          userProfile?.isBiz ? (
+          !isFetching &&
+          (userProfile?.isBiz ? (
             <div className="flex items-center gap-1.5">
               <Badge variant="secondary" className="text-[12px]">
                 사업자
@@ -165,7 +166,7 @@ const AccountInfoSection = () => {
             <Badge variant="secondary" className="text-[12px]">
               개인
             </Badge>
-          )
+          ))
         }
       />
     </SettingsGroup>

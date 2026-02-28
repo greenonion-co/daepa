@@ -116,7 +116,9 @@ export const openRelationPromoSheet = () => {
       title="혈통 정보를 한눈에"
       description={
         <>
-          <span className="font-semibold text-blue-700 dark:text-blue-400">부모, 동배, 자손</span>
+          <span className="font-semibold text-blue-700 dark:text-blue-400">
+            부모, 동배, 라인 정보
+          </span>
           까지
           <br />
           <span className="font-semibold text-gray-800 dark:text-gray-200">개체 관계도</span>로
