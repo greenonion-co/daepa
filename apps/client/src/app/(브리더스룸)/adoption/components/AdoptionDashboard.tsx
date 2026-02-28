@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useMemo, useState } from "react";
+import { memo, useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   statisticsControllerGetAdoptionStatistics,
@@ -116,7 +116,11 @@ const AdoptionDashboard = memo(() => {
   const [selectedYear, setSelectedYear] = useState<string>(String(new Date().getFullYear()));
   const [selectedMonth, setSelectedMonth] = useState<string>("all");
   const [selectedPriceRange, setSelectedPriceRange] = useState<PriceRangeItemDto | null>(null);
-  const [isParentSectionOpen, setIsParentSectionOpen] = useState(!isMobile);
+  const [isParentSectionOpen, setIsParentSectionOpen] = useState(false);
+
+  useEffect(() => {
+    setIsParentSectionOpen(!isMobile);
+  }, [isMobile]);
 
   const yearOptions = useMemo(() => generateYearOptions(), []);
 
