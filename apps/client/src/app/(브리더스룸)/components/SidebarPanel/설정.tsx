@@ -25,20 +25,18 @@ const SettingList = () => {
       <div className="flex flex-col p-4 pt-0">
         {isLoggedIn && (
           <>
-            <Link
-              href="/settings"
-              className="group mb-4 flex h-[36px] w-full items-center justify-between rounded-2xl border bg-white px-4 text-sm font-[500] shadow-sm dark:bg-neutral-800 dark:hover:bg-neutral-800/80"
-            >
-              <span>전체 설정 보기</span>
-              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-            </Link>
-
             {/* 계정 정보 */}
             <div className="mb-6 text-sm">
-              <h3 className="mb-3 font-semibold text-gray-700 dark:text-gray-400">계정 정보</h3>
-
+              <h3 className="mb-3 font-semibold text-gray-700 dark:text-gray-400">내 정보</h3>
               <Item label="닉네임" content={user?.name} />
               <Item label="이메일" content={user?.email} />
+              <Link
+                href="/settings"
+                className="group my-1.5 ml-auto flex w-fit items-center gap-1 py-1 text-xs font-[500] text-blue-500"
+              >
+                <span>상세보기</span>
+                <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />
+              </Link>
             </div>
 
             <Separator className="my-4" />

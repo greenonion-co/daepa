@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Edit2, Mail, Shield } from "lucide-react";
+import { Edit2, Mail, Briefcase } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -25,7 +25,7 @@ const AccountInfoSection = () => {
     (typeof DUPLICATE_CHECK_STATUS)[keyof typeof DUPLICATE_CHECK_STATUS]
   >(DUPLICATE_CHECK_STATUS.NONE);
 
-  const { data: userProfile } = useQuery({
+  const { data: userProfile, isFetching } = useQuery({
     queryKey: [userControllerGetUserProfile.name],
     queryFn: userControllerGetUserProfile,
     select: (response) => response.data.data,
@@ -134,8 +134,8 @@ const AccountInfoSection = () => {
                 key={provider}
                 src={providerIconMap[provider]}
                 alt={provider}
-                width={18}
-                height={18}
+                width={22}
+                height={22}
                 className={cn(provider === "apple" && "dark:invert")}
               />
             ))}
@@ -143,14 +143,30 @@ const AccountInfoSection = () => {
         }
       />
       <SettingsItem
-        icon={<Shield className="h-4 w-4" />}
+        icon={<Briefcase className="h-4 w-4" />}
         iconBgColor="bg-blue-100 dark:bg-blue-900/30"
         iconColor="text-blue-600 dark:text-blue-400"
-        label="계정 상태"
+        label="회원 유형"
         rightElement={
-          <Badge variant="secondary" className="text-[12px]">
-            정상
-          </Badge>
+          !isFetching &&
+          (userProfile?.isBiz ? (
+            <div className="flex items-center gap-1.5">
+              <Badge variant="secondary" className="text-[12px]">
+                사업자
+              </Badge>
+              <Badge
+                variant="outline"
+                className="cursor-pointer text-[12px] text-amber-600 dark:text-amber-400"
+                onClick={() => toast.info("사업자 인증 기능은 준비 중입니다.")}
+              >
+                미인증
+              </Badge>
+            </div>
+          ) : (
+            <Badge variant="secondary" className="text-[12px]">
+              개인
+            </Badge>
+          ))
         }
       />
     </SettingsGroup>
