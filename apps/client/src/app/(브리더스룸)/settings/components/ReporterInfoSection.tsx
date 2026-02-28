@@ -13,6 +13,7 @@ import {
 import { toast } from "@/lib/toast";
 import { AxiosError } from "axios";
 import { SettingsGroup } from "./SettingsGroup";
+import AddressSearch from "@/components/common/AddressSearch";
 import { SettingsItem } from "./SettingsItem";
 
 type PublicField = "isRealNamePublic" | "isPhonePublic" | "isAddressPublic";
@@ -219,12 +220,11 @@ const ReporterInfoSection = () => {
           </div>
           <div className="space-y-2">
             <label className="text-[13px] font-medium text-gray-600 dark:text-gray-400">주소</label>
-            <input
-              type="text"
-              className="h-[40px] w-full rounded-xl border border-gray-200 p-3 text-[16px] placeholder:font-[500] dark:border-neutral-600 dark:bg-neutral-700 dark:text-white"
-              placeholder="주소를 입력하세요"
+            <AddressSearch
               value={form.address}
-              onChange={(e) => setForm((prev) => ({ ...prev, address: e.target.value }))}
+              onChange={(address) => setForm((prev) => ({ ...prev, address }))}
+              placeholder="주소를 검색하세요"
+              className="h-[40px] w-full rounded-xl border border-gray-200 p-3 text-[16px] placeholder:font-[500] dark:border-neutral-600 dark:bg-neutral-700 dark:text-white"
             />
           </div>
           <div className="flex gap-2">
