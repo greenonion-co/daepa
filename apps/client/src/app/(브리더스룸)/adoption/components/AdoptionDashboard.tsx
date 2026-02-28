@@ -7,7 +7,6 @@ import {
   StatisticsControllerGetPairStatisticsSpecies,
   PetParentDto,
   PetDtoSex,
-  PetDto,
 } from "@repo/api-client";
 import { overlay } from "overlay-kit";
 import { useRouter } from "next/navigation";
