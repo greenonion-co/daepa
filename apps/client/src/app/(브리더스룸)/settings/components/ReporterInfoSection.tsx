@@ -119,7 +119,7 @@ const ReporterInfoSection = () => {
               <input
                 type="tel"
                 className="h-[40px] w-full rounded-xl border border-gray-200 p-3 text-center text-[16px] placeholder:font-[500] dark:border-neutral-600 dark:bg-neutral-700 dark:text-white"
-                placeholder="010"
+                placeholder="00"
                 maxLength={3}
                 value={form.phone1}
                 inputMode="numeric"
