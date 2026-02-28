@@ -156,7 +156,7 @@ const ReporterInfoSection = () => {
   );
 
   return (
-    <SettingsGroup title="실명 정보">
+    <SettingsGroup title="실명 정보" subTitle="*비공개 정보는 신고서 작성 시에만 사용됩니다.">
       {isEditing ? (
         <div className="space-y-3 p-4">
           <div className="space-y-2">
