@@ -266,7 +266,7 @@ const PairStatisticsDashboard = memo(() => {
         </div>
       ) : isStatsLoading ? (
         <Loading />
-      ) : statistics && statistics.egg.total > 0 ? (
+      ) : statistics ? (
         <div>
           {/* 메타 정보 */}
           <div className="my-4 grid grid-cols-2 rounded-2xl bg-gradient-to-r from-blue-200/25 to-purple-200/25 p-4 sm:grid-cols-3 lg:grid-cols-5 dark:from-blue-900/30 dark:to-purple-900/30">
@@ -302,48 +302,58 @@ const PairStatisticsDashboard = memo(() => {
           {/* 차트 그리드 */}
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
             {/* 알 통계 파이 차트 */}
-            {eggChartData.length > 0 && (
-              <ChartCard title="알 상태 분포">
+            <ChartCard title="알 상태 분포">
+              {eggChartData.length > 0 ? (
                 <StatsPieChart
                   data={eggChartData}
                   config={eggChartConfig}
                   format={(value) => `${value}개`}
                 />
-              </ChartCard>
-            )}
+              ) : (
+                <p className="flex h-32 items-center justify-center text-sm text-gray-400 dark:text-gray-500">알 상태 데이터가 없습니다.</p>
+              )}
+            </ChartCard>
 
             {/* 성별 통계 파이 차트 */}
-            {sexChartData.length > 0 && (
-              <ChartCard
-                title="성별 분포"
-                footer={
+            <ChartCard
+              title="성별 분포"
+              footer={
+                sexChartData.length > 0 ? (
                   <div className="mt-2 text-center text-sm font-[600] text-gray-700 dark:text-gray-300">
                     수컷 {statistics.sex.maleRate.toFixed(1)}% / 암컷{" "}
                     {statistics.sex.femaleRate.toFixed(1)}%
                   </div>
-                }
-              >
+                ) : undefined
+              }
+            >
+              {sexChartData.length > 0 ? (
                 <StatsPieChart
                   data={sexChartData}
                   config={sexChartConfig}
                   format={(value) => `${value}개`}
                 />
-              </ChartCard>
-            )}
+              ) : (
+                <p className="flex h-32 items-center justify-center text-sm text-gray-400 dark:text-gray-500">성별 분포 데이터가 없습니다.</p>
+              )}
+            </ChartCard>
 
             {/* 모프 분포 바 차트 */}
-            {morphChartData.length > 0 && (
-              <ChartCard title="모프 분포">
+            <ChartCard title="모프 분포">
+              {morphChartData.length > 0 ? (
                 <StatsBarChart data={morphChartData} />
-              </ChartCard>
-            )}
+              ) : (
+                <p className="flex h-32 items-center justify-center text-sm text-gray-400 dark:text-gray-500">모프 분포 데이터가 없습니다.</p>
+              )}
+            </ChartCard>
 
             {/* 형질 분포 바 차트 */}
-            {traitChartData.length > 0 && (
-              <ChartCard title="형질 분포">
+            <ChartCard title="형질 분포">
+              {traitChartData.length > 0 ? (
                 <StatsBarChart data={traitChartData} />
-              </ChartCard>
-            )}
+              ) : (
+                <p className="flex h-32 items-center justify-center text-sm text-gray-400 dark:text-gray-500">형질 분포 데이터가 없습니다.</p>
+              )}
+            </ChartCard>
           </div>
 
           {/* 월별 통계 차트 (연도 + 월 선택: 분포 차트 아래) */}
@@ -355,11 +365,7 @@ const PairStatisticsDashboard = memo(() => {
             </div>
           )}
         </div>
-      ) : (
-        <div className="mt-6 flex flex-col items-center text-sm text-gray-400 dark:text-gray-500">
-          아직 데이터가 없습니다.
-        </div>
-      )}
+      ) : null}
     </div>
   );
 });
