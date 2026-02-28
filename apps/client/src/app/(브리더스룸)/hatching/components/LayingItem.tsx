@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  pairControllerGetPairList,
   LayingByDateDto,
   PetSummaryLayingDto,
   UpdatePetDto,
@@ -10,6 +9,7 @@ import {
   UpdatePetDtoEggStatus,
 } from "@repo/api-client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { usePairInvalidate } from "../hooks/usePairInvalidate";
 import { toast } from "@/lib/toast";
 import { AxiosError } from "axios";
 import React from "react";
@@ -35,6 +35,7 @@ const LayingItem = ({
   showTutorial,
 }: LayingItemProps) => {
   const queryClient = useQueryClient();
+  const invalidatePair = usePairInvalidate();
 
   const { mutateAsync: updateEggStatus } = useMutation({
     mutationFn: ({ eggId, data }: { eggId: string; data: UpdatePetDto }) =>
@@ -58,9 +59,7 @@ const LayingItem = ({
         data: { eggStatus: value },
       });
       toast.success("상태가 변경되었습니다.");
-      await queryClient.invalidateQueries({
-        queryKey: [pairControllerGetPairList.name],
-      });
+      invalidatePair();
     } catch (error) {
       if (error instanceof AxiosError) {
         toast.error(error.response?.data?.message ?? "개체 수정에 실패했습니다.");
@@ -73,7 +72,7 @@ const LayingItem = ({
   const handleDeleteEgg = async (eggId: string, onClose: () => void) => {
     try {
       await deleteEgg(eggId);
-      await queryClient.invalidateQueries({ queryKey: [pairControllerGetPairList.name] });
+      invalidatePair();
       toast.success("삭제되었습니다.");
       onClose();
     } catch (error) {

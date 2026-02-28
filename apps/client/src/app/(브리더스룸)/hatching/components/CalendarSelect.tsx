@@ -17,6 +17,8 @@ interface CalendarSelectProps {
   showSeasonInput?: boolean;
   latestSeason?: number;
   onConfirm: (matingDate: string, season?: number) => void | Promise<void>;
+  popOverAlign?: "start" | "center" | "end";
+  size?: "sm" | "md";
 }
 
 const CalendarSelect = ({
@@ -30,6 +32,8 @@ const CalendarSelect = ({
   triggerTextClassName,
   showSeasonInput,
   latestSeason,
+  popOverAlign = "start",
+  size = "md",
 }: CalendarSelectProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [matingDate, setMatingDate] = useState<string | undefined>(initialDate);
@@ -58,11 +62,19 @@ const CalendarSelect = ({
               <Plus className="h-2 w-2" />
             </div>
           )}
-          <div className={cn("flex items-center gap-1", triggerTextClassName)}>{triggerText}</div>
+          <div
+            className={cn(
+              "flex items-center gap-1",
+              size === "sm" ? "text-xs" : "text-sm",
+              triggerTextClassName,
+            )}
+          >
+            {triggerText}
+          </div>
           {type === "edit" && <Pencil className="h-3 w-3 text-blue-600 dark:text-blue-400" />}
         </div>
       </PopoverTrigger>
-      <PopoverContent className="w-fit p-0" align="start">
+      <PopoverContent className="w-fit p-0" align={popOverAlign}>
         <Calendar
           mode="single"
           selected={matingDate ? DateTime.fromISO(matingDate).toJSDate() : undefined}

@@ -2,13 +2,9 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  pairControllerGetPairList,
-  petControllerUpdate,
-  PetSummaryLayingDto,
-  UpdatePetDto,
-} from "@repo/api-client";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { petControllerUpdate, PetSummaryLayingDto, UpdatePetDto } from "@repo/api-client";
+import { useMutation } from "@tanstack/react-query";
+import { usePairInvalidate } from "../hooks/usePairInvalidate";
 import { AxiosError } from "axios";
 import { useState } from "react";
 import { toast } from "@/lib/toast";
@@ -22,7 +18,7 @@ const EditEggModal = ({
   onClose: () => void;
   egg: PetSummaryLayingDto;
 }) => {
-  const queryClient = useQueryClient();
+  const invalidatePair = usePairInvalidate();
   const [formData, setFormData] = useState<{
     temperature: string;
   }>({
@@ -42,7 +38,7 @@ const EditEggModal = ({
     try {
       const { data } = await updateEgg({ temperature: temp });
       toast.success(data.message ?? "알 수정 완료");
-      queryClient.invalidateQueries({ queryKey: [pairControllerGetPairList.name] });
+      invalidatePair();
     } catch (error) {
       if (error instanceof AxiosError) {
         toast.error(error.response?.data?.message ?? "알 수정 실패");

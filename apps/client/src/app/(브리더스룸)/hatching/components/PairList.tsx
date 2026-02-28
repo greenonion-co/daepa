@@ -5,7 +5,6 @@ import {
   pairControllerDeletePair,
   pairControllerGetPairList,
   PetDtoSpecies,
-  UpdatePairDto,
 } from "@repo/api-client";
 import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { HelpCircle, Plus } from "lucide-react";
@@ -24,15 +23,10 @@ import MatingDetailDialog from "./MatingDetailDialog";
 import PairCard from "./PairCard";
 import { overlay } from "overlay-kit";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import UpdatePairModal from "./UpdatePairModal";
 import ConfirmDialog from "../../components/Form/Dialog";
 import { CalendarEventDetail, EGG_STATUS } from "./PairMiniCalendar";
 import { usePairCardTutorial } from "./PairCardTutorial";
 import AddMatingModal from "./AddMatingModal";
-
-export interface updatePairProps extends UpdatePairDto {
-  pairId: number;
-}
 
 const PairList = memo(() => {
   const queryClient = useQueryClient();
@@ -139,21 +133,6 @@ const PairList = memo(() => {
         onExit={unmount}
         title="페어 삭제"
         description={"정말로 이 페어를 삭제하시겠습니까?\n삭제 후 복구할 수 없습니다."}
-      />
-    ));
-  };
-
-  const handleClickUpdateDesc = (pair: updatePairProps) => {
-    if (!pair?.pairId) return toast.error("오류가 발생했습니다. 잠시후에 다시 시도해주세요.");
-
-    overlay.open(({ isOpen, close }) => (
-      <UpdatePairModal
-        pair={pair}
-        isOpen={isOpen}
-        close={close}
-        onSuccess={async () => {
-          await refetch();
-        }}
       />
     ));
   };
@@ -297,7 +276,7 @@ const PairList = memo(() => {
             <PairCard
               key={index}
               pair={pair}
-              onClickUpdateDesc={handleClickUpdateDesc}
+              onDescUpdated={refetch}
               onClick={() => {
                 setIsOpen(true);
                 setSelectedPairIndex(index);
