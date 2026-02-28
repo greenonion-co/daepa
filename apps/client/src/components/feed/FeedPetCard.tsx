@@ -18,7 +18,7 @@ export default function FeedPetCard({ pet }: FeedPetCardProps) {
     <Link href={`/pet/${pet.petId}`} className="block">
       <article className="overflow-hidden rounded-2xl bg-white transition-shadow hover:shadow-md dark:bg-neutral-900">
         {/* Header - 유저 정보 */}
-        <div className="flex items-center gap-3 px-4 py-3">
+        <div className="flex items-center gap-3 py-3">
           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-r from-blue-200 to-purple-200 text-xs font-bold text-white">
             {pet.owner?.name?.charAt(0) || "?"}
           </div>

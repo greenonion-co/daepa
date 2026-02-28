@@ -1,17 +1,52 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { User, Phone, MapPin } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   userControllerGetUserPrivateInfo,
+  userControllerGetUserProfile,
   userControllerUpdateUserPrivateInfo,
 } from "@repo/api-client";
 import { toast } from "@/lib/toast";
 import { AxiosError } from "axios";
 import { SettingsGroup } from "./SettingsGroup";
 import { SettingsItem } from "./SettingsItem";
+
+type PublicField = "isRealNamePublic" | "isPhonePublic" | "isAddressPublic";
+
+const PublicToggle = ({
+  checked,
+  field,
+  disabled,
+  onToggle,
+  tooltipText,
+}: {
+  checked: boolean;
+  field: PublicField;
+  disabled: boolean;
+  onToggle: (field: PublicField, value: boolean) => void;
+  tooltipText?: string;
+}) => (
+  <div
+    className="flex items-center py-4"
+    onClick={(e) => {
+      e.stopPropagation();
+      if (!disabled) onToggle(field, !checked);
+    }}
+  >
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <span className="flex items-center">
+          <Switch checked={checked} disabled={disabled} />
+        </span>
+      </TooltipTrigger>
+      {disabled && tooltipText && <TooltipContent>{tooltipText}</TooltipContent>}
+    </Tooltip>
+  </div>
+);
 
 const ReporterInfoSection = () => {
   const [isEditing, setIsEditing] = useState(false);
@@ -21,6 +56,12 @@ const ReporterInfoSection = () => {
     phone2: "",
     phone3: "",
     address: "",
+  });
+
+  const { data: userProfile } = useQuery({
+    queryKey: [userControllerGetUserProfile.name],
+    queryFn: userControllerGetUserProfile,
+    select: (response) => response.data.data,
   });
 
   const { data: privateInfo, refetch } = useQuery({
@@ -94,8 +135,28 @@ const ReporterInfoSection = () => {
     }
   };
 
+  const isBiz = userProfile?.isBiz ?? false;
+
+  const handleTogglePublic = useCallback(
+    async (field: PublicField, value: boolean) => {
+      try {
+        await updatePrivateInfo({ [field]: value });
+        await refetch();
+        const label = {
+          isRealNamePublic: "성명",
+          isPhonePublic: "연락처",
+          isAddressPublic: "주소",
+        }[field];
+        toast.success(`${label} 정보가 ${value ? "공개" : "비공개"}로 변경되었습니다.`);
+      } catch {
+        toast.error("공개 설정 변경에 실패했습니다.");
+      }
+    },
+    [updatePrivateInfo, refetch],
+  );
+
   return (
-    <SettingsGroup title="신고자 정보">
+    <SettingsGroup title="실명 정보" subTitle="*비공개 정보는 신고서 작성 시에만 사용됩니다.">
       {isEditing ? (
         <div className="space-y-3 p-4">
           <div className="space-y-2">
@@ -119,7 +180,7 @@ const ReporterInfoSection = () => {
               <input
                 type="tel"
                 className="h-[40px] w-full rounded-xl border border-gray-200 p-3 text-center text-[16px] placeholder:font-[500] dark:border-neutral-600 dark:bg-neutral-700 dark:text-white"
-                placeholder="010"
+                placeholder="00"
                 maxLength={3}
                 value={form.phone1}
                 inputMode="numeric"
@@ -189,27 +250,45 @@ const ReporterInfoSection = () => {
       ) : (
         <>
           <SettingsItem
-            icon={<User className="h-4 w-4" />}
-            iconBgColor="bg-orange-100 dark:bg-orange-900/30"
-            iconColor="text-orange-600 dark:text-orange-400"
+            icon={
+              <PublicToggle
+                checked={privateInfo?.isRealNamePublic ?? false}
+                field="isRealNamePublic"
+                disabled={!isBiz}
+                onToggle={handleTogglePublic}
+                tooltipText="개인 회원의 정보 공개는 준비중입니다"
+              />
+            }
             label="성명(상호)"
             value={String(privateInfo?.realName ?? "미설정")}
             onClick={handleStartEdit}
             showChevron
           />
           <SettingsItem
-            icon={<Phone className="h-4 w-4" />}
-            iconBgColor="bg-orange-100 dark:bg-orange-900/30"
-            iconColor="text-orange-600 dark:text-orange-400"
+            icon={
+              <PublicToggle
+                checked={privateInfo?.isPhonePublic ?? false}
+                field="isPhonePublic"
+                disabled={!isBiz}
+                onToggle={handleTogglePublic}
+                tooltipText="개인 회원의 정보 공개는 준비중입니다"
+              />
+            }
             label="연락처"
             value={String(privateInfo?.phone ?? "미설정")}
             onClick={handleStartEdit}
             showChevron
           />
           <SettingsItem
-            icon={<MapPin className="h-4 w-4" />}
-            iconBgColor="bg-orange-100 dark:bg-orange-900/30"
-            iconColor="text-orange-600 dark:text-orange-400"
+            icon={
+              <PublicToggle
+                checked={privateInfo?.isAddressPublic ?? false}
+                field="isAddressPublic"
+                disabled={!isBiz}
+                onToggle={handleTogglePublic}
+                tooltipText="개인 회원의 정보 공개는 준비중입니다"
+              />
+            }
             label="주소"
             value={String(privateInfo?.address ?? "미설정")}
             onClick={handleStartEdit}

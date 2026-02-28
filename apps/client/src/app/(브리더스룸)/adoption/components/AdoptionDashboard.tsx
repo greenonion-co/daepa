@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useMemo, useState } from "react";
+import { memo, useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   statisticsControllerGetAdoptionStatistics,
@@ -9,6 +9,7 @@ import {
   PetDtoSex,
 } from "@repo/api-client";
 import { overlay } from "overlay-kit";
+import { useRouter } from "next/navigation";
 import FilterItem from "../../hatching/components/Filters/FilterItem";
 import ParentSearchSelector from "../../components/selector/parentSearch";
 import { ChartConfig } from "@/components/ui/chart";
@@ -33,7 +34,7 @@ import { STATISTICS_COLORS, ADOPTION_STATISTICS_COLORS } from "../../constants";
 import { cn, formatPrice } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/useMobile";
 import { AlertCircle, ChevronDown } from "lucide-react";
-import SiblingPetCard from "../../pet/[petId]/relation/components/SiblingPetCard";
+import PetCard from "../../pet/components/PetCard";
 
 // 연도 옵션 생성 (최근 5년)
 const generateYearOptions = (): CustomSelectOption[] => {
@@ -105,6 +106,7 @@ const getMethodColor = (method: string): string => {
 
 const AdoptionDashboard = memo(() => {
   const isMobile = useIsMobile();
+  const router = useRouter();
   const [species, setSpecies] = useState<StatisticsControllerGetPairStatisticsSpecies>(
     StatisticsControllerGetPairStatisticsSpecies.CR,
   );
@@ -114,6 +116,10 @@ const AdoptionDashboard = memo(() => {
   const [selectedMonth, setSelectedMonth] = useState<string>("all");
   const [selectedPriceRange, setSelectedPriceRange] = useState<PriceRangeItemDto | null>(null);
   const [isParentSectionOpen, setIsParentSectionOpen] = useState(false);
+
+  useEffect(() => {
+    setIsParentSectionOpen(!isMobile);
+  }, [isMobile]);
 
   const yearOptions = useMemo(() => generateYearOptions(), []);
 
@@ -322,16 +328,17 @@ const AdoptionDashboard = memo(() => {
             <div
               className={cn(
                 "relative grid transition-all duration-200",
-                isParentSectionOpen
-                  ? "mt-4 grid-rows-[1fr] opacity-100"
-                  : "grid-rows-[0fr] opacity-0",
+                isParentSectionOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0",
               )}
             >
               <div className="overflow-hidden">
-                <div className="flex flex-wrap items-stretch justify-center gap-3 pt-2">
-                  {father && <SiblingPetCard pet={father} width={140} />}
-
-                  {mother && <SiblingPetCard pet={mother} width={140} />}
+                <div className="grid grid-cols-1 gap-3 px-3 pt-2 sm:grid-cols-2">
+                  {father && (
+                    <PetCard pet={father} onCardClick={(pet) => router.push(`/pet/${pet.petId}`)} />
+                  )}
+                  {mother && (
+                    <PetCard pet={mother} onCardClick={(pet) => router.push(`/pet/${pet.petId}`)} />
+                  )}
                 </div>
               </div>
             </div>
@@ -345,7 +352,7 @@ const AdoptionDashboard = memo(() => {
         </div>
       ) : isStatsLoading ? (
         <Loading />
-      ) : statistics && statistics.totalCount > 0 ? (
+      ) : statistics ? (
         <div>
           {/* 메타 정보 */}
           <div
@@ -383,22 +390,32 @@ const AdoptionDashboard = memo(() => {
           {/* 차트 그리드 */}
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
             {/* 요일별 분양 통계 */}
-            {statistics.dayOfWeekStats && statistics.dayOfWeekStats.some((d) => d.count > 0) && (
-              <ChartCard title="요일별 분양 통계">
+            <ChartCard title="요일별 분양 통계">
+              {statistics.dayOfWeekStats && statistics.dayOfWeekStats.some((d) => d.count > 0) ? (
                 <DayOfWeekChart data={statistics.dayOfWeekStats} />
+              ) : (
+                <p className="flex h-32 items-center justify-center text-sm text-gray-400 dark:text-gray-500">
+                  요일별 분양 통계가 없습니다.
+                </p>
+              )}
+            </ChartCard>
+
+            {/* 고객 분석 */}
+            {statistics.customerAnalysis ? (
+              <CustomerAnalysisCard data={statistics.customerAnalysis} />
+            ) : (
+              <ChartCard title="고객 분석">
+                <p className="flex h-32 items-center justify-center text-sm text-gray-400 dark:text-gray-500">
+                  고객 분석 데이터가 없습니다.
+                </p>
               </ChartCard>
             )}
 
-            {/* 고객 분석 */}
-            {statistics.customerAnalysis && (
-              <CustomerAnalysisCard data={statistics.customerAnalysis} />
-            )}
-
             {/* 가격대별 분양 통계 */}
-            {statistics.priceRangeStats && statistics.priceRangeStats.length > 0 && (
-              <ChartCard
-                title="가격대별 분양 분포"
-                footer={
+            <ChartCard
+              title="가격대별 분양 분포"
+              footer={
+                statistics.priceRangeStats && statistics.priceRangeStats.length > 0 ? (
                   <div className="flex flex-col items-center justify-center rounded-2xl bg-gradient-to-r from-blue-200/50 to-purple-200/65 px-2 py-4 dark:from-blue-900/40 dark:to-purple-900/50">
                     <span className="text-center text-[14px] font-[500] text-gray-900 dark:text-purple-200">
                       막대 차트를 클릭하면 해당 가격대의 분양 개체 목록을 확인할 수 있습니다.
@@ -408,20 +425,26 @@ const AdoptionDashboard = memo(() => {
                       <span>가격을 등록하지 않은 분양은 제외됩니다.</span>
                     </div>
                   </div>
-                }
-              >
+                ) : undefined
+              }
+            >
+              {statistics.priceRangeStats && statistics.priceRangeStats.length > 0 ? (
                 <PriceRangeChart
                   data={statistics.priceRangeStats}
                   onRangeClick={setSelectedPriceRange}
                 />
-              </ChartCard>
-            )}
+              ) : (
+                <p className="flex h-32 items-center justify-center text-sm text-gray-400 dark:text-gray-500">
+                  가격대별 분양 데이터가 없습니다.
+                </p>
+              )}
+            </ChartCard>
 
             {/* 성별 통계 파이 차트 (분양가 기준) */}
-            {sexChartData.length > 0 && (
-              <ChartCard
-                title="성별 분포 (분양가 기준)"
-                footer={
+            <ChartCard
+              title="성별 분포 (분양가 기준)"
+              footer={
+                sexChartData.length > 0 ? (
                   <div className="flex flex-col flex-wrap items-center gap-x-3 gap-y-1 text-[13px] text-gray-700 dark:text-gray-300">
                     <div>
                       {statistics.sex.map((item) => (
@@ -451,17 +474,23 @@ const AdoptionDashboard = memo(() => {
                       ))}
                     </div>
                   </div>
-                }
-              >
+                ) : undefined
+              }
+            >
+              {sexChartData.length > 0 ? (
                 <StatsPieChart data={sexChartData} config={sexChartConfig} format={formatPrice} />
-              </ChartCard>
-            )}
+              ) : (
+                <p className="flex h-32 items-center justify-center text-sm text-gray-400 dark:text-gray-500">
+                  성별 분포 데이터가 없습니다.
+                </p>
+              )}
+            </ChartCard>
 
             {/* 분양 방식 분포 파이 차트 (분양가 기준) */}
-            {methodChartData.length > 0 && (
-              <ChartCard
-                title="분양 방식 분포 (분양가 기준)"
-                footer={
+            <ChartCard
+              title="분양 방식 분포 (분양가 기준)"
+              footer={
+                methodChartData.length > 0 ? (
                   <div className="flex flex-col flex-wrap items-center text-[13px] text-gray-700 dark:text-gray-300">
                     <div>
                       {statistics.methods.map((method) => (
@@ -479,21 +508,27 @@ const AdoptionDashboard = memo(() => {
                       ))}
                     </div>
                   </div>
-                }
-              >
+                ) : undefined
+              }
+            >
+              {methodChartData.length > 0 ? (
                 <StatsPieChart
                   data={methodChartData}
                   config={methodChartConfig}
                   format={formatPrice}
                 />
-              </ChartCard>
-            )}
+              ) : (
+                <p className="flex h-32 items-center justify-center text-sm text-gray-400 dark:text-gray-500">
+                  분양 방식 데이터가 없습니다.
+                </p>
+              )}
+            </ChartCard>
 
             {/* 모프 분포 바 차트 (분양가 기준) */}
-            {morphChartData.length > 0 && (
-              <ChartCard
-                title="모프 분포 (분양가 기준)"
-                footer={
+            <ChartCard
+              title="모프 분포 (분양가 기준)"
+              footer={
+                morphChartData.length > 0 ? (
                   <div className="mt-7 flex flex-wrap justify-center gap-x-3 gap-y-1 text-xs">
                     {morphChartData.slice(0, 5).map((morph) => (
                       <span key={morph.name} className="flex items-center gap-1 font-[500]">
@@ -509,17 +544,23 @@ const AdoptionDashboard = memo(() => {
                       </span>
                     ))}
                   </div>
-                }
-              >
+                ) : undefined
+              }
+            >
+              {morphChartData.length > 0 ? (
                 <StatsBarChart data={morphChartData} mode="revenue" />
-              </ChartCard>
-            )}
+              ) : (
+                <p className="flex h-32 items-center justify-center text-sm text-gray-400 dark:text-gray-500">
+                  모프 분포 데이터가 없습니다.
+                </p>
+              )}
+            </ChartCard>
 
             {/* 형질 분포 바 차트 (분양가 기준) */}
-            {traitChartData.length > 0 && (
-              <ChartCard
-                title="형질 분포 (분양가 기준)"
-                footer={
+            <ChartCard
+              title="형질 분포 (분양가 기준)"
+              footer={
+                traitChartData.length > 0 ? (
                   <div className="mt-7 flex flex-wrap justify-center gap-x-3 gap-y-1 text-xs text-gray-700 dark:text-gray-300">
                     {traitChartData.slice(0, 5).map((trait) => (
                       <span key={trait.name} className="flex items-center gap-1 font-[500]">
@@ -535,18 +576,20 @@ const AdoptionDashboard = memo(() => {
                       </span>
                     ))}
                   </div>
-                }
-              >
+                ) : undefined
+              }
+            >
+              {traitChartData.length > 0 ? (
                 <StatsBarChart data={traitChartData} mode="revenue" />
-              </ChartCard>
-            )}
+              ) : (
+                <p className="flex h-32 items-center justify-center text-sm text-gray-400 dark:text-gray-500">
+                  형질 분포 데이터가 없습니다.
+                </p>
+              )}
+            </ChartCard>
           </div>
         </div>
-      ) : (
-        <div className="mt-6 flex flex-col items-center text-sm text-gray-400 dark:text-gray-500">
-          아직 데이터가 없습니다.
-        </div>
-      )}
+      ) : null}
 
       {/* 가격대별 분양 목록 모달 */}
       <PriceRangePetsModal

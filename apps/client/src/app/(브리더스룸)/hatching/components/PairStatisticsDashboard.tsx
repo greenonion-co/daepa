@@ -1,4 +1,4 @@
-import { memo, useMemo, useState } from "react";
+import { memo, useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   PairControllerGetPairListSpecies,
@@ -8,6 +8,7 @@ import {
 } from "@repo/api-client";
 import { ChartConfig } from "@/components/ui/chart";
 import { overlay } from "overlay-kit";
+import { useRouter } from "next/navigation";
 import SingleSelect from "../../components/selector/SingleSelect";
 import FilterItem from "./Filters/FilterItem";
 import ParentSearchSelector from "../../components/selector/parentSearch";
@@ -22,8 +23,12 @@ import {
   getMorphOrTraitColor,
 } from "./Charts";
 import Loading from "@/components/common/Loading";
+import PetCard from "../../pet/components/PetCard";
+import { cn } from "@/lib/utils";
+import { ChevronDown } from "lucide-react";
 
 import { STATISTICS_COLORS } from "../../constants";
+import { useIsMobile } from "@/hooks/useMobile";
 
 // 연도 옵션 생성 (최근 5년)
 const generateYearOptions = (): CustomSelectOption[] => {
@@ -56,7 +61,9 @@ const MONTH_OPTIONS: CustomSelectOption[] = [
 ];
 
 const PairStatisticsDashboard = memo(() => {
+  const isMobile = useIsMobile();
   const currentYear = String(new Date().getFullYear());
+  const router = useRouter();
 
   const [species, setSpecies] = useState<PairControllerGetPairListSpecies>(
     PairControllerGetPairListSpecies.CR,
@@ -65,6 +72,11 @@ const PairStatisticsDashboard = memo(() => {
   const [mother, setMother] = useState<PetParentDto | undefined>(undefined);
   const [selectedYear, setSelectedYear] = useState<string>(currentYear);
   const [selectedMonth, setSelectedMonth] = useState<string>("all");
+  const [isParentSectionOpen, setIsParentSectionOpen] = useState(false);
+
+  useEffect(() => {
+    setIsParentSectionOpen(!isMobile);
+  }, [isMobile]);
 
   const yearOptions = useMemo(() => generateYearOptions(), []);
 
@@ -260,13 +272,66 @@ const PairStatisticsDashboard = memo(() => {
         />
       </div>
 
+      {/* 선택된 부모 개체 표시 */}
+      {(father || mother) && (
+        <div className="my-2 rounded-2xl bg-gradient-to-r from-blue-300/50 to-purple-300/50 p-[1px] dark:from-blue-600/40 dark:to-purple-600/40">
+          <div className="relative overflow-hidden rounded-2xl bg-white py-2 dark:bg-gray-900">
+            <div className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-200/25 to-purple-200/25 dark:from-blue-800/20 dark:to-purple-800/20" />
+            <button
+              type="button"
+              onClick={() => setIsParentSectionOpen(!isParentSectionOpen)}
+              className="relative flex w-full items-center justify-center gap-1 text-sm font-medium text-gray-600 dark:text-gray-300"
+            >
+              <span
+                className="bg-clip-text text-transparent"
+                style={{
+                  backgroundImage: "linear-gradient(90deg, #3b82f6, #a855f7)",
+                }}
+              >
+                선택된 부모 개체
+              </span>
+              <ChevronDown
+                size={16}
+                className={cn(
+                  "text-[#a855f7] transition-transform duration-200",
+                  isParentSectionOpen && "rotate-180",
+                )}
+              />
+            </button>
+            <div
+              className={cn(
+                "relative grid transition-all duration-200",
+                isParentSectionOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0",
+              )}
+            >
+              <div className="overflow-hidden">
+                <div className="grid grid-cols-1 gap-3 px-3 pt-2 sm:grid-cols-2">
+                  {father && (
+                    <PetCard
+                      pet={father as never}
+                      onCardClick={(pet) => router.push(`/pet/${pet.petId}`)}
+                    />
+                  )}
+                  {mother && (
+                    <PetCard
+                      pet={mother as never}
+                      onCardClick={(pet) => router.push(`/pet/${pet.petId}`)}
+                    />
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {!species ? (
         <div className="flex h-40 flex-col items-center justify-center text-sm text-gray-400 dark:text-gray-500">
           종을 선택해주세요.
         </div>
       ) : isStatsLoading ? (
         <Loading />
-      ) : statistics && statistics.egg.total > 0 ? (
+      ) : statistics ? (
         <div>
           {/* 메타 정보 */}
           <div className="my-4 grid grid-cols-2 rounded-2xl bg-gradient-to-r from-blue-200/25 to-purple-200/25 p-4 sm:grid-cols-3 lg:grid-cols-5 dark:from-blue-900/30 dark:to-purple-900/30">
@@ -302,48 +367,66 @@ const PairStatisticsDashboard = memo(() => {
           {/* 차트 그리드 */}
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
             {/* 알 통계 파이 차트 */}
-            {eggChartData.length > 0 && (
-              <ChartCard title="알 상태 분포">
+            <ChartCard title="알 상태 분포">
+              {eggChartData.length > 0 ? (
                 <StatsPieChart
                   data={eggChartData}
                   config={eggChartConfig}
                   format={(value) => `${value}개`}
                 />
-              </ChartCard>
-            )}
+              ) : (
+                <p className="flex h-32 items-center justify-center text-sm text-gray-400 dark:text-gray-500">
+                  알 상태 데이터가 없습니다.
+                </p>
+              )}
+            </ChartCard>
 
             {/* 성별 통계 파이 차트 */}
-            {sexChartData.length > 0 && (
-              <ChartCard
-                title="성별 분포"
-                footer={
+            <ChartCard
+              title="성별 분포"
+              footer={
+                sexChartData.length > 0 ? (
                   <div className="mt-2 text-center text-sm font-[600] text-gray-700 dark:text-gray-300">
                     수컷 {statistics.sex.maleRate.toFixed(1)}% / 암컷{" "}
                     {statistics.sex.femaleRate.toFixed(1)}%
                   </div>
-                }
-              >
+                ) : undefined
+              }
+            >
+              {sexChartData.length > 0 ? (
                 <StatsPieChart
                   data={sexChartData}
                   config={sexChartConfig}
                   format={(value) => `${value}개`}
                 />
-              </ChartCard>
-            )}
+              ) : (
+                <p className="flex h-32 items-center justify-center text-sm text-gray-400 dark:text-gray-500">
+                  성별 분포 데이터가 없습니다.
+                </p>
+              )}
+            </ChartCard>
 
             {/* 모프 분포 바 차트 */}
-            {morphChartData.length > 0 && (
-              <ChartCard title="모프 분포">
+            <ChartCard title="모프 분포">
+              {morphChartData.length > 0 ? (
                 <StatsBarChart data={morphChartData} />
-              </ChartCard>
-            )}
+              ) : (
+                <p className="flex h-32 items-center justify-center text-sm text-gray-400 dark:text-gray-500">
+                  모프 분포 데이터가 없습니다.
+                </p>
+              )}
+            </ChartCard>
 
             {/* 형질 분포 바 차트 */}
-            {traitChartData.length > 0 && (
-              <ChartCard title="형질 분포">
+            <ChartCard title="형질 분포">
+              {traitChartData.length > 0 ? (
                 <StatsBarChart data={traitChartData} />
-              </ChartCard>
-            )}
+              ) : (
+                <p className="flex h-32 items-center justify-center text-sm text-gray-400 dark:text-gray-500">
+                  형질 분포 데이터가 없습니다.
+                </p>
+              )}
+            </ChartCard>
           </div>
 
           {/* 월별 통계 차트 (연도 + 월 선택: 분포 차트 아래) */}
@@ -355,11 +438,7 @@ const PairStatisticsDashboard = memo(() => {
             </div>
           )}
         </div>
-      ) : (
-        <div className="mt-6 flex flex-col items-center text-sm text-gray-400 dark:text-gray-500">
-          아직 데이터가 없습니다.
-        </div>
-      )}
+      ) : null}
     </div>
   );
 });
