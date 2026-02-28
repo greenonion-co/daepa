@@ -241,6 +241,30 @@ export class UserPrivateInfoDto {
   @IsString()
   @IsOptional()
   address?: string | null;
+
+  @ApiProperty({
+    description: '본명 공개 여부',
+    example: false,
+  })
+  @IsBoolean()
+  @IsOptional()
+  isRealNamePublic?: boolean;
+
+  @ApiProperty({
+    description: '전화번호 공개 여부',
+    example: false,
+  })
+  @IsBoolean()
+  @IsOptional()
+  isPhonePublic?: boolean;
+
+  @ApiProperty({
+    description: '주소 공개 여부',
+    example: false,
+  })
+  @IsBoolean()
+  @IsOptional()
+  isAddressPublic?: boolean;
 }
 
 export class UserPrivateInfoResponseDto extends CommonResponseDto {
@@ -281,6 +305,33 @@ export class UpdateUserPrivateInfoDto {
   @IsString()
   @IsOptional()
   address?: string | null;
+
+  @ApiProperty({
+    description: '본명 공개 여부',
+    example: false,
+    required: false,
+  })
+  @IsBoolean()
+  @IsOptional()
+  isRealNamePublic?: boolean;
+
+  @ApiProperty({
+    description: '전화번호 공개 여부',
+    example: false,
+    required: false,
+  })
+  @IsBoolean()
+  @IsOptional()
+  isPhonePublic?: boolean;
+
+  @ApiProperty({
+    description: '주소 공개 여부',
+    example: false,
+    required: false,
+  })
+  @IsBoolean()
+  @IsOptional()
+  isAddressPublic?: boolean;
 }
 
 export class VerifyNameDto {
