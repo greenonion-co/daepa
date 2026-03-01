@@ -11,8 +11,8 @@ const STATUS_STYLE: Record<string, string> = {
 
 const AdoptionStatusBadge = forwardRef<
   HTMLSpanElement,
-  { status: PetAdoptionDtoStatus | null | undefined; className?: string }
->(({ status, className, ...props }, ref) => {
+  { status: PetAdoptionDtoStatus | null | undefined; className?: string; children?: React.ReactNode }
+>(({ status, className, children, ...props }, ref) => {
   if (!status) return null;
 
   return (
@@ -26,6 +26,7 @@ const AdoptionStatusBadge = forwardRef<
       {...props}
     >
       {SALE_STATUS_KOREAN_INFO[status]}
+      {children}
     </span>
   );
 });
