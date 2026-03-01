@@ -13,6 +13,26 @@ import { PageMetaDto, PageOptionsDto } from 'src/common/page.dto';
 import { PET_TYPE } from 'src/pet/pet.constants';
 
 /**
+ * Raw query result interface for getFamilyTree (내부 변환용)
+ */
+export interface RawFamilyTreeQueryResult {
+  petId: string;
+  depth: number | null;
+  fatherId: string | null;
+  motherId: string | null;
+  name: string | null;
+  species: string;
+  hatchingDate: Date | null;
+  type: string;
+  isPublic: boolean;
+  ownerId: string | null;
+  sex: string | null;
+  morphs: string | string[] | null;
+  traits: string | string[] | null;
+  ownerName: string | null;
+}
+
+/**
  * Raw query result interface for getSiblingsWithDetails (내부 변환용)
  */
 export interface RawSiblingQueryResult {

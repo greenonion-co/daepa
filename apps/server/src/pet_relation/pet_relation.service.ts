@@ -12,6 +12,7 @@ import {
   PARENT_STATUS,
 } from '../parent_request/parent_request.constants';
 import {
+  RawFamilyTreeQueryResult,
   RawSiblingQueryResult,
   RawChildQueryResult,
   ChildPetDetailDto,
@@ -582,7 +583,7 @@ export class PetRelationService {
       }
 
       // Recursive CTE: 조상(ancestor) + 후손(descendant) + 공동 부모를 한 번에 조회
-      const rawResults: any[] = await em.query(
+      const rawResults: RawFamilyTreeQueryResult[] = await em.query(
         `
         WITH RECURSIVE
         ancestor_cte AS (
@@ -689,10 +690,20 @@ export class PetRelationService {
         LEFT JOIN users         u  ON u.user_id = p.owner_id
         `,
         [
-          petId, petId, maxAncestorDepth, maxAncestorDepth, // ancestor_cte
-          petId, petId, maxDepth,                           // descendant_cte
-          petId, petId, petId, petId, petId, petId,         // all_ids
-          petId,                                            // exclude root from ancestors
+          petId,
+          petId,
+          maxAncestorDepth,
+          maxAncestorDepth, // ancestor_cte
+          petId,
+          petId,
+          maxDepth, // descendant_cte
+          petId,
+          petId,
+          petId,
+          petId,
+          petId,
+          petId, // all_ids
+          petId, // exclude root from ancestors
         ],
       );
 
@@ -718,45 +729,46 @@ export class PetRelationService {
         ...new Set(pairPartnerRows.map((r) => r.partnerId).filter(Boolean)),
       ];
 
-      const nodes: (FamilyTreeNodeDto | PetHiddenStatusDto)[] = uniqueResults.map((raw) => {
-        const isOwner = userId && raw.ownerId === userId;
-        const isPublic = Boolean(raw.isPublic);
+      const nodes: (FamilyTreeNodeDto | PetHiddenStatusDto)[] =
+        uniqueResults.map((raw) => {
+          const isOwner = userId && raw.ownerId === userId;
+          const isPublic = Boolean(raw.isPublic);
 
-        // 비공개이고 본인 개체가 아니면 petId + hiddenStatus만 반환 (보안)
-        if (!isPublic && !isOwner) {
+          // 비공개이고 본인 개체가 아니면 petId + hiddenStatus만 반환 (보안)
+          if (!isPublic && !isOwner) {
+            return {
+              petId: raw.petId,
+              hiddenStatus: PET_HIDDEN_STATUS.SECRET,
+            } as PetHiddenStatusDto;
+          }
+
           return {
             petId: raw.petId,
-            hiddenStatus: PET_HIDDEN_STATUS.SECRET,
-          } as PetHiddenStatusDto;
-        }
-
-        return {
-          petId: raw.petId,
-          fatherId: raw.fatherId ?? null,
-          motherId: raw.motherId ?? null,
-          depth: raw.depth !== null ? Number(raw.depth) : null,
-          name: raw.name ?? undefined,
-          sex: raw.sex ?? undefined,
-          morphs: raw.morphs
-            ? typeof raw.morphs === 'string'
-              ? JSON.parse(raw.morphs)
-              : raw.morphs
-            : undefined,
-          traits: raw.traits
-            ? typeof raw.traits === 'string'
-              ? JSON.parse(raw.traits)
-              : raw.traits
-            : undefined,
-          species: raw.species,
-          hatchingDate: raw.hatchingDate
-            ? new Date(raw.hatchingDate).toISOString().split('T')[0]
-            : undefined,
-          type: raw.type,
-          isPublic,
-          isOwner: Boolean(isOwner),
-          ownerName: raw.ownerName ?? undefined,
-        } as FamilyTreeNodeDto;
-      });
+            fatherId: raw.fatherId ?? null,
+            motherId: raw.motherId ?? null,
+            depth: raw.depth !== null ? Number(raw.depth) : null,
+            name: raw.name ?? undefined,
+            sex: raw.sex ?? undefined,
+            morphs: raw.morphs
+              ? typeof raw.morphs === 'string'
+                ? (JSON.parse(raw.morphs) as string[])
+                : raw.morphs
+              : undefined,
+            traits: raw.traits
+              ? typeof raw.traits === 'string'
+                ? (JSON.parse(raw.traits) as string[])
+                : raw.traits
+              : undefined,
+            species: raw.species,
+            hatchingDate: raw.hatchingDate
+              ? new Date(raw.hatchingDate).toISOString().split('T')[0]
+              : undefined,
+            type: raw.type,
+            isPublic,
+            isOwner: Boolean(isOwner),
+            ownerName: raw.ownerName ?? undefined,
+          } as FamilyTreeNodeDto;
+        });
 
       return { nodes, centerPairPartnerIds };
     };
