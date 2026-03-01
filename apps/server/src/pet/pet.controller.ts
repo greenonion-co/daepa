@@ -7,6 +7,8 @@ import {
   Patch,
   Delete,
   ConflictException,
+  ForbiddenException,
+  NotFoundException,
   Query,
 } from '@nestjs/common';
 import {
@@ -53,6 +55,8 @@ import {
   GetFamilyTreeQueryDto,
 } from 'src/pet_relation/pet_relation.dto';
 import { PetHiddenStatusDto } from './pet.dto';
+import { Roles, RolesGuard } from 'src/common/decorators/roles.decorator';
+import { USER_ROLE } from 'src/user/user.constant';
 
 @Controller('/v1/pet')
 export class PetController {
@@ -174,8 +178,8 @@ export class PetController {
   }
 
   @Get('/family-tree/:petId')
-  @Public()
-  @UseGuards(OptionalJwtAuthGuard)
+  @Roles(USER_ROLE.BREEDER, USER_ROLE.ADMIN)
+  @UseGuards(RolesGuard)
   @ApiParam({
     name: 'petId',
     description: '중심 펫 아이디',
@@ -186,17 +190,27 @@ export class PetController {
     description: '가계도 조회 성공',
     type: GetFamilyTreeResponseDto,
   })
+  @ApiResponse({ status: 403, description: '접근 권한이 없습니다.' })
   @ApiResponse({ status: 404, description: '펫을 찾을 수 없습니다.' })
   async getFamilyTree(
     @Param('petId') petId: string,
     @Query() queryDto: GetFamilyTreeQueryDto,
-    @OptionalJwtUser() token: JwtUserPayload | null,
+    @JwtUser() token: JwtUserPayload,
   ): Promise<GetFamilyTreeResponseDto> {
+    const pet = await this.petService.findPetByPetId(petId, token.userId);
+    if (!pet) {
+      throw new NotFoundException('펫을 찾을 수 없습니다.');
+    }
+
+    if (pet.owner?.userId !== token.userId) {
+      throw new ForbiddenException('본인 소유의 펫만 조회할 수 있습니다.');
+    }
+
     const maxDepth = Math.min(queryDto.depth ?? 5, 7);
     const maxAncestorDepth = Math.min(Number(queryDto.ancestorDepth ?? 2), 5);
     return this.petRelationService.getFamilyTree(
       petId,
-      token?.userId ?? null,
+      token.userId,
       maxDepth,
       maxAncestorDepth,
     );

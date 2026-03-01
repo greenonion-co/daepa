@@ -563,14 +563,14 @@ export class PetRelationService {
    * Recursive CTE로 특정 펫의 전체 가계도(후손 + 공동 부모)를 한 번에 조회합니다.
    * @param petId - 중심 개체 ID
    * @param userId - 요청 사용자 ID (privacy 처리용)
-   * @param maxDepth - 최대 후손 탐색 깊이 (기본 5)
+   * @param maxDepth - 최대 후손 탐색 깊이 (기본 2)
    * @param maxAncestorDepth - 최대 조상 탐색 깊이 (기본 2: 부모·조부모)
    * @param manager - 선택적 EntityManager
    */
   async getFamilyTree(
     petId: string,
     userId: string | null,
-    maxDepth: number = 5,
+    maxDepth: number = 2,
     maxAncestorDepth: number = 2,
     manager?: EntityManager,
   ): Promise<GetFamilyTreeResponseDto> {

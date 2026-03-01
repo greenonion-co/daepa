@@ -19,7 +19,7 @@ GET /v1/pet/family-tree/:petId?depth=N&ancestorDepth=M
 #### Controller
 - `@Public()` + `@UseGuards(OptionalJwtAuthGuard)` — 비로그인도 조회 가능, 로그인 시 소유권 기반 프라이버시 처리
 - 쿼리 파라미터:
-  - `depth` (후손 탐색 깊이, 기본 5, 최대 7)
+  - `depth` (후손 탐색 깊이, 기본 2, 최대 7)
   - `ancestorDepth` (조상 탐색 깊이, 기본 2, 최대 5)
 - `Math.min`으로 상한값 제한
 
