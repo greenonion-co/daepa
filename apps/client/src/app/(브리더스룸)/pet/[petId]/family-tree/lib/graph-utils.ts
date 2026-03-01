@@ -45,20 +45,3 @@ export interface FamilyEdge {
   target: string;
 }
 
-/** 페어 엣지 생성 (파트너 연결) */
-export function createPairEdge(sourceId: string, targetId: string, pairId: number): FamilyEdge {
-  return {
-    id: `pair-${pairId}-${sourceId}-${targetId}`,
-    source: sourceId,
-    target: targetId,
-  };
-}
-
-/** 후손 엣지 생성 (파트너 → 후손) */
-export function createOffspringEdge(partnerId: string, offspringId: string): FamilyEdge {
-  return {
-    id: `offspring-${partnerId}-${offspringId}`,
-    source: partnerId,
-    target: offspringId,
-  };
-}

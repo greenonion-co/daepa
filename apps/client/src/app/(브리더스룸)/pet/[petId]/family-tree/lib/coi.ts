@@ -1,4 +1,12 @@
 import { petControllerGetParentsByPetId } from "@repo/api-client";
+import { AxiosError } from "axios";
+
+// --- Constants ---
+
+/** COI 위험도 임계값 (Wright coefficient) */
+const COI_THRESHOLD_CAUTION = 0.0625; // 6.25% — 사촌 수준
+const COI_THRESHOLD_WARNING = 0.125; // 12.5% — 반형제 수준
+const COI_THRESHOLD_DANGER = 0.25; // 25% — 형제/부모-자식 수준
 
 // --- Types ---
 
@@ -87,9 +95,14 @@ export async function buildPedigree(
       if (fatherId) promises.push(fetchAncestors(fatherId, nextGen));
       if (motherId) promises.push(fetchAncestors(motherId, nextGen));
       await Promise.all(promises);
-    } catch {
-      // 부모 정보 없으면 leaf로 처리
+    } catch (error) {
+      // 404 등 데이터 없음 → leaf로 처리, 네트워크 에러는 경고 로그
       pedigree.set(id, {});
+      if (error instanceof AxiosError && error.response?.status && error.response.status < 500) {
+        // 4xx: 부모 정보 없음 — 정상적인 leaf
+      } else {
+        console.warn(`[COI] Failed to fetch parents for ${id}:`, error);
+      }
     }
   }
 
@@ -156,6 +169,17 @@ export function calculateCOI(
   petIdB: string,
   pedigree: Pedigree,
 ): CoiResult {
+  return calculateCOIWithCache(petIdA, petIdB, pedigree, new Map(), new Map());
+}
+
+/** 캐시 기반 내부 COI 계산 */
+function calculateCOIWithCache(
+  petIdA: string,
+  petIdB: string,
+  pedigree: Pedigree,
+  pathCache: Map<string, string[][]>,
+  faCache: Map<string, number>,
+): CoiResult {
   // 공통 조상 찾기 (자신도 포함 — 부모×자식 등에서 부모 자신이 공통 조상이 됨)
   const ancestorsA = getAllAncestors(petIdA, pedigree);
   ancestorsA.add(petIdA);
@@ -171,9 +195,9 @@ export function calculateCOI(
   const details: CommonAncestorDetail[] = [];
 
   for (const ca of commonAncestorIds) {
-    const pathsA = findAllPaths(petIdA, ca, pedigree);
-    const pathsB = findAllPaths(petIdB, ca, pedigree);
-    const fa = calculateAncestorInbreeding(ca, pedigree);
+    const pathsA = findAllPathsCached(petIdA, ca, pedigree, pathCache);
+    const pathsB = findAllPathsCached(petIdB, ca, pedigree, pathCache);
+    const fa = cachedAncestorInbreeding(ca, pedigree, faCache, pathCache);
 
     let contribution = 0;
     let minGen = Infinity;
@@ -216,6 +240,40 @@ export function calculateCOI(
   };
 }
 
+/** findAllPaths 결과 캐시 (같은 from→to 쌍은 pedigree 변경 없으면 동일 결과) */
+function findAllPathsCached(
+  from: string,
+  to: string,
+  pedigree: Pedigree,
+  cache: Map<string, string[][]>,
+): string[][] {
+  const key = `${from}→${to}`;
+  const cached = cache.get(key);
+  if (cached) return cached;
+  const result = findAllPaths(from, to, pedigree);
+  cache.set(key, result);
+  return result;
+}
+
+/** 조상 근친계수 캐시 (재귀 중복 방지) */
+function cachedAncestorInbreeding(
+  id: string,
+  pedigree: Pedigree,
+  faCache: Map<string, number>,
+  pathCache: Map<string, string[][]>,
+): number {
+  const cached = faCache.get(id);
+  if (cached !== undefined) return cached;
+  const entry = pedigree.get(id);
+  if (!entry?.fatherId || !entry?.motherId) {
+    faCache.set(id, 0);
+    return 0;
+  }
+  const result = calculateCOIWithCache(entry.fatherId, entry.motherId, pedigree, pathCache, faCache).coi;
+  faCache.set(id, result);
+  return result;
+}
+
 /** COI → 대표 관계 예시 매칭 */
 function getEquivalentRelation(coi: number): string {
   if (coi <= 0) return "무관";
@@ -228,22 +286,12 @@ function getEquivalentRelation(coi: number): string {
   return "극근친 수준";
 }
 
-/** 특정 개체의 근친계수 계산 (부모의 공통 조상 기반) */
-function calculateAncestorInbreeding(
-  id: string,
-  pedigree: Pedigree,
-): number {
-  const entry = pedigree.get(id);
-  if (!entry?.fatherId || !entry?.motherId) return 0;
-  return calculateCOI(entry.fatherId, entry.motherId, pedigree).coi;
-}
-
 // --- 위험도 ---
 
 export function getCoiLevel(coi: number): CoiLevel {
-  if (coi < 0.0625) return "safe";
-  if (coi < 0.125) return "caution";
-  if (coi < 0.25) return "warning";
+  if (coi < COI_THRESHOLD_CAUTION) return "safe";
+  if (coi < COI_THRESHOLD_WARNING) return "caution";
+  if (coi < COI_THRESHOLD_DANGER) return "warning";
   return "danger";
 }
 

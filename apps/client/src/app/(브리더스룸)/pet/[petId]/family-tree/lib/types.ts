@@ -1,4 +1,27 @@
 import type { PetDto } from "@repo/api-client";
+import type { SimulationNodeDatum, SimulationLinkDatum } from "d3-force";
+
+// --- ForceGraph 타입 ---
+
+export interface GraphNode extends SimulationNodeDatum {
+  id: string;
+  label: string;
+  degree: number;
+  imageUrl?: string;
+  sex?: string;
+  isPairOfCenter?: boolean;
+  generation?: number;
+  morphs?: string[];
+  isPrivate?: boolean;
+  fatherId?: string;
+  motherId?: string;
+}
+
+export interface GraphLink extends SimulationLinkDatum<GraphNode> {
+  source: string | GraphNode;
+  target: string | GraphNode;
+  isPair?: boolean;
+}
 
 /** 그래프 노드에 표시할 펫 데이터 */
 export interface FamilyPetData {
