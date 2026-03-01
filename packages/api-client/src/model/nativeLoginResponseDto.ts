@@ -19,16 +19,6 @@ export interface NativeLoginResponseDto {
   role: NativeLoginResponseDtoRole;
   /** 사업자 여부 */
   isBiz: boolean;
-  /**
-   * refresh token
-   * @nullable
-   */
-  refreshToken: string | null;
-  /**
-   * refresh token 만료 시간
-   * @nullable
-   */
-  refreshTokenExpiresAt: string | null;
   /** 유저 상태 */
   status: NativeLoginResponseDtoStatus;
   /** 생성 시간 */

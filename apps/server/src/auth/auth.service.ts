@@ -272,25 +272,25 @@ export class AuthService {
         secret: process.env.JWT_REFRESH_SECRET ?? '',
       });
 
-      const user = await this.userService.findOne({
+      const userEntity = await this.userService.findOneEntity({
         userId: tokenPayload.sub,
       });
 
-      if (!user) {
+      if (!userEntity) {
         throw new UnauthorizedException('사용자를 찾을 수 없습니다.');
       }
 
       const isRefreshTokenValid = await bcrypt.compare(
         refreshToken,
-        user.refreshToken ?? '',
+        userEntity.refreshToken ?? '',
       );
 
       if (!isRefreshTokenValid) {
         throw new UnauthorizedException('유효하지 않은 refresh token입니다.');
       }
 
-      const userRefreshTokenExpiresAt = user.refreshTokenExpiresAt
-        ? DateTime.fromJSDate(user.refreshTokenExpiresAt)
+      const userRefreshTokenExpiresAt = userEntity.refreshTokenExpiresAt
+        ? DateTime.fromJSDate(userEntity.refreshTokenExpiresAt)
         : null;
 
       if (
@@ -301,8 +301,8 @@ export class AuthService {
       }
 
       const newAccessToken = this.createJwtAccessToken({
-        userId: user.userId,
-        role: user.role,
+        userId: userEntity.userId,
+        role: userEntity.role,
       });
 
       const oneWeekFromNow = DateTime.now()
@@ -312,11 +312,11 @@ export class AuthService {
 
       let newRefreshToken: string | undefined;
       if (
-        user.refreshTokenExpiresAt &&
-        user.refreshTokenExpiresAt <= oneWeekFromNow
+        userEntity.refreshTokenExpiresAt &&
+        userEntity.refreshTokenExpiresAt <= oneWeekFromNow
       ) {
         // TODO: 짧은 기간으로 설정하여 테스트해볼것
-        newRefreshToken = await this.createJwtRefreshToken(user.userId);
+        newRefreshToken = await this.createJwtRefreshToken(userEntity.userId);
       }
 
       return {

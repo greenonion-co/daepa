@@ -3373,11 +3373,6 @@ export const getAuthControllerKakaoNativeResponseMock = (
   email: faker.string.alpha(20),
   role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
   isBiz: faker.datatype.boolean(),
-  refreshToken: faker.helpers.arrayElement([faker.string.alpha(20), null]),
-  refreshTokenExpiresAt: faker.helpers.arrayElement([
-    `${faker.date.past().toISOString().split(".")[0]}Z`,
-    null,
-  ]),
   status: faker.helpers.arrayElement([
     "pending",
     "active",
@@ -3399,11 +3394,6 @@ export const getAuthControllerAppleNativeResponseMock = (
   email: faker.string.alpha(20),
   role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
   isBiz: faker.datatype.boolean(),
-  refreshToken: faker.helpers.arrayElement([faker.string.alpha(20), null]),
-  refreshTokenExpiresAt: faker.helpers.arrayElement([
-    `${faker.date.past().toISOString().split(".")[0]}Z`,
-    null,
-  ]),
   status: faker.helpers.arrayElement([
     "pending",
     "active",
@@ -3425,11 +3415,6 @@ export const getAuthControllerGoogleNativeResponseMock = (
   email: faker.string.alpha(20),
   role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
   isBiz: faker.datatype.boolean(),
-  refreshToken: faker.helpers.arrayElement([faker.string.alpha(20), null]),
-  refreshTokenExpiresAt: faker.helpers.arrayElement([
-    `${faker.date.past().toISOString().split(".")[0]}Z`,
-    null,
-  ]),
   status: faker.helpers.arrayElement([
     "pending",
     "active",
