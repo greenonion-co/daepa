@@ -199,7 +199,7 @@ export default function FamilyTreeCanvas({ petId }: FamilyTreeCanvasProps) {
 
       // 타인 소유 개체는 트리 확장 불가
       if (nodeData?.pet && !nodeData.pet.isOwner) {
-        toast.info("타인의 개체입니다.");
+        toast.info("타인의 개체입니다.", { position: "bottom-center" });
         return;
       }
 
@@ -216,7 +216,7 @@ export default function FamilyTreeCanvas({ petId }: FamilyTreeCanvasProps) {
         const hasNewNodes = data.nodes.some((n) => !nodesMap.has(n.petId));
         mergeTree(nodeId, data.nodes, data.centerPairPartnerIds ?? []);
         if (!hasNewNodes) {
-          toast.info("추가로 표시할 개체가 없습니다.");
+          toast.info("추가로 표시할 개체가 없습니다.", { position: "bottom-center" });
         }
       } catch {
         // 실패 시 무시
