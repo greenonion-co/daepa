@@ -50,7 +50,7 @@ interface MorphLegendProps {
 }
 
 export default function MorphLegend({ morphs }: MorphLegendProps) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(true);
 
   const isDark =
     typeof document !== "undefined" && document.documentElement.classList.contains("dark");
@@ -58,19 +58,19 @@ export default function MorphLegend({ morphs }: MorphLegendProps) {
   const edgeLegend = [
     {
       color: isDark ? "#a78bfa" : "#c084fc",
-      label: "배우자 연결",
+      label: "페어 관계",
       hasArrow: false,
       strokeWidth: 1.5,
     },
     {
       color: "#22d3ee",
-      label: "부모-자식",
+      label: "자식 관계",
       hasArrow: true,
       strokeWidth: 1.5,
     },
     {
       color: "#f97316",
-      label: "부모 (hover)",
+      label: "부모 관계",
       hasArrow: true,
       strokeWidth: 2,
     },
