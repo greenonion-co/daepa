@@ -6,10 +6,7 @@ import BreederHeader from "./BreederHeader";
 import ShowcaseFilterBar, { type ShowcaseFilters } from "./ShowcaseFilterBar";
 import PetShowcaseGrid from "./PetShowcaseGrid";
 import ShowcaseMultiSelect from "./ShowcaseMultiSelect";
-import {
-  MORPH_LIST_BY_SPECIES,
-  TRAIT_LIST_BY_SPECIES,
-} from "@/app/(브리더스룸)/constants";
+import { MORPH_LIST_BY_SPECIES, TRAIT_LIST_BY_SPECIES } from "@/app/(브리더스룸)/constants";
 
 const SORT_DISPLAY: Record<string, string> = {
   DESC: "최신순",
@@ -37,14 +34,8 @@ export default function ShowcaseContent({ profile }: ShowcaseContentProps) {
     return () => clearTimeout(timer);
   }, [filters.search]);
 
-  const allMorphs = useMemo(
-    () => Object.assign({}, ...Object.values(MORPH_LIST_BY_SPECIES)),
-    [],
-  );
-  const allTraits = useMemo(
-    () => Object.assign({}, ...Object.values(TRAIT_LIST_BY_SPECIES)),
-    [],
-  );
+  const allMorphs = useMemo(() => Object.assign({}, ...Object.values(MORPH_LIST_BY_SPECIES)), []);
+  const allTraits = useMemo(() => Object.assign({}, ...Object.values(TRAIT_LIST_BY_SPECIES)), []);
 
   // 모바일 미니 헤더: BreederHeader가 스크롤 아웃되면 표시
   const headerRef = useRef<HTMLDivElement>(null);
@@ -135,7 +126,7 @@ export default function ShowcaseContent({ profile }: ShowcaseContentProps) {
         {/* 모바일 필터 + 그리드 */}
         <div className="md:flex-1 md:overflow-y-auto">
           {/* 모바일 필터 */}
-          <div className="px-2 py-2 md:hidden">
+          <div className="px-2 md:hidden">
             <ShowcaseFilterBar
               filters={filters}
               onChange={setFilters}
