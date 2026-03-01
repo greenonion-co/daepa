@@ -212,14 +212,14 @@ export class StatisticsService {
       hatchingRate: 0,
     });
 
-    // 1) 페어 조회 (양방향, ownerId 무관)
+    // 1) 페어 조회 (단방향 — 저장 시 성별 정규화 보장)
     const pair = await this.dataSource
       .createQueryBuilder(PairEntity, 'pair')
       .where('pair.isDeleted = false')
-      .andWhere(
-        '(pair.fatherId = :fatherId AND pair.motherId = :motherId) OR (pair.fatherId = :motherId AND pair.motherId = :fatherId)',
-        { fatherId, motherId },
-      )
+      .andWhere('pair.fatherId = :fatherId AND pair.motherId = :motherId', {
+        fatherId,
+        motherId,
+      })
       .select(['pair.id'])
       .getOne();
 
