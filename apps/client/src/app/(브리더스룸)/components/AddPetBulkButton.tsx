@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { Upload } from "lucide-react";
+import { CircleHelp } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { brPetControllerFindAll, petControllerBulkCreate } from "@repo/api-client";
@@ -16,6 +16,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 const AddPetBulkButton = () => {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -44,9 +45,7 @@ const AddPetBulkButton = () => {
     } catch (error: unknown) {
       if (error instanceof AxiosError) {
         const message = error.response?.data?.message;
-        const errorText = Array.isArray(message)
-          ? message.join("\n")
-          : message;
+        const errorText = Array.isArray(message) ? message.join("\n") : message;
         setErrorMessage(errorText || "개체 등록 중 오류가 발생했습니다.");
       } else if (error instanceof Error) {
         setErrorMessage(error.message);
@@ -65,19 +64,22 @@ const AddPetBulkButton = () => {
         className="hidden"
         onChange={handleFileChange}
       />
-      <button
-        type="button"
-        disabled={isPending}
-        onClick={() => inputRef.current?.click()}
-        className="flex w-fit items-center rounded-lg px-2 py-1 hover:bg-gray-100 dark:hover:bg-gray-800"
-      >
-        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-900/50 dark:text-emerald-400">
-          <Upload className="h-3 w-3" />
-        </div>
-        <span className="px-2 py-1 text-[14px] font-[500] text-emerald-600 dark:text-emerald-400">
-          {isPending ? "업로드 중..." : "파일 업로드"}
-        </span>
-      </button>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button
+            type="button"
+            disabled={isPending}
+            onClick={() => inputRef.current?.click()}
+            className="flex w-fit items-center gap-1 rounded-lg px-2 py-1 text-emerald-600 hover:bg-gray-100 dark:hover:bg-gray-800"
+          >
+            <span className="text-[14px] font-[500] dark:text-emerald-400">
+              {isPending ? "업로드 중..." : "파일 업로드"}
+            </span>
+            <CircleHelp className="h-3.5 w-3.5" />
+          </button>
+        </TooltipTrigger>
+        <TooltipContent>개체 대량 업로드가 필요한 경우 관리자에게 문의주세요</TooltipContent>
+      </Tooltip>
 
       <AlertDialog open={!!errorMessage}>
         <AlertDialogContent>
@@ -88,9 +90,7 @@ const AddPetBulkButton = () => {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogAction onClick={() => setErrorMessage(null)}>
-              확인
-            </AlertDialogAction>
+            <AlertDialogAction onClick={() => setErrorMessage(null)}>확인</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
