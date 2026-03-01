@@ -32,7 +32,7 @@ export default function PetDetailPanel({
 }: PetDetailPanelProps) {
   if (!pet) {
     return (
-      <div className="pointer-events-none flex h-52 w-full items-center justify-center rounded-xl border border-gray-200 bg-white/90 px-3 py-4 shadow-lg backdrop-blur-sm md:w-52 dark:border-gray-700 dark:bg-gray-900/90">
+      <div className="pointer-events-none flex h-52 w-full items-center justify-center rounded-xl border border-gray-200 bg-white/70 px-3 py-4 shadow-lg backdrop-blur-sm md:w-52 dark:border-gray-700 dark:bg-gray-900/70">
         <p className="text-xs text-gray-400 dark:text-gray-500">선택된 개체가 없습니다</p>
       </div>
     );
@@ -59,7 +59,7 @@ export default function PetDetailPanel({
   return (
     <div
       key={pet.petId}
-      className="pointer-events-none flex w-full flex-col gap-1 rounded-xl border border-gray-200 bg-white/90 p-3 shadow-lg backdrop-blur-sm md:w-52 dark:border-gray-700 dark:bg-gray-900/90"
+      className="pointer-events-none flex w-full flex-col gap-1 rounded-xl border border-gray-200 bg-white/70 p-3 shadow-lg backdrop-blur-sm md:w-52 dark:border-gray-700 dark:bg-gray-900/70"
     >
       {/* 비공개 배지 */}
       {disabledPet && (
