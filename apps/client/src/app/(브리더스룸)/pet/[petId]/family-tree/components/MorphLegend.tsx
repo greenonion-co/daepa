@@ -82,7 +82,7 @@ export default function MorphLegend({ morphs }: MorphLegendProps) {
     return (
       <button
         type="button"
-        className="pointer-events-auto flex h-7 w-7 items-center justify-center rounded-full border border-gray-200 bg-white/90 shadow-lg backdrop-blur-sm transition-colors hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-900/90 dark:hover:bg-gray-800"
+        className="pointer-events-auto flex h-7 w-7 items-center justify-center rounded-full border border-gray-200 bg-white/70 shadow-lg backdrop-blur-sm transition-colors hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-900/70 dark:hover:bg-gray-800"
         onClick={() => setOpen(true)}
         title="범례"
       >
@@ -112,7 +112,7 @@ export default function MorphLegend({ morphs }: MorphLegendProps) {
   }
 
   return (
-    <div className="pointer-events-auto rounded-xl border border-gray-200 bg-white/90 shadow-lg backdrop-blur-sm dark:border-gray-700 dark:bg-gray-900/90">
+    <div className="pointer-events-auto rounded-xl border border-gray-200 bg-white/70 shadow-lg backdrop-blur-sm dark:border-gray-700 dark:bg-gray-900/70">
       {/* 헤더 */}
       <button
         type="button"

@@ -61,7 +61,7 @@ export default function CoiPanel({
       className={`pointer-events-auto flex flex-col gap-2 rounded-xl border backdrop-blur-sm transition-all duration-300 ${
         hasSelection
           ? "border-gray-200 bg-gradient-to-r from-blue-200/50 to-purple-200/65 dark:border-gray-700 dark:from-blue-900/40 dark:to-purple-900/50"
-          : "border-gray-200 bg-white/90 shadow-lg dark:border-gray-700 dark:bg-gray-900/90"
+          : "border-gray-200 bg-white/70 shadow-lg dark:border-gray-700 dark:bg-gray-900/70"
       } ${expanded ? "w-80 p-4" : "w-full p-3 md:w-52"}`}
     >
       {/* 헤더 */}
@@ -97,13 +97,13 @@ export default function CoiPanel({
             <Fragment key={pet?.petId ?? idx}>
               <div className="flex min-w-0 flex-1 flex-col items-center gap-1">
                 {pet ? (
-                  <div>
+                  <div className="flex w-full flex-col">
                     <span className="text-[10px] text-gray-800">{role}</span>
 
-                    <div className="relative h-[80px] w-[80px] overflow-hidden rounded-lg">
+                    <div className="relative aspect-square w-full overflow-hidden rounded-lg">
                       <PetThumbnail
                         petId={pet.petId}
-                        maxSize={70}
+                        maxSize={100}
                         objectFit="cover"
                         className="h-full w-full"
                       />
@@ -132,11 +132,11 @@ export default function CoiPanel({
                     </div>
                   </div>
                 ) : (
-                  <div>
+                  <div className="flex w-full flex-col">
                     <span className="text-[10px] text-gray-800">{role}</span>
 
                     <div
-                      className={`flex h-[80px] w-[80px] flex-col items-center justify-center rounded-2xl bg-gray-100 text-gray-400 dark:bg-gray-800 ${onSelectMate ? "cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700" : ""}`}
+                      className={`flex aspect-square w-full flex-col items-center justify-center rounded-2xl bg-gray-100 text-gray-400 dark:bg-gray-800 ${onSelectMate ? "cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700" : ""}`}
                       onClick={() => onSelectMate?.(role)}
                     >
                       <span className="text-sm">+</span>

@@ -100,7 +100,7 @@ export default function PairStatisticsPanel({
 
   if (!isOpposite) {
     return (
-      <div className="pointer-events-auto flex w-full flex-col gap-2 rounded-xl border border-gray-200 bg-white/90 p-3 shadow-lg backdrop-blur-sm md:w-52 dark:border-gray-700 dark:bg-gray-900/90">
+      <div className="pointer-events-auto flex w-full flex-col gap-2 rounded-xl border border-gray-200 bg-white/70 p-3 shadow-lg backdrop-blur-sm md:w-52 dark:border-gray-700 dark:bg-gray-900/70">
         <span className="text-[11px] font-medium text-gray-500 dark:text-gray-400">
           메이팅 이력
         </span>
@@ -113,7 +113,7 @@ export default function PairStatisticsPanel({
 
   if (isLoading) {
     return (
-      <div className="pointer-events-auto flex w-full flex-col items-center gap-2 rounded-xl border border-gray-200 bg-white/90 p-3 shadow-lg backdrop-blur-sm md:w-52 dark:border-gray-700 dark:bg-gray-900/90">
+      <div className="pointer-events-auto flex w-full flex-col items-center gap-2 rounded-xl border border-gray-200 bg-white/70 p-3 shadow-lg backdrop-blur-sm md:w-52 dark:border-gray-700 dark:bg-gray-900/70">
         <span className="self-start text-[11px] font-medium text-gray-500 dark:text-gray-400">
           메이팅 이력
         </span>
@@ -124,7 +124,7 @@ export default function PairStatisticsPanel({
 
   if (!hasPair || !statistics) {
     return (
-      <div className="pointer-events-auto flex w-full flex-col gap-2 rounded-xl border border-gray-200 bg-white/90 p-3 shadow-lg backdrop-blur-sm md:w-52 dark:border-gray-700 dark:bg-gray-900/90">
+      <div className="pointer-events-auto flex w-full flex-col gap-2 rounded-xl border border-gray-200 bg-white/70 p-3 shadow-lg backdrop-blur-sm md:w-52 dark:border-gray-700 dark:bg-gray-900/70">
         <div className="flex items-center justify-between">
           <span className="text-[11px] font-medium text-gray-500 dark:text-gray-400">
             메이팅 이력
@@ -156,7 +156,7 @@ export default function PairStatisticsPanel({
   const { egg, totalMatings, totalLayings } = statistics;
 
   return (
-    <div className="pointer-events-auto flex w-full flex-col gap-2 rounded-xl border border-gray-200 bg-white/90 p-3 shadow-lg backdrop-blur-sm md:w-52 dark:border-gray-700 dark:bg-gray-900/90">
+    <div className="pointer-events-auto flex w-full flex-col gap-2 rounded-xl border border-gray-200 bg-white/70 p-3 shadow-lg backdrop-blur-sm md:w-52 dark:border-gray-700 dark:bg-gray-900/70">
       {/* 헤더 */}
       <div className="flex items-center justify-between">
         <span className="text-[11px] font-medium text-gray-500 dark:text-gray-400">번식 이력</span>
