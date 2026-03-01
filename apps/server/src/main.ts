@@ -25,7 +25,7 @@ async function bootstrap() {
     credentials: true,
   });
 
-  // body parser: bulk 엔드포인트만 512KB, 나머지는 기본 100KB
+  // body parser: bulk 엔드포인트만 256kb, 나머지는 기본 100KB
   app.use('/api/v1/pet/bulk', json({ limit: '256kb' }));
   app.use(json({ limit: '100kb' }));
 

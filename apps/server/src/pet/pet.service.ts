@@ -352,7 +352,6 @@ export class PetService {
       }
 
       // === 3단계: 테이블별 일괄 INSERT ===
-      console.log(pets);
       // pets (1 query)
       await em.insert(
         PetEntity,
