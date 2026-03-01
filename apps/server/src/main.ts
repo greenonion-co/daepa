@@ -3,9 +3,10 @@ import { AppModule } from './app.module';
 import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import * as cookieParser from 'cookie-parser';
+import { json } from 'express';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { bodyParser: false });
 
   if (!process.env.CLIENT_BASE_URL || !process.env.SERVER_BASE_URL) {
     throw new Error('CLIENT_BASE_URL and SERVER_BASE_URL must be defined');
@@ -23,6 +24,10 @@ async function bootstrap() {
     origin: corsOrigins,
     credentials: true,
   });
+
+  // body parser: bulk 엔드포인트만 512KB, 나머지는 기본 100KB
+  app.use('/api/v1/pet/bulk', json({ limit: '256kb' }));
+  app.use(json({ limit: '100kb' }));
 
   app.use(cookieParser());
 

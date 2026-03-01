@@ -11,6 +11,7 @@ import type {
   BrPetControllerFindAllParams,
   BrPetControllerGetPetsByDateRangeParams,
   BrPetControllerGetPetsByMonthParams,
+  BulkCreatePetDto,
   CompleteAdoptionDto,
   CompleteHatchingDto,
   CreateAdoptionDto,
@@ -117,6 +118,15 @@ export const petControllerGetDeletedPets = (params?: PetControllerGetDeletedPets
     url: `/api/v1/pet/deleted/list`,
     method: "GET",
     params,
+  });
+};
+
+export const petControllerBulkCreate = (bulkCreatePetDto: BulkCreatePetDto) => {
+  return useCustomInstance<CommonResponseDto>({
+    url: `/api/v1/pet/bulk`,
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    data: bulkCreatePetDto,
   });
 };
 
@@ -722,6 +732,9 @@ export type PetControllerCreateResult = NonNullable<
 export type PetControllerGetDeletedPetsResult = NonNullable<
   Awaited<ReturnType<typeof petControllerGetDeletedPets>>
 >;
+export type PetControllerBulkCreateResult = NonNullable<
+  Awaited<ReturnType<typeof petControllerBulkCreate>>
+>;
 export type PetControllerVerifyNameResult = NonNullable<
   Awaited<ReturnType<typeof petControllerVerifyName>>
 >;
@@ -1245,6 +1258,14 @@ export const getPetControllerGetDeletedPetsResponseMock = (
     hasPreviousPage: faker.datatype.boolean(),
     hasNextPage: faker.datatype.boolean(),
   },
+  ...overrideResponse,
+});
+
+export const getPetControllerBulkCreateResponseMock = (
+  overrideResponse: Partial<CommonResponseDto> = {},
+): CommonResponseDto => ({
+  success: faker.datatype.boolean(),
+  message: faker.string.alpha(20),
   ...overrideResponse,
 });
 
@@ -4466,6 +4487,29 @@ export const getPetControllerGetDeletedPetsMockHandler = (
   });
 };
 
+export const getPetControllerBulkCreateMockHandler = (
+  overrideResponse?:
+    | CommonResponseDto
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<CommonResponseDto> | CommonResponseDto),
+) => {
+  return http.post("*/api/v1/pet/bulk", async (info) => {
+    await delay(1000);
+
+    return new HttpResponse(
+      JSON.stringify(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getPetControllerBulkCreateResponseMock(),
+      ),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+  });
+};
+
 export const getPetControllerVerifyNameMockHandler = (
   overrideResponse?:
     | CommonResponseDto
@@ -5978,6 +6022,7 @@ export const getProjectDaepaAPIMock = () => [
   getPetControllerFindAllMockHandler(),
   getPetControllerCreateMockHandler(),
   getPetControllerGetDeletedPetsMockHandler(),
+  getPetControllerBulkCreateMockHandler(),
   getPetControllerVerifyNameMockHandler(),
   getPetControllerGetParentsByPetIdMockHandler(),
   getPetControllerGetSiblingsByPetIdMockHandler(),
