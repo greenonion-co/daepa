@@ -274,14 +274,9 @@ export function PairDetailContent({
   const { data: pair, isLoading } = useQuery({
     queryKey: ["pair-detail-modal", fatherId, motherId],
     queryFn: async () => {
-      const [res, resRev] = await Promise.all([
-        pairControllerGetPairList({ fatherId, motherId, itemPerPage: 1 }),
-        pairControllerGetPairList({ fatherId: motherId, motherId: fatherId, itemPerPage: 1 }),
-      ]);
+      const res = await pairControllerGetPairList({ fatherId, motherId, itemPerPage: 1 });
       const data = res.data.data ?? [];
       if (data.length > 0) return data[0] as MatingByParentsDto;
-      const dataRev = resRev.data.data ?? [];
-      if (dataRev.length > 0) return dataRev[0] as MatingByParentsDto;
       return null;
     },
     staleTime: 5 * 60 * 1000,

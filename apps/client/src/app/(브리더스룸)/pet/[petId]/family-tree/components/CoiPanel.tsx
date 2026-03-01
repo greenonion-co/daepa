@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useState } from "react";
+import { Fragment } from "react";
 import { COI_LEVEL_CONFIG, type CoiLevel, type CommonAncestorDetail } from "../lib/coi";
 import PetThumbnail from "@/components/common/PetThumbnail";
 
@@ -34,7 +34,6 @@ export default function CoiPanel({
   coi,
   level,
   commonAncestors,
-  // equivalentRelation,
   isLoading,
   isReady,
   onClear,
@@ -42,8 +41,7 @@ export default function CoiPanel({
   onFocusAncestor,
   onSelectMate,
 }: CoiPanelProps) {
-  const [expanded] = useState(false);
-  // const [expanded, setExpanded] = useState(false);
+  const expanded = false;
 
   const isDark =
     typeof document !== "undefined" && document.documentElement.classList.contains("dark");
@@ -53,7 +51,6 @@ export default function CoiPanel({
   const accentColor = isDark ? config.darkColor : config.color;
   const bgColor = isDark ? config.darkBgColor : config.bgColor;
 
-  // const showResult = isReady && !isLoading;
   const ancestorLimit = expanded ? commonAncestors.length : 5;
 
   return (
@@ -98,7 +95,7 @@ export default function CoiPanel({
                   <div>
                     <span className="text-[10px]">{role}</span>
 
-                    <div className="relative h-[70px] w-[70px] overflow-hidden rounded-lg">
+                    <div className="relative h-[80px] w-[80px] overflow-hidden rounded-lg">
                       <PetThumbnail
                         petId={pet.petId}
                         maxSize={70}
@@ -134,7 +131,7 @@ export default function CoiPanel({
                     <span className="text-[10px]">{role}</span>
 
                     <div
-                      className={`flex h-[70px] w-[70px] flex-col items-center justify-center rounded-2xl bg-gray-100 text-gray-400 dark:bg-gray-800 ${onSelectMate ? "cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700" : ""}`}
+                      className={`flex h-[80px] w-[80px] flex-col items-center justify-center rounded-2xl bg-gray-100 text-gray-400 dark:bg-gray-800 ${onSelectMate ? "cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700" : ""}`}
                       onClick={() => onSelectMate?.(role)}
                     >
                       <span className="text-sm">+</span>
@@ -188,19 +185,7 @@ export default function CoiPanel({
                 {config.label}
               </span>
             </div>
-            {/* <span
-              className={`text-gray-500 dark:text-gray-400 ${expanded ? "text-xs" : "text-[10px]"}`}
-            >
-              {equivalentRelation}
-            </span> */}
           </div>
-
-          {/* 설명 */}
-          {/* <p
-            className={`text-center text-gray-400 dark:text-gray-500 ${expanded ? "text-xs" : "text-[10px]"}`}
-          >
-            {config.description}
-          </p> */}
 
           {/* 공통 조상 */}
           {commonAncestors.length > 0 && (
@@ -270,60 +255,6 @@ export default function CoiPanel({
           </div>
         </>
       )}
-
-      {/* 확대/축소 버튼 (우측 하단) */}
-      {/* {showResult && (
-        <div className="flex justify-end">
-          <button
-            type="button"
-            onClick={() => setExpanded((v) => !v)}
-            className="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
-            title={expanded ? "축소" : "확대"}
-          >
-            {expanded ? <CollapseIcon size={12} /> : <ExpandIcon size={12} />}
-          </button>
-        </div>
-      )} */}
     </div>
   );
 }
-
-// function ExpandIcon({ size = 14 }: { size?: number }) {
-//   return (
-//     <svg
-//       width={size}
-//       height={size}
-//       viewBox="0 0 16 16"
-//       fill="none"
-//       stroke="currentColor"
-//       strokeWidth="1.5"
-//       strokeLinecap="round"
-//       strokeLinejoin="round"
-//     >
-//       <polyline points="10 2 14 2 14 6" />
-//       <polyline points="6 14 2 14 2 10" />
-//       <line x1="14" y1="2" x2="9" y2="7" />
-//       <line x1="2" y1="14" x2="7" y2="9" />
-//     </svg>
-//   );
-// }
-
-// function CollapseIcon({ size = 14 }: { size?: number }) {
-//   return (
-//     <svg
-//       width={size}
-//       height={size}
-//       viewBox="0 0 16 16"
-//       fill="none"
-//       stroke="currentColor"
-//       strokeWidth="1.5"
-//       strokeLinecap="round"
-//       strokeLinejoin="round"
-//     >
-//       <polyline points="4 10 0 10 0 14" />
-//       <polyline points="12 6 16 6 16 2" />
-//       <line x1="0" y1="14" x2="6" y2="8" />
-//       <line x1="16" y1="2" x2="10" y2="8" />
-//     </svg>
-//   );
-// }

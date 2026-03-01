@@ -38,18 +38,13 @@ export function usePairStatistics(
     ? determinePairRoles(petIdA!, petIdB!, sexA, sexB)
     : { fatherId: undefined, motherId: undefined };
 
-  // 페어 존재 여부 확인 (양방향 시도)
+  // 페어 존재 여부 확인 (저장 시 성별 정규화 보장)
   const { data: pairData, isLoading: isPairLoading } = useQuery({
     queryKey: ["pair-lookup", fatherId, motherId],
     queryFn: async () => {
-      const [res, resRev] = await Promise.all([
-        pairControllerGetPairList({ fatherId, motherId, itemPerPage: 1 }),
-        pairControllerGetPairList({ fatherId: motherId, motherId: fatherId, itemPerPage: 1 }),
-      ]);
+      const res = await pairControllerGetPairList({ fatherId, motherId, itemPerPage: 1 });
       const pairs = res.data.data ?? [];
       if (pairs.length > 0) return { pairId: pairs[0]!.pairId, fatherId, motherId };
-      const pairsRev = resRev.data.data ?? [];
-      if (pairsRev.length > 0) return { pairId: pairsRev[0]!.pairId, fatherId: motherId, motherId: fatherId };
       return null;
     },
     enabled,

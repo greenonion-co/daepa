@@ -1,15 +1,14 @@
 "use client";
 
 import PetThumbnail from "@/components/common/PetThumbnail";
-// import { SPECIES_KOREAN_INFO } from "@/app/(브리더스룸)/constants";
 import type { FamilyPetData } from "../lib/types";
-// import type { PetDtoSpecies } from "@repo/api-client";
 
 interface PetDetailPanelProps {
   pet: FamilyPetData | null;
   father?: FamilyPetData | null;
   mother?: FamilyPetData | null;
   onAction?: (action: string, petId: string) => void;
+  onFocusNode?: (petId: string) => void;
 }
 
 function PanelRow({ children, delay }: { children: React.ReactNode; delay: number }) {
@@ -23,7 +22,7 @@ function PanelRow({ children, delay }: { children: React.ReactNode; delay: numbe
   );
 }
 
-export default function PetDetailPanel({ pet, father, mother, onAction }: PetDetailPanelProps) {
+export default function PetDetailPanel({ pet, father, mother, onAction, onFocusNode }: PetDetailPanelProps) {
   if (!pet) {
     return (
       <div className="pointer-events-none flex h-52 w-52 items-center justify-center rounded-xl border border-gray-200 bg-white/90 px-3 py-4 shadow-lg backdrop-blur-sm dark:border-gray-700 dark:bg-gray-900/90">
@@ -38,8 +37,6 @@ export default function PetDetailPanel({ pet, father, mother, onAction }: PetDet
       : pet.sex === "F" || pet.sex === "FEMALE"
         ? "bg-[#E03E3E] dark:bg-[#FF7369]"
         : "bg-gray-300";
-
-  // const speciesLabel = pet.species ? SPECIES_KOREAN_INFO[pet.species as PetDtoSpecies] : null;
 
   const hatchingLabel = pet.hatchingDate
     ? new Date(pet.hatchingDate).toLocaleDateString("ko-KR", {
@@ -88,23 +85,31 @@ export default function PetDetailPanel({ pet, father, mother, onAction }: PetDet
             {(father || mother) && (
               <div className="flex items-center justify-center gap-1">
                 {father && (
-                  <div className="flex items-center gap-0.5">
+                  <button
+                    type="button"
+                    className="pointer-events-auto flex items-center gap-0.5 rounded px-0.5 hover:bg-gray-100 dark:hover:bg-gray-800"
+                    onClick={() => onFocusNode?.(father.petId)}
+                  >
                     <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#2383E2] dark:bg-[#529CCA]" />
-                    <span className="truncate text-[10px] text-gray-500 dark:text-gray-400">
+                    <span className="truncate text-[10px] text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
                       {father.name ?? "이름 없음"}
                     </span>
-                  </div>
+                  </button>
                 )}
                 {father && mother && (
                   <span className="text-[10px] text-gray-400 dark:text-gray-500">x</span>
                 )}
                 {mother && (
-                  <div className="flex items-center gap-0.5">
+                  <button
+                    type="button"
+                    className="pointer-events-auto flex items-center gap-0.5 rounded px-0.5 hover:bg-gray-100 dark:hover:bg-gray-800"
+                    onClick={() => onFocusNode?.(mother.petId)}
+                  >
                     <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#E03E3E] dark:bg-[#FF7369]" />
-                    <span className="truncate text-[10px] text-gray-500 dark:text-gray-400">
+                    <span className="truncate text-[10px] text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
                       {mother.name ?? "이름 없음"}
                     </span>
-                  </div>
+                  </button>
                 )}
               </div>
             )}
@@ -120,13 +125,6 @@ export default function PetDetailPanel({ pet, father, mother, onAction }: PetDet
           </p>
         </PanelRow>
       )}
-
-      {/* 종 */}
-      {/* {speciesLabel && (
-        <PanelRow delay={step++ * 50}>
-          <p className="text-center text-xs text-gray-500 dark:text-gray-400">{speciesLabel}</p>
-        </PanelRow>
-      )} */}
 
       {/* 모프 */}
       {pet.morphs && pet.morphs.length > 0 && (
@@ -148,27 +146,6 @@ export default function PetDetailPanel({ pet, father, mother, onAction }: PetDet
           </div>
         </PanelRow>
       )}
-
-      {/* 형질 */}
-      {/* {pet.traits && pet.traits.length > 0 && (
-        <PanelRow delay={step++ * 50}>
-          <div className="flex flex-wrap justify-center gap-1">
-            {pet.traits.slice(0, 2).map((trait) => (
-              <span
-                key={trait}
-                className="rounded-full border border-gray-200 px-1.5 py-0.5 text-[10px] text-gray-600 dark:border-gray-700 dark:text-gray-400"
-              >
-                {trait}
-              </span>
-            ))}
-            {pet.traits.length > 2 && (
-              <span className="rounded-full border border-gray-200 px-1.5 py-0.5 text-[10px] text-gray-400 dark:border-gray-700 dark:text-gray-500">
-                +{pet.traits.length - 2}
-              </span>
-            )}
-          </div>
-        </PanelRow>
-      )} */}
 
       {/* 해칭일 */}
       {hatchingLabel && (
