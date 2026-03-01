@@ -163,7 +163,7 @@ const PairList = memo(() => {
     return (
       <div className="flex flex-col items-center justify-center px-4 py-20">
         <h1 className="bg-gradient-to-r from-[#4285F4] via-[#9B72CB] to-[#D96570] bg-clip-text text-3xl font-semibold text-transparent dark:from-[#8AB4F8] dark:via-[#C58AF9] dark:to-[#F28B82]">
-          번식 관리를 시작해보세요
+          메이팅 관리를 시작해보세요
         </h1>
         <p className="mt-3 text-[15px] text-gray-500 dark:text-gray-400">
           페어를 등록하고 메이팅・산란・해칭까지 한눈에 관리할 수 있어요.
