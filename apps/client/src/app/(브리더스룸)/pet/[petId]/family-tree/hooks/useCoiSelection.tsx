@@ -65,11 +65,6 @@ export function useCoiSelection({
         if (prev.length === 0) return [nodeId];
 
         const existingId = prev[0]!;
-        if (existingId === nodeId) {
-          toast.error("같은 개체를 부/모로 선택할 수 없습니다.", { position: "bottom-center" });
-          return prev;
-        }
-
         const existingNode = nodesMap.get(existingId);
         const existingSex = existingNode?.pet?.sex;
         const isExistingMale = existingSex === "M" || existingSex === "MALE";

@@ -4,7 +4,11 @@ import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "@/lib/toast";
 import { AxiosError } from "axios";
-import { updatePairProps } from "./PairList";
+
+interface updatePairProps {
+  pairId: number;
+  desc?: string | null;
+}
 
 const UpdatePairModal = ({
   pair,

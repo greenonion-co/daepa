@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { DataSource } from 'typeorm';
+import { Brackets, DataSource } from 'typeorm';
 import { plainToInstance } from 'class-transformer';
 import { DateTime } from 'luxon';
 import { PairEntity } from 'src/pair/pair.entity';
@@ -341,8 +341,17 @@ export class StatisticsService {
 
     if (fatherId && motherId) {
       query.andWhere(
-        '(pair.fatherId = :fatherId AND pair.motherId = :motherId) OR (pair.fatherId = :motherId AND pair.motherId = :fatherId)',
-        { fatherId, motherId },
+        new Brackets((qb) =>
+          qb
+            .where('pair.fatherId = :fatherId AND pair.motherId = :motherId', {
+              fatherId,
+              motherId,
+            })
+            .orWhere(
+              'pair.fatherId = :motherId AND pair.motherId = :fatherId',
+              { fatherId, motherId },
+            ),
+        ),
       );
     } else if (fatherId) {
       query.andWhere('pair.fatherId = :fatherId', { fatherId });

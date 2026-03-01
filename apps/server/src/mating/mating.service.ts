@@ -29,6 +29,10 @@ export class MatingService {
   ): Promise<{ fatherId?: string; motherId?: string }> {
     if (!fatherId || !motherId) return { fatherId, motherId };
 
+    if (fatherId === motherId) {
+      throw new BadRequestException('부모 펫은 서로 달라야 합니다.');
+    }
+
     const details = await entityManager.find(PetDetailEntity, {
       where: [{ petId: fatherId }, { petId: motherId }],
       select: ['petId', 'sex'],
@@ -37,9 +41,21 @@ export class MatingService {
     const fatherSex = details.find((d) => d.petId === fatherId)?.sex;
     const motherSex = details.find((d) => d.petId === motherId)?.sex;
 
-    // fatherId가 암컷이거나 motherId가 수컷이면 swap
-    if (fatherSex === PET_SEX.FEMALE || motherSex === PET_SEX.MALE) {
+    if (!fatherSex || !motherSex) {
+      throw new BadRequestException(
+        '부모 펫의 성별 정보를 확인할 수 없습니다.',
+      );
+    }
+
+    // 완전히 반대로 들어온 경우만 swap
+    if (fatherSex === PET_SEX.FEMALE && motherSex === PET_SEX.MALE) {
       return { fatherId: motherId, motherId: fatherId };
+    }
+
+    if (fatherSex !== PET_SEX.MALE || motherSex !== PET_SEX.FEMALE) {
+      throw new BadRequestException(
+        'fatherId는 수컷, motherId는 암컷이어야 합니다.',
+      );
     }
 
     return { fatherId, motherId };

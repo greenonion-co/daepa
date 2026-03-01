@@ -46,11 +46,19 @@ export function useForceSimulation({
   const [tickId, setTickId] = useState(0);
 
   useEffect(() => {
-    initialNodePositionsRef.current = initialNodePositions ?? {};
+    initialNodePositionsRef.current = { ...(initialNodePositions ?? {}) };
   }, [initialNodePositions]);
 
   useEffect(() => {
-    if (nodes.length === 0) return;
+    if (nodes.length === 0) {
+      simulationRef.current?.stop();
+      simulationRef.current = null;
+      simNodesRef.current = [];
+      simLinksRef.current = [];
+      prevNodeCountRef.current = 0;
+      setTickId((t) => t + 1);
+      return;
+    }
 
     const prevPositions = new Map<
       string,
