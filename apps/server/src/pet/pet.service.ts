@@ -189,6 +189,9 @@ export class PetService {
   ): Promise<number> {
     return this.dataSource.transaction(async (em: EntityManager) => {
       const { pets } = dto;
+      if (pets.length === 0) {
+        throw new BadRequestException('최소 1개 이상의 개체가 필요합니다.');
+      }
 
       // === 1단계: 사전 검증 ===
 
