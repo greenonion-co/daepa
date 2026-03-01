@@ -45,4 +45,6 @@ export interface FamilyTreeNodeDto {
   isPublic: boolean;
   /** 현재 유저의 소유 여부 */
   isOwner: boolean;
+  /** 소유자 이름 */
+  ownerName?: string;
 }

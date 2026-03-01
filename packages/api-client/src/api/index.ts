@@ -72,6 +72,7 @@ import type {
   ChildPetDetailDto,
   CommonResponseDto,
   DetailJson,
+  FamilyTreeNodeDto,
   FeedingControllerGetList200,
   FilterPetListResponseDto,
   FindPetByPetIdResponseDto,
@@ -1311,10 +1312,10 @@ export const getPetControllerVerifyNameResponseMock = (
   ...overrideResponse,
 });
 
-export const getPetControllerGetFamilyTreeResponseMock = (
-  overrideResponse: Partial<GetFamilyTreeResponseDto> = {},
-): GetFamilyTreeResponseDto => ({
-  nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+export const getPetControllerGetFamilyTreeResponseFamilyTreeNodeDtoMock = (
+  overrideResponse: Partial<FamilyTreeNodeDto> = {},
+): FamilyTreeNodeDto => ({
+  ...{
     petId: faker.string.alpha(20),
     fatherId: {},
     motherId: {},
@@ -1338,7 +1339,30 @@ export const getPetControllerGetFamilyTreeResponseMock = (
     type: faker.string.alpha(20),
     isPublic: faker.datatype.boolean(),
     isOwner: faker.datatype.boolean(),
-  })),
+    ownerName: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+  },
+  ...overrideResponse,
+});
+
+export const getPetControllerGetFamilyTreeResponsePetHiddenStatusDtoMock = (
+  overrideResponse: Partial<PetHiddenStatusDto> = {},
+): PetHiddenStatusDto => ({
+  ...{
+    petId: faker.string.alpha(20),
+    hiddenStatus: faker.helpers.arrayElement(["SECRET", "PENDING", "DELETED"] as const),
+  },
+  ...overrideResponse,
+});
+
+export const getPetControllerGetFamilyTreeResponseMock = (
+  overrideResponse: Partial<GetFamilyTreeResponseDto> = {},
+): GetFamilyTreeResponseDto => ({
+  nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+    faker.helpers.arrayElement([
+      { ...getPetControllerGetFamilyTreeResponseFamilyTreeNodeDtoMock() },
+      { ...getPetControllerGetFamilyTreeResponsePetHiddenStatusDtoMock() },
+    ]),
+  ),
   centerPairPartnerIds: Array.from(
     { length: faker.number.int({ min: 1, max: 10 }) },
     (_, i) => i + 1,
