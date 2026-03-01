@@ -1,12 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
-import {
-  pairControllerGetPairList,
-  statisticsControllerGetPairSummary,
-  type PairSummaryDto,
-} from "@repo/api-client";
+import { statisticsControllerGetPairStatistics, type EggStatisticsDto } from "@repo/api-client";
+
+export interface PairStatisticsSummary {
+  totalMatings: number;
+  totalLayings: number;
+  egg: EggStatisticsDto;
+}
 
 interface UsePairStatisticsResult {
-  statistics: PairSummaryDto | null;
+  statistics: PairStatisticsSummary | null;
   isLoading: boolean;
   hasPair: boolean;
 }
@@ -38,38 +40,25 @@ export function usePairStatistics(
     ? determinePairRoles(petIdA!, petIdB!, sexA, sexB)
     : { fatherId: undefined, motherId: undefined };
 
-  // 페어 존재 여부 확인 (저장 시 성별 정규화 보장)
-  const { data: pairData, isLoading: isPairLoading } = useQuery({
-    queryKey: ["pair-lookup", fatherId, motherId],
-    queryFn: async () => {
-      const res = await pairControllerGetPairList({ fatherId, motherId, itemPerPage: 1 });
-      const pairs = res.data.data ?? [];
-      if (pairs.length > 0) return { pairId: pairs[0]!.pairId, fatherId, motherId };
-      return null;
+  const { data, isLoading } = useQuery({
+    queryKey: [statisticsControllerGetPairStatistics.name, fatherId, motherId],
+    queryFn: () => statisticsControllerGetPairStatistics({ fatherId, motherId }),
+    select: (res) => {
+      const { meta, egg } = res.data;
+      return {
+        totalMatings: meta.totalMatings,
+        totalLayings: meta.totalLayings,
+        egg,
+        hasPair: meta.totalMatings > 0,
+      };
     },
     enabled,
     staleTime: 5 * 60 * 1000,
   });
 
-  const resolvedFatherId = pairData?.fatherId;
-  const resolvedMotherId = pairData?.motherId;
-
-  // 번식 이력 요약 fetch (새 전용 API: 산란 없어도 totalMatings 정확히 반환)
-  const { data: statsData, isLoading: isStatsLoading } = useQuery({
-    queryKey: ["pair-summary", resolvedFatherId, resolvedMotherId],
-    queryFn: () =>
-      statisticsControllerGetPairSummary({
-        fatherId: resolvedFatherId!,
-        motherId: resolvedMotherId!,
-      }),
-    select: (res) => res.data,
-    enabled: !!pairData && !!resolvedFatherId && !!resolvedMotherId,
-    staleTime: 5 * 60 * 1000,
-  });
-
   return {
-    statistics: statsData ?? null,
-    isLoading: enabled && (isPairLoading || (!!pairData && isStatsLoading)),
-    hasPair: !!pairData,
+    statistics: data ? { totalMatings: data.totalMatings, totalLayings: data.totalLayings, egg: data.egg } : null,
+    isLoading: enabled && isLoading,
+    hasPair: data?.hasPair ?? false,
   };
 }

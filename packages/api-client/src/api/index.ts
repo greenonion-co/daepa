@@ -39,7 +39,6 @@ import type {
   SaveFilesDto,
   StatisticsControllerGetAdoptionStatisticsParams,
   StatisticsControllerGetPairStatisticsParams,
-  StatisticsControllerGetPairSummaryParams,
   TestPushNotificationDto,
   UnlinkParentDto,
   UpdateAdoptionDto,
@@ -85,7 +84,6 @@ import type {
   NativeLoginResponseDto,
   PairControllerGetPairList200,
   PairDetailDto,
-  PairSummaryDto,
   ParentLinkDetailJson,
   ParentStatisticsDto,
   PendingRequestCountResponseDto,
@@ -655,19 +653,6 @@ export const petImageControllerSavePetImages = (petId: string, saveFilesDto: Sav
 };
 
 /**
- * @summary 가계도 번식 이력 패널용 페어 요약 통계
- */
-export const statisticsControllerGetPairSummary = (
-  params: StatisticsControllerGetPairSummaryParams,
-) => {
-  return useCustomInstance<PairSummaryDto>({
-    url: `/api/v1/statistics/pair-summary`,
-    method: "GET",
-    params,
-  });
-};
-
-/**
  * @summary 부모 개체 통계 조회 (부 또는 모 개체 기준)
  */
 export const statisticsControllerGetPairStatistics = (
@@ -940,9 +925,6 @@ export type PetImageControllerFindOneResult = NonNullable<
 >;
 export type PetImageControllerSavePetImagesResult = NonNullable<
   Awaited<ReturnType<typeof petImageControllerSavePetImages>>
->;
-export type StatisticsControllerGetPairSummaryResult = NonNullable<
-  Awaited<ReturnType<typeof statisticsControllerGetPairSummary>>
 >;
 export type StatisticsControllerGetPairStatisticsResult = NonNullable<
   Awaited<ReturnType<typeof statisticsControllerGetPairStatistics>>
@@ -4227,33 +4209,6 @@ export const getPetImageControllerSavePetImagesResponseMock = (
   ...overrideResponse,
 });
 
-export const getStatisticsControllerGetPairSummaryResponseMock = (
-  overrideResponse: Partial<PairSummaryDto> = {},
-): PairSummaryDto => ({
-  totalMatings: faker.number.int({ min: undefined, max: undefined }),
-  totalLayings: faker.number.int({ min: undefined, max: undefined }),
-  egg: {
-    ...{
-      total: faker.number.int({ min: undefined, max: undefined }),
-      fertilized: faker.number.int({ min: undefined, max: undefined }),
-      unfertilized: faker.number.int({ min: undefined, max: undefined }),
-      hatched: faker.number.int({ min: undefined, max: undefined }),
-      dead: faker.number.int({ min: undefined, max: undefined }),
-      pending: faker.number.int({ min: undefined, max: undefined }),
-      fertilizedRate: faker.number.int({ min: undefined, max: undefined }),
-      hatchingRate: faker.number.int({ min: undefined, max: undefined }),
-    },
-  },
-  morphs: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-    () => ({
-      key: faker.string.alpha(20),
-      count: faker.number.int({ min: undefined, max: undefined }),
-      percentage: faker.number.int({ min: undefined, max: undefined }),
-    }),
-  ),
-  ...overrideResponse,
-});
-
 export const getStatisticsControllerGetPairStatisticsResponseMock = (
   overrideResponse: Partial<ParentStatisticsDto> = {},
 ): ParentStatisticsDto => ({
@@ -5955,29 +5910,6 @@ export const getPetImageControllerSavePetImagesMockHandler = (
   });
 };
 
-export const getStatisticsControllerGetPairSummaryMockHandler = (
-  overrideResponse?:
-    | PairSummaryDto
-    | ((
-        info: Parameters<Parameters<typeof http.get>[1]>[0],
-      ) => Promise<PairSummaryDto> | PairSummaryDto),
-) => {
-  return http.get("*/api/v1/statistics/pair-summary", async (info) => {
-    await delay(1000);
-
-    return new HttpResponse(
-      JSON.stringify(
-        overrideResponse !== undefined
-          ? typeof overrideResponse === "function"
-            ? await overrideResponse(info)
-            : overrideResponse
-          : getStatisticsControllerGetPairSummaryResponseMock(),
-      ),
-      { status: 200, headers: { "Content-Type": "application/json" } },
-    );
-  });
-};
-
 export const getStatisticsControllerGetPairStatisticsMockHandler = (
   overrideResponse?:
     | ParentStatisticsDto
@@ -6248,7 +6180,6 @@ export const getProjectDaepaAPIMock = () => [
   getPetImageControllerFindThumbnailMockHandler(),
   getPetImageControllerFindOneMockHandler(),
   getPetImageControllerSavePetImagesMockHandler(),
-  getStatisticsControllerGetPairSummaryMockHandler(),
   getStatisticsControllerGetPairStatisticsMockHandler(),
   getStatisticsControllerGetAdoptionStatisticsMockHandler(),
   getFeedingControllerCreateMockHandler(),

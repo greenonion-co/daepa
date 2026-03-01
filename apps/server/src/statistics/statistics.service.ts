@@ -31,7 +31,6 @@ import {
   CustomerAnalysisDto,
   PriceRangeItemDto,
   ParentStatisticsQueryDto,
-  PairSummaryDto,
 } from './statistics.dto';
 
 interface PetWithDetails {
@@ -116,7 +115,15 @@ export class StatisticsService {
     const layingEntities = await layingQuery.getMany();
 
     if (layingEntities.length === 0) {
-      return this.buildEmptyParentStatistics(fatherId, motherId, year, month);
+      return this.buildParentStatistics(
+        fatherId,
+        motherId,
+        [],
+        totalMatings,
+        0,
+        year,
+        month,
+      );
     }
 
     const layingsForStats: LayingWithDate[] = layingEntities.map((laying) => ({
@@ -190,134 +197,6 @@ export class StatisticsService {
       year,
       month,
     );
-  }
-
-  /**
-   * 가계도 번식 이력 패널용 페어 요약 통계
-   * - ownerId 무관, fatherId/motherId 양방향 조회
-   * - 메이팅만 있고 산란 없어도 totalMatings 정확히 반환
-   */
-  async getPairSummary(
-    fatherId: string,
-    motherId: string,
-  ): Promise<PairSummaryDto> {
-    const emptyEgg = plainToInstance(EggStatisticsDto, {
-      total: 0,
-      fertilized: 0,
-      unfertilized: 0,
-      hatched: 0,
-      dead: 0,
-      pending: 0,
-      fertilizedRate: 0,
-      hatchingRate: 0,
-    });
-
-    // 1) 페어 조회 (단방향 — 저장 시 성별 정규화 보장)
-    const pair = await this.dataSource
-      .createQueryBuilder(PairEntity, 'pair')
-      .where('pair.isDeleted = false')
-      .andWhere('pair.fatherId = :fatherId AND pair.motherId = :motherId', {
-        fatherId,
-        motherId,
-      })
-      .select(['pair.id'])
-      .getOne();
-
-    if (!pair) {
-      return plainToInstance(PairSummaryDto, {
-        totalMatings: 0,
-        totalLayings: 0,
-        egg: emptyEgg,
-        morphs: [],
-      });
-    }
-
-    // 2) 메이팅 조회
-    const matings = await this.dataSource
-      .createQueryBuilder(MatingEntity, 'mating')
-      .where('mating.pairId = :pairId', { pairId: pair.id })
-      .select(['mating.id'])
-      .getMany();
-
-    const totalMatings = matings.length;
-
-    if (totalMatings === 0) {
-      return plainToInstance(PairSummaryDto, {
-        totalMatings: 0,
-        totalLayings: 0,
-        egg: emptyEgg,
-        morphs: [],
-      });
-    }
-
-    // 3) 산란 조회
-    const matingIds = matings.map((m) => m.id);
-    const layings = await this.dataSource
-      .createQueryBuilder(LayingEntity, 'laying')
-      .where('laying.matingId IN (:...matingIds)', { matingIds })
-      .select(['laying.id'])
-      .getMany();
-
-    const totalLayings = layings.length;
-
-    if (totalLayings === 0) {
-      return plainToInstance(PairSummaryDto, {
-        totalMatings,
-        totalLayings: 0,
-        egg: emptyEgg,
-        morphs: [],
-      });
-    }
-
-    // 4) 알/펫 통계 조회
-    const layingIds = layings.map((l) => l.id);
-    const pets = await this.dataSource
-      .createQueryBuilder(PetEntity, 'pet')
-      .leftJoinAndMapOne(
-        'pet.eggDetail',
-        EggDetailEntity,
-        'eggDetail',
-        'eggDetail.petId = pet.petId',
-      )
-      .leftJoinAndMapOne(
-        'pet.petDetail',
-        PetDetailEntity,
-        'petDetail',
-        'petDetail.petId = pet.petId',
-      )
-      .where('pet.layingId IN (:...layingIds)', { layingIds })
-      .andWhere('pet.isDeleted = false')
-      .select([
-        'pet.petId',
-        'pet.layingId',
-        'eggDetail.status',
-        'petDetail.morphs',
-      ])
-      .getMany();
-
-    const petsWithDetails: PetWithDetails[] = pets.map((pet) => ({
-      petId: pet.petId,
-      layingId: pet.layingId ?? null,
-      eggDetail: pet.eggDetail
-        ? { status: pet.eggDetail.status ?? null }
-        : undefined,
-      petDetail: pet.petDetail
-        ? { sex: null, morphs: pet.petDetail.morphs ?? null, traits: null }
-        : undefined,
-    }));
-
-    const egg = this.buildEggStatistics(petsWithDetails);
-    const morphs = this.buildDistribution(
-      petsWithDetails.filter((p) => p.eggDetail?.status === EGG_STATUS.HATCHED),
-      (p) => p.petDetail?.morphs ?? null,
-    );
-
-    return plainToInstance(PairSummaryDto, {
-      totalMatings,
-      totalLayings,
-      egg,
-      morphs,
-    });
   }
 
   /**

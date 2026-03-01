@@ -2,7 +2,7 @@
 
 import CalendarSelect from "@/app/(브리더스룸)/hatching/components/CalendarSelect";
 import { cn } from "@/lib/utils";
-import type { PairSummaryDto } from "@repo/api-client";
+import type { PairStatisticsSummary } from "../hooks/usePairStatistics";
 import { Plus } from "lucide-react";
 
 export interface PairChildInfo {
@@ -15,7 +15,7 @@ export interface PairChildInfo {
 }
 
 interface PairStatisticsPanelProps {
-  statistics: PairSummaryDto | null;
+  statistics: PairStatisticsSummary | null;
   isLoading: boolean;
   hasPair: boolean;
   isOpposite?: boolean;

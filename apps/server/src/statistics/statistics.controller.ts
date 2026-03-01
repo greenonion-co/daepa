@@ -1,4 +1,4 @@
-import { Controller, Get, Query, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Query } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtUser } from 'src/auth/auth.decorator';
 import { JwtUserPayload } from 'src/auth/strategies/jwt.strategy';
@@ -8,30 +8,12 @@ import {
   ParentStatisticsQueryDto,
   AdoptionStatisticsDto,
   AdoptionStatisticsQueryDto,
-  PairSummaryDto,
 } from './statistics.dto';
 
 @Controller('v1/statistics')
 @ApiTags('Statistics')
 export class StatisticsController {
   constructor(private readonly statisticsService: StatisticsService) {}
-
-  @Get('pair-summary')
-  @ApiOperation({ summary: '가계도 번식 이력 패널용 페어 요약 통계' })
-  @ApiResponse({
-    status: 200,
-    description: '페어 요약 통계 조회 성공',
-    type: PairSummaryDto,
-  })
-  async getPairSummary(
-    @Query('fatherId') fatherId?: string,
-    @Query('motherId') motherId?: string,
-  ): Promise<PairSummaryDto> {
-    if (!fatherId || !motherId) {
-      throw new BadRequestException('fatherId and motherId are required');
-    }
-    return this.statisticsService.getPairSummary(fatherId, motherId);
-  }
 
   @Get('pairs')
   @ApiOperation({ summary: '부모 개체 통계 조회 (부 또는 모 개체 기준)' })
