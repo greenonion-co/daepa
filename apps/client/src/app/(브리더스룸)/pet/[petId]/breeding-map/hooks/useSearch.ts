@@ -8,7 +8,11 @@ interface UseSearchParams {
   nodesMap: Map<string, FamilyTreeNodeData>;
   nodeKey: string;
   queryClient: QueryClient;
-  mergeTree: (petId: string, nodes: FamilyTreeResponse["nodes"], centerPairPartnerIds: string[]) => void;
+  mergeTree: (
+    petId: string,
+    nodes: FamilyTreeResponse["nodes"],
+    centerPairPartnerIds: string[],
+  ) => void;
 }
 
 export function useSearch({ nodesMap, nodeKey, queryClient, mergeTree }: UseSearchParams) {
@@ -78,7 +82,7 @@ export function useSearch({ nodesMap, nodeKey, queryClient, mergeTree }: UseSear
           queryFn: () => petControllerGetFamilyTree(targetPetId, { depth: 2 }),
           staleTime: 5 * 60 * 1000,
         });
-        const data = response.data as unknown as FamilyTreeResponse;
+        const data = response.data;
         mergeTree(targetPetId, data.nodes, data.centerPairPartnerIds ?? []);
         setSearchQuery("");
         setTimeout(() => setFocusNodeId(targetPetId), 1500);
