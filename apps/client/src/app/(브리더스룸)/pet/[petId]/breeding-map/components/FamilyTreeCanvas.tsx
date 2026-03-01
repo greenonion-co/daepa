@@ -11,7 +11,7 @@ import MorphLegend from "./MorphLegend";
 import SearchDropdown from "./SearchDropdown";
 import CreateLayingModal from "../../../../hatching/components/CreateLayingModal";
 import PetDetailModal from "../../components/PetDetailModal";
-import { useCenterPet, useFamilyTree, type FamilyTreeResponse } from "../hooks/useFamilyTreeData";
+import { useFamilyTree, type FamilyTreeResponse } from "../hooks/useFamilyTreeData";
 import { usePairInvalidate } from "../../../../hatching/hooks/usePairInvalidate";
 import { useGraphTransform } from "../hooks/useGraphTransform";
 import { useSearch } from "../hooks/useSearch";
@@ -77,9 +77,6 @@ export default function FamilyTreeCanvas({ petId }: FamilyTreeCanvasProps) {
   >({});
   const reshuffleRef = useRef<(() => void) | null>(null);
   const isMobile = useIsMobile();
-
-  // 중심 개체 fetch
-  const { data: centerPet, isLoading: isCenterLoading } = useCenterPet(petId);
 
   // 브리딩맵 전체 데이터 fetch (Recursive CTE)
   const { data: familyTreeNodes, isLoading: isTreeLoading } = useFamilyTree(petId);
@@ -251,7 +248,6 @@ export default function FamilyTreeCanvas({ petId }: FamilyTreeCanvasProps) {
     queryFn: () => petControllerFindPetByPetId(detailModalPetId!),
     select: (response) => response.data.data,
     enabled: !!detailModalPetId,
-    staleTime: 5 * 60 * 1000,
   });
 
   // 번식 이력 통계 + 메이팅/산란 핸들러
@@ -312,7 +308,10 @@ export default function FamilyTreeCanvas({ petId }: FamilyTreeCanvasProps) {
     setTimeout(() => setFocusNodeId(nodeId), 0);
   }, []);
 
-  if (isCenterLoading || isTreeLoading) {
+  // 중심 개체 데이터 (트리 데이터에서 파생)
+  const centerPet = nodesMap.get(petId)?.pet ?? null;
+
+  if (isTreeLoading) {
     return (
       <div className="flex h-full items-center justify-center">
         <Loading />
