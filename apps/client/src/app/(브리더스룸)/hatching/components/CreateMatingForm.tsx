@@ -31,13 +31,9 @@ const getInitialFormData = () => ({
 
 interface CreateMatingFormProps {
   onClose: () => void;
-  onSuccess?: () => void;
-  initialFather?: { petId: string; name?: string | null };
-  initialMother?: { petId: string; name?: string | null };
-  lockParents?: boolean;
 }
 
-const CreateMatingForm = ({ onClose, onSuccess, initialFather, initialMother, lockParents }: CreateMatingFormProps) => {
+const CreateMatingForm = ({ onClose }: CreateMatingFormProps) => {
   const queryClient = useQueryClient();
   const [formData, setFormData] = useState<{
     species: PetDtoSpecies;
@@ -45,11 +41,7 @@ const CreateMatingForm = ({ onClose, onSuccess, initialFather, initialMother, lo
     mother?: PetParentDto;
     matingDate: string;
     season: number | undefined;
-  }>(() => ({
-    ...getInitialFormData(),
-    ...(initialFather ? { father: { petId: initialFather.petId, name: initialFather.name } as PetParentDto } : {}),
-    ...(initialMother ? { mother: { petId: initialMother.petId, name: initialMother.name } as PetParentDto } : {}),
-  }));
+  }>(getInitialFormData);
 
   const { mutateAsync: createMating, isPending } = useMutation({
     mutationFn: matingControllerCreateMating,
@@ -99,7 +91,6 @@ const CreateMatingForm = ({ onClose, onSuccess, initialFather, initialMother, lo
 
       toast.success("메이팅이 추가되었습니다.");
       await queryClient.invalidateQueries({ queryKey: [pairControllerGetPairList.name] });
-      onSuccess?.();
       onClose();
       setFormData(getInitialFormData());
     } catch (error) {
@@ -230,7 +221,7 @@ const CreateMatingForm = ({ onClose, onSuccess, initialFather, initialMother, lo
                 label="부"
                 species={formData.species}
                 data={formData.father}
-                editable={!(lockParents && initialFather)}
+                editable
                 onSelect={(item) => handleParentSelect(UnlinkParentDtoRole.FATHER, item)}
                 onUnlink={handleFatherUnlink}
               />
@@ -241,7 +232,7 @@ const CreateMatingForm = ({ onClose, onSuccess, initialFather, initialMother, lo
                 label="모"
                 species={formData.species}
                 data={formData.mother}
-                editable={!(lockParents && initialMother)}
+                editable
                 onSelect={(item) => handleParentSelect(UnlinkParentDtoRole.MOTHER, item)}
                 onUnlink={handleMotherUnlink}
               />

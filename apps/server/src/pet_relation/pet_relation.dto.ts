@@ -6,6 +6,8 @@ import {
   IsNumber,
   IsObject,
   IsOptional,
+  Min,
+  Max,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { PetSummaryDto, PetHiddenStatusDto } from 'src/pet/pet.dto';
@@ -278,14 +280,23 @@ export class FamilyTreeNodeDto {
   @ApiProperty({ description: '펫 아이디' })
   petId: string;
 
-  @ApiProperty({ description: '아버지 펫 아이디', nullable: true })
+  @ApiProperty({
+    description: '아버지 펫 아이디',
+    type: 'string',
+    nullable: true,
+  })
   fatherId: string | null;
 
-  @ApiProperty({ description: '어머니 펫 아이디', nullable: true })
+  @ApiProperty({
+    description: '어머니 펫 아이디',
+    type: 'string',
+    nullable: true,
+  })
   motherId: string | null;
 
   @ApiProperty({
     description: '중심 개체로부터의 세대 깊이 (0=루트, null=공동 부모)',
+    type: 'number',
     nullable: true,
   })
   depth: number | null;
@@ -355,6 +366,8 @@ export class GetFamilyTreeQueryDto {
     required: false,
     example: 5,
   })
+  @Min(1)
+  @Max(7)
   @IsOptional()
   @IsNumber()
   @Transform(({ value }) => Number(value))
@@ -365,6 +378,8 @@ export class GetFamilyTreeQueryDto {
     required: false,
     example: 2,
   })
+  @Min(1)
+  @Max(5)
   @IsOptional()
   @IsNumber()
   @Transform(({ value }) => Number(value))

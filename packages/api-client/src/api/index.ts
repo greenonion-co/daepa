@@ -1299,9 +1299,9 @@ export const getPetControllerGetFamilyTreeResponseFamilyTreeNodeDtoMock = (
 ): FamilyTreeNodeDto => ({
   ...{
     petId: faker.string.alpha(20),
-    fatherId: {},
-    motherId: {},
-    depth: {},
+    fatherId: faker.helpers.arrayElement([faker.string.alpha(20), null]),
+    motherId: faker.helpers.arrayElement([faker.string.alpha(20), null]),
+    depth: faker.helpers.arrayElement([faker.number.int({ min: undefined, max: undefined }), null]),
     name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
     sex: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
     morphs: faker.helpers.arrayElement([
