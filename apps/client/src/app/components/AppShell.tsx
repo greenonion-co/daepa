@@ -17,6 +17,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const searchParams = useSearchParams();
   const isPetDetail = pathname?.startsWith("/pet/") ?? false;
   const isFamilyTree = /\/pet\/[^/]+\/family-tree/.test(pathname ?? "");
+  const isShowcase = pathname?.startsWith("/@") ?? false;
   const isIntroPage = pathname === "/intro";
   const isMobile = useIsMobile();
 
@@ -39,11 +40,11 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       className={`relative mx-auto flex min-h-screen w-full ${isPetDetail ? "dark:bg-background bg-gray-100" : ""}`}
     >
       <div className={cn("w-full", !isMobile && "max-w-[calc(100%_-_var(--right-sidebar-width))]")}>
-        {!hasNativeTopBar && <Menubar unreadCount={unreadCount} />}
+        {!hasNativeTopBar && (!isShowcase || user) && <Menubar unreadCount={unreadCount} />}
         <div className={cn(isNativeApp() && "pb-[80px]")}>{children}</div>
       </div>
       {/* 모바일 웹 */}
-      {!isNativeApp() && isMobile && !isFamilyTree && <AddPetButton />}
+      {!isNativeApp() && isMobile && !isFamilyTree && !isShowcase && <AddPetButton />}
       {/* 웹 */}
       {!isNativeApp() && !isMobile && <Sidebar unreadCount={unreadCount} />}
     </main>

@@ -29,6 +29,7 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
   const isNative = isNativeApp();
   const isRegisterPage = pathname.includes("/register/");
   const isPetDetailPage = pathname?.startsWith("/pet/") ?? false;
+  const isShowcase = pathname?.startsWith("/@") ?? false;
   const isFeedPage = pathname === "/";
   const isPetListPage = pathname === "/pet";
 
@@ -134,8 +135,13 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
   return (
     <div
       className={cn(
-        "dark:bg-background flex h-[52px] items-center justify-between px-2",
-        !isPetDetailPage && "bg-background sticky top-0 left-0 z-20 w-full",
+        "flex h-[52px] items-center justify-between px-2",
+        isShowcase
+          ? "w-full"
+          : cn(
+              "dark:bg-background",
+              !isPetDetailPage && "bg-background sticky top-0 left-0 z-20 w-full",
+            ),
         isNative && "pr-4",
       )}
     >
