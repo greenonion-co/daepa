@@ -4,9 +4,9 @@
 
 ---
 
-## 1. types.ts (91줄, 신규)
+## 1. types.ts (~120줄)
 
-가계도 전용 타입 정의 및 변환 함수.
+가계도 전용 타입 정의 및 변환 함수. ForceGraph의 `GraphNode`, `GraphLink` 타입도 여기에 정의.
 
 ### 주요 타입
 
@@ -220,7 +220,61 @@ COI 공통 조상의 모든 경로에서 현재 그래프에 보이는 엣지만
 
 ---
 
-## 5. hooks (신규)
+## 5. force-graph-constants.ts (~65줄, 신규)
+
+ForceGraph 관련 모든 상수 (30+개):
+- 노드 크기: `MIN_RADIUS`, `MAX_RADIUS`, `PAIR_RADIUS_BOOST`, `BASE_FONT_SIZE`
+- 색상: `COLOR_DEFAULT_NODE`, `COLOR_HOVER_CENTER`, `COLOR_COI_PATH`, `COLOR_PAIR_EDGE` 등
+- 시뮬레이션: `SIM_LINK_DISTANCE`, `SIM_CHARGE_STRENGTH`, `PAIR_ALIGN_STRENGTH`, `GENERATION_GAP` 등
+- 포커스 애니메이션: `FOCUS_MIN_ZOOM`, `FOCUS_TRANSITION_MS` 등
+- 화살표 마커: `ARROW_MARKER_DEFS` (색상별 마커 정의 배열)
+
+---
+
+## 6. force-graph-utils.ts (~265줄, 신규)
+
+ForceGraph 스타일 계산 순수함수 + 유틸리티.
+
+### 유틸리티 함수
+| 함수 | 용도 |
+|------|------|
+| `getLinkSourceId(link)` | 링크 source ID 추출 (string 또는 GraphNode) |
+| `getLinkTargetId(link)` | 링크 target ID 추출 |
+| `adjustMorphColorForTheme(hex, isDark)` | 다크/라이트 모드 색상 보정 |
+| `nodeRadius(degree, maxDegree, isPairOfCenter?)` | degree 기반 노드 반지름 계산 |
+| `screenToSvg(gEl, clientX, clientY)` | 화면 좌표 → SVG 좌표 변환 |
+| `getSexDotColor(sex?)` | 성별 dot 색상 (M: 파란, F: 빨간) |
+
+### 스타일 순수함수
+| 함수 | 용도 |
+|------|------|
+| `computeNodeColor(node, ctx)` | 노드 fill/stroke 색상 |
+| `computeEdgeColor(link, ctx)` | 엣지 stroke 색상 |
+| `computeEdgeWidth(link, ctx)` | 엣지 두께 |
+| `computeEdgeHidden(link, ...)` | 엣지 숨김 여부 |
+| `computeArrowMarkerId(color)` | 화살표 마커 ID |
+| `computeNodeOpacity(node, ctx)` | 노드 불투명도 |
+| `computeLabelOpacity(node, ctx)` | 라벨 불투명도 |
+
+### StyleContext
+```ts
+interface StyleContext {
+  hoveredNodeId: string | null;
+  isDark: boolean;
+  highlightSelected: boolean;
+  selectedSet: Set<string>;
+  coiNodeSet: Set<string>;
+  coiEdgeSet: Set<string>;
+  childSet: Set<string>;
+  connectedMap: Map<string, Set<string>>;
+  simNodes: GraphNode[];
+  maxDegree: number;
+}
+```
+
+---
+
+## 7. hooks
 
 ### useFamilyTreeData.ts (39줄)
 | 훅 | API | queryKey | staleTime |
@@ -243,5 +297,46 @@ COI 공통 조상의 모든 경로에서 현재 그래프에 보이는 엣지만
 | `usePairStatistics(petIdA?, petIdB?, sexA?, sexB?)` | 페어 존재 여부 + 번식 통계 조회 |
 
 - `determinePairRoles` — 성별 기반 father/mother 역할 결정
-- 양방향 페어 조회 (`Promise.all`로 정방향 + 역방향)
+- 단방향 페어 조회 (서버 저장 시 성별 정규화 보장)
 - queryKey: `["pair-lookup", ...]`, `["pair-summary", ...]`
+
+### useGraphTransform.ts (~180줄, 신규)
+FamilyTreeCanvas에서 추출. 그래프 데이터 변환:
+- `nodesMap`/`edgesMap` → `GraphNode[]`/`GraphLink[]` 변환
+- 썸네일 URL 일괄 fetch (`useQueries`)
+- 성별 필터 적용
+- 모프 범례 (visibleMorphs)
+- 비공개 노드 필터링
+
+### useSearch.ts (~157줄, 신규)
+FamilyTreeCanvas에서 추출. 검색 + 외부 트리 추가:
+- 검색어 debounce (300ms)
+- API 검색 결과 → 그래프 포커스
+- 외부 개체 선택 → API fetch → 스토어 merge
+
+### useCoiSelection.tsx (~321줄, 신규)
+FamilyTreeCanvas에서 추출. COI 선택/메이트 선택:
+- COI 첫 번째/두 번째 개체 선택 상태 관리
+- `useCoiCalculation` 연동
+- 메이트 선택 모드 + 메이팅 생성 + pair 엣지 추가
+
+### usePairActions.tsx (~193줄, 신규)
+FamilyTreeCanvas에서 추출. 페어 통계 + 메이팅/산란:
+- `usePairStatistics` 연동
+- 메이팅 생성/산란 추가 (overlay-kit 모달)
+- 쿼리 무효화
+
+### useForceSimulation.ts (~180줄, 신규)
+ForceGraph에서 추출. d3-force 시뮬레이션 생명주기:
+- rAF 배칭으로 틱 렌더링 최적화
+- 노드 위치 보존, 이웃 기반 초기 배치
+- 커스텀 pairAlignForce
+- Alpha 관리 (확장 vs 초기)
+
+### useForceInteraction.ts (~190줄, 신규)
+ForceGraph에서 추출. 인터랙션 관리:
+- d3-zoom 줌/팬
+- focusNodeId 포커스 애니메이션 (줌인 + 글로우)
+- 노드 드래그 (mousedown → mousemove → mouseup)
+- 싱글클릭/더블클릭 구분 (250ms 딜레이)
+- hover 상태 + connectedMap

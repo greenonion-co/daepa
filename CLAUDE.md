@@ -6,6 +6,19 @@
 - `packages/api-client` — orval 자동생성 API 클라이언트 (`@repo/api-client`)
 - 주요 앱 경로: `apps/client/src/app/(브리더스룸)/`
 
+## 상세 문서 (작업 전 관련 파일 읽기)
+가계도 관련 작업 시 아래 문서를 참조할 것:
+| 문서 | 내용 |
+|------|------|
+| `docs/family-tree/01-server-api.md` | 서버 API (Family Tree CTE, Pair Summary) |
+| `docs/family-tree/02-client-core-architecture.md` | 클라이언트 코어 (page, store, canvas, 데이터 흐름) |
+| `docs/family-tree/03-force-graph.md` | ForceGraph d3-force 시각화 (힘, 노드/엣지 색상, 하이라이트) |
+| `docs/family-tree/04-panels-and-modals.md` | 패널/모달 10개 (PetDetail, COI, PairStats, QuickRegister 등) |
+| `docs/family-tree/05-libraries.md` | 라이브러리 (types, COI 엔진, 유전 예측, graph-utils, hooks) |
+| `docs/family-tree/06-hatching-improvements.md` | 해칭 개선 (usePairInvalidate, PairCard, UX) |
+| `docs/family-tree/07-common-extensions.md` | 공통 컴포넌트 확장 (forceCenter, parentSearch, ParentLink) |
+| `docs/family-tree/08-api-client-and-setup.md` | API 클라이언트 타입, 의존성, 전체 통계 |
+
 ## 가계도 기능
 **경로**: `apps/client/src/app/(브리더스룸)/pet/[petId]/family-tree/`
 

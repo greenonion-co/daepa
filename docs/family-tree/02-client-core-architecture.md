@@ -12,15 +12,26 @@ family-tree/
 ├── hooks/
 │   ├── useFamilyTreeData.ts          # 데이터 fetching 훅
 │   ├── useCoiCalculation.ts          # COI 계산 훅
-│   └── usePairStatistics.ts          # 페어 통계 훅
+│   ├── usePairStatistics.ts          # 페어 통계 훅
+│   ├── useGraphTransform.ts          # 그래프 데이터 변환 (썸네일, 필터, 모프 범례)
+│   ├── useSearch.ts                  # 검색 + 외부 트리 추가
+│   ├── useCoiSelection.tsx           # COI 선택 + 메이트 선택
+│   ├── usePairActions.tsx            # 페어 통계 + 메이팅 액션
+│   ├── useForceSimulation.ts         # d3-force 시뮬레이션 (rAF 배칭)
+│   └── useForceInteraction.ts        # 줌/팬, 포커스, 드래그, 클릭, hover
 ├── lib/
-│   ├── types.ts                      # 타입 정의
+│   ├── types.ts                      # 타입 정의 (GraphNode, GraphLink 포함)
 │   ├── coi.ts                        # COI 계산 엔진
 │   ├── genetics.ts                   # 유전 예측 엔진
-│   └── graph-utils.ts                # 그래프 유틸리티
+│   ├── graph-utils.ts                # 그래프 유틸리티
+│   ├── force-graph-constants.ts      # ForceGraph 상수 (색상, 크기, 시뮬레이션)
+│   └── force-graph-utils.ts          # ForceGraph 스타일 순수함수
 ├── components/
-│   ├── FamilyTreeCanvas.tsx           # 메인 컨테이너 (1,171줄)
-│   ├── ForceGraph.tsx                 # d3-force SVG 렌더링 (1,097줄)
+│   ├── FamilyTreeCanvas.tsx           # 메인 컨테이너 (~540줄)
+│   ├── ForceGraph.tsx                 # d3-force SVG 렌더링 (~250줄)
+│   ├── GraphNodeElement.tsx           # SVG 노드 (React.memo)
+│   ├── GraphEdge.tsx                  # SVG 엣지 (React.memo)
+│   ├── SearchDropdown.tsx             # 검색 드롭다운
 │   ├── CoiPanel.tsx                   # COI 정보 패널
 │   ├── PetDetailPanel.tsx             # 개체 상세 패널
 │   ├── PairStatisticsPanel.tsx        # 페어 통계 패널
@@ -80,9 +91,10 @@ Zustand 기반 가계도 전역 상태 관리.
 
 ---
 
-## FamilyTreeCanvas.tsx (1,171줄, 신규)
+## FamilyTreeCanvas.tsx (~540줄, 리팩터링)
 
 가계도 기능의 메인 컨테이너. 모든 하위 컴포넌트, 훅, 스토어를 조합.
+원래 1,171줄에서 5개 훅 + SearchDropdown 컴포넌트 추출로 ~540줄로 축소.
 
 ### Props
 ```ts
@@ -94,12 +106,14 @@ interface FamilyTreeCanvasProps {
 ### 사용하는 훅
 - `useFamilyTreeStore` (Zustand)
 - `useFamilyTree` / `useCenterPet` — 데이터 fetching
-- `useCoiCalculation` — COI 계산
-- `usePairStatistics` — 페어 통계
-- `usePairInvalidate` — 쿼리 무효화
+- `useGraphTransform` — 그래프 데이터 변환 (썸네일, 필터, 모프 범례)
+- `useSearch` — 검색 + 외부 트리 추가
+- `useCoiSelection` — COI 선택/해제/메이트 선택
+- `usePairActions` — 페어 통계 + 메이팅/산란 액션
 
 ### 연결하는 컴포넌트
 - `ForceGraph` — d3 그래프 렌더링
+- `SearchDropdown` — 검색 드롭다운
 - `PetDetailPanel` — 개체 상세 (좌측)
 - `CoiPanel` — COI 정보 (좌측 하단)
 - `OffspringPredictionPanel` — 유전 예측
@@ -107,19 +121,10 @@ interface FamilyTreeCanvasProps {
 - `MorphLegend` — 모프 범례
 - `NodeContextMenu` — 우클릭 메뉴
 - `QuickRegisterModal` — 빠른 등록 모달
-- `PairDetailContent` — 페어 상세 다이얼로그
-- `CreateLayingModal` — 산란 생성
-- `PetDetailModal` — 개체 상세 모달
-
-### 주요 핸들러
-- `handleNodeClick` — 노드 확장 (API fetch) 또는 COI 선택
-- `handleNodeDoubleClick` — COI 두 번째 개체 선택 (같은 개체 방지)
-- `handleSelectMate` — 메이팅 개체 선택 → 메이팅 생성 → `addPairEdge`
-- `handleContextMenuAction` — 상세보기, 관계도, 가계도 이동
 
 ### 데이터 흐름
 1. `useFamilyTree(petId)` → API 응답
 2. `setFamilyTree(petId, nodes, centerPairPartnerIds)` → 스토어 초기화
-3. `nodesMap` / `edgesMap` → `GraphNode[]` / `GraphLink[]` 변환
+3. `useGraphTransform` → `GraphNode[]` / `GraphLink[]` 변환 (썸네일 일괄 fetch 포함)
 4. `<ForceGraph nodes={graphNodes} links={graphLinks} />` 렌더링
 5. 노드 클릭 → `mergeTree` → 그래프 확장
