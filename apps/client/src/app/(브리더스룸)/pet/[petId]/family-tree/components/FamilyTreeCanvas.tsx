@@ -6,7 +6,6 @@ import { petControllerFindPetByPetId, petControllerGetFamilyTree } from "@repo/a
 import ForceGraph from "./ForceGraph";
 import PetDetailPanel from "./PetDetailPanel";
 import CoiPanel from "./CoiPanel";
-import OffspringPredictionPanel from "./OffspringPredictionPanel";
 import PairStatisticsPanel from "./PairStatisticsPanel";
 import MorphLegend from "./MorphLegend";
 import SearchDropdown from "./SearchDropdown";
