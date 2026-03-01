@@ -439,7 +439,7 @@ export default function FamilyTreeCanvas({ petId }: FamilyTreeCanvasProps) {
                 setShowQuickRegister(true);
               }}
             >
-              새 개체 등록
+              새로운 개체 추가
             </button>
           </div>
         </>
