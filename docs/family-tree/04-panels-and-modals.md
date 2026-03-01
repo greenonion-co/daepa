@@ -1,6 +1,6 @@
 # 가계도 패널 및 모달 컴포넌트
 
-모든 파일은 `apps/client/src/app/(브리더스룸)/pet/[petId]/family-tree/components/` 경로에 위치.
+모든 파일은 `apps/client/src/app/(브리더스룸)/pet/[petId]/breeding-map/components/` 경로에 위치.
 
 ---
 

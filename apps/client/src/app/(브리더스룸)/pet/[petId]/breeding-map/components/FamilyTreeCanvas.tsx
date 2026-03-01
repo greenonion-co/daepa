@@ -178,7 +178,7 @@ export default function FamilyTreeCanvas({ petId }: FamilyTreeCanvasProps) {
           window.open(`/pet/${nodeId}/relation`, "_blank");
           break;
         case "family-tree":
-          window.open(`/pet/${nodeId}/family-tree`, "_blank");
+          window.open(`/pet/${nodeId}/breeding-map`, "_blank");
           break;
       }
     },
@@ -196,6 +196,12 @@ export default function FamilyTreeCanvas({ petId }: FamilyTreeCanvasProps) {
 
       // 클릭 시 패널 고정 (중심 개체 포함 모든 노드)
       setPanelPetId(nodeId);
+
+      // 타인 소유 개체는 트리 확장 불가
+      if (nodeData?.pet && !nodeData.pet.isOwner) {
+        toast.info("타인의 개체입니다.");
+        return;
+      }
 
       // 이미 확장됐거나 중심 개체면 확장 skip
       if (nodeId === centerPetId || expandedNodeIds.has(nodeId)) return;

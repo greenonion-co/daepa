@@ -1,11 +1,11 @@
 # 클라이언트 가계도 — 코어 아키텍처
 
 ## 개요
-`apps/client/src/app/(브리더스룸)/pet/[petId]/family-tree/` 경로에 가계도 기능 전체를 구현.
+`apps/client/src/app/(브리더스룸)/pet/[petId]/breeding-map/` 경로에 브리딩맵 기능 전체를 구현.
 
 ## 파일 구조
 ```
-family-tree/
+breeding-map/
 ├── page.tsx                          # Next.js 라우트 엔트리포인트
 ├── store/
 │   └── familyTreeStore.ts            # Zustand 전역 상태

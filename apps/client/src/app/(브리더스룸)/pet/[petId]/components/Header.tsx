@@ -214,7 +214,7 @@ const Header = ({
           {isBreeder && isMyPet && (
             <button
               type="button"
-              onClick={() => router.push(`/pet/${pet.petId}/family-tree`)}
+              onClick={() => router.push(`/pet/${pet.petId}/breeding-map`)}
               className={cn(
                 "flex items-center gap-0.5 rounded-lg border border-gray-200 bg-gradient-to-r from-blue-200/50 to-purple-200/65 px-2 font-[700] text-white transition-colors hover:from-blue-200/70 hover:to-purple-200/80 dark:border-gray-700 dark:from-blue-900/40 dark:to-purple-900/50 dark:hover:from-blue-900/60 dark:hover:to-purple-900/70",
                 isScrolled ? "h-8 text-xs" : "h-8 text-sm",
