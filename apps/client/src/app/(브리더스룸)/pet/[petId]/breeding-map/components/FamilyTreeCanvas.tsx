@@ -299,7 +299,6 @@ export default function FamilyTreeCanvas({ petId }: FamilyTreeCanvasProps) {
 
   const handleNodeHover = useCallback((nodeId: string | null) => {
     setHoveredPetId(nodeId);
-    if (nodeId) setPanelPetId(nodeId);
   }, []);
 
   const handleChildClick = useCallback((childId: string) => {
