@@ -173,7 +173,7 @@ export default function PetDetailPanel({
                 onClick={() => onAction("detail", pet.petId)}
                 className="flex w-full items-center justify-between rounded-lg border border-gray-200 bg-gray-100 px-2.5 py-1 text-[11px] text-gray-700 transition-colors hover:bg-gray-200 active:bg-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 dark:active:bg-gray-600"
               >
-                상세 보기
+                상세 정보
                 <ChevronRight className="h-3 w-3 text-gray-700 dark:text-gray-300" />
               </button>
             )}
@@ -194,18 +194,18 @@ export default function PetDetailPanel({
               )} */}
             <button
               type="button"
-              onClick={() => onAction("relation", pet.petId)}
-              className="flex w-full items-center justify-between rounded-lg border border-gray-200 bg-gray-100 px-2.5 py-1 text-[11px] text-gray-700 transition-colors hover:bg-gray-200 active:bg-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 dark:active:bg-gray-600"
+              onClick={() => onAction("family-tree", pet.petId)}
+              className="flex w-full items-center justify-between rounded-lg border border-gray-200 bg-gradient-to-r from-blue-200/50 to-purple-200/65 px-2.5 py-1 text-[11px] text-gray-700 transition-colors hover:from-blue-200/70 hover:to-purple-200/80 active:from-blue-200/70 active:to-purple-200/80 dark:border-gray-700 dark:from-blue-900/40 dark:to-purple-900/50 dark:text-gray-300 dark:hover:from-blue-900/60 dark:hover:to-purple-900/70 dark:active:from-blue-900/60 dark:active:to-purple-900/70"
             >
-              관계도
+              브리딩맵
               <ChevronRight className="h-3 w-3 text-gray-700 dark:text-gray-300" />
             </button>
             <button
               type="button"
-              onClick={() => onAction("family-tree", pet.petId)}
+              onClick={() => onAction("relation", pet.petId)}
               className="flex w-full items-center justify-between rounded-lg border border-gray-200 bg-gray-100 px-2.5 py-1 text-[11px] text-gray-700 transition-colors hover:bg-gray-200 active:bg-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 dark:active:bg-gray-600"
             >
-              가계도
+              관계도
               <ChevronRight className="h-3 w-3 text-gray-700 dark:text-gray-300" />
             </button>
           </div>

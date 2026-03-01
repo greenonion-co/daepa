@@ -212,42 +212,42 @@ const Header = ({
             type="button"
             onClick={() => {
               if (isLoggedIn) {
-                router.push(`/pet/${pet.petId}/relation`);
-              } else {
-                openRelationPromoSheet();
-              }
-            }}
-            className={cn(
-              "flex items-center gap-0.5 rounded-lg bg-blue-100 px-2 font-[700] text-white transition-colors hover:bg-blue-200 dark:bg-blue-900/40 dark:hover:bg-blue-800/40",
-              isScrolled ? "h-8 text-xs" : "h-8 text-sm",
-            )}
-          >
-            <TooltipText
-              text="관계도"
-              title="개체 관계도"
-              className="text-blue-600"
-              content="혈통 관계가 있는 개체들을 확인합니다."
-            />
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              if (isLoggedIn) {
                 router.push(`/pet/${pet.petId}/family-tree`);
               } else {
                 openRelationPromoSheet();
               }
             }}
             className={cn(
-              "flex items-center gap-0.5 rounded-lg bg-green-100 px-2 font-[700] text-white transition-colors hover:bg-green-200 dark:bg-green-900/40 dark:hover:bg-green-800/40",
+              "flex items-center gap-0.5 rounded-lg border border-gray-200 bg-gradient-to-r from-blue-200/50 to-purple-200/65 px-2 font-[700] text-white transition-colors hover:from-blue-200/70 hover:to-purple-200/80 dark:border-gray-700 dark:from-blue-900/40 dark:to-purple-900/50 dark:hover:from-blue-900/60 dark:hover:to-purple-900/70",
               isScrolled ? "h-8 text-xs" : "h-8 text-sm",
             )}
           >
             <TooltipText
-              text="가계도"
-              title="가계도"
-              className="text-green-600"
-              content="가족 관계를 트리 구조로 확인합니다."
+              text="브리딩맵"
+              title="브리딩맵"
+              className="text-blue-600 dark:text-purple-300"
+              content="혈통 관계를 트리 구조로 확인합니다."
+            />
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              if (isLoggedIn) {
+                router.push(`/pet/${pet.petId}/relation`);
+              } else {
+                openRelationPromoSheet();
+              }
+            }}
+            className={cn(
+              "flex items-center gap-0.5 rounded-lg border border-gray-200 bg-white px-2 font-[700] transition-colors hover:bg-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700",
+              isScrolled ? "h-8 text-xs" : "h-8 text-sm",
+            )}
+          >
+            <TooltipText
+              text="관계도"
+              title="개체 관계도"
+              className="text-gray-600 dark:text-gray-300"
+              content="혈통 관계가 있는 개체들을 확인합니다."
             />
           </button>
         </div>

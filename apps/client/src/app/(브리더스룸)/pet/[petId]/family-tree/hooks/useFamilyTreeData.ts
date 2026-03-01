@@ -17,7 +17,7 @@ export function useCenterPet(petId: string) {
 }
 
 /**
- * Recursive CTE 기반 가계도 노드 전체 조회
+ * Recursive CTE 기반 브리딩맵 노드 전체 조회
  * GET /v1/pet/family-tree/:petId?depth=N&ancestorDepth=M
  * - depth: 후손 탐색 깊이 (기본 2)
  * - ancestorDepth: 조상(부모·조부모 등) 탐색 깊이 (기본 2)

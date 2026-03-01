@@ -82,10 +82,10 @@ export default function FamilyTreeCanvas({ petId }: FamilyTreeCanvasProps) {
   // 중심 개체 fetch
   const { data: centerPet, isLoading: isCenterLoading } = useCenterPet(petId);
 
-  // 가계도 전체 데이터 fetch (Recursive CTE)
+  // 브리딩맵 전체 데이터 fetch (Recursive CTE)
   const { data: familyTreeNodes, isLoading: isTreeLoading } = useFamilyTree(petId);
 
-  // 가계도 데이터 로드 시 스토어 초기화
+  // 브리딩맵 데이터 로드 시 스토어 초기화
   useEffect(() => {
     if (familyTreeNodes) {
       setFamilyTree(petId, familyTreeNodes.nodes, familyTreeNodes.centerPairPartnerIds ?? []);
@@ -225,7 +225,7 @@ export default function FamilyTreeCanvas({ petId }: FamilyTreeCanvasProps) {
     if (!detailModalPetId) return;
     const closingPetId = detailModalPetId;
     setDetailModalPetId(null);
-    // 가계도 쿼리 무효화 → 새 자식 노드 반영
+    // 브리딩맵 쿼리 무효화 → 새 자식 노드 반영
     queryClient.invalidateQueries({ queryKey: ["family-tree", petId] });
     try {
       const fresh = await queryClient.fetchQuery({
@@ -354,7 +354,7 @@ export default function FamilyTreeCanvas({ petId }: FamilyTreeCanvasProps) {
               }}
             />
             <span className="text-sm font-medium">{centerPet.name ?? "이름 없음"}</span>
-            <span className="text-muted-foreground text-xs">의 가계도</span>
+            <span className="text-muted-foreground text-xs">의 브리딩맵</span>
           </div>
         </div>
       )}

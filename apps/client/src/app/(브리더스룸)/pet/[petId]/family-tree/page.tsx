@@ -25,7 +25,7 @@ export default function FamilyTreePage({ params }: FamilyTreePageProps) {
           <ArrowLeft className="h-4 w-4" />
           돌아가기
         </Link>
-        <span className="text-[10px] text-blue-400 dark:text-blue-200">
+        <span className="text-sm text-blue-600 dark:text-blue-200">
           * 처음 부모+2세대 표시 · 클릭으로 확장 가능
         </span>
       </div>

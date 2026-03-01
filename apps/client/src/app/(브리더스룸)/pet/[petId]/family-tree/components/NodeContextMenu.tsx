@@ -17,7 +17,7 @@ const MENU_ITEMS = [
   { action: "detail", label: "개체 상세 보기" },
   { action: "select-mate", label: "메이팅 개체 선택" },
   { action: "relation", label: "관계도 보기" },
-  { action: "family-tree", label: "이 개체의 가계도" },
+  { action: "family-tree", label: "이 개체의 브리딩맵" },
 ] as const;
 
 export default function NodeContextMenu({

@@ -249,7 +249,7 @@ const QRCode = ({ pet, isScrolled }: QRCodeProps) => {
     <div className="ml-auto">
       <Dialog open={qrOpen} onOpenChange={setQrOpen}>
         <DialogTrigger asChild>
-          <Button size="sm" variant="outline" className={cn(isScrolled ? "text-xs" : "text-sm")}>
+          <Button size="sm" variant="outline" className={cn("bg-neutral-900 text-white hover:bg-neutral-800 dark:border-gray-700 dark:bg-transparent dark:text-gray-300 dark:hover:bg-gray-800", isScrolled ? "text-xs" : "text-sm")}>
             QR
           </Button>
         </DialogTrigger>
