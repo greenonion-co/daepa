@@ -21,7 +21,7 @@ interface GraphNodeElementProps {
   isFocused: boolean;
   onMouseEnter: (nodeId: string) => void;
   onMouseLeave: () => void;
-  onMouseDown: (e: React.MouseEvent, nodeId: string) => void;
+  onPointerDown: (e: React.PointerEvent, nodeId: string) => void;
   onClick: (nodeId: string, position: { x: number; y: number }) => void;
   onContextMenu?: (nodeId: string, position: { x: number; y: number }) => void;
 }
@@ -39,7 +39,7 @@ function GraphNodeElementInner({
   isFocused,
   onMouseEnter,
   onMouseLeave,
-  onMouseDown,
+  onPointerDown,
   onClick,
   onContextMenu,
 }: GraphNodeElementProps) {
@@ -56,7 +56,7 @@ function GraphNodeElementInner({
       opacity={opacity}
       onMouseEnter={() => onMouseEnter(node.id)}
       onMouseLeave={onMouseLeave}
-      onMouseDown={(e) => onMouseDown(e, node.id)}
+      onPointerDown={(e) => onPointerDown(e, node.id)}
       onClick={(e) => onClick(node.id, { x: e.clientX, y: e.clientY })}
       onContextMenu={(e) => {
         e.preventDefault();

@@ -32,7 +32,7 @@ export default function PetDetailPanel({
 }: PetDetailPanelProps) {
   if (!pet) {
     return (
-      <div className="pointer-events-none flex h-52 w-52 items-center justify-center rounded-xl border border-gray-200 bg-white/90 px-3 py-4 shadow-lg backdrop-blur-sm dark:border-gray-700 dark:bg-gray-900/90">
+      <div className="pointer-events-none flex h-52 w-full md:w-52 items-center justify-center rounded-xl border border-gray-200 bg-white/90 px-3 py-4 shadow-lg backdrop-blur-sm dark:border-gray-700 dark:bg-gray-900/90">
         <p className="text-xs text-gray-400 dark:text-gray-500">선택된 개체가 없습니다</p>
       </div>
     );
@@ -59,7 +59,7 @@ export default function PetDetailPanel({
   return (
     <div
       key={pet.petId}
-      className="pointer-events-none flex w-52 flex-col gap-1 rounded-xl border border-gray-200 bg-white/90 p-3 shadow-lg backdrop-blur-sm dark:border-gray-700 dark:bg-gray-900/90"
+      className="pointer-events-none flex w-full md:w-52 flex-col gap-1 rounded-xl border border-gray-200 bg-white/90 p-3 shadow-lg backdrop-blur-sm dark:border-gray-700 dark:bg-gray-900/90"
     >
       {/* 비공개 배지 */}
       {disabledPet && (
@@ -166,7 +166,7 @@ export default function PetDetailPanel({
       {/* 액션 메뉴 */}
       {onAction && (
         <PanelRow delay={step++ * 50}>
-          <div className="pointer-events-auto flex flex-col gap-1 border-t border-gray-100 pt-1.5 dark:border-gray-800">
+          <div className="pointer-events-auto flex flex-col gap-1 pt-1.5 dark:border-gray-800">
             {!disabledPet && (
               <button
                 type="button"

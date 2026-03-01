@@ -12,6 +12,7 @@ import {
   FOCUS_RETRY_TIMEOUT,
   FOCUS_RETRY_INTERVAL,
 } from "../lib/force-graph-constants";
+import { useIsMobile } from "@/hooks/useMobile";
 
 interface UseForceInteractionParams {
   svgRef: RefObject<SVGSVGElement | null>;
@@ -40,6 +41,7 @@ export function useForceInteraction({
   onNodeDoubleClick,
   onNodeHover,
 }: UseForceInteractionParams) {
+  const isMobile = useIsMobile();
   const zoomRef = useRef<ZoomBehavior<SVGSVGElement, unknown> | null>(null);
   const [hoveredNodeId, setHoveredNodeId] = useState<string | null>(null);
   const dragMovedRef = useRef(false);
@@ -129,9 +131,9 @@ export function useForceInteraction({
     };
   }, []);
 
-  // 노드 드래그
-  const handleNodeMouseDown = useCallback(
-    (e: React.MouseEvent, nodeId: string) => {
+  // 노드 드래그 (pointer events: 마우스+터치 통합)
+  const handleNodePointerDown = useCallback(
+    (e: React.PointerEvent, nodeId: string) => {
       if (e.button !== 0) return;
       e.preventDefault();
       e.stopPropagation();
@@ -147,7 +149,7 @@ export function useForceInteraction({
       dragMovedRef.current = false;
       let dragStarted = false;
 
-      const handleMouseMove = (ev: MouseEvent) => {
+      const handlePointerMove = (ev: PointerEvent) => {
         dragMovedRef.current = true;
         if (!dragStarted) {
           dragStarted = true;
@@ -160,17 +162,17 @@ export function useForceInteraction({
         }
       };
 
-      const handleMouseUp = () => {
+      const handlePointerUp = () => {
         node.fx = node.x;
         node.fy = node.y;
         simulationRef.current?.alphaTarget(0);
 
-        window.removeEventListener("mousemove", handleMouseMove);
-        window.removeEventListener("mouseup", handleMouseUp);
+        window.removeEventListener("pointermove", handlePointerMove);
+        window.removeEventListener("pointerup", handlePointerUp);
       };
 
-      window.addEventListener("mousemove", handleMouseMove);
-      window.addEventListener("mouseup", handleMouseUp);
+      window.addEventListener("pointermove", handlePointerMove);
+      window.addEventListener("pointerup", handlePointerUp);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [SIM_DRAG_ALPHA_TARGET],
@@ -180,6 +182,12 @@ export function useForceInteraction({
   const handleNodeClick = useCallback(
     (nodeId: string, position: { x: number; y: number }) => {
       if (dragMovedRef.current) return;
+
+      // 모바일: 탭으로 hover 하이라이트 고정
+      if (isMobile) {
+        setHoveredNodeId(nodeId);
+        onNodeHover?.(nodeId);
+      }
 
       if (pendingClickRef.current) {
         clearTimeout(pendingClickRef.current);
@@ -193,30 +201,41 @@ export function useForceInteraction({
         onNodeClick?.(nodeId, position);
       }, DBLCLICK_DELAY);
     },
-    [onNodeClick, onNodeDoubleClick],
+    [onNodeClick, onNodeDoubleClick, isMobile, onNodeHover],
   );
 
-  // hover 핸들러
+  // hover 핸들러 (데스크톱 전용 — 모바일은 탭으로 대체)
   const handleNodeMouseEnter = useCallback(
     (nodeId: string) => {
+      if (isMobile) return;
       setHoveredNodeId(nodeId);
       onNodeHover?.(nodeId);
     },
-    [onNodeHover],
+    [onNodeHover, isMobile],
   );
 
   const handleNodeMouseLeave = useCallback(() => {
+    if (isMobile) return;
     setHoveredNodeId(null);
     onNodeHover?.(null);
-  }, [onNodeHover]);
+  }, [onNodeHover, isMobile]);
+
+  // 모바일: 빈 영역 탭 시 hover 해제
+  const clearMobileHover = useCallback(() => {
+    if (!isMobile) return;
+    setHoveredNodeId(null);
+    onNodeHover?.(null);
+  }, [isMobile, onNodeHover]);
 
   return {
+    isMobile,
     hoveredNodeId,
     highlightFocusedId,
     connectedMap,
-    handleNodeMouseDown,
+    handleNodePointerDown,
     handleNodeClick,
     handleNodeMouseEnter,
     handleNodeMouseLeave,
+    clearMobileHover,
   };
 }

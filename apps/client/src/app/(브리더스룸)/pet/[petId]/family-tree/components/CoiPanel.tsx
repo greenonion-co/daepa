@@ -56,7 +56,7 @@ export default function CoiPanel({
   return (
     <div
       className={`pointer-events-auto flex flex-col gap-2 rounded-xl border border-gray-200 bg-white/90 shadow-lg backdrop-blur-sm transition-all duration-200 dark:border-gray-700 dark:bg-gray-900/90 ${
-        expanded ? "w-80 p-4" : "w-52 p-3"
+        expanded ? "w-80 p-4" : "w-full md:w-52 p-3"
       }`}
     >
       {/* 헤더 */}

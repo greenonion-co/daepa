@@ -100,7 +100,7 @@ export default function PairStatisticsPanel({
 
   if (!isOpposite) {
     return (
-      <div className="pointer-events-auto flex w-52 flex-col gap-2 rounded-xl border border-gray-200 bg-white/90 p-3 shadow-lg backdrop-blur-sm dark:border-gray-700 dark:bg-gray-900/90">
+      <div className="pointer-events-auto flex w-full md:w-52 flex-col gap-2 rounded-xl border border-gray-200 bg-white/90 p-3 shadow-lg backdrop-blur-sm dark:border-gray-700 dark:bg-gray-900/90">
         <span className="text-[11px] font-medium text-gray-500 dark:text-gray-400">번식 이력</span>
         <p className="text-center text-[10px] text-red-500 dark:text-gray-500">
           수컷 × 암컷 조합에서만 확인할 수 있습니다
@@ -111,7 +111,7 @@ export default function PairStatisticsPanel({
 
   if (isLoading) {
     return (
-      <div className="pointer-events-auto flex w-52 flex-col items-center gap-2 rounded-xl border border-gray-200 bg-white/90 p-3 shadow-lg backdrop-blur-sm dark:border-gray-700 dark:bg-gray-900/90">
+      <div className="pointer-events-auto flex w-full md:w-52 flex-col items-center gap-2 rounded-xl border border-gray-200 bg-white/90 p-3 shadow-lg backdrop-blur-sm dark:border-gray-700 dark:bg-gray-900/90">
         <span className="self-start text-[11px] font-medium text-gray-500 dark:text-gray-400">
           번식 이력
         </span>
@@ -122,7 +122,7 @@ export default function PairStatisticsPanel({
 
   if (!hasPair || !statistics) {
     return (
-      <div className="pointer-events-auto flex w-52 flex-col gap-2 rounded-xl border border-gray-200 bg-white/90 p-3 shadow-lg backdrop-blur-sm dark:border-gray-700 dark:bg-gray-900/90">
+      <div className="pointer-events-auto flex w-full md:w-52 flex-col gap-2 rounded-xl border border-gray-200 bg-white/90 p-3 shadow-lg backdrop-blur-sm dark:border-gray-700 dark:bg-gray-900/90">
         <div className="flex items-center justify-between">
           <span className="text-[11px] font-medium text-gray-500 dark:text-gray-400">
             번식 이력
@@ -154,7 +154,7 @@ export default function PairStatisticsPanel({
   const { egg, totalMatings, totalLayings } = statistics;
 
   return (
-    <div className="pointer-events-auto flex w-52 flex-col gap-2 rounded-xl border border-gray-200 bg-white/90 p-3 shadow-lg backdrop-blur-sm dark:border-gray-700 dark:bg-gray-900/90">
+    <div className="pointer-events-auto flex w-full md:w-52 flex-col gap-2 rounded-xl border border-gray-200 bg-white/90 p-3 shadow-lg backdrop-blur-sm dark:border-gray-700 dark:bg-gray-900/90">
       {/* 헤더 */}
       <div className="flex items-center justify-between">
         <span className="text-[11px] font-medium text-gray-500 dark:text-gray-400">번식 이력</span>
@@ -190,7 +190,7 @@ export default function PairStatisticsPanel({
           <p className="mb-1 text-[10px] font-medium text-gray-400 dark:text-gray-500">
             자식 ({pairChildren.length})
           </p>
-          <div className="flex max-h-24 flex-col gap-0.5 overflow-y-auto">
+          <div className="flex max-h-24 flex-col gap-0.5 overflow-y-auto overflow-x-hidden">
             {pairChildren.map((child) => {
               const dotColor =
                 child.sex === "M" || child.sex === "MALE"
@@ -203,6 +203,7 @@ export default function PairStatisticsPanel({
                   key={child.petId}
                   className="-mx-1 flex cursor-pointer items-center gap-1.5 rounded px-1 py-0.5 text-left hover:bg-gray-100 dark:hover:bg-gray-800"
                   onMouseEnter={() => onChildClick?.(child.petId)}
+                  onClick={() => onChildClick?.(child.petId)}
                 >
                   <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${dotColor}`} />
                   <span className="truncate text-[10px] text-gray-600 dark:text-gray-300">

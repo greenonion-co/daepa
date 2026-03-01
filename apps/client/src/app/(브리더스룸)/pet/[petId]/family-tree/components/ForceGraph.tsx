@@ -45,6 +45,8 @@ interface ForceGraphProps {
   initialNodePositions?: Record<string, { x: number; y: number }>;
   /** 패널 hover 시 함께 하이라이트할 자식 노드 ID 목록 */
   highlightedChildIds?: string[];
+  /** 위치 재배치 함수를 부모에게 전달 */
+  onReshuffleReady?: (reshuffle: () => void) => void;
 }
 
 // --- Component ---
@@ -65,6 +67,7 @@ export default function ForceGraph({
   focusNodeId,
   initialNodePositions,
   highlightedChildIds,
+  onReshuffleReady,
 }: ForceGraphProps) {
   const svgRef = useRef<SVGSVGElement>(null);
   const gRef = useRef<SVGGElement>(null);
@@ -72,19 +75,26 @@ export default function ForceGraph({
   const maxDegree = useMemo(() => Math.max(...nodes.map((n) => n.degree), 1), [nodes]);
 
   // Force simulation (rAF 배칭)
-  const { simNodesRef, simLinksRef, simulationRef, tickId, SIM_DRAG_ALPHA_TARGET } = useForceSimulation({
+  const { simNodesRef, simLinksRef, simulationRef, tickId, SIM_DRAG_ALPHA_TARGET, reshufflePositions } = useForceSimulation({
     nodes, links, maxDegree, initialNodePositions,
   });
 
+  // 부모에게 reshuffle 함수 전달
+  useEffect(() => {
+    onReshuffleReady?.(reshufflePositions);
+  }, [onReshuffleReady, reshufflePositions]);
+
   // 인터랙션 (줌/팬, 포커스, 드래그, 클릭, hover)
   const {
+    isMobile,
     hoveredNodeId,
     highlightFocusedId,
     connectedMap,
-    handleNodeMouseDown,
+    handleNodePointerDown,
     handleNodeClick,
     handleNodeMouseEnter,
     handleNodeMouseLeave,
+    clearMobileHover,
   } = useForceInteraction({
     svgRef, gRef, simNodesRef, simulationRef, SIM_DRAG_ALPHA_TARGET,
     nodes, links, focusNodeId, onNodeClick, onNodeDoubleClick, onNodeHover,
@@ -188,7 +198,7 @@ export default function ForceGraph({
     <svg
       ref={svgRef}
       className={className}
-      style={{ width: "100%", height: "100%", cursor: "grab" }}
+      style={{ width: "100%", height: "100%", cursor: "grab", touchAction: "none" }}
       onContextMenu={(e) => {
         e.preventDefault();
         const simPos = gRef.current ? screenToSvg(gRef.current, e.clientX, e.clientY) : undefined;
@@ -196,6 +206,12 @@ export default function ForceGraph({
       }}
       onClick={(e) => {
         if ((e.target as Element)?.closest?.("[data-node]")) return;
+        // 모바일: hover 활성 상태면 해제만 하고 캔버스 클릭은 무시
+        if (isMobile && hoveredNodeId) {
+          clearMobileHover();
+          return;
+        }
+        clearMobileHover();
         const simPos = gRef.current ? screenToSvg(gRef.current, e.clientX, e.clientY) : undefined;
         onCanvasClick?.({ x: e.clientX, y: e.clientY }, simPos ?? undefined);
       }}
@@ -284,7 +300,7 @@ export default function ForceGraph({
             isFocused={highlightFocusedId === node.id}
             onMouseEnter={handleNodeMouseEnter}
             onMouseLeave={handleNodeMouseLeave}
-            onMouseDown={handleNodeMouseDown}
+            onPointerDown={handleNodePointerDown}
             onClick={handleNodeClick}
             onContextMenu={onNodeContextMenu}
           />

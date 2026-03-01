@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, useCallback } from "react";
+import { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { petControllerFindPetByPetId, petControllerGetFamilyTree } from "@repo/api-client";
 import ForceGraph from "./ForceGraph";
@@ -21,6 +21,7 @@ import { usePairActions } from "../hooks/usePairActions";
 import { useFamilyTreeStore } from "../store/familyTreeStore";
 import { useShallow } from "zustand/react/shallow";
 import Loading from "@/components/common/Loading";
+import { useIsMobile } from "@/hooks/useMobile";
 import { toast } from "@/lib/toast";
 import SingleSelect from "@/app/(브리더스룸)/components/selector/SingleSelect";
 import QuickRegisterModal from "./QuickRegisterModal";
@@ -75,6 +76,8 @@ export default function FamilyTreeCanvas({ petId }: FamilyTreeCanvasProps) {
   const [initialNodePositions, setInitialNodePositions] = useState<
     Record<string, { x: number; y: number }>
   >({});
+  const reshuffleRef = useRef<(() => void) | null>(null);
+  const isMobile = useIsMobile();
 
   // 중심 개체 fetch
   const { data: centerPet, isLoading: isCenterLoading } = useCenterPet(petId);
@@ -332,11 +335,20 @@ export default function FamilyTreeCanvas({ petId }: FamilyTreeCanvasProps) {
         onNodeHover={handleNodeHover}
         onCanvasClick={handleCanvasContextMenu}
         initialNodePositions={initialNodePositions}
+        onReshuffleReady={(fn) => {
+          reshuffleRef.current = fn;
+        }}
       />
 
-      {/* 중심 개체 이름 (상단 중앙) */}
+      {/* 중심 개체 이름 — 데스크톱: 상단 중앙, 모바일: 우측 상단 (재배치 버튼 자리) */}
       {centerPet && (
-        <div className="absolute top-3 left-1/2 z-10 -translate-x-1/2">
+        <div
+          className={
+            isMobile
+              ? "absolute top-1 right-1 z-10"
+              : "absolute top-3 left-1/2 z-10 -translate-x-1/2"
+          }
+        >
           <div className="bg-background/80 border-border flex items-center gap-1.5 rounded-lg border px-3 py-1.5 shadow-sm backdrop-blur-sm">
             <span
               className="inline-block h-2 w-2 shrink-0 rounded-full"
@@ -352,7 +364,9 @@ export default function FamilyTreeCanvas({ petId }: FamilyTreeCanvasProps) {
       )}
 
       {/* 검색 + 성별 필터 (좌측 상단) */}
-      <div className="absolute top-3 left-3 z-10 flex flex-col gap-1">
+      <div
+        className={`absolute z-10 flex flex-col gap-1 ${isMobile ? "top-1 left-1" : "top-3 left-3"}`}
+      >
         <div className="flex items-center gap-1">
           <input
             type="text"
@@ -362,7 +376,7 @@ export default function FamilyTreeCanvas({ petId }: FamilyTreeCanvasProps) {
             onBlur={() => setTimeout(() => setSearchFocused(false), 150)}
             onKeyDown={handleSearchKeyDown}
             placeholder="개체 검색..."
-            className="border-border bg-background/80 placeholder:text-muted-foreground focus:ring-primary w-52 rounded-lg border px-3 py-1.5 text-sm backdrop-blur-sm focus:ring-1 focus:outline-none"
+            className={`border-border bg-background/80 placeholder:text-muted-foreground focus:ring-primary ${isMobile ? "w-40" : "w-52"} rounded-lg border px-3 py-1.5 text-sm backdrop-blur-sm focus:ring-1 focus:outline-none`}
           />
           {/* 성별 필터 */}
           <SingleSelect
@@ -389,7 +403,7 @@ export default function FamilyTreeCanvas({ petId }: FamilyTreeCanvasProps) {
       {/* 컨텍스트 메뉴 + 백드롭 */}
       {canvasContextMenu && (
         <>
-          <div className="fixed inset-0 z-40" onMouseDown={() => setCanvasContextMenu(null)} />
+          <div className="fixed inset-0 z-40" onPointerDown={() => setCanvasContextMenu(null)} />
           <div
             className="fixed z-50 min-w-[140px] overflow-hidden rounded-xl border border-gray-200 bg-white py-1 shadow-lg dark:border-gray-700 dark:bg-gray-900"
             style={{ left: canvasContextMenu.position.x, top: canvasContextMenu.position.y }}
@@ -454,8 +468,26 @@ export default function FamilyTreeCanvas({ petId }: FamilyTreeCanvasProps) {
         <MorphLegend morphs={visibleMorphs} />
       </div>
 
-      {/* 우측 패널 영역 */}
-      <div className="absolute top-3 right-3 flex max-h-[calc(100dvh-1.5rem)] flex-col gap-2 overflow-y-auto">
+      {/* 위치 재배치 버튼 (데스크톱만) */}
+      {!isMobile && (
+        <button
+          type="button"
+          onClick={() => reshuffleRef.current?.()}
+          className="absolute right-3 bottom-3 z-10 rounded-lg border border-gray-300 bg-gray-600 px-3 py-1.5 text-xs text-white shadow-sm transition-colors hover:bg-gray-700 active:bg-gray-800 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600 dark:active:bg-gray-500"
+          title="노드 위치 재배치"
+        >
+          재배치
+        </button>
+      )}
+
+      {/* 패널 영역 — 데스크톱: 우측 상단, 모바일: 하단 시트 */}
+      <div
+        className={
+          isMobile
+            ? "absolute right-0 bottom-0 left-0 z-10 grid max-h-[40dvh] grid-cols-2 gap-2 overflow-y-auto px-3 pb-3"
+            : "absolute top-3 right-3 flex max-h-[calc(100%-1.5rem)] flex-col gap-2 overflow-y-auto"
+        }
+      >
         <PetDetailPanel
           key={panelSourceId ?? "empty"}
           pet={hoveredPet}
@@ -467,7 +499,7 @@ export default function FamilyTreeCanvas({ petId }: FamilyTreeCanvasProps) {
         <div
           onMouseEnter={() => setIsPanelHovered(true)}
           onMouseLeave={() => setIsPanelHovered(false)}
-          className="flex flex-col gap-2"
+          className={isMobile ? "contents" : "flex flex-col gap-2"}
         >
           <CoiPanel
             pets={coiPets}

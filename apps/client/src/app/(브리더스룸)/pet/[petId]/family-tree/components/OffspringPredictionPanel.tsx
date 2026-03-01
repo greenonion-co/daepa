@@ -19,7 +19,7 @@ export default function OffspringPredictionPanel({
 
   if (prediction.genes.length === 0) {
     return (
-      <div className="pointer-events-auto flex w-52 flex-col gap-2 rounded-xl border border-gray-200 bg-white/90 p-3 shadow-lg backdrop-blur-sm dark:border-gray-700 dark:bg-gray-900/90">
+      <div className="pointer-events-auto flex w-full md:w-52 flex-col gap-2 rounded-xl border border-gray-200 bg-white/90 p-3 shadow-lg backdrop-blur-sm dark:border-gray-700 dark:bg-gray-900/90">
         <span className="text-[11px] font-medium text-gray-500 dark:text-gray-400">자식 예측</span>
         <p className="text-center text-[10px] text-gray-400 dark:text-gray-500">
           예측 가능한 유전 정보 없음
@@ -30,7 +30,7 @@ export default function OffspringPredictionPanel({
 
   return (
     <div
-      className={`pointer-events-auto flex flex-col gap-2 rounded-xl border border-gray-200 bg-white/90 shadow-lg backdrop-blur-sm transition-all duration-200 dark:border-gray-700 dark:bg-gray-900/90 ${"w-52 p-3"}`}
+      className={`pointer-events-auto flex flex-col gap-2 rounded-xl border border-gray-200 bg-white/90 shadow-lg backdrop-blur-sm transition-all duration-200 dark:border-gray-700 dark:bg-gray-900/90 ${"w-full md:w-52 p-3"}`}
     >
       {/* 헤더 */}
       <div className="flex items-center justify-between">

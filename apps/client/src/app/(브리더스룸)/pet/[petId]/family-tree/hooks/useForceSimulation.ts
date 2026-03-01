@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   forceSimulation,
   forceLink,
@@ -170,6 +170,19 @@ export function useForceSimulation({
     };
   }, [nodes, links, maxDegree]);
 
+  // 노드 위치 랜덤 재배치
+  const reshufflePositions = useCallback(() => {
+    const sim = simulationRef.current;
+    if (!sim) return;
+    for (const node of simNodesRef.current) {
+      node.x = (Math.random() - 0.5) * 300;
+      node.y = (Math.random() - 0.5) * 300;
+      node.fx = undefined;
+      node.fy = undefined;
+    }
+    sim.alpha(SIM_ALPHA_INITIAL).restart();
+  }, []);
+
   return {
     simNodesRef,
     simLinksRef,
@@ -177,5 +190,6 @@ export function useForceSimulation({
     tickId,
     /** 드래그 시 사용 */
     SIM_DRAG_ALPHA_TARGET,
+    reshufflePositions,
   };
 }
