@@ -3,12 +3,14 @@ import {
   ConflictException,
   Controller,
   Get,
+  Param,
   Patch,
   Post,
   Query,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import {
+  BreederPublicProfileResponseDto,
   CreateInitUserInfoDto,
   UpdateUserPrivateInfoDto,
   UserFilterDto,
@@ -18,7 +20,7 @@ import {
   UserProfilePublicDto,
 } from './user.dto';
 import { CommonResponseDto } from 'src/common/response.dto';
-import { ApiExtraModels, ApiResponse, getSchemaPath } from '@nestjs/swagger';
+import { ApiExtraModels, ApiParam, ApiResponse, getSchemaPath } from '@nestjs/swagger';
 import { JwtUser, Public } from 'src/auth/auth.decorator';
 import { JwtUserPayload } from 'src/auth/strategies/jwt.strategy';
 import { VerifyEmailDto } from './user.dto';
@@ -27,6 +29,35 @@ import { PageDto, PageMetaDto } from 'src/common/page.dto';
 @Controller('/v1/user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
+
+  @Get('/public-profile/:name')
+  @Public()
+  @ApiParam({
+    name: 'name',
+    description: '브리더 이름',
+    example: 'nancy',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '브리더 공개 프로필 조회 성공',
+    type: BreederPublicProfileResponseDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: '사용자를 찾을 수 없습니다.',
+  })
+  async getPublicProfile(
+    @Param('name') name: string,
+  ): Promise<BreederPublicProfileResponseDto> {
+    const data = await this.userService.findPublicProfileByName(
+      decodeURIComponent(name),
+    );
+    return {
+      success: true,
+      message: '브리더 공개 프로필 조회 성공',
+      data,
+    };
+  }
 
   @Get('/simple')
   @ApiExtraModels(UserProfilePublicDto, PageMetaDto)

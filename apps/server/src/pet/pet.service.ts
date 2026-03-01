@@ -1385,5 +1385,12 @@ export class PetService {
         growth: pageOptionsDto.growth,
       });
     }
+
+    // 소유자 필터링
+    if (pageOptionsDto.ownerId) {
+      queryBuilder.andWhere('pets.ownerId = :filterOwnerId', {
+        filterOwnerId: pageOptionsDto.ownerId,
+      });
+    }
   }
 }

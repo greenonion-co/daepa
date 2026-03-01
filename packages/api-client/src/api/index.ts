@@ -69,6 +69,7 @@ import type {
   AdoptionStatisticsDto,
   BrPetControllerFindAll200,
   BrPetControllerGetPetsByYear200,
+  BreederPublicProfileResponseDto,
   ChildPetDetailDto,
   CommonResponseDto,
   DetailJson,
@@ -380,6 +381,13 @@ export const authControllerSignOut = () => {
 
 export const authControllerDeleteAccount = () => {
   return useCustomInstance<CommonResponseDto>({ url: `/api/auth/delete-account`, method: "POST" });
+};
+
+export const userControllerGetPublicProfile = (name: string) => {
+  return useCustomInstance<BreederPublicProfileResponseDto>({
+    url: `/api/v1/user/public-profile/${name}`,
+    method: "GET",
+  });
 };
 
 export const userControllerGetUserListSimple = (params?: UserControllerGetUserListSimpleParams) => {
@@ -850,6 +858,9 @@ export type AuthControllerSignOutResult = NonNullable<
 >;
 export type AuthControllerDeleteAccountResult = NonNullable<
   Awaited<ReturnType<typeof authControllerDeleteAccount>>
+>;
+export type UserControllerGetPublicProfileResult = NonNullable<
+  Awaited<ReturnType<typeof userControllerGetPublicProfile>>
 >;
 export type UserControllerGetUserListSimpleResult = NonNullable<
   Awaited<ReturnType<typeof userControllerGetUserListSimple>>
@@ -3486,6 +3497,36 @@ export const getAuthControllerDeleteAccountResponseMock = (
   ...overrideResponse,
 });
 
+export const getUserControllerGetPublicProfileResponseMock = (
+  overrideResponse: Partial<BreederPublicProfileResponseDto> = {},
+): BreederPublicProfileResponseDto => ({
+  success: faker.datatype.boolean(),
+  message: faker.string.alpha(20),
+  data: {
+    ...{
+      status: faker.helpers.arrayElement([
+        "pending",
+        "active",
+        "inactive",
+        "suspended",
+        "deleted",
+      ] as const),
+      userId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+      name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+      role: faker.helpers.arrayElement([
+        faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
+        undefined,
+      ]),
+      isBiz: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+      petCount: faker.number.int({ min: undefined, max: undefined }),
+      realName: faker.helpers.arrayElement([{}, undefined]),
+      phone: faker.helpers.arrayElement([{}, undefined]),
+      address: faker.helpers.arrayElement([{}, undefined]),
+    },
+  },
+  ...overrideResponse,
+});
+
 export const getUserControllerGetUserListSimpleResponseMock = (
   overrideResponse: Partial<UserControllerGetUserListSimple200> = {},
 ): UserControllerGetUserListSimple200 => ({
@@ -5281,6 +5322,29 @@ export const getAuthControllerDeleteAccountMockHandler = (
   });
 };
 
+export const getUserControllerGetPublicProfileMockHandler = (
+  overrideResponse?:
+    | BreederPublicProfileResponseDto
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<BreederPublicProfileResponseDto> | BreederPublicProfileResponseDto),
+) => {
+  return http.get("*/api/v1/user/public-profile/:name", async (info) => {
+    await delay(1000);
+
+    return new HttpResponse(
+      JSON.stringify(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getUserControllerGetPublicProfileResponseMock(),
+      ),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+  });
+};
+
 export const getUserControllerGetUserListSimpleMockHandler = (
   overrideResponse?:
     | UserControllerGetUserListSimple200
@@ -6218,6 +6282,7 @@ export const getProjectDaepaAPIMock = () => [
   getAuthControllerGetTokenMockHandler(),
   getAuthControllerSignOutMockHandler(),
   getAuthControllerDeleteAccountMockHandler(),
+  getUserControllerGetPublicProfileMockHandler(),
   getUserControllerGetUserListSimpleMockHandler(),
   getUserControllerGetUserProfileMockHandler(),
   getUserControllerCreateInitUserInfoMockHandler(),
