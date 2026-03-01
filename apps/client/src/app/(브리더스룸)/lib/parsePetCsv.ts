@@ -1,3 +1,4 @@
+import * as XLSX from "xlsx";
 import type {
   BulkCreatePetRowDto,
   BulkCreatePetRowDtoAdoptionStatus,
@@ -138,16 +139,49 @@ function parseArray(value: string): string[] {
     .filter(Boolean);
 }
 
-export function parsePetCsv(csvText: string): BulkCreatePetRowDto[] {
-  // BOM 제거
-  const text = csvText.replace(/^\uFEFF/, "");
-  const rawRows = parseCsvText(text);
+function parseXlsxToRows(buffer: ArrayBuffer): string[][] {
+  const workbook = XLSX.read(buffer, { type: "array" });
+  const sheet = workbook.Sheets[workbook.SheetNames[0]!]!;
+  const rows: string[][] = XLSX.utils.sheet_to_json(sheet, {
+    header: 1,
+    raw: false,
+    defval: "",
+  });
+  return rows.filter((row) => row.some((cell) => cell !== ""));
+}
+
+export function parsePetCsv(input: string | ArrayBuffer): BulkCreatePetRowDto[] {
+  const rawRows =
+    typeof input === "string"
+      ? parseCsvText(input.replace(/^\uFEFF/, ""))
+      : parseXlsxToRows(input);
 
   if (rawRows.length < 2) {
-    throw new Error("CSV 파일에 데이터가 없습니다.");
+    throw new Error("파일에 데이터가 없습니다.");
   }
 
   const headers = rawRows[0]!;
+
+  // 헤더 검증: 알려진 컬럼명이 하나도 없으면 에러
+  const knownHeaders = headers.filter((h) => h in COLUMN_MAP);
+  if (knownHeaders.length === 0) {
+    throw new Error(
+      "올바른 헤더를 찾을 수 없습니다.\n필수 헤더: 종, 개체 이름",
+    );
+  }
+
+  // 필수 헤더 체크
+  const mappedFields = new Set(knownHeaders.map((h) => COLUMN_MAP[h]));
+  const requiredHeaders: [string, string][] = [
+    ["name", "개체 이름"],
+    ["species", "종"],
+  ];
+  const missingHeaders = requiredHeaders
+    .filter(([field]) => !mappedFields.has(field))
+    .map(([, label]) => label);
+  if (missingHeaders.length > 0) {
+    throw new Error(`필수 헤더가 누락되었습니다: ${missingHeaders.join(", ")}`);
+  }
   const errors: string[] = [];
   const results: BulkCreatePetRowDto[] = [];
 

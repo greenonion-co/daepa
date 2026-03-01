@@ -34,8 +34,9 @@ const AddPetBulkButton = () => {
     e.target.value = "";
 
     try {
-      const text = await file.text();
-      const pets = parsePetCsv(text);
+      const isXlsx = file.name.endsWith(".xlsx") || file.name.endsWith(".xls");
+      const input = isXlsx ? await file.arrayBuffer() : await file.text();
+      const pets = parsePetCsv(input);
 
       const result = await mutateAsync({ pets });
       toast.success(result.data.message ?? `${pets.length}개의 개체가 등록되었습니다.`);
@@ -60,7 +61,7 @@ const AddPetBulkButton = () => {
       <input
         ref={inputRef}
         type="file"
-        accept=".csv"
+        accept=".csv,.xlsx,.xls"
         className="hidden"
         onChange={handleFileChange}
       />
@@ -74,7 +75,7 @@ const AddPetBulkButton = () => {
           <Upload className="h-3 w-3" />
         </div>
         <span className="px-2 py-1 text-[14px] font-[500] text-emerald-600 dark:text-emerald-400">
-          {isPending ? "업로드 중..." : "CSV 파일 업로드"}
+          {isPending ? "업로드 중..." : "파일 업로드"}
         </span>
       </button>
 
