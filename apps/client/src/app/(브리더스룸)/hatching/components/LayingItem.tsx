@@ -8,7 +8,7 @@ import {
   petControllerUpdate,
   UpdatePetDtoEggStatus,
 } from "@repo/api-client";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { usePairInvalidate } from "../hooks/usePairInvalidate";
 import { toast } from "@/lib/toast";
 import { AxiosError } from "axios";
@@ -34,7 +34,6 @@ const LayingItem = ({
   mother,
   showTutorial,
 }: LayingItemProps) => {
-  const queryClient = useQueryClient();
   const invalidatePair = usePairInvalidate();
 
   const { mutateAsync: updateEggStatus } = useMutation({
