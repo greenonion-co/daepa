@@ -11,8 +11,6 @@ import {
   COLOR_HOVER_EDGE,
   COLOR_FADED,
   COLOR_FADED_DARK,
-  COLOR_COI_PATH,
-  COLOR_COI_PATH_WIDTH,
   COLOR_PAIR_EDGE,
   COLOR_PAIR_EDGE_DARK,
   COLOR_HOVER_PAIR_EDGE,
@@ -87,8 +85,6 @@ export interface StyleContext {
   isDark: boolean;
   highlightSelected: boolean;
   selectedSet: Set<string>;
-  coiNodeSet: Set<string>;
-  coiEdgeSet: Set<string>;
   childSet: Set<string>;
   siblingSet: Set<string>;
   connectedMap: Map<string, Set<string>>;
@@ -130,13 +126,6 @@ function isParentOfHovered(link: GraphLink, ctx: StyleContext): boolean {
   return false;
 }
 
-function isCoiPathEdge(link: GraphLink, coiEdgeSet: Set<string>): boolean {
-  if (coiEdgeSet.size === 0) return false;
-  const s = getLinkSourceId(link);
-  const t = getLinkTargetId(link);
-  return coiEdgeSet.has(`${s}-${t}`);
-}
-
 function isEdgeBetweenSelected(link: GraphLink, selectedSet: Set<string>): boolean {
   const s = getLinkSourceId(link);
   const t = getLinkTargetId(link);
@@ -164,7 +153,6 @@ export function computeNodeColor(node: GraphNode, ctx: StyleContext): string {
   if (ctx.highlightSelected && ctx.selectedSet.size > 0) {
     if (ctx.selectedSet.has(node.id)) return ctx.isDark ? COLOR_PAIR_EDGE_DARK : COLOR_PAIR_EDGE;
     if (ctx.childSet.has(node.id)) return COLOR_CHILD_HIGHLIGHT;
-    if (ctx.coiNodeSet.has(node.id)) return getMorphColor(node, ctx.isDark);
     return ctx.isDark ? COLOR_FADED_DARK : COLOR_FADED;
   }
   if (!ctx.hoveredNodeId) return getMorphColor(node, ctx.isDark);
@@ -189,7 +177,6 @@ export function computeEdgeColor(link: GraphLink, ctx: StyleContext): string {
     if (isEdgeBetweenSelected(link, ctx.selectedSet))
       return ctx.isDark ? COLOR_PAIR_EDGE_DARK : COLOR_PAIR_EDGE;
     if (isEdgeToChild(link, ctx.selectedSet, ctx.childSet)) return COLOR_CHILD_HIGHLIGHT;
-    if (isCoiPathEdge(link, ctx.coiEdgeSet)) return COLOR_COI_PATH;
     return ctx.isDark ? COLOR_FADED_EDGE_DARK : COLOR_FADED_EDGE;
   }
   if (!ctx.hoveredNodeId) {
@@ -206,7 +193,6 @@ export function computeEdgeWidth(link: GraphLink, ctx: StyleContext): number {
   if (ctx.highlightSelected && ctx.selectedSet.size > 0) {
     if (isEdgeBetweenSelected(link, ctx.selectedSet)) return 2.5;
     if (isEdgeToChild(link, ctx.selectedSet, ctx.childSet)) return 2.5;
-    if (isCoiPathEdge(link, ctx.coiEdgeSet)) return COLOR_COI_PATH_WIDTH;
     return 0.5;
   }
   if (!ctx.hoveredNodeId) return 1;
@@ -233,7 +219,6 @@ export function computeArrowMarkerId(color: string): string {
   if (color === COLOR_PARENT_EDGE) return "arrowhead-parent";
   if (color === COLOR_CHILD_HIGHLIGHT) return "arrowhead-child-hl";
   if (color === COLOR_HOVER_EDGE) return "arrowhead-hover";
-  if (color === COLOR_COI_PATH) return "arrowhead-coi";
   if (color === COLOR_SELECTED_RING) return "arrowhead-selected";
   if (color === COLOR_FADED_EDGE) return "arrowhead-faded-light";
   if (color === COLOR_FADED_EDGE_DARK) return "arrowhead-faded-dark";
@@ -243,7 +228,7 @@ export function computeArrowMarkerId(color: string): string {
 
 export function computeNodeOpacity(node: GraphNode, ctx: StyleContext): number {
   if (ctx.highlightSelected && ctx.selectedSet.size > 0) {
-    return ctx.selectedSet.has(node.id) || ctx.childSet.has(node.id) || ctx.coiNodeSet.has(node.id)
+    return ctx.selectedSet.has(node.id) || ctx.childSet.has(node.id)
       ? 1
       : 0.15;
   }
@@ -255,7 +240,7 @@ export function computeNodeOpacity(node: GraphNode, ctx: StyleContext): number {
 
 export function computeLabelOpacity(node: GraphNode, ctx: StyleContext): number {
   if (ctx.highlightSelected && ctx.selectedSet.size > 0) {
-    return ctx.selectedSet.has(node.id) || ctx.childSet.has(node.id) || ctx.coiNodeSet.has(node.id)
+    return ctx.selectedSet.has(node.id) || ctx.childSet.has(node.id)
       ? 1
       : 0.1;
   }

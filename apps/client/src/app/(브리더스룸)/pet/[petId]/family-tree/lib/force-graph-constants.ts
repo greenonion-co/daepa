@@ -14,9 +14,6 @@ export const COLOR_FADED = "#e5e7eb";
 export const COLOR_FADED_DARK = "#374151";
 export const COLOR_SELECTED_RING = "#3b82f6";
 
-export const COLOR_COI_PATH = "#10b981"; // emerald-500
-export const COLOR_COI_PATH_WIDTH = 3;
-
 export const COLOR_PAIR_EDGE = "#c084fc"; // purple-400
 export const COLOR_PAIR_EDGE_DARK = "#a78bfa"; // violet-400
 export const COLOR_HOVER_PAIR_EDGE = "#e879f9"; // fuchsia-400
@@ -57,7 +54,6 @@ export const ARROW_MARKER_DEFS: [string, string, number, number][] = [
   ["arrowhead", COLOR_DEFAULT_EDGE, 8, 6],
   ["arrowhead-dark", COLOR_DEFAULT_EDGE_DARK, 8, 6],
   ["arrowhead-hover", COLOR_HOVER_EDGE, 14, 10],
-  ["arrowhead-coi", COLOR_COI_PATH, 16, 11],
   ["arrowhead-parent", COLOR_PARENT_EDGE, 14, 10],
   ["arrowhead-child-hl", COLOR_CHILD_HIGHLIGHT, 14, 10],
   ["arrowhead-selected", COLOR_SELECTED_RING, 14, 10],

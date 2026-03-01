@@ -28,7 +28,6 @@ interface ForceGraphProps {
   className?: string;
   selectedNodeIds?: string[];
   highlightSelected?: boolean;
-  highlightedEdges?: { source: string; target: string }[];
   onNodeClick?: (nodeId: string, position: { x: number; y: number }) => void;
   onNodeDoubleClick?: (nodeId: string) => void;
   onNodeHover?: (nodeId: string | null) => void;
@@ -57,7 +56,6 @@ export default function ForceGraph({
   className,
   selectedNodeIds,
   highlightSelected,
-  highlightedEdges,
   onNodeClick,
   onNodeDoubleClick,
   onNodeHover,
@@ -115,25 +113,6 @@ export default function ForceGraph({
     return () => observer.disconnect();
   }, []);
 
-  // COI 경로 엣지/노드 룩업
-  const coiEdgeSet = useMemo(() => {
-    const set = new Set<string>();
-    for (const e of highlightedEdges ?? []) {
-      set.add(`${e.source}-${e.target}`);
-      set.add(`${e.target}-${e.source}`);
-    }
-    return set;
-  }, [highlightedEdges]);
-
-  const coiNodeSet = useMemo(() => {
-    const set = new Set<string>();
-    for (const e of highlightedEdges ?? []) {
-      set.add(e.source);
-      set.add(e.target);
-    }
-    return set;
-  }, [highlightedEdges]);
-
   const childSet = useMemo(() => new Set(highlightedChildIds ?? []), [highlightedChildIds]);
 
   // 같은 부모를 가진 형제(클러치 메이트) 맵: parentKey → Set<nodeId>
@@ -182,8 +161,6 @@ export default function ForceGraph({
       isDark,
       highlightSelected: !!highlightSelected,
       selectedSet,
-      coiNodeSet,
-      coiEdgeSet,
       childSet,
       siblingSet,
       connectedMap: connectedMap.current,
@@ -191,7 +168,7 @@ export default function ForceGraph({
       maxDegree,
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [hoveredNodeId, isDark, highlightSelected, selectedSet, coiNodeSet, coiEdgeSet, childSet, siblingSet, maxDegree, tickId],
+    [hoveredNodeId, isDark, highlightSelected, selectedSet, childSet, siblingSet, maxDegree, tickId],
   );
 
   return (
