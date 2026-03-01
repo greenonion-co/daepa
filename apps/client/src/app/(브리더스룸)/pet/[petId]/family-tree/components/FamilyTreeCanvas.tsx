@@ -123,7 +123,7 @@ export default function FamilyTreeCanvas({ petId }: FamilyTreeCanvasProps) {
   const handleCanvasContextMenu = useCallback(
     (position: { x: number; y: number }, simPosition?: { x: number; y: number }) => {
       setCanvasContextMenu({ position });
-      if (simPosition) setQuickRegisterSimPosition(simPosition);
+      setQuickRegisterSimPosition(simPosition ?? null);
     },
     [],
   );

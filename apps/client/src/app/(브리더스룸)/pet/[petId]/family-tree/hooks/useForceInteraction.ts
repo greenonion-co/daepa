@@ -45,7 +45,11 @@ export function useForceInteraction({
   const zoomRef = useRef<ZoomBehavior<SVGSVGElement, unknown> | null>(null);
   const [hoveredNodeId, setHoveredNodeId] = useState<string | null>(null);
   const dragMovedRef = useRef(false);
-  const pendingClickRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingClickRef = useRef<{
+    timer: ReturnType<typeof setTimeout>;
+    nodeId: string;
+    position: { x: number; y: number };
+  } | null>(null);
   const [highlightFocusedId, setHighlightFocusedId] = useState<string | null>(null);
   const focusTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -128,6 +132,10 @@ export function useForceInteraction({
   useEffect(() => {
     return () => {
       if (focusTimeoutRef.current) clearTimeout(focusTimeoutRef.current);
+      if (pendingClickRef.current) {
+        clearTimeout(pendingClickRef.current.timer);
+        pendingClickRef.current = null;
+      }
     };
   }, []);
 
@@ -169,10 +177,12 @@ export function useForceInteraction({
 
         window.removeEventListener("pointermove", handlePointerMove);
         window.removeEventListener("pointerup", handlePointerUp);
+        window.removeEventListener("pointercancel", handlePointerUp);
       };
 
       window.addEventListener("pointermove", handlePointerMove);
       window.addEventListener("pointerup", handlePointerUp);
+      window.addEventListener("pointercancel", handlePointerUp);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [SIM_DRAG_ALPHA_TARGET],
@@ -189,17 +199,27 @@ export function useForceInteraction({
         onNodeHover?.(nodeId);
       }
 
-      if (pendingClickRef.current) {
-        clearTimeout(pendingClickRef.current);
+      if (pendingClickRef.current?.nodeId === nodeId) {
+        clearTimeout(pendingClickRef.current.timer);
         pendingClickRef.current = null;
         onNodeDoubleClick?.(nodeId);
         return;
       }
 
-      pendingClickRef.current = setTimeout(() => {
+      if (pendingClickRef.current) {
+        const prev = pendingClickRef.current;
+        clearTimeout(prev.timer);
+        pendingClickRef.current = null;
+        onNodeClick?.(prev.nodeId, prev.position);
+      }
+
+      const timer = setTimeout(() => {
+        if (!pendingClickRef.current) return;
         pendingClickRef.current = null;
         onNodeClick?.(nodeId, position);
       }, DBLCLICK_DELAY);
+
+      pendingClickRef.current = { timer, nodeId, position };
     },
     [onNodeClick, onNodeDoubleClick, isMobile, onNodeHover],
   );

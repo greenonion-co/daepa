@@ -41,7 +41,7 @@ const PetItem = ({
                     ? "bg-[#2383E2] dark:bg-[#529CCA]"
                     : item.sex === PetDtoSex.FEMALE
                       ? "bg-[#E03E3E] dark:bg-[#FF7369]"
-                      : "bg-gray-300",
+                      : "bg-gray-300 dark:bg-gray-500",
                 )}
               />
               {item.name}
