@@ -22,6 +22,7 @@ export const COLOR_PAIR_EDGE_DARK = "#a78bfa"; // violet-400
 export const COLOR_HOVER_PAIR_EDGE = "#e879f9"; // fuchsia-400
 export const COLOR_PARENT_EDGE = "#f97316"; // orange-500
 export const COLOR_CHILD_HIGHLIGHT = "#22d3ee"; // cyan-400
+export const COLOR_SIBLING = "#f97316"; // orange-500
 
 export const COLOR_DEFAULT_EDGE_DARK = "#4b5563"; // gray-600
 export const COLOR_FADED_EDGE = "#f3f4f6"; // gray-100

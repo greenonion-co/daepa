@@ -11,7 +11,6 @@ import PairStatisticsPanel from "./PairStatisticsPanel";
 import MorphLegend from "./MorphLegend";
 import SearchDropdown from "./SearchDropdown";
 import CreateLayingModal from "../../../../hatching/components/CreateLayingModal";
-import NodeContextMenu from "./NodeContextMenu";
 import PetDetailModal from "../../components/PetDetailModal";
 import { useCenterPet, useFamilyTree, type FamilyTreeResponse } from "../hooks/useFamilyTreeData";
 import { usePairInvalidate } from "../../../../hatching/hooks/usePairInvalidate";
@@ -62,10 +61,6 @@ export default function FamilyTreeCanvas({ petId }: FamilyTreeCanvasProps) {
   const [hoveredPetId, setHoveredPetId] = useState<string | null>(null);
   const [panelPetId, setPanelPetId] = useState<string | null>(petId);
   const [detailModalPetId, setDetailModalPetId] = useState<string | null>(null);
-  const [contextMenu, setContextMenu] = useState<{
-    nodeId: string;
-    position: { x: number; y: number };
-  } | null>(null);
   const [canvasContextMenu, setCanvasContextMenu] = useState<{
     position: { x: number; y: number };
   } | null>(null);
@@ -124,14 +119,6 @@ export default function FamilyTreeCanvas({ petId }: FamilyTreeCanvasProps) {
     handleSearchKeyDown,
   } = useSearch({ nodesMap, nodeKey, queryClient, mergeTree });
 
-  // 노드 우클릭 → 컨텍스트 메뉴
-  const handleNodeContextMenu = useCallback(
-    (nodeId: string, position: { x: number; y: number }) => {
-      setContextMenu({ nodeId, position });
-    },
-    [],
-  );
-
   const handleCanvasContextMenu = useCallback(
     (position: { x: number; y: number }, simPosition?: { x: number; y: number }) => {
       setCanvasContextMenu({ position });
@@ -176,7 +163,6 @@ export default function FamilyTreeCanvas({ petId }: FamilyTreeCanvasProps) {
 
   const handleContextMenuAction = useCallback(
     (action: string, nodeId: string) => {
-      setContextMenu(null);
       switch (action) {
         case "detail": {
           // 타인의 비공개 개체는 petControllerFindPetByPetId 호출 불가
@@ -344,7 +330,6 @@ export default function FamilyTreeCanvas({ petId }: FamilyTreeCanvasProps) {
         onNodeClick={handleNodeClick}
         onNodeDoubleClick={handleNodeDoubleClick}
         onNodeHover={handleNodeHover}
-        onNodeContextMenu={handleNodeContextMenu}
         onCanvasClick={handleCanvasContextMenu}
         initialNodePositions={initialNodePositions}
       />
@@ -420,25 +405,6 @@ export default function FamilyTreeCanvas({ petId }: FamilyTreeCanvasProps) {
               새 개체 등록
             </button>
           </div>
-        </>
-      )}
-
-      {contextMenu && (
-        <>
-          <div className="fixed inset-0 z-40" onMouseDown={() => setContextMenu(null)} />
-          <NodeContextMenu
-            nodeId={contextMenu.nodeId}
-            nodeName={nodesMap.get(contextMenu.nodeId)?.pet?.name ?? "이름 없음"}
-            isPrivate={(() => {
-              const n = nodesMap.get(contextMenu.nodeId);
-              return n?.isHidden || (n?.pet?.isPublic === false && !n?.pet?.isOwner);
-            })()}
-            isOwner={nodesMap.get(contextMenu.nodeId)?.pet?.isOwner ?? false}
-            nodeSex={nodesMap.get(contextMenu.nodeId)?.pet?.sex ?? undefined}
-            position={contextMenu.position}
-            onAction={handleContextMenuAction}
-            onClose={() => setContextMenu(null)}
-          />
         </>
       )}
 

@@ -18,6 +18,7 @@ import {
   COLOR_HOVER_PAIR_EDGE,
   COLOR_PARENT_EDGE,
   COLOR_CHILD_HIGHLIGHT,
+  COLOR_SIBLING,
   COLOR_DEFAULT_EDGE_DARK,
   COLOR_FADED_EDGE,
   COLOR_FADED_EDGE_DARK,
@@ -89,6 +90,7 @@ export interface StyleContext {
   coiNodeSet: Set<string>;
   coiEdgeSet: Set<string>;
   childSet: Set<string>;
+  siblingSet: Set<string>;
   connectedMap: Map<string, Set<string>>;
   simNodes: GraphNode[];
   maxDegree: number;
@@ -178,6 +180,7 @@ export function computeNodeColor(node: GraphNode, ctx: StyleContext): string {
     }
     return COLOR_HOVER_NODE;
   }
+  if (ctx.siblingSet.has(node.id)) return COLOR_SIBLING;
   return ctx.isDark ? COLOR_FADED_DARK : COLOR_FADED;
 }
 
@@ -246,6 +249,7 @@ export function computeNodeOpacity(node: GraphNode, ctx: StyleContext): number {
   }
   if (!ctx.hoveredNodeId) return 1;
   if (isConnected(node.id, ctx)) return 1;
+  if (ctx.siblingSet.has(node.id)) return 0.85;
   return 0.2;
 }
 
@@ -256,8 +260,10 @@ export function computeLabelOpacity(node: GraphNode, ctx: StyleContext): number 
       : 0.1;
   }
   if (!ctx.hoveredNodeId) {
+    if (ctx.isDark) return node.degree >= ctx.maxDegree * 0.3 ? 0.9 : 0.7;
     return node.degree >= ctx.maxDegree * 0.3 ? 0.7 : 0.4;
   }
   if (isConnected(node.id, ctx)) return 1;
+  if (ctx.siblingSet.has(node.id)) return 0.8;
   return 0.1;
 }

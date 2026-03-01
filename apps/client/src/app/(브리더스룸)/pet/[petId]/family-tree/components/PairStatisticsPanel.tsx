@@ -10,6 +10,8 @@ export interface PairChildInfo {
   name?: string;
   sex?: string;
   morphs?: string[];
+  season?: number;
+  clutchIndex?: number;
 }
 
 interface PairStatisticsPanelProps {
@@ -197,17 +199,21 @@ export default function PairStatisticsPanel({
                     ? "bg-[#E03E3E] dark:bg-[#FF7369]"
                     : "bg-gray-300";
               return (
-                <button
+                <div
                   key={child.petId}
-                  type="button"
-                  className="-mx-1 flex items-center gap-1.5 rounded px-1 py-0.5 text-left hover:bg-gray-100 dark:hover:bg-gray-800"
-                  onClick={() => onChildClick?.(child.petId)}
+                  className="-mx-1 flex cursor-pointer items-center gap-1.5 rounded px-1 py-0.5 text-left hover:bg-gray-100 dark:hover:bg-gray-800"
+                  onMouseEnter={() => onChildClick?.(child.petId)}
                 >
                   <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${dotColor}`} />
                   <span className="truncate text-[10px] text-gray-600 dark:text-gray-300">
                     {child.name ?? "이름 없음"}
                   </span>
-                </button>
+                  {child.season != null && (
+                    <span className="shrink-0 text-[9px] text-gray-400 dark:text-gray-500">
+                      {child.season}-{child.clutchIndex}
+                    </span>
+                  )}
+                </div>
               );
             })}
           </div>

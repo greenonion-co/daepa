@@ -1,5 +1,6 @@
 "use client";
 
+import { ChevronRight } from "lucide-react";
 import PetThumbnail from "@/components/common/PetThumbnail";
 import type { FamilyPetData } from "../lib/types";
 
@@ -22,7 +23,13 @@ function PanelRow({ children, delay }: { children: React.ReactNode; delay: numbe
   );
 }
 
-export default function PetDetailPanel({ pet, father, mother, onAction, onFocusNode }: PetDetailPanelProps) {
+export default function PetDetailPanel({
+  pet,
+  father,
+  mother,
+  onAction,
+  onFocusNode,
+}: PetDetailPanelProps) {
   if (!pet) {
     return (
       <div className="pointer-events-none flex h-52 w-52 items-center justify-center rounded-xl border border-gray-200 bg-white/90 px-3 py-4 shadow-lg backdrop-blur-sm dark:border-gray-700 dark:bg-gray-900/90">
@@ -159,14 +166,15 @@ export default function PetDetailPanel({ pet, father, mother, onAction, onFocusN
       {/* 액션 메뉴 */}
       {onAction && (
         <PanelRow delay={step++ * 50}>
-          <div className="pointer-events-auto flex flex-col gap-0.5 border-t border-gray-100 pt-1.5 dark:border-gray-800">
+          <div className="pointer-events-auto flex flex-col gap-1 border-t border-gray-100 pt-1.5 dark:border-gray-800">
             {!disabledPet && (
               <button
                 type="button"
                 onClick={() => onAction("detail", pet.petId)}
-                className="w-full rounded-md px-2 py-1 text-left text-[11px] text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
+                className="flex w-full items-center justify-between rounded-lg border border-gray-200 bg-gray-100 px-2.5 py-1 text-[11px] text-gray-700 transition-colors hover:bg-gray-200 active:bg-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 dark:active:bg-gray-600"
               >
                 상세 보기
+                <ChevronRight className="h-3 w-3 text-gray-700 dark:text-gray-300" />
               </button>
             )}
             {!disabledPet &&
@@ -178,24 +186,27 @@ export default function PetDetailPanel({ pet, father, mother, onAction, onFocusN
                 <button
                   type="button"
                   onClick={() => onAction("select-mate", pet.petId)}
-                  className="w-full rounded-md px-2 py-1 text-left text-[11px] text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
+                  className="flex w-full items-center justify-between rounded-lg border border-gray-200 bg-gray-100 px-2.5 py-1 text-[11px] text-gray-700 transition-colors hover:bg-gray-200 active:bg-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 dark:active:bg-gray-600"
                 >
                   메이팅 개체 선택
+                  <ChevronRight className="h-3 w-3 text-gray-700 dark:text-gray-300" />
                 </button>
               )}
             <button
               type="button"
               onClick={() => onAction("relation", pet.petId)}
-              className="w-full rounded-md px-2 py-1 text-left text-[11px] text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
+              className="flex w-full items-center justify-between rounded-lg border border-gray-200 bg-gray-100 px-2.5 py-1 text-[11px] text-gray-700 transition-colors hover:bg-gray-200 active:bg-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 dark:active:bg-gray-600"
             >
               관계도
+              <ChevronRight className="h-3 w-3 text-gray-700 dark:text-gray-300" />
             </button>
             <button
               type="button"
               onClick={() => onAction("family-tree", pet.petId)}
-              className="w-full rounded-md px-2 py-1 text-left text-[11px] text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
+              className="flex w-full items-center justify-between rounded-lg border border-gray-200 bg-gray-100 px-2.5 py-1 text-[11px] text-gray-700 transition-colors hover:bg-gray-200 active:bg-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 dark:active:bg-gray-600"
             >
               가계도
+              <ChevronRight className="h-3 w-3 text-gray-700 dark:text-gray-300" />
             </button>
           </div>
         </PanelRow>

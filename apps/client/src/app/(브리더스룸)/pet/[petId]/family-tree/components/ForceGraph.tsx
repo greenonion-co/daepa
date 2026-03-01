@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useMemo } from "react";
+import { useRef, useMemo, useState, useEffect } from "react";
 import type { GraphNode, GraphLink } from "../lib/types";
 import {
   nodeRadius,
@@ -92,10 +92,18 @@ export default function ForceGraph({
 
   const selectedSet = useMemo(() => new Set(selectedNodeIds ?? []), [selectedNodeIds]);
 
-  const isDark = useMemo(
+  const [isDark, setIsDark] = useState(
     () => typeof document !== "undefined" && document.documentElement.classList.contains("dark"),
-    [],
   );
+
+  useEffect(() => {
+    const el = document.documentElement;
+    const observer = new MutationObserver(() => {
+      setIsDark(el.classList.contains("dark"));
+    });
+    observer.observe(el, { attributes: true, attributeFilter: ["class"] });
+    return () => observer.disconnect();
+  }, []);
 
   // COI 경로 엣지/노드 룩업
   const coiEdgeSet = useMemo(() => {
@@ -118,6 +126,36 @@ export default function ForceGraph({
 
   const childSet = useMemo(() => new Set(highlightedChildIds ?? []), [highlightedChildIds]);
 
+  // 같은 부모를 가진 형제(클러치 메이트) 맵: parentKey → Set<nodeId>
+  const siblingMap = useMemo(() => {
+    const map = new Map<string, Set<string>>();
+    for (const node of nodes) {
+      if (!node.fatherId && !node.motherId) continue;
+      const key = `${node.fatherId ?? ""}-${node.motherId ?? ""}`;
+      let set = map.get(key);
+      if (!set) {
+        set = new Set();
+        map.set(key, set);
+      }
+      set.add(node.id);
+    }
+    return map;
+  }, [nodes]);
+
+  // hover된 노드의 형제 Set (자기 자신 제외)
+  const siblingSet = useMemo(() => {
+    if (!hoveredNodeId) return new Set<string>();
+    const hovered = simNodesRef.current.find((n) => n.id === hoveredNodeId);
+    if (!hovered || (!hovered.fatherId && !hovered.motherId)) return new Set<string>();
+    const key = `${hovered.fatherId ?? ""}-${hovered.motherId ?? ""}`;
+    const siblings = siblingMap.get(key);
+    if (!siblings) return new Set<string>();
+    const result = new Set(siblings);
+    result.delete(hoveredNodeId);
+    return result;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hoveredNodeId, siblingMap]);
+
   // 노드별 반지름 캐시 (degree/isPairOfCenter는 props에서 결정되므로 nodes 변경 시만 재계산)
   const nodeRadiusMap = useMemo(() => {
     const map = new Map<string, number>();
@@ -137,12 +175,13 @@ export default function ForceGraph({
       coiNodeSet,
       coiEdgeSet,
       childSet,
+      siblingSet,
       connectedMap: connectedMap.current,
       simNodes: simNodesRef.current,
       maxDegree,
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [hoveredNodeId, isDark, highlightSelected, selectedSet, coiNodeSet, coiEdgeSet, childSet, maxDegree, tickId],
+    [hoveredNodeId, isDark, highlightSelected, selectedSet, coiNodeSet, coiEdgeSet, childSet, siblingSet, maxDegree, tickId],
   );
 
   return (

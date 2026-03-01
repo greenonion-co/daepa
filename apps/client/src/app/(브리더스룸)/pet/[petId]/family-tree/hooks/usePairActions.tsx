@@ -17,6 +17,8 @@ interface PairChildInfo {
   name?: string;
   sex?: string;
   morphs?: string[];
+  season?: number;
+  clutchIndex?: number;
 }
 
 interface UsePairActionsParams {
@@ -92,6 +94,32 @@ export function usePairActions({
     enabled: !!pairFatherId && !!pairMotherId,
     staleTime: 5 * 60 * 1000,
   });
+
+  // petId → { season, clutchIndex } 매핑
+  const childSeasonMap = useMemo(() => {
+    const map = new Map<string, { season: number; clutchIndex: number }>();
+    if (!pairMatingsByDate) return map;
+    for (const mating of pairMatingsByDate) {
+      const layings = mating.layingsByDate ?? [];
+      layings.forEach((laying, layingIdx) => {
+        for (const pet of laying.layings) {
+          map.set(pet.petId, { season: mating.season, clutchIndex: layingIdx + 1 });
+        }
+      });
+    }
+    return map;
+  }, [pairMatingsByDate]);
+
+  // pairChildren에 시즌/클러치 정보 병합
+  const enrichedPairChildren = useMemo(
+    () =>
+      pairChildren.map((child) => ({
+        ...child,
+        season: childSeasonMap.get(child.petId)?.season,
+        clutchIndex: childSeasonMap.get(child.petId)?.clutchIndex,
+      })),
+    [pairChildren, childSeasonMap],
+  );
 
   // 산란 추가 모달용 메이팅 날짜/시즌 계산
   const matingDatesForCalendar = useMemo(
@@ -174,7 +202,7 @@ export function usePairActions({
     pairStatistics,
     isPairStatsLoading,
     hasPair,
-    pairChildren,
+    pairChildren: enrichedPairChildren,
     pairMatingsByDate,
     matingDatesForCalendar,
     latestMatingSeasonForCalendar,
