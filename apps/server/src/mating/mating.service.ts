@@ -47,6 +47,7 @@ export class MatingService {
           {
             isDeleted: false,
             deletedAt: null,
+            desc: null,
             species: createMatingDto.species,
           },
         );
@@ -120,6 +121,7 @@ export class MatingService {
           {
             isDeleted: false,
             deletedAt: null,
+            desc: null,
           },
         );
       }
@@ -164,7 +166,7 @@ export class MatingService {
       try {
         const mating = await entityManager.findOne(MatingEntity, {
           where: { id: matingId },
-          select: ['id'],
+          select: ['id', 'pairId'],
         });
 
         if (!mating) {
@@ -182,7 +184,21 @@ export class MatingService {
           );
         }
 
+        // pairId를 미리 저장
+        const pairId = mating.pairId;
+
         await entityManager.delete(MatingEntity, { id: matingId });
+
+        // 해당 페어에 남은 메이팅이 없으면 페어도 삭제
+        const remainingMatings = await entityManager.existsBy(MatingEntity, {
+          pairId,
+        });
+        if (!remainingMatings) {
+          await entityManager.update(PairEntity, pairId, {
+            isDeleted: true,
+            deletedAt: new Date(),
+          });
+        }
       } catch (error) {
         if (error instanceof BadRequestException) {
           throw error;

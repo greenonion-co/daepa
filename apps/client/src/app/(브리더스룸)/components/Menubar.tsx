@@ -8,12 +8,14 @@ import { Mail, Settings } from "lucide-react";
 import { useSearchKeywordStore } from "../store/searchKeyword";
 import { useIsMobile } from "@/hooks/useMobile";
 import SearchInput from "./SearchInput";
-import { useIsLoggedIn } from "@/hooks/useAuth";
+import { useIsLoggedIn, useUser } from "@/hooks/useAuth";
 import { isNativeApp } from "@/lib/native-bridge";
 import AddPetButton from "@/app/(브리더스룸)/components/AddPetButton";
+import AddPetBulkButton from "@/app/(브리더스룸)/components/AddPetBulkButton";
 
 const Menubar = ({ unreadCount }: { unreadCount: number }) => {
   const isLoggedIn = useIsLoggedIn();
+  const user = useUser();
   const pathname = usePathname();
   const isMobile = useIsMobile();
   const { searchKeyword, setSearchKeyword } = useSearchKeywordStore();
@@ -101,6 +103,7 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
         {!isNative && <NavLinks />}
         {/* 웹에서만 메뉴바에 렌더링 */}
         {!isNative && !isMobile && !isRegisterPage && <AddPetButton />}
+        {!isNative && !isMobile && !isRegisterPage && user?.isBiz && <AddPetBulkButton />}
       </div>
 
       {/* 우측: 검색 + 알림 + 설정 */}

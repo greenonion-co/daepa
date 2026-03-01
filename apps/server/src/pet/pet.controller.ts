@@ -23,6 +23,7 @@ import {
   DeletedPetDto,
   PetSummaryDto,
 } from './pet.dto';
+import { BulkCreatePetDto } from './bulk-create-pet.dto';
 import { PetService } from './pet.service';
 import {
   ApiResponse,
@@ -127,6 +128,23 @@ export class PetController {
     @JwtUser() token: JwtUserPayload,
   ): Promise<PageDto<DeletedPetDto>> {
     return this.petService.getDeletedPets(pageOptionsDto, token.userId);
+  }
+
+  @Post('/bulk')
+  @ApiResponse({
+    status: 200,
+    description: '개체 대량 등록이 완료되었습니다.',
+    type: CommonResponseDto,
+  })
+  async bulkCreate(
+    @Body() dto: BulkCreatePetDto,
+    @JwtUser() token: JwtUserPayload,
+  ): Promise<CommonResponseDto> {
+    const count = await this.petService.bulkCreatePets(dto, token.userId);
+    return {
+      success: true,
+      message: `${count}개의 개체가 등록되었습니다.`,
+    };
   }
 
   @Post('/duplicate-check')
