@@ -1,8 +1,8 @@
 import { Bubbles, DollarSign, Home } from "lucide-react";
 import { FormStep } from "./pet/types/form.type";
 import {
+  AdoptionHistoryDtoMethod,
   EggDetailDtoStatus,
-  PetAdoptionDtoMethod,
   PetDtoGrowth,
   PetDtoSex,
   PetDtoSpecies,
@@ -474,7 +474,7 @@ export const EGG_STATUS_KOREAN_INFO: Record<EggDetailDtoStatus, string> = {
   DEAD: "중지란",
 };
 
-export const ADOPTION_METHOD_KOREAN_INFO: Record<PetAdoptionDtoMethod, string> = {
+export const ADOPTION_METHOD_KOREAN_INFO: Record<AdoptionHistoryDtoMethod, string> = {
   PICKUP: "직거래",
   DELIVERY: "택배",
   WHOLESALE: "도매",

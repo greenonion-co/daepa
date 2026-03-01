@@ -11,7 +11,8 @@ import TooltipText from "@/app/(브리더스룸)/components/TooltipText";
 import PetThumbnail, { getPetThumbnailQueryKey } from "@/components/common/PetThumbnail";
 import { petImageControllerFindThumbnail } from "@repo/api-client";
 import { useQuery } from "@tanstack/react-query";
-import { useIsLoggedIn } from "@/hooks/useAuth";
+import { useAuth } from "@/hooks/useAuth";
+import { UserProfileDtoRole } from "@repo/api-client";
 import { useIsMyPet } from "@/hooks/useIsMyPet";
 import { openRelationPromoSheet } from "@/app/(브리더스룸)/components/LoginPromoSheet";
 import { useAppRouter } from "@/hooks/useAppRouter";
@@ -43,7 +44,9 @@ const Header = ({
   onDelete,
 }: HeaderProps) => {
   const isMyPet = useIsMyPet(pet?.owner?.userId);
-  const isLoggedIn = useIsLoggedIn();
+  const { isLoggedIn, user } = useAuth();
+  const isBreeder =
+    user?.role === UserProfileDtoRole.BREEDER || user?.role === UserProfileDtoRole.ADMIN;
   const router = useAppRouter();
   const [isScrolled, setIsScrolled] = useState(size === "small");
 
@@ -207,27 +210,46 @@ const Header = ({
           </div>
         </div>
 
-        <button
-          type="button"
-          onClick={() => {
-            if (isLoggedIn) {
-              router.push(`/pet/${pet.petId}/relation`);
-            } else {
-              openRelationPromoSheet();
-            }
-          }}
-          className={cn(
-            "flex items-center gap-0.5 rounded-lg bg-blue-100 px-2 font-[700] text-white transition-colors hover:bg-blue-200 dark:bg-blue-900/40 dark:hover:bg-blue-800/40",
-            isScrolled ? "h-8 text-xs" : "h-8 text-sm",
+        <div className="flex items-center gap-1">
+          {isBreeder && isMyPet && (
+            <button
+              type="button"
+              onClick={() => router.push(`/pet/${pet.petId}/breeding-map`)}
+              className={cn(
+                "flex items-center gap-0.5 rounded-lg border border-gray-200 bg-gradient-to-r from-blue-200/50 to-purple-200/65 px-2 font-[700] text-white transition-colors hover:from-blue-200/70 hover:to-purple-200/80 dark:border-gray-700 dark:from-blue-900/40 dark:to-purple-900/50 dark:hover:from-blue-900/60 dark:hover:to-purple-900/70",
+                isScrolled ? "h-8 text-xs" : "h-8 text-sm",
+              )}
+            >
+              <TooltipText
+                text="브리딩맵"
+                title="브리딩맵"
+                className="text-blue-600 dark:text-purple-300"
+                content="혈통 관계를 트리 구조로 확인합니다."
+              />
+            </button>
           )}
-        >
-          <TooltipText
-            text="개체 관계도"
-            title="개체 관계도"
-            className="text-blue-600"
-            content="혈통 관계가 있는 개체들을 확인합니다."
-          />
-        </button>
+          <button
+            type="button"
+            onClick={() => {
+              if (isLoggedIn) {
+                router.push(`/pet/${pet.petId}/relation`);
+              } else {
+                openRelationPromoSheet();
+              }
+            }}
+            className={cn(
+              "flex items-center gap-0.5 rounded-lg border border-gray-200 bg-white px-2 font-[700] transition-colors hover:bg-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700",
+              isScrolled ? "h-8 text-xs" : "h-8 text-sm",
+            )}
+          >
+            <TooltipText
+              text="관계도"
+              title="개체 관계도"
+              className="text-gray-600 dark:text-gray-300"
+              content="혈통 관계가 있는 개체들을 확인합니다."
+            />
+          </button>
+        </div>
 
         <div className="flex items-center gap-1">
           <QRCode pet={pet} isScrolled={isScrolled} />

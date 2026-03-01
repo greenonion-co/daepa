@@ -28,6 +28,7 @@ const getInitialFormData = () => ({
   season: 1,
 });
 
+
 interface CreateMatingFormProps {
   onClose: () => void;
 }
@@ -40,7 +41,7 @@ const CreateMatingForm = ({ onClose }: CreateMatingFormProps) => {
     mother?: PetParentDto;
     matingDate: string;
     season: number | undefined;
-  }>(() => getInitialFormData());
+  }>(getInitialFormData);
 
   const { mutateAsync: createMating, isPending } = useMutation({
     mutationFn: matingControllerCreateMating,
@@ -220,6 +221,7 @@ const CreateMatingForm = ({ onClose }: CreateMatingFormProps) => {
                 label="부"
                 species={formData.species}
                 data={formData.father}
+                editable
                 onSelect={(item) => handleParentSelect(UnlinkParentDtoRole.FATHER, item)}
                 onUnlink={handleFatherUnlink}
               />
@@ -230,6 +232,7 @@ const CreateMatingForm = ({ onClose }: CreateMatingFormProps) => {
                 label="모"
                 species={formData.species}
                 data={formData.mother}
+                editable
                 onSelect={(item) => handleParentSelect(UnlinkParentDtoRole.MOTHER, item)}
                 onUnlink={handleMotherUnlink}
               />

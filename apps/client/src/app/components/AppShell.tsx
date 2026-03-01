@@ -16,6 +16,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const isPetDetail = pathname?.startsWith("/pet/") ?? false;
+  const isFamilyTree = /\/pet\/[^/]+\/breeding-map/.test(pathname ?? "");
   const isIntroPage = pathname === "/intro";
   const isMobile = useIsMobile();
 
@@ -42,7 +43,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         <div className={cn(isNativeApp() && "pb-[80px]")}>{children}</div>
       </div>
       {/* 모바일 웹 */}
-      {!isNativeApp() && isMobile && <AddPetButton />}
+      {!isNativeApp() && isMobile && !isFamilyTree && <AddPetButton />}
       {/* 웹 */}
       {!isNativeApp() && !isMobile && <Sidebar unreadCount={unreadCount} />}
     </main>

@@ -11,6 +11,7 @@ import { Exclude } from 'class-transformer';
 @Entity({ name: 'pet_relations' })
 @Index('UNIQUE_PET_ID', ['petId'], { unique: true })
 @Index('IDX_FATHER_MOTHER', ['fatherId', 'motherId'])
+@Index('IDX_MOTHER_ID', ['motherId'])
 export class PetRelationEntity {
   @Exclude()
   @PrimaryGeneratedColumn()

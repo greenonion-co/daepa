@@ -32,6 +32,7 @@ import type {
   PetControllerGetChildrenByPetIdParams,
   PetControllerGetClutchMatesByPetIdParams,
   PetControllerGetDeletedPetsParams,
+  PetControllerGetFamilyTreeParams,
   PetControllerGetParentsByPetIdParams,
   PetControllerGetSiblingsByPetIdParams,
   RegisterFcmTokenDto,
@@ -70,12 +71,14 @@ import type {
   ChildPetDetailDto,
   CommonResponseDto,
   DetailJson,
+  FamilyTreeNodeDto,
   FeedingControllerGetList200,
   FilterPetListResponseDto,
   FindPetByPetIdResponseDto,
   FindPetImagesResponseDto,
   FindThumbnailResponseDto,
   GetChildrenPageResponseDto,
+  GetFamilyTreeResponseDto,
   GetParentsByPetIdResponseDto,
   GetSiblingsPageResponseDto,
   NativeLoginResponseDto,
@@ -136,6 +139,17 @@ export const petControllerVerifyName = (verifyPetNameDto: VerifyPetNameDto) => {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     data: verifyPetNameDto,
+  });
+};
+
+export const petControllerGetFamilyTree = (
+  petId: string,
+  params?: PetControllerGetFamilyTreeParams,
+) => {
+  return useCustomInstance<GetFamilyTreeResponseDto>({
+    url: `/api/v1/pet/family-tree/${petId}`,
+    method: "GET",
+    params,
   });
 };
 
@@ -738,6 +752,9 @@ export type PetControllerBulkCreateResult = NonNullable<
 export type PetControllerVerifyNameResult = NonNullable<
   Awaited<ReturnType<typeof petControllerVerifyName>>
 >;
+export type PetControllerGetFamilyTreeResult = NonNullable<
+  Awaited<ReturnType<typeof petControllerGetFamilyTree>>
+>;
 export type PetControllerGetParentsByPetIdResult = NonNullable<
   Awaited<ReturnType<typeof petControllerGetParentsByPetId>>
 >;
@@ -1274,6 +1291,64 @@ export const getPetControllerVerifyNameResponseMock = (
 ): CommonResponseDto => ({
   success: faker.datatype.boolean(),
   message: faker.string.alpha(20),
+  ...overrideResponse,
+});
+
+export const getPetControllerGetFamilyTreeResponseFamilyTreeNodeDtoMock = (
+  overrideResponse: Partial<FamilyTreeNodeDto> = {},
+): FamilyTreeNodeDto => ({
+  ...{
+    petId: faker.string.alpha(20),
+    fatherId: faker.helpers.arrayElement([faker.string.alpha(20), null]),
+    motherId: faker.helpers.arrayElement([faker.string.alpha(20), null]),
+    depth: faker.helpers.arrayElement([faker.number.int({ min: undefined, max: undefined }), null]),
+    name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+    sex: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+    morphs: faker.helpers.arrayElement([
+      Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+        faker.string.alpha(20),
+      ),
+      undefined,
+    ]),
+    traits: faker.helpers.arrayElement([
+      Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+        faker.string.alpha(20),
+      ),
+      undefined,
+    ]),
+    species: faker.string.alpha(20),
+    hatchingDate: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+    type: faker.string.alpha(20),
+    isPublic: faker.datatype.boolean(),
+    isOwner: faker.datatype.boolean(),
+    ownerName: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+  },
+  ...overrideResponse,
+});
+
+export const getPetControllerGetFamilyTreeResponsePetHiddenStatusDtoMock = (
+  overrideResponse: Partial<PetHiddenStatusDto> = {},
+): PetHiddenStatusDto => ({
+  ...{
+    petId: faker.string.alpha(20),
+    hiddenStatus: faker.helpers.arrayElement(["SECRET", "PENDING", "DELETED"] as const),
+  },
+  ...overrideResponse,
+});
+
+export const getPetControllerGetFamilyTreeResponseMock = (
+  overrideResponse: Partial<GetFamilyTreeResponseDto> = {},
+): GetFamilyTreeResponseDto => ({
+  nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+    faker.helpers.arrayElement([
+      { ...getPetControllerGetFamilyTreeResponseFamilyTreeNodeDtoMock() },
+      { ...getPetControllerGetFamilyTreeResponsePetHiddenStatusDtoMock() },
+    ]),
+  ),
+  centerPairPartnerIds: Array.from(
+    { length: faker.number.int({ min: 1, max: 10 }) },
+    (_, i) => i + 1,
+  ).map(() => faker.string.alpha(20)),
   ...overrideResponse,
 });
 
@@ -3298,11 +3373,6 @@ export const getAuthControllerKakaoNativeResponseMock = (
   email: faker.string.alpha(20),
   role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
   isBiz: faker.datatype.boolean(),
-  refreshToken: faker.helpers.arrayElement([faker.string.alpha(20), null]),
-  refreshTokenExpiresAt: faker.helpers.arrayElement([
-    `${faker.date.past().toISOString().split(".")[0]}Z`,
-    null,
-  ]),
   status: faker.helpers.arrayElement([
     "pending",
     "active",
@@ -3324,11 +3394,6 @@ export const getAuthControllerAppleNativeResponseMock = (
   email: faker.string.alpha(20),
   role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
   isBiz: faker.datatype.boolean(),
-  refreshToken: faker.helpers.arrayElement([faker.string.alpha(20), null]),
-  refreshTokenExpiresAt: faker.helpers.arrayElement([
-    `${faker.date.past().toISOString().split(".")[0]}Z`,
-    null,
-  ]),
   status: faker.helpers.arrayElement([
     "pending",
     "active",
@@ -3350,11 +3415,6 @@ export const getAuthControllerGoogleNativeResponseMock = (
   email: faker.string.alpha(20),
   role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
   isBiz: faker.datatype.boolean(),
-  refreshToken: faker.helpers.arrayElement([faker.string.alpha(20), null]),
-  refreshTokenExpiresAt: faker.helpers.arrayElement([
-    `${faker.date.past().toISOString().split(".")[0]}Z`,
-    null,
-  ]),
   status: faker.helpers.arrayElement([
     "pending",
     "active",
@@ -4527,6 +4587,29 @@ export const getPetControllerVerifyNameMockHandler = (
             ? await overrideResponse(info)
             : overrideResponse
           : getPetControllerVerifyNameResponseMock(),
+      ),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+  });
+};
+
+export const getPetControllerGetFamilyTreeMockHandler = (
+  overrideResponse?:
+    | GetFamilyTreeResponseDto
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<GetFamilyTreeResponseDto> | GetFamilyTreeResponseDto),
+) => {
+  return http.get("*/api/v1/pet/family-tree/:petId", async (info) => {
+    await delay(1000);
+
+    return new HttpResponse(
+      JSON.stringify(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getPetControllerGetFamilyTreeResponseMock(),
       ),
       { status: 200, headers: { "Content-Type": "application/json" } },
     );
@@ -6024,6 +6107,7 @@ export const getProjectDaepaAPIMock = () => [
   getPetControllerGetDeletedPetsMockHandler(),
   getPetControllerBulkCreateMockHandler(),
   getPetControllerVerifyNameMockHandler(),
+  getPetControllerGetFamilyTreeMockHandler(),
   getPetControllerGetParentsByPetIdMockHandler(),
   getPetControllerGetSiblingsByPetIdMockHandler(),
   getPetControllerGetChildrenByPetIdMockHandler(),
