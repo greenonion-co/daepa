@@ -1,9 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import {
-  getMorphOrTraitColor,
-} from "@/app/(브리더스룸)/hatching/components/Charts/morphColors";
+import { getMorphOrTraitColor } from "@/app/(브리더스룸)/hatching/components/Charts/morphColors";
 
 /** 노드 컬러링과 동일한 보정 함수 */
 function adjustMorphColorForTheme(hex: string, isDark: boolean): string {
@@ -41,9 +39,7 @@ function EdgeIcon({ color, strokeWidth = 1.5, hasArrow = false }: EdgeIconProps)
         strokeWidth={strokeWidth}
         strokeLinecap="round"
       />
-      {hasArrow && (
-        <path d="M 15 1.5 L 23 4 L 15 6.5 Z" fill={color} />
-      )}
+      {hasArrow && <path d="M 15 1.5 L 23 4 L 15 6.5 Z" fill={color} />}
     </svg>
   );
 }
@@ -54,11 +50,10 @@ interface MorphLegendProps {
 }
 
 export default function MorphLegend({ morphs }: MorphLegendProps) {
-  const [collapsed, setCollapsed] = useState(false);
+  const [open, setOpen] = useState(false);
 
   const isDark =
-    typeof document !== "undefined" &&
-    document.documentElement.classList.contains("dark");
+    typeof document !== "undefined" && document.documentElement.classList.contains("dark");
 
   const edgeLegend = [
     {
@@ -79,27 +74,72 @@ export default function MorphLegend({ morphs }: MorphLegendProps) {
       hasArrow: true,
       strokeWidth: 2,
     },
-    {
-      color: "#10b981",
-      label: "COI 경로",
-      hasArrow: false,
-      strokeWidth: 2.5,
-    },
   ];
 
   const hasMorphs = morphs.length > 0;
+
+  if (!open) {
+    return (
+      <button
+        type="button"
+        className="pointer-events-auto flex h-7 w-7 items-center justify-center rounded-full border border-gray-200 bg-white/90 shadow-lg backdrop-blur-sm transition-colors hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-900/90 dark:hover:bg-gray-800"
+        onClick={() => setOpen(true)}
+        title="범례"
+      >
+        <svg width={14} height={14} viewBox="0 0 20 20" fill="none">
+          <circle
+            cx="10"
+            cy="10"
+            r="9"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            className="text-gray-400 dark:text-gray-500"
+          />
+          <text
+            x="10"
+            y="14.5"
+            textAnchor="middle"
+            fontSize="12"
+            fontWeight="600"
+            fill="currentColor"
+            className="text-gray-500 dark:text-gray-400"
+          >
+            i
+          </text>
+        </svg>
+      </button>
+    );
+  }
 
   return (
     <div className="pointer-events-auto rounded-xl border border-gray-200 bg-white/90 shadow-lg backdrop-blur-sm dark:border-gray-700 dark:bg-gray-900/90">
       {/* 헤더 */}
       <button
         type="button"
-        className="flex w-full items-center justify-between gap-3 px-3 py-2"
-        onClick={() => setCollapsed((v) => !v)}
+        className="flex w-full items-center justify-between gap-3 px-2.5 py-2"
+        onClick={() => setOpen(false)}
       >
-        <span className="text-[11px] font-medium text-gray-500 dark:text-gray-400">
-          범례
-        </span>
+        <svg width={14} height={14} viewBox="0 0 20 20" fill="none" className="shrink-0">
+          <circle
+            cx="10"
+            cy="10"
+            r="9"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            className="text-gray-400 dark:text-gray-500"
+          />
+          <text
+            x="10"
+            y="14.5"
+            textAnchor="middle"
+            fontSize="12"
+            fontWeight="600"
+            fill="currentColor"
+            className="text-gray-500 dark:text-gray-400"
+          >
+            i
+          </text>
+        </svg>
         <svg
           width={10}
           height={10}
@@ -108,50 +148,49 @@ export default function MorphLegend({ morphs }: MorphLegendProps) {
           stroke="currentColor"
           strokeWidth="1.5"
           strokeLinecap="round"
-          className={`text-gray-400 transition-transform duration-150 ${collapsed ? "" : "rotate-180"}`}
+          className="text-gray-400"
         >
-          <polyline points="2 7 5 4 8 7" />
+          <line x1="2" y1="2" x2="8" y2="8" />
+          <line x1="8" y1="2" x2="2" y2="8" />
         </svg>
       </button>
 
-      {!collapsed && (
-        <div className="px-3 pb-2">
-          {/* 선 색상 범례 */}
-          <p className="mb-1 text-[10px] font-medium text-gray-400 dark:text-gray-500">선</p>
-          <div className="flex flex-col gap-1">
-            {edgeLegend.map(({ color, label, hasArrow, strokeWidth }) => (
-              <div key={label} className="flex items-center gap-1.5">
-                <EdgeIcon color={color} strokeWidth={strokeWidth} hasArrow={hasArrow} />
-                <span className="text-[10px] text-gray-600 dark:text-gray-300">{label}</span>
-              </div>
-            ))}
-          </div>
-
-          {/* 모프 색상 범례 */}
-          {hasMorphs && (
-            <>
-              <p className="mb-1 mt-2.5 text-[10px] font-medium text-gray-400 dark:text-gray-500">노드</p>
-              <div className="flex max-h-36 flex-col gap-1 overflow-y-auto">
-                {morphs.map((morph) => {
-                  const rawColor = getMorphOrTraitColor(morph);
-                  const color = adjustMorphColorForTheme(rawColor, isDark);
-                  return (
-                    <div key={morph} className="flex items-center gap-1.5">
-                      <span
-                        className="h-2.5 w-2.5 shrink-0 rounded-full border border-black/10"
-                        style={{ backgroundColor: color }}
-                      />
-                      <span className="text-[10px] text-gray-600 dark:text-gray-300">
-                        {morph}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            </>
-          )}
+      <div className="px-3 pb-2">
+        {/* 선 색상 범례 */}
+        <p className="mb-1 text-[10px] font-medium text-gray-400 dark:text-gray-500">선</p>
+        <div className="flex flex-col gap-1">
+          {edgeLegend.map(({ color, label, hasArrow, strokeWidth }) => (
+            <div key={label} className="flex items-center gap-1.5">
+              <EdgeIcon color={color} strokeWidth={strokeWidth} hasArrow={hasArrow} />
+              <span className="text-[10px] text-gray-600 dark:text-gray-300">{label}</span>
+            </div>
+          ))}
         </div>
-      )}
+
+        {/* 모프 색상 범례 */}
+        {hasMorphs && (
+          <>
+            <p className="mt-2.5 mb-1 text-[10px] font-medium text-gray-400 dark:text-gray-500">
+              노드
+            </p>
+            <div className="flex max-h-36 flex-col gap-1 overflow-y-auto">
+              {morphs.map((morph) => {
+                const rawColor = getMorphOrTraitColor(morph);
+                const color = adjustMorphColorForTheme(rawColor, isDark);
+                return (
+                  <div key={morph} className="flex items-center gap-1.5">
+                    <span
+                      className="h-2.5 w-2.5 shrink-0 rounded-full border border-black/10"
+                      style={{ backgroundColor: color }}
+                    />
+                    <span className="text-[10px] text-gray-600 dark:text-gray-300">{morph}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 }

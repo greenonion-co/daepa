@@ -100,7 +100,6 @@ export default function FamilyTreeCanvas({ petId }: FamilyTreeCanvasProps) {
     filteredGraphNodes,
     filteredGraphLinks,
     visibleMorphs,
-    visibleNodeIdSet,
   } = useGraphTransform({ nodesMap, edgesMap, centerPetId, getGenerationMap, petId, sexFilter });
 
   // 검색 + 외부 개체 추가 + 포커스
@@ -140,7 +139,6 @@ export default function FamilyTreeCanvas({ petId }: FamilyTreeCanvasProps) {
     commonAncestors,
     equivalentRelation,
     isCoiLoading,
-    coiHighlightedEdges,
     selectedPetA,
     selectedPetB,
     isMaleFemale,
@@ -161,7 +159,6 @@ export default function FamilyTreeCanvas({ petId }: FamilyTreeCanvasProps) {
     addPairEdge,
     invalidatePair,
     thumbnailMap,
-    visibleNodeIdSet,
   });
 
   const handleContextMenuAction = useCallback(
@@ -327,7 +324,6 @@ export default function FamilyTreeCanvas({ petId }: FamilyTreeCanvasProps) {
         className="h-full w-full"
         selectedNodeIds={selectedNodes}
         highlightSelected={isPanelHovered && selectedNodes.length === 2}
-        highlightedEdges={coiHighlightedEdges}
         highlightedChildIds={isPanelHovered ? pairChildren.map((c) => c.petId) : undefined}
         focusNodeId={focusNodeId}
         onNodeClick={handleNodeClick}
@@ -365,7 +361,7 @@ export default function FamilyTreeCanvas({ petId }: FamilyTreeCanvasProps) {
 
       {/* 검색 + 성별 필터 (좌측 상단) */}
       <div
-        className={`absolute z-10 flex flex-col gap-1 ${isMobile ? "top-1 left-1" : "top-3 left-3"}`}
+        className={`absolute z-20 flex flex-col gap-1 ${isMobile ? "top-1 left-1" : "top-3 left-3"}`}
       >
         <div className="flex items-center gap-1">
           <input
@@ -398,6 +394,30 @@ export default function FamilyTreeCanvas({ petId }: FamilyTreeCanvasProps) {
           onSearchSelect={handleSearchSelect}
           onAddExternalTree={handleAddExternalTree}
         />
+      </div>
+
+      {/* 더블클릭 안내 힌트 */}
+      <div
+        className={`pointer-events-none absolute z-10 flex justify-center ${
+          isMobile ? "top-10 right-0 left-0" : "top-12 right-0 left-0"
+        }`}
+      >
+        <span className="inline-flex items-center gap-1 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text px-3 py-1 text-sm font-medium text-transparent dark:from-blue-200 dark:to-purple-200">
+          <svg width={14} height={14} viewBox="0 0 20 20" fill="none" className="shrink-0">
+            <circle cx="10" cy="10" r="9" stroke="currentColor" strokeWidth="1.5" />
+            <text
+              x="10"
+              y="14.5"
+              textAnchor="middle"
+              fontSize="12"
+              fontWeight="600"
+              fill="currentColor"
+            >
+              i
+            </text>
+          </svg>
+          개체를 더블클릭하면 페어 분석이 가능합니다.
+        </span>
       </div>
 
       {/* 컨텍스트 메뉴 + 백드롭 */}
@@ -463,13 +483,15 @@ export default function FamilyTreeCanvas({ petId }: FamilyTreeCanvasProps) {
         }}
       />
 
-      {/* 모프 범례 + 깊이 안내 (좌측 하단) */}
-      <div className="absolute bottom-3 left-3">
-        <MorphLegend morphs={visibleMorphs} />
-      </div>
+      {/* 모프 범례 + 깊이 안내 (좌측 하단, 데스크톱만) */}
+      {!isMobile && (
+        <div className="absolute bottom-3 left-3">
+          <MorphLegend morphs={visibleMorphs} />
+        </div>
+      )}
 
       {/* 위치 재배치 버튼 (데스크톱만) */}
-      {!isMobile && (
+      {/* {!isMobile && (
         <button
           type="button"
           onClick={() => reshuffleRef.current?.()}
@@ -478,7 +500,7 @@ export default function FamilyTreeCanvas({ petId }: FamilyTreeCanvasProps) {
         >
           재배치
         </button>
-      )}
+      )} */}
 
       {/* 패널 영역 — 데스크톱: 우측 상단, 모바일: 하단 시트 */}
       <div
@@ -513,15 +535,16 @@ export default function FamilyTreeCanvas({ petId }: FamilyTreeCanvasProps) {
             onClearPet={handleCoiClearPet}
             onFocusAncestor={handleFocusAncestor}
             onSelectMate={selectedNodes.length <= 1 ? handleCoiSelectMate : undefined}
+            hasSelection={selectedNodes.length > 0}
           />
-          {selectedNodes.length === 2 && selectedPetA && selectedPetB && (
+          {/* {selectedNodes.length === 2 && selectedPetA && selectedPetB && (
             <OffspringPredictionPanel
               morphsA={selectedPetA.morphs ?? []}
               morphsB={selectedPetB.morphs ?? []}
               nameA={selectedPetA.name ?? "이름 없음"}
               nameB={selectedPetB.name ?? "이름 없음"}
             />
-          )}
+          )} */}
           {selectedNodes.length === 2 && (
             <PairStatisticsPanel
               statistics={pairStatistics}
@@ -538,6 +561,8 @@ export default function FamilyTreeCanvas({ petId }: FamilyTreeCanvasProps) {
               onChildClick={handleChildClick}
             />
           )}
+          {/* 모바일에서만 범례를 패널 그리드 안에 표시 */}
+          {isMobile && <MorphLegend morphs={visibleMorphs} />}
         </div>
       </div>
     </div>

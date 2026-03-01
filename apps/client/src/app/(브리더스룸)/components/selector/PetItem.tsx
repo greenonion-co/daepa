@@ -2,6 +2,7 @@ import { PetParentDtoWithMessage } from "@/app/(브리더스룸)/pet/store/paren
 import { cn } from "@/lib/utils";
 import PetThumbnail from "@/components/common/PetThumbnail";
 import BadgeList from "../BadgeList";
+import { PetDtoSex } from "@repo/api-client";
 
 const PetItem = ({
   item,
@@ -32,7 +33,17 @@ const PetItem = ({
         </div>
         <div className="flex w-full flex-col gap-1">
           <div className="text-center">
-            <span className="relative text-center font-semibold after:absolute after:-bottom-[1px] after:left-1 after:h-[12px] after:w-full after:bg-transparent after:opacity-40 after:content-[''] group-hover:after:bg-[#247DFE] dark:text-gray-100">
+            <span className="relative inline-flex items-center justify-center gap-1 text-center font-semibold after:absolute after:-bottom-[1px] after:left-1 after:h-[12px] after:w-full after:bg-transparent after:opacity-40 after:content-[''] group-hover:after:bg-[#247DFE] dark:text-gray-100">
+              <span
+                className={cn(
+                  "h-2 w-2 shrink-0 rounded-full",
+                  item.sex === PetDtoSex.MALE
+                    ? "bg-[#2383E2] dark:bg-[#529CCA]"
+                    : item.sex === PetDtoSex.FEMALE
+                      ? "bg-[#E03E3E] dark:bg-[#FF7369]"
+                      : "bg-gray-300",
+                )}
+              />
               {item.name}
             </span>
             {item.owner?.name && (

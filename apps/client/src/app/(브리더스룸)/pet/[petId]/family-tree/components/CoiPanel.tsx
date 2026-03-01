@@ -26,7 +26,9 @@ interface CoiPanelProps {
   onClear: () => void;
   onClearPet?: (petId: string) => void;
   onFocusAncestor?: (petId: string) => void;
-  onSelectMate?: (role: "부" | "모") => void;
+  onSelectMate?: (role: "수컷" | "암컷") => void;
+  /** 개체가 1개 이상 선택되어 있는 동안 지속 강조 */
+  hasSelection?: boolean;
 }
 
 export default function CoiPanel({
@@ -40,6 +42,7 @@ export default function CoiPanel({
   onClearPet,
   onFocusAncestor,
   onSelectMate,
+  hasSelection,
 }: CoiPanelProps) {
   const expanded = false;
 
@@ -55,16 +58,18 @@ export default function CoiPanel({
 
   return (
     <div
-      className={`pointer-events-auto flex flex-col gap-2 rounded-xl border border-gray-200 bg-white/90 shadow-lg backdrop-blur-sm transition-all duration-200 dark:border-gray-700 dark:bg-gray-900/90 ${
-        expanded ? "w-80 p-4" : "w-full md:w-52 p-3"
-      }`}
+      className={`pointer-events-auto flex flex-col gap-2 rounded-xl border backdrop-blur-sm transition-all duration-300 ${
+        hasSelection
+          ? "border-gray-200 bg-gradient-to-r from-blue-200/50 to-purple-200/65 dark:border-gray-700 dark:from-blue-900/40 dark:to-purple-900/50"
+          : "border-gray-200 bg-white/90 shadow-lg dark:border-gray-700 dark:bg-gray-900/90"
+      } ${expanded ? "w-80 p-4" : "w-full p-3 md:w-52"}`}
     >
       {/* 헤더 */}
       <div className="flex items-center justify-between">
         <span
           className={`font-medium text-gray-500 dark:text-gray-400 ${expanded ? "text-sm" : "text-[11px]"}`}
         >
-          COI 계산
+          페어 분석
         </span>
         {pets && pets.some(Boolean) && (
           <button
@@ -79,7 +84,7 @@ export default function CoiPanel({
 
       {/* 선택된 개체 정보 */}
       <div className="flex items-center gap-1">
-        {(["부", "모"] as const).map((role, idx) => {
+        {(["수컷", "암컷"] as const).map((role, idx) => {
           const pet = pets?.[idx];
           const dotClass =
             pet?.sex === "M" || pet?.sex === "MALE"
@@ -93,7 +98,7 @@ export default function CoiPanel({
               <div className="flex min-w-0 flex-1 flex-col items-center gap-1">
                 {pet ? (
                   <div>
-                    <span className="text-[10px]">{role}</span>
+                    <span className="text-[10px] text-gray-800">{role}</span>
 
                     <div className="relative h-[80px] w-[80px] overflow-hidden rounded-lg">
                       <PetThumbnail
@@ -128,7 +133,7 @@ export default function CoiPanel({
                   </div>
                 ) : (
                   <div>
-                    <span className="text-[10px]">{role}</span>
+                    <span className="text-[10px] text-gray-800">{role}</span>
 
                     <div
                       className={`flex h-[80px] w-[80px] flex-col items-center justify-center rounded-2xl bg-gray-100 text-gray-400 dark:bg-gray-800 ${onSelectMate ? "cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700" : ""}`}
@@ -163,6 +168,8 @@ export default function CoiPanel({
             className={`rounded-lg text-center ${expanded ? "px-4 py-3" : "px-2 py-2"}`}
             style={{ backgroundColor: bgColor }}
           >
+            <p className="text-[10px] text-gray-700 dark:text-gray-500">근친 계수</p>
+
             <span
               className={`font-bold tabular-nums ${expanded ? "text-4xl" : "text-2xl"}`}
               style={{ color: accentColor }}
@@ -172,7 +179,7 @@ export default function CoiPanel({
           </div>
 
           {/* 위험도 라벨 + 관계 */}
-          <div className="flex flex-col items-center gap-0.5">
+          {/* <div className="flex flex-col items-center gap-0.5">
             <div className="flex items-center gap-1.5">
               <span
                 className={`rounded-full ${expanded ? "h-2.5 w-2.5" : "h-2 w-2"}`}
@@ -185,7 +192,7 @@ export default function CoiPanel({
                 {config.label}
               </span>
             </div>
-          </div>
+          </div> */}
 
           {/* 공통 조상 */}
           {commonAncestors.length > 0 && (
@@ -232,7 +239,7 @@ export default function CoiPanel({
           )}
 
           {/* 기준 안내 */}
-          <div
+          {/* <div
             className={`mt-1 border-t border-gray-100 pt-1.5 dark:border-gray-800 ${expanded ? "space-y-1" : "space-y-0.5"}`}
           >
             {(
@@ -252,7 +259,7 @@ export default function CoiPanel({
                 <span className="text-gray-500 dark:text-gray-400">{cfg.label}</span>
               </div>
             ))}
-          </div>
+          </div> */}
         </>
       )}
     </div>

@@ -13,7 +13,6 @@ import ParentSearchSelector from "@/app/(브리더스룸)/components/selector/pa
 import type { CoiPanelPetInfo } from "../components/CoiPanel";
 import type { FamilyTreeNodeData, FamilyPetData } from "../lib/types";
 import { useCoiCalculation } from "./useCoiCalculation";
-import { extractCoiPathEdges } from "../lib/graph-utils";
 import type { FamilyTreeResponse } from "./useFamilyTreeData";
 
 interface UseCoiSelectionParams {
@@ -28,7 +27,6 @@ interface UseCoiSelectionParams {
   addPairEdge: (petIdA: string, petIdB: string) => void;
   invalidatePair: () => void;
   thumbnailMap: Map<string, string>;
-  visibleNodeIdSet: Set<string>;
 }
 
 const isMale = (s?: string | null) => s === "M" || s === "MALE";
@@ -42,38 +40,48 @@ export function useCoiSelection({
   addPairEdge,
   invalidatePair,
   thumbnailMap,
-  visibleNodeIdSet,
 }: UseCoiSelectionParams) {
   const [selectedNodes, setSelectedNodes] = useState<string[]>([]);
 
   // 노드 더블클릭 → COI 선택 (수컷=왼쪽 슬롯[0], 암컷=오른쪽 슬롯[1])
   const handleNodeDoubleClick = useCallback(
     (nodeId: string) => {
+      const node = nodesMap.get(nodeId);
+      const sex = node?.pet?.sex;
+      const isMale = sex === "M" || sex === "MALE";
+      const isFemale = sex === "F" || sex === "FEMALE";
+
+      if (!isMale && !isFemale) {
+        toast.error("미구분 개체는 페어로 선택할 수 없습니다.", { position: "bottom-center" });
+        return;
+      }
+
       setSelectedNodes((prev) => {
         if (prev.includes(nodeId)) {
           return prev.filter((id) => id !== nodeId);
         }
-
-        const node = nodesMap.get(nodeId);
-        const sex = node?.pet?.sex;
-        const isNodeMale = sex === "M" || sex === "MALE";
-        const isNodeFemale = sex === "F" || sex === "FEMALE";
 
         if (prev.length >= 2) return [nodeId];
         if (prev.length === 0) return [nodeId];
 
         const existingId = prev[0]!;
         if (existingId === nodeId) {
-          toast.error("같은 개체를 부/모로 선택할 수 없습니다.");
+          toast.error("같은 개체를 부/모로 선택할 수 없습니다.", { position: "bottom-center" });
           return prev;
         }
 
         const existingNode = nodesMap.get(existingId);
         const existingSex = existingNode?.pet?.sex;
         const isExistingMale = existingSex === "M" || existingSex === "MALE";
+        const isExistingFemale = existingSex === "F" || existingSex === "FEMALE";
 
-        if (isNodeMale) return [nodeId, existingId];
-        if (isNodeFemale) return [existingId, nodeId];
+        if ((isMale && isExistingMale) || (isFemale && isExistingFemale)) {
+          toast.error("같은 성별은 페어로 선택할 수 없습니다.", { position: "bottom-center" });
+          return prev;
+        }
+
+        if (isMale) return [nodeId, existingId];
+        if (isFemale) return [existingId, nodeId];
         if (isExistingMale) return [existingId, nodeId];
         return [nodeId, existingId];
       });
@@ -111,7 +119,9 @@ export function useCoiSelection({
             }
             setSelectedNodes((prev) => {
               if (prev.includes(selected.petId)) {
-                toast.error("같은 개체를 부/모로 선택할 수 없습니다.");
+                toast.error("같은 개체를 부/모로 선택할 수 없습니다.", {
+                  position: "bottom-center",
+                });
                 return prev;
               }
               if (prev.length === 0) return [selected.petId];
@@ -204,12 +214,6 @@ export function useCoiSelection({
     isLoading: isCoiLoading,
   } = useCoiCalculation(selectedNodes[0], selectedNodes[1]);
 
-  // COI 경로 엣지 (그래프 하이라이트용)
-  const coiHighlightedEdges = useMemo(
-    () => extractCoiPathEdges(commonAncestors, visibleNodeIdSet),
-    [commonAncestors, visibleNodeIdSet],
-  );
-
   // 선택된 펫 데이터
   const selectedPetA = selectedNodes[0]
     ? (nodesMap.get(selectedNodes[0])?.pet ?? undefined)
@@ -295,7 +299,7 @@ export function useCoiSelection({
   );
   const handleCoiSelectMate = useCallback(
     (role: string) => {
-      const sex = role === "부" ? PetDtoSex.MALE : PetDtoSex.FEMALE;
+      const sex = role === "수컷" ? PetDtoSex.MALE : PetDtoSex.FEMALE;
       handleSelectPetForCoi(sex);
     },
     [handleSelectPetForCoi],
@@ -312,7 +316,6 @@ export function useCoiSelection({
     commonAncestors,
     equivalentRelation,
     isCoiLoading,
-    coiHighlightedEdges,
     selectedPetA,
     selectedPetB,
     isMaleFemale,
