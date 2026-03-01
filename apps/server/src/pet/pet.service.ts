@@ -275,6 +275,16 @@ export class PetService {
         const row = pets[i];
         const rowNum = i + 2; // CSV 헤더 제외, 1-based
 
+        if (
+          row.fatherName &&
+          row.motherName &&
+          row.fatherName === row.motherName
+        ) {
+          throw new BadRequestException(
+            `${rowNum}행: "${row.name}"의 부개체와 모개체가 동일합니다.`,
+          );
+        }
+
         if (row.fatherName) {
           if (row.fatherName === row.name) {
             throw new BadRequestException(
