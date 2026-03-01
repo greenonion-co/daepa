@@ -115,7 +115,7 @@ export default function ShowcaseFilterBar({
         </div>
       )}
 
-      {Object.keys(availableTraits).length > 0 && (
+      {filters.morphs.length > 0 && Object.keys(availableTraits).length > 0 && (
         <div className="flex flex-col gap-1.5 p-4">
           <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400">형질</h3>
           <ShowcaseMultiSelect

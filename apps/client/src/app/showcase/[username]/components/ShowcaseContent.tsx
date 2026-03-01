@@ -1,11 +1,15 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import type { BreederPublicProfile } from "../data";
 import BreederHeader from "./BreederHeader";
 import ShowcaseFilterBar, { type ShowcaseFilters } from "./ShowcaseFilterBar";
 import PetShowcaseGrid from "./PetShowcaseGrid";
 import ShowcaseMultiSelect from "./ShowcaseMultiSelect";
+import {
+  MORPH_LIST_BY_SPECIES,
+  TRAIT_LIST_BY_SPECIES,
+} from "@/app/(브리더스룸)/constants";
 
 const SORT_DISPLAY: Record<string, string> = {
   DESC: "최신순",
@@ -33,13 +37,14 @@ export default function ShowcaseContent({ profile }: ShowcaseContentProps) {
     return () => clearTimeout(timer);
   }, [filters.search]);
 
-  const [availableMorphs, setAvailableMorphs] = useState<Record<string, string>>({});
-  const [availableTraits, setAvailableTraits] = useState<Record<string, string>>({});
-
-  const handleOptionsUpdate = useCallback((morphs: string[], traits: string[]) => {
-    setAvailableMorphs(Object.fromEntries(morphs.map((m) => [m, m])));
-    setAvailableTraits(Object.fromEntries(traits.map((t) => [t, t])));
-  }, []);
+  const allMorphs = useMemo(
+    () => Object.assign({}, ...Object.values(MORPH_LIST_BY_SPECIES)),
+    [],
+  );
+  const allTraits = useMemo(
+    () => Object.assign({}, ...Object.values(TRAIT_LIST_BY_SPECIES)),
+    [],
+  );
 
   // 모바일 미니 헤더: BreederHeader가 스크롤 아웃되면 표시
   const headerRef = useRef<HTMLDivElement>(null);
@@ -121,8 +126,8 @@ export default function ShowcaseContent({ profile }: ShowcaseContentProps) {
             <ShowcaseFilterBar
               filters={filters}
               onChange={setFilters}
-              availableMorphs={availableMorphs}
-              availableTraits={availableTraits}
+              availableMorphs={allMorphs}
+              availableTraits={allTraits}
             />
           </div>
         </aside>
@@ -134,8 +139,8 @@ export default function ShowcaseContent({ profile }: ShowcaseContentProps) {
             <ShowcaseFilterBar
               filters={filters}
               onChange={setFilters}
-              availableMorphs={availableMorphs}
-              availableTraits={availableTraits}
+              availableMorphs={allMorphs}
+              availableTraits={allTraits}
               mobile
             />
           </div>
@@ -143,7 +148,6 @@ export default function ShowcaseContent({ profile }: ShowcaseContentProps) {
           <PetShowcaseGrid
             userId={profile.userId}
             filters={{ ...filters, search: debouncedSearch }}
-            onOptionsUpdate={handleOptionsUpdate}
           />
         </div>
       </div>

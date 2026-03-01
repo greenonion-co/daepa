@@ -12,18 +12,16 @@ const ITEMS_PER_PAGE = 20;
 interface PetShowcaseGridProps {
   userId: string;
   filters: ShowcaseFilters;
-  onOptionsUpdate?: (morphs: string[], traits: string[]) => void;
 }
 
 export default function PetShowcaseGrid({
   userId,
   filters,
-  onOptionsUpdate,
 }: PetShowcaseGridProps) {
   const observerRef = useRef<IntersectionObserver | null>(null);
   const loadMoreRef = useRef<HTMLDivElement>(null);
 
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useInfiniteQuery({
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isFetching, isLoading } = useInfiniteQuery({
     queryKey: [
       "showcase-pets",
       userId,
@@ -63,25 +61,6 @@ export default function PetShowcaseGrid({
   });
 
   const { items: pets = [], totalCount = 0 } = data ?? {};
-
-  // 로드된 데이터에서 모프/형질 옵션 수집
-  const prevOptionsRef = useRef<string>("");
-  useEffect(() => {
-    if (!onOptionsUpdate || pets.length === 0) return;
-    const morphSet = new Set<string>();
-    const traitSet = new Set<string>();
-    pets.forEach((pet) => {
-      pet.morphs?.forEach((m: string) => morphSet.add(m));
-      pet.traits?.forEach((t: string) => traitSet.add(t));
-    });
-    const morphs = [...morphSet].sort();
-    const traits = [...traitSet].sort();
-    const key = JSON.stringify({ morphs, traits });
-    if (key !== prevOptionsRef.current) {
-      prevOptionsRef.current = key;
-      onOptionsUpdate(morphs, traits);
-    }
-  }, [pets, onOptionsUpdate]);
 
   const handleObserver = useCallback(
     (entries: IntersectionObserverEntry[]) => {
@@ -136,7 +115,15 @@ export default function PetShowcaseGrid({
   return (
     <div className="flex flex-col gap-4 p-2">
       {/* 개수 표시 */}
-      <p className="text-xs text-gray-400 dark:text-gray-500">{`${totalCount}마리`}</p>
+      <div className="flex items-center gap-1.5 text-xs text-gray-400 dark:text-gray-500">
+        <span>{`${totalCount}마리`}</span>
+        {isFetching && !isFetchingNextPage && (
+          <svg className="h-3 w-3 animate-spin" viewBox="0 0 24 24" fill="none">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+          </svg>
+        )}
+      </div>
 
       {/* 그리드 */}
       <div className="grid grid-cols-2 gap-2 min-[1800px]:grid-cols-7 min-[2100px]:grid-cols-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
