@@ -33,7 +33,7 @@ import { patchPetListCache } from "../../utils/patchPetListCache";
 import { useIsMyPet } from "@/hooks/useIsMyPet";
 import CompleteAdoptionModal from "./CompleteAdoptionModal";
 import { useIsMobile } from "@/hooks/useMobile";
-import { useRouter } from "next/navigation";
+import { useAppRouter } from "@/hooks/useAppRouter";
 import { useRegisterFlush } from "./FlushContext";
 
 interface AdoptionInfoContentProps {
@@ -51,7 +51,7 @@ const AdoptionInfoContent = ({
   onClose,
 }: AdoptionInfoContentProps) => {
   const queryClient = useQueryClient();
-  const router = useRouter();
+  const router = useAppRouter();
   const { setAdoption } = useAdoptionStore();
   const [isProcessing, setIsProcessing] = useState(false);
   const [adoptionData, setAdoptionData] = useState<

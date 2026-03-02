@@ -7,6 +7,8 @@ import ShowcaseFilterBar, { type ShowcaseFilters } from "./ShowcaseFilterBar";
 import PetShowcaseGrid from "./PetShowcaseGrid";
 import ShowcaseMultiSelect from "./ShowcaseMultiSelect";
 import { MORPH_LIST_BY_SPECIES, TRAIT_LIST_BY_SPECIES } from "@/app/(브리더스룸)/constants";
+import { useIsLoggedIn } from "@/hooks/useAuth";
+import Link from "next/link";
 
 const SORT_DISPLAY: Record<string, string> = {
   DESC: "최신순",
@@ -18,6 +20,7 @@ interface ShowcaseContentProps {
 }
 
 export default function ShowcaseContent({ profile }: ShowcaseContentProps) {
+  const isLoggedIn = useIsLoggedIn();
   const [filters, setFilters] = useState<ShowcaseFilters>({
     sex: [],
     status: [],
@@ -64,9 +67,17 @@ export default function ShowcaseContent({ profile }: ShowcaseContentProps) {
       >
         <span className="text-sm font-bold text-gray-900 dark:text-gray-100">{displayName}</span>
         {profile.isBiz && (
-          <span className="rounded-full bg-blue-100 px-1.5 py-0.5 text-[9px] font-medium text-blue-700 dark:bg-blue-900/50 dark:text-blue-300">
+          <span className="inline-flex items-center rounded-full bg-[#DBEDDB] px-2 py-0.5 text-[11px] leading-none font-medium text-[#2B6A2F] dark:bg-[#1E3D1F] dark:text-[#A3D9A5]">
             사업자
           </span>
+        )}
+        {!isLoggedIn && (
+          <Link
+            href="/sign-in"
+            className="ml-auto rounded-full bg-blue-500 px-3 py-1 text-xs font-medium text-white"
+          >
+            로그인
+          </Link>
         )}
       </div>
 

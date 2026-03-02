@@ -20,7 +20,7 @@ export default function BreederHeader({ profile }: BreederHeaderProps) {
         <div className="flex items-center gap-2">
           <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">{displayName}</h1>
           {profile.isBiz && (
-            <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-medium text-blue-700 dark:bg-blue-900/50 dark:text-blue-300">
+            <span className="inline-flex items-center rounded-full bg-[#DBEDDB] px-2 py-0.5 text-[11px] leading-none font-medium text-[#2B6A2F] dark:bg-[#1E3D1F] dark:text-[#A3D9A5]">
               사업자
             </span>
           )}

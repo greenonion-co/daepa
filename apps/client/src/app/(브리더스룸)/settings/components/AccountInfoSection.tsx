@@ -2,8 +2,6 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Edit2, Mail, Briefcase } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -113,7 +111,6 @@ const AccountInfoSection = () => {
         </div>
       ) : (
         <SettingsItem
-          icon={<Edit2 className="h-4 w-4" />}
           iconBgColor="bg-blue-100 dark:bg-blue-900/30"
           iconColor="text-blue-600 dark:text-blue-400"
           label="닉네임"
@@ -123,7 +120,6 @@ const AccountInfoSection = () => {
         />
       )}
       <SettingsItem
-        icon={<Mail className="h-4 w-4" />}
         iconBgColor="bg-blue-100 dark:bg-blue-900/30"
         iconColor="text-blue-600 dark:text-blue-400"
         label="계정 연동"
@@ -143,7 +139,6 @@ const AccountInfoSection = () => {
         }
       />
       <SettingsItem
-        icon={<Briefcase className="h-4 w-4" />}
         iconBgColor="bg-blue-100 dark:bg-blue-900/30"
         iconColor="text-blue-600 dark:text-blue-400"
         label="회원 유형"
@@ -151,21 +146,21 @@ const AccountInfoSection = () => {
           !isFetching &&
           (userProfile?.isBiz ? (
             <div className="flex items-center gap-1.5">
-              <Badge variant="secondary" className="text-[12px]">
+              <span className="inline-flex items-center rounded-full bg-[#DBEDDB] px-2 py-0.5 text-[11px] leading-none font-medium text-[#2B6A2F] dark:bg-[#1E3D1F] dark:text-[#A3D9A5]">
                 사업자
-              </Badge>
-              <Badge
-                variant="outline"
-                className="cursor-pointer text-[12px] text-amber-600 dark:text-amber-400"
+              </span>
+              <button
+                type="button"
+                className="inline-flex items-center rounded-full border border-amber-300 px-2 py-0.5 text-[11px] leading-none font-medium text-amber-600 dark:border-amber-600 dark:text-amber-400"
                 onClick={() => toast.info("사업자 인증 기능은 준비 중입니다.")}
               >
                 미인증
-              </Badge>
+              </button>
             </div>
           ) : (
-            <Badge variant="secondary" className="text-[12px]">
+            <span className="inline-flex items-center rounded-full bg-[#D3E5EF] px-2 py-0.5 text-[11px] leading-none font-medium text-[#28638D] dark:bg-[#1E3A5F] dark:text-[#A3C9E8]">
               개인
-            </Badge>
+            </span>
           ))
         }
       />

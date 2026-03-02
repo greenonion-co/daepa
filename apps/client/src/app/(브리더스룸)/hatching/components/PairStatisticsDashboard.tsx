@@ -8,7 +8,7 @@ import {
 } from "@repo/api-client";
 import { ChartConfig } from "@/components/ui/chart";
 import { overlay } from "overlay-kit";
-import { useRouter } from "next/navigation";
+import { useAppRouter } from "@/hooks/useAppRouter";
 import SingleSelect from "../../components/selector/SingleSelect";
 import FilterItem from "./Filters/FilterItem";
 import ParentSearchSelector from "../../components/selector/parentSearch";
@@ -63,7 +63,7 @@ const MONTH_OPTIONS: CustomSelectOption[] = [
 const PairStatisticsDashboard = memo(() => {
   const isMobile = useIsMobile();
   const currentYear = String(new Date().getFullYear());
-  const router = useRouter();
+  const router = useAppRouter();
 
   const [species, setSpecies] = useState<PairControllerGetPairListSpecies>(
     PairControllerGetPairListSpecies.CR,

@@ -74,7 +74,7 @@ export default function MultiSelectList({
               : `${selectedItems.length}개 선택됨`}
           </span>
         </div>
-        <div className="max-h-[50vh] overflow-y-auto">
+        <div className="max-h-[50dvh] overflow-y-auto">
           {selectList?.map((key) => (
             <button
               key={key}

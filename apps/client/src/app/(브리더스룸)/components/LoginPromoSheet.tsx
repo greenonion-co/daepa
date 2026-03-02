@@ -15,7 +15,7 @@ import {
   showNativeLoginPromoSheet,
   showNativeRelationPromoSheet,
 } from "@/lib/native-bridge";
-import { useRouter } from "next/navigation";
+import { useAppRouter } from "@/hooks/useAppRouter";
 import { overlay } from "overlay-kit";
 
 interface LoginPromoSheetProps {
@@ -26,7 +26,7 @@ interface LoginPromoSheetProps {
 }
 
 const LoginPromoSheet = ({ isOpen, onOpenChange, title, description }: LoginPromoSheetProps) => {
-  const router = useRouter();
+  const router = useAppRouter();
 
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>

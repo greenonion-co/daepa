@@ -33,7 +33,7 @@ const NotificationHeader = ({ item, isOpen }: NotificationHeaderProps) => {
             <div
               className={cn(
                 STATUS_MAP[detailData?.status ?? UpdateParentRequestDtoStatus.PENDING]?.color,
-                "mb-1 flex h-5 w-fit items-center rounded-sm px-1 text-xs font-[600] text-white",
+                "mb-1 flex w-fit items-center rounded-full px-2 py-0.5 text-[11px] leading-none font-medium",
               )}
             >
               {STATUS_MAP[detailData?.status ?? UpdateParentRequestDtoStatus.PENDING]?.label}

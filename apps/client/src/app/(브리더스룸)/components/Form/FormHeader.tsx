@@ -1,4 +1,4 @@
-import { useRouter } from "next/navigation";
+import { useAppRouter } from "@/hooks/useAppRouter";
 import { REGISTER_PAGE } from "../../constants";
 import { useUserStore } from "../../store/user";
 import { ArrowLeftCircle } from "lucide-react";
@@ -6,7 +6,7 @@ import { memo } from "react";
 import { isNativeApp } from "@/lib/native-bridge";
 
 export const FormHeader = memo(({ funnel }: { funnel: number }) => {
-  const router = useRouter();
+  const router = useAppRouter();
   const { user } = useUserStore();
 
   return (

@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 import { useQuery } from "@tanstack/react-query";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -145,6 +145,23 @@ const MonthlyCalendar = memo(() => {
     }
   }, []);
 
+  // 캘린더 영역 터치 스와이프로 isScrolled 토글
+  const calendarTouchStartY = useRef(0);
+  const handleCalendarTouchStart = useCallback((e: React.TouchEvent) => {
+    calendarTouchStartY.current = e.touches[0]!.clientY;
+  }, []);
+  const handleCalendarTouchMove = useCallback((e: React.TouchEvent) => {
+    const deltaY = calendarTouchStartY.current - e.touches[0]!.clientY;
+    if (deltaY > 20) {
+      setIsScrolled(true);
+    } else if (deltaY < -20) {
+      const viewport = scrollAreaRef.current?.querySelector("[data-radix-scroll-area-viewport]");
+      if (!viewport || viewport.scrollTop <= 5) {
+        setIsScrolled(false);
+      }
+    }
+  }, []);
+
   return (
     <div
       className={cn(
@@ -170,10 +187,12 @@ const MonthlyCalendar = memo(() => {
         {isMobile && (
           <div
             className={cn(
-              "shrink-0 touch-none transition-all duration-300",
+              "shrink-0 transition-all duration-300",
               isScrolled &&
                 "dark:bg-background sticky top-0 z-20 [margin-bottom:-22%] w-full origin-top-left scale-75",
             )}
+            onTouchStart={handleCalendarTouchStart}
+            onTouchMove={handleCalendarTouchMove}
           >
             <Calendar
               mode="single"

@@ -243,7 +243,7 @@ export default function QuickRegisterModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-h-[90vh] w-[calc(100%-2rem)] max-w-[440px] overflow-y-auto rounded-2xl p-6 dark:bg-neutral-800">
+      <DialogContent className="max-h-[90dvh] w-[calc(100%-2rem)] max-w-[440px] overflow-y-auto rounded-2xl p-6 dark:bg-neutral-800">
         <DialogTitle className="text-[16px] font-semibold dark:text-gray-100">
           {step === 1 ? "빠른 개체 등록" : "추가 정보 입력"}
         </DialogTitle>

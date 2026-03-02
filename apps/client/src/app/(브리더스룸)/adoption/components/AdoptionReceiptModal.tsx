@@ -1,6 +1,12 @@
 "use client";
 
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   AdoptionHistoryDto,
   adoptionHistoryControllerGetAllAdoptions,
@@ -23,7 +29,6 @@ import { InfiniteData, useMutation, useQueryClient } from "@tanstack/react-query
 import { toast } from "@/lib/toast";
 import { Textarea } from "@/components/ui/textarea";
 import { AxiosError, AxiosResponse } from "axios";
-import { getSexIcon } from "@/lib/sex-icon";
 
 interface AdoptionReceiptModalProps {
   isOpen: boolean;
@@ -57,7 +62,7 @@ const PetInfoCard = ({
   const cardContent = (
     <div
       className={cn(
-        "mb-4 flex gap-0 rounded-2xl bg-gradient-to-r from-blue-200/25 to-purple-200/25 p-4 dark:from-blue-900/30 dark:to-purple-900/30",
+        "mb-4 flex gap-0 rounded-2xl bg-gradient-to-r from-blue-200/25 to-purple-200/25 p-2 px-4 dark:from-blue-900/30 dark:to-purple-900/30",
         isDeleted ? "cursor-not-allowed" : "hover:shadow-md",
       )}
     >
@@ -68,10 +73,22 @@ const PetInfoCard = ({
         <div>
           <div
             className={cn(
-              "mb-2 flex items-center gap-2 font-semibold dark:text-gray-100",
+              "mb-1 flex items-center gap-2 font-semibold dark:text-gray-100",
               isMobile && "text-sm",
             )}
           >
+            {sex && (
+              <span
+                className={cn(
+                  "h-2 w-2 shrink-0 rounded-full",
+                  sex === "M"
+                    ? "bg-[#2383E2] dark:bg-[#529CCA]"
+                    : sex === "F"
+                      ? "bg-[#E03E3E] dark:bg-[#FF7369]"
+                      : "bg-gray-300",
+                )}
+              />
+            )}
             {isDeleted ? (
               <DeletedPetName
                 name={name}
@@ -81,15 +98,12 @@ const PetInfoCard = ({
               name
             )}
 
-            {hatchingDate && <span className="text-sm font-normal text-gray-500">{hatchingDate}</span>}
+            {hatchingDate && (
+              <span className="text-sm font-normal text-gray-500">{hatchingDate}</span>
+            )}
             {/*<div className={cn("text-muted-foreground", isMobile ? "text-xs" : "text-sm")}>*/}
             {/*  | {(SPECIES_KOREAN_INFO as Record<string, string>)[species] || "미분류"}*/}
             {/*</div>*/}
-            {sex && (
-              <span className={cn("text-blue-500", isMobile ? "text-xs" : "text-sm")}>
-                {getSexIcon(sex, { size: "xs" })}
-              </span>
-            )}
           </div>
           <div
             className={cn(
@@ -178,7 +192,7 @@ const AdoptionReceiptModal = ({ isOpen, adoption, onClose }: AdoptionReceiptModa
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="max-h-[90dvh] overflow-y-auto rounded-3xl px-4 py-6 sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>분양 상세 정보</DialogTitle>
           <DialogDescription className="sr-only">분양 상세 정보를 확인합니다.</DialogDescription>
@@ -198,7 +212,7 @@ const AdoptionReceiptModal = ({ isOpen, adoption, onClose }: AdoptionReceiptModa
           />
 
           <div className="space-y-3">
-            <div className="pt-4 pb-4">
+            <div className="pb-4">
               <div className="relative rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 p-4 dark:border-gray-600 dark:bg-neutral-900">
                 <div className="mb-2 flex flex-col items-center justify-center text-center">
                   <div className="flex items-center gap-2 text-lg font-bold text-gray-800 dark:text-gray-200">
