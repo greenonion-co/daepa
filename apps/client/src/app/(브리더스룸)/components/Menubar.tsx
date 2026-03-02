@@ -29,6 +29,7 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
   const isNative = isNativeApp();
   const isRegisterPage = pathname.includes("/register/");
   const isPetDetailPage = pathname?.startsWith("/pet/") ?? false;
+  const isShowcase = pathname?.startsWith("/@") ?? false;
   const isFeedPage = pathname === "/";
   const isPetListPage = pathname === "/pet";
 
@@ -45,9 +46,11 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
   );
 
   // 로고 컴포넌트
-  const Logo = ({ withLink = false }: { withLink?: boolean }) => {
+  const Logo = ({ withLink = false, isMobile }: { withLink?: boolean; isMobile?: boolean }) => {
     const logo = (
-      <h1 className={cn("pr-4 text-2xl font-bold", isMobile && "px-1 text-lg")}>BREEDY</h1>
+      <h1 className={cn("pr-4 text-2xl font-bold", isMobile && "px-1 text-lg")}>
+        {isMobile ? "B." : "BREEDY"}
+      </h1>
     );
 
     if (isNative && withLink) {
@@ -68,27 +71,30 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
   // 네비게이션 링크 컴포넌트
   const NavLinks = () => (
     <>
-      {SIDEBAR_ITEMS.map((item) => (
-        <Link
-          key={item.title}
-          href={item.url}
-          className={cn(
-            item.url === pathname
-              ? "font-semibold text-blue-500 underline"
-              : "font-semibold text-gray-500 hover:text-blue-500 hover:underline dark:text-gray-400",
-            isMobile ? "my-auto px-1.5" : "px-3 py-1.5",
-          )}
-        >
-          {item.title}
-        </Link>
-      ))}
+      {SIDEBAR_ITEMS.map((item) => {
+        const href = item.url === "/@" && user?.name ? `/@${encodeURIComponent(user.name)}` : item.url;
+        return (
+          <Link
+            key={item.title}
+            href={href}
+            className={cn(
+              (item.url === "/@" ? isShowcase : item.url === pathname)
+                ? "font-semibold text-blue-500 underline"
+                : "font-semibold text-gray-500 hover:text-blue-500 hover:underline dark:text-gray-400",
+              isMobile ? "my-auto px-1.5" : "px-3 py-1.5",
+            )}
+          >
+            {item.title}
+          </Link>
+        );
+      })}
     </>
   );
 
   // 게스트/피드 뷰 렌더링
   const renderGuestView = () => (
     <>
-      <Logo withLink />
+      <Logo withLink isMobile={isMobile} />
       {/* 웹에서만 메뉴바에 렌더링 */}
       {!isNative && !isMobile && !isRegisterPage && <AddPetButton />}
     </>
@@ -99,7 +105,7 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
     <>
       {/* 좌측: 로고 + 네비게이션 + 펫 추가 */}
       <div className="flex gap-1">
-        <Logo withLink />
+        <Logo withLink isMobile={isMobile} />
         {!isNative && <NavLinks />}
         {/* 웹에서만 메뉴바에 렌더링 */}
         {!isNative && !isMobile && !isRegisterPage && <AddPetButton />}
@@ -134,8 +140,13 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
   return (
     <div
       className={cn(
-        "dark:bg-background flex h-[52px] items-center justify-between px-2",
-        !isPetDetailPage && "bg-background sticky top-0 left-0 z-20 w-full",
+        "flex h-[52px] items-center justify-between px-2",
+        isShowcase
+          ? "w-full"
+          : cn(
+              "dark:bg-background",
+              !isPetDetailPage && "bg-background sticky top-0 left-0 z-20 w-full",
+            ),
         isNative && "pr-4",
       )}
     >

@@ -12,6 +12,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn, generateQRCode } from "@/lib/utils";
 import { useEffect, useState, useCallback } from "react";
+import { QrCode } from "lucide-react";
 import { PetDto } from "@repo/api-client";
 import { GENDER_KOREAN_INFO } from "@/app/(브리더스룸)/constants";
 import { DateTime } from "luxon";
@@ -250,7 +251,8 @@ const QRCode = ({ pet, isScrolled }: QRCodeProps) => {
       <Dialog open={qrOpen} onOpenChange={setQrOpen}>
         <DialogTrigger asChild>
           <Button size="sm" variant="outline" className={cn("bg-neutral-900 text-white hover:bg-neutral-800 dark:border-gray-700 dark:bg-transparent dark:text-gray-300 dark:hover:bg-gray-800", isScrolled ? "text-xs" : "text-sm")}>
-            QR
+            <QrCode className="h-4 w-4 sm:hidden" />
+            <span className="hidden sm:inline">QR</span>
           </Button>
         </DialogTrigger>
 

@@ -353,3 +353,37 @@ export class VerifyEmailDto {
   @IsEmail()
   email: string;
 }
+
+export class BreederPublicProfileDto extends UserProfilePublicDto {
+  @ApiProperty({
+    description: '공개 펫 수',
+    example: 12,
+  })
+  petCount: number;
+
+  @ApiProperty({
+    description: '실명/상호 (공개 설정 시)',
+    required: false,
+  })
+  realName?: string | null;
+
+  @ApiProperty({
+    description: '연락처 (공개 설정 시)',
+    required: false,
+  })
+  phone?: string | null;
+
+  @ApiProperty({
+    description: '주소 (공개 설정 시)',
+    required: false,
+  })
+  address?: string | null;
+}
+
+export class BreederPublicProfileResponseDto extends CommonResponseDto {
+  @ApiProperty({
+    description: '브리더 공개 프로필',
+    type: BreederPublicProfileDto,
+  })
+  data: BreederPublicProfileDto;
+}
