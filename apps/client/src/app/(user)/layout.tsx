@@ -9,6 +9,7 @@ async function isRefreshTokenValid(refreshToken: string): Promise<boolean> {
     const res = await fetch(`${BASE_URL}/api/auth/token`, {
       headers: { Cookie: `refreshToken=${refreshToken}` },
       cache: "no-store",
+      signal: AbortSignal.timeout(3000),
     });
     return res.ok;
   } catch {
