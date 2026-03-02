@@ -69,13 +69,16 @@ export default function ShowcaseContent({ profile }: ShowcaseContentProps) {
     <div className="mx-auto md:flex md:h-dvh md:flex-col">
       {/* 모바일 미니 헤더 */}
       <div
-        className={`fixed top-0 right-0 left-0 z-30 flex items-center justify-between border-b border-gray-200 bg-white/95 px-4 py-2.5 backdrop-blur-sm transition-transform duration-300 md:hidden dark:border-gray-700 dark:bg-gray-900/95 ${
+        className={`fixed top-0 right-0 left-0 z-30 flex items-center justify-between border-b border-gray-200 bg-white/80 px-4 py-2.5 backdrop-blur-sm transition-transform duration-300 md:hidden dark:border-gray-700 dark:bg-gray-900/80 ${
           showMiniHeader ? "translate-y-0" : "-translate-y-full"
         }`}
       >
         <div className="flex items-center gap-2">
           <span className="text-sm font-bold text-gray-900 dark:text-gray-100">
-            {profile.name}&#39;s SHOWROOM
+            {profile.name}
+            <span style={{ marginLeft: 4, fontFamily: "Yeongwol, sans-serif" }}>
+              &#39;s SHOWROOM
+            </span>
           </span>
           {profile.isBiz && (
             <span className="inline-flex items-center rounded-full bg-[#DBEDDB] px-2 py-0.5 text-[11px] leading-none font-medium text-[#2B6A2F] dark:bg-[#1E3D1F] dark:text-[#A3D9A5]">

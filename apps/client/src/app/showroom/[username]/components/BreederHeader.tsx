@@ -25,8 +25,12 @@ export default function BreederHeader({ profile }: BreederHeaderProps) {
       <div className="flex w-full flex-col gap-0.5">
         <div className="flex w-full items-center justify-between">
           <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">
-            {profile.name}&#39;s SHOWROOM
+            {profile.name}
+            <span style={{ marginLeft: 4, fontFamily: "Yeongwol, sans-serif" }}>
+              &#39;s SHOWROOM
+            </span>
           </h1>
+
           <button
             type="button"
             onClick={handleShare}
