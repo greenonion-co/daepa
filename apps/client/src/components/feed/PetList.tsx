@@ -47,6 +47,7 @@ export default function PetList({ filterType, isVisible }: PetListProps) {
           order: "DESC",
           filterType,
           keyword: searchKeyword,
+          isPublic: 1,
         });
         return result;
       },
