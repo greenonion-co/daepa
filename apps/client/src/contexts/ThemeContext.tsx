@@ -28,12 +28,9 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
   const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">("light");
   const [mounted, setMounted] = useState(false);
 
-  // 실제 적용할 테마 계산
-  const computeResolvedTheme = (t: Theme): "light" | "dark" => {
-    if (t === "system") {
-      return getSystemTheme();
-    }
-    return t;
+  // 실제 적용할 테마 계산 — 다크모드 이슈 해결 전까지 라이트 고정
+  const computeResolvedTheme = (_t: Theme): "light" | "dark" => {
+    return "light";
   };
 
   useEffect(() => {
@@ -44,12 +41,11 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
 
     if (savedTheme && (savedTheme === "light" || savedTheme === "dark" || savedTheme === "system")) {
       setTheme(savedTheme);
-      setResolvedTheme(computeResolvedTheme(savedTheme));
     } else {
-      // 저장된 테마가 없으면 system 기본값
       setTheme("system");
-      setResolvedTheme(getSystemTheme());
     }
+    // 다크모드 이슈 해결 전까지 항상 라이트
+    setResolvedTheme("light");
   }, []);
 
   // 시스템 테마 변경 감지 리스너
@@ -58,10 +54,8 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
 
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
     const handleChange = () => {
-      // system 모드일 때만 시스템 테마 변경에 반응
-      if (theme === "system") {
-        setResolvedTheme(getSystemTheme());
-      }
+      // 다크모드 이슈 해결 전까지 라이트 고정
+      setResolvedTheme("light");
     };
 
     mediaQuery.addEventListener("change", handleChange);
