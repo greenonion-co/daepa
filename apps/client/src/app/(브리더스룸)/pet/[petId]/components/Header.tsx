@@ -203,7 +203,7 @@ const Header = ({
 
           {pet.owner?.name && (
             <Link
-              href={`/@${pet.owner.name}`}
+              href={`/@${encodeURIComponent(pet.owner.name)}`}
               className="mt-1 text-[12px] font-medium text-blue-500 transition-colors hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300"
             >
               @{pet.owner.name}

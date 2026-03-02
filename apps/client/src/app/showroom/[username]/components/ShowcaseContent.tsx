@@ -56,7 +56,7 @@ export default function ShowcaseContent({ profile }: ShowcaseContentProps) {
   }, []);
 
   const handleShare = () => {
-    const url = `${window.location.origin}/@${profile.name}`;
+    const url = `${window.location.origin}/@${encodeURIComponent(profile.name)}`;
     navigator.clipboard.writeText(url).then(() => {
       toast.success("쇼룸 링크가 복사되었습니다");
     });

@@ -72,7 +72,7 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
   const NavLinks = () => (
     <>
       {SIDEBAR_ITEMS.map((item) => {
-        const href = item.url === "/@" && user?.name ? `/@${user.name}` : item.url;
+        const href = item.url === "/@" && user?.name ? `/@${encodeURIComponent(user.name)}` : item.url;
         return (
           <Link
             key={item.title}
