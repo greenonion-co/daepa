@@ -17,8 +17,8 @@ const SettingsPage = () => {
           <AccountInfoSection />
           <ReporterInfoSection />
           {/*<AppSettingsSection />*/}
-          <HelpSection />
           <AccountManagementSection />
+          <HelpSection />
         </div>
 
         {/* 버전 정보 */}

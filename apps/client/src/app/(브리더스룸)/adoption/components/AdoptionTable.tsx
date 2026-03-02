@@ -27,6 +27,7 @@ import { AdoptionFilters } from "./AdoptionFilters";
 import { columns } from "./adoption_columns";
 import { adoptionHistoryControllerGetAllAdoptions } from "@repo/api-client";
 import { useIsMobile } from "@/hooks/useMobile";
+import { useDebouncedHover } from "@/hooks/useDebouncedHover";
 import PetHoverPreview from "../../pet/components/PetHoverPreview";
 
 const AdoptionTable = () => {
@@ -38,7 +39,7 @@ const AdoptionTable = () => {
 
   const isMobile = useIsMobile();
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [hoveredPetId, setHoveredPetId] = useState<string | null>(null);
+  const [debouncedHoveredPetId, hoverEnter, hoverLeave] = useDebouncedHover<string>();
   const [previewOverridePetId, setPreviewOverridePetId] = useState<string | null>(null);
   const [previewSuppressed, setPreviewSuppressed] = useState(false);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
@@ -47,13 +48,13 @@ const AdoptionTable = () => {
     setMousePos({ x: e.clientX, y: e.clientY });
     const cell = (e.target as HTMLElement).closest("td[data-column-id]");
     if (cell?.getAttribute("data-column-id") === "memo") {
-      setHoveredPetId(null);
+      hoverLeave();
     } else {
       const row = (e.target as HTMLElement).closest("tr[data-pet-id]");
       const petId = row?.getAttribute("data-pet-id");
-      if (petId) setHoveredPetId(petId);
+      if (petId) hoverEnter(petId);
     }
-  }, []);
+  }, [hoverEnter, hoverLeave]);
 
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage, refetch } =
     useInfiniteQuery({
@@ -165,8 +166,8 @@ const AdoptionTable = () => {
                       "cursor-pointer",
                       "hover:bg-purple-50 dark:bg-[#18171C] dark:hover:bg-purple-900/30",
                     )}
-                    onMouseEnter={!isMobile ? () => setHoveredPetId(row.original.petId) : undefined}
-                    onMouseLeave={!isMobile ? () => setHoveredPetId(null) : undefined}
+                    onMouseEnter={!isMobile ? () => hoverEnter(row.original.petId) : undefined}
+                    onMouseLeave={!isMobile ? hoverLeave : undefined}
                     onClick={() => {
                       overlay.open(({ isOpen, close }) => (
                         <AdoptionReceiptModal
@@ -208,8 +209,8 @@ const AdoptionTable = () => {
         </Table>
       </div>
 
-      {!previewSuppressed && (previewOverridePetId || hoveredPetId) && (
-        <PetHoverPreview petId={(previewOverridePetId || hoveredPetId)!} mousePos={mousePos} />
+      {!previewSuppressed && (previewOverridePetId || debouncedHoveredPetId) && (
+        <PetHoverPreview petId={(previewOverridePetId || debouncedHoveredPetId)!} mousePos={mousePos} />
       )}
     </div>
   );
