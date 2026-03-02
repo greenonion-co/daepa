@@ -9,7 +9,7 @@ interface ShowcasePageProps {
 
 export async function generateMetadata({ params }: ShowcasePageProps): Promise<Metadata> {
   const { username } = await params;
-  const profile = await fetchBreederProfile(decodeURIComponent(username));
+  const profile = await fetchBreederProfile(username);
 
   if (!profile) {
     return { title: "브리더를 찾을 수 없습니다" };
@@ -27,7 +27,7 @@ export async function generateMetadata({ params }: ShowcasePageProps): Promise<M
 
 export default async function ShowcasePage({ params }: ShowcasePageProps) {
   const { username } = await params;
-  const profile = await fetchBreederProfile(decodeURIComponent(username));
+  const profile = await fetchBreederProfile(username);
 
   if (!profile) {
     notFound();
