@@ -304,24 +304,38 @@ export default function QuickRegisterModal({
               />
             </div>
 
-            {/* 상세 설명 */}
-            <div>
-              <label className="mb-1 block text-[13px] font-medium text-gray-700 dark:text-gray-300">
-                상세 설명
+            {/* 해칭일 */}
+            <div className="flex w-fit items-center">
+              <label className="block min-w-12 text-[13px] font-medium text-gray-700 dark:text-gray-300">
+                해칭일
               </label>
-              <div className="relative">
-                <textarea
-                  className="min-h-[120px] w-full rounded-xl bg-gray-100 p-4 text-left text-sm focus:ring-0 focus:outline-none dark:bg-[#18171C] dark:text-white"
-                  rows={3}
-                  maxLength={DESC_MAX_LENGTH}
-                  placeholder="개체에 대한 설명을 입력해주세요"
-                  value={desc}
-                  onChange={(e) => setDesc(e.target.value)}
-                />
-                <span className="absolute right-3 bottom-2 text-xs text-gray-400">
-                  {desc.length}/{DESC_MAX_LENGTH}
-                </span>
-              </div>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button
+                    type="button"
+                    className="flex h-9 w-full items-center justify-between rounded-lg border border-gray-200 px-3 text-left text-sm dark:border-gray-700 dark:bg-[#18171C] dark:text-white"
+                  >
+                    <span
+                      className={hatchingDate ? "text-gray-900 dark:text-white" : "text-gray-400"}
+                    >
+                      {hatchingDate
+                        ? DateTime.fromISO(hatchingDate).toFormat("yyyy년 MM월 dd일")
+                        : "해칭일을 선택해주세요"}
+                    </span>
+                    <CalendarIcon className="h-4 w-4 text-gray-400" />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={hatchingDate ? new Date(hatchingDate) : undefined}
+                    onSelect={(date) => {
+                      if (date) setHatchingDate(date.toISOString());
+                    }}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
           </div>
         ) : (
@@ -357,40 +371,6 @@ export default function QuickRegisterModal({
               <DndImagePicker images={photos} onChange={setPhotos} max={3} />
             </div>
 
-            {/* 해칭일 */}
-            <div className="flex w-fit items-center">
-              <label className="block min-w-12 text-[13px] font-medium text-gray-700 dark:text-gray-300">
-                해칭일
-              </label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <button
-                    type="button"
-                    className="flex h-9 w-full items-center justify-between rounded-lg border border-gray-200 px-3 text-left text-sm dark:border-gray-700 dark:bg-[#18171C] dark:text-white"
-                  >
-                    <span
-                      className={hatchingDate ? "text-gray-900 dark:text-white" : "text-gray-400"}
-                    >
-                      {hatchingDate
-                        ? DateTime.fromISO(hatchingDate).toFormat("yyyy년 MM월 dd일")
-                        : "해칭일을 선택해주세요"}
-                    </span>
-                    <CalendarIcon className="h-4 w-4 text-gray-400" />
-                  </button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={hatchingDate ? new Date(hatchingDate) : undefined}
-                    onSelect={(date) => {
-                      if (date) setHatchingDate(date.toISOString());
-                    }}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-
             {/* 체중 */}
             <div className="flex w-fit items-center">
               <label className="block min-w-12 text-[13px] font-medium text-gray-700 dark:text-gray-300">
@@ -417,6 +397,26 @@ export default function QuickRegisterModal({
                 onSelect={(items) => setFoods(items ?? [])}
                 forceCenter
               />
+            </div>
+
+            {/* 상세 설명 */}
+            <div>
+              <label className="mb-1 block text-[13px] font-medium text-gray-700 dark:text-gray-300">
+                상세 설명
+              </label>
+              <div className="relative">
+                <textarea
+                  className="min-h-[120px] w-full rounded-xl bg-gray-100 p-4 text-left text-sm focus:ring-0 focus:outline-none dark:bg-[#18171C] dark:text-white"
+                  rows={3}
+                  maxLength={DESC_MAX_LENGTH}
+                  placeholder="개체에 대한 설명을 입력해주세요"
+                  value={desc}
+                  onChange={(e) => setDesc(e.target.value)}
+                />
+                <span className="absolute right-3 bottom-2 text-xs text-gray-400">
+                  {desc.length}/{DESC_MAX_LENGTH}
+                </span>
+              </div>
             </div>
           </div>
         )}

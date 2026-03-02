@@ -16,8 +16,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const isPetDetail = pathname?.startsWith("/pet/") ?? false;
-  const isFamilyTree = /\/pet\/[^/]+\/family-tree/.test(pathname ?? "");
   const isShowcase = pathname?.startsWith("/@") ?? false;
+  const isFamilyTree = /\/pet\/[^/]+\/breeding-map/.test(pathname ?? "");
   const isIntroPage = pathname === "/intro";
   const isMobile = useIsMobile();
 

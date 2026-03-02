@@ -14,10 +14,6 @@ export function usePairInvalidate() {
   return useCallback(() => {
     // 브리딩 메인 페이지의 페어 목록 무한스크롤 쿼리 (PairList.tsx)
     queryClient.invalidateQueries({ queryKey: [pairControllerGetPairList.name] });
-    // 브리딩맵 번식 이력 패널에서 페어 존재 여부 확인용 쿼리 (usePairStatistics.ts)
-    queryClient.invalidateQueries({ queryKey: ["pair-lookup"] });
-    // 브리딩맵 번식 이력 패널의 요약 통계 쿼리 — GET /v1/statistics/pair-summary (usePairStatistics.ts)
-    queryClient.invalidateQueries({ queryKey: ["pair-summary"] });
     // 브리딩맵 '브리딩 상세' 패널의 메이팅/산란 상세 데이터 쿼리 (PairDetailContent.tsx)
     queryClient.invalidateQueries({ queryKey: ["pair-detail-modal"] });
     // PairStatisticsPanel 메이팅 추가 캘린더의 기존 메이팅 날짜 목록 쿼리 (FamilyTreeCanvas.tsx)

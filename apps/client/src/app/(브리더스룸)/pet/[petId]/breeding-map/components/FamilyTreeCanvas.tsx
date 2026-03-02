@@ -11,7 +11,7 @@ import MorphLegend from "./MorphLegend";
 import SearchDropdown from "./SearchDropdown";
 import CreateLayingModal from "../../../../hatching/components/CreateLayingModal";
 import PetDetailModal from "../../components/PetDetailModal";
-import { useCenterPet, useFamilyTree, type FamilyTreeResponse } from "../hooks/useFamilyTreeData";
+import { useFamilyTree, type FamilyTreeResponse } from "../hooks/useFamilyTreeData";
 import { usePairInvalidate } from "../../../../hatching/hooks/usePairInvalidate";
 import { useGraphTransform } from "../hooks/useGraphTransform";
 import { useSearch } from "../hooks/useSearch";
@@ -77,9 +77,6 @@ export default function FamilyTreeCanvas({ petId }: FamilyTreeCanvasProps) {
   >({});
   const reshuffleRef = useRef<(() => void) | null>(null);
   const isMobile = useIsMobile();
-
-  // 중심 개체 fetch
-  const { data: centerPet, isLoading: isCenterLoading } = useCenterPet(petId);
 
   // 브리딩맵 전체 데이터 fetch (Recursive CTE)
   const { data: familyTreeNodes, isLoading: isTreeLoading } = useFamilyTree(petId);
@@ -178,7 +175,7 @@ export default function FamilyTreeCanvas({ petId }: FamilyTreeCanvasProps) {
           window.open(`/pet/${nodeId}/relation`, "_blank");
           break;
         case "family-tree":
-          window.open(`/pet/${nodeId}/family-tree`, "_blank");
+          window.open(`/pet/${nodeId}/breeding-map`, "_blank");
           break;
       }
     },
@@ -197,6 +194,12 @@ export default function FamilyTreeCanvas({ petId }: FamilyTreeCanvasProps) {
       // 클릭 시 패널 고정 (중심 개체 포함 모든 노드)
       setPanelPetId(nodeId);
 
+      // 타인 소유 개체는 트리 확장 불가
+      if (nodeData?.pet && !nodeData.pet.isOwner) {
+        toast.info("타인의 개체입니다.", { position: "bottom-center" });
+        return;
+      }
+
       // 이미 확장됐거나 중심 개체면 확장 skip
       if (nodeId === centerPetId || expandedNodeIds.has(nodeId)) return;
 
@@ -210,7 +213,7 @@ export default function FamilyTreeCanvas({ petId }: FamilyTreeCanvasProps) {
         const hasNewNodes = data.nodes.some((n) => !nodesMap.has(n.petId));
         mergeTree(nodeId, data.nodes, data.centerPairPartnerIds ?? []);
         if (!hasNewNodes) {
-          toast.info("추가로 표시할 개체가 없습니다.");
+          toast.info("추가로 표시할 개체가 없습니다.", { position: "bottom-center" });
         }
       } catch {
         // 실패 시 무시
@@ -245,7 +248,6 @@ export default function FamilyTreeCanvas({ petId }: FamilyTreeCanvasProps) {
     queryFn: () => petControllerFindPetByPetId(detailModalPetId!),
     select: (response) => response.data.data,
     enabled: !!detailModalPetId,
-    staleTime: 5 * 60 * 1000,
   });
 
   // 번식 이력 통계 + 메이팅/산란 핸들러
@@ -293,7 +295,6 @@ export default function FamilyTreeCanvas({ petId }: FamilyTreeCanvasProps) {
 
   const handleNodeHover = useCallback((nodeId: string | null) => {
     setHoveredPetId(nodeId);
-    if (nodeId) setPanelPetId(nodeId);
   }, []);
 
   const handleChildClick = useCallback((childId: string) => {
@@ -307,7 +308,10 @@ export default function FamilyTreeCanvas({ petId }: FamilyTreeCanvasProps) {
     setTimeout(() => setFocusNodeId(nodeId), 0);
   }, []);
 
-  if (isCenterLoading || isTreeLoading) {
+  // 중심 개체 데이터 (트리 데이터에서 파생)
+  const centerPet = nodesMap.get(petId)?.pet ?? null;
+
+  if (isTreeLoading) {
     return (
       <div className="flex h-full items-center justify-center">
         <Loading />
@@ -435,7 +439,7 @@ export default function FamilyTreeCanvas({ petId }: FamilyTreeCanvasProps) {
                 setShowQuickRegister(true);
               }}
             >
-              새 개체 등록
+              새로운 개체 추가
             </button>
           </div>
         </>

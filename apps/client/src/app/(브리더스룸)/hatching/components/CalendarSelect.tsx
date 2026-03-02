@@ -37,7 +37,9 @@ const CalendarSelect = ({
 }: CalendarSelectProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [matingDate, setMatingDate] = useState<string | undefined>(initialDate);
-  const [season, setSeason] = useState<number | undefined>(undefined);
+  const [season, setSeason] = useState<number | undefined>(
+    latestSeason ? latestSeason + 1 : undefined,
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   return (

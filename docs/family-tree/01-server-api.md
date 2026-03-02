@@ -17,9 +17,10 @@ GET /v1/pet/family-tree/:petId?depth=N&ancestorDepth=M
 ### 상세
 
 #### Controller
-- `@Public()` + `@UseGuards(OptionalJwtAuthGuard)` — 비로그인도 조회 가능, 로그인 시 소유권 기반 프라이버시 처리
+- `@Roles(USER_ROLE.BREEDER, USER_ROLE.ADMIN)` + `@UseGuards(RolesGuard)` — 브리더/관리자만 접근 가능
+- `@JwtUser()` 필수 인증 — 본인 소유 펫만 조회 가능 (소유권 검증 후 `ForbiddenException`)
 - 쿼리 파라미터:
-  - `depth` (후손 탐색 깊이, 기본 5, 최대 7)
+  - `depth` (후손 탐색 깊이, 기본 2, 최대 7)
   - `ancestorDepth` (조상 탐색 깊이, 기본 2, 최대 5)
 - `Math.min`으로 상한값 제한
 
@@ -44,41 +45,7 @@ Recursive CTE SQL 쿼리로 4개의 CTE를 조합:
 
 ---
 
-## 2. Pair Summary API
-
-### 엔드포인트
-```
-GET /v1/statistics/pair-summary?fatherId=...&motherId=...
-```
-
-### 파일
-| 파일 | 변경 |
-|------|------|
-| `apps/server/src/statistics/statistics.controller.ts` | 엔드포인트 등록 (+20줄) |
-| `apps/server/src/statistics/statistics.dto.ts` | `PairSummaryDto` 추가 (+20줄) |
-| `apps/server/src/statistics/statistics.service.ts` | `getPairSummary()` 메서드 추가 (+131줄) |
-
-### 상세
-
-#### Controller
-- `fatherId`, `motherId` 둘 다 필수 (없으면 `BadRequestException`)
-- 인증 필요 (`@Public()` 없음)
-
-#### DTO (`PairSummaryDto`)
-- `totalMatings: number` — 총 메이팅 횟수
-- `totalLayings: number` — 총 산란 횟수
-- `egg: EggStatisticsDto` — 알 통계 (total, fertilized, unfertilized, hatched, dead, pending, fertilizedRate, hatchingRate)
-- `morphs: DistributionItemDto[]` — 모프 분포
-
-#### Service (`getPairSummary`)
-1. pairs 테이블에서 단방향 조회 (`ownerId` 무관, 저장 시 성별 정규화 보장)
-2. 페어 없으면 모든 값 0인 빈 결과 반환
-3. 메이팅 → 산란 → 알/펫 정보 순차 조회
-4. `buildEggStatistics` + `buildDistribution`으로 통계 계산
-
----
-
-## 3. 인덱스 최적화
+## 2. 인덱스 최적화
 
 ### 파일
 | 파일 | 변경 |
@@ -103,13 +70,12 @@ GET /v1/statistics/pair-summary?fatherId=...&motherId=...
 
 ---
 
-## 4. 페어 저장 시 성별 정규화
+## 3. 페어 저장 시 성별 정규화
 
 ### 파일
 | 파일 | 변경 |
 |------|------|
 | `apps/server/src/mating/mating.service.ts` | `normalizeParentIds()` 헬퍼 추가, `saveMating`/`updateMating`에서 호출 |
-| `apps/server/src/statistics/statistics.service.ts` | `getPairSummary` 양방향 → 단방향 전환 |
 | `apps/client/.../hooks/usePairStatistics.ts` | `Promise.all` 2중 호출 → 단일 호출 |
 | `apps/client/.../hooks/usePairActions.tsx` | `Promise.all` 2중 호출 → 단일 호출 (2곳) |
 | `apps/client/.../components/PairDetailContent.tsx` | `Promise.all` 2중 호출 → 단일 호출 |
@@ -121,4 +87,4 @@ GET /v1/statistics/pair-summary?fatherId=...&motherId=...
 
 #### 해결
 1. **저장 시 정규화**: `MatingService.normalizeParentIds()`가 `pet_details.sex`를 조회하여 fatherId에 수컷, motherId에 암컷이 오도록 swap
-2. **조회 단방향 전환**: 정규화가 보장되므로 `getPairSummary`의 OR 양방향 조회와 클라이언트의 2중 API 호출 제거
+2. **조회 단방향 전환**: 정규화가 보장되므로 OR 양방향 조회와 클라이언트의 2중 API 호출 제거

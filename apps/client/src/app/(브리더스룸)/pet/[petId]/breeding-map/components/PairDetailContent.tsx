@@ -17,6 +17,18 @@ import {
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "@/lib/toast";
 import CreateLayingModal from "../../../../hatching/components/CreateLayingModal";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import PairCard from "../../../../hatching/components/PairCard";
+import { type CalendarEventDetail } from "../../../../hatching/components/PairMiniCalendar";
+import MatingItem from "../../../../hatching/components/MatingItem";
+import EditMatingModal from "../../../../hatching/components/EditMatingModal";
+import DeleteMatingModal from "../../../../hatching/components/DeleteMatingModal";
 
 function AddMatingSeasonDialog({
   isOpen,
@@ -34,7 +46,7 @@ function AddMatingSeasonDialog({
   fatherId: string;
   motherId: string;
   latestSeason: number;
-  species: string;
+  species: CreateMatingDtoSpecies;
   onSuccess: () => void;
 }) {
   const [season, setSeason] = useState<number | undefined>(latestSeason > 0 ? latestSeason + 1 : 1);
@@ -52,7 +64,7 @@ function AddMatingSeasonDialog({
         motherId,
         matingDate: date,
         season,
-        species: species as CreateMatingDtoSpecies,
+        species,
       });
       toast.success("메이팅이 추가되었습니다.");
       onSuccess();
@@ -116,18 +128,6 @@ function AddMatingSeasonDialog({
   );
 }
 
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import PairCard from "../../../../hatching/components/PairCard";
-import { type CalendarEventDetail } from "../../../../hatching/components/PairMiniCalendar";
-import MatingItem from "../../../../hatching/components/MatingItem";
-import EditMatingModal from "../../../../hatching/components/EditMatingModal";
-import DeleteMatingModal from "../../../../hatching/components/DeleteMatingModal";
 // MatingDetailDialog lines 249~369 재현
 function MatingDetailSection({
   matingGroup,
@@ -294,7 +294,7 @@ export function PairDetailContent({
       const mId = pair.mother?.petId ?? motherId;
       const latestSeason =
         pair.matingsByDate?.reduce((max, m) => Math.max(max, m.season ?? 0), 0) ?? 0;
-      const species = (pair.father as { species?: string })?.species ?? "CRESTED";
+      const species = pair.father?.species ?? "CR";
 
       overlay.open(({ isOpen, close }) => (
         <AddMatingSeasonDialog

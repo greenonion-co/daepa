@@ -2,7 +2,7 @@
 
 import CalendarSelect from "@/app/(브리더스룸)/hatching/components/CalendarSelect";
 import { cn } from "@/lib/utils";
-import type { PairSummaryDto } from "@repo/api-client";
+import type { PairStatisticsSummary } from "../hooks/usePairStatistics";
 import { Plus } from "lucide-react";
 
 export interface PairChildInfo {
@@ -15,7 +15,7 @@ export interface PairChildInfo {
 }
 
 interface PairStatisticsPanelProps {
-  statistics: PairSummaryDto | null;
+  statistics: PairStatisticsSummary | null;
   isLoading: boolean;
   hasPair: boolean;
   isOpposite?: boolean;
@@ -102,7 +102,7 @@ export default function PairStatisticsPanel({
     return (
       <div className="pointer-events-auto flex w-full flex-col gap-2 rounded-xl border border-gray-200 bg-white/70 p-3 shadow-lg backdrop-blur-sm md:w-52 dark:border-gray-700 dark:bg-gray-900/70">
         <span className="text-[11px] font-medium text-gray-500 dark:text-gray-400">
-          메이팅 이력
+          메이팅 정보
         </span>
         <p className="text-center text-[10px] text-red-500 dark:text-gray-500">
           수컷 × 암컷 조합에서만 확인할 수 있습니다
@@ -115,7 +115,7 @@ export default function PairStatisticsPanel({
     return (
       <div className="pointer-events-auto flex w-full flex-col items-center gap-2 rounded-xl border border-gray-200 bg-white/70 p-3 shadow-lg backdrop-blur-sm md:w-52 dark:border-gray-700 dark:bg-gray-900/70">
         <span className="self-start text-[11px] font-medium text-gray-500 dark:text-gray-400">
-          메이팅 이력
+          메이팅 정보
         </span>
         <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-blue-500" />
       </div>
@@ -127,7 +127,7 @@ export default function PairStatisticsPanel({
       <div className="pointer-events-auto flex w-full flex-col gap-2 rounded-xl border border-gray-200 bg-white/70 p-3 shadow-lg backdrop-blur-sm md:w-52 dark:border-gray-700 dark:bg-gray-900/70">
         <div className="flex items-center justify-between">
           <span className="text-[11px] font-medium text-gray-500 dark:text-gray-400">
-            메이팅 이력
+            메이팅 정보
           </span>
           {isBothOwned && (
             <AddButtons
@@ -146,7 +146,7 @@ export default function PairStatisticsPanel({
           </p>
         ) : (
           <p className="text-center text-[10px] text-gray-400 dark:text-gray-500">
-            등록된 페어 기록 없음
+            선택된 페어 메이팅 정보 없음
           </p>
         )}
       </div>
@@ -159,7 +159,9 @@ export default function PairStatisticsPanel({
     <div className="pointer-events-auto flex w-full flex-col gap-2 rounded-xl border border-gray-200 bg-white/70 p-3 shadow-lg backdrop-blur-sm md:w-52 dark:border-gray-700 dark:bg-gray-900/70">
       {/* 헤더 */}
       <div className="flex items-center justify-between">
-        <span className="text-[11px] font-medium text-gray-500 dark:text-gray-400">번식 이력</span>
+        <span className="text-[11px] font-medium text-gray-500 dark:text-gray-400">
+          메이팅 정보
+        </span>
         {isBothOwned && (
           <AddButtons
             onAddMating={onAddMating}
@@ -178,12 +180,25 @@ export default function PairStatisticsPanel({
 
       {/* 핵심 지표 */}
       <div className="space-y-1">
-        <StatRow label="메이팅" value={`${totalMatings}회`} />
-        <StatRow label="산란" value={`${totalLayings}회`} />
-        <StatRow label="총 알" value={`${egg.total}개`} />
-        <StatRow label="부화 완료" value={`${egg.hatched}개`} highlight />
+        <StatRow label="메이팅" value={`${totalMatings}시즌`} />
+        <StatRow label="산란" value={`${totalLayings}차`} />
+        <StatRow label="알" value={`${egg.total}개`} />
         <StatRow label="유정란 비율" value={`${egg.fertilizedRate.toFixed(1)}%`} />
-        <StatRow label="부화 성공률" value={`${egg.hatchingRate.toFixed(1)}%`} highlight />
+        <StatRow label="해칭 성공" value={`${egg.hatched}개`} highlight />
+        <StatRow label="해칭 성공률" value={`${egg.hatchingRate.toFixed(1)}%`} highlight />
+      </div>
+
+      {/* 상세 보기 버튼 */}
+      <div className="flex justify-end">
+        <button
+          type="button"
+          onClick={() => onExpand?.()}
+          className="flex items-center gap-1 text-blue-500 hover:font-semibold dark:text-gray-500 dark:hover:text-gray-300"
+          title="상세 보기"
+        >
+          <span className={"text-[11px]"}>상세 정보 열기</span>
+          <ExpandIcon size={10} />
+        </button>
       </div>
 
       {/* 자식 목록 */}
@@ -222,18 +237,6 @@ export default function PairStatisticsPanel({
           </div>
         </div>
       )}
-
-      {/* 상세 보기 버튼 */}
-      <div className="flex justify-end">
-        <button
-          type="button"
-          onClick={() => onExpand?.()}
-          className="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
-          title="상세 보기"
-        >
-          <ExpandIcon size={12} />
-        </button>
-      </div>
     </div>
   );
 }

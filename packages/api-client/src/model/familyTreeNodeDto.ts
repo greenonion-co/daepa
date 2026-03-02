@@ -5,9 +5,6 @@
  * Project Daepa API description
  * OpenAPI spec version: 1.0
  */
-import type { FamilyTreeNodeDtoFatherId } from "./familyTreeNodeDtoFatherId";
-import type { FamilyTreeNodeDtoMotherId } from "./familyTreeNodeDtoMotherId";
-import type { FamilyTreeNodeDtoDepth } from "./familyTreeNodeDtoDepth";
 
 export interface FamilyTreeNodeDto {
   /** 펫 아이디 */
@@ -16,17 +13,17 @@ export interface FamilyTreeNodeDto {
    * 아버지 펫 아이디
    * @nullable
    */
-  fatherId: FamilyTreeNodeDtoFatherId;
+  fatherId: string | null;
   /**
    * 어머니 펫 아이디
    * @nullable
    */
-  motherId: FamilyTreeNodeDtoMotherId;
+  motherId: string | null;
   /**
    * 중심 개체로부터의 세대 깊이 (0=루트, null=공동 부모)
    * @nullable
    */
-  depth: FamilyTreeNodeDtoDepth;
+  depth: number | null;
   /** 펫 이름 */
   name?: string;
   /** 성별 */

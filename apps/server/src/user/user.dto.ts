@@ -114,8 +114,6 @@ export class UserDto extends PickType(UserBaseDto, [
   'email',
   'role',
   'isBiz',
-  'refreshToken',
-  'refreshTokenExpiresAt',
   'status',
   'createdAt',
   'updatedAt',
@@ -142,12 +140,6 @@ export class UserProfileDto extends PickType(UserBaseDto, [
   'status',
   'createdAt',
 ]) {
-  @Exclude()
-  declare refreshToken?: string | null;
-
-  @Exclude()
-  declare refreshTokenExpiresAt?: Date | null;
-
   @Exclude()
   declare updatedAt?: Date;
 }
@@ -194,12 +186,6 @@ export class UserProfilePublicDto extends PickType(UserBaseDto, ['status']) {
 
   @Exclude()
   declare provider?: OAUTH_PROVIDER[];
-
-  @Exclude()
-  declare refreshToken?: string | null;
-
-  @Exclude()
-  declare refreshTokenExpiresAt?: Date | null;
 
   @Exclude()
   declare updatedAt?: Date;

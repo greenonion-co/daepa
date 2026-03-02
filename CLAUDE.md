@@ -10,7 +10,7 @@
 가계도 관련 작업 시 아래 문서를 참조할 것:
 | 문서 | 내용 |
 |------|------|
-| `docs/family-tree/01-server-api.md` | 서버 API (Family Tree CTE, Pair Summary) |
+| `docs/family-tree/01-server-api.md` | 서버 API (Family Tree CTE) |
 | `docs/family-tree/02-client-core-architecture.md` | 클라이언트 코어 (page, store, canvas, 데이터 흐름) |
 | `docs/family-tree/03-force-graph.md` | ForceGraph d3-force 시각화 (힘, 노드/엣지 색상, 하이라이트) |
 | `docs/family-tree/04-panels-and-modals.md` | 패널/모달 10개 (PetDetail, COI, PairStats, QuickRegister 등) |
@@ -20,7 +20,7 @@
 | `docs/family-tree/08-api-client-and-setup.md` | API 클라이언트 타입, 의존성, 전체 통계 |
 
 ## 가계도 기능
-**경로**: `apps/client/src/app/(브리더스룸)/pet/[petId]/family-tree/`
+**경로**: `apps/client/src/app/(브리더스룸)/pet/[petId]/breeding-map/`
 
 ### 핵심 파일
 | 파일 | 역할 |
@@ -133,16 +133,15 @@ overlay.open(({ isOpen, close }) => (
 
 ## Query 무효화 키 (가계도 관련)
 ```ts
-queryClient.invalidateQueries({ queryKey: ["pair-lookup"] });
-queryClient.invalidateQueries({ queryKey: ["pair-statistics"] });
+queryClient.invalidateQueries({ queryKey: [statisticsControllerGetPairStatistics.name] });
 queryClient.invalidateQueries({ queryKey: ["family-tree", petId] });
 ```
 
 ## PairStatisticsPanel
-`apps/client/src/app/(브리더스룸)/pet/[petId]/family-tree/components/PairStatisticsPanel.tsx`
+`apps/client/src/app/(브리더스룸)/pet/[petId]/breeding-map/components/PairStatisticsPanel.tsx`
 - `onAddMating` / `onAddLaying` props로 버튼 표시
-- 산란+ 버튼: `statistics?.meta?.totalMatings > 0` 일 때만 활성화
-- `usePairStatistics` hook: `hooks/usePairStatistics.ts`
+- 산란+ 버튼: `statistics?.totalMatings > 0` 일 때만 활성화
+- `usePairStatistics` hook: `hooks/usePairStatistics.ts` — `statisticsControllerGetPairStatistics` 단일 API 호출
 
 ## ForceGraph 렌더링 구조
 `components/ForceGraph.tsx` — d3-force 시뮬레이션 + React SVG 렌더링
@@ -172,8 +171,12 @@ queryClient.invalidateQueries({ queryKey: ["family-tree", petId] });
 - hover 연결: cyan/fuchsia
 - 기본: 회색
 
+### 노드 클릭 접근 제어 (`handleNodeClick`)
+- **비공개 노드** (`isHidden` 또는 `isPublic === false && !isOwner`): early return (아무 반응 없음)
+- **타인 소유 공개 노드** (`!isOwner`): 패널 표시 + "타인의 개체입니다." 토스트, 트리 확장 API 호출 안 함
+- **본인 소유 노드**: 패널 표시 + `petControllerGetFamilyTree` 호출로 트리 확장
+
 ### 비공개 노드 처리 (`isPrivate: true`)
-- `handleNodeClick`: 가계도 확장 API 호출 skip
 - `handleContextMenuAction("detail")`: `setDetailModalPetId` 호출 skip → `petControllerFindPetByPetId` 불호출
 - `NodeContextMenu`: "개체 상세 보기" 항목 숨김 (`isPrivate` prop)
 - `PetDetailPanel`: "비공개 개체" 배지 표시

@@ -80,8 +80,6 @@ export class UserService {
       email: entity.email,
       role: entity.role,
       isBiz: entity.isBiz,
-      refreshToken: entity.refreshToken,
-      refreshTokenExpiresAt: entity.refreshTokenExpiresAt,
       status: entity.status,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
@@ -96,6 +94,12 @@ export class UserService {
       role: entity.role,
       isBiz: entity.isBiz,
     };
+  }
+
+  async findOneEntity(
+    where: FindOptionsWhere<UserEntity>,
+  ): Promise<UserEntity | null> {
+    return this.userRepository.findOneBy(where);
   }
 
   async findOne(where: FindOptionsWhere<UserEntity>) {
@@ -171,9 +175,9 @@ export class UserService {
     }
   }
 
-  async update(userId: string, userDto: Partial<UserDto>) {
+  async update(userId: string, data: Partial<UserEntity>) {
     const userEntity = new UserEntity();
-    Object.assign(userEntity, userDto);
+    Object.assign(userEntity, data);
     await this.userRepository.update({ userId }, userEntity);
   }
 

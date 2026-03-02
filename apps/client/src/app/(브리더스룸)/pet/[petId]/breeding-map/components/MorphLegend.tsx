@@ -50,7 +50,7 @@ interface MorphLegendProps {
 }
 
 export default function MorphLegend({ morphs }: MorphLegendProps) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(true);
 
   const isDark =
     typeof document !== "undefined" && document.documentElement.classList.contains("dark");
@@ -58,21 +58,26 @@ export default function MorphLegend({ morphs }: MorphLegendProps) {
   const edgeLegend = [
     {
       color: isDark ? "#a78bfa" : "#c084fc",
-      label: "배우자 연결",
+      label: "페어 관계",
       hasArrow: false,
       strokeWidth: 1.5,
     },
     {
       color: "#22d3ee",
-      label: "부모-자식",
+      label: "자식 관계",
       hasArrow: true,
       strokeWidth: 1.5,
     },
     {
       color: "#f97316",
-      label: "부모 (hover)",
+      label: "부모 관계",
       hasArrow: true,
       strokeWidth: 2,
+    },
+    {
+      color: "#f43f5e",
+      label: "동배 관계",
+      type: "circle" as const,
     },
   ];
 
@@ -159,9 +164,18 @@ export default function MorphLegend({ morphs }: MorphLegendProps) {
         {/* 선 색상 범례 */}
         <p className="mb-1 text-[10px] font-medium text-gray-400 dark:text-gray-500">선</p>
         <div className="flex flex-col gap-1">
-          {edgeLegend.map(({ color, label, hasArrow, strokeWidth }) => (
+          {edgeLegend.map(({ color, label, hasArrow, strokeWidth, type }) => (
             <div key={label} className="flex items-center gap-1.5">
-              <EdgeIcon color={color} strokeWidth={strokeWidth} hasArrow={hasArrow} />
+              <span className="flex w-[26px] shrink-0 items-center justify-center">
+                {type === "circle" ? (
+                  <span
+                    className="h-2 w-2 rounded-full border border-black/10"
+                    style={{ backgroundColor: color }}
+                  />
+                ) : (
+                  <EdgeIcon color={color} strokeWidth={strokeWidth} hasArrow={hasArrow} />
+                )}
+              </span>
               <span className="text-[10px] text-gray-600 dark:text-gray-300">{label}</span>
             </div>
           ))}
