@@ -15,7 +15,7 @@ export async function generateMetadata({ params }: ShowcasePageProps): Promise<M
     return { title: "브리더를 찾을 수 없습니다" };
   }
 
-  const title = `${profile.name}의 브리더스룸 | 대파`;
+  const title = `${profile.name}의 쇼케이스`;
   const description = `${profile.name}의 개체 ${profile.petCount}마리`;
 
   return {

@@ -26,7 +26,7 @@ const SEX_DISPLAY: Record<string, string> = {
 };
 
 const STATUS_DISPLAY: Record<string, string> = {
-  ON_SALE: "판매중",
+  ON_SALE: "분양중",
   ON_RESERVATION: "예약중",
   NFS: "NFS",
 };
@@ -115,17 +115,15 @@ export default function ShowcaseFilterBar({
         </div>
       )}
 
-      {filters.morphs.length > 0 && Object.keys(availableTraits).length > 0 && (
-        <div className="flex flex-col gap-1.5 p-4">
-          <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400">형질</h3>
-          <ShowcaseMultiSelect
-            title="형질"
-            displayMap={availableTraits}
-            selected={filters.traits}
-            onChange={(traits) => onChange({ ...filters, traits })}
-          />
-        </div>
-      )}
+      <div className="flex flex-col gap-1.5 p-4">
+        <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400">형질</h3>
+        <ShowcaseMultiSelect
+          title="형질"
+          displayMap={availableTraits}
+          selected={filters.traits}
+          onChange={(traits) => onChange({ ...filters, traits })}
+        />
+      </div>
     </div>
   );
 }
