@@ -8,7 +8,8 @@ import ViewModeToggle from "./ViewModeToggle";
 import { brPetControllerFindAll } from "@repo/api-client";
 import { useInView } from "react-intersection-observer";
 import { useEffect, useMemo, useState, useRef } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { useAppRouter } from "@/hooks/useAppRouter";
 import { toast } from "@/lib/toast";
 import Link from "next/link";
 import { RefreshCcw } from "lucide-react";
@@ -29,7 +30,7 @@ export default function PetList() {
   const { searchKeyword } = useSearchKeywordStore();
   const { viewMode } = useViewMode();
   const searchParams = useSearchParams();
-  const router = useRouter();
+  const router = useAppRouter();
   const itemPerPage = 10;
 
   // 404 에러 처리 (개체를 찾을 수 없는 경우)

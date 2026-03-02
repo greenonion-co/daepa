@@ -3,11 +3,12 @@
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import PairList from "./components/PairList";
 import MonthlyCalendar from "./components/MonthlyCalendar";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
+import { useAppRouter } from "@/hooks/useAppRouter";
 import PairStatisticsDashboard from "./components/PairStatisticsDashboard";
 
 const HatchingPage = () => {
-  const router = useRouter();
+  const router = useAppRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const current = searchParams.get("tab") ?? "pair";

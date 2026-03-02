@@ -117,7 +117,7 @@ export default function Selector({
     <BottomSheet isOpen={isOpen} onClose={onCloseAction}>
       <div className="space-y-4">
         {title && <h2 className="pl-4 text-xl font-bold">{title}</h2>}
-        <div className="flex max-h-[60vh] min-h-[200px] flex-col gap-1 overflow-y-auto">
+        <div className="flex max-h-[60dvh] min-h-[200px] flex-col gap-1 overflow-y-auto">
           {selectList.map((item, index) => (
             <SelectButton
               key={item.key}

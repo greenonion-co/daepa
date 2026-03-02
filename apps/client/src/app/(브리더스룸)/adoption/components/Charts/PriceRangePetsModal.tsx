@@ -56,7 +56,7 @@ const PriceRangePetsModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="flex max-h-[90vh] flex-col overflow-y-auto p-0 py-5">
+      <DialogContent className="flex max-h-[90dvh] flex-col overflow-y-auto p-0 py-5">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 px-4">
             <span>{priceRange.label}</span>

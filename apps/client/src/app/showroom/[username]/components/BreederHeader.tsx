@@ -22,8 +22,8 @@ export default function BreederHeader({ profile }: BreederHeaderProps) {
       </div> */}
 
       {/* 정보 */}
-      <div className="flex flex-col gap-0.5">
-        <div className={"flex flex-row items-center"}>
+      <div className="flex w-full flex-col gap-0.5">
+        <div className="flex w-full items-center justify-between">
           <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">
             {profile.name}&#39;s SHOWROOM
           </h1>
@@ -37,21 +37,15 @@ export default function BreederHeader({ profile }: BreederHeaderProps) {
         </div>
 
         {/* 닉네임 (실명과 다를 때) */}
-        {profile.realName && profile.realName !== profile.name && (
+        {profile.name && (
           <div className="flex items-center gap-1.5">
             <p className="text-sm text-gray-500 dark:text-gray-400">@{profile.name}</p>
             {profile.isBiz && (
-              <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-medium text-blue-700 dark:bg-blue-900/50 dark:text-blue-300">
+              <span className="inline-flex items-center rounded-full bg-[#DBEDDB] px-2 py-0.5 text-[11px] leading-none font-medium text-[#2B6A2F] dark:bg-[#1E3D1F] dark:text-[#A3D9A5]">
                 사업자
               </span>
             )}
           </div>
-        )}
-        {/* 실명 없을 때 사업자 배지 단독 표시 */}
-        {(!profile.realName || profile.realName === profile.name) && profile.isBiz && (
-          <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-medium text-blue-700 dark:bg-blue-900/50 dark:text-blue-300">
-            사업자
-          </span>
         )}
 
         {/* 연락처 / 주소 */}

@@ -9,7 +9,7 @@ import {
   PetDtoSex,
 } from "@repo/api-client";
 import { overlay } from "overlay-kit";
-import { useRouter } from "next/navigation";
+import { useAppRouter } from "@/hooks/useAppRouter";
 import FilterItem from "../../hatching/components/Filters/FilterItem";
 import ParentSearchSelector from "../../components/selector/parentSearch";
 import { ChartConfig } from "@/components/ui/chart";
@@ -106,7 +106,7 @@ const getMethodColor = (method: string): string => {
 
 const AdoptionDashboard = memo(() => {
   const isMobile = useIsMobile();
-  const router = useRouter();
+  const router = useAppRouter();
   const [species, setSpecies] = useState<StatisticsControllerGetPairStatisticsSpecies>(
     StatisticsControllerGetPairStatisticsSpecies.CR,
   );

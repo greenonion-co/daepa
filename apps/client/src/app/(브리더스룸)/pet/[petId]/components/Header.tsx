@@ -176,15 +176,6 @@ const Header = ({
               </div>
             )}
             <span className={`h-2 w-2 shrink-0 rounded-full ${dotColor}`} />
-
-            {/* <div
-              className={cn(
-                "flex-1 text-gray-500 transition-all max-[480px]:text-xs dark:text-gray-400",
-                isScrolled ? "text-xs" : "text-sm",
-              )}
-            >
-              {SPECIES_KOREAN_ALIAS_INFO[pet.species]}
-            </div> */}
           </div>
 
           <div className="flex items-center gap-1">
@@ -220,41 +211,53 @@ const Header = ({
           </div>
         </div>
 
-        <div className="flex flex-col items-end gap-1 sm:flex-row-reverse sm:items-center">
-          <div className="flex items-center gap-1">
-            <QRCode pet={pet} isScrolled={isScrolled} />
-            {isLoggedIn && isMyPet && (
+        {isLoggedIn && isMyPet ? (
+          <div className="flex flex-col items-end gap-1 sm:flex-row-reverse sm:items-center">
+            <div className="flex items-center gap-1">
+              <QRCode pet={pet} isScrolled={isScrolled} />
               <DeletePetButton petId={pet.petId} petName={pet.name} onSuccess={onDelete} />
-            )}
-          </div>
-
-          <div className="flex items-center gap-1">
-            {isBreeder && isMyPet && (
+            </div>
+            <div className="flex items-center gap-1">
+              {isBreeder && (
+                <button
+                  type="button"
+                  onClick={() => router.push(`/pet/${pet.petId}/breeding-map`)}
+                  className={cn(
+                    "flex items-center gap-0.5 rounded-lg border border-gray-200 bg-gradient-to-r from-blue-200/50 to-purple-200/65 px-2 font-[700] text-white transition-colors hover:from-blue-200/70 hover:to-purple-200/80 dark:border-gray-700 dark:from-blue-900/40 dark:to-purple-900/50 dark:hover:from-blue-900/60 dark:hover:to-purple-900/70",
+                    isScrolled ? "h-8 text-xs" : "h-8 text-sm",
+                  )}
+                >
+                  <TooltipText
+                    text="브리딩맵"
+                    title="브리딩맵"
+                    className="text-blue-600 dark:text-purple-300"
+                    content="혈통 관계를 트리 구조로 확인합니다."
+                  />
+                </button>
+              )}
               <button
                 type="button"
-                onClick={() => router.push(`/pet/${pet.petId}/breeding-map`)}
+                onClick={() => router.push(`/pet/${pet.petId}/relation`)}
                 className={cn(
-                  "flex items-center gap-0.5 rounded-lg border border-gray-200 bg-gradient-to-r from-blue-200/50 to-purple-200/65 px-2 font-[700] text-white transition-colors hover:from-blue-200/70 hover:to-purple-200/80 dark:border-gray-700 dark:from-blue-900/40 dark:to-purple-900/50 dark:hover:from-blue-900/60 dark:hover:to-purple-900/70",
+                  "flex items-center gap-0.5 rounded-lg border border-gray-200 bg-white px-2 font-[700] transition-colors hover:bg-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700",
                   isScrolled ? "h-8 text-xs" : "h-8 text-sm",
                 )}
               >
                 <TooltipText
-                  text="브리딩맵"
-                  title="브리딩맵"
-                  className="text-blue-600 dark:text-purple-300"
-                  content="혈통 관계를 트리 구조로 확인합니다."
+                  text="관계도"
+                  title="개체 관계도"
+                  className="text-gray-600 dark:text-gray-300"
+                  content="혈통 관계가 있는 개체들을 확인합니다."
                 />
               </button>
-            )}
+            </div>
+          </div>
+        ) : (
+          <div className="flex items-center gap-1">
+            <QRCode pet={pet} isScrolled={isScrolled} />
             <button
               type="button"
-              onClick={() => {
-                if (isLoggedIn) {
-                  router.push(`/pet/${pet.petId}/relation`);
-                } else {
-                  openRelationPromoSheet();
-                }
-              }}
+              onClick={() => openRelationPromoSheet()}
               className={cn(
                 "flex items-center gap-0.5 rounded-lg border border-gray-200 bg-white px-2 font-[700] transition-colors hover:bg-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700",
                 isScrolled ? "h-8 text-xs" : "h-8 text-sm",
@@ -268,7 +271,7 @@ const Header = ({
               />
             </button>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Tab Navigation - Only visible on screens 580px or smaller */}

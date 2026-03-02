@@ -73,9 +73,20 @@ export const SettingsItem = ({
 
   if (onClick) {
     return (
-      <button type="button" onClick={onClick} disabled={disabled} className={className}>
+      <div
+        role="button"
+        tabIndex={disabled ? -1 : 0}
+        onClick={disabled ? undefined : onClick}
+        onKeyDown={(e) => {
+          if (!disabled && (e.key === "Enter" || e.key === " ")) {
+            e.preventDefault();
+            onClick();
+          }
+        }}
+        className={cn(className, "cursor-pointer")}
+      >
         {content}
-      </button>
+      </div>
     );
   }
 

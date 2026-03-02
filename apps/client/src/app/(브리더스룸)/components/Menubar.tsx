@@ -97,6 +97,14 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
       <Logo withLink isMobile={isMobile} />
       {/* 웹에서만 메뉴바에 렌더링 */}
       {!isNative && !isMobile && !isRegisterPage && <AddPetButton />}
+      {isMobile && !pathname?.startsWith("/sign-in") && (
+        <Link
+          href="/sign-in"
+          className="rounded-full bg-blue-500 px-3 py-1 text-xs font-medium text-white"
+        >
+          로그인
+        </Link>
+      )}
     </>
   );
 

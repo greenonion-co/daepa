@@ -149,7 +149,7 @@ const PairList = memo(() => {
   const handleOpenCreateForm = () => {
     overlay.open(({ isOpen, close }) => (
       <Dialog open={isOpen} onOpenChange={close}>
-        <DialogContent className="max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-h-[90dvh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>새 페어 추가</DialogTitle>
           </DialogHeader>
@@ -165,7 +165,7 @@ const PairList = memo(() => {
         <h1 className="bg-gradient-to-r from-[#4285F4] via-[#9B72CB] to-[#D96570] bg-clip-text text-3xl font-semibold text-transparent dark:from-[#8AB4F8] dark:via-[#C58AF9] dark:to-[#F28B82]">
           메이팅 관리를 시작해보세요
         </h1>
-        <p className="mt-3 text-[15px] text-gray-500 dark:text-gray-400">
+        <p className="mt-3 text-center text-[15px] text-gray-500 dark:text-gray-400">
           페어를 등록하고 메이팅・산란・해칭까지 한눈에 관리할 수 있어요.
         </p>
         <button

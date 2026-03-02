@@ -139,7 +139,7 @@ const TransferReportModal = ({ isOpen, onClose }: TransferReportModalProps) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent
-        className={`max-h-[90vh] overflow-y-auto ${isMobile ? "sm:max-w-[95vw]" : "sm:max-w-[500px]"}`}
+        className={`max-h-[90dvh] overflow-y-auto ${isMobile ? "sm:max-w-[95vw]" : "sm:max-w-[500px]"}`}
       >
         <DialogHeader>
           <DialogTitle>양도·양수·보관 신고서 작성</DialogTitle>

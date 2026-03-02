@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useAppRouter } from "@/hooks/useAppRouter";
 import { useMutation } from "@tanstack/react-query";
 import { authControllerAppleNative, UserDtoStatus } from "@repo/api-client";
 import { useUserStore } from "@/app/(브리더스룸)/store/user";
@@ -25,7 +25,7 @@ interface AppleSignInResponse {
 
 const AppleLoginButton = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
+  const router = useAppRouter();
   const onLoginSuccess = useUserStore((state) => state.onLoginSuccess);
 
   const { mutateAsync: appleNativeLogin } = useMutation({

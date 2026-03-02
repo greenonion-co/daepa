@@ -22,7 +22,7 @@ const SettingsPage = () => {
         </div>
 
         {/* 버전 정보 */}
-        <div className="mt-8 text-center">
+        <div className="my-8 text-center">
           <p className="text-[13px] text-gray-400 dark:text-gray-500">버전 1.0.0</p>
         </div>
       </div>

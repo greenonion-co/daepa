@@ -4,13 +4,13 @@ import Image from "next/image";
 // import AppleLoginButton from "./AppleLoginButton";
 import { providerIconMap } from "../constants";
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useAppRouter } from "@/hooks/useAppRouter";
 import { tokenStorage } from "@/lib/tokenStorage";
 import { toast } from "@/lib/toast";
 import { UserProfileDtoProviderItem } from "@repo/api-client";
 
 const SignInPage = () => {
-  const router = useRouter();
+  const router = useAppRouter();
 
   useEffect(() => {
     const token = tokenStorage.getToken();
@@ -21,7 +21,7 @@ const SignInPage = () => {
   }, [router]);
 
   return (
-    <div className="flex min-h-screen w-full items-center justify-center dark:bg-black">
+    <div className="flex min-h-[calc(100dvh-52px)] w-full items-center justify-center dark:bg-black">
       <div className="w-[90vw] max-w-md">
         {/* 메인 카드 */}
         <div className="mb-10 text-center text-3xl font-bold text-gray-800/90 dark:text-white">

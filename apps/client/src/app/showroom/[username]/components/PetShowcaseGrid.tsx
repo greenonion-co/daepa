@@ -14,14 +14,20 @@ interface PetShowcaseGridProps {
   filters: ShowcaseFilters;
 }
 
-export default function PetShowcaseGrid({
-  userId,
-  filters,
-}: PetShowcaseGridProps) {
+export default function PetShowcaseGrid({ userId, filters }: PetShowcaseGridProps) {
   const observerRef = useRef<IntersectionObserver | null>(null);
   const loadMoreRef = useRef<HTMLDivElement>(null);
 
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isFetching, isLoading } = useInfiniteQuery({
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isFetching,
+    isLoading,
+    isError,
+    refetch,
+  } = useInfiniteQuery({
     queryKey: [
       "showroom-pets",
       userId,
@@ -98,6 +104,22 @@ export default function PetShowcaseGrid({
     );
   }
 
+  if (isError) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-3 py-20 text-center">
+        <p className="text-sm text-gray-500 dark:text-gray-400">
+          데이터를 불러오는 중 문제가 발생했습니다
+        </p>
+        <button
+          onClick={() => refetch()}
+          className="rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+        >
+          다시 시도
+        </button>
+      </div>
+    );
+  }
+
   if (pets.length === 0) {
     const hasFilters =
       filters.sex.length > 0 ||
@@ -107,10 +129,26 @@ export default function PetShowcaseGrid({
       filters.traits.length > 0 ||
       filters.search;
     return (
-      <div className="flex flex-col items-center justify-center gap-2 py-20 text-center">
-        <p className="text-sm text-gray-500 dark:text-gray-400">
-          {hasFilters ? "조건에 맞는 개체가 없습니다" : "등록된 개체가 없습니다"}
-        </p>
+      <div className="flex flex-col items-center justify-center px-4 py-20">
+        {hasFilters ? (
+          <>
+            <h1 className="bg-gradient-to-r from-[#4285F4] via-[#9B72CB] to-[#D96570] bg-clip-text text-xl font-semibold text-transparent dark:from-[#8AB4F8] dark:via-[#C58AF9] dark:to-[#F28B82]">
+              조건에 맞는 개체가 없습니다
+            </h1>
+            <p className="mt-1 text-[15px] text-gray-500 dark:text-gray-400">
+              다른 필터로 검색해보세요
+            </p>
+          </>
+        ) : (
+          <>
+            <h1 className="bg-gradient-to-r from-[#4285F4] via-[#9B72CB] to-[#D96570] bg-clip-text text-xl font-semibold text-transparent dark:from-[#8AB4F8] dark:via-[#C58AF9] dark:to-[#F28B82]">
+              등록된 개체가 없습니다
+            </h1>
+            <p className="mt-1 text-[15px] text-gray-500 dark:text-gray-400">
+              아직 공개된 개체가 없어요
+            </p>
+          </>
+        )}
       </div>
     );
   }
@@ -122,8 +160,19 @@ export default function PetShowcaseGrid({
         <span>{`${totalCount}마리`}</span>
         {isFetching && !isFetchingNextPage && (
           <svg className="h-3 w-3 animate-spin" viewBox="0 0 24 24" fill="none">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
+            />
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+            />
           </svg>
         )}
       </div>

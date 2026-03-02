@@ -1,7 +1,5 @@
-import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { UserProfilePublicDto } from "@repo/api-client";
-import { BadgeCheck } from "lucide-react";
 
 interface UserItemProps {
   item: UserProfilePublicDto;
@@ -21,12 +19,13 @@ const UserItem = ({ item, isSelected, onSelect }: UserItemProps) => {
     >
       {item.name}
       {item.isBiz ? (
-        <Badge className="ml-2 bg-green-500 text-white">
-          <BadgeCheck />
+        <span className="ml-2 inline-flex items-center rounded-full bg-[#DBEDDB] px-2 py-0.5 text-[11px] leading-none font-medium text-[#2B6A2F] dark:bg-[#1E3D1F] dark:text-[#A3D9A5]">
           사업자
-        </Badge>
+        </span>
       ) : (
-        <Badge className="ml-2 bg-blue-500 text-white">일반 사용자</Badge>
+        <span className="ml-2 inline-flex items-center rounded-full bg-[#D3E5EF] px-2 py-0.5 text-[11px] leading-none font-medium text-[#28638D] dark:bg-[#1E3A5F] dark:text-[#A3C9E8]">
+          일반
+        </span>
       )}
     </div>
   );

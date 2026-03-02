@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useAppRouter } from "@/hooks/useAppRouter";
 import { InfiniteData, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Trash2 } from "lucide-react";
 import { toast } from "@/lib/toast";
@@ -33,7 +33,7 @@ interface DeletePetButtonProps {
 function DeletePetButton({ petId, petName, onSuccess }: DeletePetButtonProps) {
   const [open, setOpen] = useState(false);
   const [deleteReason, setDeleteReason] = useState("");
-  const router = useRouter();
+  const router = useAppRouter();
   const queryClient = useQueryClient();
   const isMobile = useIsMobile();
 
