@@ -700,7 +700,7 @@ export const SELECTOR_CONFIGS: Record<
 
 export const SIDEBAR_ITEMS = [
   {
-    title: "MY개체",
+    title: "개체룸",
     url: "/pet",
     icon: Home,
   },
@@ -713,6 +713,10 @@ export const SIDEBAR_ITEMS = [
     title: "분양룸",
     url: "/adoption",
     icon: DollarSign,
+  },
+  {
+    title: "쇼룸",
+    url: "/@", // Menubar에서 /@{user.name}으로 동적 치환
   },
 ];
 
