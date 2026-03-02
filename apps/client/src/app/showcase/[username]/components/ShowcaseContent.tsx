@@ -21,6 +21,7 @@ export default function ShowcaseContent({ profile }: ShowcaseContentProps) {
   const [filters, setFilters] = useState<ShowcaseFilters>({
     sex: [],
     status: [],
+    growth: [],
     morphs: [],
     traits: [],
     search: "",

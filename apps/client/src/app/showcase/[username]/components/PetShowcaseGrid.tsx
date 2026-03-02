@@ -27,6 +27,7 @@ export default function PetShowcaseGrid({
       userId,
       filters.sex,
       filters.status,
+      filters.growth,
       filters.morphs,
       filters.traits,
       filters.search,
@@ -41,6 +42,7 @@ export default function PetShowcaseGrid({
         ...(filters.search ? { keyword: filters.search } : {}),
         ...(filters.sex.length > 0 ? { sex: filters.sex as any } : {}),
         ...(filters.status.length > 0 ? { status: filters.status as any } : {}),
+        ...(filters.growth.length > 0 ? { growth: filters.growth as any } : {}),
         ...(filters.morphs.length > 0 ? { morphs: filters.morphs as any } : {}),
         ...(filters.traits.length > 0 ? { traits: filters.traits as any } : {}),
       });
@@ -100,6 +102,7 @@ export default function PetShowcaseGrid({
     const hasFilters =
       filters.sex.length > 0 ||
       filters.status.length > 0 ||
+      filters.growth.length > 0 ||
       filters.morphs.length > 0 ||
       filters.traits.length > 0 ||
       filters.search;
