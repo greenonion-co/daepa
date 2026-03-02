@@ -71,7 +71,7 @@ export default function PetShowcaseCard({ pet }: PetShowcaseCardProps) {
         />
         {/* 분양 상태 배지 */}
         {pet.adoption?.status && (
-          <div className="absolute top-1.5 left-1.5">
+          <div className="absolute top-0 left-1">
             <AdoptionBadge status={pet.adoption.status} price={pet.adoption.price} />
           </div>
         )}
