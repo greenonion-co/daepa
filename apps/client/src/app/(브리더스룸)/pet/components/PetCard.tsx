@@ -18,6 +18,7 @@ import HiddenPetBadge from "@/components/common/HiddenPetBadge";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { DateTime } from "luxon";
 import PetHoverPreview from "./PetHoverPreview";
+import { useDebouncedHover } from "@/hooks/useDebouncedHover";
 
 interface PetCardProps {
   pet: PetDto;
@@ -80,7 +81,8 @@ export default function PetCard({ pet, onCardClick }: PetCardProps) {
         ? "bg-[#E03E3E] dark:bg-[#FF7369]"
         : "bg-gray-300";
   const [pressed, setPressed] = useState(false);
-  const [hoveredParent, setHoveredParent] = useState<HoveredParent>(null);
+  const [hoveredParent, parentHoverEnter, parentHoverLeave] = useDebouncedHover<NonNullable<HoveredParent>>();
+  const handleParentHover = (info: HoveredParent) => info ? parentHoverEnter(info) : parentHoverLeave();
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
   return (
@@ -150,13 +152,13 @@ export default function PetCard({ pet, onCardClick }: PetCardProps) {
           >
             <span className="shrink-0 text-gray-400">부모</span>
             {pet.father ? (
-              renderParent(pet.father, setHoveredParent)
+              renderParent(pet.father, handleParentHover)
             ) : (
               <span className="text-gray-400">미등록</span>
             )}
             <span className="text-gray-400">×</span>
             {pet.mother ? (
-              renderParent(pet.mother, setHoveredParent)
+              renderParent(pet.mother, handleParentHover)
             ) : (
               <span className="text-gray-400">미등록</span>
             )}

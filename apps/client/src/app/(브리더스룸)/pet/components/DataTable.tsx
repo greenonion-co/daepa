@@ -36,6 +36,7 @@ import { cn } from "@/lib/utils";
 import { useAppRouter } from "@/hooks/useAppRouter";
 import PetDetailModal from "../[petId]/components/PetDetailModal";
 import { useIsMobile } from "@/hooks/useMobile";
+import { useDebouncedHover } from "@/hooks/useDebouncedHover";
 import PetHoverPreview from "./PetHoverPreview";
 
 interface DataTableProps<TData> {
@@ -63,7 +64,7 @@ export const DataTable = ({
   const queryClient = useQueryClient();
   const router = useAppRouter();
   const [selectedPet, setSelectedPet] = useState<PetDto | null>(null);
-  const [hoveredPetId, setHoveredPetId] = useState<string | null>(null);
+  const [hoveredPetId, hoverEnter, hoverLeave] = useDebouncedHover<string>();
   const [previewOverride, setPreviewOverride] = useState<{ petId: string; name?: string; status?: string } | null>(null);
   const [previewSuppressed, setPreviewSuppressed] = useState(false);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
@@ -205,8 +206,8 @@ export const DataTable = ({
                         : "dark:bg-zinc-900 dark:hover:bg-zinc-800",
                     )}
                     onClick={(e) => handleRowClick({ e, pet: row.original })}
-                    onMouseEnter={!isMobile ? () => setHoveredPetId(row.original.petId) : undefined}
-                    onMouseLeave={!isMobile ? () => setHoveredPetId(null) : undefined}
+                    onMouseEnter={!isMobile ? () => hoverEnter(row.original.petId) : undefined}
+                    onMouseLeave={!isMobile ? hoverLeave : undefined}
                   >
                     {row.getVisibleCells().map((cell) => {
                       const size = cell.column.getSize();
