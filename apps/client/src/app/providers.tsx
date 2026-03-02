@@ -13,6 +13,7 @@ import NavigationProgress from "@/components/common/NavigationProgress";
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
+      refetchOnWindowFocus: false,
       retry: (failureCount, error) => {
         // 4xx 에러는 재시도하지 않음 (클라이언트 에러)
         if (
