@@ -8,6 +8,8 @@ import PetShowcaseGrid from "./PetShowcaseGrid";
 import ShowcaseMultiSelect from "./ShowcaseMultiSelect";
 import { MORPH_LIST_BY_SPECIES, TRAIT_LIST_BY_SPECIES } from "@/app/(브리더스룸)/constants";
 import { useIsLoggedIn } from "@/hooks/useAuth";
+import { Share2 } from "lucide-react";
+import { toast } from "@/lib/toast";
 import Link from "next/link";
 
 const SORT_DISPLAY: Record<string, string> = {
@@ -24,6 +26,7 @@ export default function ShowcaseContent({ profile }: ShowcaseContentProps) {
   const [filters, setFilters] = useState<ShowcaseFilters>({
     sex: [],
     status: [],
+    growth: [],
     morphs: [],
     traits: [],
     search: "",
@@ -55,27 +58,41 @@ export default function ShowcaseContent({ profile }: ShowcaseContentProps) {
     return () => observer.disconnect();
   }, []);
 
-  const displayName = profile.realName || profile.name;
+  const handleShare = () => {
+    const url = `${window.location.origin}/@${encodeURIComponent(profile.name)}`;
+    navigator.clipboard.writeText(url).then(() => {
+      toast.success("쇼룸 링크가 복사되었습니다");
+    });
+  };
 
   return (
     <div className="mx-auto md:flex md:h-dvh md:flex-col">
       {/* 모바일 미니 헤더 */}
       <div
-        className={`fixed top-0 right-0 left-0 z-30 flex items-center gap-2 border-b border-gray-200 bg-white/95 px-4 py-2.5 backdrop-blur-sm transition-transform duration-300 md:hidden dark:border-gray-700 dark:bg-gray-900/95 ${
+        className={`fixed top-0 right-0 left-0 z-30 flex items-center justify-between border-b border-gray-200 bg-white/95 px-4 py-2.5 backdrop-blur-sm transition-transform duration-300 md:hidden dark:border-gray-700 dark:bg-gray-900/95 ${
           showMiniHeader ? "translate-y-0" : "-translate-y-full"
         }`}
       >
-        <span className="text-sm font-bold text-gray-900 dark:text-gray-100">{displayName}</span>
-        {profile.isBiz && (
-          <span className="inline-flex items-center rounded-full bg-[#DBEDDB] px-2 py-0.5 text-[11px] leading-none font-medium text-[#2B6A2F] dark:bg-[#1E3D1F] dark:text-[#A3D9A5]">
-            사업자
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-bold text-gray-900 dark:text-gray-100">
+            {profile.name}&#39;s SHOWROOM
           </span>
-        )}
+          {profile.isBiz && (
+            <span className="inline-flex items-center rounded-full bg-[#DBEDDB] px-2 py-0.5 text-[11px] leading-none font-medium text-[#2B6A2F] dark:bg-[#1E3D1F] dark:text-[#A3D9A5]">
+              사업자
+            </span>
+          )}
+        </div>
+
+        <button
+          type="button"
+          onClick={handleShare}
+          className="flex items-center gap-1 rounded-lg px-2 py-1 text-xs text-amber-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
+        >
+          <Share2 className="h-3.5 w-3.5" />
+        </button>
         {!isLoggedIn && (
-          <Link
-            href="/sign-in"
-            className="ml-auto rounded-full bg-blue-500 px-3 py-1 text-xs font-medium text-white"
-          >
+          <Link href="/sign-in" className="ml-auto px-3 py-1 text-xs font-medium text-blue-500">
             로그인
           </Link>
         )}

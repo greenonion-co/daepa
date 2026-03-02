@@ -14,7 +14,7 @@ function AdoptionBadge({ status, price }: { status?: string; price?: number }) {
   if (status === "ON_SALE") {
     return (
       <span className="inline-flex items-center gap-1 rounded-full bg-[#D3E5EF] px-2 py-0.5 text-[10px] font-medium text-[#28638D] dark:bg-[#1E3A5F] dark:text-[#A3C9E8]">
-        판매중
+        분양중
         {price != null && price > 0 && (
           <span className="font-semibold">{price.toLocaleString()}원</span>
         )}
@@ -71,7 +71,7 @@ export default function PetShowcaseCard({ pet }: PetShowcaseCardProps) {
         />
         {/* 분양 상태 배지 */}
         {pet.adoption?.status && (
-          <div className="absolute top-1.5 left-1.5">
+          <div className="absolute top-0 left-1">
             <AdoptionBadge status={pet.adoption.status} price={pet.adoption.price} />
           </div>
         )}

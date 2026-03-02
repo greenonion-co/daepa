@@ -4,12 +4,12 @@ import type { NextRequest } from 'next/server';
 export function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
-  // /@username → /showcase/username 리라이트
+  // /@username → /showroom/username 리라이트
   if (pathname.startsWith('/@')) {
     const username = pathname.slice(2);
     if (username) {
       const url = request.nextUrl.clone();
-      url.pathname = `/showcase/${username}`;
+      url.pathname = `/showroom/${username}`;
       const response = NextResponse.rewrite(url);
       response.headers.set('x-pathname', pathname);
       return response;
