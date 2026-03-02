@@ -8,7 +8,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "check-types": "tsc --noEmit"
+    "check-types": "tsc --noEmit",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:production": "playwright test --config playwright.production.config.ts"
   },
   "dependencies": {
     "@dagrejs/dagre": "^1.1.5",
@@ -77,6 +80,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@playwright/test": "^1.58.2",
     "@repo/eslint-config": "workspace:^",
     "@repo/typescript-config": "workspace:^",
     "@tailwindcss/postcss": "^4",
