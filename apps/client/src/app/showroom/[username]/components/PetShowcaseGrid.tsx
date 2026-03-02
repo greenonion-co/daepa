@@ -23,7 +23,7 @@ export default function PetShowcaseGrid({
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isFetching, isLoading } = useInfiniteQuery({
     queryKey: [
-      "showcase-pets",
+      "showroom-pets",
       userId,
       filters.sex,
       filters.status,
