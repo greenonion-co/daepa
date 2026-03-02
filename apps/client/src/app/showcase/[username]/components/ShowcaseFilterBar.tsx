@@ -38,6 +38,16 @@ export default function ShowcaseFilterBar({
   availableTraits,
   mobile,
 }: ShowcaseFilterBarProps) {
+  const hasActiveFilters =
+    filters.sex.length > 0 ||
+    filters.status.length > 0 ||
+    filters.morphs.length > 0 ||
+    filters.traits.length > 0;
+
+  const handleReset = () => {
+    onChange({ ...filters, sex: [], status: [], morphs: [], traits: [] });
+  };
+
   if (mobile) {
     return (
       <div className="flex flex-wrap gap-2">
@@ -75,13 +85,33 @@ export default function ShowcaseFilterBar({
             dropdownPosition="right"
           />
         )}
+        {hasActiveFilters && (
+          <button
+            type="button"
+            onClick={handleReset}
+            className="rounded-full px-2.5 py-1 text-xs text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200"
+          >
+            초기화
+          </button>
+        )}
       </div>
     );
   }
 
   return (
     <div className="flex flex-col divide-y divide-gray-200 dark:divide-gray-700">
-      <div className="p-2 text-center font-semibold text-gray-900 dark:text-gray-300">필터</div>
+      <div className="relative p-2 text-center font-semibold text-gray-900 dark:text-gray-300">
+        필터
+        {hasActiveFilters && (
+          <button
+            type="button"
+            onClick={handleReset}
+            className="absolute top-1/2 right-2 -translate-y-1/2 rounded px-1.5 py-0.5 text-xs font-normal text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200"
+          >
+            초기화
+          </button>
+        )}
+      </div>
 
       <div className="flex flex-col gap-1.5 p-4">
         <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400">성별</h3>
