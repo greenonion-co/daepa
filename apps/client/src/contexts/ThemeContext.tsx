@@ -17,21 +17,17 @@ interface ThemeProviderProps {
   children: React.ReactNode;
 }
 
-// 시스템 테마 가져오기
-const getSystemTheme = (): "light" | "dark" => {
-  if (typeof window === "undefined") return "light";
-  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-};
+// 시스템 테마 가져오기 — 다크모드 이슈 해결 후 복원
+// const getSystemTheme = (): "light" | "dark" => {
+//   if (typeof window === "undefined") return "light";
+//   return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+// };
 
 export function ThemeProvider({ children }: ThemeProviderProps) {
   const [theme, setTheme] = useState<Theme>("system");
   const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">("light");
   const [mounted, setMounted] = useState(false);
 
-  // 실제 적용할 테마 계산 — 다크모드 이슈 해결 전까지 라이트 고정
-  const computeResolvedTheme = (_t: Theme): "light" | "dark" => {
-    return "light";
-  };
 
   useEffect(() => {
     setMounted(true);
@@ -105,7 +101,7 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
 
   const handleSetTheme = (newTheme: Theme) => {
     setTheme(newTheme);
-    setResolvedTheme(computeResolvedTheme(newTheme));
+    setResolvedTheme("light");
     localStorage.setItem("theme", newTheme);
   };
 
