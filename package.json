@@ -9,7 +9,6 @@
     "check-types": "turbo run check-types",
     "generate": "pnpm --filter @repo/api-client generate",
     "generate:prod": "pnpm --filter @repo/api-client generate:prod",
-    "test:e2e": "turbo run test:e2e",
     "server-script": "pnpm --filter server script"
   },
   "devDependencies": {
