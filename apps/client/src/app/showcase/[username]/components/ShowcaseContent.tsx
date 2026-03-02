@@ -72,7 +72,7 @@ export default function ShowcaseContent({ profile }: ShowcaseContentProps) {
       >
         <div className="flex items-center gap-2">
           <span className="text-sm font-bold text-gray-900 dark:text-gray-100">
-            {profile.name}&#39;s SHOWCASE
+            {profile.name}&#39;s SHOWROOM
           </span>
           {profile.isBiz && (
             <span className="rounded-full bg-blue-100 px-1.5 py-0.5 text-[9px] font-medium text-blue-700 dark:bg-blue-900/50 dark:text-blue-300">
