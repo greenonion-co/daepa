@@ -67,7 +67,7 @@ export default function ShowcaseFilterBar({
             selected={filters.morphs}
             onChange={(morphs) => onChange({ ...filters, morphs })}
             variant="light"
-            dropdownPosition="right"
+            dropdownPosition="left"
           />
         )}
         {Object.keys(availableTraits).length > 0 && (
@@ -77,7 +77,7 @@ export default function ShowcaseFilterBar({
             selected={filters.traits}
             onChange={(traits) => onChange({ ...filters, traits })}
             variant="light"
-            dropdownPosition="right"
+            dropdownPosition="left"
           />
         )}
         <ShowcaseMultiSelect
@@ -86,6 +86,7 @@ export default function ShowcaseFilterBar({
           selected={filters.sex}
           onChange={(sex) => onChange({ ...filters, sex })}
           variant="light"
+          dropdownPosition="right"
         />
         <ShowcaseMultiSelect
           title="크기"
@@ -93,6 +94,7 @@ export default function ShowcaseFilterBar({
           selected={filters.growth}
           onChange={(growth) => onChange({ ...filters, growth })}
           variant="light"
+          dropdownPosition="right"
         />
         <ShowcaseMultiSelect
           title="분양상태"
@@ -100,6 +102,7 @@ export default function ShowcaseFilterBar({
           selected={filters.status}
           onChange={(status) => onChange({ ...filters, status })}
           variant="light"
+          dropdownPosition="right"
         />
         {hasActiveFilters && (
           <button
