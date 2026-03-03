@@ -90,7 +90,7 @@ export default function ImageViewer({
             "inset-0",
             // 900px 이상: Dialog 형태
             "min-[900px]:inset-auto min-[900px]:left-1/2 min-[900px]:top-1/2 min-[900px]:-translate-x-1/2 min-[900px]:-translate-y-1/2",
-            "min-[900px]:h-[80vh] min-[900px]:max-h-[800px] min-[900px]:w-[80vw] min-[900px]:max-w-[1200px]",
+            "min-[900px]:h-[80dvh] min-[900px]:max-h-[800px] min-[900px]:w-[80vw] min-[900px]:max-w-[1200px]",
             "min-[900px]:overflow-hidden min-[900px]:rounded-2xl",
           )}
           onPointerDownOutside={(e) => e.preventDefault()}

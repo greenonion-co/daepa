@@ -271,7 +271,7 @@ const MonthlyCalendar = memo(() => {
             ref={scrollAreaRef}
             className={cn(
               "relative mt-1 [&>[data-radix-scroll-area-viewport]]:overscroll-contain",
-              isMobile ? "min-h-0 flex-1" : "h-[calc(100vh-150px)]",
+              isMobile ? "min-h-0 flex-1" : "h-[calc(100dvh-150px)]",
             )}
           >
             {monthlyIsPending || todayIsFetching ? (

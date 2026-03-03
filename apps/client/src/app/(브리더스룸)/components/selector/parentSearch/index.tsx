@@ -108,7 +108,7 @@ const ParentSearchSelector = ({
       <DialogContent className="max-h-[90dvh] overflow-hidden rounded-3xl px-3 sm:max-w-[720px]">
         <DialogTitle className="sr-only">부모 개체 선택</DialogTitle>
 
-        <div className={cn("flex flex-col", step === 2 && "max-h-[calc(90vh-3rem)]")}>
+        <div className={cn("flex flex-col", step === 2 && "max-h-[calc(90dvh-3rem)]")}>
           <Header
             step={step}
             searchType={petListType}

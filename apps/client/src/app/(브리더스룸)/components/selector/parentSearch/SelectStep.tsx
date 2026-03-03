@@ -33,7 +33,7 @@ const SelectStep = ({
 
   if (isLoading || (isFetching && !petList?.length) || !user)
     return (
-      <div className="h-[calc(100vh-200px)]">
+      <div className="h-[calc(100dvh-200px)]">
         <div className="h-[200px]">
           <Loading />
         </div>
@@ -42,7 +42,7 @@ const SelectStep = ({
 
   if (petList.length === 0)
     return (
-      <div className="flex h-[calc(100vh-200px)] w-full flex-col items-center justify-center text-center text-sm text-gray-400 dark:text-gray-500">
+      <div className="flex h-[calc(100dvh-200px)] w-full flex-col items-center justify-center text-center text-sm text-gray-400 dark:text-gray-500">
         조회된 개체가 없습니다.
       </div>
     );
@@ -50,7 +50,7 @@ const SelectStep = ({
   return (
     <div className="h-full overflow-y-auto">
       <div>
-        <ScrollArea className="h-[calc(100vh-200px)]">
+        <ScrollArea className="h-[calc(100dvh-200px)]">
           <div className="mb-10 grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
             {pets
               ?.filter((pet) =>

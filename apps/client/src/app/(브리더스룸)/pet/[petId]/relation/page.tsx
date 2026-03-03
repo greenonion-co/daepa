@@ -150,7 +150,7 @@ function SiblingsPage({ params }: PetDetailPageProps) {
 
   if (isLoading) {
     return (
-      <div className="flex h-[calc(100vh-52px)]">
+      <div className="flex h-[calc(100dvh-52px)]">
         <Loading />
       </div>
     );
@@ -158,7 +158,7 @@ function SiblingsPage({ params }: PetDetailPageProps) {
 
   if (isError) {
     return (
-      <div className="flex h-[calc(100vh-52px)] flex-1 flex-col items-center justify-center gap-1">
+      <div className="flex h-[calc(100dvh-52px)] flex-1 flex-col items-center justify-center gap-1">
         <p className="text-[15px] font-medium text-gray-500 dark:text-gray-400">
           개체 정보를 불러오는 중 오류가 발생했습니다
         </p>

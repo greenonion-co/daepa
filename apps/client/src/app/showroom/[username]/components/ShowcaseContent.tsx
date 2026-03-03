@@ -7,10 +7,8 @@ import ShowcaseFilterBar, { type ShowcaseFilters } from "./ShowcaseFilterBar";
 import PetShowcaseGrid from "./PetShowcaseGrid";
 import ShowcaseMultiSelect from "./ShowcaseMultiSelect";
 import { MORPH_LIST_BY_SPECIES, TRAIT_LIST_BY_SPECIES } from "@/app/(브리더스룸)/constants";
-import { useIsLoggedIn } from "@/hooks/useAuth";
 import { Share2 } from "lucide-react";
 import { toast } from "@/lib/toast";
-import Link from "next/link";
 
 const SORT_DISPLAY: Record<string, string> = {
   DESC: "최신순",
@@ -22,7 +20,6 @@ interface ShowcaseContentProps {
 }
 
 export default function ShowcaseContent({ profile }: ShowcaseContentProps) {
-  const isLoggedIn = useIsLoggedIn();
   const [filters, setFilters] = useState<ShowcaseFilters>({
     sex: [],
     status: [],
@@ -94,11 +91,6 @@ export default function ShowcaseContent({ profile }: ShowcaseContentProps) {
         >
           <Share2 className="h-3.5 w-3.5" />
         </button>
-        {!isLoggedIn && (
-          <Link href="/sign-in" className="ml-auto px-3 py-1 text-xs font-medium text-blue-500">
-            로그인
-          </Link>
-        )}
       </div>
 
       <div ref={headerRef}>

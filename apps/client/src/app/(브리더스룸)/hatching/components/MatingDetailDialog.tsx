@@ -44,7 +44,11 @@ const MatingDetailDialog = ({
   initialLayingId,
 }: MatingDetailDialogProps) => {
   const isMobile = useIsMobile();
-  const isEditable = !matingGroup?.father?.isDeleted && !matingGroup?.mother?.isDeleted;
+  const isEditable =
+    !matingGroup?.father?.isDeleted &&
+    !matingGroup?.mother?.isDeleted &&
+    (matingGroup?.father?.isMine ?? true) &&
+    (matingGroup?.mother?.isMine ?? true);
   const { showTutorial, openTutorial, closeTutorial } = useMatingDetailDialogTutorial(isOpen);
   const dialogContentRef = useRef<HTMLDivElement>(null);
   // 메이팅 날짜들을 추출하여 Calendar용 날짜 배열 생성

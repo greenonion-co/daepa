@@ -21,7 +21,7 @@ const HatchingPage = () => {
         onValueChange={(v) => {
           const params = new URLSearchParams(Array.from(searchParams.entries()));
           params.set("tab", v);
-          router.replace(`${pathname}?${params.toString()}`);
+          router.push(`${pathname}?${params.toString()}`);
         }}
         className="flex flex-col"
       >

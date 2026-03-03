@@ -296,43 +296,51 @@ const PairList = memo(() => {
                   setInitialLayingId(eventData.layingId ?? null);
                 }
               }}
-              onAddMating={(date) => {
-                overlay.open(({ isOpen, close }) => (
-                  <AddMatingModal
-                    isOpen={isOpen}
-                    onClose={close}
-                    matingDate={date}
-                    latestSeason={(() => {
-                      const seasons = (pair.matingsByDate ?? [])
-                        .map((m) => m.season)
-                        .filter((s): s is number => s != null);
-                      return seasons.length > 0 ? Math.max(...seasons) : undefined;
-                    })()}
-                    onConfirm={async (matingDate, season) => {
-                      await handleAddPairClick({
-                        species: pair.father?.species,
-                        fatherId: pair.father?.petId,
-                        motherId: pair.mother?.petId,
-                        matingDate,
-                        season,
-                      });
-                    }}
-                  />
-                ));
-              }}
-              onAddLaying={(date) => {
-                overlay.open(({ isOpen, close }) => (
-                  <CreateLayingModal
-                    isOpen={isOpen}
-                    onClose={close}
-                    fatherId={pair.father?.petId}
-                    motherId={pair.mother?.petId}
-                    initialLayingDate={date}
-                    isLayingDateEditable={false}
-                    matingsByDate={pair.matingsByDate}
-                  />
-                ));
-              }}
+              onAddMating={
+                (pair.father?.isMine ?? true) && (pair.mother?.isMine ?? true)
+                  ? (date) => {
+                      overlay.open(({ isOpen, close }) => (
+                        <AddMatingModal
+                          isOpen={isOpen}
+                          onClose={close}
+                          matingDate={date}
+                          latestSeason={(() => {
+                            const seasons = (pair.matingsByDate ?? [])
+                              .map((m) => m.season)
+                              .filter((s): s is number => s != null);
+                            return seasons.length > 0 ? Math.max(...seasons) : undefined;
+                          })()}
+                          onConfirm={async (matingDate, season) => {
+                            await handleAddPairClick({
+                              species: pair.father?.species,
+                              fatherId: pair.father?.petId,
+                              motherId: pair.mother?.petId,
+                              matingDate,
+                              season,
+                            });
+                          }}
+                        />
+                      ));
+                    }
+                  : undefined
+              }
+              onAddLaying={
+                (pair.father?.isMine ?? true) && (pair.mother?.isMine ?? true)
+                  ? (date) => {
+                      overlay.open(({ isOpen, close }) => (
+                        <CreateLayingModal
+                          isOpen={isOpen}
+                          onClose={close}
+                          fatherId={pair.father?.petId}
+                          motherId={pair.mother?.petId}
+                          initialLayingDate={date}
+                          isLayingDateEditable={false}
+                          matingsByDate={pair.matingsByDate}
+                        />
+                      ));
+                    }
+                  : undefined
+              }
               onDelete={() => handleDeletePair(pair.pairId)}
               showTutorial={index === 0 && showTutorial}
               onCloseTutorial={closeTutorial}

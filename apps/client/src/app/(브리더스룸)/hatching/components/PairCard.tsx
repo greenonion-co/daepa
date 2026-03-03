@@ -153,6 +153,13 @@ const PairCard = ({
         />
       </div>
 
+      {/* 분양된 개체 포함 안내 */}
+      {(pair.father?.isMine === false || pair.mother?.isMine === false) && (
+        <p className="mt-1 text-center text-[11px] text-red-500">
+          분양된 개체가 포함되어 메이팅·산란 추가가 불가합니다.
+        </p>
+      )}
+
       {/* 요약 정보 */}
       <div
         data-tutorial={PAIR_CARD_TUTORIAL_TARGETS.SUMMARY_INFO}

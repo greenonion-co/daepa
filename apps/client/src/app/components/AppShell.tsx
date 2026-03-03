@@ -19,6 +19,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const isShowcase = pathname?.startsWith("/@") ?? false;
   const isFamilyTree = /\/pet\/[^/]+\/breeding-map/.test(pathname ?? "");
   const isIntroPage = pathname === "/intro";
+  const isSignIn = pathname?.startsWith("/sign-in") ?? false;
   const isMobile = useIsMobile();
 
   // 네이티브 앱에서 TopBar를 사용하는 경우 Menubar 숨김
@@ -37,14 +38,14 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <main
-      className={`relative mx-auto flex min-h-screen w-full ${isPetDetail ? "dark:bg-background bg-gray-100" : ""}`}
+      className={`relative mx-auto flex w-full ${isFamilyTree ? "h-dvh overflow-hidden" : "min-h-screen"} ${isPetDetail ? "dark:bg-background bg-gray-100" : ""}`}
     >
       <div className={cn("w-full", !isMobile && "max-w-[calc(100%_-_var(--right-sidebar-width))]")}>
-        {!hasNativeTopBar && (!isShowcase || user) && <Menubar unreadCount={unreadCount} />}
+        {!hasNativeTopBar && !isFamilyTree && (!isShowcase || user) && <Menubar unreadCount={unreadCount} />}
         <div className={cn(isNativeApp() && "pb-[80px]")}>{children}</div>
       </div>
       {/* 모바일 웹 */}
-      {!isNativeApp() && isMobile && !isFamilyTree && !isShowcase && <AddPetButton />}
+      {!isNativeApp() && isMobile && !isFamilyTree && !isShowcase && !isSignIn && <AddPetButton />}
       {/* 웹 */}
       {!isNativeApp() && !isMobile && <Sidebar unreadCount={unreadCount} />}
     </main>
