@@ -169,7 +169,7 @@ export function usePairActions({
     const mId = pairMotherId;
     overlay.open(({ isOpen, close }) => (
       <Dialog open={isOpen} onOpenChange={close}>
-        <DialogContent className="mt-[-10px] h-[90vh] max-h-[700px] max-w-xl overflow-y-auto rounded-2xl">
+        <DialogContent className="mt-[-10px] h-[90dvh] max-h-[700px] max-w-xl overflow-y-auto rounded-2xl">
           <VisuallyHidden>
             <DialogTitle>번식 이력</DialogTitle>
           </VisuallyHidden>

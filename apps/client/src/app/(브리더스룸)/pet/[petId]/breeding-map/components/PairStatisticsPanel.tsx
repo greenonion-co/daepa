@@ -46,11 +46,12 @@ function AddButtons({
 }) {
   if (!onAddMating && !onAddLaying) return null;
   return (
-    <div className="flex gap-1">
+    <div className="mx-auto flex gap-1">
       {onAddMating && (
         <CalendarSelect
           size="sm"
           triggerText="메이팅"
+          triggerTextClassName="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text font-semibold text-transparent dark:from-blue-400 dark:to-purple-400"
           confirmButtonText="추가"
           disabledDates={matingDates}
           showSeasonInput
@@ -100,7 +101,7 @@ export default function PairStatisticsPanel({
 
   if (!isOpposite) {
     return (
-      <div className="pointer-events-auto flex w-full flex-col gap-2 rounded-xl border border-gray-200 bg-white/70 p-3 shadow-lg backdrop-blur-sm md:w-52 dark:border-gray-700 dark:bg-gray-900/70">
+      <div className="pointer-events-auto flex w-full flex-col gap-2 rounded-xl border border-gray-200 bg-gradient-to-r from-blue-200/50 to-purple-200/65 p-3 shadow-lg backdrop-blur-sm md:w-52 dark:border-gray-700 dark:from-blue-900/40 dark:to-purple-900/50">
         <span className="text-[11px] font-medium text-gray-500 dark:text-gray-400">
           메이팅 정보
         </span>
@@ -113,7 +114,7 @@ export default function PairStatisticsPanel({
 
   if (isLoading) {
     return (
-      <div className="pointer-events-auto flex w-full flex-col items-center gap-2 rounded-xl border border-gray-200 bg-white/70 p-3 shadow-lg backdrop-blur-sm md:w-52 dark:border-gray-700 dark:bg-gray-900/70">
+      <div className="pointer-events-auto flex w-full flex-col items-center gap-2 rounded-xl border border-gray-200 bg-gradient-to-r from-blue-200/50 to-purple-200/65 p-3 shadow-lg backdrop-blur-sm md:w-52 dark:border-gray-700 dark:from-blue-900/40 dark:to-purple-900/50">
         <span className="self-start text-[11px] font-medium text-gray-500 dark:text-gray-400">
           메이팅 정보
         </span>
@@ -124,8 +125,8 @@ export default function PairStatisticsPanel({
 
   if (!hasPair || !statistics) {
     return (
-      <div className="pointer-events-auto flex w-full flex-col gap-2 rounded-xl border border-gray-200 bg-white/70 p-3 shadow-lg backdrop-blur-sm md:w-52 dark:border-gray-700 dark:bg-gray-900/70">
-        <div className="flex items-center justify-between">
+      <div className="pointer-events-auto flex w-full flex-col gap-2 rounded-xl border border-gray-200 bg-gradient-to-r from-blue-200/50 to-purple-200/65 p-3 shadow-lg backdrop-blur-sm md:w-52 dark:border-gray-700 dark:from-blue-900/40 dark:to-purple-900/50">
+        <div className="flex flex-wrap items-center justify-between gap-1">
           <span className="text-[11px] font-medium text-gray-500 dark:text-gray-400">
             메이팅 정보
           </span>
@@ -156,9 +157,9 @@ export default function PairStatisticsPanel({
   const { egg, totalMatings, totalLayings } = statistics;
 
   return (
-    <div className="pointer-events-auto flex w-full flex-col gap-2 rounded-xl border border-gray-200 bg-white/70 p-3 shadow-lg backdrop-blur-sm md:w-52 dark:border-gray-700 dark:bg-gray-900/70">
+    <div className="pointer-events-auto flex w-full flex-col gap-2 rounded-xl border border-gray-200 bg-gradient-to-r from-blue-200/50 to-purple-200/65 p-3 shadow-lg backdrop-blur-sm md:w-52 dark:border-gray-700 dark:from-blue-900/40 dark:to-purple-900/50">
       {/* 헤더 */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-1">
         <span className="text-[11px] font-medium text-gray-500 dark:text-gray-400">
           메이팅 정보
         </span>
@@ -251,7 +252,7 @@ function StatRow({
   highlight?: boolean;
 }) {
   return (
-    <div className="flex items-center justify-between">
+    <div className="flex flex-wrap items-center justify-between gap-1">
       <span className="text-[10px] text-gray-500 dark:text-gray-400">{label}</span>
       <span
         className={`text-[11px] font-medium tabular-nums ${

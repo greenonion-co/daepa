@@ -15,6 +15,8 @@ interface SingleSelectProps {
   showTitle?: boolean;
   showSelectAll?: boolean; // 전체 선택 항목 표시
   variant?: "default" | "light" | "form";
+  /** 선택된 값이 있으면 타이틀 숨김 (값만 표시) */
+  hideTitleOnSelect?: boolean;
   /** 데스크탑에서도 화면 중앙 모달로 표시 */
   forceCenter?: boolean;
 }
@@ -27,6 +29,7 @@ const SingleSelect = ({
   showTitle = false,
   showSelectAll = false,
   variant = "default",
+  hideTitleOnSelect = false,
   forceCenter,
 }: SingleSelectProps) => {
   const isLight = variant === "light";
@@ -133,8 +136,8 @@ const SingleSelect = ({
         ) : (
           <>
             <div>
-              {showTitle && SELECTOR_CONFIGS[type].title}
-              {showTitle && initialItem && "・"}
+              {showTitle && !(hideTitleOnSelect && initialItem) && SELECTOR_CONFIGS[type].title}
+              {showTitle && !(hideTitleOnSelect && initialItem) && initialItem && "・"}
               {initialItem &&
                 `${SELECTOR_CONFIGS[type].selectList.find((item) => item.key === initialItem)?.value}`}
             </div>

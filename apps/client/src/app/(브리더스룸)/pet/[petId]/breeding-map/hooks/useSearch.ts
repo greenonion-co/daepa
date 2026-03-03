@@ -13,9 +13,10 @@ interface UseSearchParams {
     nodes: FamilyTreeResponse["nodes"],
     centerPairPartnerIds: string[],
   ) => void;
+  addExternalTreeRoot: (petId: string) => void;
 }
 
-export function useSearch({ nodesMap, nodeKey, queryClient, mergeTree }: UseSearchParams) {
+export function useSearch({ nodesMap, nodeKey, queryClient, mergeTree, addExternalTreeRoot }: UseSearchParams) {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchFocused, setSearchFocused] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
@@ -84,6 +85,7 @@ export function useSearch({ nodesMap, nodeKey, queryClient, mergeTree }: UseSear
         });
         const data = response.data;
         mergeTree(targetPetId, data.nodes, data.centerPairPartnerIds ?? []);
+        addExternalTreeRoot(targetPetId);
         setSearchQuery("");
         setTimeout(() => setFocusNodeId(targetPetId), 1500);
       } catch {
@@ -92,7 +94,7 @@ export function useSearch({ nodesMap, nodeKey, queryClient, mergeTree }: UseSear
         setAddingPetId(null);
       }
     },
-    [queryClient, mergeTree],
+    [queryClient, mergeTree, addExternalTreeRoot],
   );
 
   const handleFocusAncestor = useCallback(

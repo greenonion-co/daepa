@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { memo, useState } from "react";
 import type { GraphNode } from "../lib/types";
 import { getSexDotColor } from "../lib/force-graph-utils";
 import {
@@ -43,8 +43,9 @@ function GraphNodeElementInner({
   onClick,
   onContextMenu,
 }: GraphNodeElementProps) {
+  const [imageError, setImageError] = useState(false);
   const fontSize = Math.max(BASE_FONT_SIZE, r * 0.5);
-  const hasImage = !!node.imageUrl;
+  const hasImage = !!node.imageUrl && !imageError;
   const sexDotColor = getSexDotColor(node.sex);
   const labelY = y + r + fontSize + 2;
   const dotRadius = fontSize * 0.3;
@@ -89,6 +90,7 @@ function GraphNodeElementInner({
             height={r * 2}
             clipPath={`url(#clip-${node.id})`}
             preserveAspectRatio="xMidYMid slice"
+            onError={() => setImageError(true)}
           />
           <circle
             r={r}

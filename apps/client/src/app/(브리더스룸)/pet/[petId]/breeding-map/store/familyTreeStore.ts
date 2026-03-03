@@ -12,6 +12,8 @@ interface FamilyTreeStore {
   edgesMap: Map<string, FamilyEdge>;
   /** 확장 fetch가 완료된 노드 ID 집합 */
   expandedNodeIds: Set<string>;
+  /** 검색으로 추가된 외부 트리의 루트 petId 목록 */
+  externalTreeRootIds: string[];
 
   // Actions
   setFamilyTree: (petId: string, nodes: FamilyTreeApiNodeOrHidden[], centerPairPartnerIds: string[]) => void;
@@ -19,6 +21,8 @@ interface FamilyTreeStore {
   updateNodePet: (petId: string, pet: PetDto) => void;
   addPairEdge: (petIdA: string, petIdB: string) => void;
   removePairEdge: (petIdA: string, petIdB: string) => void;
+  addExternalTreeRoot: (petId: string) => void;
+  removeExternalTreeRoot: (petId: string) => void;
 
   // Selectors
   getGenerationMap: () => Map<string, number>;
@@ -99,6 +103,7 @@ export const useFamilyTreeStore = create<FamilyTreeStore>((set, get) => ({
   nodesMap: new Map(),
   edgesMap: new Map(),
   expandedNodeIds: new Set(),
+  externalTreeRootIds: [],
 
   setFamilyTree: (petId, nodes, centerPairPartnerIds) => {
     const nodesMap = new Map<string, FamilyTreeNodeData>();
@@ -137,7 +142,7 @@ export const useFamilyTreeStore = create<FamilyTreeStore>((set, get) => ({
       }
     }
 
-    set({ centerPetId: petId, nodesMap, edgesMap, expandedNodeIds: new Set() });
+    set({ centerPetId: petId, nodesMap, edgesMap, expandedNodeIds: new Set(), externalTreeRootIds: [] });
   },
 
   mergeTree: (petId, nodes, centerPairPartnerIds) => {
@@ -234,6 +239,17 @@ export const useFamilyTreeStore = create<FamilyTreeStore>((set, get) => ({
     const newNodes = new Map(nodesMap);
     newNodes.set(petId, { ...node, pet: toPetData(pet) });
     set({ nodesMap: newNodes });
+  },
+
+  addExternalTreeRoot: (petId) => {
+    const { externalTreeRootIds } = get();
+    if (externalTreeRootIds.includes(petId)) return;
+    set({ externalTreeRootIds: [...externalTreeRootIds, petId] });
+  },
+
+  removeExternalTreeRoot: (petId) => {
+    const { externalTreeRootIds } = get();
+    set({ externalTreeRootIds: externalTreeRootIds.filter((id) => id !== petId) });
   },
 
   getGenerationMap: () => {
