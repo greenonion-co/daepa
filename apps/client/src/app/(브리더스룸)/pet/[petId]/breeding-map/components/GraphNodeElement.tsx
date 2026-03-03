@@ -90,6 +90,7 @@ function GraphNodeElementInner({
             height={r * 2}
             clipPath={`url(#clip-${node.id})`}
             preserveAspectRatio="xMidYMid slice"
+            // eslint-disable-next-line react/no-unknown-property
             onError={() => setImageError(true)}
           />
           <circle
