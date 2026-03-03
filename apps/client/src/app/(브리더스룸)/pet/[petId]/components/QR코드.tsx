@@ -293,10 +293,7 @@ const QRCode = ({ pet, isScrolled }: QRCodeProps) => {
                   src={previewDataUrl}
                   alt="QR Code Preview"
                   className="rounded-lg border border-gray-300 dark:border-neutral-600"
-                  style={{
-                    width: `${customWidth * (96 / 2.54)}px`,
-                    height: `${customHeight * (96 / 2.54)}px`,
-                  }}
+                  style={{ height: `${customHeight * (96 / 2.54)}px` }}
                 />
               ) : (
                 <div className="flex h-[200px] w-[200px] items-center justify-center text-sm text-gray-500">
@@ -340,9 +337,11 @@ const QRCode = ({ pet, isScrolled }: QRCodeProps) => {
                         step={0.1}
                         value={customWidth}
                         onChange={(e) => {
-                          setCustomWidth(Math.min(Number(e.target.value) || 1, 10));
+                          const v = Number(e.target.value);
+                          if (!isNaN(v)) setCustomWidth(Math.max(1, Math.min(v, 10)));
                           setSelectedPreset(null);
                         }}
+                        onBlur={() => setCustomWidth((prev) => Math.max(1, Math.min(prev, 10)))}
                         className="w-16 rounded-md border border-gray-300 px-2 py-1 text-center dark:border-neutral-600 dark:bg-neutral-700 dark:text-gray-200"
                       />
                       cm
@@ -357,9 +356,11 @@ const QRCode = ({ pet, isScrolled }: QRCodeProps) => {
                         step={0.1}
                         value={customHeight}
                         onChange={(e) => {
-                          setCustomHeight(Math.min(Number(e.target.value) || 1, 5));
+                          const v = Number(e.target.value);
+                          if (!isNaN(v)) setCustomHeight(Math.max(1, Math.min(v, 5)));
                           setSelectedPreset(null);
                         }}
+                        onBlur={() => setCustomHeight((prev) => Math.max(1, Math.min(prev, 5)))}
                         className="w-16 rounded-md border border-gray-300 px-2 py-1 text-center dark:border-neutral-600 dark:bg-neutral-700 dark:text-gray-200"
                       />
                       cm
