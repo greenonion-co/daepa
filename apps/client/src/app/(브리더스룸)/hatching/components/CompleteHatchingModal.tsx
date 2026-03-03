@@ -153,6 +153,7 @@ const CompleteHatchingModal = ({
               <Textarea
                 id="desc"
                 placeholder="메모를 입력하세요"
+                maxLength={100}
                 value={formData.desc}
                 onChange={(e) => setFormData((prev) => ({ ...prev, desc: e.target.value }))}
               />
