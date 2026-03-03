@@ -3915,6 +3915,7 @@ export const getPairControllerGetPairListResponseMock = (
             faker.number.int({ min: undefined, max: undefined }),
             undefined,
           ]),
+          isMine: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
           layingId: faker.helpers.arrayElement([
             faker.number.int({ min: undefined, max: undefined }),
             undefined,
@@ -3976,6 +3977,7 @@ export const getPairControllerGetPairListResponseMock = (
             faker.number.int({ min: undefined, max: undefined }),
             undefined,
           ]),
+          isMine: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
           layingId: faker.helpers.arrayElement([
             faker.number.int({ min: undefined, max: undefined }),
             undefined,
@@ -4049,6 +4051,7 @@ export const getPairControllerGetPairListResponseMock = (
               faker.number.int({ min: undefined, max: undefined }),
               undefined,
             ]),
+            isMine: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
             layingId: faker.helpers.arrayElement([
               faker.number.int({ min: undefined, max: undefined }),
               undefined,

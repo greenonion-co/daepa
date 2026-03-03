@@ -430,6 +430,15 @@ export class PetSummaryLayingDto extends PickType(PetSummaryDto, [
   declare isDeleted?: boolean;
 
   @ApiProperty({
+    description: '내 개체 여부 (분양 완료 등으로 소유권이 이전되면 false)',
+    example: true,
+    required: false,
+  })
+  @IsOptional()
+  @IsBoolean()
+  isMine?: boolean;
+
+  @ApiProperty({
     description: '산란 아이디',
     example: 1,
     required: false,
