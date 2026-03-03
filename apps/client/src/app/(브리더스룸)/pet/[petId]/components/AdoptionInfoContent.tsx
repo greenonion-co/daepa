@@ -477,7 +477,7 @@ const AdoptionInfoContent = ({
                 !isViewingMyPet && "border-none",
               )}
               value={String(adoptionData.memo || "")}
-              maxLength={500}
+              maxLength={100}
               placeholder={isViewingMyPet ? "메모를 입력하세요" : "-"}
               onChange={(e) =>
                 setAdoptionData((prev) => ({
@@ -490,7 +490,7 @@ const AdoptionInfoContent = ({
             />
             {isViewingMyPet && (
               <div className="mt-1 text-right text-xs text-gray-400">
-                {adoptionData.memo?.length ?? 0}/500
+                {adoptionData.memo?.length ?? 0}/100
               </div>
             )}
           </div>

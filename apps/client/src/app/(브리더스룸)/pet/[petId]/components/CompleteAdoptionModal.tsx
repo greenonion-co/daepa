@@ -179,13 +179,13 @@ const CompleteAdoptionModal = ({
               <div className="w-full">
                 <textarea
                   value={memo}
-                  maxLength={500}
+                  maxLength={100}
                   placeholder="메모를 입력하세요"
                   onChange={(e) => setMemo(e.target.value)}
                   className="min-h-[80px] w-full resize-none rounded-md border border-gray-200 p-2 text-sm font-[500] placeholder:font-[500] dark:border-gray-700 dark:bg-transparent"
                 />
                 <div className="mt-1 text-right text-xs text-gray-400">
-                  {memo.length}/500
+                  {memo.length}/100
                 </div>
               </div>
             }

@@ -239,7 +239,7 @@ function FeedingModal({
               value={feedingMemo}
               onChange={(e) => setFeedingMemo(e.target.value)}
               placeholder="메모를 입력하세요"
-              maxLength={500}
+              maxLength={100}
               rows={2}
               className="min-h-[60px] resize-none rounded-md border border-gray-200 p-2 text-sm font-[500] placeholder:font-[500] focus:outline-none dark:border-gray-700 dark:bg-transparent dark:text-gray-200"
             />

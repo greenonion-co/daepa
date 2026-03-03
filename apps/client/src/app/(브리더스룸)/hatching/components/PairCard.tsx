@@ -190,13 +190,13 @@ const PairCard = ({
                 ref={textareaRef}
                 value={editDesc}
                 onChange={(e) => setEditDesc(e.target.value)}
-                maxLength={500}
+                maxLength={100}
                 rows={3}
                 className="w-full resize-none rounded-lg px-2 py-1.5 text-sm focus:ring-0 focus:outline-none dark:text-gray-100"
                 placeholder="메모를 입력하세요"
               />
               <div className="flex items-center justify-between">
-                <span className="text-[11px] text-gray-400">{editDesc.length}/500</span>
+                <span className="text-[11px] text-gray-400">{editDesc.length}/100</span>
                 <div className="flex gap-1.5">
                   <button
                     type="button"
