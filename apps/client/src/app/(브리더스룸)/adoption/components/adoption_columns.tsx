@@ -120,6 +120,7 @@ export const columns: ColumnDef<AdoptionHistoryDto>[] = [
 
       return (
         <span
+          onClick={(e) => e.stopPropagation()}
           onMouseEnter={() => setPreview?.(father.petId)}
           onMouseLeave={() => setPreview?.(null)}
         >
@@ -139,6 +140,7 @@ export const columns: ColumnDef<AdoptionHistoryDto>[] = [
 
       return (
         <span
+          onClick={(e) => e.stopPropagation()}
           onMouseEnter={() => setPreview?.(mother.petId)}
           onMouseLeave={() => setPreview?.(null)}
         >
