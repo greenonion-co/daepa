@@ -59,13 +59,7 @@ export default function FamilyTreePage({ params }: FamilyTreePageProps) {
       <div className="flex items-center gap-2 border-b border-gray-200 bg-white px-3 py-2 dark:border-gray-700 dark:bg-gray-900">
         <button
           type="button"
-          onClick={() => {
-            if (window.history.length > 1) {
-              router.back();
-            } else {
-              router.push("/");
-            }
-          }}
+          onClick={() => router.back()}
           className="flex items-center gap-1 rounded-lg px-2 py-1 text-sm text-gray-600 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
         >
           <ArrowLeft className="h-4 w-4" />

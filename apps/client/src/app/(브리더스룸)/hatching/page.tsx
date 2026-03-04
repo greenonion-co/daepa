@@ -1,27 +1,38 @@
 "use client";
 
+import { useState } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import PairList from "./components/PairList";
 import MonthlyCalendar from "./components/MonthlyCalendar";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useAppRouter } from "@/hooks/useAppRouter";
 import PairStatisticsDashboard from "./components/PairStatisticsDashboard";
+import { isNativeApp } from "@/lib/native-bridge";
 
 const HatchingPage = () => {
   const router = useAppRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const isNative = isNativeApp();
+
   const current = searchParams.get("tab") ?? "pair";
-  const value = ["pair", "range", "dashboard"].includes(current) ? current : "pair";
+  const urlTab = ["pair", "range", "dashboard"].includes(current) ? current : "pair";
+
+  const [localTab, setLocalTab] = useState(urlTab);
+  const value = isNative ? localTab : urlTab;
 
   return (
     <div>
       <Tabs
         value={value}
         onValueChange={(v) => {
-          const params = new URLSearchParams(Array.from(searchParams.entries()));
-          params.set("tab", v);
-          router.push(`${pathname}?${params.toString()}`);
+          if (isNative) {
+            setLocalTab(v);
+          } else {
+            const params = new URLSearchParams(Array.from(searchParams.entries()));
+            params.set("tab", v);
+            router.push(`${pathname}?${params.toString()}`);
+          }
         }}
         className="flex flex-col"
       >

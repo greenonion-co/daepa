@@ -3,6 +3,7 @@
 import { ReactNode, RefObject, useEffect, useRef, useState } from "react";
 import { PetDto } from "@repo/api-client";
 import { useIsMyPet } from "@/hooks/useIsMyPet";
+import { isNativeApp, requestSetPullToRefresh } from "@/lib/native-bridge";
 import Header from "./Header";
 import { useIsMobile } from "@/hooks/useMobile";
 import { cn } from "@/lib/utils";
@@ -45,6 +46,15 @@ export default function PetDetailLayout({
   const imagesRef = useRef<HTMLDivElement>(null);
   const pedigreeRef = useRef<HTMLDivElement>(null);
   const feedingRef = useRef<HTMLDivElement>(null);
+
+  // 네이티브 웹뷰: 펫 상세에서 pull-to-refresh 비활성화
+  useEffect(() => {
+    if (!isNativeApp()) return;
+    requestSetPullToRefresh(false);
+    return () => {
+      requestSetPullToRefresh(true);
+    };
+  }, []);
 
   useEffect(() => {
     const scrollContainer = variant === "modal" ? scrollContainerRef.current : null;

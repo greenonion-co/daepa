@@ -3,12 +3,14 @@ import { MapPin, Phone, Share2 } from "lucide-react";
 import { toast } from "@/lib/toast";
 import { useIsLoggedIn } from "@/hooks/useAuth";
 import Link from "next/link";
+import { isNativeApp } from "@/lib/native-bridge";
 
 interface BreederHeaderProps {
   profile: BreederPublicProfile;
 }
 
 export default function BreederHeader({ profile }: BreederHeaderProps) {
+  const isNative = isNativeApp();
   const isLoggedIn = useIsLoggedIn();
 
   const handleShare = () => {
@@ -43,7 +45,7 @@ export default function BreederHeader({ profile }: BreederHeaderProps) {
             >
               <Share2 className="h-4 w-4" />
             </button>
-            {!isLoggedIn && (
+            {!isNative && !isLoggedIn && (
               <Link
                 href="/sign-in"
                 className="shrink-0 rounded-lg border border-blue-200 px-3 py-1 text-xs font-medium text-blue-500 hover:bg-blue-50 dark:border-blue-800 dark:hover:bg-blue-900/30"
