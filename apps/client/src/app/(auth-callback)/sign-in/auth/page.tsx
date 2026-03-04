@@ -3,7 +3,11 @@
 import LoadingScreen from "@/app/loading";
 import { tokenStorage } from "@/lib/tokenStorage";
 import { useUserStore } from "@/app/(브리더스룸)/store/user";
-import { UserDtoStatus, authControllerGetToken } from "@repo/api-client";
+import {
+  UserDtoStatus,
+  authControllerGetToken,
+  AXIOS_INSTANCE,
+} from "@repo/api-client";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
 import { useAppRouter } from "@/hooks/useAppRouter";
@@ -14,13 +18,22 @@ const AuthPage = () => {
   const router = useAppRouter();
   const searchParams = useSearchParams();
   const userStatus = searchParams.get("status");
+  const authCode = searchParams.get("code");
 
   const onLoginSuccess = useUserStore((state) => state.onLoginSuccess);
   const isProcessed = useRef(false);
 
   const { data } = useQuery({
-    queryKey: [authControllerGetToken.name],
-    queryFn: () => authControllerGetToken(),
+    queryKey: ["authGetToken", authCode],
+    queryFn: () => {
+      // auth code가 있으면 토큰 교환, 없으면 cookie 기반 refresh
+      if (authCode) {
+        return AXIOS_INSTANCE.get<{ token: string }>("/api/auth/token", {
+          params: { code: authCode },
+        });
+      }
+      return authControllerGetToken();
+    },
     select: (response) => response.data,
   });
 
