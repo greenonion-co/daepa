@@ -1,7 +1,6 @@
 import React from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { StyleSheet, View, Text, Image, useColorScheme } from 'react-native';
-import LinearGradient from 'react-native-linear-gradient';
+import { StyleSheet, View, Text, useColorScheme } from 'react-native';
 import KakaoLoginButton from '../Settings/KakaoLoginButton';
 import AppleLoginButton from '../Settings/AppleLoginButton';
 import GoogleLoginButton from '../Settings/GoogleLoginButton';
@@ -10,23 +9,17 @@ const LoginScreen = () => {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
 
-  const gradientColors = isDark
-    ? ['#18171C', '#18171C']
-    : ['#e5cf94', '#ffffff'];
-
   return (
-    <LinearGradient colors={gradientColors} style={styles.gradient}>
+    <View style={[styles.background, isDark && styles.backgroundDark]}>
       <SafeAreaView style={styles.container}>
         <View style={styles.content}>
           {/* 메인 카드 */}
           <View style={styles.card}>
             {/* 로고 이미지 */}
             <View style={styles.logoContainer}>
-              <Image
-                source={require('@/assets/images/lizard.png')}
-                style={styles.logo}
-                resizeMode="contain"
-              />
+              <Text style={[styles.logoText, isDark && styles.logoTextDark]}>
+                B.
+              </Text>
             </View>
 
             {/* 로그인 버튼들 */}
@@ -43,13 +36,17 @@ const LoginScreen = () => {
           </Text>
         </View>
       </SafeAreaView>
-    </LinearGradient>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  gradient: {
+  background: {
     flex: 1,
+    backgroundColor: '#ffffff',
+  },
+  backgroundDark: {
+    backgroundColor: '#18171C',
   },
   container: {
     flex: 1,
@@ -60,13 +57,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20,
   },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: 'rgba(31, 41, 55, 0.9)',
-    marginBottom: 10,
-    textAlign: 'center',
-  },
   card: {
     width: '100%',
     maxWidth: 400,
@@ -74,11 +64,15 @@ const styles = StyleSheet.create({
   },
   logoContainer: {
     alignItems: 'center',
-    paddingBottom: 40,
+    paddingBottom: 50,
   },
-  logo: {
-    width: 200,
-    height: 200,
+  logoText: {
+    fontSize: 64,
+    fontWeight: 'bold',
+    color: '#1f2937',
+  },
+  logoTextDark: {
+    color: '#f3f4f6',
   },
   buttonContainer: {
     gap: 8,
