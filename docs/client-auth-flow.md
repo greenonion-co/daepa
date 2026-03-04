@@ -31,10 +31,11 @@ interface UserActions {
 
 ## 2. 토큰 저장 위치
 
-| 토큰 | 저장 위치 | 접근 가능 |
-|------|----------|----------|
-| accessToken | localStorage | 클라이언트 JS만 |
-| refreshToken | HttpOnly 쿠키 | 서버만 (XSS 방어) |
+| 토큰 | 저장 위치 | 접근 가능 | 만료 시간 | 설정 위치 |
+|------|----------|----------|----------|----------|
+| accessToken | localStorage | 클라이언트 JS만 | 1시간 | `apps/server/src/app.module.ts` → `JwtModule.register({ signOptions: { expiresIn: '1h' } })` |
+| refreshToken | HttpOnly 쿠키 | 서버만 (XSS 방어) | 180일 | `AuthService.createJwtRefreshToken()` → `{ expiresIn: '180d' }` |
+| auth code | URL 파라미터 (일회성) | 클라이언트 JS | 30초 | `AuthService.createAuthCode()` → `{ expiresIn: '30s' }` |
 
 **왜 accessToken을 쿠키에 저장하지 않나요?**
 - 보안: 쿠키 노출 최소화
@@ -117,7 +118,7 @@ const user = useUser();              // state.user 추상화
 **참고:**
 - redirect URL에는 단기 auth code만 포함 (refresh token 직접 노출 방지)
 - auth code가 없는 경우 (기존 쿠키 기반) fallback으로 `authControllerGetToken()` 호출
-- `/sign-in/auth` 페이지는 `(auth-callback)` 라우트 그룹에 위치하여 `(user)` 레이아웃의 리다이렉트 로직 영향을 받지 않음
+- `/sign-in/auth` 페이지는 `(auth-callback)` 라우트 그룹에 위치
 
 **관련 파일:**
 
@@ -153,7 +154,47 @@ useEffect(() => {
 
 ---
 
-## 5. 서버 컴포넌트 인증
+## 5. 라우트 보호
+
+### 인증 필요 경로 보호 (서버 사이드)
+
+**파일: `apps/client/src/app/(브리더스룸)/layout.tsx`**
+
+```typescript
+const PUBLIC_PATHS = [
+  /^\/pet\/[^/]+$/, // /pet/[petId] (펫 상세 페이지)
+];
+
+export default async function BrLayout({ children }) {
+  const cookieStore = await cookies();
+  const refreshToken = cookieStore.get("refreshToken");
+  const pathname = headersList.get("x-pathname") || "";
+
+  // 공개 경로는 인증 체크 스킵
+  if (isPublicPath(pathname)) return <>{children}</>;
+
+  // 비공개 경로는 refreshToken 존재 여부로 인증 체크
+  if (!refreshToken?.value) redirect("/sign-in");
+
+  return <>{children}</>;
+}
+```
+
+### 로그인 페이지 (/sign-in)
+
+**파일: `apps/client/src/app/(user)/sign-in/page.tsx`**
+
+- 서버 사이드 보호 없음 — 누구나 접근 가능
+- 마운트 시 `tokenStorage.removeToken()`으로 stale accessToken 정리
+- sign-in 페이지에 도달하는 주요 경로:
+  1. 브리더스룸 layout에서 refreshToken 없음 → `/sign-in` 리다이렉트
+  2. axios 인터셉터에서 토큰 갱신 실패 → `/sign-in` 리다이렉트
+  3. 사용자가 직접 URL 접근
+- 모든 경우에 stale accessToken을 정리하고 로그인 폼 표시
+
+**accessToken이 있지만 refreshToken이 없는 사용자가 /sign-in에 도달하는 경우:**
+- accessToken이 유효하더라도 refreshToken이 없으면 세션 갱신 불가 → 사실상 만료된 상태
+- stale accessToken을 정리하고 재로그인 유도가 적절
 
 ### SSR에서 인증된 API 요청
 
@@ -167,19 +208,17 @@ export const getServerRequestHeaders = cache(async () => {
   const cookieStore = await cookies();
   const refreshToken = cookieStore.get("refreshToken")?.value;
 
-  if (!refreshToken) {
-    return {};
-  }
+  if (!refreshToken) return {};
 
   // refreshToken으로 accessToken 획득
-  const response = await fetch(`${BASE_URL}/api/v1/auth/token`, {
+  const response = await fetch(`${BASE_URL}/api/auth/token`, {
     headers: { Cookie: `refreshToken=${refreshToken}` },
     cache: "no-store",
   });
 
   if (response.ok) {
     const data = await response.json();
-    return { Authorization: `Bearer ${data.data.token}` };
+    return { Authorization: `Bearer ${data.token}` };
   }
 
   return {};
@@ -190,24 +229,6 @@ export const getServerRequestHeaders = cache(async () => {
 - `cache()`로 감싸서 같은 렌더링 사이클 내 중복 요청 방지
 - refreshToken 쿠키로 accessToken 획득 후 Authorization 헤더 반환
 - 서버 측에서 동일 유저의 동시 refresh 요청을 in-memory deduplication으로 처리하여 SSR/CSR 간 rotation race condition 방지
-
-### 게스트 전용 페이지 보호
-
-**파일: `apps/client/src/app/(user)/layout.tsx`**
-
-```typescript
-export default async function UserLayout({ children }) {
-  const cookieStore = await cookies();
-  const refreshToken = cookieStore.get("refreshToken");
-
-  // refreshToken 존재 = 로그인 상태로 간주
-  if (refreshToken?.value) {
-    redirect("/");
-  }
-
-  return <>{children}</>;
-}
-```
 
 ---
 
@@ -251,12 +272,17 @@ export default async function UserLayout({ children }) {
 
 ```
 [API 401 에러 + ACCESS_TOKEN_INVALID]
-    ↓ refreshToken 쿠키로 토큰 갱신 시도
+    ↓ refreshToken 쿠키로 토큰 갱신 시도 (authControllerGetToken)
     ↓ 성공: 새 accessToken으로 원래 요청 재시도
     ↓ 실패:
         ↓ tokenProvider.removeToken()
         ↓ WebView: TOKEN_REFRESH_FAILED 메시지 → Native
         ↓ Web: /sign-in으로 리다이렉트 (/sign-in/* 경로는 제외)
+
+[API 401 에러 + 기타 (ACCESS_TOKEN_INVALID가 아닌 경우)]
+    ↓ tokenProvider.removeToken()
+    ↓ WebView: TOKEN_REFRESH_FAILED 메시지 → Native
+    ↓ Web: /sign-in으로 리다이렉트 (/sign-in/* 경로는 제외)
 ```
 
 **참고:** 무한 리다이렉트 방지를 위해 `/sign-in/*` 경로에서는 리다이렉트하지 않음
@@ -327,8 +353,9 @@ export default async function UserLayout({ children }) {
 | `apps/client/src/lib/server/auth.ts`               | SSR용 인증 헤더 생성 (refreshToken → accessToken) |
 | `apps/client/src/providers/AuthProvider.tsx`       | 앱 시작 시 인증 초기화                  |
 | `apps/client/src/lib/native-bridge.ts`             | Native ↔ WebView 통신                   |
-| `apps/client/src/app/(user)/layout.tsx`            | 게스트 전용 페이지 보호                 |
+| `apps/client/src/app/(user)/sign-in/page.tsx`      | 로그인 페이지 (stale 토큰 정리 + 로그인 폼) |
 | `apps/client/src/app/(auth-callback)/sign-in/auth/page.tsx` | OAuth 콜백 처리           |
+| `apps/client/src/app/(브리더스룸)/layout.tsx`      | 인증 필요 경로 보호 (refreshToken 체크) |
 
 ---
 
@@ -363,7 +390,7 @@ export default async function UserLayout({ children }) {
 4. **무한루프 방지**: `/sign-in/*` 경로에서는 로그인 리다이렉트 제외
 5. **SSR 인증 분리**: 서버 컴포넌트는 refreshToken으로 별도 인증
 6. **Auth code 패턴**: OAuth redirect URL에 refresh token 대신 30초 유효 auth code 사용하여 URL 노출 방지
-7. **사용자 상태 검증**: token refresh 시 ACTIVE 상태가 아닌 사용자(SUSPENDED/INACTIVE) 차단
+7. **사용자 상태 검증**: token refresh 시 ACTIVE 상태가 아닌 사용자 차단
 8. **토큰 만료 정합성**: JWT 만료(180일)와 DB `refreshTokenExpiresAt`(180일) 동일하게 유지
 
 ### 토큰 갱신 큐
@@ -377,3 +404,62 @@ export default async function UserLayout({ children }) {
 
 - **Rotation race condition 방지**: 동일 유저의 동시 refresh 요청을 in-memory deduplication으로 하나만 실행
 - **Sign-out 접근성**: `@Public()` 데코레이터로 access token 만료 상태에서도 로그아웃 가능
+
+---
+
+## 11. 비상 조치: 사용자 세션 강제 무효화
+
+### 관리자가 특정 사용자를 강제 로그아웃
+
+DB에서 해당 사용자의 refreshToken을 무효화하면, 다음 accessToken 만료 시 자동으로 로그아웃됩니다.
+
+**서버 메서드: `AuthService.invalidateRefreshToken()`**
+
+```typescript
+// apps/server/src/auth/auth.service.ts
+async invalidateRefreshToken(refreshToken: string): Promise<void> {
+  const tokenPayload = this.jwtService.verify<JwtPayload>(refreshToken, {
+    secret: process.env.JWT_REFRESH_SECRET ?? '',
+  });
+  await this.userService.update(tokenPayload.sub, {
+    refreshToken: null,
+    refreshTokenExpiresAt: null,
+  });
+}
+```
+
+**또는 DB 직접 조작:**
+
+```sql
+UPDATE user SET refresh_token = NULL, refresh_token_expires_at = NULL WHERE user_id = '대상_사용자_ID';
+```
+
+**동작 흐름:**
+
+```
+[관리자: DB에서 refreshToken 무효화]
+    ↓
+[사용자: accessToken 만료 전까지 정상 이용]
+    ↓ accessToken 만료
+    ↓ axios 인터셉터: refreshToken으로 갱신 시도
+    ↓ 서버: bcrypt.compare(refreshToken, null) → 실패
+    ↓ 401 응답 → 인터셉터가 tokenProvider.removeToken() + /sign-in 리다이렉트
+    ↓
+[사용자: 강제 로그아웃 완료]
+```
+
+### 한계
+
+- **즉시 차단 불가**: accessToken 만료(1시간)까지 기존 요청은 정상 처리됨
+- 즉시 차단이 필요하면 accessToken 블랙리스트(Redis 등) 또는 매 요청 DB 체크가 필요
+
+### 사용자 상태 변경을 통한 차단
+
+`user.status`를 `ACTIVE`가 아닌 상태로 변경하면 token refresh 시 차단됩니다.
+
+```sql
+UPDATE user SET status = 'SUSPENDED' WHERE user_id = '대상_사용자_ID';
+```
+
+이 경우 `performRefresh()`에서 `userEntity.status !== USER_STATUS.ACTIVE` 체크에 의해 401 응답 → 강제 로그아웃.
+refreshToken 무효화와 동일한 타이밍(accessToken 만료 후, 최대 1시간 이내)에 적용됩니다.
