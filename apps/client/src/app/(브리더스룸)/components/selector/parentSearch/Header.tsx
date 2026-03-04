@@ -33,11 +33,11 @@ const Header = ({
   return (
     <div
       className={cn(
-        "dark:bg-background sticky -top-[12px] z-20 mt-3 bg-white py-4 pt-0",
+        "dark:bg-background sticky -top-[12px] z-20 mt-4 bg-white py-4 pt-0",
         className,
       )}
     >
-      <div className="flex items-center gap-2 pb-2">
+      <div className={cn("flex items-center gap-2", step === 1 && "mb-2")}>
         <button
           onClick={() => step === 2 && setStep(1)}
           className={`text-[16px] font-bold ${step === 2 ? "text-gray-400 hover:text-gray-700 dark:text-gray-500 dark:hover:text-gray-300" : "dark:text-gray-100"}`}

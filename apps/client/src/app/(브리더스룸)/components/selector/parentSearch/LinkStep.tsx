@@ -63,19 +63,27 @@ const LinkStep = ({ selectedPet, onSelect, onClose }: LinkStepProps) => {
                 )}
               </div>
 
-              <div className="space-y-1">
+              <div className="space-y-2">
                 <div>
-                  <h4 className="mb-1.5 text-[12px] font-medium text-gray-500 dark:text-gray-400">
-                    모프
-                  </h4>
-                  <BadgeList variant={"outline"} items={selectedPet.morphs} />
+                  <h4 className="text-[12px] font-medium text-gray-500 dark:text-gray-400">모프</h4>
+                  {selectedPet.morphs && selectedPet.morphs.length > 0 ? (
+                    <BadgeList variant={"outline"} items={selectedPet.morphs} />
+                  ) : (
+                    <p className="text-xs text-gray-400 dark:text-gray-500">
+                      등록된 모프가 없습니다
+                    </p>
+                  )}
                 </div>
 
                 <div>
-                  <h4 className="mb-1.5 text-[12px] font-medium text-gray-500 dark:text-gray-400">
-                    특성
-                  </h4>
-                  <BadgeList variant={"secondary"} items={selectedPet.traits} />
+                  <h4 className="text-[12px] font-medium text-gray-500 dark:text-gray-400">특성</h4>
+                  {selectedPet.traits && selectedPet.traits.length > 0 ? (
+                    <BadgeList variant={"secondary"} items={selectedPet.traits} />
+                  ) : (
+                    <p className="text-xs text-gray-400 dark:text-gray-500">
+                      등록된 특성이 없습니다
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
