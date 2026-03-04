@@ -124,11 +124,9 @@ export default function CoiPanel({
                           {pet.name ?? "이름 없음"}
                         </span>
                       </div>
-                      {pet.ownerName && (
-                        <span className="truncate text-[9px] text-gray-400 dark:text-gray-500">
-                          @{pet.ownerName}
-                        </span>
-                      )}
+                      <span className="truncate text-[9px] text-gray-400 dark:text-gray-500">
+                        {pet.ownerName && `@${pet.ownerName}`}
+                      </span>
                     </div>
                   </div>
                 ) : (

@@ -24,7 +24,7 @@ import { useIsMobile } from "@/hooks/useMobile";
 import { toast } from "@/lib/toast";
 import SingleSelect from "@/app/(브리더스룸)/components/selector/SingleSelect";
 import QuickRegisterModal from "./QuickRegisterModal";
-import { ChevronUp, X } from "lucide-react";
+import { X } from "lucide-react";
 
 interface FamilyTreeCanvasProps {
   petId: string;
@@ -89,8 +89,8 @@ export default function FamilyTreeCanvas({ petId }: FamilyTreeCanvasProps) {
   const dragStartY = useRef(0);
   const dragStartHeight = useRef(0);
   const isDragging = useRef(false);
-  const [isPanelDismissed, setIsPanelDismissed] = useState(false);
-  const maxPanelH = typeof window !== "undefined" ? window.innerHeight * 0.4 : 300; // 40dvh
+  const defaultPanelH = typeof window !== "undefined" ? window.innerHeight * 0.3 : 225; // 30dvh
+  const maxPanelH = typeof window !== "undefined" ? window.innerHeight * 0.8 : 600; // 80dvh
 
   const handlePanelTouchStart = useCallback((e: React.TouchEvent) => {
     dragStartY.current = e.touches[0]!.clientY;
@@ -121,25 +121,8 @@ export default function FamilyTreeCanvas({ petId }: FamilyTreeCanvasProps) {
     if (!content) return;
 
     const currentH = content.offsetHeight;
-    const downDelta = currentH === 0 ? dragStartHeight.current : dragStartHeight.current - currentH;
-
-    // 이미 0인 상태에서 시작했고 아래로 80px 이상 드래그 → 완전 숨김
-    if (dragStartHeight.current <= 0) {
-      setIsPanelDismissed(true);
-      return;
-    }
 
     content.style.transition = "height 0.2s ease";
-    // 강한 아래 드래그 (시작 높이의 80% 이상 줄임) → 완전 숨김
-    if (downDelta > dragStartHeight.current * 0.8 && dragStartHeight.current > 50) {
-      content.style.height = "0px";
-      const dismissAfterCollapse = () => {
-        setIsPanelDismissed(true);
-        content.removeEventListener("transitionend", dismissAfterCollapse);
-      };
-      content.addEventListener("transitionend", dismissAfterCollapse);
-      return;
-    }
 
     if (currentH < 30) {
       content.style.height = "0px";
@@ -150,17 +133,6 @@ export default function FamilyTreeCanvas({ petId }: FamilyTreeCanvasProps) {
     };
     content.addEventListener("transitionend", cleanup);
   }, []);
-
-  const handleRestorePanel = useCallback(() => {
-    setIsPanelDismissed(false);
-    // 복원 시 콘텐츠 높이를 max로
-    requestAnimationFrame(() => {
-      const content = panelContentRef.current;
-      if (content) {
-        content.style.height = `${maxPanelH}px`;
-      }
-    });
-  }, [maxPanelH]);
 
   // 브리딩맵 전체 데이터 fetch (Recursive CTE)
   const { data: familyTreeNodes, isLoading: isTreeLoading } = useFamilyTree(petId);
@@ -457,15 +429,23 @@ export default function FamilyTreeCanvas({ petId }: FamilyTreeCanvasProps) {
         <div
           ref={chipScrollRef}
           className={`absolute z-10 cursor-grab overflow-x-auto active:cursor-grabbing ${
-            isMobile ? "top-2 right-2 left-[245px]" : "top-4 right-[232px] left-[300px]"
+            isMobile ? "top-2 right-2 left-[235px]" : "top-4 right-[232px] left-[300px]"
           }`}
           onMouseDown={(e) => {
             const el = chipScrollRef.current;
             if (!el) return;
-            chipDrag.current = { isDown: true, startX: e.pageX - el.offsetLeft, scrollLeft: el.scrollLeft };
+            chipDrag.current = {
+              isDown: true,
+              startX: e.pageX - el.offsetLeft,
+              scrollLeft: el.scrollLeft,
+            };
           }}
-          onMouseLeave={() => { chipDrag.current.isDown = false; }}
-          onMouseUp={() => { chipDrag.current.isDown = false; }}
+          onMouseLeave={() => {
+            chipDrag.current.isDown = false;
+          }}
+          onMouseUp={() => {
+            chipDrag.current.isDown = false;
+          }}
           onMouseMove={(e) => {
             const d = chipDrag.current;
             if (!d.isDown) return;
@@ -681,16 +661,7 @@ export default function FamilyTreeCanvas({ petId }: FamilyTreeCanvasProps) {
       )} */}
 
       {/* 패널 영역 — 데스크톱: 우측 상단, 모바일: 하단 시트 */}
-      {isMobile && isPanelDismissed && (
-        <button
-          type="button"
-          onClick={handleRestorePanel}
-          className="absolute right-3 bottom-3 z-10 rounded-full bg-white/90 p-2.5 shadow-lg backdrop-blur-sm dark:bg-gray-800/90"
-        >
-          <ChevronUp className="h-5 w-5 text-gray-600 dark:text-gray-300" />
-        </button>
-      )}
-      {isMobile && !isPanelDismissed ? (
+      {isMobile ? (
         <div className="absolute right-0 bottom-0 left-0 z-10 flex flex-col rounded-t-3xl bg-white/90 backdrop-blur-sm dark:bg-gray-900/90">
           {/* 드래그 핸들 */}
           <div
@@ -705,7 +676,7 @@ export default function FamilyTreeCanvas({ petId }: FamilyTreeCanvasProps) {
           <div
             ref={panelContentRef}
             className="grid grid-cols-2 gap-2 overflow-y-auto overscroll-contain bg-white/90 px-3 pb-3 backdrop-blur-sm dark:bg-gray-900/90"
-            style={{ height: `${maxPanelH}px` }}
+            style={{ height: `${defaultPanelH}px` }}
           >
             {selectedNodes.length === 2 && (
               <button
