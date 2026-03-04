@@ -1,4 +1,4 @@
-# 인증 상태 관리 구조
+# 인증 상태 관리 구조 (Mobile)
 
 ## 1. 저장소 (Zustand Store)
 
@@ -71,7 +71,7 @@ type AuthState = {
 
 ### C. 앱 시작/토큰 변경 시 자동 유저 정보 갱신
 
-**파일: `apps/mobile/App.tsx` (Line 83-100)**
+**파일: `apps/mobile/App.tsx`**
 
 ```typescript
 useEffect(() => {
@@ -196,6 +196,14 @@ const user = useUser();              // state.user 추상화
 | Web (CSR) | localStorage | HttpOnly 쿠키 |
 | Web (SSR) | refreshToken으로 획득 | HttpOnly 쿠키 |
 
+### 토큰 만료 시간
+
+| 토큰 | 만료 시간 | 설정 위치 |
+|------|----------|----------|
+| accessToken | 1시간 | `apps/server/src/app.module.ts` → `JwtModule.register({ signOptions: { expiresIn: '1h' } })` |
+| refreshToken | 180일 | `AuthService.createJwtRefreshToken()` → `{ expiresIn: '180d' }` |
+| auth code | 30초 | `AuthService.createAuthCode()` → `{ expiresIn: '30s' }` |
+
 **핵심:**
 - `accessToken`은 쿠키에 저장하지 않음 (localStorage만 사용)
 - `refreshToken`은 HttpOnly 쿠키로 서버에서 관리
@@ -300,3 +308,68 @@ const user = useUser();              // state.user 추상화
 3. **토큰 노출 최소화**: accessToken은 쿠키에 저장하지 않음
 4. **자동 로그아웃**: 토큰 갱신 실패 시 즉시 로그아웃 처리
 5. **무한루프 방지**: `/sign-in/*` 경로에서는 리다이렉트 제외
+6. **Auth code 패턴**: 웹 OAuth redirect URL에 refresh token 대신 30초 유효 auth code 사용하여 URL 노출 방지
+7. **사용자 상태 검증**: token refresh 시 ACTIVE 상태가 아닌 사용자 차단
+8. **Rotation race condition 방지**: 동일 유저의 동시 refresh 요청을 서버에서 in-memory deduplication으로 처리
+9. **토큰 만료 정합성**: JWT 만료(180일)와 DB `refreshTokenExpiresAt`(180일) 동일하게 유지
+10. **Sign-out 접근성**: `@Public()` 데코레이터로 access token 만료 상태에서도 로그아웃 가능
+
+---
+
+## 10. 비상 조치: 사용자 세션 강제 무효화
+
+### 방법 1: refreshToken 무효화
+
+DB에서 해당 사용자의 refreshToken을 삭제하면, 다음 accessToken 만료 시 자동으로 로그아웃됩니다.
+
+**서버 메서드: `AuthService.invalidateRefreshToken()`**
+
+```typescript
+// apps/server/src/auth/auth.service.ts
+async invalidateRefreshToken(refreshToken: string): Promise<void> {
+  const tokenPayload = this.jwtService.verify<JwtPayload>(refreshToken, {
+    secret: process.env.JWT_REFRESH_SECRET ?? '',
+  });
+  await this.userService.update(tokenPayload.sub, {
+    refreshToken: null,
+    refreshTokenExpiresAt: null,
+  });
+}
+```
+
+**또는 DB 직접 조작:**
+
+```sql
+UPDATE user SET refresh_token = NULL, refresh_token_expires_at = NULL WHERE user_id = '대상_사용자_ID';
+```
+
+### 방법 2: 사용자 상태 변경
+
+`user.status`를 `ACTIVE`가 아닌 상태로 변경하면 token refresh 시 차단됩니다.
+
+```sql
+UPDATE user SET status = 'SUSPENDED' WHERE user_id = '대상_사용자_ID';
+```
+
+`performRefresh()`에서 `userEntity.status !== USER_STATUS.ACTIVE` 체크에 의해 401 응답 → 강제 로그아웃.
+
+### 동작 흐름
+
+```
+[관리자: DB에서 refreshToken 무효화 또는 사용자 상태 변경]
+    ↓
+[사용자: accessToken 만료 전까지 정상 이용]
+    ↓ accessToken 만료
+    ↓ axios 인터셉터: refreshToken으로 갱신 시도
+    ↓ 서버: refreshToken 검증 실패 또는 사용자 상태 비활성 → 401 응답
+    ↓
+[Web] tokenProvider.removeToken() + /sign-in 리다이렉트
+[Native] TOKEN_REFRESH_FAILED 메시지 → useAuthStore.clear() → Login 화면
+    ↓
+[사용자: 강제 로그아웃 완료]
+```
+
+### 한계
+
+- **즉시 차단 불가**: accessToken 만료(1시간)까지 기존 요청은 정상 처리됨
+- 즉시 차단이 필요하면 accessToken 블랙리스트(Redis 등) 또는 매 요청 DB 체크가 필요

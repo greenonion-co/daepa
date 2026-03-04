@@ -41,6 +41,12 @@ export class AuthService {
 
   private readonly logger = new Logger(AuthService.name);
 
+  // 동일 유저의 동시 refresh 요청을 중복 제거하여 rotation race condition 방지
+  private readonly refreshPromises = new Map<
+    string,
+    Promise<{ newAccessToken: string; newRefreshToken?: string }>
+  >();
+
   async validateAppleNativeAndGetUser({
     identityToken,
     email,
@@ -249,6 +255,51 @@ export class AuthService {
     return accessToken;
   }
 
+  /**
+   * OAuth 콜백 후 redirect URL에 포함할 단기 auth code 생성 (30초 유효).
+   * refresh token을 URL에 직접 노출하지 않기 위해 사용.
+   */
+  createAuthCode(userId: string): string {
+    return this.jwtService.sign(
+      { sub: userId, type: 'auth_code' },
+      { expiresIn: '30s' },
+    );
+  }
+
+  /**
+   * auth code를 검증하고 해당 유저의 access token + refresh token을 발급.
+   */
+  async exchangeAuthCode(code: string) {
+    try {
+      const payload = this.jwtService.verify<{
+        sub: string;
+        type: string;
+      }>(code);
+
+      if (payload.type !== 'auth_code') {
+        throw new UnauthorizedException('유효하지 않은 auth code입니다.');
+      }
+
+      const user = await this.userService.findOne({ userId: payload.sub });
+      if (!user) {
+        throw new UnauthorizedException('사용자를 찾을 수 없습니다.');
+      }
+
+      const newAccessToken = this.createJwtAccessToken({
+        userId: user.userId,
+        role: user.role,
+      });
+      const newRefreshToken = await this.createJwtRefreshToken(user.userId);
+
+      return { newAccessToken, newRefreshToken };
+    } catch (error) {
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+      throw new UnauthorizedException('auth code 검증에 실패했습니다.');
+    }
+  }
+
   async createJwtRefreshToken(userId: string) {
     const refreshToken = this.jwtService.sign(
       {
@@ -267,17 +318,46 @@ export class AuthService {
   }
 
   async refresh(refreshToken: string) {
+    let tokenPayload: JwtPayload;
     try {
-      const tokenPayload = this.jwtService.verify<JwtPayload>(refreshToken, {
+      tokenPayload = this.jwtService.verify<JwtPayload>(refreshToken, {
         secret: process.env.JWT_REFRESH_SECRET ?? '',
       });
+    } catch {
+      throw new UnauthorizedException('유효하지 않은 refresh token입니다.');
+    }
 
+    const userId = tokenPayload.sub;
+
+    // 동일 유저에 대한 refresh가 이미 진행 중이면 해당 Promise를 반환하여
+    // SSR/CSR 동시 요청 시 rotation race condition 방지
+    const existing = this.refreshPromises.get(userId);
+    if (existing) {
+      return existing;
+    }
+
+    const promise = this.performRefresh(refreshToken, tokenPayload).finally(
+      () => {
+        this.refreshPromises.delete(userId);
+      },
+    );
+
+    this.refreshPromises.set(userId, promise);
+    return promise;
+  }
+
+  private async performRefresh(refreshToken: string, tokenPayload: JwtPayload) {
+    try {
       const userEntity = await this.userService.findOneEntity({
         userId: tokenPayload.sub,
       });
 
       if (!userEntity) {
         throw new UnauthorizedException('사용자를 찾을 수 없습니다.');
+      }
+
+      if (userEntity.status !== USER_STATUS.ACTIVE) {
+        throw new UnauthorizedException('비활성화된 계정입니다.');
       }
 
       const isRefreshTokenValid = await bcrypt.compare(
@@ -344,7 +424,10 @@ export class AuthService {
     // refresh token 해싱
     const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
 
-    const expiresAt = DateTime.now().plus({ years: 1 }).endOf('day').toJSDate();
+    const expiresAt = DateTime.now()
+      .plus({ days: 180 })
+      .endOf('day')
+      .toJSDate();
 
     await this.userService.update(user.userId, {
       refreshToken: hashedRefreshToken,
