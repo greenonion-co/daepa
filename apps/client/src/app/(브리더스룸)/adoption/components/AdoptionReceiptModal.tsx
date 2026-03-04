@@ -111,8 +111,18 @@ const PetInfoCard = ({
               isMobile ? "text-xs" : "text-sm",
             )}
           >
-            <BadgeList inline variant={"outline"} items={morphs} badgeSize={isMobile ? "sm" : "md"} />
-            <BadgeList inline items={traits} variant="secondary" badgeSize={isMobile ? "sm" : "md"} />
+            <BadgeList
+              inline
+              variant={"outline"}
+              items={morphs}
+              badgeSize={isMobile ? "sm" : "md"}
+            />
+            <BadgeList
+              inline
+              items={traits}
+              variant="secondary"
+              badgeSize={isMobile ? "sm" : "md"}
+            />
           </div>
         </div>
       </div>
@@ -193,7 +203,7 @@ const AdoptionReceiptModal = ({ isOpen, adoption, onClose }: AdoptionReceiptModa
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-h-[90dvh] overflow-y-auto rounded-3xl px-4 py-6 sm:max-w-[500px]">
-        <DialogHeader>
+        <DialogHeader className="-mt-0">
           <DialogTitle>분양 상세 정보</DialogTitle>
           <DialogDescription className="sr-only">분양 상세 정보를 확인합니다.</DialogDescription>
         </DialogHeader>
