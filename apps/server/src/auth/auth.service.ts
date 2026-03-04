@@ -318,9 +318,15 @@ export class AuthService {
   }
 
   async refresh(refreshToken: string) {
-    const tokenPayload = this.jwtService.verify<JwtPayload>(refreshToken, {
-      secret: process.env.JWT_REFRESH_SECRET ?? '',
-    });
+    let tokenPayload: JwtPayload;
+    try {
+      tokenPayload = this.jwtService.verify<JwtPayload>(refreshToken, {
+        secret: process.env.JWT_REFRESH_SECRET ?? '',
+      });
+    } catch {
+      throw new UnauthorizedException('유효하지 않은 refresh token입니다.');
+    }
+
     const userId = tokenPayload.sub;
 
     // 동일 유저에 대한 refresh가 이미 진행 중이면 해당 Promise를 반환하여
