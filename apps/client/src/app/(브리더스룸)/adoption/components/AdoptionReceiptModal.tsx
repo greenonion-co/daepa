@@ -292,6 +292,7 @@ const AdoptionReceiptModal = ({ isOpen, adoption, onClose }: AdoptionReceiptModa
                         value={memoValue}
                         onChange={(e) => setMemoValue(e.target.value)}
                         placeholder="메모를 입력하세요"
+                        maxLength={100}
                         className="min-h-[80px] w-full text-sm"
                         autoFocus
                       />

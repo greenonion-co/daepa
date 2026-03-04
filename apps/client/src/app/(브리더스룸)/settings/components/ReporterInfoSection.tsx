@@ -162,7 +162,7 @@ const ReporterInfoSection = () => {
         <div className="space-y-3 p-4">
           <div className="space-y-2">
             <label className="text-[13px] font-medium text-gray-600 dark:text-gray-400">
-              성명(상호)
+              상호(성명)
             </label>
             <input
               type="text"
@@ -259,7 +259,7 @@ const ReporterInfoSection = () => {
                 tooltipText="개인 회원의 정보 공개는 준비중입니다"
               />
             }
-            label="성명(상호)"
+            label="상호(성명)"
             value={String(privateInfo?.realName ?? "미설정")}
             onClick={handleStartEdit}
             showChevron

@@ -144,7 +144,7 @@ export const PetDetailInfo = ({
               onChange={(e) => handleInput("desc", e.target.value)}
               onBlur={() => onFieldBlur?.("desc")}
               maxLength={100}
-              placeholder={isEditMode ? "개채 설명을 입력하세요" : "-"}
+              placeholder={isEditMode ? "개체 설명을 입력하세요" : "-"}
               className={cn(
                 "min-h-[80px] w-full resize-none rounded-md border border-gray-200 p-2 text-sm font-[500] placeholder:font-[500] disabled:bg-transparent dark:border-gray-700 dark:bg-transparent dark:text-white",
                 !isEditMode && "border-none",

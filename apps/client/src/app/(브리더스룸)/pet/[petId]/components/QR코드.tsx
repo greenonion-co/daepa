@@ -29,21 +29,11 @@ type PetInfoOption = {
   getValue: (pet: PetDto) => string | null;
 };
 
-type sizeOption = {
-  id: "small" | "medium" | "large";
-  label: "S" | "M" | "L";
-  width: number;
-  height: number;
-  padding: number;
-  lineHeight: number;
-  fontSize: number;
-};
-
-const SIZE_OPTIONS: sizeOption[] = [
-  { id: "small", label: "S", width: 240, height: 70, padding: 5, lineHeight: 14, fontSize: 10 },
-  { id: "medium", label: "M", width: 340, height: 120, padding: 8, lineHeight: 22, fontSize: 16 },
-  { id: "large", label: "L", width: 520, height: 200, padding: 20, lineHeight: 36, fontSize: 24 },
-];
+const SIZE_PRESETS = [
+  { label: "S", width: 2.5, height: 0.75 },
+  { label: "M", width: 4, height: 1.2 },
+  { label: "L", width: 6.5, height: 2 },
+] as const;
 
 const PET_INFO_OPTIONS: PetInfoOption[] = [
   // {
@@ -92,7 +82,9 @@ const QRCode = ({ pet, isScrolled }: QRCodeProps) => {
   const [selectedOptions, setSelectedOptions] = useState<string[]>(
     PET_INFO_OPTIONS.filter((opt) => opt.getValue(pet)).map((opt) => opt.id),
   );
-  const [selectedSize, setSelectedSize] = useState<string>("medium");
+  const [selectedPreset, setSelectedPreset] = useState<string | null>("M");
+  const [customWidth, setCustomWidth] = useState(4);
+  const [customHeight, setCustomHeight] = useState(1.2);
   const [isDownloading, setIsDownloading] = useState(false);
   const [qrError, setQrError] = useState(false);
 
@@ -132,8 +124,13 @@ const QRCode = ({ pet, isScrolled }: QRCodeProps) => {
       return;
     }
 
-    const sizeConfig = SIZE_OPTIONS.find((s) => s.id === selectedSize) ?? SIZE_OPTIONS[1]!;
-    const { width, height, padding, lineHeight, fontSize } = sizeConfig;
+    const scale = 2; // 렌더링 선명도용 배율
+    const CM_TO_PX = 300 / 2.54 / scale; // 논리 px/cm (실제 px = 논리 × scale → 300 DPI 유지)
+    const width = Math.round(customWidth * CM_TO_PX);
+    const height = Math.round(customHeight * CM_TO_PX);
+    const padding = Math.round(height * 0.07);
+    let fontSize = 0; // infoLines 구성 후 동적 계산
+    let lineHeight = 0;
     const qrSize = height - padding * 2;
     const fontFamily = `-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
 
@@ -169,57 +166,67 @@ const QRCode = ({ pet, isScrolled }: QRCodeProps) => {
     }
 
     const hasInfo = infoLines.length > 0;
-    const totalWidth = hasInfo ? width : qrSize + padding * 2;
-    const totalHeight = height;
-    const infoMaxWidth = totalWidth - qrSize - padding * 3;
 
-    // 텍스트 줄바꿈 계산 (임시 캔버스 크기 설정)
-    const wrappedLines: { text: string; bold: boolean }[] = [];
+    // 텍스트 줄 수 기반 동적 폰트 크기 계산
     if (hasInfo) {
-      canvas.width = 1000;
-      canvas.height = 1000;
-      for (const line of infoLines) {
-        ctx.font = `${line.bold ? "bold" : "normal"} ${fontSize}px ${fontFamily}`;
-        let currentLine = "";
-        for (const char of line.text) {
-          const testLine = currentLine + char;
-          if (ctx.measureText(testLine).width > infoMaxWidth && currentLine.length > 0) {
-            wrappedLines.push({ text: currentLine, bold: line.bold });
-            currentLine = char;
-          } else {
-            currentLine = testLine;
-          }
-        }
-        if (currentLine) wrappedLines.push({ text: currentLine, bold: line.bold });
-      }
+      const availableTextHeight = height - padding * 2;
+      fontSize = Math.max(
+        10,
+        Math.min(
+          Math.round(availableTextHeight / (infoLines.length * 1.5)),
+          Math.round(height * 0.15),
+        ),
+      );
+      lineHeight = Math.round(fontSize * 1.5);
     }
 
-    canvas.width = totalWidth;
-    canvas.height = totalHeight;
+    const totalHeight = height;
+
+    // 텍스트 너비 측정 → 줄바꿈 없이 캔버스 너비를 텍스트에 맞게 확장
+    let totalWidth: number;
+    if (hasInfo) {
+      canvas.width = 2000;
+      canvas.height = 2000;
+      let maxTextWidth = 0;
+      for (const line of infoLines) {
+        ctx.font = `${line.bold ? "bold" : "normal"} ${fontSize}px ${fontFamily}`;
+        maxTextWidth = Math.max(maxTextWidth, ctx.measureText(line.text).width);
+      }
+      const requiredWidth = qrSize + padding * 4 + Math.ceil(maxTextWidth);
+      totalWidth = Math.max(width, requiredWidth);
+    } else {
+      totalWidth = qrSize + padding * 2;
+    }
+
+    canvas.width = totalWidth * scale;
+    canvas.height = totalHeight * scale;
+    ctx.scale(scale, scale);
 
     // 배경
     ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, totalWidth, totalHeight);
 
-    // QR 코드 (세로 중앙 정렬)
+    // QR 코드 (세로 중앙 정렬, 보간 비활성화로 선명한 확대)
+    ctx.imageSmoothingEnabled = false;
     ctx.drawImage(qrImage, padding, padding, qrSize, qrSize);
+    ctx.imageSmoothingEnabled = true;
 
     // 펫 정보 (QR 우측, 세로 중앙 정렬)
     if (hasInfo) {
-      const infoHeight = wrappedLines.length * lineHeight;
+      const infoHeight = infoLines.length * lineHeight;
       ctx.fillStyle = "#333333";
       ctx.textAlign = "left";
       const infoX = qrSize + padding * 2;
       const infoStartY = (totalHeight - infoHeight) / 2;
 
-      wrappedLines.forEach((line, index) => {
+      infoLines.forEach((line, index) => {
         ctx.font = `${line.bold ? "bold" : "normal"} ${fontSize}px ${fontFamily}`;
         ctx.fillText(line.text, infoX, infoStartY + index * lineHeight + fontSize);
       });
     }
 
     setPreviewDataUrl(canvas.toDataURL("image/png"));
-  }, [qrCodeDataUrl, selectedOptions, selectedSize, pet]);
+  }, [qrCodeDataUrl, selectedOptions, customWidth, customHeight, pet]);
 
   // qrCodeDataUrl 또는 selectedOptions 변경 시 미리보기 업데이트
   useEffect(() => {
@@ -250,13 +257,20 @@ const QRCode = ({ pet, isScrolled }: QRCodeProps) => {
     <div className="ml-auto">
       <Dialog open={qrOpen} onOpenChange={setQrOpen}>
         <DialogTrigger asChild>
-          <Button size="sm" variant="outline" className={cn("bg-neutral-900 text-white hover:bg-neutral-800 dark:border-gray-700 dark:bg-transparent dark:text-gray-300 dark:hover:bg-gray-800", isScrolled ? "text-xs" : "text-sm")}>
+          <Button
+            size="sm"
+            variant="outline"
+            className={cn(
+              "bg-neutral-900 text-white hover:bg-neutral-800 dark:border-gray-700 dark:bg-transparent dark:text-gray-300 dark:hover:bg-gray-800",
+              isScrolled ? "text-xs" : "text-sm",
+            )}
+          >
             <QrCode className="h-4 w-4 sm:hidden" />
             <span className="hidden sm:inline">QR</span>
           </Button>
         </DialogTrigger>
 
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="max-h-[90vh] w-auto max-w-[90vw] min-w-[320px] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>QR CODE</DialogTitle>
           </DialogHeader>
@@ -275,7 +289,12 @@ const QRCode = ({ pet, isScrolled }: QRCodeProps) => {
                 </div>
               ) : previewDataUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={previewDataUrl} alt="QR Code Preview" className="max-h-[280px]" />
+                <img
+                  src={previewDataUrl}
+                  alt="QR Code Preview"
+                  className="rounded-lg border border-gray-300 dark:border-neutral-600"
+                  style={{ height: `${customHeight * (96 / 2.54)}px` }}
+                />
               ) : (
                 <div className="flex h-[200px] w-[200px] items-center justify-center text-sm text-gray-500">
                   QR 코드를 생성 중입니다...
@@ -289,20 +308,63 @@ const QRCode = ({ pet, isScrolled }: QRCodeProps) => {
                 <div className="rounded-lg bg-gray-50 p-3 dark:bg-neutral-800">
                   <p className="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">크기</p>
                   <div className="flex gap-2">
-                    {SIZE_OPTIONS.map((size) => (
+                    {SIZE_PRESETS.map((preset) => (
                       <button
-                        key={size.id}
-                        onClick={() => setSelectedSize(size.id)}
+                        key={preset.label}
+                        onClick={() => {
+                          setCustomWidth(preset.width);
+                          setCustomHeight(preset.height);
+                          setSelectedPreset(preset.label);
+                        }}
                         className={cn(
                           "flex-1 rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
-                          selectedSize === size.id
+                          selectedPreset === preset.label
                             ? "bg-neutral-800 text-white dark:bg-white dark:text-neutral-800"
                             : "bg-gray-200 text-gray-600 hover:bg-gray-300 dark:bg-neutral-700 dark:text-gray-300 dark:hover:bg-neutral-600",
                         )}
                       >
-                        {size.label}
+                        {preset.label}
                       </button>
                     ))}
+                  </div>
+                  <div className="mt-2 flex items-center gap-2 text-sm">
+                    <label className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
+                      가로
+                      <input
+                        type="number"
+                        min={1}
+                        max={10}
+                        step={0.1}
+                        value={customWidth}
+                        onChange={(e) => {
+                          const v = Number(e.target.value);
+                          if (!isNaN(v)) setCustomWidth(Math.max(1, Math.min(v, 10)));
+                          setSelectedPreset(null);
+                        }}
+                        onBlur={() => setCustomWidth((prev) => Math.max(1, Math.min(prev, 10)))}
+                        className="w-16 rounded-md border border-gray-300 px-2 py-1 text-center dark:border-neutral-600 dark:bg-neutral-700 dark:text-gray-200"
+                      />
+                      cm
+                    </label>
+                    <span className="text-gray-400">×</span>
+                    <label className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
+                      세로
+                      <input
+                        type="number"
+                        min={1}
+                        max={5}
+                        step={0.1}
+                        value={customHeight}
+                        onChange={(e) => {
+                          const v = Number(e.target.value);
+                          if (!isNaN(v)) setCustomHeight(Math.max(1, Math.min(v, 5)));
+                          setSelectedPreset(null);
+                        }}
+                        onBlur={() => setCustomHeight((prev) => Math.max(1, Math.min(prev, 5)))}
+                        className="w-16 rounded-md border border-gray-300 px-2 py-1 text-center dark:border-neutral-600 dark:bg-neutral-700 dark:text-gray-200"
+                      />
+                      cm
+                    </label>
                   </div>
                 </div>
 
