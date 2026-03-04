@@ -17,6 +17,7 @@ import { PetDto } from "@repo/api-client";
 import { GENDER_KOREAN_INFO } from "@/app/(브리더스룸)/constants";
 import { DateTime } from "luxon";
 import { useIsMyPet } from "@/hooks/useIsMyPet";
+import { isNativeApp, sendToNative } from "@/lib/native-bridge";
 
 interface QRCodeProps {
   pet: PetDto;
@@ -239,15 +240,22 @@ const QRCode = ({ pet, isScrolled }: QRCodeProps) => {
     );
   };
 
-  const downloadImage = useCallback(() => {
+  const downloadImage = useCallback(async () => {
     if (!previewDataUrl) return;
     setIsDownloading(true);
 
     try {
-      const a = document.createElement("a");
-      a.href = previewDataUrl;
-      a.download = `${pet.name || "pet"}-qr.png`;
-      a.click();
+      const fileName = `${pet.name || "pet"}-qr.png`;
+
+      // 네이티브 앱(WebView)에서는 postMessage로 이미지 저장 위임
+      if (isNativeApp()) {
+        sendToNative({ type: "DOWNLOAD_IMAGE", dataUrl: previewDataUrl, fileName });
+      } else {
+        const a = document.createElement("a");
+        a.href = previewDataUrl;
+        a.download = fileName;
+        a.click();
+      }
     } finally {
       setIsDownloading(false);
     }
@@ -271,7 +279,7 @@ const QRCode = ({ pet, isScrolled }: QRCodeProps) => {
         </DialogTrigger>
 
         <DialogContent className="max-h-[90vh] w-auto max-w-[90vw] min-w-[320px] overflow-y-auto">
-          <DialogHeader>
+          <DialogHeader className="mt-0">
             <DialogTitle>QR CODE</DialogTitle>
           </DialogHeader>
 

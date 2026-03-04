@@ -34,6 +34,7 @@ import TopBar from '@/components/common/TopBar';
 import Toast from '@/components/common/Toast';
 import Loading from '@/components/common/Loading';
 import LoginPromoSheet from '@/components/common/LoginPromoSheet';
+import RNShare from 'react-native-share';
 import {
   WebViewMessage,
   WebViewRouteParams,
@@ -264,6 +265,13 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
             setLoginPromoSheetVariant(null);
           }
           break;
+        case 'DOWNLOAD_IMAGE':
+          RNShare.open({
+            url: message.dataUrl,
+            type: 'image/png',
+            filename: message.fileName?.replace(/\.png$/i, '') || 'qr-code',
+          }).catch(() => {});
+          break;
         default:
           break;
       }
@@ -368,7 +376,16 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
 
   return (
     <View style={containerStyle}>
-      {showTopBar && <TopBar onBackPress={handleTopBarBackPress} />}
+      {showTopBar && (
+        <TopBar
+          onBackPress={handleTopBarBackPress}
+          backgroundColor={
+            /^\/pet\/[^/]+$/.test(initialPath.split(/[?#]/)[0] ?? '')
+              ? theme === 'dark' ? colors.background : '#f3f4f6'
+              : undefined
+          }
+        />
+      )}
       {/* 로딩 Progress Bar */}
       {isLoading && (
         <View style={styles.progressBarContainer}>
@@ -493,6 +510,7 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
           cacheEnabled
           // iOS Pull-to-refresh
           pullToRefreshEnabled={pullToRefreshEnabled}
+          bounces={pullToRefreshEnabled}
           // 에러 처리
           onError={syntheticEvent => {
             const { nativeEvent } = syntheticEvent;

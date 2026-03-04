@@ -32,7 +32,8 @@ export type WebViewMessage =
   | { type: 'SET_TOP_BAR_VISIBLE'; visible: boolean }
   | { type: 'SHOW_LOADING' }
   | { type: 'HIDE_LOADING' }
-  | { type: 'SHOW_LOGIN_PROMO_SHEET'; variant: 'register' | 'relation' };
+  | { type: 'SHOW_LOGIN_PROMO_SHEET'; variant: 'register' | 'relation' }
+  | { type: 'DOWNLOAD_IMAGE'; dataUrl: string; fileName: string };
 
 export type WebViewRouteParams = {
   WebView: WebViewParams | undefined;

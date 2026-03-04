@@ -2418,6 +2418,35 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
+  - RNShare (12.2.5):
+    - boost
+    - DoubleConversion
+    - fast_float
+    - fmt
+    - glog
+    - hermes-engine
+    - RCT-Folly
+    - RCT-Folly/Fabric
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-hermes
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - SocketRocket
+    - Yoga
   - RNSVG (15.12.1):
     - React-Core
   - SocketRocket (0.7.1)
@@ -2511,6 +2540,7 @@ DEPENDENCIES:
   - RNGestureHandler (from `../../../node_modules/react-native-gesture-handler`)
   - "RNGoogleSignin (from `../../../node_modules/@react-native-google-signin/google-signin`)"
   - RNScreens (from `../../../node_modules/react-native-screens`)
+  - RNShare (from `../../../node_modules/react-native-share`)
   - RNSVG (from `../../../node_modules/react-native-svg`)
   - SocketRocket (~> 0.7.1)
   - Yoga (from `../../../node_modules/react-native/ReactCommon/yoga`)
@@ -2713,6 +2743,8 @@ EXTERNAL SOURCES:
     :path: "../../../node_modules/@react-native-google-signin/google-signin"
   RNScreens:
     :path: "../../../node_modules/react-native-screens"
+  RNShare:
+    :path: "../../../node_modules/react-native-share"
   RNSVG:
     :path: "../../../node_modules/react-native-svg"
   Yoga:
@@ -2825,6 +2857,7 @@ SPEC CHECKSUMS:
   RNGestureHandler: c57b0c852781a84f8776bff8895f639ed56b1660
   RNGoogleSignin: 5782dd7dad559608a06f3c6b1d4142c395fb5308
   RNScreens: 829f6bb63f88078b060e068394d578aca28d7c51
+  RNShare: 5d77ade1db23829bb56f057e22fee639dd757ab5
   RNSVG: 58a96423776ad08359545bfbcd88660956644f28
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
   Yoga: ce248fb32065c9b00451491b06607f1c25b2f1ed

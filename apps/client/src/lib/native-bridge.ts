@@ -46,7 +46,8 @@ type NativeMessage =
   | { type: "SET_PULL_TO_REFRESH"; enabled: boolean }
   | { type: "SHOW_LOADING" }
   | { type: "HIDE_LOADING" }
-  | { type: "SHOW_LOGIN_PROMO_SHEET"; variant: "register" | "relation" };
+  | { type: "SHOW_LOGIN_PROMO_SHEET"; variant: "register" | "relation" }
+  | { type: "DOWNLOAD_IMAGE"; dataUrl: string; fileName: string };
 
 /**
  * 현재 환경이 네이티브 앱 WebView인지 확인
