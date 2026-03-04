@@ -1,12 +1,16 @@
 import type { BreederPublicProfile } from "../data";
 import { MapPin, Phone, Share2 } from "lucide-react";
 import { toast } from "@/lib/toast";
+import { useIsLoggedIn } from "@/hooks/useAuth";
+import Link from "next/link";
 
 interface BreederHeaderProps {
   profile: BreederPublicProfile;
 }
 
 export default function BreederHeader({ profile }: BreederHeaderProps) {
+  const isLoggedIn = useIsLoggedIn();
+
   const handleShare = () => {
     const url = `${window.location.origin}/@${encodeURIComponent(profile.name)}`;
     navigator.clipboard.writeText(url).then(() => {
@@ -31,13 +35,23 @@ export default function BreederHeader({ profile }: BreederHeaderProps) {
             </span>
           </h1>
 
-          <button
-            type="button"
-            onClick={handleShare}
-            className="flex shrink-0 items-center gap-1 self-start rounded-lg stroke-1 px-2.5 py-1.5 text-xs text-amber-500 hover:bg-amber-100 dark:text-gray-400 dark:hover:bg-gray-800"
-          >
-            <Share2 className="h-4 w-4" />
-          </button>
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              onClick={handleShare}
+              className="flex shrink-0 items-center gap-1 rounded-lg px-2 py-1 text-xs text-amber-500 hover:bg-amber-100 dark:text-gray-400 dark:hover:bg-gray-800"
+            >
+              <Share2 className="h-4 w-4" />
+            </button>
+            {!isLoggedIn && (
+              <Link
+                href="/sign-in"
+                className="shrink-0 rounded-lg border border-blue-200 px-3 py-1 text-xs font-medium text-blue-500 hover:bg-blue-50 dark:border-blue-800 dark:hover:bg-blue-900/30"
+              >
+                로그인
+              </Link>
+            )}
+          </div>
         </div>
 
         {/* 닉네임 (실명과 다를 때) */}

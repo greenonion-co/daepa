@@ -24,6 +24,7 @@ import { useIsMobile } from "@/hooks/useMobile";
 import { toast } from "@/lib/toast";
 import SingleSelect from "@/app/(브리더스룸)/components/selector/SingleSelect";
 import QuickRegisterModal from "./QuickRegisterModal";
+import { X } from "lucide-react";
 
 interface FamilyTreeCanvasProps {
   petId: string;
@@ -35,24 +36,28 @@ export default function FamilyTreeCanvas({ petId }: FamilyTreeCanvasProps) {
     nodesMap,
     edgesMap,
     expandedNodeIds,
+    externalTreeRootIds,
     setFamilyTree,
     mergeTree,
     getGenerationMap,
     updateNodePet,
     addPairEdge,
     removePairEdge,
+    addExternalTreeRoot,
   } = useFamilyTreeStore(
     useShallow((s) => ({
       centerPetId: s.centerPetId,
       nodesMap: s.nodesMap,
       edgesMap: s.edgesMap,
       expandedNodeIds: s.expandedNodeIds,
+      externalTreeRootIds: s.externalTreeRootIds,
       setFamilyTree: s.setFamilyTree,
       mergeTree: s.mergeTree,
       getGenerationMap: s.getGenerationMap,
       updateNodePet: s.updateNodePet,
       addPairEdge: s.addPairEdge,
       removePairEdge: s.removePairEdge,
+      addExternalTreeRoot: s.addExternalTreeRoot,
     })),
   );
 
@@ -76,7 +81,58 @@ export default function FamilyTreeCanvas({ petId }: FamilyTreeCanvasProps) {
     Record<string, { x: number; y: number }>
   >({});
   const reshuffleRef = useRef<(() => void) | null>(null);
+  const chipScrollRef = useRef<HTMLDivElement>(null);
+  const chipDrag = useRef({ isDown: false, startX: 0, scrollLeft: 0 });
   const isMobile = useIsMobile();
+  const panelContentRef = useRef<HTMLDivElement>(null);
+  const pairStatsPanelRef = useRef<HTMLDivElement>(null);
+  const dragStartY = useRef(0);
+  const dragStartHeight = useRef(0);
+  const isDragging = useRef(false);
+  const defaultPanelH = typeof window !== "undefined" ? window.innerHeight * 0.3 : 225; // 30dvh
+  const maxPanelH = typeof window !== "undefined" ? window.innerHeight * 0.8 : 600; // 80dvh
+
+  const handlePanelTouchStart = useCallback((e: React.TouchEvent) => {
+    dragStartY.current = e.touches[0]!.clientY;
+    isDragging.current = true;
+    const content = panelContentRef.current;
+    if (content) {
+      dragStartHeight.current = content.offsetHeight;
+      content.style.transition = "none";
+    }
+  }, []);
+
+  const handlePanelTouchMove = useCallback(
+    (e: React.TouchEvent) => {
+      if (!isDragging.current) return;
+      const content = panelContentRef.current;
+      if (!content) return;
+      const delta = e.touches[0]!.clientY - dragStartY.current;
+      const newHeight = Math.max(0, Math.min(dragStartHeight.current - delta, maxPanelH));
+      content.style.height = `${newHeight}px`;
+    },
+    [maxPanelH],
+  );
+
+  const handlePanelTouchEnd = useCallback(() => {
+    if (!isDragging.current) return;
+    isDragging.current = false;
+    const content = panelContentRef.current;
+    if (!content) return;
+
+    const currentH = content.offsetHeight;
+
+    content.style.transition = "height 0.2s ease";
+
+    if (currentH < 30) {
+      content.style.height = "0px";
+    }
+    const cleanup = () => {
+      content.style.transition = "";
+      content.removeEventListener("transitionend", cleanup);
+    };
+    content.addEventListener("transitionend", cleanup);
+  }, []);
 
   // 브리딩맵 전체 데이터 fetch (Recursive CTE)
   const { data: familyTreeNodes, isLoading: isTreeLoading } = useFamilyTree(petId);
@@ -115,7 +171,7 @@ export default function FamilyTreeCanvas({ petId }: FamilyTreeCanvasProps) {
     handleAddExternalTree,
     handleFocusAncestor,
     handleSearchKeyDown,
-  } = useSearch({ nodesMap, nodeKey, queryClient, mergeTree });
+  } = useSearch({ nodesMap, nodeKey, queryClient, mergeTree, addExternalTreeRoot });
 
   const handleCanvasContextMenu = useCallback(
     (position: { x: number; y: number }, simPosition?: { x: number; y: number }) => {
@@ -308,6 +364,35 @@ export default function FamilyTreeCanvas({ petId }: FamilyTreeCanvasProps) {
     setTimeout(() => setFocusNodeId(nodeId), 0);
   }, []);
 
+  // 외부 트리 삭제: 센터 트리 초기화 후 남은 외부 트리 재병합
+  const handleRemoveExternalTree = useCallback(
+    async (rootId: string) => {
+      // 센터 트리 캐시로 초기화 (useFamilyTree 쿼리 키: ["family-tree", petId, 2, 2])
+      const centerCache = queryClient.getQueryData<FamilyTreeResponse>([
+        "family-tree",
+        petId,
+        2,
+        2,
+      ]);
+      if (!centerCache) return;
+      setFamilyTree(petId, centerCache.nodes, centerCache.centerPairPartnerIds ?? []);
+
+      // 삭제 대상 제외한 나머지 외부 트리 재병합
+      const remaining = externalTreeRootIds.filter((id) => id !== rootId);
+      for (const extId of remaining) {
+        const cache = queryClient.getQueryData<
+          Awaited<ReturnType<typeof petControllerGetFamilyTree>>
+        >(["family-tree-expand", extId]);
+        if (cache) {
+          const data = cache.data;
+          mergeTree(extId, data.nodes, data.centerPairPartnerIds ?? []);
+          addExternalTreeRoot(extId);
+        }
+      }
+    },
+    [queryClient, petId, setFamilyTree, externalTreeRootIds, mergeTree, addExternalTreeRoot],
+  );
+
   // 중심 개체 데이터 (트리 데이터에서 파생)
   const centerPet = nodesMap.get(petId)?.pet ?? null;
 
@@ -339,25 +424,93 @@ export default function FamilyTreeCanvas({ petId }: FamilyTreeCanvasProps) {
         }}
       />
 
-      {/* 중심 개체 이름 — 데스크톱: 상단 중앙, 모바일: 우측 상단 (재배치 버튼 자리) */}
+      {/* 트리 칩 리스트 — 검색바 우측 나머지 영역 */}
       {centerPet && (
         <div
-          className={
-            isMobile
-              ? "absolute top-1 right-1 z-10"
-              : "absolute top-3 left-1/2 z-10 -translate-x-1/2"
-          }
+          ref={chipScrollRef}
+          className={`absolute z-10 cursor-grab overflow-x-auto active:cursor-grabbing ${
+            isMobile ? "top-2 right-2 left-[235px]" : "top-4 right-[232px] left-[300px]"
+          }`}
+          onMouseDown={(e) => {
+            const el = chipScrollRef.current;
+            if (!el) return;
+            chipDrag.current = {
+              isDown: true,
+              startX: e.pageX - el.offsetLeft,
+              scrollLeft: el.scrollLeft,
+            };
+          }}
+          onMouseLeave={() => {
+            chipDrag.current.isDown = false;
+          }}
+          onMouseUp={() => {
+            chipDrag.current.isDown = false;
+          }}
+          onMouseMove={(e) => {
+            const d = chipDrag.current;
+            if (!d.isDown) return;
+            e.preventDefault();
+            const el = chipScrollRef.current!;
+            const x = e.pageX - el.offsetLeft;
+            el.scrollLeft = d.scrollLeft - (x - d.startX);
+          }}
         >
-          <div className="bg-background/80 border-border flex items-center gap-1.5 rounded-lg border px-3 py-1.5 shadow-sm backdrop-blur-sm">
-            <span
-              className="inline-block h-2 w-2 shrink-0 rounded-full"
-              style={{
-                backgroundColor:
-                  centerPet.sex === "M" ? "#2383E2" : centerPet.sex === "F" ? "#E03E3E" : "#9ca3af",
-              }}
-            />
-            <span className="text-sm font-medium">{centerPet.name ?? "이름 없음"}</span>
-            <span className="text-muted-foreground text-xs">의 브리딩맵</span>
+          <div className="flex w-max gap-1 pb-1.5">
+            {/* 센터 개체 (항상 표시, 삭제 불가) */}
+            <button
+              type="button"
+              onClick={() => handleFocusNode(petId)}
+              className="border-border flex shrink-0 items-center gap-1.5 rounded-full border bg-white px-2.5 py-1 text-xs font-medium shadow-sm dark:bg-gray-900"
+            >
+              <span
+                className="inline-block h-2 w-2 rounded-full"
+                style={{
+                  backgroundColor:
+                    centerPet.sex === "M"
+                      ? "#2383E2"
+                      : centerPet.sex === "F"
+                        ? "#E03E3E"
+                        : "#9ca3af",
+                }}
+              />
+              <span className="max-w-[80px] truncate">{centerPet.name ?? "이름 없음"}</span>
+            </button>
+            {/* 외부 트리 (삭제 가능) */}
+            {externalTreeRootIds.map((rootId) => {
+              const rootPet = nodesMap.get(rootId)?.pet;
+              return (
+                <div
+                  key={rootId}
+                  className="border-border flex shrink-0 items-center gap-1.5 rounded-full border bg-gray-100 px-2.5 py-1 text-xs dark:bg-gray-800"
+                >
+                  <button
+                    type="button"
+                    onClick={() => handleFocusNode(rootId)}
+                    className="flex items-center gap-1.5"
+                  >
+                    <span
+                      className="inline-block h-2 w-2 rounded-full"
+                      style={{
+                        backgroundColor:
+                          rootPet?.sex === "M"
+                            ? "#2383E2"
+                            : rootPet?.sex === "F"
+                              ? "#E03E3E"
+                              : "#9ca3af",
+                      }}
+                    />
+                    <span className="max-w-[80px] truncate">{rootPet?.name ?? "이름 없음"}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveExternalTree(rootId)}
+                    className="text-muted-foreground hover:text-destructive -mr-0.5 rounded-full p-0.5 transition-colors"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
@@ -384,6 +537,7 @@ export default function FamilyTreeCanvas({ petId }: FamilyTreeCanvasProps) {
             onSelect={(v: "M" | "F" | null) => setSexFilter(v)}
             showTitle
             showSelectAll
+            hideTitleOnSelect
             variant="light"
           />
         </div>
@@ -394,6 +548,7 @@ export default function FamilyTreeCanvas({ petId }: FamilyTreeCanvasProps) {
           externalResults={externalResults}
           highlightedIndex={highlightedIndex}
           addingPetId={addingPetId}
+          isMobile={isMobile}
           onSearchSelect={handleSearchSelect}
           onAddExternalTree={handleAddExternalTree}
         />
@@ -506,68 +661,132 @@ export default function FamilyTreeCanvas({ petId }: FamilyTreeCanvasProps) {
       )} */}
 
       {/* 패널 영역 — 데스크톱: 우측 상단, 모바일: 하단 시트 */}
-      <div
-        className={
-          isMobile
-            ? "absolute right-0 bottom-0 left-0 z-10 grid max-h-[40dvh] grid-cols-2 gap-2 overflow-y-auto px-3 pb-3"
-            : "absolute top-3 right-3 flex max-h-[calc(100%-1.5rem)] flex-col gap-2 overflow-y-auto"
-        }
-      >
-        <PetDetailPanel
-          key={panelSourceId ?? "empty"}
-          pet={hoveredPet}
-          father={hoveredFather}
-          mother={hoveredMother}
-          onAction={handleContextMenuAction}
-          onFocusNode={handleFocusNode}
-        />
-        <div
-          onMouseEnter={() => setIsPanelHovered(true)}
-          onMouseLeave={() => setIsPanelHovered(false)}
-          className={isMobile ? "contents" : "flex flex-col gap-2"}
-        >
-          <CoiPanel
-            pets={coiPets}
-            coi={coi}
-            level={coiLevel}
-            commonAncestors={commonAncestors}
-            equivalentRelation={equivalentRelation}
-            isLoading={isCoiLoading}
-            isReady={selectedNodes.length === 2}
-            onClear={handleCoiClear}
-            onClearPet={handleCoiClearPet}
-            onFocusAncestor={handleFocusAncestor}
-            onSelectMate={selectedNodes.length <= 1 ? handleCoiSelectMate : undefined}
-            hasSelection={selectedNodes.length > 0}
-          />
-          {/* {selectedNodes.length === 2 && selectedPetA && selectedPetB && (
-            <OffspringPredictionPanel
-              morphsA={selectedPetA.morphs ?? []}
-              morphsB={selectedPetB.morphs ?? []}
-              nameA={selectedPetA.name ?? "이름 없음"}
-              nameB={selectedPetB.name ?? "이름 없음"}
+      {isMobile ? (
+        <div className="absolute right-0 bottom-0 left-0 z-10 flex flex-col rounded-t-3xl bg-white/90 backdrop-blur-sm dark:bg-gray-900/90">
+          {/* 드래그 핸들 */}
+          <div
+            onTouchStart={handlePanelTouchStart}
+            onTouchMove={handlePanelTouchMove}
+            onTouchEnd={handlePanelTouchEnd}
+            className="flex w-full touch-none items-center justify-center rounded-t-3xl border-t border-gray-200 bg-white/90 py-2.5 backdrop-blur-sm dark:border-gray-700 dark:bg-gray-900/90"
+          >
+            <div className="h-1 w-10 rounded-full bg-gray-400 dark:bg-gray-500" />
+          </div>
+          {/* 패널 콘텐츠 */}
+          <div
+            ref={panelContentRef}
+            className="grid grid-cols-2 gap-2 overflow-y-auto overscroll-contain bg-white/90 px-3 pb-3 backdrop-blur-sm dark:bg-gray-900/90"
+            style={{ height: `${defaultPanelH}px` }}
+          >
+            {selectedNodes.length === 2 && (
+              <button
+                type="button"
+                className="col-span-2 flex items-center justify-center rounded-full border border-purple-300/60 bg-gradient-to-r from-blue-200/50 to-purple-200/65 px-3 py-1 shadow-sm active:from-blue-200/70 active:to-purple-200/85 dark:border-purple-700/50 dark:from-blue-900/40 dark:to-purple-900/50 dark:active:from-blue-900/60 dark:active:to-purple-900/70"
+                onClick={() =>
+                  pairStatsPanelRef.current?.scrollIntoView({
+                    behavior: "smooth",
+                    block: "nearest",
+                  })
+                }
+              >
+                <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-xs font-semibold text-transparent dark:from-blue-400 dark:to-purple-400">
+                  메이팅 정보 보기
+                </span>
+              </button>
+            )}
+            <PetDetailPanel
+              key={panelSourceId ?? "empty"}
+              pet={hoveredPet}
+              father={hoveredFather}
+              mother={hoveredMother}
+              onAction={handleContextMenuAction}
+              onFocusNode={handleFocusNode}
             />
-          )} */}
-          {selectedNodes.length === 2 && (
-            <PairStatisticsPanel
-              statistics={pairStatistics}
-              isLoading={isPairStatsLoading}
-              hasPair={hasPair}
-              isOpposite={isMaleFemale}
-              isBothOwned={isBothOwned}
-              onAddMating={handleAddMating}
-              matingDates={matingDatesForCalendar}
-              latestSeason={latestMatingSeasonForCalendar}
-              onAddLaying={handleAddLaying}
-              onExpand={handleViewPairDetail}
-              pairChildren={pairChildren}
-              onChildClick={handleChildClick}
-            />
-          )}
-          {/* 모바일에서만 범례를 패널 그리드 안에 표시 */}
-          {isMobile && <MorphLegend morphs={visibleMorphs} />}
+            <div className="contents">
+              <CoiPanel
+                pets={coiPets}
+                coi={coi}
+                level={coiLevel}
+                commonAncestors={commonAncestors}
+                equivalentRelation={equivalentRelation}
+                isLoading={isCoiLoading}
+                isReady={selectedNodes.length === 2}
+                onClear={handleCoiClear}
+                onClearPet={handleCoiClearPet}
+                onFocusAncestor={handleFocusAncestor}
+                onSelectMate={selectedNodes.length <= 1 ? handleCoiSelectMate : undefined}
+                hasSelection={selectedNodes.length > 0}
+              />
+              <MorphLegend morphs={visibleMorphs} />
+              {selectedNodes.length === 2 && (
+                <div ref={pairStatsPanelRef}>
+                  <PairStatisticsPanel
+                    statistics={pairStatistics}
+                    isLoading={isPairStatsLoading}
+                    hasPair={hasPair}
+                    isOpposite={isMaleFemale}
+                    isBothOwned={isBothOwned}
+                    onAddMating={handleAddMating}
+                    matingDates={matingDatesForCalendar}
+                    latestSeason={latestMatingSeasonForCalendar}
+                    onAddLaying={handleAddLaying}
+                    onExpand={handleViewPairDetail}
+                    pairChildren={pairChildren}
+                    onChildClick={handleChildClick}
+                  />
+                </div>
+              )}
+            </div>
+          </div>
         </div>
-      </div>
+      ) : !isMobile ? (
+        <div className="absolute top-3 right-3 -mx-2 -mb-3 flex max-h-[calc(100%-1.5rem)] flex-col gap-2 overflow-y-auto px-2 pb-5">
+          <PetDetailPanel
+            key={panelSourceId ?? "empty"}
+            pet={hoveredPet}
+            father={hoveredFather}
+            mother={hoveredMother}
+            onAction={handleContextMenuAction}
+            onFocusNode={handleFocusNode}
+          />
+          <div
+            onMouseEnter={() => setIsPanelHovered(true)}
+            onMouseLeave={() => setIsPanelHovered(false)}
+            className="flex flex-col gap-2"
+          >
+            <CoiPanel
+              pets={coiPets}
+              coi={coi}
+              level={coiLevel}
+              commonAncestors={commonAncestors}
+              equivalentRelation={equivalentRelation}
+              isLoading={isCoiLoading}
+              isReady={selectedNodes.length === 2}
+              onClear={handleCoiClear}
+              onClearPet={handleCoiClearPet}
+              onFocusAncestor={handleFocusAncestor}
+              onSelectMate={selectedNodes.length <= 1 ? handleCoiSelectMate : undefined}
+              hasSelection={selectedNodes.length > 0}
+            />
+            {selectedNodes.length === 2 && (
+              <PairStatisticsPanel
+                statistics={pairStatistics}
+                isLoading={isPairStatsLoading}
+                hasPair={hasPair}
+                isOpposite={isMaleFemale}
+                isBothOwned={isBothOwned}
+                onAddMating={handleAddMating}
+                matingDates={matingDatesForCalendar}
+                latestSeason={latestMatingSeasonForCalendar}
+                onAddLaying={handleAddLaying}
+                onExpand={handleViewPairDetail}
+                pairChildren={pairChildren}
+                onChildClick={handleChildClick}
+              />
+            )}
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

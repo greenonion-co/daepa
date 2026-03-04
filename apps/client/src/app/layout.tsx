@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Script from "next/script";
@@ -23,6 +23,10 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "BREEDY",
   description: "BREEDY",
+};
+
+export const viewport: Viewport = {
+  maximumScale: 1,
 };
 
 export default function RootLayout({

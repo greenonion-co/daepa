@@ -4,7 +4,7 @@ import {
   pairControllerUpdatePair,
   pairControllerGetPairList,
 } from "@repo/api-client";
-import { StickyNote, Trash2 } from "lucide-react";
+import { StickyNote } from "lucide-react";
 import { useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
@@ -35,7 +35,7 @@ const PairCard = ({
   onDateClick,
   onAddMating,
   onAddLaying,
-  onDelete,
+  // onDelete,
   showTutorial,
   onCloseTutorial,
   petThumbnailClickable = true,
@@ -153,6 +153,13 @@ const PairCard = ({
         />
       </div>
 
+      {/* 분양된 개체 포함 안내 */}
+      {(pair.father?.isMine === false || pair.mother?.isMine === false) && (
+        <p className="mt-1 text-center text-[11px] text-red-500">
+          분양된 개체가 포함되어 메이팅·산란 추가가 불가합니다.
+        </p>
+      )}
+
       {/* 요약 정보 */}
       <div
         data-tutorial={PAIR_CARD_TUTORIAL_TARGETS.SUMMARY_INFO}
@@ -243,7 +250,7 @@ const PairCard = ({
       </div>
 
       {/* 삭제 버튼 */}
-      {onDelete && (
+      {/* {onDelete && (
         <button
           type="button"
           aria-label="페어 삭제"
@@ -255,7 +262,7 @@ const PairCard = ({
         >
           <Trash2 className="h-3.5 w-3.5" />
         </button>
-      )}
+      )} */}
     </div>
   );
 };

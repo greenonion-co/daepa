@@ -14,6 +14,7 @@ interface SearchDropdownProps {
   externalResults: ExternalPetResult[];
   highlightedIndex: number;
   addingPetId: string | null;
+  isMobile?: boolean;
   onSearchSelect: (nodeId: string) => void;
   onAddExternalTree: (petId: string) => void;
 }
@@ -25,6 +26,7 @@ export default function SearchDropdown({
   externalResults,
   highlightedIndex,
   addingPetId,
+  isMobile,
   onSearchSelect,
   onAddExternalTree,
 }: SearchDropdownProps) {
@@ -33,7 +35,7 @@ export default function SearchDropdown({
   // 검색 중 로딩
   if (isExternalFetching && searchResults.length === 0 && externalResults.length === 0) {
     return (
-      <div className="border-border bg-background/95 w-52 rounded-lg border px-3 py-2 text-xs text-gray-400 shadow-md backdrop-blur-sm">
+      <div className={`border-border bg-background/95 ${isMobile ? "w-40" : "w-52"} rounded-lg border px-3 py-2 text-xs text-gray-400 shadow-md backdrop-blur-sm`}>
         검색 중...
       </div>
     );
@@ -42,7 +44,7 @@ export default function SearchDropdown({
   if (searchResults.length === 0 && externalResults.length === 0) return null;
 
   return (
-    <div className="border-border bg-background/95 w-52 rounded-lg border py-1 shadow-md backdrop-blur-sm">
+    <div className={`border-border bg-background/95 ${isMobile ? "w-40" : "w-52"} rounded-lg border py-1 shadow-md backdrop-blur-sm`}>
       {/* 트리 내 결과 */}
       {searchResults.length > 0 && (
         <>

@@ -61,7 +61,7 @@ export default async function PetPage({ params }: PetPageProps) {
   // 삭제된 펫인 경우 처리
   if (pet.isDeleted) {
     return (
-      <div className="flex h-[calc(100vh-52px)] flex-1 items-center justify-center">
+      <div className="flex h-[calc(100dvh-52px)] flex-1 items-center justify-center">
         <div className="flex flex-col items-center gap-2 text-center">
           <h1 className="text-[15px] font-medium text-gray-500 dark:text-gray-400">
             삭제된 개체입니다

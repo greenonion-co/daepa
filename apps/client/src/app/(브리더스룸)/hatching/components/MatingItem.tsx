@@ -1,8 +1,4 @@
-import {
-  layingControllerUpdate,
-  MatingByDateDto,
-  PetSummaryLayingDto,
-} from "@repo/api-client";
+import { layingControllerUpdate, MatingByDateDto, PetSummaryLayingDto } from "@repo/api-client";
 import { overlay } from "overlay-kit";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { orderBy } from "es-toolkit";
@@ -30,7 +26,11 @@ interface MatingItemProps {
 
 const MatingItem = ({ mating, father, mother, initialLayingId, showTutorial }: MatingItemProps) => {
   const invalidatePair = usePairInvalidate();
-  const isEditable = !father?.isDeleted && !mother?.isDeleted;
+  const isEditable =
+    !father?.isDeleted &&
+    !mother?.isDeleted &&
+    (father?.isMine ?? true) &&
+    (mother?.isMine ?? true);
 
   const { mutateAsync: updateLayingDate } = useMutation({
     mutationFn: ({ id, newLayingDate }: { id: number; newLayingDate: string }) =>
@@ -170,7 +170,7 @@ const MatingItem = ({ mating, father, mother, initialLayingId, showTutorial }: M
   );
 
   return (
-    <div className="relative flex h-[calc(100vh-200px)] w-full flex-col">
+    <div className="relative flex h-[calc(100dvh-200px)] w-full flex-col">
       <div className="flex flex-col justify-center gap-1">
         <div
           data-tutorial={TUTORIAL_TARGETS.CLUTCH_TABS}

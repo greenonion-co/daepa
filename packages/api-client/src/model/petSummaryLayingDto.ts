@@ -31,6 +31,8 @@ export interface PetSummaryLayingDto {
   traits?: string[];
   /** 펫 몸무게(g) */
   weight?: number;
+  /** 내 개체 여부 (분양 완료 등으로 소유권이 이전되면 false) */
+  isMine?: boolean;
   /** 산란 아이디 */
   layingId?: number;
   /** 산란 클러치 */

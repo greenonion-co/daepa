@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useQueries, type QueryClient } from "@tanstack/react-query";
+import { useQuery, type QueryClient } from "@tanstack/react-query";
 import { petControllerFindAll, petControllerGetFamilyTree } from "@repo/api-client";
 import type { FamilyTreeNodeData } from "../lib/types";
 import type { FamilyTreeResponse } from "./useFamilyTreeData";
@@ -13,68 +13,52 @@ interface UseSearchParams {
     nodes: FamilyTreeResponse["nodes"],
     centerPairPartnerIds: string[],
   ) => void;
+  addExternalTreeRoot: (petId: string) => void;
 }
 
-export function useSearch({ nodesMap, nodeKey, queryClient, mergeTree }: UseSearchParams) {
+export function useSearch({ nodesMap, nodeKey, queryClient, mergeTree, addExternalTreeRoot }: UseSearchParams) {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchFocused, setSearchFocused] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const [focusNodeId, setFocusNodeId] = useState<string | null>(null);
   const [addingPetId, setAddingPetId] = useState<string | null>(null);
 
-  // 검색 결과 (보이는 노드 내에서 이름 매칭)
+  // 검색 결과 (보이는 노드 내에서 내 펫만 이름 매칭)
   const visibleNodes = useMemo(() => Array.from(nodesMap.values()), [nodesMap]);
   const searchResults = useMemo(() => {
     if (!searchQuery.trim()) return [];
     const q = searchQuery.toLowerCase();
-    return visibleNodes.filter((n) => n.pet?.name?.toLowerCase().includes(q)).slice(0, 8);
+    return visibleNodes
+      .filter((n) => n.pet?.name?.toLowerCase().includes(q))
+      .slice(0, 8);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchQuery, nodeKey]);
 
-  // 외부 개체 검색 — 공개 펫(ALL) + 내 비공개 펫(MY) 병렬 조회
+  // 외부 개체 검색 — 내 펫(공개+비공개)만 조회
   const enabled = searchQuery.trim().length >= 1;
-  const [
-    { data: publicPets, isFetching: isFetchingPublic },
-    { data: myPets, isFetching: isFetchingMy },
-  ] = useQueries({
-    queries: [
-      {
-        queryKey: ["pet-search-external", "ALL", searchQuery],
-        queryFn: () => petControllerFindAll({ keyword: searchQuery.trim(), itemPerPage: 5 }),
-        select: (res: Awaited<ReturnType<typeof petControllerFindAll>>) => res.data.data ?? [],
-        enabled,
-        staleTime: 30 * 1000,
-      },
-      {
-        queryKey: ["pet-search-external", "MY", searchQuery],
-        queryFn: () =>
-          petControllerFindAll({ keyword: searchQuery.trim(), itemPerPage: 5, filterType: "MY" }),
-        select: (res: Awaited<ReturnType<typeof petControllerFindAll>>) => res.data.data ?? [],
-        enabled,
-        staleTime: 30 * 1000,
-      },
-    ],
+  const { data: myPets, isFetching: isExternalFetching } = useQuery({
+    queryKey: ["pet-search-external", "MY", searchQuery],
+    queryFn: () =>
+      petControllerFindAll({ keyword: searchQuery.trim(), itemPerPage: 5, filterType: "MY" }),
+    select: (res: Awaited<ReturnType<typeof petControllerFindAll>>) => res.data.data ?? [],
+    enabled,
+    staleTime: 30 * 1000,
   });
-  const isExternalFetching = isFetchingPublic || isFetchingMy;
 
   const externalResults = useMemo(() => {
     if (!searchQuery.trim()) return [];
-    const seen = new Set<string>();
-    const merged = [...(myPets ?? []), ...(publicPets ?? [])].filter((p) => {
-      if (seen.has(p.petId) || nodesMap.has(p.petId)) return false;
-      seen.add(p.petId);
-      return true;
-    });
-    return merged.slice(0, 5);
-  }, [publicPets, myPets, searchQuery, nodesMap]);
+    return (myPets ?? []).filter((p) => !nodesMap.has(p.petId)).slice(0, 5);
+  }, [myPets, searchQuery, nodesMap]);
 
   const handleSearchSelect = useCallback((nodeId: string) => {
+    (document.activeElement as HTMLElement)?.blur();
     setFocusNodeId(nodeId);
     setSearchQuery("");
   }, []);
 
   const handleAddExternalTree = useCallback(
     async (targetPetId: string) => {
+      (document.activeElement as HTMLElement)?.blur();
       setAddingPetId(targetPetId);
       try {
         const response = await queryClient.fetchQuery({
@@ -84,6 +68,7 @@ export function useSearch({ nodesMap, nodeKey, queryClient, mergeTree }: UseSear
         });
         const data = response.data;
         mergeTree(targetPetId, data.nodes, data.centerPairPartnerIds ?? []);
+        addExternalTreeRoot(targetPetId);
         setSearchQuery("");
         setTimeout(() => setFocusNodeId(targetPetId), 1500);
       } catch {
@@ -92,7 +77,7 @@ export function useSearch({ nodesMap, nodeKey, queryClient, mergeTree }: UseSear
         setAddingPetId(null);
       }
     },
-    [queryClient, mergeTree],
+    [queryClient, mergeTree, addExternalTreeRoot],
   );
 
   const handleFocusAncestor = useCallback(

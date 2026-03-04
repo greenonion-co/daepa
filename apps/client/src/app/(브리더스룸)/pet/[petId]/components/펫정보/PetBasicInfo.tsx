@@ -48,6 +48,7 @@ export const PetBasicInfo = ({
             placeholder="미정"
             onChange={(e) => onNameChange(e.target.value)}
             onBlur={() => onFieldBlur?.("name")}
+            autoFocus={false}
           />
         }
       />

@@ -107,12 +107,22 @@ const PetInfoCard = ({
           </div>
           <div
             className={cn(
-              "flex flex-col gap-2 text-gray-600 dark:text-gray-300",
+              "flex flex-wrap items-center gap-1 text-gray-600 dark:text-gray-300",
               isMobile ? "text-xs" : "text-sm",
             )}
           >
-            <BadgeList variant={"outline"} items={morphs} badgeSize={isMobile ? "sm" : "md"} />
-            <BadgeList items={traits} variant="secondary" badgeSize={isMobile ? "sm" : "md"} />
+            <BadgeList
+              inline
+              variant={"outline"}
+              items={morphs}
+              badgeSize={isMobile ? "sm" : "md"}
+            />
+            <BadgeList
+              inline
+              items={traits}
+              variant="secondary"
+              badgeSize={isMobile ? "sm" : "md"}
+            />
           </div>
         </div>
       </div>
@@ -193,7 +203,7 @@ const AdoptionReceiptModal = ({ isOpen, adoption, onClose }: AdoptionReceiptModa
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-h-[90dvh] overflow-y-auto rounded-3xl px-4 py-6 sm:max-w-[500px]">
-        <DialogHeader>
+        <DialogHeader className="-mt-0">
           <DialogTitle>분양 상세 정보</DialogTitle>
           <DialogDescription className="sr-only">분양 상세 정보를 확인합니다.</DialogDescription>
         </DialogHeader>
@@ -246,10 +256,17 @@ const AdoptionReceiptModal = ({ isOpen, adoption, onClose }: AdoptionReceiptModa
 
                   <div className="flex justify-between">
                     <span className="text-sm text-gray-600 dark:text-gray-400">구매자 </span>
-                    <span className="text-sm text-gray-800 dark:text-gray-200">
-                      {/* TODO!: 법안을 고려하여 판매완료 정보는 사용자 정보가 삭제되더라도 기록으로 남겨놔야 할듯. */}
-                      {adoption?.buyer?.name ?? "-"}
-                    </span>
+                    {/* TODO!: 법안을 고려하여 판매완료 정보는 사용자 정보가 삭제되더라도 기록으로 남겨놔야 할듯. */}
+                    {adoption?.buyer?.name ? (
+                      <Link
+                        href={`/@${encodeURIComponent(adoption.buyer.name)}`}
+                        className="text-sm font-medium text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300"
+                      >
+                        @{adoption.buyer.name}
+                      </Link>
+                    ) : (
+                      <span className="text-sm text-gray-800 dark:text-gray-200">-</span>
+                    )}
                   </div>
                 </div>
 

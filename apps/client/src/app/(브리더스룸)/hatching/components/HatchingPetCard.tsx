@@ -91,39 +91,45 @@ const HatchingPetCard = ({ date, pets, tab, isSelected }: PetCardProps) => {
                         </div>
                       ) : (
                         <div className="flex gap-1">
-                          {pet.father && !("hiddenStatus" in pet.father) && (
-                            <Link
-                              href={`/pet/${pet.father.petId}`}
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <TooltipText
-                                text={getParentInfo(pet.father) || "@"}
-                                title={pet.father?.name ?? "@"}
-                                content={`${pet.father?.morphs?.join(" | ") ?? ""} ${pet.father?.traits?.join(" | ") ?? ""}`}
-                                description={
-                                  pet.father?.owner?.name ? `@${pet.father?.owner?.name}` : ""
-                                }
-                                className="cursor-pointer text-blue-700 underline dark:text-blue-400"
-                              />
-                            </Link>
-                          )}
+                          {pet.father &&
+                            ("hiddenStatus" in pet.father ? (
+                              <span className="text-gray-400 dark:text-gray-500">비공개</span>
+                            ) : (
+                              <Link
+                                href={`/pet/${pet.father.petId}`}
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <TooltipText
+                                  text={getParentInfo(pet.father) || "@"}
+                                  title={pet.father?.name ?? "@"}
+                                  content={`${pet.father?.morphs?.join(" | ") ?? ""} ${pet.father?.traits?.join(" | ") ?? ""}`}
+                                  description={
+                                    pet.father?.owner?.name ? `@${pet.father?.owner?.name}` : ""
+                                  }
+                                  className="cursor-pointer text-blue-700 underline dark:text-blue-400"
+                                />
+                              </Link>
+                            ))}
                           x
-                          {pet.mother && !("hiddenStatus" in pet.mother) && (
-                            <Link
-                              href={`/pet/${pet.mother.petId}`}
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <TooltipText
-                                text={getParentInfo(pet.mother) || "@"}
-                                title={pet.mother?.name ?? "@"}
-                                content={`${pet.mother?.morphs?.join(" | ") ?? ""} ${pet.mother?.traits?.join(" | ") ?? ""}`}
-                                description={
-                                  pet.mother?.owner?.name ? `@${pet.mother?.owner?.name}` : ""
-                                }
-                                className="cursor-pointer text-blue-700 underline dark:text-blue-400"
-                              />
-                            </Link>
-                          )}
+                          {pet.mother &&
+                            ("hiddenStatus" in pet.mother ? (
+                              <span className="text-gray-400 dark:text-gray-500">비공개</span>
+                            ) : (
+                              <Link
+                                href={`/pet/${pet.mother.petId}`}
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <TooltipText
+                                  text={getParentInfo(pet.mother) || "@"}
+                                  title={pet.mother?.name ?? "@"}
+                                  content={`${pet.mother?.morphs?.join(" | ") ?? ""} ${pet.mother?.traits?.join(" | ") ?? ""}`}
+                                  description={
+                                    pet.mother?.owner?.name ? `@${pet.mother?.owner?.name}` : ""
+                                  }
+                                  className="cursor-pointer text-blue-700 underline dark:text-blue-400"
+                                />
+                              </Link>
+                            ))}
                           {/* {isEgg && `${pet.clutch ?? "@"}-${pet.clutchOrder ?? "@"}`} */}
                           {isEgg && pet.temperature ? (
                             <span className="font-[400] text-gray-500 dark:text-gray-400">
