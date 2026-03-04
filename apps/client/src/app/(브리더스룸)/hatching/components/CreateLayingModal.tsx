@@ -2,20 +2,20 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 
 import { useEffect, useMemo, useState } from "react";
 import {
-  pairControllerGetPairList,
   LayingByDateDto,
   layingControllerCreate,
   MatingByDateDto,
   PetDtoSpecies,
 } from "@repo/api-client";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
+import { usePairInvalidate } from "../hooks/usePairInvalidate";
 import { AlertCircle, Info } from "lucide-react";
 import { DateTime } from "luxon";
 import { toast } from "@/lib/toast";
 import { AxiosError } from "axios";
 import CalendarSelect from "./CalendarSelect";
 import CustomSelect from "./Charts/CustomSelect";
-import { SPECIES_KOREAN_INFO } from "../../constants";
+// import { SPECIES_KOREAN_INFO } from "../../constants";
 import NumberField from "../../components/Form/NumberField";
 import FormItem from "../../pet/[petId]/components/FormItem";
 import Loading from "@/components/common/Loading";
@@ -45,7 +45,7 @@ const CreateLayingModal = ({
   isLayingDateEditable = true,
   matingsByDate,
 }: CreateLayingModalProps) => {
-  const queryClient = useQueryClient();
+  const invalidatePair = usePairInvalidate();
 
   // 선택 모드에서만 사용하는 로컬 state
   const [localSelectedMatingId, setLocalSelectedMatingId] = useState<number | undefined>(undefined);
@@ -119,6 +119,7 @@ const CreateLayingModal = ({
     clutch: String(maxClutch + 1),
   });
 
+  // mating 선택이 바뀔 때 차수(clutch) 기본값을 해당 메이팅의 maxClutch+1로 갱신
   useEffect(() => {
     setFormData((prev) => ({ ...prev, clutch: String(maxClutch + 1) }));
   }, [maxClutch]);
@@ -159,7 +160,7 @@ const CreateLayingModal = ({
         fatherId,
       });
       toast.success("산란이 추가되었습니다.");
-      await queryClient.invalidateQueries({ queryKey: [pairControllerGetPairList.name] });
+      invalidatePair();
       onClose();
     } catch (error) {
       if (error instanceof AxiosError) {
@@ -211,8 +212,8 @@ const CreateLayingModal = ({
           <Loading />
         ) : (
           <>
-            <div className="grid gap-4 py-4">
-              <FormItem
+            <div className="grid gap-4 py-2">
+              {/* <FormItem
                 label="종"
                 content={
                   <CustomSelect
@@ -228,7 +229,7 @@ const CreateLayingModal = ({
                     }
                   />
                 }
-              />
+              /> */}
 
               {/* 메이팅 선택 (matingDate가 없고 matingsByDate가 있는 경우) */}
               {!matingDate && matingsByDate && matingsByDate.length > 0 && (
@@ -250,7 +251,7 @@ const CreateLayingModal = ({
                             const layingDateTime = DateTime.fromISO(formData.layingDate).startOf(
                               "day",
                             );
-                            return matingDateTime < layingDateTime;
+                            return matingDateTime <= layingDateTime;
                           })
                           .map((mating, index, filteredArray) => {
                             const season = filteredArray.length - index;
@@ -282,7 +283,7 @@ const CreateLayingModal = ({
                   }
                 />
               )}
-              {selectedMatingId && (
+              {(selectedMatingId || !matingsByDate) && (
                 <>
                   {isLayingDateEditable && (
                     <FormItem
@@ -314,12 +315,8 @@ const CreateLayingModal = ({
                           />
 
                           {lastLayingDate && (
-                            <div className="mt-1 text-sm">
-                              <div className="flex items-center gap-1 text-gray-500">
-                                <Info className="h-4 w-4" /> 이전 산란일 이후 날짜만 선택
-                                가능합니다.
-                              </div>
-                              <div className="font-semibold text-blue-500">
+                            <div className="mt-1 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm">
+                              <div className="font-medium text-gray-600">
                                 마지막 산란일:{" "}
                                 {DateTime.fromJSDate(
                                   new Date(
@@ -328,6 +325,10 @@ const CreateLayingModal = ({
                                       .replace(/(\d{4})(\d{2})(\d{2})/, "$1-$2-$3"),
                                   ),
                                 ).toFormat("yyyy년 MM월 dd일")}
+                              </div>
+                              <div className="flex items-center gap-1 text-xs text-gray-500">
+                                <Info className="h-3 w-3" /> 이전 산란일 이후 날짜만 선택
+                                가능합니다.
                               </div>
                             </div>
                           )}
@@ -357,7 +358,7 @@ const CreateLayingModal = ({
                         {maxClutch > 0 && (
                           <div className="col-span-3">
                             <div className="flex items-center gap-1 text-sm text-gray-500">
-                              <Info className="h-4 w-4" /> 가장 마지막 차수는 {maxClutch}차 입니다.
+                              직전 차수: {maxClutch}차
                             </div>
                           </div>
                         )}
@@ -405,12 +406,12 @@ const CreateLayingModal = ({
               )}
             </div>
             <div className="flex justify-end gap-2">
-              <button
+              {/* <button
                 className="h-[32px] cursor-pointer rounded-lg bg-gray-100 px-3 text-sm font-semibold text-gray-600 hover:bg-gray-200"
                 onClick={onClose}
               >
                 취소
-              </button>
+              </button> */}
               <button
                 className="h-[32px] cursor-pointer rounded-lg bg-blue-500 px-3 text-sm font-semibold text-white hover:bg-blue-600 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-500"
                 onClick={handleSubmit}

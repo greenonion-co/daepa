@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { DataSource } from 'typeorm';
+import { Brackets, DataSource } from 'typeorm';
 import { plainToInstance } from 'class-transformer';
 import { DateTime } from 'luxon';
 import { PairEntity } from 'src/pair/pair.entity';
@@ -115,7 +115,15 @@ export class StatisticsService {
     const layingEntities = await layingQuery.getMany();
 
     if (layingEntities.length === 0) {
-      return this.buildEmptyParentStatistics(fatherId, motherId, year, month);
+      return this.buildParentStatistics(
+        fatherId,
+        motherId,
+        [],
+        totalMatings,
+        0,
+        year,
+        month,
+      );
     }
 
     const layingsForStats: LayingWithDate[] = layingEntities.map((laying) => ({
@@ -212,8 +220,17 @@ export class StatisticsService {
 
     if (fatherId && motherId) {
       query.andWhere(
-        'pair.fatherId = :fatherId AND pair.motherId = :motherId',
-        { fatherId, motherId },
+        new Brackets((qb) =>
+          qb
+            .where('pair.fatherId = :fatherId AND pair.motherId = :motherId', {
+              fatherId,
+              motherId,
+            })
+            .orWhere(
+              'pair.fatherId = :motherId AND pair.motherId = :fatherId',
+              { fatherId, motherId },
+            ),
+        ),
       );
     } else if (fatherId) {
       query.andWhere('pair.fatherId = :fatherId', { fatherId });

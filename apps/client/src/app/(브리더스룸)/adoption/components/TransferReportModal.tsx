@@ -20,6 +20,7 @@ import { DownloadIcon, Loader2Icon } from "lucide-react";
 import { toast } from "@/lib/toast";
 import { useQuery } from "@tanstack/react-query";
 import { userControllerGetUserPrivateInfo } from "@repo/api-client";
+import AddressSearch from "@/components/common/AddressSearch";
 
 interface TransferReportModalProps {
   isOpen: boolean;
@@ -138,7 +139,7 @@ const TransferReportModal = ({ isOpen, onClose }: TransferReportModalProps) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent
-        className={`max-h-[90vh] overflow-y-auto ${isMobile ? "sm:max-w-[95vw]" : "sm:max-w-[500px]"}`}
+        className={`max-h-[90dvh] overflow-y-auto ${isMobile ? "sm:max-w-[95vw]" : "sm:max-w-[500px]"}`}
       >
         <DialogHeader>
           <DialogTitle>양도·양수·보관 신고서 작성</DialogTitle>
@@ -209,11 +210,11 @@ const TransferReportModal = ({ isOpen, onClose }: TransferReportModalProps) => {
             </div>
             <div className="space-y-2">
               <Label>주소</Label>
-              <Input
+              <AddressSearch
                 value={sellerAddress}
-                onChange={(e) => setSellerAddress(e.target.value)}
-                placeholder="주소 입력"
-                className="text-blue-500"
+                onChange={(address) => setSellerAddress(address)}
+                placeholder="주소 검색"
+                className="flex h-10 w-full min-w-0 rounded-md border border-input bg-transparent px-3 py-1 text-base text-blue-500 shadow-xs outline-none placeholder:text-muted-foreground dark:bg-input/30 md:text-sm"
               />
             </div>
           </fieldset>
@@ -260,11 +261,11 @@ const TransferReportModal = ({ isOpen, onClose }: TransferReportModalProps) => {
             </div>
             <div className="space-y-2">
               <Label>주소</Label>
-              <Input
+              <AddressSearch
                 value={buyerAddress}
-                onChange={(e) => setBuyerAddress(e.target.value)}
-                placeholder="주소 입력"
-                className="text-blue-500"
+                onChange={(address) => setBuyerAddress(address)}
+                placeholder="주소 검색"
+                className="flex h-10 w-full min-w-0 rounded-md border border-input bg-transparent px-3 py-1 text-base text-blue-500 shadow-xs outline-none placeholder:text-muted-foreground dark:bg-input/30 md:text-sm"
               />
             </div>
           </fieldset>

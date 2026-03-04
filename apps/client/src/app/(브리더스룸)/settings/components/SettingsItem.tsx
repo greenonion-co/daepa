@@ -42,7 +42,7 @@ export const SettingsItem = ({
         ) : (
           <div className={cn("flex h-8 w-8 items-center justify-center", iconColor)}>{icon}</div>
         ))}
-      <div className="min-w-0">
+      <div className="">
         <span
           className={cn(
             "text-[15px] whitespace-nowrap",
@@ -52,15 +52,15 @@ export const SettingsItem = ({
           {label}
         </span>
       </div>
-      <div className="ml-auto flex items-center gap-3">
+      <div className="ml-auto flex min-w-0 items-center gap-3">
         {typeof value === "string" && (
           <p className="truncate text-[13px] font-[600] text-gray-700 dark:text-gray-400">
             {value}
           </p>
         )}
         {typeof value !== "string" && value}
-        {rightElement}
-        {showChevron && <ChevronRight className="h-5 w-5 text-gray-400" />}
+        {rightElement && <div className="shrink-0">{rightElement}</div>}
+        {showChevron && <ChevronRight className="h-5 w-5 shrink-0 text-gray-400" />}
       </div>
     </>
   );
@@ -73,9 +73,20 @@ export const SettingsItem = ({
 
   if (onClick) {
     return (
-      <button type="button" onClick={onClick} disabled={disabled} className={className}>
+      <div
+        role="button"
+        tabIndex={disabled ? -1 : 0}
+        onClick={disabled ? undefined : onClick}
+        onKeyDown={(e) => {
+          if (!disabled && (e.key === "Enter" || e.key === " ")) {
+            e.preventDefault();
+            onClick();
+          }
+        }}
+        className={cn(className, "cursor-pointer")}
+      >
         {content}
-      </button>
+      </div>
     );
   }
 

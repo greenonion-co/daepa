@@ -12,6 +12,7 @@ import {
   PARENT_STATUS,
 } from '../parent_request/parent_request.constants';
 import {
+  RawFamilyTreeQueryResult,
   RawSiblingQueryResult,
   RawChildQueryResult,
   ChildPetDetailDto,
@@ -20,12 +21,15 @@ import {
   GetClutchMatesResponseDto,
   GetSiblingsQueryDto,
   GetClutchMatesQueryDto,
+  FamilyTreeNodeDto,
+  GetFamilyTreeResponseDto,
 } from './pet_relation.dto';
 import { ParentRequestService } from '../parent_request/parent_request.service';
 import { PetEntity } from '../pet/pet.entity';
 import { replaceSiblingPublicSafe } from '../common/utils/pet-parent.helper';
 import { PageOptionsDto, PageMetaDto } from '../common/page.dto';
-import { PetSummaryDto } from 'src/pet/pet.dto';
+import { PetSummaryDto, PetHiddenStatusDto } from 'src/pet/pet.dto';
+import { PET_HIDDEN_STATUS } from 'src/pet/pet.constants';
 import { PET_TYPE } from '../pet/pet.constants';
 
 @Injectable()
@@ -544,6 +548,229 @@ export class PetRelationService {
       });
 
       return { data: clutchMates };
+    };
+
+    if (manager) {
+      return run(manager);
+    }
+
+    return this.dataSource.transaction(async (entityManager: EntityManager) => {
+      return run(entityManager);
+    });
+  }
+
+  /**
+   * Recursive CTE로 특정 펫의 전체 가계도(후손 + 공동 부모)를 한 번에 조회합니다.
+   * @param petId - 중심 개체 ID
+   * @param userId - 요청 사용자 ID (privacy 처리용)
+   * @param maxDepth - 최대 후손 탐색 깊이 (기본 2)
+   * @param maxAncestorDepth - 최대 조상 탐색 깊이 (기본 2: 부모·조부모)
+   * @param manager - 선택적 EntityManager
+   */
+  async getFamilyTree(
+    petId: string,
+    userId: string | null,
+    maxDepth: number = 2,
+    maxAncestorDepth: number = 2,
+    manager?: EntityManager,
+  ): Promise<GetFamilyTreeResponseDto> {
+    const run = async (em: EntityManager) => {
+      const rootPet = await em.findOne(PetEntity, {
+        where: { petId, isDeleted: false },
+      });
+      if (!rootPet) {
+        throw new NotFoundException('펫을 찾을 수 없습니다.');
+      }
+
+      // Recursive CTE: 조상(ancestor) + 후손(descendant) + 공동 부모를 한 번에 조회
+      const rawResults: RawFamilyTreeQueryResult[] = await em.query(
+        `
+        WITH RECURSIVE
+        ancestor_cte AS (
+          SELECT father_id AS pet_id, 1 AS anc_depth
+          FROM pet_relations
+          WHERE pet_id = ? AND father_id IS NOT NULL
+          UNION ALL
+          SELECT mother_id AS pet_id, 1 AS anc_depth
+          FROM pet_relations
+          WHERE pet_id = ? AND mother_id IS NOT NULL
+          UNION ALL
+          SELECT pr.father_id, cte.anc_depth + 1
+          FROM pet_relations pr
+          INNER JOIN ancestor_cte cte ON pr.pet_id = cte.pet_id
+          WHERE cte.anc_depth < ? AND pr.father_id IS NOT NULL
+          UNION ALL
+          SELECT pr.mother_id, cte.anc_depth + 1
+          FROM pet_relations pr
+          INNER JOIN ancestor_cte cte ON pr.pet_id = cte.pet_id
+          WHERE cte.anc_depth < ? AND pr.mother_id IS NOT NULL
+        ),
+
+        deduped_ancestors AS (
+          SELECT pet_id, MIN(anc_depth) AS anc_depth
+          FROM ancestor_cte
+          GROUP BY pet_id
+        ),
+
+        descendant_cte AS (
+          SELECT pet_id, father_id, mother_id, 1 AS depth
+          FROM pet_relations
+          WHERE (father_id = ? OR mother_id = ?)
+
+          UNION ALL
+
+          SELECT pr.pet_id, pr.father_id, pr.mother_id, cte.depth + 1
+          FROM pet_relations pr
+          INNER JOIN descendant_cte cte
+            ON (pr.father_id = cte.pet_id OR pr.mother_id = cte.pet_id)
+          WHERE cte.depth < ?
+        ),
+
+        deduped AS (
+          SELECT pet_id,
+                 MAX(father_id) AS father_id,
+                 MAX(mother_id) AS mother_id,
+                 MIN(depth)     AS depth
+          FROM descendant_cte
+          GROUP BY pet_id
+        ),
+
+        all_ids AS (
+          SELECT ? AS pid, 0 AS node_depth
+          UNION
+          SELECT pet_id, depth FROM deduped
+          UNION
+          SELECT DISTINCT father_id, NULL
+          FROM deduped
+          WHERE father_id IS NOT NULL
+            AND father_id != ?
+            AND father_id NOT IN (SELECT pet_id FROM deduped)
+          UNION
+          SELECT DISTINCT mother_id, NULL
+          FROM deduped
+          WHERE mother_id IS NOT NULL
+            AND mother_id != ?
+            AND mother_id NOT IN (SELECT pet_id FROM deduped)
+          UNION
+          SELECT DISTINCT
+            CASE WHEN father_id = ? THEN mother_id ELSE father_id END,
+            NULL
+          FROM pairs
+          WHERE (father_id = ? OR mother_id = ?)
+            AND is_deleted = false
+            AND EXISTS (SELECT 1 FROM matings m WHERE m.pair_id = pairs.id)
+          UNION
+          SELECT pet_id, -anc_depth
+          FROM deduped_ancestors
+          WHERE pet_id != ?
+        )
+
+        SELECT
+          ai.pid            AS petId,
+          ai.node_depth     AS depth,
+          pr.father_id      AS fatherId,
+          pr.mother_id      AS motherId,
+          p.name,
+          p.species,
+          p.hatching_date   AS hatchingDate,
+          p.type,
+          p.is_public       AS isPublic,
+          p.owner_id        AS ownerId,
+          pd.sex,
+          pd.morphs,
+          pd.traits,
+          u.name            AS ownerName
+        FROM all_ids ai
+        INNER JOIN pets p
+          ON p.pet_id = ai.pid
+          AND p.is_deleted = false
+          AND p.type = 'PET'
+        LEFT JOIN pet_relations pr ON pr.pet_id = ai.pid
+        LEFT JOIN pet_details   pd ON pd.pet_id = ai.pid
+        LEFT JOIN users         u  ON u.user_id = p.owner_id
+        `,
+        [
+          petId,
+          petId,
+          maxAncestorDepth,
+          maxAncestorDepth, // ancestor_cte
+          petId,
+          petId,
+          maxDepth, // descendant_cte
+          petId,
+          petId,
+          petId,
+          petId,
+          petId,
+          petId, // all_ids
+          petId, // exclude root from ancestors
+        ],
+      );
+
+      // petId 기준 중복 제거 (조상이 다른 브랜치에 중복 포함될 수 있음)
+      const seenPetIds = new Set<string>();
+      const uniqueResults = rawResults.filter((raw) => {
+        if (seenPetIds.has(raw.petId)) return false;
+        seenPetIds.add(raw.petId);
+        return true;
+      });
+
+      // pairs 테이블에서 중심 개체의 파트너 ID 목록 수집
+      const pairPartnerRows: { partnerId: string }[] = await em.query(
+        `SELECT CASE WHEN father_id = ? THEN mother_id ELSE father_id END AS partnerId
+         FROM pairs
+         WHERE (father_id = ? OR mother_id = ?)
+           AND is_deleted = false
+           AND EXISTS (SELECT 1 FROM matings m WHERE m.pair_id = pairs.id)
+           AND (CASE WHEN father_id = ? THEN mother_id ELSE father_id END) IS NOT NULL`,
+        [petId, petId, petId, petId],
+      );
+      const centerPairPartnerIds = [
+        ...new Set(pairPartnerRows.map((r) => r.partnerId).filter(Boolean)),
+      ];
+
+      const nodes: (FamilyTreeNodeDto | PetHiddenStatusDto)[] =
+        uniqueResults.map((raw) => {
+          const isOwner = userId && raw.ownerId === userId;
+          const isPublic = Boolean(raw.isPublic);
+
+          // 비공개이고 본인 개체가 아니면 petId + hiddenStatus만 반환 (보안)
+          if (!isPublic && !isOwner) {
+            return {
+              petId: raw.petId,
+              hiddenStatus: PET_HIDDEN_STATUS.SECRET,
+            } as PetHiddenStatusDto;
+          }
+
+          return {
+            petId: raw.petId,
+            fatherId: raw.fatherId ?? null,
+            motherId: raw.motherId ?? null,
+            depth: raw.depth !== null ? Number(raw.depth) : null,
+            name: raw.name ?? undefined,
+            sex: raw.sex ?? undefined,
+            morphs: raw.morphs
+              ? typeof raw.morphs === 'string'
+                ? (JSON.parse(raw.morphs) as string[])
+                : raw.morphs
+              : undefined,
+            traits: raw.traits
+              ? typeof raw.traits === 'string'
+                ? (JSON.parse(raw.traits) as string[])
+                : raw.traits
+              : undefined,
+            species: raw.species,
+            hatchingDate: raw.hatchingDate
+              ? new Date(raw.hatchingDate).toISOString().split('T')[0]
+              : undefined,
+            type: raw.type,
+            isPublic,
+            isOwner: Boolean(isOwner),
+            ownerName: raw.ownerName ?? undefined,
+          } as FamilyTreeNodeDto;
+        });
+
+      return { nodes, centerPairPartnerIds };
     };
 
     if (manager) {

@@ -1,6 +1,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { pairControllerGetPairList, matingControllerDeleteMating } from "@repo/api-client";
+import { useMutation } from "@tanstack/react-query";
+import { matingControllerDeleteMating } from "@repo/api-client";
+import { usePairInvalidate } from "../hooks/usePairInvalidate";
 import { toast } from "@/lib/toast";
 import { AxiosError } from "axios";
 import { Info } from "lucide-react";
@@ -13,7 +14,7 @@ interface DeleteMatingModalProps {
 }
 
 const DeleteMatingModal = ({ isOpen, onClose, matingId, matingDate }: DeleteMatingModalProps) => {
-  const queryClient = useQueryClient();
+  const invalidatePair = usePairInvalidate();
 
   const { mutateAsync: deleteMating, isPending } = useMutation({
     mutationFn: () => matingControllerDeleteMating(matingId),
@@ -24,7 +25,7 @@ const DeleteMatingModal = ({ isOpen, onClose, matingId, matingDate }: DeleteMati
       const { data } = await deleteMating();
 
       toast.success(data.message ?? "메이팅 정보가 삭제되었습니다.");
-      await queryClient.invalidateQueries({ queryKey: [pairControllerGetPairList.name] });
+      invalidatePair();
       onClose();
     } catch (error) {
       if (error instanceof AxiosError) {

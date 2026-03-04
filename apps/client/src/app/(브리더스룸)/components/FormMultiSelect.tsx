@@ -12,6 +12,8 @@ interface FormMultiSelectProps {
   disabled?: boolean;
   initialItems?: string[];
   onSelect: (items?: string[]) => void;
+  /** 데스크탑에서도 화면 중앙 모달로 표시 */
+  forceCenter?: boolean;
 }
 
 const FormMultiSelect = ({
@@ -20,6 +22,7 @@ const FormMultiSelect = ({
   disabled = false,
   initialItems,
   onSelect,
+  forceCenter,
 }: FormMultiSelectProps) => {
   const isMobile = useIsMobile();
   const [isOpen, setIsOpen] = useState(false);
@@ -143,7 +146,7 @@ const FormMultiSelect = ({
         )}
       </div>
 
-      {isOpen && isMobile && (
+      {isOpen && (isMobile || forceCenter) && (
         <div
           className="fixed inset-0 z-40 bg-black/40"
           onClick={() => closeAndSave()}
@@ -154,14 +157,14 @@ const FormMultiSelect = ({
           className={cn(
             "z-50 w-[320px] rounded-2xl border-[1.8px] border-gray-200 bg-white p-5 shadow-lg dark:border-gray-700 dark:bg-gray-800",
             "transform transition-all duration-200 ease-out",
-            isMobile
+            isMobile || forceCenter
               ? "fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
               : "absolute top-[40px] left-0 origin-top",
             isEntering
-              ? isMobile
+              ? isMobile || forceCenter
                 ? "scale-100 opacity-100"
                 : "translate-y-0 scale-100 opacity-100"
-              : isMobile
+              : isMobile || forceCenter
                 ? "scale-95 opacity-0"
                 : "-translate-y-1 scale-95 opacity-0",
           )}

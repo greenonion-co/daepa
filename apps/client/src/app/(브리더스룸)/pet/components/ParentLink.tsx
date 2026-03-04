@@ -191,7 +191,7 @@ const ParentLink = ({
   }
 
   const parent = data as PetParentDto;
-  const isMyPet = parent.owner.userId === user?.userId;
+  const isMyPet = parent.owner?.userId === user?.userId;
   const isDeleted = parent.isDeleted;
 
   const handleParentClick = (e: React.MouseEvent) => {
@@ -252,9 +252,11 @@ const ParentLink = ({
                   <PetThumbnail petId={parent.petId} maxSize={220} objectFit="cover" />
                 </div>
               )}
-              {!isMyPet && (
+              {!isMyPet && parent.owner?.name && (
                 <div className="flex items-center justify-center">
-                  <span className="text-[12px] font-bold text-gray-500">@ {parent.owner.name}</span>
+                  <span className="text-[12px] font-bold text-gray-500">
+                    @ {parent.owner?.name}
+                  </span>
                 </div>
               )}
             </>
@@ -267,14 +269,22 @@ const ParentLink = ({
             )}
           </div>
 
-          <span
-            className={cn(
-              "relative pt-1 text-[14px] font-bold after:absolute after:bottom-0 after:left-0 after:-z-10 after:h-[15px] after:w-full after:opacity-40",
-              label === "모" ? "after:bg-red-400" : "after:bg-[#247DFE]",
-            )}
-          >
-            {parent.name ?? "-"}
-          </span>
+          <div className="flex w-full items-center justify-center gap-1.5 pt-1">
+            <span
+              className={cn(
+                "h-2 w-2 shrink-0 rounded-full",
+                label === "모"
+                  ? "bg-[#E03E3E] dark:bg-[#FF7369]"
+                  : "bg-[#2383E2] dark:bg-[#529CCA]",
+              )}
+            />
+
+            <div className="leading-none">
+              <span className="text-[14px] font-bold text-gray-800 dark:text-gray-100">
+                {parent.name ?? "-"}
+              </span>
+            </div>
+          </div>
 
           <div className="mt-2 flex flex-col gap-1">
             <BadgeList variant={"outline"} items={parent.morphs} />

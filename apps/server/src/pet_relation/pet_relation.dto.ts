@@ -6,10 +6,33 @@ import {
   IsNumber,
   IsObject,
   IsOptional,
+  Min,
+  Max,
 } from 'class-validator';
+import { Transform } from 'class-transformer';
 import { PetSummaryDto, PetHiddenStatusDto } from 'src/pet/pet.dto';
 import { PageMetaDto, PageOptionsDto } from 'src/common/page.dto';
 import { PET_TYPE } from 'src/pet/pet.constants';
+
+/**
+ * Raw query result interface for getFamilyTree (내부 변환용)
+ */
+export interface RawFamilyTreeQueryResult {
+  petId: string;
+  depth: number | null;
+  fatherId: string | null;
+  motherId: string | null;
+  name: string | null;
+  species: string;
+  hatchingDate: Date | null;
+  type: string;
+  isPublic: boolean;
+  ownerId: string | null;
+  sex: string | null;
+  morphs: string | string[] | null;
+  traits: string | string[] | null;
+  ownerName: string | null;
+}
 
 /**
  * Raw query result interface for getSiblingsWithDetails (내부 변환용)
@@ -248,4 +271,117 @@ export class GetClutchMatesQueryDto {
   @IsOptional()
   @IsEnum(PET_TYPE)
   readonly type?: PET_TYPE;
+}
+
+/**
+ * 가계도 노드 정보 (후손 + 공동 부모 포함)
+ */
+export class FamilyTreeNodeDto {
+  @ApiProperty({ description: '펫 아이디' })
+  petId: string;
+
+  @ApiProperty({
+    description: '아버지 펫 아이디',
+    type: 'string',
+    nullable: true,
+  })
+  fatherId: string | null;
+
+  @ApiProperty({
+    description: '어머니 펫 아이디',
+    type: 'string',
+    nullable: true,
+  })
+  motherId: string | null;
+
+  @ApiProperty({
+    description: '중심 개체로부터의 세대 깊이 (0=루트, null=공동 부모)',
+    type: 'number',
+    nullable: true,
+  })
+  depth: number | null;
+
+  @ApiProperty({ description: '펫 이름', required: false })
+  name?: string;
+
+  @ApiProperty({ description: '성별', required: false })
+  sex?: string;
+
+  @ApiProperty({ description: '모프 목록', required: false })
+  morphs?: string[];
+
+  @ApiProperty({ description: '형질 목록', required: false })
+  traits?: string[];
+
+  @ApiProperty({ description: '종' })
+  species: string;
+
+  @ApiProperty({ description: '출생일', required: false })
+  hatchingDate?: string;
+
+  @ApiProperty({ description: '타입 (PET)' })
+  type: string;
+
+  @ApiProperty({ description: '공개 여부' })
+  isPublic: boolean;
+
+  @ApiProperty({ description: '현재 유저의 소유 여부' })
+  isOwner: boolean;
+
+  @ApiProperty({ description: '소유자 이름', required: false })
+  ownerName?: string;
+}
+
+/**
+ * 가계도 조회 응답
+ */
+@ApiExtraModels(FamilyTreeNodeDto, PetHiddenStatusDto)
+export class GetFamilyTreeResponseDto {
+  @ApiProperty({
+    description: '가계도 노드 목록 (비공개 개체는 hiddenStatus만 포함)',
+    type: 'array',
+    items: {
+      oneOf: [
+        { $ref: getSchemaPath(FamilyTreeNodeDto) },
+        { $ref: getSchemaPath(PetHiddenStatusDto) },
+      ],
+    },
+  })
+  nodes: (FamilyTreeNodeDto | PetHiddenStatusDto)[];
+
+  @ApiProperty({
+    description:
+      '중심 개체의 pairs 테이블 기준 파트너 ID 목록 (자식 없는 페어 포함)',
+    type: [String],
+  })
+  centerPairPartnerIds: string[];
+}
+
+/**
+ * 가계도 조회 쿼리 파라미터
+ */
+export class GetFamilyTreeQueryDto {
+  @ApiProperty({
+    description: '최대 탐색 깊이 (기본값 5, 최대 7)',
+    required: false,
+    example: 5,
+  })
+  @Min(1)
+  @Max(7)
+  @IsOptional()
+  @IsNumber()
+  @Transform(({ value }) => Number(value))
+  readonly depth?: number;
+
+  @ApiProperty({
+    description: '조상(부모·조부모 등) 탐색 깊이 (기본값 2, 최대 5)',
+    required: false,
+    example: 2,
+  })
+  @Min(1)
+  @Max(5)
+  @IsOptional()
+  @IsNumber()
+  @Transform(({ value }) => Number(value))
+  readonly ancestorDepth?: number;
 }

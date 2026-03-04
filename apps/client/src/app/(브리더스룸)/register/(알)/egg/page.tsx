@@ -9,7 +9,7 @@ import { Check } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "@/lib/toast";
 import { AxiosError } from "axios";
-import { useRouter } from "next/navigation";
+import { useAppRouter } from "@/hooks/useAppRouter";
 import { FormStep } from "../../../pet/types/form.type";
 import FloatingButton from "@/app/(브리더스룸)/components/FloatingButton";
 import { useEggStore } from "../../../pet/store/egg";
@@ -22,7 +22,7 @@ import { useUserStore } from "../../../store/user";
 import { BaseFormData } from "../../../pet/store/base";
 
 const EggRegisterPage = () => {
-  const router = useRouter();
+  const router = useAppRouter();
   const { user } = useUserStore();
   const { formData, setFormData, step, setStep, errors, setErrors, resetForm } = useEggStore();
   const { handleSelect } = useSelect();

@@ -18,7 +18,7 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 
 interface ParentSearchProps {
-  sex: PetDtoSex;
+  sex?: PetDtoSex;
   species?: PetDtoSpecies;
   isOpen: boolean;
   onlySelect?: boolean;
@@ -71,7 +71,9 @@ const ParentSearchSelector = ({
       data.pages
         .flatMap((page) => page.data.data)
         .filter(
-          (pet) => (!excludePetId || pet.petId !== excludePetId) && pet.sex?.toString() === sex,
+          (pet) =>
+            (!excludePetId || pet.petId !== excludePetId) &&
+            (!sex || pet.sex?.toString() === sex),
         ),
   });
 
@@ -103,7 +105,7 @@ const ParentSearchSelector = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-h-[90vh] overflow-hidden rounded-3xl px-3 sm:max-w-[720px]">
+      <DialogContent className="max-h-[90dvh] overflow-hidden rounded-3xl px-3 sm:max-w-[720px]">
         <DialogTitle className="sr-only">부모 개체 선택</DialogTitle>
 
         <div className={cn("flex flex-col", step === 2 && "max-h-[calc(90vh-3rem)]")}>

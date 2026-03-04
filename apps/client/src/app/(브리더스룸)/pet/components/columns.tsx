@@ -20,6 +20,7 @@ import AdoptionStatusBadge from "../../components/AdoptionStatusBadge";
 import DeletedPetName from "../../components/DeletedPetName";
 import HiddenPetBadge from "@/components/common/HiddenPetBadge";
 import { Popover, PopoverTrigger, PopoverContent, PopoverClose } from "@/components/ui/popover";
+import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export type PreviewOverride = { petId: string; name?: string; status?: string } | null;
@@ -115,13 +116,16 @@ export const columns: ColumnDef<PetDto>[] = [
               <button
                 type="button"
                 onClick={(e) => e.stopPropagation()}
-                className="cursor-pointer rounded-full transition-opacity hover:opacity-70"
+                className="group cursor-pointer rounded-full transition-opacity hover:opacity-70"
               >
                 {adoptionStatus ? (
-                  <AdoptionStatusBadge status={adoptionStatus} />
+                  <AdoptionStatusBadge status={adoptionStatus} className="gap-0.5">
+                    <ChevronDown className="h-3 w-3 transition-transform group-data-[state=open]:rotate-180" />
+                  </AdoptionStatusBadge>
                 ) : (
-                  <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-[11px] leading-none font-medium text-gray-500 dark:bg-gray-700 dark:text-gray-400">
-                    미설정
+                  <span className="inline-flex items-center gap-0.5 rounded-full bg-gray-100 px-2 py-0.5 text-[11px] leading-none font-medium text-gray-500 dark:bg-gray-700 dark:text-gray-400">
+                    선택
+                    <ChevronDown className="h-3 w-3 transition-transform group-data-[state=open]:rotate-180" />
                   </span>
                 )}
               </button>
@@ -155,7 +159,7 @@ export const columns: ColumnDef<PetDto>[] = [
                         <AdoptionStatusBadge status={option.value} />
                       ) : (
                         <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-[11px] leading-none font-medium text-gray-500 dark:bg-gray-700 dark:text-gray-400">
-                          미설정
+                          선택
                         </span>
                       )}
                     </button>
@@ -250,20 +254,22 @@ export const columns: ColumnDef<PetDto>[] = [
               <button
                 type="button"
                 onClick={(e) => e.stopPropagation()}
-                className="cursor-pointer rounded-full transition-opacity hover:opacity-70"
+                className="group cursor-pointer rounded-full transition-opacity hover:opacity-70"
               >
                 {currentLabel ? (
                   <span
                     className={cn(
-                      "inline-flex items-center rounded-full px-2 py-0.5 text-[11px] leading-none font-medium",
+                      "inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-[11px] leading-none font-medium",
                       growthColorMap[growth],
                     )}
                   >
                     {currentLabel}
+                    <ChevronDown className="h-3 w-3 transition-transform group-data-[state=open]:rotate-180" />
                   </span>
                 ) : (
-                  <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-[11px] leading-none font-medium text-gray-500 dark:bg-gray-700 dark:text-gray-400">
-                    미설정
+                  <span className="inline-flex items-center gap-0.5 rounded-full bg-gray-100 px-2 py-0.5 text-[11px] leading-none font-medium text-gray-500 dark:bg-gray-700 dark:text-gray-400">
+                    선택
+                    <ChevronDown className="h-3 w-3 transition-transform group-data-[state=open]:rotate-180" />
                   </span>
                 )}
               </button>

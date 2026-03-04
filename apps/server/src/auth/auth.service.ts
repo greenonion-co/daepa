@@ -340,34 +340,31 @@ export class AuthService {
     return promise;
   }
 
-  private async performRefresh(
-    refreshToken: string,
-    tokenPayload: JwtPayload,
-  ) {
+  private async performRefresh(refreshToken: string, tokenPayload: JwtPayload) {
     try {
-      const user = await this.userService.findOne({
+      const userEntity = await this.userService.findOneEntity({
         userId: tokenPayload.sub,
       });
 
-      if (!user) {
+      if (!userEntity) {
         throw new UnauthorizedException('사용자를 찾을 수 없습니다.');
       }
 
-      if (user.status !== USER_STATUS.ACTIVE) {
+      if (userEntity.status !== USER_STATUS.ACTIVE) {
         throw new UnauthorizedException('비활성화된 계정입니다.');
       }
 
       const isRefreshTokenValid = await bcrypt.compare(
         refreshToken,
-        user.refreshToken ?? '',
+        userEntity.refreshToken ?? '',
       );
 
       if (!isRefreshTokenValid) {
         throw new UnauthorizedException('유효하지 않은 refresh token입니다.');
       }
 
-      const userRefreshTokenExpiresAt = user.refreshTokenExpiresAt
-        ? DateTime.fromJSDate(user.refreshTokenExpiresAt)
+      const userRefreshTokenExpiresAt = userEntity.refreshTokenExpiresAt
+        ? DateTime.fromJSDate(userEntity.refreshTokenExpiresAt)
         : null;
 
       if (
@@ -378,8 +375,8 @@ export class AuthService {
       }
 
       const newAccessToken = this.createJwtAccessToken({
-        userId: user.userId,
-        role: user.role,
+        userId: userEntity.userId,
+        role: userEntity.role,
       });
 
       const oneWeekFromNow = DateTime.now()
@@ -389,10 +386,11 @@ export class AuthService {
 
       let newRefreshToken: string | undefined;
       if (
-        user.refreshTokenExpiresAt &&
-        user.refreshTokenExpiresAt <= oneWeekFromNow
+        userEntity.refreshTokenExpiresAt &&
+        userEntity.refreshTokenExpiresAt <= oneWeekFromNow
       ) {
-        newRefreshToken = await this.createJwtRefreshToken(user.userId);
+        // TODO: 짧은 기간으로 설정하여 테스트해볼것
+        newRefreshToken = await this.createJwtRefreshToken(userEntity.userId);
       }
 
       return {
@@ -420,7 +418,10 @@ export class AuthService {
     // refresh token 해싱
     const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
 
-    const expiresAt = DateTime.now().plus({ days: 180 }).endOf('day').toJSDate();
+    const expiresAt = DateTime.now()
+      .plus({ days: 180 })
+      .endOf('day')
+      .toJSDate();
 
     await this.userService.update(user.userId, {
       refreshToken: hashedRefreshToken,

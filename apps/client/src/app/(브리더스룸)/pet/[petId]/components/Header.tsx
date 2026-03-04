@@ -11,7 +11,8 @@ import TooltipText from "@/app/(브리더스룸)/components/TooltipText";
 import PetThumbnail, { getPetThumbnailQueryKey } from "@/components/common/PetThumbnail";
 import { petImageControllerFindThumbnail } from "@repo/api-client";
 import { useQuery } from "@tanstack/react-query";
-import { useIsLoggedIn } from "@/hooks/useAuth";
+import { useAuth } from "@/hooks/useAuth";
+import { UserProfileDtoRole } from "@repo/api-client";
 import { useIsMyPet } from "@/hooks/useIsMyPet";
 import { openRelationPromoSheet } from "@/app/(브리더스룸)/components/LoginPromoSheet";
 import { useAppRouter } from "@/hooks/useAppRouter";
@@ -43,7 +44,9 @@ const Header = ({
   onDelete,
 }: HeaderProps) => {
   const isMyPet = useIsMyPet(pet?.owner?.userId);
-  const isLoggedIn = useIsLoggedIn();
+  const { isLoggedIn, user } = useAuth();
+  const isBreeder =
+    user?.role === UserProfileDtoRole.BREEDER || user?.role === UserProfileDtoRole.ADMIN;
   const router = useAppRouter();
   const [isScrolled, setIsScrolled] = useState(size === "small");
 
@@ -121,6 +124,7 @@ const Header = ({
           "before:dark:bg-background top-1.5 pb-2 before:absolute before:-top-2 before:right-0 before:left-0 before:h-2 before:bg-gray-100", // 모달에서 X 버튼 아래로 위치
       )}
     >
+      {/* 썸네일 + 정보 영역 */}
       <div className="flex items-center gap-2">
         <div
           className={cn(
@@ -172,15 +176,6 @@ const Header = ({
               </div>
             )}
             <span className={`h-2 w-2 shrink-0 rounded-full ${dotColor}`} />
-
-            {/* <div
-              className={cn(
-                "flex-1 text-gray-500 transition-all max-[480px]:text-xs dark:text-gray-400",
-                isScrolled ? "text-xs" : "text-sm",
-              )}
-            >
-              {SPECIES_KOREAN_ALIAS_INFO[pet.species]}
-            </div> */}
           </div>
 
           <div className="flex items-center gap-1">
@@ -197,6 +192,15 @@ const Header = ({
             {adoptionData?.status && <AdoptionStatusBadge status={adoptionData.status} />}
           </div>
 
+          {pet.owner?.name && (
+            <Link
+              href={`/@${encodeURIComponent(pet.owner.name)}`}
+              className="mt-1 text-[12px] font-medium text-blue-500 transition-colors hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300"
+            >
+              @{pet.owner.name}
+            </Link>
+          )}
+
           <div
             className={cn(
               "font-semibold text-green-600 transition-all max-[480px]:text-[16px]",
@@ -207,33 +211,57 @@ const Header = ({
           </div>
         </div>
 
-        <button
-          type="button"
-          onClick={() => {
-            if (isLoggedIn) {
-              router.push(`/pet/${pet.petId}/relation`);
-            } else {
-              openRelationPromoSheet();
-            }
-          }}
-          className={cn(
-            "flex items-center gap-0.5 rounded-lg bg-blue-100 px-2 font-[700] text-white transition-colors hover:bg-blue-200 dark:bg-blue-900/40 dark:hover:bg-blue-800/40",
-            isScrolled ? "h-8 text-xs" : "h-8 text-sm",
-          )}
-        >
-          <TooltipText
-            text="개체 관계도"
-            title="개체 관계도"
-            className="text-blue-600"
-            content="혈통 관계가 있는 개체들을 확인합니다."
-          />
-        </button>
-
-        <div className="flex items-center gap-1">
-          <QRCode pet={pet} isScrolled={isScrolled} />
-          {isLoggedIn && isMyPet && (
-            <DeletePetButton petId={pet.petId} petName={pet.name} onSuccess={onDelete} />
-          )}
+        <div className="flex flex-col items-end gap-1 sm:flex-row-reverse sm:items-center">
+          <div className="flex items-center gap-1">
+            {/* QR코드 */}
+            <QRCode pet={pet} isScrolled={isScrolled} />
+            {/* 개체 삭제 버튼 */}
+            {isLoggedIn && isMyPet && (
+              <DeletePetButton petId={pet.petId} petName={pet.name} onSuccess={onDelete} />
+            )}
+          </div>
+          <div className="flex items-center gap-1">
+            {/* 브리딩맵 */}
+            {isLoggedIn && isMyPet && isBreeder && (
+              <button
+                type="button"
+                onClick={() => router.push(`/pet/${pet.petId}/breeding-map`)}
+                className={cn(
+                  "flex items-center gap-0.5 rounded-lg border border-gray-200 bg-gradient-to-r from-blue-200/50 to-purple-200/65 px-2 font-[700] text-white transition-colors hover:from-blue-200/70 hover:to-purple-200/80 dark:border-gray-700 dark:from-blue-900/40 dark:to-purple-900/50 dark:hover:from-blue-900/60 dark:hover:to-purple-900/70",
+                  isScrolled ? "h-8 text-xs" : "h-8 text-sm",
+                )}
+              >
+                <TooltipText
+                  text="브리딩맵"
+                  title="브리딩맵"
+                  className="text-blue-600 dark:text-purple-300"
+                  content="혈통 관계를 트리 구조로 확인합니다."
+                />
+              </button>
+            )}
+            {/* 관계도 */}
+            <button
+              type="button"
+              onClick={() => {
+                if (isLoggedIn) {
+                  router.push(`/pet/${pet.petId}/relation`);
+                } else {
+                  openRelationPromoSheet();
+                }
+              }}
+              className={cn(
+                "flex items-center gap-0.5 rounded-lg border border-gray-200 bg-white px-2 font-[700] transition-colors hover:bg-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700",
+                isScrolled ? "h-8 text-xs" : "h-8 text-sm",
+              )}
+            >
+              <TooltipText
+                text="관계도"
+                title="개체 관계도"
+                className="text-gray-600 dark:text-gray-300"
+                content="혈통 관계가 있는 개체들을 확인합니다."
+              />
+            </button>
+          </div>
         </div>
       </div>
 

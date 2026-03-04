@@ -1,12 +1,13 @@
 "use client";
 
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
+import { useAppRouter } from "@/hooks/useAppRouter";
 import AdoptionTable from "./components/AdoptionTable";
 import AdoptionDashboard from "./components/AdoptionDashboard";
 
 const AdoptionPage = () => {
-  const router = useRouter();
+  const router = useAppRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const current = searchParams.get("tab") ?? "list";

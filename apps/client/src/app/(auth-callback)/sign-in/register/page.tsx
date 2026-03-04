@@ -3,7 +3,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useRouter } from "next/navigation";
+import { useAppRouter } from "@/hooks/useAppRouter";
 import { toast } from "@/lib/toast";
 
 import { Button } from "@/components/ui/button";
@@ -18,6 +18,7 @@ import { DUPLICATE_CHECK_STATUS } from "@/app/(브리더스룸)/constants";
 import NameInput from "@/app/(브리더스룸)/components/NameInput";
 import { useNameStore } from "@/app/(브리더스룸)/store/name";
 import { isNativeApp, requestResetToHome, setNativeAccessToken } from "@/lib/native-bridge";
+import AddressSearch from "@/components/common/AddressSearch";
 import { tokenStorage } from "@/lib/tokenStorage";
 import { useUserStore } from "@/app/(브리더스룸)/store/user";
 import { Info } from "lucide-react";
@@ -78,7 +79,7 @@ const registerSchema = z
 type RegisterFormData = z.infer<typeof registerSchema>;
 
 const RegisterPage = () => {
-  const router = useRouter();
+  const router = useAppRouter();
   const { duplicateCheckStatus } = useNameStore();
   const { initialize } = useUserStore();
 
@@ -382,11 +383,11 @@ const RegisterPage = () => {
                 {/* 주소 */}
                 <div className="space-y-1">
                   <label className="text-xs font-bold text-gray-600 dark:text-gray-400">주소</label>
-                  <input
-                    type="text"
-                    placeholder="주소를 입력하세요"
+                  <AddressSearch
+                    value={watch("address") ?? ""}
+                    onChange={(address) => setValue("address", address)}
+                    placeholder="주소를 검색하세요"
                     className={reporterInputClassName}
-                    {...register("address")}
                   />
                 </div>
               </div>

@@ -35,7 +35,11 @@ import {
   PET_TYPE,
 } from './pet.constants';
 import { ParentRequestService } from '../parent_request/parent_request.service';
-import { PARENT_STATUS } from '../parent_request/parent_request.constants';
+import {
+  PARENT_ROLE,
+  PARENT_STATUS,
+} from '../parent_request/parent_request.constants';
+import { BulkCreatePetDto } from './bulk-create-pet.dto';
 import { UserService } from '../user/user.service';
 import { PageDto, PageMetaDto } from 'src/common/page.dto';
 import { endOfMonth, format, startOfMonth } from 'date-fns';
@@ -49,6 +53,8 @@ import { isUndefined } from 'es-toolkit';
 import { PairEntity } from 'src/pair/pair.entity';
 import { DateTime } from 'luxon';
 import { PetAdoptionService } from 'src/pet_adoption/pet_adoption.service';
+import { PetAdoptionEntity } from 'src/pet_adoption/pet_adoption.entity';
+import { PetRelationEntity } from 'src/pet_relation/pet_relation.entity';
 import { replaceParentPublicSafe } from '../common/utils/pet-parent.helper';
 import { extractOriginalPetName } from '../common/utils/pet-name.helper';
 import { LayingEntity } from 'src/laying/laying.entity';
@@ -174,6 +180,303 @@ export class PetService {
 
     return this.dataSource.transaction(async (entityManager: EntityManager) => {
       await run(entityManager);
+    });
+  }
+
+  async bulkCreatePets(
+    dto: BulkCreatePetDto,
+    ownerId: string,
+  ): Promise<number> {
+    return this.dataSource.transaction(async (em: EntityManager) => {
+      const { pets } = dto;
+      if (pets.length === 0) {
+        throw new BadRequestException('최소 1개 이상의 개체가 필요합니다.');
+      }
+
+      // === 1단계: 사전 검증 ===
+
+      // CSV 내 이름 중복 체크
+      const names = pets.map((p) => p.name);
+      const nameSet = new Set<string>();
+      const duplicateNames: string[] = [];
+      for (const name of names) {
+        if (nameSet.has(name)) {
+          duplicateNames.push(name);
+        }
+        nameSet.add(name);
+      }
+      if (duplicateNames.length > 0) {
+        const unique = [...new Set(duplicateNames)];
+        const display = unique.slice(0, 10).join(', ');
+        const suffix = unique.length > 10 ? ` 외 ${unique.length - 10}개` : '';
+        throw new BadRequestException(
+          `CSV 내 중복된 이름이 있습니다: ${display}${suffix}`,
+        );
+      }
+
+      // DB 내 기존 이름 중복 체크
+      const existingPets = await em.find(PetEntity, {
+        where: { ownerId, name: In(names), isDeleted: false },
+        select: ['name'],
+      });
+      if (existingPets.length > 0) {
+        const existingNames = existingPets.map((p) => p.name);
+        const display = existingNames.slice(0, 10).join(', ');
+        const suffix =
+          existingNames.length > 10 ? ` 외 ${existingNames.length - 10}개` : '';
+        throw new ConflictException(
+          `이미 존재하는 펫 이름입니다: ${display}${suffix}`,
+        );
+      }
+
+      // 부모 이름 수집 및 검증
+      const csvNameToRow = new Map(pets.map((p) => [p.name, p]));
+      const parentNamesToResolve = new Set<string>();
+
+      for (const row of pets) {
+        if (row.fatherName) parentNamesToResolve.add(row.fatherName);
+        if (row.motherName) parentNamesToResolve.add(row.motherName);
+      }
+
+      // DB에서 부모 후보 조회 (같은 소유자의 기존 펫)
+      const dbParentNames = [...parentNamesToResolve].filter(
+        (n) => !csvNameToRow.has(n),
+      );
+      const dbParentMap = new Map<
+        string,
+        { petId: string; sex: PET_SEX | null }
+      >();
+
+      if (dbParentNames.length > 0) {
+        const dbParents = await em
+          .createQueryBuilder(PetEntity, 'pet')
+          .leftJoinAndMapOne(
+            'pet.petDetail',
+            PetDetailEntity,
+            'pd',
+            'pd.petId = pet.petId',
+          )
+          .where('pet.ownerId = :ownerId', { ownerId })
+          .andWhere('pet.name IN (:...names)', { names: dbParentNames })
+          .andWhere('pet.isDeleted = false')
+          .select(['pet.petId', 'pet.name', 'pd.sex'])
+          .getMany();
+
+        for (const p of dbParents) {
+          dbParentMap.set(p.name!, {
+            petId: p.petId,
+            sex: p.petDetail?.sex ?? null,
+          });
+        }
+      }
+
+      // 부모 이름 존재 및 성별 검증
+      for (let i = 0; i < pets.length; i++) {
+        const row = pets[i];
+        const rowNum = i + 2; // CSV 헤더 제외, 1-based
+
+        if (
+          row.fatherName &&
+          row.motherName &&
+          row.fatherName === row.motherName
+        ) {
+          throw new BadRequestException(
+            `${rowNum}행: "${row.name}"의 부개체와 모개체가 동일합니다.`,
+          );
+        }
+
+        if (row.fatherName) {
+          if (row.fatherName === row.name) {
+            throw new BadRequestException(
+              `${rowNum}행: "${row.name}"은(는) 자기 자신을 부개체로 지정할 수 없습니다.`,
+            );
+          }
+
+          const csvParent = csvNameToRow.get(row.fatherName);
+          const dbParent = dbParentMap.get(row.fatherName);
+
+          if (!csvParent && !dbParent) {
+            throw new BadRequestException(
+              `${rowNum}행: "${row.name}"의 부개체 "${row.fatherName}"을(를) 찾을 수 없습니다.`,
+            );
+          }
+
+          const parentSex = csvParent?.sex ?? dbParent?.sex;
+          if (parentSex && parentSex !== PET_SEX.MALE) {
+            throw new BadRequestException(
+              `${rowNum}행: "${row.fatherName}"은(는) 수컷이 아니므로 부개체로 지정할 수 없습니다.`,
+            );
+          }
+        }
+
+        if (row.motherName) {
+          if (row.motherName === row.name) {
+            throw new BadRequestException(
+              `${rowNum}행: "${row.name}"은(는) 자기 자신을 모개체로 지정할 수 없습니다.`,
+            );
+          }
+
+          const csvParent = csvNameToRow.get(row.motherName);
+          const dbParent = dbParentMap.get(row.motherName);
+
+          if (!csvParent && !dbParent) {
+            throw new BadRequestException(
+              `${rowNum}행: "${row.name}"의 모개체 "${row.motherName}"을(를) 찾을 수 없습니다.`,
+            );
+          }
+
+          const parentSex = csvParent?.sex ?? dbParent?.sex;
+          if (parentSex && parentSex !== PET_SEX.FEMALE) {
+            throw new BadRequestException(
+              `${rowNum}행: "${row.motherName}"은(는) 암컷이 아니므로 모개체로 지정할 수 없습니다.`,
+            );
+          }
+        }
+      }
+
+      // === 2단계: petId 일괄 생성 ===
+      const petIdSet = new Set<string>();
+      while (petIdSet.size < pets.length) {
+        petIdSet.add(nanoid(8));
+      }
+      const petIds = [...petIdSet];
+
+      // DB 충돌 확인 (1 query)
+      const conflicting = await em.find(PetEntity, {
+        where: { petId: In(petIds) },
+        select: ['petId'],
+      });
+      if (conflicting.length > 0) {
+        const conflictSet = new Set(conflicting.map((p) => p.petId));
+        for (let i = 0; i < petIds.length; i++) {
+          while (conflictSet.has(petIds[i])) {
+            petIds[i] = nanoid(8);
+          }
+        }
+      }
+
+      // name → petId 매핑
+      const nameToId = new Map<string, string>();
+      pets.forEach((row, i) => nameToId.set(row.name, petIds[i]));
+      for (const [name, info] of dbParentMap) {
+        if (!nameToId.has(name)) {
+          nameToId.set(name, info.petId);
+        }
+      }
+
+      // === 3단계: 테이블별 일괄 INSERT ===
+      // pets (1 query)
+      await em.insert(
+        PetEntity,
+        pets.map((row, i) =>
+          plainToInstance(PetEntity, {
+            petId: petIds[i],
+            ownerId,
+            type: PET_TYPE.PET,
+            name: row.name,
+            species: row.species,
+            hatchingDate: row.hatchingDate ? new Date(row.hatchingDate) : null,
+            isPublic: row.isPublic ?? false,
+          }),
+        ),
+      );
+
+      // pet_details (1 query)
+      await em.insert(
+        PetDetailEntity,
+        pets.map((row, i) => ({
+          petId: petIds[i],
+          sex: row.sex ?? null,
+          growth: row.growth ?? null,
+          morphs: row.morphs?.length ? row.morphs : null,
+          traits: row.traits?.length ? row.traits : null,
+          foods: row.foods?.length ? row.foods : null,
+          weight: row.weight ?? null,
+        })),
+      );
+
+      // pet_adoptions (1 query)
+      await em.insert(
+        PetAdoptionEntity,
+        pets.map((row, i) => ({
+          petId: petIds[i],
+          status: row.adoptionStatus ?? null,
+        })),
+      );
+
+      // === 4단계: 부모 연결 (일괄) ===
+      // 모두 같은 소유자이므로 즉시 APPROVED, 알림 불필요
+      const parentRequests: Array<{
+        childPetId: string;
+        parentPetId: string;
+        role: PARENT_ROLE;
+        status: PARENT_STATUS;
+      }> = [];
+      const petRelationMap = new Map<
+        string,
+        { fatherId: string | null; motherId: string | null }
+      >();
+
+      for (const row of pets) {
+        const childPetId = nameToId.get(row.name)!;
+
+        if (row.fatherName) {
+          const fatherId = nameToId.get(row.fatherName);
+          if (fatherId) {
+            parentRequests.push({
+              childPetId,
+              parentPetId: fatherId,
+              role: PARENT_ROLE.FATHER,
+              status: PARENT_STATUS.APPROVED,
+            });
+            const rel = petRelationMap.get(childPetId) ?? {
+              fatherId: null,
+              motherId: null,
+            };
+            rel.fatherId = fatherId;
+            petRelationMap.set(childPetId, rel);
+          }
+        }
+
+        if (row.motherName) {
+          const motherId = nameToId.get(row.motherName);
+          if (motherId) {
+            parentRequests.push({
+              childPetId,
+              parentPetId: motherId,
+              role: PARENT_ROLE.MOTHER,
+              status: PARENT_STATUS.APPROVED,
+            });
+            const rel = petRelationMap.get(childPetId) ?? {
+              fatherId: null,
+              motherId: null,
+            };
+            rel.motherId = motherId;
+            petRelationMap.set(childPetId, rel);
+          }
+        }
+      }
+
+      // parent_requests 일괄 INSERT (1 query)
+      if (parentRequests.length > 0) {
+        await em.insert(ParentRequestEntity, parentRequests);
+      }
+
+      // pet_relations 일괄 INSERT (1 query)
+      if (petRelationMap.size > 0) {
+        await em.insert(
+          PetRelationEntity,
+          [...petRelationMap.entries()].map(
+            ([petId, { fatherId, motherId }]) => ({
+              petId,
+              fatherId,
+              motherId,
+            }),
+          ),
+        );
+      }
+
+      return pets.length;
     });
   }
 
@@ -1080,6 +1383,13 @@ export class PetService {
     if (pageOptionsDto.growth && pageOptionsDto.growth.length > 0) {
       queryBuilder.andWhere('petDetail.growth IN (:...growth)', {
         growth: pageOptionsDto.growth,
+      });
+    }
+
+    // 소유자 필터링
+    if (pageOptionsDto.ownerId) {
+      queryBuilder.andWhere('pets.ownerId = :filterOwnerId', {
+        filterOwnerId: pageOptionsDto.ownerId,
       });
     }
   }

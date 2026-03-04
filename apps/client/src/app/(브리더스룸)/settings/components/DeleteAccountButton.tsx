@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { authControllerDeleteAccount } from "@repo/api-client";
 import { useMutation } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
+import { useAppRouter } from "@/hooks/useAppRouter";
 import { toast } from "@/lib/toast";
 import {
   isNativeApp,
@@ -28,7 +28,7 @@ import {
 import { useUserStore } from "../../store/user";
 
 const DeleteAccountButton = () => {
-  const router = useRouter();
+  const router = useAppRouter();
   const [confirmText, setConfirmText] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const onLogout = useUserStore((state) => state.onLogout);

@@ -1,5 +1,4 @@
 import {
-  pairControllerGetPairList,
   layingControllerUpdate,
   MatingByDateDto,
   PetSummaryLayingDto,
@@ -13,7 +12,8 @@ import CreateLayingModal from "./CreateLayingModal";
 import LayingItem from "./LayingItem";
 import { DateTime } from "luxon";
 import CalendarSelect from "./CalendarSelect";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
+import { usePairInvalidate } from "../hooks/usePairInvalidate";
 import { toast } from "@/lib/toast";
 import { AxiosError } from "axios";
 import { cn } from "@/lib/utils";
@@ -29,7 +29,7 @@ interface MatingItemProps {
 }
 
 const MatingItem = ({ mating, father, mother, initialLayingId, showTutorial }: MatingItemProps) => {
-  const queryClient = useQueryClient();
+  const invalidatePair = usePairInvalidate();
   const isEditable = !father?.isDeleted && !mother?.isDeleted;
 
   const { mutateAsync: updateLayingDate } = useMutation({
@@ -157,7 +157,7 @@ const MatingItem = ({ mating, father, mother, initialLayingId, showTutorial }: M
           newLayingDate,
         });
         toast.success("산란일 수정에 성공했습니다.");
-        await queryClient.invalidateQueries({ queryKey: [pairControllerGetPairList.name] });
+        invalidatePair();
       } catch (error) {
         if (error instanceof AxiosError) {
           toast.error(error.response?.data?.message ?? "산란일 수정에 실패했습니다.");
@@ -166,7 +166,7 @@ const MatingItem = ({ mating, father, mother, initialLayingId, showTutorial }: M
         }
       }
     },
-    [updateLayingDate, queryClient],
+    [updateLayingDate, invalidatePair],
   );
 
   return (

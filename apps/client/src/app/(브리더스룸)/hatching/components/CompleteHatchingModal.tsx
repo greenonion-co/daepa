@@ -5,12 +5,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  pairControllerGetPairList,
-  CompleteHatchingDto,
-  petControllerCompleteHatching,
-} from "@repo/api-client";
+import { useMutation } from "@tanstack/react-query";
+import { CompleteHatchingDto, petControllerCompleteHatching } from "@repo/api-client";
+import { usePairInvalidate } from "../hooks/usePairInvalidate";
 import { toast } from "@/lib/toast";
 import { AxiosError } from "axios";
 import { useState, useCallback } from "react";
@@ -45,7 +42,7 @@ const CompleteHatchingModal = ({
   fatherName,
   motherName,
 }: CompleteHatchingModalProps) => {
-  const queryClient = useQueryClient();
+  const invalidatePair = usePairInvalidate();
   const { duplicateCheckStatus } = useNameStore();
 
   // 자동 이름 생성 로직
@@ -89,7 +86,7 @@ const CompleteHatchingModal = ({
 
       if (data?.success) {
         toast.success("해칭 완료");
-        queryClient.invalidateQueries({ queryKey: [pairControllerGetPairList.name] });
+        invalidatePair();
         onClose();
       }
     } catch (error) {
@@ -156,6 +153,7 @@ const CompleteHatchingModal = ({
               <Textarea
                 id="desc"
                 placeholder="메모를 입력하세요"
+                maxLength={100}
                 value={formData.desc}
                 onChange={(e) => setFormData((prev) => ({ ...prev, desc: e.target.value }))}
               />

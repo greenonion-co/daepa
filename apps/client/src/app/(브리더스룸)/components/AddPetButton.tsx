@@ -13,11 +13,11 @@ const FloatingButton = () => {
 };
 
 const TextButton = () => (
-  <div className="flex w-fit items-center rounded-lg px-2 py-1 hover:bg-gray-100 dark:hover:bg-gray-800">
+  <div className="flex w-fit items-center gap-1 rounded-lg px-2 py-1 hover:bg-gray-100 dark:hover:bg-gray-800">
     <div className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/50 dark:text-blue-400">
       <Plus className="h-3 w-3" />
     </div>
-    <span className="px-2 py-1 text-[14px] font-[500] text-blue-600 dark:text-blue-400">
+    <span className="py-1 text-[14px] font-[500] text-blue-600 dark:text-blue-400">
       개체 추가하기
     </span>
   </div>

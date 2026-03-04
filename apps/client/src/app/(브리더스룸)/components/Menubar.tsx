@@ -8,12 +8,14 @@ import { Mail, Settings } from "lucide-react";
 import { useSearchKeywordStore } from "../store/searchKeyword";
 import { useIsMobile } from "@/hooks/useMobile";
 import SearchInput from "./SearchInput";
-import { useIsLoggedIn } from "@/hooks/useAuth";
+import { useIsLoggedIn, useUser } from "@/hooks/useAuth";
 import { isNativeApp } from "@/lib/native-bridge";
 import AddPetButton from "@/app/(브리더스룸)/components/AddPetButton";
+import AddPetBulkButton from "@/app/(브리더스룸)/components/AddPetBulkButton";
 
 const Menubar = ({ unreadCount }: { unreadCount: number }) => {
   const isLoggedIn = useIsLoggedIn();
+  const user = useUser();
   const pathname = usePathname();
   const isMobile = useIsMobile();
   const { searchKeyword, setSearchKeyword } = useSearchKeywordStore();
@@ -27,6 +29,7 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
   const isNative = isNativeApp();
   const isRegisterPage = pathname.includes("/register/");
   const isPetDetailPage = pathname?.startsWith("/pet/") ?? false;
+  const isShowcase = pathname?.startsWith("/@") ?? false;
   const isFeedPage = pathname === "/";
   const isPetListPage = pathname === "/pet";
 
@@ -43,9 +46,11 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
   );
 
   // 로고 컴포넌트
-  const Logo = ({ withLink = false }: { withLink?: boolean }) => {
+  const Logo = ({ withLink = false, isMobile }: { withLink?: boolean; isMobile?: boolean }) => {
     const logo = (
-      <h1 className={cn("pr-4 text-2xl font-bold", isMobile && "px-1 text-lg")}>BREEDY</h1>
+      <h1 className={cn("pr-4 text-2xl font-bold", isMobile && "px-1 text-lg")}>
+        {isMobile ? "B." : "BREEDY"}
+      </h1>
     );
 
     if (isNative && withLink) {
@@ -66,29 +71,41 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
   // 네비게이션 링크 컴포넌트
   const NavLinks = () => (
     <>
-      {SIDEBAR_ITEMS.map((item) => (
-        <Link
-          key={item.title}
-          href={item.url}
-          className={cn(
-            item.url === pathname
-              ? "font-semibold text-blue-500 underline"
-              : "font-semibold text-gray-500 hover:text-blue-500 hover:underline dark:text-gray-400",
-            isMobile ? "my-auto px-1.5" : "px-3 py-1.5",
-          )}
-        >
-          {item.title}
-        </Link>
-      ))}
+      {SIDEBAR_ITEMS.map((item) => {
+        const href =
+          item.url === "/@" && user?.name ? `/@${encodeURIComponent(user.name)}` : item.url;
+        return (
+          <Link
+            key={item.title}
+            href={href}
+            className={cn(
+              (item.url === "/@" ? isShowcase : item.url === pathname)
+                ? "font-semibold text-blue-500 underline"
+                : "font-semibold text-gray-500 hover:text-blue-500 hover:underline dark:text-gray-400",
+              isMobile ? "my-auto px-1.5" : "px-3 py-1.5",
+            )}
+          >
+            {item.title}
+          </Link>
+        );
+      })}
     </>
   );
 
   // 게스트/피드 뷰 렌더링
   const renderGuestView = () => (
     <>
-      <Logo withLink />
+      <Logo withLink isMobile={isMobile} />
       {/* 웹에서만 메뉴바에 렌더링 */}
       {!isNative && !isMobile && !isRegisterPage && <AddPetButton />}
+      {isMobile && !pathname?.startsWith("/sign-in") && (
+        <Link
+          href="/sign-in"
+          className="rounded-full bg-blue-500 px-3 py-1 text-xs font-medium text-white"
+        >
+          로그인
+        </Link>
+      )}
     </>
   );
 
@@ -97,10 +114,11 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
     <>
       {/* 좌측: 로고 + 네비게이션 + 펫 추가 */}
       <div className="flex gap-1">
-        <Logo withLink />
+        <Logo withLink isMobile={isMobile} />
         {!isNative && <NavLinks />}
         {/* 웹에서만 메뉴바에 렌더링 */}
         {!isNative && !isMobile && !isRegisterPage && <AddPetButton />}
+        {!isNative && !isMobile && !isRegisterPage && user?.isBiz && <AddPetBulkButton />}
       </div>
 
       {/* 우측: 검색 + 알림 + 설정 */}
@@ -131,8 +149,13 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
   return (
     <div
       className={cn(
-        "dark:bg-background flex h-[52px] items-center justify-between px-2",
-        !isPetDetailPage && "bg-background sticky top-0 left-0 z-20 w-full",
+        "flex h-[52px] items-center justify-between px-2",
+        isShowcase
+          ? "w-full"
+          : cn(
+              "dark:bg-background",
+              !isPetDetailPage && "bg-background sticky top-0 left-0 z-20 w-full",
+            ),
         isNative && "pr-4",
       )}
     >

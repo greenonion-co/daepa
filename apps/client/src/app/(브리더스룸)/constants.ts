@@ -1,8 +1,8 @@
 import { Bubbles, DollarSign, Home } from "lucide-react";
 import { FormStep } from "./pet/types/form.type";
 import {
+  AdoptionHistoryDtoMethod,
   EggDetailDtoStatus,
-  PetAdoptionDtoMethod,
   PetDtoGrowth,
   PetDtoSex,
   PetDtoSpecies,
@@ -474,7 +474,7 @@ export const EGG_STATUS_KOREAN_INFO: Record<EggDetailDtoStatus, string> = {
   DEAD: "중지란",
 };
 
-export const ADOPTION_METHOD_KOREAN_INFO: Record<PetAdoptionDtoMethod, string> = {
+export const ADOPTION_METHOD_KOREAN_INFO: Record<AdoptionHistoryDtoMethod, string> = {
   PICKUP: "직거래",
   DELIVERY: "택배",
   WHOLESALE: "도매",
@@ -700,7 +700,7 @@ export const SELECTOR_CONFIGS: Record<
 
 export const SIDEBAR_ITEMS = [
   {
-    title: "MY개체",
+    title: "개체룸",
     url: "/pet",
     icon: Home,
   },
@@ -713,6 +713,10 @@ export const SIDEBAR_ITEMS = [
     title: "분양룸",
     url: "/adoption",
     icon: DollarSign,
+  },
+  {
+    title: "쇼룸",
+    url: "/@", // Menubar에서 /@{user.name}으로 동적 치환
   },
 ];
 
@@ -746,27 +750,27 @@ export const NOTIFICATION_TYPE: Record<UserNotificationDtoType, { label: string;
 export const STATUS_MAP = {
   pending: {
     label: "요청",
-    color: "bg-amber-400 text-white border-none",
+    color: "bg-[#FDECC8] text-[#9F6B15] dark:bg-[#4A3520] dark:text-[#F0C97E]",
     icon: "fill-amber-400 stroke-amber-400",
   },
   rejected: {
     label: "거절",
-    color: "bg-red-400 text-white border-none",
+    color: "bg-[#FFE2DD] text-[#93312E] dark:bg-[#5A2523] dark:text-[#FFB4AB]",
     icon: "fill-red-400 stroke-red-400",
   },
   approved: {
     label: "인증",
-    color: "bg-green-600 text-white border-none",
+    color: "bg-[#DBEDDB] text-[#2B6A2F] dark:bg-[#1E3D1F] dark:text-[#A3D9A5]",
     icon: "fill-green-600 stroke-green-600",
   },
   deleted: {
     label: "삭제",
-    color: "bg-red-400 text-white border-none",
+    color: "bg-[#FFE2DD] text-[#93312E] dark:bg-[#5A2523] dark:text-[#FFB4AB]",
     icon: "fill-red-400 stroke-red-400",
   },
   cancelled: {
     label: "취소",
-    color: "bg-gray-400 text-white border-none",
+    color: "bg-[#E3E2E0] text-[#55534E] dark:bg-[#3F3F3F] dark:text-[#9B9A97]",
     icon: "fill-gray-400 stroke-gray-400",
   },
 };

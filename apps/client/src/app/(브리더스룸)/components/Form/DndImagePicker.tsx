@@ -326,19 +326,6 @@ export default function DndImagePicker({
               draggable={false}
               priority={false}
             />
-            {/* [SAMPLE_WATERMARK] 베타테스트용 워터마크 - 출시 시 삭제 */}
-            <span
-              className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center select-none"
-              aria-hidden="true"
-            >
-              <span
-                className="rounded-sm border-2 border-white px-3 py-1 text-3xl font-bold tracking-widest text-white opacity-80"
-                style={{ transform: "rotate(-30deg)", textShadow: "0 1px 4px rgba(0,0,0,0.5)" }}
-              >
-                SAMPLE
-              </span>
-            </span>
-            {/* [/SAMPLE_WATERMARK] */}
             <button
               type="button"
               onClick={() => {
@@ -438,19 +425,6 @@ function SortableThumb({
           className="cursor-pointer object-cover"
           draggable={false}
         />
-        {/* [SAMPLE_WATERMARK] 베타테스트용 워터마크 - 출시 시 삭제 */}
-        <span
-          className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center select-none"
-          aria-hidden="true"
-        >
-          <span
-            className="rounded-sm border-2 border-white px-1 py-0.5 text-[0.5rem] font-bold tracking-widest text-white opacity-80"
-            style={{ transform: "rotate(-40deg)", textShadow: "0 1px 4px rgba(0,0,0,0.5)" }}
-          >
-            SAMPLE
-          </span>
-        </span>
-        {/* [/SAMPLE_WATERMARK] */}
       </div>
 
       {!disabled && !isBusy && (

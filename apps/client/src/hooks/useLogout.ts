@@ -1,10 +1,10 @@
-import { useRouter } from "next/navigation";
+import { useAppRouter } from "@/hooks/useAppRouter";
 import { toast } from "@/lib/toast";
 import { useUserStore } from "@/app/(브리더스룸)/store/user";
 import { isNativeApp } from "@/lib/native-bridge";
 
 export const useLogout = () => {
-  const router = useRouter();
+  const router = useAppRouter();
   const onLogout = useUserStore((state) => state.onLogout);
 
   const logout = async () => {

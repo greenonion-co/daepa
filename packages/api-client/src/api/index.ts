@@ -11,6 +11,7 @@ import type {
   BrPetControllerFindAllParams,
   BrPetControllerGetPetsByDateRangeParams,
   BrPetControllerGetPetsByMonthParams,
+  BulkCreatePetDto,
   CompleteAdoptionDto,
   CompleteHatchingDto,
   CreateAdoptionDto,
@@ -31,6 +32,7 @@ import type {
   PetControllerGetChildrenByPetIdParams,
   PetControllerGetClutchMatesByPetIdParams,
   PetControllerGetDeletedPetsParams,
+  PetControllerGetFamilyTreeParams,
   PetControllerGetParentsByPetIdParams,
   PetControllerGetSiblingsByPetIdParams,
   RegisterFcmTokenDto,
@@ -66,15 +68,18 @@ import type {
   AdoptionStatisticsDto,
   BrPetControllerFindAll200,
   BrPetControllerGetPetsByYear200,
+  BreederPublicProfileResponseDto,
   ChildPetDetailDto,
   CommonResponseDto,
   DetailJson,
+  FamilyTreeNodeDto,
   FeedingControllerGetList200,
   FilterPetListResponseDto,
   FindPetByPetIdResponseDto,
   FindPetImagesResponseDto,
   FindThumbnailResponseDto,
   GetChildrenPageResponseDto,
+  GetFamilyTreeResponseDto,
   GetParentsByPetIdResponseDto,
   GetSiblingsPageResponseDto,
   NativeLoginResponseDto,
@@ -120,12 +125,32 @@ export const petControllerGetDeletedPets = (params?: PetControllerGetDeletedPets
   });
 };
 
+export const petControllerBulkCreate = (bulkCreatePetDto: BulkCreatePetDto) => {
+  return useCustomInstance<CommonResponseDto>({
+    url: `/api/v1/pet/bulk`,
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    data: bulkCreatePetDto,
+  });
+};
+
 export const petControllerVerifyName = (verifyPetNameDto: VerifyPetNameDto) => {
   return useCustomInstance<CommonResponseDto>({
     url: `/api/v1/pet/duplicate-check`,
     method: "POST",
     headers: { "Content-Type": "application/json" },
     data: verifyPetNameDto,
+  });
+};
+
+export const petControllerGetFamilyTree = (
+  petId: string,
+  params?: PetControllerGetFamilyTreeParams,
+) => {
+  return useCustomInstance<GetFamilyTreeResponseDto>({
+    url: `/api/v1/pet/family-tree/${petId}`,
+    method: "GET",
+    params,
   });
 };
 
@@ -354,6 +379,13 @@ export const authControllerSignOut = () => {
 
 export const authControllerDeleteAccount = () => {
   return useCustomInstance<CommonResponseDto>({ url: `/api/auth/delete-account`, method: "POST" });
+};
+
+export const userControllerGetPublicProfile = (name: string) => {
+  return useCustomInstance<BreederPublicProfileResponseDto>({
+    url: `/api/v1/user/public-profile/${name}`,
+    method: "GET",
+  });
 };
 
 export const userControllerGetUserListSimple = (params?: UserControllerGetUserListSimpleParams) => {
@@ -722,8 +754,14 @@ export type PetControllerCreateResult = NonNullable<
 export type PetControllerGetDeletedPetsResult = NonNullable<
   Awaited<ReturnType<typeof petControllerGetDeletedPets>>
 >;
+export type PetControllerBulkCreateResult = NonNullable<
+  Awaited<ReturnType<typeof petControllerBulkCreate>>
+>;
 export type PetControllerVerifyNameResult = NonNullable<
   Awaited<ReturnType<typeof petControllerVerifyName>>
+>;
+export type PetControllerGetFamilyTreeResult = NonNullable<
+  Awaited<ReturnType<typeof petControllerGetFamilyTree>>
 >;
 export type PetControllerGetParentsByPetIdResult = NonNullable<
   Awaited<ReturnType<typeof petControllerGetParentsByPetId>>
@@ -805,6 +843,9 @@ export type AuthControllerSignOutResult = NonNullable<
 >;
 export type AuthControllerDeleteAccountResult = NonNullable<
   Awaited<ReturnType<typeof authControllerDeleteAccount>>
+>;
+export type UserControllerGetPublicProfileResult = NonNullable<
+  Awaited<ReturnType<typeof userControllerGetPublicProfile>>
 >;
 export type UserControllerGetUserListSimpleResult = NonNullable<
   Awaited<ReturnType<typeof userControllerGetUserListSimple>>
@@ -1248,11 +1289,77 @@ export const getPetControllerGetDeletedPetsResponseMock = (
   ...overrideResponse,
 });
 
+export const getPetControllerBulkCreateResponseMock = (
+  overrideResponse: Partial<CommonResponseDto> = {},
+): CommonResponseDto => ({
+  success: faker.datatype.boolean(),
+  message: faker.string.alpha(20),
+  ...overrideResponse,
+});
+
 export const getPetControllerVerifyNameResponseMock = (
   overrideResponse: Partial<CommonResponseDto> = {},
 ): CommonResponseDto => ({
   success: faker.datatype.boolean(),
   message: faker.string.alpha(20),
+  ...overrideResponse,
+});
+
+export const getPetControllerGetFamilyTreeResponseFamilyTreeNodeDtoMock = (
+  overrideResponse: Partial<FamilyTreeNodeDto> = {},
+): FamilyTreeNodeDto => ({
+  ...{
+    petId: faker.string.alpha(20),
+    fatherId: faker.helpers.arrayElement([faker.string.alpha(20), null]),
+    motherId: faker.helpers.arrayElement([faker.string.alpha(20), null]),
+    depth: faker.helpers.arrayElement([faker.number.int({ min: undefined, max: undefined }), null]),
+    name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+    sex: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+    morphs: faker.helpers.arrayElement([
+      Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+        faker.string.alpha(20),
+      ),
+      undefined,
+    ]),
+    traits: faker.helpers.arrayElement([
+      Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+        faker.string.alpha(20),
+      ),
+      undefined,
+    ]),
+    species: faker.string.alpha(20),
+    hatchingDate: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+    type: faker.string.alpha(20),
+    isPublic: faker.datatype.boolean(),
+    isOwner: faker.datatype.boolean(),
+    ownerName: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+  },
+  ...overrideResponse,
+});
+
+export const getPetControllerGetFamilyTreeResponsePetHiddenStatusDtoMock = (
+  overrideResponse: Partial<PetHiddenStatusDto> = {},
+): PetHiddenStatusDto => ({
+  ...{
+    petId: faker.string.alpha(20),
+    hiddenStatus: faker.helpers.arrayElement(["SECRET", "PENDING", "DELETED"] as const),
+  },
+  ...overrideResponse,
+});
+
+export const getPetControllerGetFamilyTreeResponseMock = (
+  overrideResponse: Partial<GetFamilyTreeResponseDto> = {},
+): GetFamilyTreeResponseDto => ({
+  nodes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+    faker.helpers.arrayElement([
+      { ...getPetControllerGetFamilyTreeResponseFamilyTreeNodeDtoMock() },
+      { ...getPetControllerGetFamilyTreeResponsePetHiddenStatusDtoMock() },
+    ]),
+  ),
+  centerPairPartnerIds: Array.from(
+    { length: faker.number.int({ min: 1, max: 10 }) },
+    (_, i) => i + 1,
+  ).map(() => faker.string.alpha(20)),
   ...overrideResponse,
 });
 
@@ -3277,11 +3384,6 @@ export const getAuthControllerKakaoNativeResponseMock = (
   email: faker.string.alpha(20),
   role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
   isBiz: faker.datatype.boolean(),
-  refreshToken: faker.helpers.arrayElement([faker.string.alpha(20), null]),
-  refreshTokenExpiresAt: faker.helpers.arrayElement([
-    `${faker.date.past().toISOString().split(".")[0]}Z`,
-    null,
-  ]),
   status: faker.helpers.arrayElement([
     "pending",
     "active",
@@ -3303,11 +3405,6 @@ export const getAuthControllerAppleNativeResponseMock = (
   email: faker.string.alpha(20),
   role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
   isBiz: faker.datatype.boolean(),
-  refreshToken: faker.helpers.arrayElement([faker.string.alpha(20), null]),
-  refreshTokenExpiresAt: faker.helpers.arrayElement([
-    `${faker.date.past().toISOString().split(".")[0]}Z`,
-    null,
-  ]),
   status: faker.helpers.arrayElement([
     "pending",
     "active",
@@ -3329,11 +3426,6 @@ export const getAuthControllerGoogleNativeResponseMock = (
   email: faker.string.alpha(20),
   role: faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
   isBiz: faker.datatype.boolean(),
-  refreshToken: faker.helpers.arrayElement([faker.string.alpha(20), null]),
-  refreshTokenExpiresAt: faker.helpers.arrayElement([
-    `${faker.date.past().toISOString().split(".")[0]}Z`,
-    null,
-  ]),
   status: faker.helpers.arrayElement([
     "pending",
     "active",
@@ -3369,6 +3461,36 @@ export const getAuthControllerDeleteAccountResponseMock = (
 ): CommonResponseDto => ({
   success: faker.datatype.boolean(),
   message: faker.string.alpha(20),
+  ...overrideResponse,
+});
+
+export const getUserControllerGetPublicProfileResponseMock = (
+  overrideResponse: Partial<BreederPublicProfileResponseDto> = {},
+): BreederPublicProfileResponseDto => ({
+  success: faker.datatype.boolean(),
+  message: faker.string.alpha(20),
+  data: {
+    ...{
+      status: faker.helpers.arrayElement([
+        "pending",
+        "active",
+        "inactive",
+        "suspended",
+        "deleted",
+      ] as const),
+      userId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+      name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+      role: faker.helpers.arrayElement([
+        faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
+        undefined,
+      ]),
+      isBiz: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+      petCount: faker.number.int({ min: undefined, max: undefined }),
+      realName: faker.helpers.arrayElement([{}, undefined]),
+      phone: faker.helpers.arrayElement([{}, undefined]),
+      address: faker.helpers.arrayElement([{}, undefined]),
+    },
+  },
   ...overrideResponse,
 });
 
@@ -4466,6 +4588,29 @@ export const getPetControllerGetDeletedPetsMockHandler = (
   });
 };
 
+export const getPetControllerBulkCreateMockHandler = (
+  overrideResponse?:
+    | CommonResponseDto
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<CommonResponseDto> | CommonResponseDto),
+) => {
+  return http.post("*/api/v1/pet/bulk", async (info) => {
+    await delay(1000);
+
+    return new HttpResponse(
+      JSON.stringify(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getPetControllerBulkCreateResponseMock(),
+      ),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+  });
+};
+
 export const getPetControllerVerifyNameMockHandler = (
   overrideResponse?:
     | CommonResponseDto
@@ -4483,6 +4628,29 @@ export const getPetControllerVerifyNameMockHandler = (
             ? await overrideResponse(info)
             : overrideResponse
           : getPetControllerVerifyNameResponseMock(),
+      ),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+  });
+};
+
+export const getPetControllerGetFamilyTreeMockHandler = (
+  overrideResponse?:
+    | GetFamilyTreeResponseDto
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<GetFamilyTreeResponseDto> | GetFamilyTreeResponseDto),
+) => {
+  return http.get("*/api/v1/pet/family-tree/:petId", async (info) => {
+    await delay(1000);
+
+    return new HttpResponse(
+      JSON.stringify(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getPetControllerGetFamilyTreeResponseMock(),
       ),
       { status: 200, headers: { "Content-Type": "application/json" } },
     );
@@ -5088,6 +5256,29 @@ export const getAuthControllerDeleteAccountMockHandler = (
             ? await overrideResponse(info)
             : overrideResponse
           : getAuthControllerDeleteAccountResponseMock(),
+      ),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+  });
+};
+
+export const getUserControllerGetPublicProfileMockHandler = (
+  overrideResponse?:
+    | BreederPublicProfileResponseDto
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<BreederPublicProfileResponseDto> | BreederPublicProfileResponseDto),
+) => {
+  return http.get("*/api/v1/user/public-profile/:name", async (info) => {
+    await delay(1000);
+
+    return new HttpResponse(
+      JSON.stringify(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getUserControllerGetPublicProfileResponseMock(),
       ),
       { status: 200, headers: { "Content-Type": "application/json" } },
     );
@@ -5978,7 +6169,9 @@ export const getProjectDaepaAPIMock = () => [
   getPetControllerFindAllMockHandler(),
   getPetControllerCreateMockHandler(),
   getPetControllerGetDeletedPetsMockHandler(),
+  getPetControllerBulkCreateMockHandler(),
   getPetControllerVerifyNameMockHandler(),
+  getPetControllerGetFamilyTreeMockHandler(),
   getPetControllerGetParentsByPetIdMockHandler(),
   getPetControllerGetSiblingsByPetIdMockHandler(),
   getPetControllerGetChildrenByPetIdMockHandler(),
@@ -6006,6 +6199,7 @@ export const getProjectDaepaAPIMock = () => [
   getAuthControllerGetTokenMockHandler(),
   getAuthControllerSignOutMockHandler(),
   getAuthControllerDeleteAccountMockHandler(),
+  getUserControllerGetPublicProfileMockHandler(),
   getUserControllerGetUserListSimpleMockHandler(),
   getUserControllerGetUserProfileMockHandler(),
   getUserControllerCreateInitUserInfoMockHandler(),

@@ -9,12 +9,13 @@ import {
   AXIOS_INSTANCE,
 } from "@repo/api-client";
 import { useQuery } from "@tanstack/react-query";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { useAppRouter } from "@/hooks/useAppRouter";
 import { useEffect, useRef } from "react";
 import { toast } from "@/lib/toast";
 
 const AuthPage = () => {
-  const router = useRouter();
+  const router = useAppRouter();
   const searchParams = useSearchParams();
   const userStatus = searchParams.get("status");
   const authCode = searchParams.get("code");

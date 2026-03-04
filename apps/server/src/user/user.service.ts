@@ -8,6 +8,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, FindOptionsWhere, Not, Repository } from 'typeorm';
 import { UserEntity } from './user.entity';
 import {
+  BreederPublicProfileDto,
   CreateInitUserInfoDto,
   UpdateUserPrivateInfoDto,
   UserDto,
@@ -17,6 +18,8 @@ import {
 } from './user.dto';
 import { ProviderInfo } from 'src/auth/auth.types';
 import { USER_ROLE, USER_STATUS } from './user.constant';
+import { PetEntity } from 'src/pet/pet.entity';
+import { PET_TYPE } from 'src/pet/pet.constants';
 import { nanoid } from 'nanoid';
 import { isMySQLError } from 'src/common/error';
 import { OauthService } from 'src/auth/oauth/oauth.service';
@@ -77,8 +80,6 @@ export class UserService {
       email: entity.email,
       role: entity.role,
       isBiz: entity.isBiz,
-      refreshToken: entity.refreshToken,
-      refreshTokenExpiresAt: entity.refreshTokenExpiresAt,
       status: entity.status,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
@@ -93,6 +94,12 @@ export class UserService {
       role: entity.role,
       isBiz: entity.isBiz,
     };
+  }
+
+  async findOneEntity(
+    where: FindOptionsWhere<UserEntity>,
+  ): Promise<UserEntity | null> {
+    return this.userRepository.findOneBy(where);
   }
 
   async findOne(where: FindOptionsWhere<UserEntity>) {
@@ -168,9 +175,9 @@ export class UserService {
     }
   }
 
-  async update(userId: string, userDto: Partial<UserDto>) {
+  async update(userId: string, data: Partial<UserEntity>) {
     const userEntity = new UserEntity();
-    Object.assign(userEntity, userDto);
+    Object.assign(userEntity, data);
     await this.userRepository.update({ userId }, userEntity);
   }
 
@@ -251,6 +258,36 @@ export class UserService {
       throw new NotFoundException('사용자를 찾을 수 없습니다.');
     }
     await this.userRepository.update({ userId }, dto);
+  }
+
+  async findPublicProfileByName(
+    name: string,
+  ): Promise<BreederPublicProfileDto> {
+    const userEntity = await this.userRepository.findOneBy({
+      name,
+      status: USER_STATUS.ACTIVE,
+    });
+
+    if (!userEntity) {
+      throw new NotFoundException('사용자를 찾을 수 없습니다.');
+    }
+
+    const petCount = await this.dataSource.getRepository(PetEntity).count({
+      where: {
+        ownerId: userEntity.userId,
+        isPublic: true,
+        isDeleted: false,
+        type: PET_TYPE.PET,
+      },
+    });
+
+    return {
+      ...this.toUserSimpleDto(userEntity),
+      petCount,
+      realName: userEntity.isRealNamePublic ? userEntity.realName : null,
+      phone: userEntity.isPhonePublic ? userEntity.phone : null,
+      address: userEntity.isAddressPublic ? userEntity.address : null,
+    };
   }
 
   async getUserListSimple(

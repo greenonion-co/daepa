@@ -7,6 +7,8 @@ import { Repository, EntityManager, DataSource, Not, Raw } from 'typeorm';
 import { LayingEntity } from 'src/laying/laying.entity';
 import { UpdateMatingDto } from './mating.dto';
 import { PairEntity } from 'src/pair/pair.entity';
+import { PetDetailEntity } from 'src/pet_detail/pet_detail.entity';
+import { PET_SEX } from 'src/pet/pet.constants';
 
 @Injectable()
 export class MatingService {
@@ -16,26 +18,75 @@ export class MatingService {
     private readonly dataSource: DataSource,
   ) {}
 
+  /**
+   * fatherId/motherId를 성별 기반으로 정규화한다.
+   * fatherId에 수컷, motherId에 암컷이 오도록 보장.
+   */
+  private async normalizeParentIds(
+    entityManager: EntityManager,
+    fatherId?: string,
+    motherId?: string,
+  ): Promise<{ fatherId?: string; motherId?: string }> {
+    if (!fatherId || !motherId) return { fatherId, motherId };
+
+    if (fatherId === motherId) {
+      throw new BadRequestException('부모 펫은 서로 달라야 합니다.');
+    }
+
+    const details = await entityManager.find(PetDetailEntity, {
+      where: [{ petId: fatherId }, { petId: motherId }],
+      select: ['petId', 'sex'],
+    });
+
+    const fatherSex = details.find((d) => d.petId === fatherId)?.sex;
+    const motherSex = details.find((d) => d.petId === motherId)?.sex;
+
+    if (!fatherSex || !motherSex) {
+      throw new BadRequestException(
+        '부모 펫의 성별 정보를 확인할 수 없습니다.',
+      );
+    }
+
+    // 완전히 반대로 들어온 경우만 swap
+    if (fatherSex === PET_SEX.FEMALE && motherSex === PET_SEX.MALE) {
+      return { fatherId: motherId, motherId: fatherId };
+    }
+
+    if (fatherSex !== PET_SEX.MALE || motherSex !== PET_SEX.FEMALE) {
+      throw new BadRequestException(
+        'fatherId는 수컷, motherId는 암컷이어야 합니다.',
+      );
+    }
+
+    return { fatherId, motherId };
+  }
+
   async saveMating(userId: string, createMatingDto: CreateMatingDto) {
     return this.dataSource.transaction(async (entityManager: EntityManager) => {
       if (!createMatingDto.fatherId && !createMatingDto.motherId) {
         throw new BadRequestException('최소 하나의 부모 펫을 입력해야 합니다.');
       }
 
+      const { fatherId, motherId } = await this.normalizeParentIds(
+        entityManager,
+        createMatingDto.fatherId,
+        createMatingDto.motherId,
+      );
+
       // 페어가 존재하는지 확인하거나 생성 (삭제된 페어 포함하여 조회)
       let pair = await entityManager.findOne(PairEntity, {
         where: {
           ownerId: userId,
-          fatherId: createMatingDto.fatherId,
-          motherId: createMatingDto.motherId,
+          fatherId,
+          motherId,
         },
       });
 
       if (!pair) {
         pair = entityManager.create(PairEntity, {
           ownerId: userId,
-          fatherId: createMatingDto.fatherId,
-          motherId: createMatingDto.motherId,
+          fatherId,
+          motherId,
           species: createMatingDto.species,
         });
         pair = await entityManager.save(PairEntity, pair);
@@ -47,6 +98,7 @@ export class MatingService {
           {
             isDeleted: false,
             deletedAt: null,
+            desc: null,
             species: createMatingDto.species,
           },
         );
@@ -96,20 +148,26 @@ export class MatingService {
         throw new BadRequestException('메이팅 정보를 찾을 수 없습니다.');
       }
 
+      const { fatherId, motherId } = await this.normalizeParentIds(
+        entityManager,
+        updateMatingDto.fatherId,
+        updateMatingDto.motherId,
+      );
+
       // 페어 정보 업데이트 또는 새 페어 생성 (삭제된 페어 포함하여 조회)
       let pair = await entityManager.findOne(PairEntity, {
         where: {
           ownerId: userId,
-          fatherId: updateMatingDto.fatherId,
-          motherId: updateMatingDto.motherId,
+          fatherId,
+          motherId,
         },
       });
 
       if (!pair) {
         pair = entityManager.create(PairEntity, {
           ownerId: userId,
-          fatherId: updateMatingDto.fatherId,
-          motherId: updateMatingDto.motherId,
+          fatherId,
+          motherId,
         });
         pair = await entityManager.save(PairEntity, pair);
       } else if (pair.isDeleted) {
@@ -120,6 +178,7 @@ export class MatingService {
           {
             isDeleted: false,
             deletedAt: null,
+            desc: null,
           },
         );
       }
@@ -164,7 +223,7 @@ export class MatingService {
       try {
         const mating = await entityManager.findOne(MatingEntity, {
           where: { id: matingId },
-          select: ['id'],
+          select: ['id', 'pairId'],
         });
 
         if (!mating) {
@@ -182,7 +241,21 @@ export class MatingService {
           );
         }
 
+        // pairId를 미리 저장
+        const pairId = mating.pairId;
+
         await entityManager.delete(MatingEntity, { id: matingId });
+
+        // 해당 페어에 남은 메이팅이 없으면 페어도 삭제
+        const remainingMatings = await entityManager.existsBy(MatingEntity, {
+          pairId,
+        });
+        if (!remainingMatings) {
+          await entityManager.update(PairEntity, pairId, {
+            isDeleted: true,
+            deletedAt: new Date(),
+          });
+        }
       } catch (error) {
         if (error instanceof BadRequestException) {
           throw error;

@@ -5,7 +5,6 @@ import {
   pairControllerDeletePair,
   pairControllerGetPairList,
   PetDtoSpecies,
-  UpdatePairDto,
 } from "@repo/api-client";
 import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { HelpCircle, Plus } from "lucide-react";
@@ -24,15 +23,10 @@ import MatingDetailDialog from "./MatingDetailDialog";
 import PairCard from "./PairCard";
 import { overlay } from "overlay-kit";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import UpdatePairModal from "./UpdatePairModal";
 import ConfirmDialog from "../../components/Form/Dialog";
 import { CalendarEventDetail, EGG_STATUS } from "./PairMiniCalendar";
 import { usePairCardTutorial } from "./PairCardTutorial";
 import AddMatingModal from "./AddMatingModal";
-
-export interface updatePairProps extends UpdatePairDto {
-  pairId: number;
-}
 
 const PairList = memo(() => {
   const queryClient = useQueryClient();
@@ -143,21 +137,6 @@ const PairList = memo(() => {
     ));
   };
 
-  const handleClickUpdateDesc = (pair: updatePairProps) => {
-    if (!pair?.pairId) return toast.error("오류가 발생했습니다. 잠시후에 다시 시도해주세요.");
-
-    overlay.open(({ isOpen, close }) => (
-      <UpdatePairModal
-        pair={pair}
-        isOpen={isOpen}
-        close={close}
-        onSuccess={async () => {
-          await refetch();
-        }}
-      />
-    ));
-  };
-
   // 무한 스크롤 처리
   useEffect(() => {
     if (inView && hasNextPage && !isFetchingNextPage) {
@@ -170,7 +149,7 @@ const PairList = memo(() => {
   const handleOpenCreateForm = () => {
     overlay.open(({ isOpen, close }) => (
       <Dialog open={isOpen} onOpenChange={close}>
-        <DialogContent className="max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-h-[90dvh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>새 페어 추가</DialogTitle>
           </DialogHeader>
@@ -184,9 +163,9 @@ const PairList = memo(() => {
     return (
       <div className="flex flex-col items-center justify-center px-4 py-20">
         <h1 className="bg-gradient-to-r from-[#4285F4] via-[#9B72CB] to-[#D96570] bg-clip-text text-3xl font-semibold text-transparent dark:from-[#8AB4F8] dark:via-[#C58AF9] dark:to-[#F28B82]">
-          번식 관리를 시작해보세요
+          메이팅 관리를 시작해보세요
         </h1>
-        <p className="mt-3 text-[15px] text-gray-500 dark:text-gray-400">
+        <p className="mt-3 text-center text-[15px] text-gray-500 dark:text-gray-400">
           페어를 등록하고 메이팅・산란・해칭까지 한눈에 관리할 수 있어요.
         </p>
         <button
@@ -297,7 +276,7 @@ const PairList = memo(() => {
             <PairCard
               key={index}
               pair={pair}
-              onClickUpdateDesc={handleClickUpdateDesc}
+              onDescUpdated={refetch}
               onClick={() => {
                 setIsOpen(true);
                 setSelectedPairIndex(index);
