@@ -33,7 +33,7 @@ interface BreedingInfoContentProps {
 const BreedingInfoContent = ({ petId, ownerId, initialPet }: BreedingInfoContentProps) => {
   const queryClient = useQueryClient();
   const { formData, errors, setFormData } = usePetStore();
-  const { duplicateCheckStatus } = useNameStore();
+  const { duplicateCheckStatus, setDuplicateCheckStatus } = useNameStore();
   const { setBreedingInfo } = useBreedingInfoStore();
 
   const isViewingMyPet = useIsMyPet(ownerId);
@@ -146,9 +146,23 @@ const BreedingInfoContent = ({ petId, ownerId, initialPet }: BreedingInfoContent
     [autoSave],
   );
 
+  // petId 변경 시 이름 중복확인 상태 초기화 (stale autoSave 방지)
+  const nameAutoSaveReadyRef = useRef(false);
+  useEffect(() => {
+    nameAutoSaveReadyRef.current = false;
+    setDuplicateCheckStatus(DUPLICATE_CHECK_STATUS.NONE);
+  }, [petId, setDuplicateCheckStatus]);
+
+  useEffect(() => {
+    if (duplicateCheckStatus === DUPLICATE_CHECK_STATUS.NONE) {
+      nameAutoSaveReadyRef.current = true;
+    }
+  }, [duplicateCheckStatus]);
+
   // 이름 중복확인 완료 시 자동 저장
   const formName = (formData as any).name;
   useEffect(() => {
+    if (!nameAutoSaveReadyRef.current) return;
     if (duplicateCheckStatus !== DUPLICATE_CHECK_STATUS.AVAILABLE) return;
     const originalName = petRef.current?.name;
     if (formName && formName !== originalName) {
