@@ -4,7 +4,7 @@ import {
   pairControllerUpdatePair,
   pairControllerGetPairList,
 } from "@repo/api-client";
-import { StickyNote, Trash2 } from "lucide-react";
+import { StickyNote } from "lucide-react";
 import { useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
@@ -35,7 +35,7 @@ const PairCard = ({
   onDateClick,
   onAddMating,
   onAddLaying,
-  onDelete,
+  // onDelete,
   showTutorial,
   onCloseTutorial,
   petThumbnailClickable = true,
@@ -250,7 +250,7 @@ const PairCard = ({
       </div>
 
       {/* 삭제 버튼 */}
-      {onDelete && (
+      {/* {onDelete && (
         <button
           type="button"
           aria-label="페어 삭제"
@@ -262,7 +262,7 @@ const PairCard = ({
         >
           <Trash2 className="h-3.5 w-3.5" />
         </button>
-      )}
+      )} */}
     </div>
   );
 };
