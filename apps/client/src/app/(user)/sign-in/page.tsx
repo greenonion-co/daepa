@@ -4,21 +4,15 @@ import Image from "next/image";
 // import AppleLoginButton from "./AppleLoginButton";
 import { providerIconMap } from "../constants";
 import { useEffect } from "react";
-import { useAppRouter } from "@/hooks/useAppRouter";
 import { tokenStorage } from "@/lib/tokenStorage";
-import { toast } from "@/lib/toast";
 import { UserProfileDtoProviderItem } from "@repo/api-client";
 
 const SignInPage = () => {
-  const router = useAppRouter();
-
   useEffect(() => {
-    const token = tokenStorage.getToken();
-    if (token) {
-      toast.error("이미 로그인된 사용자입니다.");
-      router.replace("/");
-    }
-  }, [router]);
+    // sign-in 페이지에 도달했다면 refreshToken이 유효하지 않은 상태이므로
+    // localStorage의 stale accessToken을 정리
+    tokenStorage.removeToken();
+  }, []);
 
   return (
     <div className="flex min-h-[calc(100dvh-52px)] w-full items-center justify-center dark:bg-black">
