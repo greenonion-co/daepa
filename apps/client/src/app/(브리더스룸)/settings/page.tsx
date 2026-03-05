@@ -4,7 +4,7 @@ import ProfileSection from "./components/ProfileSection";
 import AccountInfoSection from "./components/AccountInfoSection";
 import ReporterInfoSection from "./components/ReporterInfoSection";
 // import AppSettingsSection from "./components/AppSettingsSection";
-import HelpSection from "./components/HelpSection";
+// import HelpSection from "./components/HelpSection";
 import AccountManagementSection from "./components/AccountManagementSection";
 
 const SettingsPage = () => {
@@ -18,7 +18,7 @@ const SettingsPage = () => {
           <ReporterInfoSection />
           {/*<AppSettingsSection />*/}
           <AccountManagementSection />
-          <HelpSection />
+          {/* <HelpSection /> */}
         </div>
 
         {/* 버전 정보 */}
