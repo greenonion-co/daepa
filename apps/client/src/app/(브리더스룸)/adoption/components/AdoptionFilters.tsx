@@ -42,7 +42,7 @@ export function AdoptionFilters() {
     ));
 
   return (
-    <div className="mb-4 flex flex-wrap items-center gap-2 px-2">
+    <div className="flex flex-wrap items-center gap-2 px-2">
       <SelectFilter
         showSelectAll
         showTitle
@@ -78,7 +78,11 @@ export function AdoptionFilters() {
       )}
       <AdoptionMultiSelectFilter type="sex" title="성별" displayMap={GENDER_KOREAN_INFO} />
       <AdoptionMultiSelectFilter type="growth" title="크기" displayMap={GROWTH_KOREAN_INFO} />
-      <AdoptionMultiSelectFilter type="method" title="분양 방식" displayMap={ADOPTION_METHOD_KOREAN_INFO} />
+      <AdoptionMultiSelectFilter
+        type="method"
+        title="분양 방식"
+        displayMap={ADOPTION_METHOD_KOREAN_INFO}
+      />
       <AdoptionPriceRangeFilter />
       <AdoptionDateRangeFilter />
 

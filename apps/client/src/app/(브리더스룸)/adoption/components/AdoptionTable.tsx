@@ -20,15 +20,18 @@ import { cn } from "@/lib/utils";
 import { overlay } from "overlay-kit";
 import Loading from "@/components/common/Loading";
 import AdoptionReceiptModal from "./AdoptionReceiptModal";
+import AdoptionCard from "./AdoptionCard";
 import { useInView } from "react-intersection-observer";
 import { useAdoptionFilterStore } from "../../store/adoptionFilter";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { AdoptionFilters } from "./AdoptionFilters";
 import { columns } from "./adoption_columns";
-import { adoptionHistoryControllerGetAllAdoptions } from "@repo/api-client";
+import { adoptionHistoryControllerGetAllAdoptions, AdoptionHistoryDto } from "@repo/api-client";
 import { useIsMobile } from "@/hooks/useMobile";
 import { useDebouncedHover } from "@/hooks/useDebouncedHover";
 import PetHoverPreview from "../../pet/components/PetHoverPreview";
+import ViewModeToggle from "../../pet/components/ViewModeToggle";
+import { useViewMode } from "../../store/viewMode";
 
 const AdoptionTable = () => {
   const { ref, inView } = useInView();
@@ -36,6 +39,7 @@ const AdoptionTable = () => {
   const itemPerPage = 10;
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const { sorting, rowSelection, setSorting, setRowSelection } = useTableStore();
+  const { viewMode } = useViewMode();
 
   const isMobile = useIsMobile();
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -44,17 +48,20 @@ const AdoptionTable = () => {
   const [previewSuppressed, setPreviewSuppressed] = useState(false);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
-  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    setMousePos({ x: e.clientX, y: e.clientY });
-    const cell = (e.target as HTMLElement).closest("td[data-column-id]");
-    if (cell?.getAttribute("data-column-id") === "memo") {
-      hoverLeave();
-    } else {
-      const row = (e.target as HTMLElement).closest("tr[data-pet-id]");
-      const petId = row?.getAttribute("data-pet-id");
-      if (petId) hoverEnter(petId);
-    }
-  }, [hoverEnter, hoverLeave]);
+  const handleMouseMove = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      setMousePos({ x: e.clientX, y: e.clientY });
+      const cell = (e.target as HTMLElement).closest("td[data-column-id]");
+      if (cell?.getAttribute("data-column-id") === "memo") {
+        hoverLeave();
+      } else {
+        const row = (e.target as HTMLElement).closest("tr[data-pet-id]");
+        const petId = row?.getAttribute("data-pet-id");
+        if (petId) hoverEnter(petId);
+      }
+    },
+    [hoverEnter, hoverLeave],
+  );
 
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage, refetch } =
     useInfiniteQuery({
@@ -108,109 +115,158 @@ const AdoptionTable = () => {
     };
   }, []);
 
+  const [selectedAdoption, setSelectedAdoption] = useState<AdoptionHistoryDto | null>(null);
+
+  const handleAdoptionClick = useCallback((adoption: AdoptionHistoryDto) => {
+    if (viewMode === "card") {
+      setSelectedAdoption(adoption);
+    } else {
+      overlay.open(({ isOpen, close }) => (
+        <AdoptionReceiptModal isOpen={isOpen} onClose={close} adoption={adoption} />
+      ));
+    }
+  }, [viewMode]);
+
   if (isLoading) return <Loading />;
 
   return (
-    <div className="relative w-full" onMouseMove={!isMobile ? handleMouseMove : undefined}>
-      <div className="flex items-center gap-2 pb-1 pl-2">
-        <button
-          type="button"
-          aria-label="검색 결과 새로고침"
-          aria-busy={isRefreshing}
-          disabled={isRefreshing}
-          onClick={async () => {
-            if (isRefreshing) return;
-            setIsRefreshing(true);
-            try {
-              await refetch();
-            } finally {
-              timeoutRef.current = setTimeout(() => setIsRefreshing(false), 500);
-            }
-          }}
-          className="flex w-fit items-center gap-1 rounded-lg px-2 py-1 text-[12px] text-gray-600 hover:bg-blue-100 hover:text-blue-700"
-        >
-          분양 정보 ・{data?.length ?? "?"}개
-          <RefreshCcw className={cn("h-3 w-3", isRefreshing && "animate-spin")} />
-        </button>
-        <span className="text-[11px] text-blue-600">분양 완료된 개체만 표시됩니다</span>
-      </div>
-
+    <div
+      className="relative w-full"
+      onMouseMove={viewMode === "table" && !isMobile ? handleMouseMove : undefined}
+    >
       <AdoptionFilters />
-
-      <div className="rounded-md">
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead className="font-[400] text-gray-600" key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(header.column.columnDef.header, header.getContext())}
-                    </TableHead>
-                  );
-                })}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              <>
-                {table.getRowModel().rows.map((row) => (
-                  <TableRow
-                    key={row.id}
-                    data-state={row.getIsSelected() && "selected"}
-                    data-pet-id={row.original.petId}
-                    className={cn(
-                      "cursor-pointer",
-                      "hover:bg-purple-50 dark:bg-[#18171C] dark:hover:bg-purple-900/30",
-                    )}
-                    onMouseEnter={!isMobile ? () => hoverEnter(row.original.petId) : undefined}
-                    onMouseLeave={!isMobile ? hoverLeave : undefined}
-                    onClick={() => {
-                      overlay.open(({ isOpen, close }) => (
-                        <AdoptionReceiptModal
-                          isOpen={isOpen}
-                          onClose={close}
-                          adoption={row.original}
-                        />
-                      ));
-                    }}
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id} className="py-2" data-column-id={cell.column.id}>
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))}
-                {/* 무한 스크롤 로더 */}
-                {hasNextPage && (
-                  <TableRow ref={ref}>
-                    <TableCell colSpan={columns.length} className="h-20 text-center">
-                      {isFetchingNextPage && <Loading />}
-                    </TableCell>
-                  </TableRow>
-                )}
-              </>
-            ) : (
-              <TableRow>
-                <TableCell colSpan={columns.length}>
-                  <div className="flex flex-col items-center justify-center py-12 text-center">
-                    <p className="text-sm text-gray-400 dark:text-gray-500">
-                      분양 정보가 없습니다.
-                    </p>
-                  </div>
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+      <div className="flex items-center justify-between gap-2 pr-1 pb-1 pl-2">
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            aria-label="검색 결과 새로고침"
+            aria-busy={isRefreshing}
+            disabled={isRefreshing}
+            onClick={async () => {
+              if (isRefreshing) return;
+              setIsRefreshing(true);
+              try {
+                await refetch();
+              } finally {
+                timeoutRef.current = setTimeout(() => setIsRefreshing(false), 500);
+              }
+            }}
+            className="flex w-fit items-center gap-1 rounded-lg px-2 py-1 text-[12px] text-gray-600 hover:bg-blue-100 hover:text-blue-700"
+          >
+            분양 정보 ・{data?.length ?? "?"}개
+            <RefreshCcw className={cn("h-3 w-3", isRefreshing && "animate-spin")} />
+          </button>
+          <span className="text-[11px] text-blue-600">분양 완료된 개체만 표시됩니다</span>
+        </div>
+        <ViewModeToggle />
       </div>
 
-      {!previewSuppressed && (previewOverridePetId || debouncedHoveredPetId) && (
-        <PetHoverPreview petId={(previewOverridePetId || debouncedHoveredPetId)!} mousePos={mousePos} />
+      {viewMode === "card" ? (
+        <div className="space-y-2 px-2 pb-20">
+          {(data ?? []).length > 0 ? (
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(min(270px,100%),1fr))] gap-2">
+              {(data ?? []).map((adoption) => (
+                <AdoptionCard key={adoption.id} adoption={adoption} onClick={handleAdoptionClick} />
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <p className="text-sm text-gray-400 dark:text-gray-500">분양 정보가 없습니다.</p>
+            </div>
+          )}
+          {hasNextPage ? (
+            <div ref={ref} className="flex justify-center py-4">
+              {isFetchingNextPage && <Loading />}
+            </div>
+          ) : (
+            (data ?? []).length > 0 && (
+              <span className="m-10 block text-center text-sm text-gray-400">
+                데이터를 모두 불러왔습니다.
+              </span>
+            )
+          )}
+        </div>
+      ) : (
+        <div className="rounded-md">
+          <Table>
+            <TableHeader>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => {
+                    return (
+                      <TableHead className="font-[400] text-gray-600" key={header.id}>
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(header.column.columnDef.header, header.getContext())}
+                      </TableHead>
+                    );
+                  })}
+                </TableRow>
+              ))}
+            </TableHeader>
+            <TableBody>
+              {table.getRowModel().rows?.length ? (
+                <>
+                  {table.getRowModel().rows.map((row) => (
+                    <TableRow
+                      key={row.id}
+                      data-state={row.getIsSelected() && "selected"}
+                      data-pet-id={row.original.petId}
+                      className={cn(
+                        "cursor-pointer",
+                        "hover:bg-purple-50 dark:bg-[#18171C] dark:hover:bg-purple-900/30",
+                      )}
+                      onMouseEnter={!isMobile ? () => hoverEnter(row.original.petId) : undefined}
+                      onMouseLeave={!isMobile ? hoverLeave : undefined}
+                      onClick={() => handleAdoptionClick(row.original)}
+                    >
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell key={cell.id} className="py-2" data-column-id={cell.column.id}>
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))}
+                  {/* 무한 스크롤 로더 */}
+                  {hasNextPage && (
+                    <TableRow ref={ref}>
+                      <TableCell colSpan={columns.length} className="h-20 text-center">
+                        {isFetchingNextPage && <Loading />}
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </>
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={columns.length}>
+                    <div className="flex flex-col items-center justify-center py-12 text-center">
+                      <p className="text-sm text-gray-400 dark:text-gray-500">
+                        분양 정보가 없습니다.
+                      </p>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      )}
+
+      {viewMode === "table" &&
+        !previewSuppressed &&
+        (previewOverridePetId || debouncedHoveredPetId) && (
+          <PetHoverPreview
+            petId={(previewOverridePetId || debouncedHoveredPetId)!}
+            mousePos={mousePos}
+          />
+        )}
+
+      {selectedAdoption && (
+        <AdoptionReceiptModal
+          isOpen={!!selectedAdoption}
+          onClose={() => setSelectedAdoption(null)}
+          adoption={selectedAdoption}
+        />
       )}
     </div>
   );
