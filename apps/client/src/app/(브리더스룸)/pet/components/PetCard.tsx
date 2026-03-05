@@ -87,7 +87,8 @@ export default function PetCard({ pet, onCardClick }: PetCardProps) {
 
   return (
     <div
-      className={`relative flex cursor-pointer flex-col gap-1 rounded-xl border border-gray-200/70 bg-neutral-50 p-2 transition-all duration-150 hover:shadow-md dark:border-gray-700/60 dark:bg-[#18171C] ${pressed ? "scale-[0.98] dark:bg-gray-800" : ""}`}
+      className={`relative flex cursor-pointer flex-col gap-1 rounded-xl border border-gray-200/70 bg-neutral-50 p-2 transition-transform duration-100 ease-out hover:shadow-md active:scale-[0.97] active:opacity-80 dark:border-gray-700/60 dark:bg-[#18171C] ${pressed ? "scale-[0.97] opacity-80" : ""}`}
+      style={{ WebkitTapHighlightColor: "transparent", touchAction: "manipulation" }}
       onClick={() => onCardClick(pet)}
       onPointerDown={() => setPressed(true)}
       onPointerUp={() => setPressed(false)}
