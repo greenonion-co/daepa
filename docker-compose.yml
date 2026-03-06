@@ -44,5 +44,23 @@ services:
       - APPLE_KEY_ID=${APPLE_KEY_ID}
       - APPLE_PRIVATE_KEY=${APPLE_PRIVATE_KEY}
       - FIREBASE_SERVICE_ACCOUNT_PATH=${FIREBASE_SERVICE_ACCOUNT_PATH}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
     volumes:
       - ./apps/server/firebase-service-account.json:/app/apps/server/firebase-service-account.json:ro
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    restart: always
+    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru --requirepass ${REDIS_PASSWORD}
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+volumes:
+  redis_data:
