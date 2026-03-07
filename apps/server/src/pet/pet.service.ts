@@ -58,6 +58,8 @@ import { PetRelationEntity } from 'src/pet_relation/pet_relation.entity';
 import { replaceParentPublicSafe } from '../common/utils/pet-parent.helper';
 import { extractOriginalPetName } from '../common/utils/pet-name.helper';
 import { LayingEntity } from 'src/laying/laying.entity';
+import { CacheService } from 'src/common/cache.service';
+import { CACHE } from 'src/common/cache-keys';
 
 @Injectable()
 export class PetService {
@@ -71,6 +73,7 @@ export class PetService {
     private readonly petImageService: PetImageService,
     private readonly adoptionService: PetAdoptionService,
     private readonly dataSource: DataSource,
+    private readonly cacheService: CacheService,
   ) {}
 
   async createPet(
@@ -484,23 +487,45 @@ export class PetService {
     petId: string,
     viewerId?: string,
   ): Promise<PetSingleDto> {
+    const petData = await this.cacheService.wrap(
+      CACHE.pet.key(petId),
+      () => this.loadPetSingleData(petId),
+      CACHE.pet.ttl,
+    );
+
+    if (!petData) {
+      throw new NotFoundException('펫을 찾을 수 없습니다.');
+    }
+
+    // 비공개 펫 접근 제어 (캐시 외부에서 처리 — viewer별로 다름)
+    if (!petData.isPublic) {
+      if (!viewerId || petData.ownerId !== viewerId) {
+        throw new NotFoundException('펫을 찾을 수 없습니다.');
+      }
+    }
+
+    // owner 정보는 캐시에 포함하지 않고, 매 요청마다 최신 데이터를 조회
+    const ownerData = await this.userService.findOneProfile(petData.ownerId);
+    const owner = plainToInstance(UserProfilePublicDto, {
+      userId: ownerData.userId,
+      name: ownerData.name,
+      role: ownerData.role,
+      isBiz: ownerData.isBiz,
+      status: ownerData.status,
+    });
+
+    return plainToInstance(PetSingleDto, { ...petData, owner });
+  }
+
+  private async loadPetSingleData(
+    petId: string,
+  ): Promise<(PetSingleDto & { ownerId: string }) | null> {
     return this.dataSource.transaction(async (entityManager: EntityManager) => {
       const pet = await entityManager.findOne(PetEntity, {
         where: { petId },
       });
 
-      if (!pet) {
-        throw new NotFoundException('펫을 찾을 수 없습니다.');
-      }
-
-      // 비공개 펫인 경우 소유자만 접근 가능
-      if (!pet.isPublic) {
-        // 인증되지 않았거나 소유자가 아닌 경우
-        if (!viewerId || pet.ownerId !== viewerId) {
-          // 404를 반환하여 펫의 존재 여부를 숨김 (보안)
-          throw new NotFoundException('펫을 찾을 수 없습니다.');
-        }
-      }
+      if (!pet) return null;
 
       let petDetail: PetDetailEntity | null = null;
       let eggDetail: EggDetailEntity | null = null;
@@ -519,48 +544,39 @@ export class PetService {
         throw new NotFoundException('펫의 소유자를 찾을 수 없습니다.');
       }
 
-      // 소유자 정보 조회
-      const ownerData = await this.userService.findOneProfile(
-        pet.ownerId,
-        entityManager,
-      );
-
-      // 공개용 owner 정보로 변환 (민감한 정보 제거)
-      const owner = plainToInstance(UserProfilePublicDto, {
-        userId: ownerData.userId,
-        name: ownerData.name,
-        role: ownerData.role,
-        isBiz: ownerData.isBiz,
-        status: ownerData.status,
-      });
-
       const { growth, sex, morphs, traits, foods, weight } = petDetail ?? {};
       const { temperature, status: eggStatus } = eggDetail ?? {};
 
       if (pet.isDeleted) {
-        return plainToInstance(PetSingleDto, {
-          petId: pet.petId,
-          species: pet.species,
-          name: pet.name,
-          isDeleted: pet.isDeleted,
-          deletedAt: pet.deletedAt,
-          deleteReason: pet.deleteReason,
-        });
+        return {
+          ...plainToInstance(PetSingleDto, {
+            petId: pet.petId,
+            species: pet.species,
+            name: pet.name,
+            isDeleted: pet.isDeleted,
+            deletedAt: pet.deletedAt,
+            deleteReason: pet.deleteReason,
+            isPublic: pet.isPublic,
+          }),
+          ownerId: pet.ownerId,
+        };
       }
 
-      return plainToInstance(PetSingleDto, {
-        ...pet,
-        growth,
-        sex,
-        morphs,
-        traits,
-        foods,
-        weight,
-        eggDetail,
-        temperature,
-        eggStatus,
-        owner,
-      });
+      return {
+        ...plainToInstance(PetSingleDto, {
+          ...pet,
+          growth,
+          sex,
+          morphs,
+          traits,
+          foods,
+          weight,
+          eggDetail,
+          temperature,
+          eggStatus,
+        }),
+        ownerId: pet.ownerId,
+      };
     });
   }
 
@@ -569,100 +585,117 @@ export class PetService {
     updatePetDto: UpdatePetDto,
     userId: string,
   ): Promise<{ petId: string }> {
-    return this.dataSource.transaction(async (entityManager: EntityManager) => {
-      // 펫 존재 여부 및 소유권 확인
-      const existingPet = await entityManager.findOne(PetEntity, {
-        where: { petId, isDeleted: false },
-      });
-
-      if (!existingPet) {
-        throw new NotFoundException('펫을 찾을 수 없습니다.');
-      }
-
-      if (existingPet.ownerId !== userId) {
-        throw new ForbiddenException('펫의 소유자가 아닙니다.');
-      }
-
-      const {
-        sex,
-        morphs,
-        traits,
-        foods,
-        weight,
-        growth,
-        temperature,
-        eggStatus,
-        ...petData
-      } = updatePetDto;
-
-      const isSexChanged =
-        !isUndefined(sex) && sex !== existingPet.petDetail?.sex;
-
-      if (isSexChanged) {
-        const pairExists = await entityManager.exists(PairEntity, {
-          where: [
-            { ownerId: existingPet.ownerId, fatherId: petId, isDeleted: false },
-            { ownerId: existingPet.ownerId, motherId: petId, isDeleted: false },
-          ],
+    const result = await this.dataSource.transaction(
+      async (entityManager: EntityManager) => {
+        // 펫 존재 여부 및 소유권 확인
+        const existingPet = await entityManager.findOne(PetEntity, {
+          where: { petId, isDeleted: false },
         });
-        if (pairExists) {
-          throw new BadRequestException(
-            '페어가 존재하는 펫의 성별을 변경할 수 없습니다. 페어를 먼저 삭제해주세요.',
-          );
+
+        if (!existingPet) {
+          throw new NotFoundException('펫을 찾을 수 없습니다.');
         }
 
-        const childExists = await entityManager.exists(ParentRequestEntity, {
-          where: {
-            parentPetId: petId,
-            status: In([PARENT_STATUS.APPROVED, PARENT_STATUS.PENDING]),
-          },
-        });
-        if (childExists) {
-          throw new BadRequestException(
-            '누군가의 부모로 연결된 펫입니다. 성별을 변경하기 전에 이를 먼저 처리해주세요.',
-          );
+        if (existingPet.ownerId !== userId) {
+          throw new ForbiddenException('펫의 소유자가 아닙니다.');
         }
-      }
 
-      try {
-        // 펫 기본 정보 업데이트
-        await entityManager.update(PetEntity, { petId }, petData);
+        const {
+          sex,
+          morphs,
+          traits,
+          foods,
+          weight,
+          growth,
+          temperature,
+          eggStatus,
+          ...petData
+        } = updatePetDto;
 
-        if (existingPet.type === PET_TYPE.EGG) {
-          await entityManager.update(
-            EggDetailEntity,
-            { petId },
-            {
-              ...(temperature && { temperature }),
-              ...(eggStatus && { status: eggStatus }),
+        const isSexChanged =
+          !isUndefined(sex) && sex !== existingPet.petDetail?.sex;
+
+        if (isSexChanged) {
+          const pairExists = await entityManager.exists(PairEntity, {
+            where: [
+              {
+                ownerId: existingPet.ownerId,
+                fatherId: petId,
+                isDeleted: false,
+              },
+              {
+                ownerId: existingPet.ownerId,
+                motherId: petId,
+                isDeleted: false,
+              },
+            ],
+          });
+          if (pairExists) {
+            throw new BadRequestException(
+              '페어가 존재하는 펫의 성별을 변경할 수 없습니다. 페어를 먼저 삭제해주세요.',
+            );
+          }
+
+          const childExists = await entityManager.exists(ParentRequestEntity, {
+            where: {
+              parentPetId: petId,
+              status: In([PARENT_STATUS.APPROVED, PARENT_STATUS.PENDING]),
             },
+          });
+          if (childExists) {
+            throw new BadRequestException(
+              '누군가의 부모로 연결된 펫입니다. 성별을 변경하기 전에 이를 먼저 처리해주세요.',
+            );
+          }
+        }
+
+        try {
+          // 펫 기본 정보 업데이트
+          await entityManager.update(PetEntity, { petId }, petData);
+
+          if (existingPet.type === PET_TYPE.EGG) {
+            await entityManager.update(
+              EggDetailEntity,
+              { petId },
+              {
+                ...(temperature && { temperature }),
+                ...(eggStatus && { status: eggStatus }),
+              },
+            );
+          } else {
+            const updateData: Partial<PetDetailEntity> = {};
+            if (!isUndefined(sex)) updateData.sex = sex;
+            if (!isUndefined(morphs)) updateData.morphs = morphs;
+            if (!isUndefined(traits)) updateData.traits = traits;
+            if (!isUndefined(foods)) updateData.foods = foods;
+            if (!isUndefined(weight)) updateData.weight = weight;
+            if (!isUndefined(growth)) updateData.growth = growth;
+
+            if (Object.keys(updateData).length > 0) {
+              await entityManager.update(
+                PetDetailEntity,
+                { petId },
+                updateData,
+              );
+            }
+          }
+
+          return { petId };
+        } catch (error: unknown) {
+          if (isMySQLError(error) && error.code === 'ER_DUP_ENTRY') {
+            if (error.message.includes('UNIQUE_OWNER_PET_NAME')) {
+              throw new ConflictException('이미 존재하는 펫 이름입니다.');
+            }
+          }
+          throw new InternalServerErrorException(
+            '펫 수정 중 오류가 발생했습니다.',
           );
-        } else {
-          const updateData: Partial<PetDetailEntity> = {};
-          if (!isUndefined(sex)) updateData.sex = sex;
-          if (!isUndefined(morphs)) updateData.morphs = morphs;
-          if (!isUndefined(traits)) updateData.traits = traits;
-          if (!isUndefined(foods)) updateData.foods = foods;
-          if (!isUndefined(weight)) updateData.weight = weight;
-          if (!isUndefined(growth)) updateData.growth = growth;
-
-          if (Object.keys(updateData).length > 0) {
-            await entityManager.update(PetDetailEntity, { petId }, updateData);
-          }
         }
+      },
+    );
 
-        return { petId };
-      } catch (error: unknown) {
-        if (isMySQLError(error) && error.code === 'ER_DUP_ENTRY') {
-          if (error.message.includes('UNIQUE_OWNER_PET_NAME')) {
-            throw new ConflictException('이미 존재하는 펫 이름입니다.');
-          }
-        }
-        throw new InternalServerErrorException(
-          '펫 수정 중 오류가 발생했습니다.',
-        );
-      }
-    });
+    await this.cacheService.del(CACHE.pet.key(petId));
+    return result;
   }
 
   async getPetListFull(
@@ -782,138 +815,148 @@ export class PetService {
     userId: string,
     deleteReason?: string,
   ): Promise<{ petId: string }> {
-    return this.dataSource.transaction(async (entityManager: EntityManager) => {
-      // 펫 존재 여부 및 소유권 확인
-      const existingPet = await entityManager.findOne(PetEntity, {
-        where: { petId, isDeleted: false },
-      });
+    const result = await this.dataSource.transaction(
+      async (entityManager: EntityManager) => {
+        // 펫 존재 여부 및 소유권 확인
+        const existingPet = await entityManager.findOne(PetEntity, {
+          where: { petId, isDeleted: false },
+        });
 
-      if (!existingPet) {
-        throw new NotFoundException('펫을 찾을 수 없습니다.');
-      }
-
-      if (existingPet.ownerId !== userId) {
-        throw new ForbiddenException('펫의 소유자가 아닙니다.');
-      }
-
-      try {
-        const now = DateTime.now().setZone('Asia/Seoul').toJSDate();
-
-        // 펫 soft delete
-        await entityManager.update(
-          PetEntity,
-          { petId },
-          {
-            name: `DELETED_${existingPet.name}_${Date.now()}`,
-            isDeleted: true,
-            deletedAt: now,
-            deleteReason: deleteReason || null,
-          },
-        );
-
-        // 펫 상세 정보 soft delete
-        if (existingPet.type === PET_TYPE.PET) {
-          await entityManager.update(
-            PetDetailEntity,
-            { petId },
-            { isDeleted: true },
-          );
-        } else {
-          await entityManager.update(
-            EggDetailEntity,
-            { petId },
-            { isDeleted: true },
-          );
+        if (!existingPet) {
+          throw new NotFoundException('펫을 찾을 수 없습니다.');
         }
 
-        // layingId가 있는 경우, 해당 laying에 남은 펫이 없으면 laying 삭제
-        if (existingPet.layingId) {
-          const remainingPets = await entityManager.count(PetEntity, {
-            where: {
-              layingId: existingPet.layingId,
-              isDeleted: false,
+        if (existingPet.ownerId !== userId) {
+          throw new ForbiddenException('펫의 소유자가 아닙니다.');
+        }
+
+        try {
+          const now = DateTime.now().setZone('Asia/Seoul').toJSDate();
+
+          // 펫 soft delete
+          await entityManager.update(
+            PetEntity,
+            { petId },
+            {
+              name: `DELETED_${existingPet.name}_${Date.now()}`,
+              isDeleted: true,
+              deletedAt: now,
+              deleteReason: deleteReason || null,
             },
-          });
+          );
 
-          if (remainingPets === 0) {
-            await entityManager.delete(LayingEntity, {
-              id: existingPet.layingId,
-            });
+          // 펫 상세 정보 soft delete
+          if (existingPet.type === PET_TYPE.PET) {
+            await entityManager.update(
+              PetDetailEntity,
+              { petId },
+              { isDeleted: true },
+            );
+          } else {
+            await entityManager.update(
+              EggDetailEntity,
+              { petId },
+              { isDeleted: true },
+            );
           }
-        }
 
-        return { petId };
-      } catch (error: unknown) {
-        if (error instanceof HttpException) {
-          throw error;
+          // layingId가 있는 경우, 해당 laying에 남은 펫이 없으면 laying 삭제
+          if (existingPet.layingId) {
+            const remainingPets = await entityManager.count(PetEntity, {
+              where: {
+                layingId: existingPet.layingId,
+                isDeleted: false,
+              },
+            });
+
+            if (remainingPets === 0) {
+              await entityManager.delete(LayingEntity, {
+                id: existingPet.layingId,
+              });
+            }
+          }
+
+          return { petId };
+        } catch (error: unknown) {
+          if (error instanceof HttpException) {
+            throw error;
+          }
+          throw new InternalServerErrorException(
+            '펫 삭제 중 오류가 발생했습니다.',
+          );
         }
-        throw new InternalServerErrorException(
-          '펫 삭제 중 오류가 발생했습니다.',
-        );
-      }
-    });
+      },
+    );
+
+    await this.cacheService.del(CACHE.pet.key(petId));
+    return result;
   }
 
   async restorePet(petId: string, userId: string): Promise<{ petId: string }> {
-    return this.dataSource.transaction(async (entityManager: EntityManager) => {
-      // 삭제된 펫 존재 여부 및 소유권 확인
-      const existingPet = await entityManager.findOne(PetEntity, {
-        where: { petId, isDeleted: true },
-      });
+    const result = await this.dataSource.transaction(
+      async (entityManager: EntityManager) => {
+        // 삭제된 펫 존재 여부 및 소유권 확인
+        const existingPet = await entityManager.findOne(PetEntity, {
+          where: { petId, isDeleted: true },
+        });
 
-      if (!existingPet) {
-        throw new NotFoundException('삭제된 펫을 찾을 수 없습니다.');
-      }
-
-      if (existingPet.ownerId !== userId) {
-        throw new ForbiddenException('펫의 소유자가 아닙니다.');
-      }
-
-      try {
-        const originalName = extractOriginalPetName(existingPet.name);
-
-        // 펫 복구
-        await entityManager.update(
-          PetEntity,
-          { petId },
-          {
-            name: originalName || existingPet.name,
-            isDeleted: false,
-            deletedAt: null,
-            deleteReason: null,
-          },
-        );
-
-        // 펫 상세 정보 복구
-        if (existingPet.type === PET_TYPE.PET) {
-          await entityManager.update(
-            PetDetailEntity,
-            { petId },
-            { isDeleted: false },
-          );
-        } else {
-          await entityManager.update(
-            EggDetailEntity,
-            { petId },
-            { isDeleted: false },
-          );
+        if (!existingPet) {
+          throw new NotFoundException('삭제된 펫을 찾을 수 없습니다.');
         }
 
-        return { petId };
-      } catch (error: unknown) {
-        if (error instanceof HttpException) {
-          throw error;
+        if (existingPet.ownerId !== userId) {
+          throw new ForbiddenException('펫의 소유자가 아닙니다.');
         }
-        if (isMySQLError(error) && error.code === 'ER_DUP_ENTRY') {
-          if (error.message.includes('UNIQUE_OWNER_PET_NAME')) {
-            throw new ConflictException('이미 존재하는 펫 이름입니다.');
+
+        try {
+          const originalName = extractOriginalPetName(existingPet.name);
+
+          // 펫 복구
+          await entityManager.update(
+            PetEntity,
+            { petId },
+            {
+              name: originalName || existingPet.name,
+              isDeleted: false,
+              deletedAt: null,
+              deleteReason: null,
+            },
+          );
+
+          // 펫 상세 정보 복구
+          if (existingPet.type === PET_TYPE.PET) {
+            await entityManager.update(
+              PetDetailEntity,
+              { petId },
+              { isDeleted: false },
+            );
+          } else {
+            await entityManager.update(
+              EggDetailEntity,
+              { petId },
+              { isDeleted: false },
+            );
           }
+
+          return { petId };
+        } catch (error: unknown) {
+          if (error instanceof HttpException) {
+            throw error;
+          }
+          if (isMySQLError(error) && error.code === 'ER_DUP_ENTRY') {
+            if (error.message.includes('UNIQUE_OWNER_PET_NAME')) {
+              throw new ConflictException('이미 존재하는 펫 이름입니다.');
+            }
+          }
+          throw new InternalServerErrorException(
+            '펫 복구 중 오류가 발생했습니다.',
+          );
         }
-        throw new InternalServerErrorException(
-          '펫 복구 중 오류가 발생했습니다.',
-        );
-      }
-    });
+      },
+    );
+
+    await this.cacheService.del(CACHE.pet.key(petId));
+    return result;
   }
 
   async getDeletedPets(
@@ -1017,59 +1060,64 @@ export class PetService {
     userId: string,
     hatchingData: CompleteHatchingDto,
   ): Promise<{ petId: string }> {
-    return this.dataSource.transaction(async (entityManager: EntityManager) => {
-      const existingPet = await entityManager.findOne(PetEntity, {
-        where: { petId, isDeleted: false },
-      });
-
-      if (!existingPet) {
-        throw new NotFoundException('펫을 찾을 수 없습니다.');
-      }
-
-      if (existingPet.ownerId !== userId) {
-        throw new ForbiddenException('펫의 소유자가 아닙니다.');
-      }
-
-      if (existingPet.type !== PET_TYPE.EGG) {
-        throw new BadRequestException('이미 부화한 펫입니다.');
-      }
-
-      const { hatchingDate, name, desc } = hatchingData;
-
-      try {
-        await entityManager.update(
-          PetEntity,
-          { petId },
-          {
-            type: PET_TYPE.PET,
-            hatchingDate,
-            name,
-            desc,
-          },
-        );
-
-        await entityManager.update(
-          EggDetailEntity,
-          { petId },
-          { status: EGG_STATUS.HATCHED },
-        );
-
-        await entityManager.insert(PetDetailEntity, {
-          petId,
-          growth: PET_GROWTH.BABY,
-          sex: PET_SEX.NON,
+    const result = await this.dataSource.transaction(
+      async (entityManager: EntityManager) => {
+        const existingPet = await entityManager.findOne(PetEntity, {
+          where: { petId, isDeleted: false },
         });
 
-        return { petId };
-      } catch (error: unknown) {
-        if (isMySQLError(error) && error.code === 'ER_DUP_ENTRY') {
-          throw new ConflictException('이미 존재하는 펫 이름입니다.');
+        if (!existingPet) {
+          throw new NotFoundException('펫을 찾을 수 없습니다.');
         }
-        throw new InternalServerErrorException(
-          '펫 부화 중 오류가 발생했습니다.',
-        );
-      }
-    });
+
+        if (existingPet.ownerId !== userId) {
+          throw new ForbiddenException('펫의 소유자가 아닙니다.');
+        }
+
+        if (existingPet.type !== PET_TYPE.EGG) {
+          throw new BadRequestException('이미 부화한 펫입니다.');
+        }
+
+        const { hatchingDate, name, desc } = hatchingData;
+
+        try {
+          await entityManager.update(
+            PetEntity,
+            { petId },
+            {
+              type: PET_TYPE.PET,
+              hatchingDate,
+              name,
+              desc,
+            },
+          );
+
+          await entityManager.update(
+            EggDetailEntity,
+            { petId },
+            { status: EGG_STATUS.HATCHED },
+          );
+
+          await entityManager.insert(PetDetailEntity, {
+            petId,
+            growth: PET_GROWTH.BABY,
+            sex: PET_SEX.NON,
+          });
+
+          return { petId };
+        } catch (error: unknown) {
+          if (isMySQLError(error) && error.code === 'ER_DUP_ENTRY') {
+            throw new ConflictException('이미 존재하는 펫 이름입니다.');
+          }
+          throw new InternalServerErrorException(
+            '펫 부화 중 오류가 발생했습니다.',
+          );
+        }
+      },
+    );
+
+    await this.cacheService.del(CACHE.pet.key(petId));
+    return result;
   }
 
   async getPetListByHatchingDate(
