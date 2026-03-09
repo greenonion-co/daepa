@@ -32,7 +32,7 @@ export class CacheInvalidation {
   ) {
     const promises: Promise<void>[] = [
       this.cacheService.del(CACHE.pet.key(petId)),
-      this.cacheService.del(CACHE.thumbnail.key(petId)),
+      this.cacheService.del(CACHE.petImages.key(petId)),
       this.cacheService.del(CACHE.petAdoption.key(petId)),
       this.cacheService.delByPattern(CACHE.feed.pattern),
       this.cacheService.delByPattern(CACHE.myPets.pattern(userId)),

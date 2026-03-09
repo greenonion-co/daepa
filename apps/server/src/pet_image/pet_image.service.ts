@@ -9,6 +9,8 @@ import { PetImageItem, UpsertPetImageDto } from './pet_image.dto';
 import { R2Service } from 'src/common/cloudflare/r2.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PetEntity } from '../pet/pet.entity';
+import { CacheService } from 'src/common/cache.service';
+import { CACHE } from 'src/common/cache-keys';
 
 @Injectable()
 export class PetImageService {
@@ -17,26 +19,25 @@ export class PetImageService {
     @InjectRepository(PetImageEntity)
     private readonly petImageRepository: Repository<PetImageEntity>,
     private readonly dataSource: DataSource,
+    private readonly cacheService: CacheService,
   ) {}
 
   async findOneByPetId(petId: string): Promise<PetImageItem[]> {
-    const petImage = await this.petImageRepository.findOne({
-      where: { petId },
-    });
-
-    return petImage?.files ?? [];
+    return this.cacheService.wrap(
+      CACHE.petImages.key(petId),
+      async () => {
+        const petImage = await this.petImageRepository.findOne({
+          where: { petId },
+        });
+        return petImage?.files ?? [];
+      },
+      CACHE.petImages.ttl,
+    );
   }
 
   async findThumbnailByPetId(petId: string): Promise<PetImageItem | null> {
-    const petImage = await this.petImageRepository.findOne({
-      where: { petId },
-    });
-
-    if (petImage?.files && petImage.files.length > 0) {
-      return petImage.files[0];
-    }
-
-    return null;
+    const files = await this.findOneByPetId(petId);
+    return files.length > 0 ? files[0] : null;
   }
 
   /**
@@ -70,12 +71,18 @@ export class PetImageService {
     };
 
     if (manager) {
-      return run(manager);
+      const result = await run(manager);
+      await this.invalidateImageCache(petId);
+      return result;
     }
 
-    return this.dataSource.transaction(async (entityManager: EntityManager) => {
-      return run(entityManager);
-    });
+    const result = await this.dataSource.transaction(
+      async (entityManager: EntityManager) => {
+        return run(entityManager);
+      },
+    );
+    await this.invalidateImageCache(petId);
+    return result;
   }
 
   /**
@@ -211,6 +218,10 @@ export class PetImageService {
         `이미지 업로드 중 오류가 발생했습니다: ${(error as Error).message}`,
       );
     }
+  }
+
+  private async invalidateImageCache(petId: string): Promise<void> {
+    await this.cacheService.del(CACHE.petImages.key(petId));
   }
 
   /**

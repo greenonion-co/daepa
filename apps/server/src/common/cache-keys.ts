@@ -12,9 +12,9 @@ export const CACHE = {
     key: (petId: string) => `pet:${petId}`,
     ttl: DEFAULT_TTL,
   },
-  /** GET /v1/pet-image/thumbnail/:petId — PetImageService.findThumbnail */
-  thumbnail: {
-    key: (petId: string) => `thumb:${petId}`,
+  /** GET /v1/pet-image/:petId — PetImageService.findOneByPetId (thumbnail도 이 캐시 재사용) */
+  petImages: {
+    key: (petId: string) => `pet-img:${petId}`,
     ttl: DEFAULT_TTL,
   },
   /** GET /v1/pet/family-tree/:petId — PetRelationService.getFamilyTree */
