@@ -44,11 +44,14 @@ export class CacheService {
     try {
       const cached = await this.cache.get<T | string>(key);
       if (cached === NULL_SENTINEL) {
+        this.logger.debug(`Cache HIT (null) key=${key}`);
         return null as T;
       }
       if (cached !== undefined && cached !== null) {
+        this.logger.debug(`Cache HIT key=${key}`);
         return cached as T;
       }
+      this.logger.debug(`Cache MISS key=${key}`);
     } catch (err) {
       this.logger.warn(`Cache GET failed for key=${key}`, err);
     }
