@@ -52,10 +52,9 @@ export class CacheInvalidation {
   }
 
   /** 브리딩 이벤트 (메이팅/산란/해칭) 변경 시 */
-  async onBreedingChanged(userId: string, pairId: string) {
+  async onBreedingChanged(userId: string) {
     await Promise.all([
       this.cacheService.delByPattern(CACHE.pairList.pattern(userId)),
-      this.cacheService.del(CACHE.pairDetail.key(pairId)),
       this.cacheService.delByPattern(CACHE.pairStats.pattern(userId)),
     ]);
   }

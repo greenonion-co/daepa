@@ -24,11 +24,6 @@ export const CACHE = {
     pattern: (petId: string) => `ftree:${petId}:*`,
     ttl: DEFAULT_TTL,
   },
-  /** GET /v1/pairs/:pairId — PairService.getPairDetailById */
-  pairDetail: {
-    key: (pairId: string) => `pair:${pairId}`,
-    ttl: DEFAULT_TTL,
-  },
   /** GET /v1/statistics/pairs — StatisticsService.getPairStatistics */
   pairStats: {
     key: (userId: string, filterHash: string) =>

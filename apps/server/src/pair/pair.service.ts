@@ -1,14 +1,11 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { PET_TYPE } from 'src/pet/pet.constants';
 import { DataSource, Repository } from 'typeorm';
 import { PairEntity } from './pair.entity';
 import { PetEntity } from 'src/pet/pet.entity';
 import { PetDetailEntity } from 'src/pet_detail/pet_detail.entity';
-import { compact, isNil, omitBy } from 'es-toolkit';
 import { plainToInstance } from 'class-transformer';
 import {
   MatingByParentsDto,
-  PairDetailDto,
   PairFilterDto,
   UpdatePairDto,
 } from './pair.dto';
@@ -16,7 +13,7 @@ import { PageDto, PageMetaDto } from 'src/common/page.dto';
 import { MatingEntity } from 'src/mating/mating.entity';
 import { LayingEntity } from 'src/laying/laying.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { PetLayingDto, PetSummaryLayingDto } from 'src/pet/pet.dto';
+import { PetSummaryLayingDto } from 'src/pet/pet.dto';
 import { format } from 'date-fns';
 import { EggDetailEntity } from 'src/egg_detail/egg_detail.entity';
 
@@ -402,181 +399,6 @@ export class PairService {
     });
   }
 
-  async getPairDetailById(
-    pairId: number,
-    userId: string,
-  ): Promise<PairDetailDto | null> {
-    const queryBuilder = this.pairRepository
-      .createQueryBuilder('pairs')
-      .where(
-        'pairs.id = :pairId AND pairs.ownerId = :userId AND pairs.isDeleted = false',
-        {
-          pairId,
-          userId,
-        },
-      )
-      .leftJoinAndMapMany(
-        'matings',
-        MatingEntity,
-        'matings',
-        'matings.pairId = pairs.id',
-      )
-      .leftJoinAndMapMany(
-        'layings',
-        LayingEntity,
-        'layings',
-        'layings.matingId = matings.id',
-      )
-      .select([
-        'pairs.id as pairId',
-        'pairs.fatherId as fatherId',
-        'pairs.motherId as motherId',
-        'matings.id as matingId',
-        'matings.matingDate as matingDate',
-        'matings.season as season',
-        'layings.id as layingId',
-        'layings.layingDate as layingDate',
-        'layings.clutch as clutch',
-      ]);
-
-    const { raw } = await queryBuilder.getRawAndEntities<{
-      pairId: number;
-      fatherId: string;
-      motherId: string;
-      matingId: number;
-      matingDate: Date;
-      season: number;
-      layingId: number;
-      layingDate: Date;
-      clutch: number;
-    }>();
-
-    if (!raw.length) {
-      return null;
-    }
-
-    const nestedByPairMatingLaying = this.transformRawDataToNested(raw);
-    const layingIds = Object.values(
-      nestedByPairMatingLaying?.matings ?? {},
-    ).flatMap((mating) => mating.layings?.map((laying) => laying.layingId));
-
-    if (!compact(layingIds).length) {
-      return nestedByPairMatingLaying;
-    }
-
-    // laying id에 해당하는 pet들을 조회
-    const petQueryBuilder = this.dataSource
-      .createQueryBuilder(PetEntity, 'pets')
-      .where('pets.layingId IN (:...layingIds)', { layingIds })
-      .andWhere('pets.isDeleted = false')
-      .leftJoinAndMapOne(
-        'pets.petDetail',
-        'pet_details',
-        'petDetail',
-        'petDetail.petId = pets.petId',
-      )
-      .where(
-        'pets.ownerId = :userId AND pets.type = :petType AND pets.isDeleted = :isDeleted',
-        {
-          userId,
-          petType: PET_TYPE.PET,
-          isDeleted: false,
-        },
-      )
-      .select([
-        'pets.petId',
-        'pets.name',
-        'pets.species',
-        'pets.hatchingDate',
-        'pets.clutchOrder',
-        'pets.type',
-        'petDetail.sex',
-        'petDetail.morphs',
-        'petDetail.traits',
-        'petDetail.weight',
-      ]);
-
-    const eggQueryBuilder = this.dataSource
-      .createQueryBuilder(PetEntity, 'pets')
-      .where('pets.layingId IN (:...layingIds)', { layingIds })
-      .andWhere('pets.isDeleted = false')
-      .leftJoinAndMapOne(
-        'pets.eggDetail',
-        'egg_details',
-        'eggDetail',
-        'eggDetail.petId = pets.petId',
-      )
-      .where(
-        'pets.ownerId = :userId AND pets.type = :petType AND pets.isDeleted = :isDeleted',
-        {
-          userId,
-          petType: PET_TYPE.EGG,
-          isDeleted: false,
-        },
-      )
-      .select([
-        'pets',
-        'pets.petId',
-        'pets.name',
-        'pets.species',
-        'pets.hatchingDate',
-        'pets.clutchOrder',
-        'pets.type',
-        'eggDetail.temperature',
-        'eggDetail.status',
-      ]);
-
-    const [petEntities, eggEntities] = await Promise.all([
-      petQueryBuilder.getMany(),
-      eggQueryBuilder.getMany(),
-    ]);
-
-    const petsByLayingId = new Map<number, PetLayingDto[]>();
-    [...petEntities, ...eggEntities].forEach((pet) => {
-      if (pet.layingId) {
-        const existing = petsByLayingId.get(pet.layingId) || [];
-        existing.push({
-          petId: pet.petId,
-          species: pet.species,
-          type: pet.type,
-          ...omitBy(
-            {
-              name: pet.name ?? undefined,
-              hatchingDate: pet.hatchingDate ?? undefined,
-              clutchOrder: pet.clutchOrder ?? undefined,
-              sex: pet.petDetail?.sex ?? undefined,
-              morphs: pet.petDetail?.morphs ?? undefined,
-              traits: pet.petDetail?.traits ?? undefined,
-              weight: pet.petDetail?.weight ?? undefined,
-              temperature: pet.eggDetail?.temperature ?? undefined,
-              eggStatus: pet.eggDetail?.status ?? undefined,
-            },
-            isNil,
-          ),
-        });
-        petsByLayingId.set(pet.layingId, existing);
-      }
-    });
-
-    const { matings, ...pairInfos } = nestedByPairMatingLaying;
-    const matingsWithPets = matings?.map((mating) => {
-      return {
-        ...mating,
-        layings: mating.layings?.map((laying) => {
-          return {
-            ...laying,
-            pets: petsByLayingId.get(laying.layingId) ?? [],
-          };
-        }),
-      };
-    });
-
-    return {
-      ...pairInfos,
-      matings: matingsWithPets,
-    };
-  }
-
   async updatePair(
     userId: string,
     pairId: number,
@@ -634,77 +456,5 @@ export class PairService {
         deletedAt: new Date(),
       },
     );
-  }
-
-  private transformRawDataToNested(
-    raw: {
-      pairId: number;
-      fatherId: string;
-      motherId: string;
-      matingId: number;
-      matingDate: Date;
-      season: number;
-      layingId: number;
-      layingDate: Date;
-      clutch: number;
-    }[],
-  ) {
-    const pairId = raw[0].pairId;
-    const fatherId = raw[0].fatherId;
-    const motherId = raw[0].motherId;
-
-    const matingsMap = new Map<
-      number,
-      {
-        matingId: number;
-        matingDate: string;
-        season: number;
-        layings?: {
-          layingId: number;
-          layingDate: string;
-          clutch: number;
-        }[];
-      }
-    >();
-
-    for (const row of raw) {
-      const { matingId, matingDate, season, layingId, layingDate, clutch } =
-        row;
-
-      if (!matingId) continue;
-
-      if (!matingsMap.has(matingId)) {
-        matingsMap.set(matingId, {
-          matingId,
-          matingDate: format(matingDate, 'yyyy-MM-dd'),
-          season,
-        });
-      }
-
-      if (layingId) {
-        const layings = matingsMap.get(matingId)?.layings ?? [];
-
-        layings.push({
-          layingId,
-          layingDate: format(layingDate, 'yyyy-MM-dd'),
-          clutch,
-        });
-
-        matingsMap.set(matingId, {
-          matingId,
-          matingDate: format(matingDate, 'yyyy-MM-dd'),
-          season,
-          layings,
-        });
-      }
-    }
-
-    return {
-      pairId,
-      fatherId,
-      motherId,
-      matings:
-        matingsMap.size > 0 ? Array.from(matingsMap.values()) : undefined,
-    };
   }
 }
