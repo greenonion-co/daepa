@@ -46,6 +46,20 @@
 | **무효화** | `invalidateImageCache` 시 `del` |
 | | `CacheInvalidation.onPetDeleted` 시 `del` |
 
+### petAdoption — 분양 정보
+
+| 항목 | 값 |
+|------|---|
+| **키** | `pet-adopt:{petId}` |
+| **TTL** | 30일 |
+| **API** | `GET /v1/pet-adoption/:petId` |
+| **서비스** | `PetAdoptionService.findOne` |
+| **제외** | reservedUser 정보 (매 요청마다 별도 조회) |
+| **무효화** | `createAdoption` — 자체 트랜잭션일 때 `del` |
+| | `updateAdoption` — 자체 트랜잭션일 때 `del` |
+| | `CacheInvalidation.onPetDeleted`, `onAdoptionCompleted` 시 `del` |
+| **참고** | 외부 트랜잭션(`entityManager` 주입) 시 호출자가 캐시 무효화 책임 |
+
 ### feeding — 피딩 기록 (월별)
 
 | 항목 | 값 |
@@ -72,6 +86,8 @@
 | `PetService.restorePet` | 복구 후 | `pet:{petId}` |
 | `PetService.completeHatching` | 해칭 후 | `pet:{petId}` |
 | `PetImageService.invalidateImageCache` | 이미지 변경 후 | `pet-img:{petId}` |
+| `PetAdoptionService.createAdoption` | 생성 후 | `pet-adopt:{petId}` |
+| `PetAdoptionService.updateAdoption` | 수정 후 | `pet-adopt:{petId}` |
 | `FeedingService.createFeeding` | 생성 후 | `feeding:{petId}:{yyyy-MM}` |
 | `FeedingService.updateFeeding` | 수정 후 | `feeding:{petId}:{yyyy-MM}` (+ 날짜 변경 시 새 월) |
 | `FeedingService.deleteFeeding` | 삭제 후 | `feeding:{petId}:{yyyy-MM}` |
