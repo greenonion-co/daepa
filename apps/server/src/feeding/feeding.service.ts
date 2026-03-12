@@ -10,6 +10,8 @@ import { FeedingEntity } from './feeding.entity';
 import { CreateFeedingDto, FeedingDto, UpdateFeedingDto } from './feeding.dto';
 import { PetEntity } from '../pet/pet.entity';
 import { PageDto, PageMetaDto, PageOptionsDto } from '../common/page.dto';
+import { CacheService } from '../common/cache.service';
+import { CACHE } from '../common/cache-keys';
 
 @Injectable()
 export class FeedingService {
@@ -17,44 +19,55 @@ export class FeedingService {
     @InjectRepository(FeedingEntity)
     private readonly feedingRepository: Repository<FeedingEntity>,
     private readonly dataSource: DataSource,
+    private readonly cacheService: CacheService,
   ) {}
 
   async createFeeding(
     createFeedingDto: CreateFeedingDto,
     userId: string,
   ): Promise<FeedingEntity> {
-    return this.dataSource.transaction(async (entityManager: EntityManager) => {
-      // 펫 조회 및 소유자 검증
-      const pet = await entityManager.findOne(PetEntity, {
-        where: { petId: createFeedingDto.petId, isDeleted: false },
-      });
+    const result = await this.dataSource.transaction(
+      async (entityManager: EntityManager) => {
+        // 펫 조회 및 소유자 검증
+        const pet = await entityManager.findOne(PetEntity, {
+          where: { petId: createFeedingDto.petId, isDeleted: false },
+        });
 
-      if (!pet) {
-        throw new NotFoundException('펫을 찾을 수 없습니다.');
-      }
+        if (!pet) {
+          throw new NotFoundException('펫을 찾을 수 없습니다.');
+        }
 
-      if (pet.ownerId !== userId) {
-        throw new ForbiddenException('펫의 소유자가 아닙니다.');
-      }
+        if (pet.ownerId !== userId) {
+          throw new ForbiddenException('펫의 소유자가 아닙니다.');
+        }
 
-      // 동일 날짜 중복 체크
-      const exists = await entityManager.existsBy(FeedingEntity, {
-        petId: createFeedingDto.petId,
-        feedingAt: new Date(createFeedingDto.feedingAt),
-      });
+        // 동일 날짜 중복 체크
+        const exists = await entityManager.existsBy(FeedingEntity, {
+          petId: createFeedingDto.petId,
+          feedingAt: new Date(createFeedingDto.feedingAt),
+        });
 
-      if (exists) {
-        throw new BadRequestException(
-          '이미 해당 날짜에 피딩 기록이 존재합니다.',
+        if (exists) {
+          throw new BadRequestException(
+            '이미 해당 날짜에 피딩 기록이 존재합니다.',
+          );
+        }
+
+        const feedingEntity = entityManager.create(
+          FeedingEntity,
+          createFeedingDto,
         );
-      }
+        return entityManager.save(FeedingEntity, feedingEntity);
+      },
+    );
 
-      const feedingEntity = entityManager.create(
-        FeedingEntity,
-        createFeedingDto,
-      );
-      return entityManager.save(FeedingEntity, feedingEntity);
-    });
+    // 트랜잭션 커밋 후 해당 월 캐시 무효화
+    const yearMonth = createFeedingDto.feedingAt.slice(0, 7);
+    await this.cacheService.del(
+      CACHE.feeding.key(createFeedingDto.petId, yearMonth),
+    );
+
+    return result;
   }
 
   async getFeedingList(
@@ -77,39 +90,48 @@ export class FeedingService {
       throw new ForbiddenException('펫의 소유자가 아닙니다.');
     }
 
-    const qb = this.feedingRepository
-      .createQueryBuilder('feeding')
-      .where('feeding.petId = :petId', { petId });
+    // 월 단위 캐시 키 (startDate에서 yyyy-MM 추출)
+    const yearMonth = startDate?.slice(0, 7) ?? 'all';
 
-    if (startDate) {
-      qb.andWhere('feeding.feedingAt >= :startDate', { startDate });
-    }
+    return this.cacheService.wrap(
+      CACHE.feeding.key(petId, yearMonth),
+      async () => {
+        const qb = this.feedingRepository
+          .createQueryBuilder('feeding')
+          .where('feeding.petId = :petId', { petId });
 
-    if (endDate) {
-      qb.andWhere('feeding.feedingAt <= :endDate', { endDate });
-    }
+        if (startDate) {
+          qb.andWhere('feeding.feedingAt >= :startDate', { startDate });
+        }
 
-    qb.orderBy('feeding.feedingAt', pageOptionsDto.order)
-      .skip(pageOptionsDto.skip)
-      .take(pageOptionsDto.itemPerPage);
+        if (endDate) {
+          qb.andWhere('feeding.feedingAt <= :endDate', { endDate });
+        }
 
-    const [entities, totalCount] = await qb.getManyAndCount();
+        qb.orderBy('feeding.feedingAt', pageOptionsDto.order)
+          .skip(pageOptionsDto.skip)
+          .take(pageOptionsDto.itemPerPage);
 
-    const data: FeedingDto[] = entities.map((entity) => ({
-      id: entity.id,
-      petId: entity.petId,
-      feedingAt: String(entity.feedingAt),
-      foods: entity.foods ?? undefined,
-      amount: entity.amount ? Number(entity.amount) : undefined,
-      memo: entity.memo,
-    }));
+        const [entities, totalCount] = await qb.getManyAndCount();
 
-    const pageMetaDto = new PageMetaDto({
-      totalCount,
-      pageOptionsDto,
-    });
+        const data: FeedingDto[] = entities.map((entity) => ({
+          id: entity.id,
+          petId: entity.petId,
+          feedingAt: String(entity.feedingAt),
+          foods: entity.foods ?? undefined,
+          amount: entity.amount ? Number(entity.amount) : undefined,
+          memo: entity.memo,
+        }));
 
-    return new PageDto(data, pageMetaDto);
+        const pageMetaDto = new PageMetaDto({
+          totalCount,
+          pageOptionsDto,
+        });
+
+        return new PageDto(data, pageMetaDto);
+      },
+      CACHE.feeding.ttl,
+    );
   }
 
   async updateFeeding(
@@ -145,6 +167,20 @@ export class FeedingService {
     if (result.affected === 0) {
       throw new NotFoundException('피딩 기록을 찾을 수 없습니다.');
     }
+
+    // 기존 날짜의 월 캐시 무효화
+    const yearMonth = String(feeding.feedingAt).slice(0, 7);
+    await this.cacheService.del(CACHE.feeding.key(feeding.petId, yearMonth));
+
+    // 날짜가 변경된 경우 새 날짜의 월 캐시도 무효화
+    if (updateFeedingDto.feedingAt) {
+      const newYearMonth = updateFeedingDto.feedingAt.slice(0, 7);
+      if (newYearMonth !== yearMonth) {
+        await this.cacheService.del(
+          CACHE.feeding.key(feeding.petId, newYearMonth),
+        );
+      }
+    }
   }
 
   async deleteFeeding(id: number, userId: string) {
@@ -169,5 +205,9 @@ export class FeedingService {
     }
 
     await this.feedingRepository.delete({ id });
+
+    // 해당 월 캐시 무효화
+    const yearMonth = String(feeding.feedingAt).slice(0, 7);
+    await this.cacheService.del(CACHE.feeding.key(feeding.petId, yearMonth));
   }
 }

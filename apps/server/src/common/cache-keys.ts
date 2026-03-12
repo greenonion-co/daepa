@@ -76,6 +76,12 @@ export const CACHE = {
     ttl: DEFAULT_TTL,
   },
 
+  /** GET /v1/feedings — FeedingService.getFeedingList (월 단위 캐싱) */
+  feeding: {
+    key: (petId: string, yearMonth: string) => `feeding:${petId}:${yearMonth}`,
+    ttl: DEFAULT_TTL,
+  },
+
   // ── 조합/목록 (3분 TTL + 패턴 무효화) ──
 
   /** GET /v1/pet (공개 피드) — PetService.getPetListFull (filterType != MY) */
