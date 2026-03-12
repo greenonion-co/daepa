@@ -1,0 +1,77 @@
+# Redis 캐시 목록
+
+> 소스: `apps/server/src/common/cache-keys.ts`, `cache-invalidation.ts`
+
+## 캐시 인프라
+
+- **Redis** + `cache-manager v7` + `cache-manager-redis-yet`
+- **CacheService** (`cache.service.ts`): `wrap`, `get`, `set`, `del`, `delByPattern`
+- **CacheInvalidation** (`cache-invalidation.ts`): 도메인 이벤트별 무효화 메서드
+- **Singleflight**: 동일 키 동시 요청 시 DB 1회만 호출 (cache stampede 방지)
+- **NULL_SENTINEL**: null 결과도 30초 TTL로 캐싱 (cache penetration 방지)
+
+## TTL 정책
+
+| 구분 | TTL | 설명 |
+|------|-----|------|
+| `DEFAULT_TTL` | 30일 | 1:1 매핑 데이터. 수동 무효화가 주 전략 |
+| `LIST_TTL` | 3분 | 목록/조합 데이터. 패턴 무효화 누락 대비 안전망 |
+
+---
+
+## 적용된 캐시 (wrap 사용 중)
+
+### pet — 개체 상세
+
+| 항목 | 값 |
+|------|---|
+| **키** | `pet:{petId}` |
+| **TTL** | 30일 |
+| **API** | `GET /v1/pet/:petId` |
+| **서비스** | `PetService.findPetByPetId`, `getParentsByPetId` |
+| **fallback** | `loadPetData()` (`pet.loader.ts`) — pet + pet_detail/egg_detail 조회 |
+| **공유** | `ParentRequestService.getParentsWithRequestStatus`에서도 동일 캐시 키 + fallback 사용 |
+| **제외** | owner 정보 (매 요청마다 별도 조회) |
+| **무효화** | `updatePet`, `softDeletePet`, `restorePet`, `completeHatching` 시 `del` |
+| | `CacheInvalidation.onPetChanged`, `onPetDeleted` 시 `del` |
+
+### petImages — 개체 이미지
+
+| 항목 | 값 |
+|------|---|
+| **키** | `pet-img:{petId}` |
+| **TTL** | 30일 |
+| **API** | `GET /v1/pet-image/:petId` (thumbnail도 재사용) |
+| **서비스** | `PetImageService.findOneByPetId` |
+| **무효화** | `invalidateImageCache` 시 `del` |
+| | `CacheInvalidation.onPetDeleted` 시 `del` |
+
+### feeding — 피딩 기록 (월별)
+
+| 항목 | 값 |
+|------|---|
+| **키** | `feeding:{petId}:{yyyy-MM}` |
+| **TTL** | 30일 |
+| **API** | `GET /v1/feedings` |
+| **서비스** | `FeedingService.getFeedingList` |
+| **특징** | 월 단위 캐싱. startDate에서 yyyy-MM 추출 |
+| **무효화** | `createFeeding` — 해당 월 `del` |
+| | `updateFeeding` — 기존 월 + 날짜 변경 시 새 월 `del` |
+| | `deleteFeeding` — 해당 월 `del` |
+
+---
+
+## 무효화
+
+### 서비스 내 직접 무효화
+
+| 서비스 | 시점 | 삭제 대상 |
+|--------|------|----------|
+| `PetService.updatePet` | 수정 후 | `pet:{petId}` |
+| `PetService.softDeletePet` | 삭제 후 | `pet:{petId}` |
+| `PetService.restorePet` | 복구 후 | `pet:{petId}` |
+| `PetService.completeHatching` | 해칭 후 | `pet:{petId}` |
+| `PetImageService.invalidateImageCache` | 이미지 변경 후 | `pet-img:{petId}` |
+| `FeedingService.createFeeding` | 생성 후 | `feeding:{petId}:{yyyy-MM}` |
+| `FeedingService.updateFeeding` | 수정 후 | `feeding:{petId}:{yyyy-MM}` (+ 날짜 변경 시 새 월) |
+| `FeedingService.deleteFeeding` | 삭제 후 | `feeding:{petId}:{yyyy-MM}` |
