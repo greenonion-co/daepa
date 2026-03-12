@@ -21,30 +21,14 @@ import { USER_NOTIFICATION_TYPE } from '../user_notification/user_notification.c
 import { PetParentDto } from 'src/pet/pet.dto';
 import { PetDetailEntity } from 'src/pet_detail/pet_detail.entity';
 import { UserEntity } from 'src/user/user.entity';
-import { USER_ROLE, USER_STATUS } from 'src/user/user.constant';
 import { UserNotificationEntity } from 'src/user_notification/user_notification.entity';
 import { CreateUserNotificationDto } from 'src/user_notification/user_notification.dto';
 import { PairEntity } from 'src/pair/pair.entity';
 import { plainToInstance } from 'class-transformer';
 import { PetRelationService } from '../pet_relation/pet_relation.service';
-
-interface ParentRawData {
-  pr_status: PARENT_STATUS;
-  p_pet_id: string;
-  p_name: string | null;
-  p_species: string;
-  p_hatching_date: Date | null;
-  p_is_public: 0 | 1;
-  p_is_deleted: 0 | 1;
-  pd_sex: PET_SEX | null;
-  pd_morphs: string[] | null;
-  pd_traits: string[] | null;
-  user_user_id: string;
-  user_name: string;
-  user_role: USER_ROLE;
-  user_is_biz: boolean;
-  user_status: USER_STATUS;
-}
+import { CacheService } from '../common/cache.service';
+import { CACHE } from '../common/cache-keys';
+import { loadPetData } from '../pet/pet.loader';
 
 @Injectable()
 export class ParentRequestService {
@@ -52,6 +36,7 @@ export class ParentRequestService {
     private readonly userNotificationService: UserNotificationService,
     private readonly petRelationService: PetRelationService,
     private readonly dataSource: DataSource,
+    private readonly cacheService: CacheService,
   ) {}
 
   async linkParent(
@@ -596,63 +581,67 @@ export class ParentRequestService {
     ];
 
     const run = async (em: EntityManager) => {
-      const parentData = await em
+      // 1. parent_request만 조회 (단일 테이블)
+      const requests = await em
         .createQueryBuilder(ParentRequestEntity, 'pr')
-        .leftJoin(PetEntity, 'p', 'p.petId = pr.parentPetId')
-        .leftJoin(PetDetailEntity, 'pd', 'pd.petId = pr.parentPetId')
-        .leftJoin(UserEntity, 'user', 'user.userId = p.ownerId')
-        .select([
-          'pr.status',
-          'p.petId',
-          'p.name',
-          'p.species',
-          'p.hatchingDate',
-          'p.isPublic',
-          'p.isDeleted',
-          'pd.sex',
-          'pd.morphs',
-          'pd.traits',
-          'user.userId',
-          'user.name',
-          'user.role',
-          'user.isBiz',
-          'user.status',
-        ])
+        .select(['pr.parentPetId', 'pr.status'])
         .where('pr.childPetId = :petId', { petId })
         .andWhere('pr.status IN (:...statuses)', { statuses })
-        .getRawMany<ParentRawData>();
+        .getRawMany<{ pr_parent_pet_id: string; pr_status: PARENT_STATUS }>();
 
-      if (parentData.length === 0) {
+      if (requests.length === 0) {
         return { father: null, mother: null };
       }
 
+      // 2. 각 부모 펫 데이터를 pet 캐시에서 조회 + owner 정보 별도 조회
       let father: PetParentDto | null = null;
       let mother: PetParentDto | null = null;
 
-      for (const row of parentData) {
-        const parent = plainToInstance(PetParentDto, {
-          petId: row.p_pet_id,
-          name: row.p_name ?? '',
-          species: row.p_species as PET_SPECIES,
-          sex: row.pd_sex ?? undefined,
-          morphs: row.pd_morphs ?? undefined,
-          traits: row.pd_traits ?? undefined,
-          hatchingDate: row.p_hatching_date ?? undefined,
-          status: row.pr_status,
-          owner: {
-            userId: row.user_user_id,
-            name: row.user_name,
-            role: row.user_role,
-            isBiz: row.user_is_biz,
-            status: row.user_status,
-          },
-          isPublic: !!row.p_is_public,
-          isDeleted: !!row.p_is_deleted,
-        });
+      await Promise.all(
+        requests.map(async (req) => {
+          const parentPetId = req.pr_parent_pet_id;
 
-        if (row.pd_sex === PET_SEX.MALE) father = parent;
-        else if (row.pd_sex === PET_SEX.FEMALE) mother = parent;
-      }
+          // pet 캐시 활용 (findPetByPetId와 동일한 캐시 키 + 동일한 fallback)
+          const petData = await this.cacheService.wrap(
+            CACHE.pet.key(parentPetId),
+            () => loadPetData(this.dataSource.manager, parentPetId),
+            CACHE.pet.ttl,
+          );
+
+          if (!petData) return;
+
+          // owner 정보는 캐시 밖에서 매번 조회
+          const owner = await em.findOne(UserEntity, {
+            where: { userId: petData.ownerId },
+            select: ['userId', 'name', 'role', 'isBiz', 'status'],
+          });
+
+          const parent = plainToInstance(PetParentDto, {
+            petId: petData.petId,
+            name: petData.name ?? '',
+            species: petData.species,
+            sex: petData.sex,
+            morphs: petData.morphs,
+            traits: petData.traits,
+            hatchingDate: petData.hatchingDate,
+            status: req.pr_status,
+            owner: owner
+              ? {
+                  userId: owner.userId,
+                  name: owner.name,
+                  role: owner.role,
+                  isBiz: owner.isBiz,
+                  status: owner.status,
+                }
+              : undefined,
+            isPublic: !!petData.isPublic,
+            isDeleted: !!petData.isDeleted,
+          });
+
+          if (petData.sex === PET_SEX.MALE) father = parent;
+          else if (petData.sex === PET_SEX.FEMALE) mother = parent;
+        }),
+      );
 
       return { father, mother };
     };

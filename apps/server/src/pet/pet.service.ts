@@ -60,6 +60,7 @@ import { extractOriginalPetName } from '../common/utils/pet-name.helper';
 import { LayingEntity } from 'src/laying/laying.entity';
 import { CacheService } from 'src/common/cache.service';
 import { CACHE } from 'src/common/cache-keys';
+import { loadPetData } from './pet.loader';
 
 @Injectable()
 export class PetService {
@@ -489,7 +490,7 @@ export class PetService {
   ): Promise<PetSingleDto> {
     const petData = await this.cacheService.wrap(
       CACHE.pet.key(petId),
-      () => this.loadPetSingleData(petId),
+      () => loadPetData(this.dataSource.manager, petId),
       CACHE.pet.ttl,
     );
 
@@ -515,69 +516,6 @@ export class PetService {
     });
 
     return plainToInstance(PetSingleDto, { ...petData, owner });
-  }
-
-  private async loadPetSingleData(
-    petId: string,
-  ): Promise<(PetSingleDto & { ownerId: string }) | null> {
-    return this.dataSource.transaction(async (entityManager: EntityManager) => {
-      const pet = await entityManager.findOne(PetEntity, {
-        where: { petId },
-      });
-
-      if (!pet) return null;
-
-      let petDetail: PetDetailEntity | null = null;
-      let eggDetail: EggDetailEntity | null = null;
-
-      if (pet.type === PET_TYPE.EGG) {
-        eggDetail = await entityManager.findOne(EggDetailEntity, {
-          where: { petId },
-        });
-      } else {
-        petDetail = await entityManager.findOne(PetDetailEntity, {
-          where: { petId },
-        });
-      }
-
-      if (!pet.ownerId) {
-        throw new NotFoundException('펫의 소유자를 찾을 수 없습니다.');
-      }
-
-      const { growth, sex, morphs, traits, foods, weight } = petDetail ?? {};
-      const { temperature, status: eggStatus } = eggDetail ?? {};
-
-      if (pet.isDeleted) {
-        return {
-          ...plainToInstance(PetSingleDto, {
-            petId: pet.petId,
-            species: pet.species,
-            name: pet.name,
-            isDeleted: pet.isDeleted,
-            deletedAt: pet.deletedAt,
-            deleteReason: pet.deleteReason,
-            isPublic: pet.isPublic,
-          }),
-          ownerId: pet.ownerId,
-        };
-      }
-
-      return {
-        ...plainToInstance(PetSingleDto, {
-          ...pet,
-          growth,
-          sex,
-          morphs,
-          traits,
-          foods,
-          weight,
-          eggDetail,
-          temperature,
-          eggStatus,
-        }),
-        ownerId: pet.ownerId,
-      };
-    });
   }
 
   async updatePet(
@@ -1031,10 +969,12 @@ export class PetService {
         petId,
         options,
       );
-    // petId로 owner 정보
-    const pet = await this.petRepository.findOne({
-      where: { petId },
-    });
+    // petId로 owner 정보 (pet 캐시 활용)
+    const pet = await this.cacheService.wrap(
+      CACHE.pet.key(petId),
+      () => loadPetData(this.dataSource.manager, petId),
+      CACHE.pet.ttl,
+    );
     if (!pet) {
       throw new NotFoundException('펫을 찾을 수 없습니다.');
     }
