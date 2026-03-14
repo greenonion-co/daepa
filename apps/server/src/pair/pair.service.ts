@@ -4,11 +4,7 @@ import { PairEntity } from './pair.entity';
 import { PetEntity } from 'src/pet/pet.entity';
 import { PetDetailEntity } from 'src/pet_detail/pet_detail.entity';
 import { plainToInstance } from 'class-transformer';
-import {
-  MatingByParentsDto,
-  PairFilterDto,
-  UpdatePairDto,
-} from './pair.dto';
+import { MatingByParentsDto, PairFilterDto, UpdatePairDto } from './pair.dto';
 import { PageDto, PageMetaDto } from 'src/common/page.dto';
 import { MatingEntity } from 'src/mating/mating.entity';
 import { LayingEntity } from 'src/laying/laying.entity';

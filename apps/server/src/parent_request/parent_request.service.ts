@@ -15,7 +15,7 @@ import {
 } from './parent_request.dto';
 import { PARENT_ROLE, PARENT_STATUS } from './parent_request.constants';
 import { PetEntity } from '../pet/pet.entity';
-import { PET_SEX, PET_SPECIES, PET_TYPE } from '../pet/pet.constants';
+import { PET_SEX, PET_TYPE } from '../pet/pet.constants';
 import { UserNotificationService } from '../user_notification/user_notification.service';
 import { USER_NOTIFICATION_TYPE } from '../user_notification/user_notification.constant';
 import { PetParentDto } from 'src/pet/pet.dto';

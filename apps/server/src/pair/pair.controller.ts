@@ -9,11 +9,7 @@ import {
   Query,
 } from '@nestjs/common';
 
-import {
-  MatingByParentsDto,
-  PairFilterDto,
-  UpdatePairDto,
-} from './pair.dto';
+import { MatingByParentsDto, PairFilterDto, UpdatePairDto } from './pair.dto';
 import { PageDto, PageMetaDto } from 'src/common/page.dto';
 import { ApiExtraModels, ApiResponse, getSchemaPath } from '@nestjs/swagger';
 import { JwtUser } from 'src/auth/auth.decorator';
