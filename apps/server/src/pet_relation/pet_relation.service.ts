@@ -1,16 +1,8 @@
-import {
-  Injectable,
-  NotFoundException,
-  Inject,
-  forwardRef,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { DataSource, EntityManager, Brackets } from 'typeorm';
 import { plainToInstance } from 'class-transformer';
 import { PetRelationEntity } from './pet_relation.entity';
-import {
-  PARENT_ROLE,
-  PARENT_STATUS,
-} from '../parent_request/parent_request.constants';
+import { PARENT_ROLE } from '../parent_request/parent_request.constants';
 import {
   RawFamilyTreeQueryResult,
   RawSiblingQueryResult,
@@ -24,7 +16,6 @@ import {
   FamilyTreeNodeDto,
   GetFamilyTreeResponseDto,
 } from './pet_relation.dto';
-import { ParentRequestService } from '../parent_request/parent_request.service';
 import { PetEntity } from '../pet/pet.entity';
 import { replaceSiblingPublicSafe } from '../common/utils/pet-parent.helper';
 import { PageOptionsDto, PageMetaDto } from '../common/page.dto';
@@ -39,8 +30,6 @@ import { loadPetData } from '../pet/pet.loader';
 export class PetRelationService {
   constructor(
     private readonly dataSource: DataSource,
-    @Inject(forwardRef(() => ParentRequestService))
-    private readonly parentRequestService: ParentRequestService,
     private readonly cacheService: CacheService,
   ) {}
 
@@ -297,30 +286,212 @@ export class PetRelationService {
     queryDto: GetSiblingsQueryDto,
     manager?: EntityManager,
   ): Promise<GetSiblingsPageResponseDto> {
+    // 트랜잭션 컨텍스트에서는 캐시 우회
+    if (manager) {
+      return this.getSiblingsDirect(petId, userId, queryDto, manager);
+    }
+
+    // 1. 관계 캐시: 형제 petId + 정렬/필터용 메타 (구조적 데이터)
+    const siblingEntries = await this.cacheService.wrap(
+      CACHE.siblings.key(petId),
+      () => this.findSiblingEntries(petId),
+      CACHE.siblings.ttl,
+    );
+
+    if (!siblingEntries.length) {
+      return {
+        data: [],
+        meta: new PageMetaDto({ pageOptionsDto: queryDto, totalCount: 0 }),
+      };
+    }
+
+    // 2. 메모리에서 필터 → 정렬 → totalCount → 페이지 슬라이스
+    let filtered = siblingEntries;
+    if (queryDto.type) {
+      const typeFilter = queryDto.type as string;
+      filtered = filtered.filter((e) => e.type === typeFilter);
+    }
+
+    const order = queryDto.order as string;
+    filtered.sort((a, b) => {
+      const aTime = a.hatchingDate ? new Date(a.hatchingDate).getTime() : 0;
+      const bTime = b.hatchingDate ? new Date(b.hatchingDate).getTime() : 0;
+      return order === 'ASC' ? aTime - bTime : bTime - aTime;
+    });
+
+    const totalCount = filtered.length;
+    const pageSlice = filtered.slice(
+      queryDto.skip,
+      queryDto.skip + queryDto.itemPerPage,
+    );
+
+    // 3. 페이지 항목에 대해 pet 캐시 + owner 배치 조회
+    const petDataResults = await Promise.all(
+      pageSlice.map((entry) =>
+        this.cacheService
+          .wrap(
+            CACHE.pet.key(entry.petId),
+            () => loadPetData(this.dataSource.manager, entry.petId),
+            CACHE.pet.ttl,
+          )
+          .then((data) => [entry.petId, data] as const),
+      ),
+    );
+    const petDataMap = new Map(
+      petDataResults.filter(([, data]) => data && !data.isDeleted),
+    );
+
+    // owner 배치 조회
+    const ownerIds = [
+      ...new Set(
+        [...petDataMap.values()].map((p) => p!.ownerId).filter(Boolean),
+      ),
+    ];
+    const ownerMap = new Map<
+      string,
+      {
+        userId: string;
+        name: string | null;
+        role: string | null;
+        isBiz: boolean | null;
+        status: string | null;
+      }
+    >();
+    if (ownerIds.length) {
+      const owners = await this.dataSource
+        .createQueryBuilder()
+        .select('u.user_id', 'userId')
+        .addSelect('u.name', 'name')
+        .addSelect('u.role', 'role')
+        .addSelect('u.is_biz', 'isBiz')
+        .addSelect('u.status', 'status')
+        .from('users', 'u')
+        .where('u.user_id IN (:...ownerIds)', { ownerIds })
+        .getRawMany<{
+          userId: string;
+          name: string | null;
+          role: string | null;
+          isBiz: boolean | null;
+          status: string | null;
+        }>();
+      for (const o of owners) {
+        ownerMap.set(o.userId, o);
+      }
+    }
+
+    // 4. DTO 조립 + privacy 마스킹
+    const data: (
+      | PetSummaryDto
+      | { petId: string; hiddenStatus: PET_HIDDEN_STATUS }
+    )[] = [];
+
+    for (const entry of pageSlice) {
+      const petData = petDataMap.get(entry.petId);
+      if (!petData) continue;
+
+      const owner = ownerMap.get(petData.ownerId);
+      const sibling = plainToInstance(PetSummaryDto, {
+        petId: petData.petId,
+        type: petData.type,
+        name: petData.name,
+        species: petData.species,
+        hatchingDate: petData.hatchingDate,
+        isPublic: petData.isPublic,
+        isDeleted: petData.isDeleted,
+        owner: owner
+          ? {
+              userId: owner.userId,
+              name: owner.name,
+              role: owner.role,
+              isBiz: owner.isBiz,
+              status: owner.status,
+            }
+          : undefined,
+        sex: petData.sex,
+        morphs: petData.morphs,
+        traits: petData.traits,
+        weight: petData.weight,
+        growth: petData.growth,
+      });
+
+      data.push(replaceSiblingPublicSafe(sibling, userId));
+    }
+
+    return {
+      data,
+      meta: new PageMetaDto({ pageOptionsDto: queryDto, totalCount }),
+    };
+  }
+
+  /**
+   * 형제 petId + 정렬/필터용 메타 조회 (관계 캐시 fallback)
+   * is_deleted 필터 없이 조회 — 삭제 여부는 pet 캐시에서 처리
+   */
+  private async findSiblingEntries(
+    petId: string,
+  ): Promise<{ petId: string; type: string; hatchingDate: string | null }[]> {
+    const em = this.dataSource.manager;
+
+    const relation = await em.findOne(PetRelationEntity, {
+      where: { petId },
+    });
+
+    const fatherId = relation?.fatherId ?? null;
+    const motherId = relation?.motherId ?? null;
+
+    if (!fatherId && !motherId) return [];
+
+    const qb = em
+      .createQueryBuilder(PetRelationEntity, 'pr')
+      .innerJoin('pets', 'p', 'p.pet_id = pr.pet_id')
+      .select('pr.pet_id', 'petId')
+      .addSelect('p.type', 'type')
+      .addSelect('p.hatching_date', 'hatchingDate');
+
+    if (fatherId) {
+      qb.andWhere('pr.father_id = :fatherId', { fatherId });
+    } else {
+      qb.andWhere('pr.father_id IS NULL');
+    }
+
+    if (motherId) {
+      qb.andWhere('pr.mother_id = :motherId', { motherId });
+    } else {
+      qb.andWhere('pr.mother_id IS NULL');
+    }
+
+    // 자기 자신 제외
+    qb.andWhere('pr.pet_id != :petId', { petId });
+
+    return qb.getRawMany<{
+      petId: string;
+      type: string;
+      hatchingDate: string | null;
+    }>();
+  }
+
+  /** 캐시 우회 — 트랜잭션 컨텍스트용 기존 JOIN 쿼리 */
+  private async getSiblingsDirect(
+    petId: string,
+    userId: string,
+    queryDto: GetSiblingsQueryDto,
+    manager?: EntityManager,
+  ): Promise<GetSiblingsPageResponseDto> {
     const run = async (em: EntityManager) => {
-      // Step 1: 대상 펫의 승인된 부모 정보 조회 (형제 찾기용)
-      const { father: rawFather, mother: rawMother } =
-        await this.parentRequestService.getParentsWithRequestStatus(
-          petId,
-          { statuses: [PARENT_STATUS.APPROVED] },
-          em,
-        );
+      const relation = await em.findOne(PetRelationEntity, {
+        where: { petId },
+      });
 
-      // pet 조회
-      const pet = await em.findOne(PetEntity, { where: { petId } });
-      if (!pet) {
-        throw new NotFoundException('펫을 찾을 수 없습니다.');
+      const fatherId = relation?.fatherId ?? null;
+      const motherId = relation?.motherId ?? null;
+
+      if (!fatherId && !motherId) {
+        return {
+          data: [],
+          meta: new PageMetaDto({ pageOptionsDto: queryDto, totalCount: 0 }),
+        };
       }
 
-      if (!rawFather && !rawMother) {
-        const emptyMeta = new PageMetaDto({
-          pageOptionsDto: queryDto,
-          totalCount: 0,
-        });
-        return { data: [], meta: emptyMeta };
-      }
-
-      // Step 2: 모든 형제 펫 정보를 한 번에 조회 (JOIN 사용)
       const queryBuilder = em
         .createQueryBuilder(PetRelationEntity, 'pr')
         .innerJoin('pets', 'p', 'p.pet_id = pr.pet_id')
@@ -328,9 +499,7 @@ export class PetRelationService {
         .leftJoin('users', 'u', 'u.user_id = p.owner_id')
         .leftJoin('layings', 'l', 'l.id = p.laying_id')
         .select([
-          // pet_relations
           'pr.pet_id as petId',
-          // pets
           'p.name as name',
           'p.species as species',
           'p.hatching_date as hatchingDate',
@@ -339,61 +508,47 @@ export class PetRelationService {
           'p.owner_id as ownerId',
           'p.is_public as isPublic',
           'p.is_deleted as isDeleted',
-          // pet_details
           'pd.sex as sex',
           'pd.morphs as morphs',
           'pd.traits as traits',
           'pd.weight as weight',
           'pd.growth as growth',
-          // users (owner)
           'u.user_id as owner_userId',
           'u.name as owner_name',
           'u.role as owner_role',
           'u.is_biz as owner_isBiz',
           'u.status as owner_status',
-          // layings
           'l.id as laying_id',
           'l.laying_date as laying_layingDate',
         ])
         .andWhere('p.is_deleted = :isDeleted', { isDeleted: false });
 
-      // type 조건 (옵션)
       if (queryDto.type) {
         queryBuilder.andWhere('p.type = :type', { type: queryDto.type });
       }
 
-      // fatherId 조건 (null 처리)
-      if (rawFather) {
-        queryBuilder.andWhere('pr.father_id = :fatherId', {
-          fatherId: rawFather.petId,
-        });
+      if (fatherId) {
+        queryBuilder.andWhere('pr.father_id = :fatherId', { fatherId });
       } else {
         queryBuilder.andWhere('pr.father_id IS NULL');
       }
 
-      // motherId 조건 (null 처리)
-      if (rawMother) {
-        queryBuilder.andWhere('pr.mother_id = :motherId', {
-          motherId: rawMother.petId,
-        });
+      if (motherId) {
+        queryBuilder.andWhere('pr.mother_id = :motherId', { motherId });
       } else {
         queryBuilder.andWhere('pr.mother_id IS NULL');
       }
 
-      // 총 개수 조회 (페이지네이션 적용 전)
       const totalCount = await queryBuilder.getCount();
 
-      // 정렬 및 페이지네이션 (getRawMany에서는 offset/limit 사용)
       queryBuilder
         .orderBy('p.hatching_date', queryDto.order)
         .offset(queryDto.skip)
         .limit(queryDto.itemPerPage);
 
-      // 데이터 조회
       const rawSiblings: RawSiblingQueryResult[] =
         await queryBuilder.getRawMany();
 
-      // Step 3: 데이터 변환 및 비공개 펫 마스킹
       const siblings = rawSiblings.map((raw) => {
         const sibling = {
           petId: raw.petId,
@@ -420,12 +575,10 @@ export class PetRelationService {
         return replaceSiblingPublicSafe(sibling, userId);
       });
 
-      const pageMetaDto = new PageMetaDto({
-        totalCount,
-        pageOptionsDto: queryDto,
-      });
-
-      return { data: siblings, meta: pageMetaDto };
+      return {
+        data: siblings,
+        meta: new PageMetaDto({ pageOptionsDto: queryDto, totalCount }),
+      };
     };
 
     if (manager) {

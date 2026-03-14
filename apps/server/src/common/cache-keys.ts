@@ -59,10 +59,9 @@ export const CACHE = {
     pattern: (petId: string) => `children:${petId}:*`,
     ttl: DEFAULT_TTL,
   },
-  /** GET /v1/pet/siblings/:petId — PetRelationService.getSiblingsWithDetails */
+  /** GET /v1/pet/siblings/:petId — 형제 관계 (petId + 정렬/필터용 메타) */
   siblings: {
-    key: (petId: string, page: number) => `siblings:${petId}:${page}`,
-    pattern: (petId: string) => `siblings:${petId}:*`,
+    key: (petId: string) => `siblings:${petId}`,
     ttl: DEFAULT_TTL,
   },
   /** GET /v1/pet/clutch-mates/:petId — PetRelationService.getClutchMatesByPetId */

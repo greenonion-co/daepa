@@ -30,7 +30,7 @@
 | **API** | `GET /v1/pet/:petId` |
 | **서비스** | `PetService.findPetByPetId`, `getParentsByPetId` |
 | **fallback** | `loadPetData()` (`pet.loader.ts`) — pet + pet_detail/egg_detail 조회 |
-| **공유** | `ParentRequestService.getParentsWithRequestStatus`, `PetRelationService.getClutchMatesByPetId`에서도 동일 캐시 키 + fallback 사용 |
+| **공유** | `ParentRequestService.getParentsWithRequestStatus`, `PetRelationService.getClutchMatesByPetId`, `getSiblingsWithDetails`에서도 동일 캐시 키 + fallback 사용 |
 | **제외** | owner 정보 (매 요청마다 별도 조회) |
 | **무효화** | `updatePet`, `softDeletePet`, `restorePet`, `completeHatching` 시 `del` |
 | | `CacheInvalidation.onPetChanged`, `onPetDeleted` 시 `del` |
@@ -84,6 +84,18 @@
 | **특징** | 관계 데이터(petId 배열)만 캐시. 펫 상세는 `pet:{petId}` 캐시 재활용 |
 | **설계** | 비공개/삭제 처리를 pet 캐시 무효화에 편승 — 별도 역방향 인덱스 불필요 |
 | **제외** | owner 정보 (매 요청마다 별도 조회) |
+| **무효화** | `CacheInvalidation.onParentChanged` 시 `del` |
+
+### siblings — 형제 관계 (petId + 정렬/필터용 메타)
+
+| 항목 | 값 |
+|------|---|
+| **키** | `siblings:{petId}` |
+| **TTL** | 30일 |
+| **API** | `GET /v1/pet/siblings/:petId` |
+| **서비스** | `PetRelationService.getSiblingsWithDetails` |
+| **특징** | 관계 데이터(`{petId, type, hatchingDate}[]`)만 캐시. 메모리에서 필터/정렬/페이징 후, 페이지 항목만 pet 캐시 재활용 |
+| **설계** | 비공개/삭제 처리를 pet 캐시 무효화에 편승. COUNT 쿼리 제거. owner 배치 조회(`WHERE IN`) |
 | **무효화** | `CacheInvalidation.onParentChanged` 시 `del` |
 
 ---

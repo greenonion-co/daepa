@@ -67,7 +67,7 @@ export class CacheInvalidation {
       this.cacheService.delByPattern(CACHE.familyTree.pattern(petId)),
       this.cacheService.delByPattern(CACHE.familyTree.pattern(parentId)),
       this.cacheService.delByPattern(CACHE.children.pattern(parentId)),
-      this.cacheService.delByPattern(CACHE.siblings.pattern(petId)),
+      this.cacheService.del(CACHE.siblings.key(petId)),
     ]);
   }
 
