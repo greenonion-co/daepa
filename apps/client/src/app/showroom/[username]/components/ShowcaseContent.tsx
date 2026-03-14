@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useMemo } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { BreederPublicProfile } from "../data";
 import BreederHeader from "./BreederHeader";
 import ShowcaseFilterBar, { type ShowcaseFilters } from "./ShowcaseFilterBar";
@@ -14,6 +14,8 @@ const SORT_DISPLAY: Record<string, string> = {
   DESC: "최신순",
   ASC: "오래된순",
 };
+
+const CURRENT_SPECIES = "CR";
 
 interface ShowcaseContentProps {
   profile: BreederPublicProfile;
@@ -37,8 +39,8 @@ export default function ShowcaseContent({ profile }: ShowcaseContentProps) {
     return () => clearTimeout(timer);
   }, [filters.search]);
 
-  const allMorphs = useMemo(() => Object.assign({}, ...Object.values(MORPH_LIST_BY_SPECIES)), []);
-  const allTraits = useMemo(() => Object.assign({}, ...Object.values(TRAIT_LIST_BY_SPECIES)), []);
+  const allMorphs = MORPH_LIST_BY_SPECIES[CURRENT_SPECIES] ?? {};
+  const allTraits = TRAIT_LIST_BY_SPECIES[CURRENT_SPECIES] ?? {};
 
   // 모바일 미니 헤더: BreederHeader가 스크롤 아웃되면 표시
   const headerRef = useRef<HTMLDivElement>(null);
