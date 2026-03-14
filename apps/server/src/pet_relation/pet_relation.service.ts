@@ -31,6 +31,9 @@ import { PageOptionsDto, PageMetaDto } from '../common/page.dto';
 import { PetSummaryDto, PetHiddenStatusDto } from 'src/pet/pet.dto';
 import { PET_HIDDEN_STATUS } from 'src/pet/pet.constants';
 import { PET_TYPE } from '../pet/pet.constants';
+import { CacheService } from '../common/cache.service';
+import { CACHE } from '../common/cache-keys';
+import { loadPetData } from '../pet/pet.loader';
 
 @Injectable()
 export class PetRelationService {
@@ -38,6 +41,7 @@ export class PetRelationService {
     private readonly dataSource: DataSource,
     @Inject(forwardRef(() => ParentRequestService))
     private readonly parentRequestService: ParentRequestService,
+    private readonly cacheService: CacheService,
   ) {}
 
   /**
@@ -448,8 +452,151 @@ export class PetRelationService {
     queryDto?: GetClutchMatesQueryDto,
     manager?: EntityManager,
   ): Promise<GetClutchMatesResponseDto> {
+    // 트랜잭션 컨텍스트에서는 캐시 우회
+    if (manager) {
+      return this.getClutchMatesDirect(petId, userId, queryDto, manager);
+    }
+
+    // 1. 관계 캐시: 클러치 메이트 petId 목록 (구조적 데이터)
+    const clutchMateIds = await this.cacheService.wrap(
+      CACHE.clutchMates.key(petId),
+      () => this.findClutchMateIds(petId),
+      CACHE.clutchMates.ttl,
+    );
+
+    if (!clutchMateIds.length) {
+      return { data: [] };
+    }
+
+    // 2. pet 캐시 + owner 조회 + privacy 마스킹 (N≈1)
+    const data: (
+      | PetSummaryDto
+      | { petId: string; hiddenStatus: PET_HIDDEN_STATUS }
+    )[] = [];
+
+    for (const clutchMateId of clutchMateIds) {
+      const petData = await this.cacheService.wrap(
+        CACHE.pet.key(clutchMateId),
+        () => loadPetData(this.dataSource.manager, clutchMateId),
+        CACHE.pet.ttl,
+      );
+
+      if (!petData || petData.isDeleted) continue;
+      if (queryDto?.type && petData.type !== queryDto.type) continue;
+
+      // owner 조회 (N≈1이므로 1회)
+      const owner = await this.dataSource
+        .createQueryBuilder()
+        .select('u.user_id', 'userId')
+        .addSelect('u.name', 'name')
+        .addSelect('u.role', 'role')
+        .addSelect('u.is_biz', 'isBiz')
+        .addSelect('u.status', 'status')
+        .from('users', 'u')
+        .where('u.user_id = :ownerId', { ownerId: petData.ownerId })
+        .getRawOne<{
+          userId: string;
+          name: string | null;
+          role: string | null;
+          isBiz: boolean | null;
+          status: string | null;
+        }>();
+
+      const clutchMate = plainToInstance(PetSummaryDto, {
+        petId: petData.petId,
+        type: petData.type,
+        name: petData.name,
+        species: petData.species,
+        hatchingDate: petData.hatchingDate,
+        isPublic: petData.isPublic,
+        isDeleted: petData.isDeleted,
+        owner: owner
+          ? {
+              userId: owner.userId,
+              name: owner.name,
+              role: owner.role,
+              isBiz: owner.isBiz,
+              status: owner.status,
+            }
+          : undefined,
+        sex: petData.sex,
+        morphs: petData.morphs,
+        traits: petData.traits,
+        weight: petData.weight,
+        growth: petData.growth,
+      });
+
+      data.push(replaceSiblingPublicSafe(clutchMate, userId));
+    }
+
+    return { data };
+  }
+
+  /**
+   * 클러치 메이트 petId 목록 조회 (관계 캐시 fallback)
+   * is_deleted 필터 없이 조회 — 삭제 여부는 pet 캐시에서 처리
+   */
+  private async findClutchMateIds(petId: string): Promise<string[]> {
+    const em = this.dataSource.manager;
+
+    const targetPet = await em
+      .createQueryBuilder(PetEntity, 'p')
+      .leftJoin('pet_relations', 'pr', 'pr.pet_id = p.pet_id')
+      .select('pr.father_id', 'fatherId')
+      .addSelect('pr.mother_id', 'motherId')
+      .addSelect('p.laying_id', 'layingId')
+      .addSelect('p.hatching_date', 'hatchingDate')
+      .where('p.pet_id = :petId', { petId })
+      .getRawOne<{
+        fatherId: string | null;
+        motherId: string | null;
+        layingId: number | null;
+        hatchingDate: Date | null;
+      }>();
+
+    if (!targetPet?.fatherId || !targetPet?.motherId) return [];
+
+    const conditions: string[] = [];
+    const params: Record<string, string | number | Date> = {
+      fatherId: targetPet.fatherId,
+      motherId: targetPet.motherId,
+      petId,
+    };
+
+    if (targetPet.layingId != null) {
+      conditions.push('p.laying_id = :layingId');
+      params.layingId = targetPet.layingId;
+    }
+    if (targetPet.hatchingDate != null) {
+      conditions.push('p.hatching_date = :hatchingDate');
+      params.hatchingDate = targetPet.hatchingDate;
+    }
+
+    if (!conditions.length) return [];
+
+    const rawResults = await em
+      .createQueryBuilder()
+      .select('pr.pet_id', 'petId')
+      .from('pet_relations', 'pr')
+      .innerJoin('pets', 'p', 'p.pet_id = pr.pet_id')
+      .where('pr.father_id = :fatherId')
+      .andWhere('pr.mother_id = :motherId')
+      .andWhere('pr.pet_id != :petId')
+      .andWhere(`(${conditions.join(' OR ')})`)
+      .setParameters(params)
+      .getRawMany<{ petId: string }>();
+
+    return rawResults.map((r) => r.petId);
+  }
+
+  /** 캐시 우회 — 트랜잭션 컨텍스트용 기존 CTE 쿼리 */
+  private async getClutchMatesDirect(
+    petId: string,
+    userId: string,
+    queryDto?: GetClutchMatesQueryDto,
+    manager?: EntityManager,
+  ): Promise<GetClutchMatesResponseDto> {
     const run = async (em: EntityManager) => {
-      // CTE: 대상 펫의 부모 및 클러치 정보
       const targetPetCte = em
         .createQueryBuilder(PetEntity, 'p')
         .leftJoin('pet_relations', 'pr', 'pr.pet_id = p.pet_id')
@@ -461,12 +608,10 @@ export class PetRelationService {
         .addSelect('l.laying_date', 'laying_date')
         .where('p.pet_id = :petId', { petId });
 
-      // 단일 쿼리: CTE를 사용하여 클러치 메이트 조회
       const queryBuilder = em
         .createQueryBuilder()
         .addCommonTableExpression(targetPetCte, 'target_pet')
         .from('target_pet', 'tp')
-        // 클러치 메이트 정보
         .select('p.pet_id', 'petId')
         .addSelect('p.name', 'name')
         .addSelect('p.species', 'species')
@@ -484,7 +629,6 @@ export class PetRelationService {
         .addSelect('u.role', 'owner_role')
         .addSelect('u.is_biz', 'owner_isBiz')
         .addSelect('u.status', 'owner_status')
-        // JOIN
         .innerJoin(
           'pet_relations',
           'pr',
@@ -495,7 +639,6 @@ export class PetRelationService {
         .leftJoin('pet_details', 'pd', 'pd.pet_id = p.pet_id')
         .leftJoin('users', 'u', 'u.user_id = p.owner_id')
         .leftJoin('layings', 'l', 'l.id = p.laying_id')
-        // 클러치 조건:  layingId, hatchingDate 중 하나가 같아야 함
         .where(
           new Brackets((qb) => {
             qb.where(
@@ -505,12 +648,10 @@ export class PetRelationService {
             );
           }),
         )
-        // 부모 정보가 있는 경우만
         .andWhere('tp.father_id IS NOT NULL')
         .andWhere('tp.mother_id IS NOT NULL')
         .orderBy('p.hatching_date', 'DESC');
 
-      // type 필터 (옵션)
       if (queryDto?.type) {
         queryBuilder.andWhere('p.type = :type', { type: queryDto.type });
       }
@@ -518,9 +659,8 @@ export class PetRelationService {
       const rawResults: RawSiblingQueryResult[] =
         await queryBuilder.getRawMany();
 
-      // 데이터 변환 및 비공개 펫 마스킹
       const clutchMates = rawResults.map((raw) => {
-        const mate = plainToInstance(PetSummaryDto, {
+        const clutchMate = plainToInstance(PetSummaryDto, {
           petId: raw.petId,
           type: raw.type,
           name: raw.name ?? undefined,
@@ -544,7 +684,7 @@ export class PetRelationService {
           growth: raw.growth ?? undefined,
         });
 
-        return replaceSiblingPublicSafe(mate, userId);
+        return replaceSiblingPublicSafe(clutchMate, userId);
       });
 
       return { data: clutchMates };

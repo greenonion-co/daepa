@@ -63,6 +63,7 @@ export class CacheInvalidation {
   async onParentChanged(petId: string, parentId: string) {
     await Promise.all([
       this.cacheService.del(CACHE.parents.key(petId)),
+      this.cacheService.del(CACHE.clutchMates.key(petId)),
       this.cacheService.delByPattern(CACHE.familyTree.pattern(petId)),
       this.cacheService.delByPattern(CACHE.familyTree.pattern(parentId)),
       this.cacheService.delByPattern(CACHE.children.pattern(parentId)),

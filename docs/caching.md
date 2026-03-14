@@ -30,7 +30,7 @@
 | **API** | `GET /v1/pet/:petId` |
 | **서비스** | `PetService.findPetByPetId`, `getParentsByPetId` |
 | **fallback** | `loadPetData()` (`pet.loader.ts`) — pet + pet_detail/egg_detail 조회 |
-| **공유** | `ParentRequestService.getParentsWithRequestStatus`에서도 동일 캐시 키 + fallback 사용 |
+| **공유** | `ParentRequestService.getParentsWithRequestStatus`, `PetRelationService.getClutchMatesByPetId`에서도 동일 캐시 키 + fallback 사용 |
 | **제외** | owner 정보 (매 요청마다 별도 조회) |
 | **무효화** | `updatePet`, `softDeletePet`, `restorePet`, `completeHatching` 시 `del` |
 | | `CacheInvalidation.onPetChanged`, `onPetDeleted` 시 `del` |
@@ -72,6 +72,19 @@
 | **무효화** | `createFeeding` — 해당 월 `del` |
 | | `updateFeeding` — 기존 월 + 날짜 변경 시 새 월 `del` |
 | | `deleteFeeding` — 해당 월 `del` |
+
+### clutchMates — 클러치 메이트 관계 (petId 목록)
+
+| 항목 | 값 |
+|------|---|
+| **키** | `clutch:{petId}` |
+| **TTL** | 30일 |
+| **API** | `GET /v1/pet/clutch-mates/:petId` |
+| **서비스** | `PetRelationService.getClutchMatesByPetId` |
+| **특징** | 관계 데이터(petId 배열)만 캐시. 펫 상세는 `pet:{petId}` 캐시 재활용 |
+| **설계** | 비공개/삭제 처리를 pet 캐시 무효화에 편승 — 별도 역방향 인덱스 불필요 |
+| **제외** | owner 정보 (매 요청마다 별도 조회) |
+| **무효화** | `CacheInvalidation.onParentChanged` 시 `del` |
 
 ---
 
