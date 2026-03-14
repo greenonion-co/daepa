@@ -7,8 +7,9 @@ import ShowcaseFilterBar, { type ShowcaseFilters } from "./ShowcaseFilterBar";
 import PetShowcaseGrid from "./PetShowcaseGrid";
 import ShowcaseMultiSelect from "./ShowcaseMultiSelect";
 import { MORPH_LIST_BY_SPECIES, TRAIT_LIST_BY_SPECIES } from "@/app/(브리더스룸)/constants";
-import { Share2 } from "lucide-react";
+import { BadgeCheck, Share2 } from "lucide-react";
 import { toast } from "@/lib/toast";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 const SORT_DISPLAY: Record<string, string> = {
   DESC: "최신순",
@@ -72,18 +73,14 @@ export default function ShowcaseContent({ profile }: ShowcaseContentProps) {
           showMiniHeader ? "translate-y-0" : "-translate-y-full"
         }`}
       >
-        <div className="flex items-center gap-2">
+        <div className="flex items-center">
+          {profile.isBiz && <BadgeCheck className="h-5 w-5 fill-blue-500 stroke-white" />}
           <span className="text-sm font-bold text-gray-900 dark:text-gray-100">
             {profile.name}
             <span style={{ marginLeft: 4, fontFamily: "Yeongwol, sans-serif" }}>
               &#39;s SHOWROOM
             </span>
           </span>
-          {profile.isBiz && (
-            <span className="inline-flex items-center rounded-full bg-[#DBEDDB] px-2 py-0.5 text-[11px] leading-none font-medium text-[#2B6A2F] dark:bg-[#1E3D1F] dark:text-[#A3D9A5]">
-              사업자
-            </span>
-          )}
         </div>
 
         <button
