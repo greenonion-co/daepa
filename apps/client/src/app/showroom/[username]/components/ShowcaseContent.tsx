@@ -9,7 +9,6 @@ import ShowcaseMultiSelect from "./ShowcaseMultiSelect";
 import { MORPH_LIST_BY_SPECIES, TRAIT_LIST_BY_SPECIES } from "@/app/(브리더스룸)/constants";
 import { BadgeCheck, Share2 } from "lucide-react";
 import { toast } from "@/lib/toast";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 const SORT_DISPLAY: Record<string, string> = {
   DESC: "최신순",
