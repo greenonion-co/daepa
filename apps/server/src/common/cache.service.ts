@@ -1,6 +1,8 @@
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import { RedisCache } from 'cache-manager-redis-yet';
+import { Cache } from 'cache-manager';
+import KeyvRedis, { RedisClientType } from '@keyv/redis';
+import { KEYV_REDIS } from '../app.module';
 
 /** null 결과를 캐시에 저장할 때 사용하는 sentinel 값 */
 const NULL_SENTINEL = '__NULL__';
@@ -21,7 +23,10 @@ export class CacheService {
    */
   private readonly inflightMap = new Map<string, Promise<any>>();
 
-  constructor(@Inject(CACHE_MANAGER) private cache: RedisCache) {}
+  constructor(
+    @Inject(CACHE_MANAGER) private cache: Cache,
+    @Inject(KEYV_REDIS) private keyvRedis: KeyvRedis<Record<string, unknown>>,
+  ) {}
 
   /**
    * 캐시에 있으면 반환, 없으면 fallback 실행 후 캐시에 저장.
@@ -111,8 +116,8 @@ export class CacheService {
   /** 패턴으로 일괄 삭제 — SCAN 기반 (비블로킹) */
   async delByPattern(pattern: string): Promise<void> {
     try {
-      const client = this.cache.store.client;
-      let cursor = 0;
+      const client = this.keyvRedis.client as RedisClientType;
+      let cursor = '0';
 
       do {
         const result = await client.scan(cursor, {
@@ -120,12 +125,12 @@ export class CacheService {
           COUNT: SCAN_COUNT,
         });
         cursor = result.cursor;
-        const keys: string[] = result.keys;
+        const keys = result.keys as string[];
 
         if (keys.length > 0) {
           await client.del(keys);
         }
-      } while (cursor !== 0);
+      } while (cursor !== '0');
     } catch (err) {
       this.logger.warn(`Cache DEL pattern failed for pattern=${pattern}`, err);
     }

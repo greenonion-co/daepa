@@ -3,12 +3,12 @@
 ## 1. 개요
 
 ### 현재 상태
-- **서버**: 캐시 없음. 모든 요청이 MySQL 직접 조회
+- **서버**: Redis Cache-Aside 패턴 적용 완료 (pet, petImages, petAdoption, feeding, clutchMates, siblings)
 - **클라이언트**: React Query로 계층화된 staleTime 적용 (썸네일 ∞, 가계도 5분, COI 10분)
 - **CDN**: Cloudflare R2 이미지만 — API 응답 캐시 없음
 
-### 목표
-- **Cache-Aside + 안전망 TTL** 패턴으로 서버 Redis 캐시 도입
+### 설계 목표
+- **Cache-Aside + 안전망 TTL** 패턴으로 서버 Redis 캐시 운영
 - 데이터 변경 시 수동 무효화 → 변경 없는 동안 DB 부하 제로
 - 안전망 TTL로 무효화 누락 시에도 최대 30일 후 자동 갱신
 
@@ -53,16 +53,30 @@
 
 ```bash
 # apps/server
-pnpm add @nestjs/cache-manager cache-manager cache-manager-redis-yet redis
+pnpm add @nestjs/cache-manager cache-manager @keyv/redis
 ```
+
+| 패키지 | 버전 | 역할 |
+|--------|------|------|
+| `@nestjs/cache-manager` | ^3.1.0 | NestJS 캐시 모듈 (CACHE_MANAGER 토큰 제공) |
+| `cache-manager` | ^7.2.8 | 캐시 추상화 레이어 (Keyv 기반) |
+| `@keyv/redis` | ^5.1.6 | Keyv → Redis 어댑터 |
+
+> **버전 호환 주의**: `cache-manager` v6+는 Keyv 기반으로 아키텍처가 변경됨.
+> 이전의 `cache-manager-redis-yet`은 v5 전용이라 v6+ 와 함께 사용하면
+> Redis store가 인식되지 않고 **인메모리로 fallback**함 (에러 없이 동작하므로 발견 어려움).
+> 반드시 `@keyv/redis`를 사용할 것.
 
 ### 환경변수
 
 ```env
-# apps/server/.env
+# apps/server/.env (개발)
 REDIS_HOST=localhost
 REDIS_PORT=6379
 REDIS_PASSWORD=
+
+# 프로덕션: docker-compose.yml에서 환경변수로 주입
+# REDIS_HOST=redis (Docker 내부 서비스명)
 ```
 
 ### AppModule 설정
@@ -70,23 +84,35 @@ REDIS_PASSWORD=
 ```ts
 // apps/server/src/app.module.ts
 import { CacheModule } from '@nestjs/cache-manager';
-import { redisStore } from 'cache-manager-redis-yet';
+import KeyvRedis from '@keyv/redis';
+
+function buildRedisUrl(): string {
+  const host = process.env.REDIS_HOST || 'localhost';
+  const port = process.env.REDIS_PORT || '6379';
+  const password = process.env.REDIS_PASSWORD;
+  return password
+    ? `redis://:${password}@${host}:${port}`
+    : `redis://${host}:${port}`;
+}
+
+export const KEYV_REDIS = 'KEYV_REDIS';
 
 @Module({
   imports: [
     CacheModule.registerAsync({
       isGlobal: true,
-      useFactory: async () => ({
-        store: await redisStore({
-          socket: {
-            host: process.env.REDIS_HOST || 'localhost',
-            port: Number(process.env.REDIS_PORT) || 6379,
-          },
-          password: process.env.REDIS_PASSWORD || undefined,
-        }),
-      }),
+      useFactory: () => ({ stores: [new KeyvRedis(buildRedisUrl())] }),
     }),
     // ... 기존 모듈
+  ],
+  providers: [
+    // SCAN 기반 패턴 삭제용 Redis 클라이언트
+    {
+      provide: KEYV_REDIS,
+      useFactory: () => new KeyvRedis(buildRedisUrl()),
+    },
+    CacheService,
+    // ...
   ],
 })
 export class AppModule {}
@@ -614,98 +640,26 @@ export const CACHE = {
 // apps/server/src/common/cache.service.ts
 
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Cache } from 'cache-manager';
 import { Inject, Injectable, Logger } from '@nestjs/common';
-
-/** null 결과를 캐시에 저장할 때 사용하는 sentinel 값 */
-const NULL_SENTINEL = '__NULL__';
-
-/** null 결과 캐시 TTL: 30초 */
-const NULL_TTL = 30 * 1000;
-
-/** SCAN 한 번에 가져올 키 수 */
-const SCAN_COUNT = 100;
+import { Cache } from 'cache-manager';
+import KeyvRedis, { RedisClientType } from '@keyv/redis';
+import { KEYV_REDIS } from '../app.module';
 
 @Injectable()
 export class CacheService {
-  private readonly logger = new Logger(CacheService.name);
+  constructor(
+    @Inject(CACHE_MANAGER) private cache: Cache,          // get/set/del 용
+    @Inject(KEYV_REDIS) private keyvRedis: KeyvRedis<...>, // SCAN 패턴 삭제용
+  ) {}
 
-  /**
-   * Singleflight: 같은 키에 대한 동시 DB 호출을 하나로 합침.
-   * 캐시 만료 직후 동시 요청 50개가 들어와도 DB는 1번만 호출.
-   */
-  private readonly inflightMap = new Map<string, Promise<any>>();
-
-  constructor(@Inject(CACHE_MANAGER) private cache: Cache) {}
-
-  /**
-   * 캐시에 있으면 반환, 없으면 fallback 실행 후 캐시에 저장.
-   * - Singleflight로 동시 요청 보호 (cache stampede 방지)
-   * - null 결과도 짧은 TTL로 캐싱 (cache penetration 방지)
-   */
-  async wrap<T>(key: string, fallback: () => Promise<T>, ttl: number): Promise<T> {
-    // 1. 캐시 조회
-    try {
-      const cached = await this.cache.get<T | string>(key);
-      if (cached === NULL_SENTINEL) return null as T;
-      if (cached !== undefined && cached !== null) return cached as T;
-    } catch (err) {
-      this.logger.warn(`Cache GET failed for key=${key}`, err);
-    }
-
-    // 2. Singleflight: 이미 같은 키로 DB 호출 중이면 그 결과를 기다림
-    const inflight = this.inflightMap.get(key);
-    if (inflight) return inflight;
-
-    // 3. DB 호출 + 캐시 저장
-    const promise = this.fetchAndCache<T>(key, fallback, ttl);
-    this.inflightMap.set(key, promise);
-    try {
-      return await promise;
-    } finally {
-      this.inflightMap.delete(key);
-    }
-  }
-
-  /** 단일 키 조회 */
-  async get<T>(key: string): Promise<T | null> { /* ... */ }
-
-  /** 단일 키 저장 */
-  async set<T>(key: string, value: T, ttl: number): Promise<void> { /* ... */ }
-
-  /** 단일 키 삭제 */
-  async del(key: string): Promise<void> { /* ... */ }
-
-  /** 패턴으로 일괄 삭제 — SCAN 기반 (비블로킹) */
-  async delByPattern(pattern: string): Promise<void> {
-    try {
-      const client = (this.cache as any).store.client;
-      let cursor = 0;
-      do {
-        const result = await client.scan(cursor, { MATCH: pattern, COUNT: SCAN_COUNT });
-        cursor = result.cursor;
-        if (result.keys.length > 0) await client.del(result.keys);
-      } while (cursor !== 0);
-    } catch (err) {
-      this.logger.warn(`Cache DEL pattern failed for pattern=${pattern}`, err);
-    }
-  }
-
-  private async fetchAndCache<T>(key: string, fallback: () => Promise<T>, ttl: number): Promise<T> {
-    const fresh = await fallback();
-    try {
-      if (fresh === undefined || fresh === null) {
-        await this.cache.set(key, NULL_SENTINEL, NULL_TTL); // penetration 방지
-      } else {
-        await this.cache.set(key, fresh, ttl);
-      }
-    } catch (err) {
-      this.logger.warn(`Cache SET failed for key=${key}`, err);
-    }
-    return fresh;
-  }
+  // wrap, get, set, del — cache (CACHE_MANAGER) 사용
+  // delByPattern — keyvRedis.client (RedisClientType) 사용하여 SCAN
 }
 ```
+
+**주입 구조**:
+- `CACHE_MANAGER` (`Cache`): cache-manager v7이 Keyv를 통해 Redis와 통신. `get/set/del` 사용
+- `KEYV_REDIS` (`KeyvRedis`): SCAN 기반 패턴 삭제(`delByPattern`)에 필요한 raw Redis 클라이언트 접근용. CacheModule 내부의 Keyv 체인으로는 SCAN 접근이 어려워 별도 인스턴스 주입
 
 ### 7.3 필터 해시 유틸 (`hash-filters.ts`)
 
@@ -922,13 +876,14 @@ if (cached === '__NULL__') return null;
 // KEYS (블로킹) — 사용하지 않음
 const keys = await client.keys('feed:*');  // 키 10만개 → 수백ms 블로킹
 
-// SCAN (비블로킹) — 현재 구현
-let cursor = 0;
+// SCAN (비블로킹) — 현재 구현 (@redis/client v5 — cursor는 string)
+const client = this.keyvRedis.client as RedisClientType;
+let cursor = '0';
 do {
   const result = await client.scan(cursor, { MATCH: pattern, COUNT: 100 });
   cursor = result.cursor;
   if (result.keys.length > 0) await client.del(result.keys);
-} while (cursor !== 0);
+} while (cursor !== '0');
 ```
 
 - `COUNT: 100` — 한 번에 100개씩 스캔 (Redis 이벤트 루프 양보)

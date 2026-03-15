@@ -1,6 +1,17 @@
 import { Module } from '@nestjs/common';
 import { CacheModule } from '@nestjs/cache-manager';
-import { redisStore } from 'cache-manager-redis-yet';
+import KeyvRedis from '@keyv/redis';
+
+function buildRedisUrl(): string {
+  const host = process.env.REDIS_HOST || 'localhost';
+  const port = process.env.REDIS_PORT || '6379';
+  const password = process.env.REDIS_PASSWORD;
+  return password
+    ? `redis://:${password}@${host}:${port}`
+    : `redis://${host}:${port}`;
+}
+
+export const KEYV_REDIS = 'KEYV_REDIS';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { CacheService } from './common/cache.service';
@@ -88,18 +99,7 @@ const ENTITIES = [
   imports: [
     CacheModule.registerAsync({
       isGlobal: true,
-      useFactory: async () => ({
-        store: await redisStore({
-          socket: {
-            host: process.env.REDIS_HOST || 'localhost',
-            port: Number(process.env.REDIS_PORT) || 6379,
-            connectTimeout: 3000,
-            reconnectStrategy: (retries: number) =>
-              Math.min(retries * 200, 3000),
-          },
-          password: process.env.REDIS_PASSWORD || undefined,
-        }),
-      }),
+      useFactory: () => ({ stores: [new KeyvRedis(buildRedisUrl())] }),
     }),
     HttpModule,
     ConfigModule.forRoot({
@@ -166,6 +166,10 @@ const ENTITIES = [
     PetRelationService,
     StatisticsService,
     FeedingService,
+    {
+      provide: KEYV_REDIS,
+      useFactory: () => new KeyvRedis(buildRedisUrl()),
+    },
     CacheService,
     CacheInvalidation,
     {
