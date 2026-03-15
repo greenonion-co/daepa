@@ -145,6 +145,7 @@ GET /v1/pet/parents/:petId       │ parents:{petId}                     │ 30�
 GET /v1/pet/children/:petId      │ children:{petId}:{page}             │ 30일     │ 중간     │ 낮음     │ 자식 목록 (페이지네이션)
 GET /v1/pet/siblings/:petId      │ siblings:{petId}:{page}             │ 30일     │ 낮음     │ 낮음     │ 형제 목록
 GET /v1/pet/clutch-mates/:petId  │ clutch:{petId}                      │ 30일     │ 낮음     │ 낮음     │ 클러치메이트
+GET /v1/feedings                 │ feeding:{petId}:{yyyy-MM}           │ 30일     │ 중간     │ 중간     │ 월별 캐시, CUD 시 해당 월 무효화
 GET /v1/pet (공개 피드)           │ feed:{hash}                         │ 3분      │ 매우높음 │ 간접     │ 조합 데이터, 정밀 무효화 어려움
 GET /v1/br/pet (내 개체)          │ my-pets:{userId}:{hash}             │ 3분      │ 높음     │ 간접     │ 사용자별 목록
 GET /v1/pairs (페어 목록)         │ pair-list:{userId}:{hash}           │ 3분      │ 중간     │ 간접     │ 필터+페이지네이션 조합 다양
@@ -155,7 +156,6 @@ GET /v1/user/public-profile/:name│ profile:{name}                      │ 30�
 
 | API | 제외 사유 |
 |-----|-----------|
-| `GET /v1/feedings` | 매일 기록, 실시간성 필요 |
 | `GET /v1/user-notification` | 실시간 알림, 캐시하면 새 알림 누락 |
 | `GET /v1/user-notification/unread/count` | 실시간 카운터 |
 | `GET /v1/parent-requests/:petId/pending-count` | 실시간 카운터 |
