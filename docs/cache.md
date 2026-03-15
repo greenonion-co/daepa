@@ -940,12 +940,12 @@ Docker Compose에 메모리 정책 설정:
 
 ```yaml
 redis:
-  command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
+  command: redis-server --maxmemory 128mb --maxmemory-policy allkeys-lru
 ```
 
 | 설정 | 값 | 설명 |
 |------|-----|------|
-| `maxmemory` | 256mb | 캐시 전용이므로 보수적 설정 (필요 시 상향) |
+| `maxmemory` | 128mb | Lightsail 1GB 인스턴스 기준 보수적 설정 (필요 시 상향) |
 | `maxmemory-policy` | `allkeys-lru` | 메모리 가득 차면 가장 오래 안 쓴 키 자동 제거 |
 
 - OOM 크래시 방지 — 메모리 한도 도달 시 자동 eviction
