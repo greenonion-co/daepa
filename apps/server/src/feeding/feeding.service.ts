@@ -91,6 +91,8 @@ export class FeedingService {
     }
 
     // 월 단위 캐시 키 (startDate에서 yyyy-MM 추출)
+    // 클라이언트가 항상 월 단위(itemPerPage=31, startDate~endDate)로 호출하므로
+    // 캐시 키에 페이지 정보를 포함하지 않음
     const yearMonth = startDate?.slice(0, 7) ?? 'all';
 
     return this.cacheService.wrap(
