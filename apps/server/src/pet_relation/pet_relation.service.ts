@@ -532,7 +532,8 @@ export class PetRelationService {
           'l.id as laying_id',
           'l.laying_date as laying_layingDate',
         ])
-        .andWhere('p.is_deleted = :isDeleted', { isDeleted: false });
+        .andWhere('p.is_deleted = :isDeleted', { isDeleted: false })
+        .andWhere('pr.pet_id != :petId', { petId });
 
       if (queryDto.type) {
         queryBuilder.andWhere('p.type = :type', { type: queryDto.type });
