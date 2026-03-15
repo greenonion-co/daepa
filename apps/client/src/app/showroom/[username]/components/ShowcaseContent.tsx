@@ -1,19 +1,21 @@
 "use client";
 
-import { useEffect, useRef, useState, useMemo } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { BreederPublicProfile } from "../data";
 import BreederHeader from "./BreederHeader";
 import ShowcaseFilterBar, { type ShowcaseFilters } from "./ShowcaseFilterBar";
 import PetShowcaseGrid from "./PetShowcaseGrid";
 import ShowcaseMultiSelect from "./ShowcaseMultiSelect";
 import { MORPH_LIST_BY_SPECIES, TRAIT_LIST_BY_SPECIES } from "@/app/(브리더스룸)/constants";
-import { Share2 } from "lucide-react";
+import { BadgeCheck, Share2 } from "lucide-react";
 import { toast } from "@/lib/toast";
 
 const SORT_DISPLAY: Record<string, string> = {
   DESC: "최신순",
   ASC: "오래된순",
 };
+
+const CURRENT_SPECIES = "CR";
 
 interface ShowcaseContentProps {
   profile: BreederPublicProfile;
@@ -37,8 +39,8 @@ export default function ShowcaseContent({ profile }: ShowcaseContentProps) {
     return () => clearTimeout(timer);
   }, [filters.search]);
 
-  const allMorphs = useMemo(() => Object.assign({}, ...Object.values(MORPH_LIST_BY_SPECIES)), []);
-  const allTraits = useMemo(() => Object.assign({}, ...Object.values(TRAIT_LIST_BY_SPECIES)), []);
+  const allMorphs = MORPH_LIST_BY_SPECIES[CURRENT_SPECIES] ?? {};
+  const allTraits = TRAIT_LIST_BY_SPECIES[CURRENT_SPECIES] ?? {};
 
   // 모바일 미니 헤더: BreederHeader가 스크롤 아웃되면 표시
   const headerRef = useRef<HTMLDivElement>(null);
@@ -70,18 +72,14 @@ export default function ShowcaseContent({ profile }: ShowcaseContentProps) {
           showMiniHeader ? "translate-y-0" : "-translate-y-full"
         }`}
       >
-        <div className="flex items-center gap-2">
+        <div className="flex items-center">
+          {profile.isBiz && <BadgeCheck className="h-5 w-5 fill-blue-500 stroke-white" />}
           <span className="text-sm font-bold text-gray-900 dark:text-gray-100">
             {profile.name}
             <span style={{ marginLeft: 4, fontFamily: "Yeongwol, sans-serif" }}>
               &#39;s SHOWROOM
             </span>
           </span>
-          {profile.isBiz && (
-            <span className="inline-flex items-center rounded-full bg-[#DBEDDB] px-2 py-0.5 text-[11px] leading-none font-medium text-[#2B6A2F] dark:bg-[#1E3D1F] dark:text-[#A3D9A5]">
-              사업자
-            </span>
-          )}
         </div>
 
         <button

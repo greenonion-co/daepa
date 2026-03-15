@@ -1,8 +1,9 @@
 import type { BreederPublicProfile } from "../data";
-import { MapPin, Phone, Share2 } from "lucide-react";
+import { BadgeCheck, MapPin, Phone, Share2 } from "lucide-react";
 import { toast } from "@/lib/toast";
 import { useIsLoggedIn } from "@/hooks/useAuth";
 import Link from "next/link";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface BreederHeaderProps {
   profile: BreederPublicProfile;
@@ -56,12 +57,17 @@ export default function BreederHeader({ profile }: BreederHeaderProps) {
 
         {/* 닉네임 (실명과 다를 때) */}
         {profile.name && (
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-0.5">
             <p className="text-sm text-gray-500 dark:text-gray-400">@{profile.name}</p>
             {profile.isBiz && (
-              <span className="inline-flex items-center rounded-full bg-[#DBEDDB] px-2 py-0.5 text-[11px] leading-none font-medium text-[#2B6A2F] dark:bg-[#1E3D1F] dark:text-[#A3D9A5]">
-                사업자
-              </span>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span>
+                    <BadgeCheck className="h-5 w-5 fill-blue-500 stroke-white" />
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>사업자 인증 완료</TooltipContent>
+              </Tooltip>
             )}
           </div>
         )}

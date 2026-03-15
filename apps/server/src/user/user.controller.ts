@@ -20,7 +20,12 @@ import {
   UserProfilePublicDto,
 } from './user.dto';
 import { CommonResponseDto } from 'src/common/response.dto';
-import { ApiExtraModels, ApiParam, ApiResponse, getSchemaPath } from '@nestjs/swagger';
+import {
+  ApiExtraModels,
+  ApiParam,
+  ApiResponse,
+  getSchemaPath,
+} from '@nestjs/swagger';
 import { JwtUser, Public } from 'src/auth/auth.decorator';
 import { JwtUserPayload } from 'src/auth/strategies/jwt.strategy';
 import { VerifyEmailDto } from './user.dto';

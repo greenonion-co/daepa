@@ -16,6 +16,8 @@ import { isUndefined, omitBy } from 'es-toolkit';
 import { PetEntity } from 'src/pet/pet.entity';
 import { UserEntity } from 'src/user/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
+import { CacheService } from '../common/cache.service';
+import { CACHE } from '../common/cache-keys';
 
 @Injectable()
 export class PetAdoptionService {
@@ -23,30 +25,51 @@ export class PetAdoptionService {
     @InjectRepository(PetAdoptionEntity)
     private readonly petAdoptionRepository: Repository<PetAdoptionEntity>,
     private readonly dataSource: DataSource,
+    private readonly cacheService: CacheService,
   ) {}
 
   async findOne(petId: string): Promise<AdoptionDto | null> {
-    const adoptionEntity = await this.petAdoptionRepository.findOne({
-      where: { petId },
-      select: [
-        'id',
-        'petId',
-        'price',
-        'memo',
-        'status',
-        'reservedUserId',
-        'createdAt',
-      ],
-    });
+    const cached = await this.cacheService.wrap(
+      CACHE.petAdoption.key(petId),
+      async () => {
+        const adoptionEntity = await this.petAdoptionRepository.findOne({
+          where: { petId },
+          select: [
+            'id',
+            'petId',
+            'price',
+            'memo',
+            'status',
+            'reservedUserId',
+            'createdAt',
+          ],
+        });
 
-    if (!adoptionEntity) {
+        if (!adoptionEntity) {
+          return null;
+        }
+
+        return {
+          petId: adoptionEntity.petId,
+          status: adoptionEntity.status,
+          price: adoptionEntity.price ?? undefined,
+          memo: adoptionEntity.memo ?? undefined,
+          createdAt: adoptionEntity.createdAt,
+          reservedUserId: adoptionEntity.reservedUserId ?? undefined,
+        };
+      },
+      CACHE.petAdoption.ttl,
+    );
+
+    if (!cached) {
       return null;
     }
 
+    // reservedUser는 캐시 밖에서 fresh 조회
     let reservedUser: AdoptionDto['reservedUser'] = null;
-    if (adoptionEntity.reservedUserId) {
+    if (cached.reservedUserId) {
       const user = await this.dataSource.getRepository(UserEntity).findOne({
-        where: { userId: adoptionEntity.reservedUserId },
+        where: { userId: cached.reservedUserId },
         select: ['userId', 'name', 'role', 'isBiz', 'status'],
       });
       if (user) {
@@ -61,11 +84,11 @@ export class PetAdoptionService {
     }
 
     return {
-      petId: adoptionEntity.petId,
-      status: adoptionEntity.status,
-      price: adoptionEntity.price ?? undefined,
-      memo: adoptionEntity.memo ?? undefined,
-      createdAt: adoptionEntity.createdAt,
+      petId: cached.petId,
+      status: cached.status,
+      price: cached.price,
+      memo: cached.memo,
+      createdAt: cached.createdAt,
       reservedUser,
     } as AdoptionDto;
   }
@@ -109,12 +132,16 @@ export class PetAdoptionService {
     };
 
     if (entityManager) {
+      // 외부 트랜잭션: 호출자가 캐시 무효화 책임
       return await run(entityManager);
     }
 
-    return this.dataSource.transaction(async (entityManager: EntityManager) => {
-      return await run(entityManager);
+    await this.dataSource.transaction(async (entityManager: EntityManager) => {
+      await run(entityManager);
     });
+
+    // NULL_SENTINEL 캐시 무효화 (findOne에서 null이 캐싱된 경우)
+    await this.cacheService.del(CACHE.petAdoption.key(createAdoptionDto.petId));
   }
 
   async updateAdoption(
@@ -189,8 +216,12 @@ export class PetAdoptionService {
       await em.save(PetAdoptionEntity, adoptionEntity);
     };
 
-    return entityManager
-      ? run(entityManager)
-      : this.dataSource.transaction(run);
+    if (entityManager) {
+      // 외부 트랜잭션: 호출자가 캐시 무효화 책임
+      return run(entityManager);
+    }
+
+    await this.dataSource.transaction(run);
+    await this.cacheService.del(CACHE.petAdoption.key(petId));
   }
 }

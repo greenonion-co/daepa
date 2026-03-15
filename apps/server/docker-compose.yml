@@ -26,7 +26,20 @@ services:
       # (선택 사항) 사용자 정의 MySQL 설정 파일을 마운트하려면 주석 해제
       # - ./mysql/my.cnf:/etc/mysql/my.cnf
 
+  # Redis 캐시 서비스
+  redis:
+    image: redis:7-alpine
+    container_name: redis_local
+    restart: always
+    command: redis-server --maxmemory 128mb --maxmemory-policy allkeys-lru --requirepass ${REDIS_PASSWORD}
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+
 # Docker 볼륨 정의 (데이터 저장을 위해 필요)
 volumes:
   db_data: # 위 services.db.volumes에서 사용한 볼륨 이름
     driver: local # 로컬 스토리지에 저장
+  redis_data:
+    driver: local

@@ -8,12 +8,8 @@ import {
   Patch,
   Query,
 } from '@nestjs/common';
-import {
-  MatingByParentsDto,
-  PairDetailDto,
-  PairFilterDto,
-  UpdatePairDto,
-} from './pair.dto';
+
+import { MatingByParentsDto, PairFilterDto, UpdatePairDto } from './pair.dto';
 import { PageDto, PageMetaDto } from 'src/common/page.dto';
 import { ApiExtraModels, ApiResponse, getSchemaPath } from '@nestjs/swagger';
 import { JwtUser } from 'src/auth/auth.decorator';
@@ -47,19 +43,6 @@ export class PairController {
     @JwtUser() token: JwtUserPayload,
   ): Promise<PageDto<MatingByParentsDto>> {
     return this.pairService.getPairList(pageOptionsDto, token.userId);
-  }
-
-  @Get(':pairId')
-  @ApiResponse({
-    status: 200,
-    description: '페어 상세 정보 조회 성공',
-    type: PairDetailDto,
-  })
-  async getPairDetail(
-    @Param('pairId') pairId: string,
-    @JwtUser() token: JwtUserPayload,
-  ) {
-    return this.pairService.getPairDetailById(Number(pairId), token.userId);
   }
 
   @Patch(':pairId')

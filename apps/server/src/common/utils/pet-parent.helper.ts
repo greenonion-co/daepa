@@ -20,7 +20,7 @@ export function replaceParentPublicSafe(
 
   const isViewingMyPet = childPetOwnerId === viewerId; // 내 펫을 보고 있는가?
   const isViewingMyPetAndParentPetMine =
-    isViewingMyPet && parentPet.owner.userId === viewerId; // 내 펫을 보고 있으면서, 부모 펫도 내 펫인가?
+    isViewingMyPet && parentPet.owner?.userId === viewerId; // 내 펫을 보고 있으면서, 부모 펫도 내 펫인가?
 
   if (isViewingMyPet) {
     if (!parentPet.isPublic && !isViewingMyPetAndParentPetMine) {

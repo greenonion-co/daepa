@@ -36,6 +36,8 @@ import { PetEntity } from '../pet/pet.entity';
 import { PetDetailEntity } from '../pet_detail/pet_detail.entity';
 import { UserEntity } from '../user/user.entity';
 import { PARENT_STATUS } from '../parent_request/parent_request.constants';
+import { CacheService } from '../common/cache.service';
+import { CACHE } from '../common/cache-keys';
 
 @Injectable()
 export class AdoptionHistoryService {
@@ -44,6 +46,7 @@ export class AdoptionHistoryService {
     private readonly adoptionHistoryRepository: Repository<AdoptionHistoryEntity>,
     private readonly parentRequestService: ParentRequestService,
     private readonly dataSource: DataSource,
+    private readonly cacheService: CacheService,
   ) {}
 
   private toAdoptionHistoryDto(
@@ -373,6 +376,12 @@ export class AdoptionHistoryService {
       // 8. 펫 소유권 이전 (입양자가 없으면 소유권 박탈)
       await em.update('pets', { petId }, { ownerId: finalBuyerId ?? null });
     });
+
+    // 9. 캐시 무효화 (트랜잭션 커밋 후)
+    await Promise.all([
+      this.cacheService.del(CACHE.pet.key(petId)),
+      this.cacheService.del(CACHE.petAdoption.key(petId)),
+    ]);
   }
 
   /** 수정 가능한 필드 목록 */

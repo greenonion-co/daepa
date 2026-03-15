@@ -1,6 +1,10 @@
 import { Module } from '@nestjs/common';
+import { CacheModule } from '@nestjs/cache-manager';
+import { redisStore } from 'cache-manager-redis-yet';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { CacheService } from './common/cache.service';
+import { CacheInvalidation } from './common/cache-invalidation';
 import { PetController } from './pet/pet.controller';
 import { PetService } from './pet/pet.service';
 import { ConfigModule } from '@nestjs/config';
@@ -82,6 +86,21 @@ const ENTITIES = [
 
 @Module({
   imports: [
+    CacheModule.registerAsync({
+      isGlobal: true,
+      useFactory: async () => ({
+        store: await redisStore({
+          socket: {
+            host: process.env.REDIS_HOST || 'localhost',
+            port: Number(process.env.REDIS_PORT) || 6379,
+            connectTimeout: 3000,
+            reconnectStrategy: (retries: number) =>
+              Math.min(retries * 200, 3000),
+          },
+          password: process.env.REDIS_PASSWORD || undefined,
+        }),
+      }),
+    }),
     HttpModule,
     ConfigModule.forRoot({
       isGlobal: true,
@@ -147,6 +166,8 @@ const ENTITIES = [
     PetRelationService,
     StatisticsService,
     FeedingService,
+    CacheService,
+    CacheInvalidation,
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
