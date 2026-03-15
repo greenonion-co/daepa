@@ -305,12 +305,32 @@ export class PetRelationService {
       };
     }
 
-    // 2. 메모리에서 필터 → 정렬 → totalCount → 페이지 슬라이스
+    // 2. 메모리에서 필터 → 삭제 제거 → 정렬 → totalCount → 페이지 슬라이스
     let filtered = siblingEntries;
     if (queryDto.type) {
       const typeFilter = queryDto.type as string;
       filtered = filtered.filter((e) => e.type === typeFilter);
     }
+
+    // 전체 항목의 pet 캐시 조회 (삭제 여부 판별용)
+    const allPetDataResults = await Promise.all(
+      filtered.map((entry) =>
+        this.cacheService
+          .wrap(
+            CACHE.pet.key(entry.petId),
+            () => loadPetData(this.dataSource.manager, entry.petId),
+            CACHE.pet.ttl,
+          )
+          .then((data) => [entry.petId, data] as const),
+      ),
+    );
+    const allPetDataMap = new Map(allPetDataResults);
+
+    // 삭제된 펫 제거 후 정렬 → 페이지네이션
+    filtered = filtered.filter((e) => {
+      const petData = allPetDataMap.get(e.petId);
+      return petData && !petData.isDeleted;
+    });
 
     const order = queryDto.order as string;
     filtered.sort((a, b) => {
@@ -325,20 +345,11 @@ export class PetRelationService {
       queryDto.skip + queryDto.itemPerPage,
     );
 
-    // 3. 페이지 항목에 대해 pet 캐시 + owner 배치 조회
-    const petDataResults = await Promise.all(
-      pageSlice.map((entry) =>
-        this.cacheService
-          .wrap(
-            CACHE.pet.key(entry.petId),
-            () => loadPetData(this.dataSource.manager, entry.petId),
-            CACHE.pet.ttl,
-          )
-          .then((data) => [entry.petId, data] as const),
-      ),
-    );
+    // 3. 페이지 항목의 pet 데이터 (이미 캐시에서 로드 완료)
     const petDataMap = new Map(
-      petDataResults.filter(([, data]) => data && !data.isDeleted),
+      pageSlice
+        .map((entry) => [entry.petId, allPetDataMap.get(entry.petId)] as const)
+        .filter(([, data]) => !!data),
     );
 
     // owner 배치 조회
