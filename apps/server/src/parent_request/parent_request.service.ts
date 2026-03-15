@@ -26,6 +26,7 @@ import { CreateUserNotificationDto } from 'src/user_notification/user_notificati
 import { PairEntity } from 'src/pair/pair.entity';
 import { plainToInstance } from 'class-transformer';
 import { PetRelationService } from '../pet_relation/pet_relation.service';
+import { PetRelationEntity } from '../pet_relation/pet_relation.entity';
 import { CacheService } from '../common/cache.service';
 import { CACHE } from '../common/cache-keys';
 import { loadPetData } from '../pet/pet.loader';
@@ -180,7 +181,7 @@ export class ParentRequestService {
                 },
               },
             );
-          return notification;
+          return { notification, parentLinked: false };
         } catch (error: unknown) {
           const err = error as Partial<{ code: string }>;
 
@@ -190,25 +191,33 @@ export class ParentRequestService {
           throw new InternalServerErrorException('알림 생성에 실패했습니다.');
         }
       }
-      return null;
+      return { notification: null, parentLinked: isParentMyPet };
     };
 
     if (manager) {
-      // 외부 트랜잭션 사용 시 호출부에서 푸시 발송 처리 필요
+      // 외부 트랜잭션 사용 시 호출부에서 푸시 발송 및 캐시 무효화 처리 필요
       await run(manager);
       return;
     }
 
-    const notification = await this.dataSource.transaction(
+    const result = await this.dataSource.transaction(
       async (entityManager: EntityManager) => {
         return await run(entityManager);
       },
     );
 
     // 트랜잭션 커밋 후 푸시 알림 발송
-    if (notification) {
+    if (result?.notification) {
       this.userNotificationService.sendPushNotificationForNotification(
-        notification,
+        result.notification,
+      );
+    }
+
+    // 트랜잭션 커밋 후 캐시 무효화 (즉시 확정된 부모 관계)
+    if (result?.parentLinked) {
+      await this.invalidateRelationCaches(
+        childPetId,
+        createParentDto.parentId,
       );
     }
   }
@@ -219,7 +228,7 @@ export class ParentRequestService {
     unlinkParentDto: UnlinkParentDto,
   ) {
     const { role } = unlinkParentDto;
-    const notification = await this.dataSource.transaction(
+    const result = await this.dataSource.transaction(
       async (entityManager: EntityManager) => {
         // 펫 존재 여부 및 소유권 확인
         const pet = await entityManager.findOne(PetEntity, {
@@ -304,7 +313,7 @@ export class ParentRequestService {
                   },
                 },
               );
-            return notification;
+            return { notification, parentUnlinked: false };
           } catch (error: unknown) {
             const err = error as { code?: string };
             if (err?.code === 'ER_DUP_ENTRY') {
@@ -319,7 +328,9 @@ export class ParentRequestService {
         }
 
         // APPROVED 상태였던 부모 관계를 해제하는 경우 pet_relations 업데이트
-        if (parentRequest.status === PARENT_STATUS.APPROVED) {
+        const parentUnlinked =
+          parentRequest.status === PARENT_STATUS.APPROVED;
+        if (parentUnlinked) {
           await this.petRelationService.removeParentRelation(
             petId,
             role,
@@ -334,15 +345,24 @@ export class ParentRequestService {
             status: PARENT_STATUS.CANCELLED,
           },
         );
-        return null;
+        return {
+          notification: null,
+          parentUnlinked,
+          parentPetId: parentRequest.parentPetId,
+        };
       },
     );
 
     // 트랜잭션 커밋 후 푸시 알림 발송
-    if (notification) {
+    if (result?.notification) {
       this.userNotificationService.sendPushNotificationForNotification(
-        notification,
+        result.notification,
       );
+    }
+
+    // 트랜잭션 커밋 후 캐시 무효화 (해제된 부모 관계)
+    if (result?.parentUnlinked && result.parentPetId) {
+      await this.invalidateRelationCaches(petId, result.parentPetId);
     }
   }
 
@@ -354,7 +374,7 @@ export class ParentRequestService {
     // 삭제된 펫으로 인한 취소 메시지를 트랜잭션 외부에서 throw하기 위한 변수
     let cancelledByDeletedPetReason: string | null = null;
 
-    const notification = await this.dataSource.transaction(
+    const result = await this.dataSource.transaction(
       async (entityManager: EntityManager) => {
         const existingNotification = await entityManager.findOneBy(
           UserNotificationEntity,
@@ -517,14 +537,28 @@ export class ParentRequestService {
           { detailJson: updateExistingNotification },
         );
 
-        return notification;
+        return {
+          notification,
+          parentLinked:
+            updateParentRequestDto.status === PARENT_STATUS.APPROVED,
+          childPetId: parentRequest.childPetId,
+          parentPetId: parentRequest.parentPetId,
+        };
       },
     );
 
     // 트랜잭션 커밋 후 푸시 알림 발송
-    if (notification) {
+    if (result?.notification) {
       this.userNotificationService.sendPushNotificationForNotification(
-        notification,
+        result.notification,
+      );
+    }
+
+    // 트랜잭션 커밋 후 캐시 무효화 (승인된 부모 관계)
+    if (result?.parentLinked && result.childPetId && result.parentPetId) {
+      await this.invalidateRelationCaches(
+        result.childPetId,
+        result.parentPetId,
       );
     }
 
@@ -653,6 +687,34 @@ export class ParentRequestService {
     return this.dataSource.transaction(async (entityManager: EntityManager) => {
       return await run(entityManager);
     });
+  }
+
+  /**
+   * 부모 관계 변경 후 영향받는 모든 자식 펫의 clutchMates/siblings 캐시 무효화
+   * - 변경된 본인(childPetId) + 같은 부모를 공유하는 다른 자식들
+   */
+  private async invalidateRelationCaches(
+    childPetId: string,
+    parentId: string,
+  ): Promise<void> {
+    // 해당 부모의 모든 자식 조회 (커밋 후이므로 현재 DB 상태 반영)
+    const siblingRelations = await this.dataSource.manager.find(
+      PetRelationEntity,
+      {
+        where: [{ fatherId: parentId }, { motherId: parentId }],
+        select: ['petId'],
+      },
+    );
+
+    const petIdsToInvalidate = new Set(siblingRelations.map((r) => r.petId));
+    petIdsToInvalidate.add(childPetId);
+
+    await Promise.all(
+      [...petIdsToInvalidate].flatMap((id) => [
+        this.cacheService.del(CACHE.clutchMates.key(id)),
+        this.cacheService.del(CACHE.siblings.key(id)),
+      ]),
+    );
   }
 
   private getNotificationTypeByStatus(

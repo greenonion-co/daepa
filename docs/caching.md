@@ -84,7 +84,7 @@
 | **특징** | 관계 데이터(petId 배열)만 캐시. 펫 상세는 `pet:{petId}` 캐시 재활용 |
 | **설계** | 비공개/삭제 처리를 pet 캐시 무효화에 편승 — 별도 역방향 인덱스 불필요 |
 | **제외** | owner 정보 (매 요청마다 별도 조회) |
-| **무효화** | `CacheInvalidation.onParentChanged` 시 `del` |
+| **무효화** | `ParentRequestService.invalidateRelationCaches` — 본인 + 같은 부모의 모든 자식 `del` |
 
 ### siblings — 형제 관계 (petId + 정렬/필터용 메타)
 
@@ -96,7 +96,7 @@
 | **서비스** | `PetRelationService.getSiblingsWithDetails` |
 | **특징** | 관계 데이터(`{petId, type, hatchingDate}[]`)만 캐시. 메모리에서 필터/정렬/페이징 후, 페이지 항목만 pet 캐시 재활용 |
 | **설계** | 비공개/삭제 처리를 pet 캐시 무효화에 편승. COUNT 쿼리 제거. owner 배치 조회(`WHERE IN`) |
-| **무효화** | `CacheInvalidation.onParentChanged` 시 `del` |
+| **무효화** | `ParentRequestService.invalidateRelationCaches` — 본인 + 같은 부모의 모든 자식 `del` |
 
 ---
 
@@ -113,6 +113,10 @@
 | `PetImageService.invalidateImageCache` | 이미지 변경 후 | `pet-img:{petId}` |
 | `PetAdoptionService.createAdoption` | 생성 후 | `pet-adopt:{petId}` |
 | `PetAdoptionService.updateAdoption` | 수정 후 | `pet-adopt:{petId}` |
+| `AdoptionHistoryService.completeAdoption` | 분양 완료 후 | `pet:{petId}`, `pet-adopt:{petId}` |
+| `ParentRequestService.linkParent` | 부모 연결 후 (즉시 확정) | 본인 + 같은 부모의 모든 자식의 `clutch:*`, `siblings:*` |
+| `ParentRequestService.unlinkParent` | 부모 해제 후 (APPROVED) | 본인 + 같은 부모의 모든 자식의 `clutch:*`, `siblings:*` |
+| `ParentRequestService.updateParentRequestByNotificationId` | 부모 승인 후 | 본인 + 같은 부모의 모든 자식의 `clutch:*`, `siblings:*` |
 | `FeedingService.createFeeding` | 생성 후 | `feeding:{petId}:{yyyy-MM}` |
 | `FeedingService.updateFeeding` | 수정 후 | `feeding:{petId}:{yyyy-MM}` (+ 날짜 변경 시 새 월) |
 | `FeedingService.deleteFeeding` | 삭제 후 | `feeding:{petId}:{yyyy-MM}` |
