@@ -638,7 +638,7 @@ export class ParentRequestService {
           // pet 캐시 활용 (findPetByPetId와 동일한 캐시 키 + 동일한 fallback)
           const petData = await this.cacheService.wrap(
             CACHE.pet.key(parentPetId),
-            () => loadPetData(this.dataSource.manager, parentPetId),
+            () => loadPetData(em, parentPetId),
             CACHE.pet.ttl,
           );
 
