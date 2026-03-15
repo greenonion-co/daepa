@@ -215,10 +215,7 @@ export class ParentRequestService {
 
     // 트랜잭션 커밋 후 캐시 무효화 (즉시 확정된 부모 관계)
     if (result?.parentLinked) {
-      await this.invalidateRelationCaches(
-        childPetId,
-        createParentDto.parentId,
-      );
+      await this.invalidateRelationCaches(childPetId, createParentDto.parentId);
     }
   }
 
@@ -328,8 +325,7 @@ export class ParentRequestService {
         }
 
         // APPROVED 상태였던 부모 관계를 해제하는 경우 pet_relations 업데이트
-        const parentUnlinked =
-          parentRequest.status === PARENT_STATUS.APPROVED;
+        const parentUnlinked = parentRequest.status === PARENT_STATUS.APPROVED;
         if (parentUnlinked) {
           await this.petRelationService.removeParentRelation(
             petId,
@@ -618,10 +614,14 @@ export class ParentRequestService {
       // 1. parent_request만 조회 (단일 테이블)
       const requests = await em
         .createQueryBuilder(ParentRequestEntity, 'pr')
-        .select(['pr.parentPetId', 'pr.status'])
+        .select(['pr.parentPetId', 'pr.status', 'pr.role'])
         .where('pr.childPetId = :petId', { petId })
         .andWhere('pr.status IN (:...statuses)', { statuses })
-        .getRawMany<{ pr_parent_pet_id: string; pr_status: PARENT_STATUS }>();
+        .getRawMany<{
+          pr_parent_pet_id: string;
+          pr_status: PARENT_STATUS;
+          pr_role: PARENT_ROLE;
+        }>();
 
       if (requests.length === 0) {
         return { father: null, mother: null };
@@ -672,8 +672,8 @@ export class ParentRequestService {
             isDeleted: !!petData.isDeleted,
           });
 
-          if (petData.sex === PET_SEX.MALE) father = parent;
-          else if (petData.sex === PET_SEX.FEMALE) mother = parent;
+          if (req.pr_role === PARENT_ROLE.FATHER) father = parent;
+          else if (req.pr_role === PARENT_ROLE.MOTHER) mother = parent;
         }),
       );
 
