@@ -13,6 +13,16 @@ import { PageDto, PageMetaDto, PageOptionsDto } from '../common/page.dto';
 import { CacheService } from '../common/cache.service';
 import { CACHE } from '../common/cache-keys';
 
+/** DATE 컬럼 값(string | Date)에서 yyyy-MM 추출 */
+function toYearMonth(date: Date | string): string {
+  if (date instanceof Date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    return `${y}-${m}`;
+  }
+  return String(date).slice(0, 7);
+}
+
 @Injectable()
 export class FeedingService {
   constructor(
@@ -119,7 +129,10 @@ export class FeedingService {
         const data: FeedingDto[] = entities.map((entity) => ({
           id: entity.id,
           petId: entity.petId,
-          feedingAt: String(entity.feedingAt),
+          feedingAt:
+            entity.feedingAt instanceof Date
+              ? entity.feedingAt.toISOString().slice(0, 10)
+              : String(entity.feedingAt),
           foods: entity.foods ?? undefined,
           amount: entity.amount ? Number(entity.amount) : undefined,
           memo: entity.memo,
@@ -171,7 +184,7 @@ export class FeedingService {
     }
 
     // 기존 날짜의 월 캐시 무효화
-    const yearMonth = String(feeding.feedingAt).slice(0, 7);
+    const yearMonth = toYearMonth(feeding.feedingAt);
     await this.cacheService.del(CACHE.feeding.key(feeding.petId, yearMonth));
 
     // 날짜가 변경된 경우 새 날짜의 월 캐시도 무효화
@@ -209,7 +222,7 @@ export class FeedingService {
     await this.feedingRepository.delete({ id });
 
     // 해당 월 캐시 무효화
-    const yearMonth = String(feeding.feedingAt).slice(0, 7);
+    const yearMonth = toYearMonth(feeding.feedingAt);
     await this.cacheService.del(CACHE.feeding.key(feeding.petId, yearMonth));
   }
 }
