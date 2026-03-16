@@ -20,6 +20,7 @@ import { cn } from "@/lib/utils";
 import { useNameStore } from "../../store/name";
 import { DUPLICATE_CHECK_STATUS } from "../../constants";
 import CalendarSelect from "./CalendarSelect";
+import { useIsMobile } from "@/hooks/useMobile";
 
 interface CompleteHatchingModalProps {
   isOpen: boolean;
@@ -43,6 +44,7 @@ const CompleteHatchingModal = ({
   motherName,
 }: CompleteHatchingModalProps) => {
   const invalidatePair = usePairInvalidate();
+  const isMobile = useIsMobile();
   const { duplicateCheckStatus } = useNameStore();
 
   // 자동 이름 생성 로직
@@ -50,13 +52,13 @@ const CompleteHatchingModal = ({
     if (clutch === undefined || clutchOrder === undefined) {
       return null;
     }
-    // 부모 이름의 첫글자 추출, 없으면 "?" 사용
-    const fatherFirstChar = fatherName ? fatherName.charAt(0) : "?";
-    const motherFirstChar = motherName ? motherName.charAt(0) : "?";
+    // 부모 이름의 앞 2글자 추출 (1글자면 1글자만), 없으면 "?" 사용
+    const fatherPrefix = fatherName ? fatherName.slice(0, 2) : "?";
+    const motherPrefix = motherName ? motherName.slice(0, 2) : "?";
     // clutchOrder를 알파벳으로 변환 (1 -> A, 2 -> B, ...)
     const clutchOrderChar = String.fromCharCode(64 + clutchOrder);
-    // 예: "대x미_2A" 형식으로 생성
-    return `${fatherFirstChar}x${motherFirstChar}_${clutch}${clutchOrderChar}`;
+    // 예: "대파x미나_2A" 형식으로 생성
+    return `${fatherPrefix}x${motherPrefix}_${clutch}${clutchOrderChar}`;
   }, [clutch, clutchOrder, fatherName, motherName]);
 
   const [formData, setFormData] = useState<CompleteHatchingDto>({
@@ -143,6 +145,7 @@ const CompleteHatchingModal = ({
                   "text-blue-600",
                 )}
                 buttonClassName="h-10"
+                showCount={!isMobile}
               />
             </div>
           </div>
