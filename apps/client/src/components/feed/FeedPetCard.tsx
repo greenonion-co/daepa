@@ -19,18 +19,19 @@ export default function FeedPetCard({ pet }: FeedPetCardProps) {
     <article className="overflow-hidden rounded-2xl bg-white transition-shadow hover:shadow-md dark:bg-neutral-900">
       {/* Header - 유저 정보 */}
       <div className="flex items-center gap-3 px-3 pt-3 pb-2">
-        {pet.owner?.isBiz ? (
+        {pet.owner?.isBiz && pet.owner?.name ? (
           <Link
             href={`/@${pet.owner.name}`}
             target="_blank"
+            rel="noopener noreferrer"
             className="flex items-center text-sm font-semibold text-blue-500 hover:text-blue-600 dark:text-gray-100"
           >
-            {pet.owner.name ?? "-"}
+            {pet.owner.name}
             <BadgeCheck className="h-5 w-5 fill-blue-500 stroke-white" />
           </Link>
         ) : (
           <span className="text-sm font-semibold text-gray-700 dark:text-gray-100">
-            {pet.owner.name ?? "-"}
+            {pet.owner?.name ?? "-"}
           </span>
         )}
       </div>
