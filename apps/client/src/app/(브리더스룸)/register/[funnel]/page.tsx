@@ -22,6 +22,7 @@ import FloatingButton from "../../components/FloatingButton";
 import { useIsMobile } from "@/hooks/useMobile";
 import { useAppRouter } from "@/hooks/useAppRouter";
 import { isNativeApp, requestPopToRoot } from "@/lib/native-bridge";
+import WebViewTopBar from "@/components/common/WebViewTopBar";
 import PreviousDataSheet from "../components/PreviousDataSheet";
 
 const formatFormData = (formData: BaseFormData): CreatePetDto | undefined => {
@@ -217,6 +218,8 @@ export default function RegisterPage({ params }: { params: Promise<{ funnel: str
   }
 
   return (
+    <>
+    <WebViewTopBar title="개체 등록" />
     <div className="relative mx-auto min-h-screen max-w-[640px] p-4 pb-20">
       <FormHeader funnel={funnel} />
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -307,5 +310,6 @@ export default function RegisterPage({ params }: { params: Promise<{ funnel: str
         }}
       />
     </div>
+    </>
   );
 }
