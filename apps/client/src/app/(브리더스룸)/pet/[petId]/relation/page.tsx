@@ -15,6 +15,7 @@ import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/useMobile";
 
 import Loading from "@/components/common/Loading";
+import { BizGuard } from "@/app/(브리더스룸)/components/BizGuard";
 
 interface PetDetailPageProps {
   params: Promise<{
@@ -28,7 +29,7 @@ function isVisiblePet(pet: unknown): pet is { petId: string } {
 
 const ITEM_PER_PAGE = 10;
 
-function SiblingsPage({ params }: PetDetailPageProps) {
+function SiblingsPageContent({ params }: PetDetailPageProps) {
   const { petId } = use(params);
   const isMobile = useIsMobile();
 
@@ -255,4 +256,10 @@ function SiblingsPage({ params }: PetDetailPageProps) {
   );
 }
 
-export default SiblingsPage;
+export default function SiblingsPage({ params }: PetDetailPageProps) {
+  return (
+    <BizGuard>
+      <SiblingsPageContent params={params} />
+    </BizGuard>
+  );
+}

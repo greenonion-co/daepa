@@ -38,6 +38,11 @@ export default function FamilyTreePage({ params }: FamilyTreePageProps) {
       router.replace(`/pet/${petId}`);
       return;
     }
+    if (user && !user.isBiz) {
+      toast.error("권한이 없습니다");
+      router.replace("/");
+      return;
+    }
     if (user && !isBreeder) {
       toast.error("브리더 회원만 이용할 수 있는 기능입니다.");
       router.replace(`/pet/${petId}`);
@@ -49,7 +54,7 @@ export default function FamilyTreePage({ params }: FamilyTreePageProps) {
     }
   }, [isLoggedIn, user, isBreeder, pet, isMyPet, petId, router]);
 
-  if (!isLoggedIn || !isBreeder || (pet && !isMyPet)) {
+  if (!isLoggedIn || !user?.isBiz || !isBreeder || (pet && !isMyPet)) {
     return null;
   }
 
