@@ -46,7 +46,9 @@ type NativeMessage =
   | { type: "SET_PULL_TO_REFRESH"; enabled: boolean }
   | { type: "SHOW_LOADING" }
   | { type: "HIDE_LOADING" }
-  | { type: "SHOW_LOGIN_PROMO_SHEET"; variant: "register" | "relation" };
+  | { type: "SHOW_LOGIN_PROMO_SHEET"; variant: "register" | "relation" }
+  | { type: "DOWNLOAD_IMAGE"; dataUrl: string; fileName: string }
+  | { type: "SET_SWIPE_BACK"; enabled: boolean };
 
 /**
  * 현재 환경이 네이티브 앱 WebView인지 확인
@@ -233,4 +235,12 @@ export const showNativeLoginPromoSheet = (): boolean => {
  */
 export const showNativeRelationPromoSheet = (): boolean => {
   return sendToNative({ type: "SHOW_LOGIN_PROMO_SHEET", variant: "relation" });
+};
+
+/**
+ * iOS swipe back 제스처 활성화/비활성화
+ * 바텀시트 등 오버레이가 열릴 때 false로 설정
+ */
+export const setSwipeBack = (enabled: boolean): boolean => {
+  return sendToNative({ type: "SET_SWIPE_BACK", enabled });
 };

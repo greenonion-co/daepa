@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { setSwipeBack } from "@/lib/native-bridge";
 
 interface BottomSheetProps {
   isOpen: boolean;
@@ -61,19 +62,38 @@ export default function BottomSheet({
     };
   }, [isVisible]);
 
+  // 바텀시트 열릴 때 iOS swipe back 비활성화
+  useEffect(() => {
+    if (isOpen) {
+      setSwipeBack(false);
+    } else {
+      setSwipeBack(true);
+    }
+    return () => {
+      setSwipeBack(true);
+    };
+  }, [isOpen]);
+
   // 뒤로가기 시 바텀시트 닫기
+  const closedByPopState = useRef(false);
   useEffect(() => {
     if (!isOpen) return;
 
+    closedByPopState.current = false;
     history.pushState({ bottomSheet: true }, "");
 
     const handlePopState = () => {
+      closedByPopState.current = true;
       onClose();
     };
 
     window.addEventListener("popstate", handlePopState);
     return () => {
       window.removeEventListener("popstate", handlePopState);
+      // 버튼 등으로 닫힌 경우 pushState로 추가된 히스토리를 제거
+      if (!closedByPopState.current) {
+        history.back();
+      }
     };
   }, [isOpen, onClose]);
 
