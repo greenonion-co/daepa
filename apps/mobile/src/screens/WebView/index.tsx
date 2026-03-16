@@ -62,6 +62,7 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [topBarVisible, setTopBarVisible] = useState(true); // TopBar 표시 여부
+  const [swipeBackEnabled, setSwipeBackEnabled] = useState(true); // iOS swipe back 제스처
   const [loginPromoSheetVariant, setLoginPromoSheetVariant] = useState<
     'register' | 'relation' | null
   >(null);
@@ -84,6 +85,17 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
   // URL 파라미터에서 _hideTopBar 체크
   const hideTopBar = initialPath.includes('_hideTopBar=1');
   const showTopBar = isPushed && !hideTopBar && topBarVisible;
+
+  // TopBar 배경색 계산 (pet 상세, 쇼룸 페이지는 gray-100 배경)
+  const pathname = decodeURIComponent(initialPath.split(/[?#]/)[0] ?? '');
+  const isGrayBackgroundPage =
+    /^\/pet\/[^/]+$/.test(pathname) || /^\/@/.test(pathname);
+  const topBarBackgroundColor =
+    showTopBar && isGrayBackgroundPage
+      ? theme === 'dark'
+        ? colors.background
+        : '#f3f4f6'
+      : undefined;
 
   if (__DEV__) {
     console.log('[WebView] Loading URL:', webViewUrl);
@@ -264,6 +276,10 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
             setLoginPromoSheetVariant(null);
           }
           break;
+        case 'SET_SWIPE_BACK':
+          setSwipeBackEnabled(message.enabled);
+          navigation.setOptions({ gestureEnabled: message.enabled });
+          break;
         default:
           break;
       }
@@ -327,7 +343,7 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
     [],
   );
 
-  // 동적 컨테이너 스타일
+  // 동적 컨테이너 스타일 (status bar 영역도 TopBar 배경색에 맞춤)
   const containerStyle = useMemo(
     () => [
       styles.container,
@@ -335,16 +351,25 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
         paddingTop: insets.top,
         paddingBottom:
           Platform.OS === 'ios' ? insets.bottom : isPushed ? insets.bottom : 0,
-        backgroundColor: colors.background,
+        backgroundColor: topBarBackgroundColor ?? colors.background,
       },
     ],
-    [insets.top, insets.bottom, isPushed, colors.background],
+    [
+      insets.top,
+      insets.bottom,
+      isPushed,
+      colors.background,
+      topBarBackgroundColor,
+    ],
   );
 
-  // 동적 로딩 스타일
+  // 동적 로딩 스타일 (TopBar 배경색에 맞춤)
   const loadingStyle = useMemo(
-    () => [styles.loadingContainer, { backgroundColor: colors.background }],
-    [colors.background],
+    () => [
+      styles.loadingContainer,
+      { backgroundColor: topBarBackgroundColor ?? colors.background },
+    ],
+    [colors.background, topBarBackgroundColor],
   );
 
   // 동적 에러 스타일
@@ -368,7 +393,12 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
 
   return (
     <View style={containerStyle}>
-      {showTopBar && <TopBar onBackPress={handleTopBarBackPress} />}
+      {showTopBar && (
+        <TopBar
+          onBackPress={handleTopBarBackPress}
+          backgroundColor={topBarBackgroundColor}
+        />
+      )}
       {/* 로딩 Progress Bar */}
       {isLoading && (
         <View style={styles.progressBarContainer}>
@@ -400,7 +430,10 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
           <WebView
             ref={webViewRef}
             source={{ uri: webViewUrl }}
-            style={[styles.webview, { backgroundColor: colors.background }]}
+            style={[
+              styles.webview,
+              { backgroundColor: topBarBackgroundColor ?? colors.background },
+            ]}
             injectedJavaScriptBeforeContentLoaded={
               injectedJavaScriptBeforeContentLoaded
             }
@@ -426,7 +459,7 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
             javaScriptEnabled
             domStorageEnabled
             startInLoadingState
-            allowsBackForwardNavigationGestures
+            allowsBackForwardNavigationGestures={swipeBackEnabled}
             sharedCookiesEnabled
             thirdPartyCookiesEnabled
             allowsInlineMediaPlayback
@@ -459,7 +492,10 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
         <WebView
           ref={webViewRef}
           source={{ uri: webViewUrl }}
-          style={[styles.webview, { backgroundColor: colors.background }]}
+          style={[
+            styles.webview,
+            { backgroundColor: topBarBackgroundColor ?? colors.background },
+          ]}
           injectedJavaScriptBeforeContentLoaded={
             injectedJavaScriptBeforeContentLoaded
           }
@@ -484,7 +520,7 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
           javaScriptEnabled
           domStorageEnabled
           startInLoadingState
-          allowsBackForwardNavigationGestures
+          allowsBackForwardNavigationGestures={swipeBackEnabled}
           sharedCookiesEnabled
           thirdPartyCookiesEnabled
           allowsInlineMediaPlayback

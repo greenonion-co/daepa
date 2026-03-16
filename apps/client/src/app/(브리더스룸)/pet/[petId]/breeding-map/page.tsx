@@ -9,6 +9,7 @@ import { UserProfileDtoRole, petControllerFindPetByPetId } from "@repo/api-clien
 import { useQuery } from "@tanstack/react-query";
 import { useAppRouter } from "@/hooks/useAppRouter";
 import { toast } from "@/lib/toast";
+import { setTopBarVisible, requestSetPullToRefresh } from "@/lib/native-bridge";
 
 interface FamilyTreePageProps {
   params: Promise<{
@@ -31,6 +32,16 @@ export default function FamilyTreePage({ params }: FamilyTreePageProps) {
   const isBreeder =
     user?.role === UserProfileDtoRole.BREEDER || user?.role === UserProfileDtoRole.ADMIN;
   const isMyPet = useIsMyPet(pet?.owner?.userId);
+
+  // 모바일 앱에서 네이티브 TopBar 숨기기 + pull-to-refresh 비활성화
+  useEffect(() => {
+    setTopBarVisible(false);
+    requestSetPullToRefresh(false);
+    return () => {
+      setTopBarVisible(true);
+      requestSetPullToRefresh(true);
+    };
+  }, []);
 
   useEffect(() => {
     if (!isLoggedIn) {
