@@ -128,7 +128,10 @@ const BreedingInfoContent = ({ petId, ownerId, initialPet }: BreedingInfoContent
         // 중복확인 버튼 클릭 시 blur가 먼저 발생하므로 지연 후 상태 확인
         setTimeout(() => {
           const status = useNameStore.getState().duplicateCheckStatus;
-          if (status !== DUPLICATE_CHECK_STATUS.AVAILABLE && status !== DUPLICATE_CHECK_STATUS.CHECKING) {
+          if (
+            status !== DUPLICATE_CHECK_STATUS.AVAILABLE &&
+            status !== DUPLICATE_CHECK_STATUS.CHECKING
+          ) {
             toast.error("이름 중복확인을 완료해주세요.");
           }
         }, 150);
@@ -208,7 +211,9 @@ const BreedingInfoContent = ({ petId, ownerId, initialPet }: BreedingInfoContent
 
   // 페이지 이동 등 언마운트 시 fallback
   useEffect(() => {
-    return () => { flushUnsavedFields(); };
+    return () => {
+      flushUnsavedFields();
+    };
   }, [flushUnsavedFields]);
 
   // 펫 데이터 및 브리딩 정보 초기화
@@ -232,12 +237,14 @@ const BreedingInfoContent = ({ petId, ownerId, initialPet }: BreedingInfoContent
     <div className="flex flex-1 flex-col gap-2 rounded-2xl bg-white p-3 shadow-xs dark:bg-neutral-900">
       <div className="text-[14px] font-[600] text-gray-600 dark:text-gray-300">개체 정보</div>
 
-      {/* 공개 여부 */}
-      <PublicToggle
-        isPublic={!!formData.isPublic}
-        isEditMode={isViewingMyPet}
-        onChange={(isPublic) => updateFieldAndSave("isPublic", isPublic)}
-      />
+      {/* 공개 여부 (본인 소유 펫만 노출) */}
+      {isViewingMyPet && (
+        <PublicToggle
+          isPublic={!!formData.isPublic}
+          isEditMode={isViewingMyPet}
+          onChange={(isPublic) => updateFieldAndSave("isPublic", isPublic)}
+        />
+      )}
 
       {/* 기본 정보 */}
       <PetBasicInfo
