@@ -6,6 +6,7 @@ import { DateTime } from "luxon";
 import PetThumbnail from "@/components/common/PetThumbnail";
 import { Badge } from "@/components/ui/badge";
 import { getSexIcon } from "@/lib/sex-icon";
+import { BadgeCheck } from "lucide-react";
 
 interface FeedPetCardProps {
   pet: PetDto;
@@ -15,21 +16,27 @@ export default function FeedPetCard({ pet }: FeedPetCardProps) {
   const sexLabel = getSexIcon(pet.sex, { size: "xs" });
 
   return (
-    <Link href={`/pet/${pet.petId}`} className="block">
-      <article className="overflow-hidden rounded-2xl bg-white transition-shadow hover:shadow-md dark:bg-neutral-900">
-        {/* Header - 유저 정보 */}
-        <div className="flex items-center gap-3 py-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-r from-blue-200 to-purple-200 text-xs font-bold text-white">
-            {pet.owner?.name?.charAt(0) || "?"}
-          </div>
-          <div className="flex-1">
-            <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-              {pet.owner?.name || "익명"}
-            </p>
-          </div>
-        </div>
+    <article className="overflow-hidden rounded-2xl bg-white transition-shadow hover:shadow-md dark:bg-neutral-900">
+      {/* Header - 유저 정보 */}
+      <div className="flex items-center gap-3 px-3 pt-3 pb-2">
+        {pet.owner?.isBiz ? (
+          <Link
+            href={`/@${pet.owner.name}`}
+            target="_blank"
+            className="flex items-center text-sm font-semibold text-blue-500 hover:text-blue-600 dark:text-gray-100"
+          >
+            {pet.owner.name ?? "-"}
+            <BadgeCheck className="h-5 w-5 fill-blue-500 stroke-white" />
+          </Link>
+        ) : (
+          <span className="text-sm font-semibold text-gray-700 dark:text-gray-100">
+            {pet.owner.name ?? "-"}
+          </span>
+        )}
+      </div>
 
-        {/* 이미지 */}
+      {/* 이미지 + 컨텐츠 */}
+      <Link href={`/pet/${pet.petId}`}>
         <div className="relative aspect-square w-full bg-gray-100 dark:bg-transparent">
           <PetThumbnail
             petId={pet.petId}
@@ -39,23 +46,6 @@ export default function FeedPetCard({ pet }: FeedPetCardProps) {
           />
         </div>
 
-        {/* 액션 버튼 (인스타 스타일) */}
-        {/* <div className="flex items-center gap-4 px-4 py-3">
-          <button
-            type="button"
-            className="text-gray-700 transition-colors hover:text-red-500 dark:text-gray-300"
-          >
-            <Heart className="h-6 w-6" />
-          </button>
-          <button
-            type="button"
-            className="text-gray-700 transition-colors hover:text-blue-500 dark:text-gray-300"
-          >
-            <MessageCircle className="h-6 w-6" />
-          </button>
-        </div> */}
-
-        {/* 컨텐츠 */}
         <div className="mt-2 space-y-2 px-4 pb-4">
           {/* 이름과 성별 */}
           <div className="flex items-center gap-2">
@@ -106,7 +96,7 @@ export default function FeedPetCard({ pet }: FeedPetCardProps) {
             </p>
           )}
         </div>
-      </article>
-    </Link>
+      </Link>
+    </article>
   );
 }
