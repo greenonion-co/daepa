@@ -220,8 +220,8 @@ export function computeArrowMarkerId(color: string): string {
   if (color === COLOR_CHILD_HIGHLIGHT) return "arrowhead-child-hl";
   if (color === COLOR_HOVER_EDGE) return "arrowhead-hover";
   if (color === COLOR_SELECTED_RING) return "arrowhead-selected";
-  if (color === COLOR_FADED_EDGE) return "arrowhead-faded-light";
-  if (color === COLOR_FADED_EDGE_DARK) return "arrowhead-faded-dark";
+  if (color === COLOR_FADED_EDGE) return "";
+  if (color === COLOR_FADED_EDGE_DARK) return "";
   if (color === COLOR_DEFAULT_EDGE_DARK) return "arrowhead-dark";
   return "arrowhead";
 }

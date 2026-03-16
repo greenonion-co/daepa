@@ -49,7 +49,7 @@ function GraphEdgeInner({ link, sx, sy, tx, ty, nodeRadiusMap, color, width, arr
       y2={y2}
       stroke={color}
       strokeWidth={width}
-      markerEnd={isOffspring ? `url(#${arrowMarkerId})` : undefined}
+      markerEnd={isOffspring && arrowMarkerId ? `url(#${arrowMarkerId})` : undefined}
       style={{ transition: "stroke-width 0.2s" }}
     />
   );
