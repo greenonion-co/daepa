@@ -2,7 +2,7 @@
 
 import { memo, useCallback, useMemo, useState } from "react";
 import { DateTime } from "luxon";
-import { ChevronLeft, ChevronRight, Loader2, Trash2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Info, Loader2, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useIsMyPet } from "@/hooks/useIsMyPet";
 import { toast } from "@/lib/toast";
@@ -409,7 +409,13 @@ const FeedingInfoContent = ({
   return (
     <div className="flex flex-1 flex-col gap-2 rounded-2xl bg-white p-3 shadow-xs dark:bg-neutral-900">
       <div className="flex items-center justify-between">
-        <span className="text-[14px] font-[600] text-gray-600 dark:text-gray-300">피딩 정보</span>
+        <span className="flex items-center gap-1.5 text-[14px] font-[600] text-gray-600 dark:text-gray-300">
+          피딩 정보
+          <span className="flex items-center gap-0.5 rounded-full bg-gray-100 px-1.5 py-0.5 text-[11px] font-medium text-gray-400 dark:bg-gray-800 dark:text-gray-500">
+            <Info className="h-3 w-3" />
+            타인에게 노출되지 않습니다
+          </span>
+        </span>
         <span className="text-xs font-bold text-blue-600 dark:text-gray-400">
           이번 달 {feedingCount}회
         </span>
