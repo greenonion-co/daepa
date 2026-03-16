@@ -161,8 +161,8 @@ export default function PetDetailLayout({
   }[] = [
     { id: "images", label: "이미지", ref: imagesRef },
     { id: "breeding", label: "개체정보", ref: breedingRef },
-    ...(isMyPet ? [{ id: "adoption" as TabType, label: "분양정보", ref: adoptionRef }] : []),
     { id: "pedigree", label: "혈통정보", ref: pedigreeRef },
+    ...(isMyPet ? [{ id: "adoption" as TabType, label: "분양정보", ref: adoptionRef }] : []),
     ...(isMyPet && feedingSlot
       ? [{ id: "feeding" as TabType, label: "피딩정보", ref: feedingRef }]
       : []),
