@@ -48,7 +48,9 @@ const SettingList = () => {
 
           <Item
             label="다크모드"
-            content={<Switch checked={theme === "dark"} onCheckedChange={handleThemeChange} />}
+            content={
+              <Switch disabled checked={theme === "dark"} onCheckedChange={handleThemeChange} />
+            }
           />
         </div>
 

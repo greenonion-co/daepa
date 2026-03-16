@@ -16,6 +16,7 @@ const NAME_MIN_LENGTH = 2;
 interface NameInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   errorMessage?: string;
   buttonClassName?: string;
+  showCount?: boolean;
 }
 const NameInput = ({
   value,
@@ -23,6 +24,7 @@ const NameInput = ({
   errorMessage,
   disabled,
   buttonClassName,
+  showCount = true,
   ...props
 }: NameInputProps) => {
   const { mutateAsync: mutateVerifyName, isPending: isVerifyPending } = useMutation({
@@ -97,7 +99,7 @@ const NameInput = ({
             id="name"
             type="text"
             className={cn(
-              "h-12 pr-16 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-500",
+              "h-12 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-500",
             )}
             maxLength={NAME_MAX_LENGTH}
             value={value}
@@ -105,7 +107,7 @@ const NameInput = ({
             disabled={disabled}
             {...props}
           />
-          {value && typeof value === "string" && (
+          {showCount && value && typeof value === "string" && (
             <div className="absolute top-1/2 right-3 -translate-y-1/2 text-xs text-gray-400 dark:text-gray-500">
               {value.length}/{NAME_MAX_LENGTH}
             </div>
