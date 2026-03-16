@@ -56,6 +56,8 @@ const renderParent = (
     <span
       onMouseEnter={() => onHover({ petId: p.petId, name: p.name, status: p.status })}
       onMouseLeave={() => onHover(null)}
+      onClick={(e) => e.stopPropagation()}
+      onPointerDown={(e) => e.stopPropagation()}
     >
       <LinkButton
         href={`/pet/${p.petId}`}
@@ -146,8 +148,6 @@ export default function PetCard({ pet, onCardClick }: PetCardProps) {
           {/* 부모 정보 */}
           <div
             className="flex items-center gap-1 truncate text-xs"
-            onClick={(e) => e.stopPropagation()}
-            onPointerDown={(e) => e.stopPropagation()}
             onMouseMove={(e) => setMousePos({ x: e.clientX, y: e.clientY })}
           >
             <span className="shrink-0 text-gray-400">부모</span>
