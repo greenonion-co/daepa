@@ -100,7 +100,6 @@ const NameInput = ({
             type="text"
             className={cn(
               "h-12 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-500",
-              showCount && "pr-16",
             )}
             maxLength={NAME_MAX_LENGTH}
             value={value}
