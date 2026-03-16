@@ -11,6 +11,7 @@ interface TopBarProps {
   leftComponent?: React.ReactNode;
   rightComponent?: React.ReactNode;
   onBackPress?: () => void;
+  backgroundColor?: string;
 }
 
 const TopBar = ({
@@ -21,6 +22,7 @@ const TopBar = ({
   leftComponent,
   rightComponent,
   onBackPress,
+  backgroundColor,
 }: TopBarProps) => {
   const navigation = useNavigation();
   const theme = useThemeStore(state => state.theme);
@@ -39,7 +41,7 @@ const TopBar = ({
       style={[
         styles.container,
         {
-          backgroundColor: colors.background,
+          backgroundColor: backgroundColor ?? colors.background,
           borderBottomColor: colors.tabBarBorder,
         },
       ]}
