@@ -34,7 +34,8 @@ export type WebViewMessage =
   | { type: 'HIDE_LOADING' }
   | { type: 'SHOW_LOGIN_PROMO_SHEET'; variant: 'register' | 'relation' }
   | { type: 'DOWNLOAD_IMAGE'; dataUrl: string; fileName: string }
-  | { type: 'SET_SWIPE_BACK'; enabled: boolean };
+  | { type: 'SET_SWIPE_BACK'; enabled: boolean }
+  | { type: 'OPEN_QR_SCANNER' };
 
 export type WebViewRouteParams = {
   WebView: WebViewParams | undefined;
