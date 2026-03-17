@@ -10,6 +10,7 @@ import { useQuery } from "@tanstack/react-query";
 import { userNotificationControllerGetUnreadCount } from "@repo/api-client";
 import { isNativeApp } from "@/lib/native-bridge";
 import AddPetButton from "@/app/(브리더스룸)/components/AddPetButton";
+import QrScannerButton from "@/app/components/QrScannerButton";
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const { user } = useUserStore();
@@ -45,8 +46,13 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         {!hasNativeTopBar && !hasHiddenTopBar && !isFamilyTree && (!isShowcase || user) && <Menubar unreadCount={unreadCount} />}
         <div className={cn(isNativeApp() && "pb-[80px]")}>{children}</div>
       </div>
-      {/* 모바일 웹 */}
-      {!isNativeApp() && isMobile && !isFamilyTree && !isShowcase && !isSignIn && <AddPetButton />}
+      {/* 모바일 플로팅 버튼 */}
+      {isMobile && !isFamilyTree && !isShowcase && !isSignIn && (
+        <>
+          {!isNativeApp() && <AddPetButton />}
+          <QrScannerButton />
+        </>
+      )}
       {/* 웹 */}
       {!isNativeApp() && !isMobile && <Sidebar unreadCount={unreadCount} />}
     </main>

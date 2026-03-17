@@ -280,6 +280,9 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
           setSwipeBackEnabled(message.enabled);
           navigation.setOptions({ gestureEnabled: message.enabled });
           break;
+        case 'OPEN_QR_SCANNER':
+          navigation.push('QrScanner');
+          break;
         default:
           break;
       }

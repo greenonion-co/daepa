@@ -50,6 +50,7 @@
     "d3-selection": "^3.0.0",
     "d3-zoom": "^3.0.0",
     "framer-motion": "^12.11.0",
+    "html5-qrcode": "^2.3.8",
     "lottie-react": "^2.4.1",
     "lucide-react": "^0.504.0",
     "luxon": "^3.7.2",

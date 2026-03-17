@@ -48,7 +48,8 @@ type NativeMessage =
   | { type: "HIDE_LOADING" }
   | { type: "SHOW_LOGIN_PROMO_SHEET"; variant: "register" | "relation" }
   | { type: "DOWNLOAD_IMAGE"; dataUrl: string; fileName: string }
-  | { type: "SET_SWIPE_BACK"; enabled: boolean };
+  | { type: "SET_SWIPE_BACK"; enabled: boolean }
+  | { type: "OPEN_QR_SCANNER" };
 
 /**
  * 현재 환경이 네이티브 앱 WebView인지 확인
@@ -243,4 +244,11 @@ export const showNativeRelationPromoSheet = (): boolean => {
  */
 export const setSwipeBack = (enabled: boolean): boolean => {
   return sendToNative({ type: "SET_SWIPE_BACK", enabled });
+};
+
+/**
+ * 네이티브 QR 스캐너 열기
+ */
+export const requestOpenQrScanner = (): boolean => {
+  return sendToNative({ type: "OPEN_QR_SCANNER" });
 };

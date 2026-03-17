@@ -49,6 +49,9 @@ export type RootStackParamList = {
 
   // WebView (하이브리드)
   Main: WebViewParams | undefined;
+
+  // QR 스캐너
+  QrScanner: undefined;
 };
 
 // Navigation prop 타입들
