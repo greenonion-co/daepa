@@ -4,17 +4,24 @@ import { ScanLine } from "lucide-react";
 import { overlay } from "overlay-kit";
 import { isNativeApp, requestOpenQrScanner } from "@/lib/native-bridge";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 import QrScanner from "./QrScanner";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
-function openQrScanner() {
+async function openQrScanner() {
   if (isNativeApp()) {
     requestOpenQrScanner();
+    return;
+  }
+
+  // 유저 제스처 컨텍스트에서 카메라 권한을 먼저 획득
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: "environment" },
+    });
+    stream.getTracks().forEach((t) => t.stop());
+  } catch {
+    toast.error("카메라를 사용할 수 없습니다. 카메라 권한을 확인해주세요.");
     return;
   }
 
@@ -36,7 +43,7 @@ export default function QrScannerButton() {
       type="button"
       onClick={openQrScanner}
       className={cn(
-        "fixed right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-neutral-800 text-white shadow-lg shadow-neutral-900/30 ring-1 ring-white/20 transition-all active:scale-95 dark:bg-neutral-700 dark:text-neutral-100 dark:shadow-neutral-900/40 dark:ring-white/20",
+        "fixed right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-neutral-800 text-white shadow-lg ring-1 shadow-neutral-900/30 ring-white/20 transition-all active:scale-95 dark:bg-neutral-700 dark:text-neutral-100 dark:shadow-neutral-900/40 dark:ring-white/20",
         isNativeApp() ? "bottom-24" : "bottom-[92px]",
       )}
     >
