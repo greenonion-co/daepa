@@ -43,14 +43,17 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       className={`relative mx-auto flex w-full ${isFamilyTree ? "h-dvh overflow-hidden" : "min-h-screen"} ${isPetDetail ? "dark:bg-background bg-gray-100" : ""}`}
     >
       <div className={cn("w-full", !isMobile && "max-w-[calc(100%_-_var(--right-sidebar-width))]")}>
-        {!hasNativeTopBar && !hasHiddenTopBar && !isFamilyTree && (!isShowcase || user) && <Menubar unreadCount={unreadCount} />}
+        {!hasNativeTopBar && !hasHiddenTopBar && !isFamilyTree && (!isShowcase || user) && (
+          <Menubar unreadCount={unreadCount} />
+        )}
         <div className={cn(isNativeApp() && "pb-[80px]")}>{children}</div>
       </div>
       {/* 모바일 플로팅 버튼 */}
       {isMobile && !isFamilyTree && !isShowcase && !isSignIn && (
         <>
           {!isNativeApp() && <AddPetButton />}
-          <QrScannerButton />
+          {/* TODO: 모바일 웹 카메라 호환성 해결 후 복원 */}
+          {isNativeApp() && <QrScannerButton />}
         </>
       )}
       {/* 웹 */}
