@@ -17,7 +17,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { RootStackNavigationProp } from '@/types/navigation';
 import Toast from '@/components/common/Toast';
-import Config from '@/utils/config';
 
 const SERVICE_DOMAINS = ['breedy.kr', 'www.breedy.kr'];
 
@@ -108,7 +107,10 @@ export default function QrScannerScreen() {
           >
             <Text style={styles.permissionButtonText}>설정으로 이동</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.closeTextButton} onPress={handleClose}>
+          <TouchableOpacity
+            style={styles.closeTextButton}
+            onPress={handleClose}
+          >
             <Text style={styles.closeTextButtonLabel}>닫기</Text>
           </TouchableOpacity>
         </View>
@@ -121,8 +123,13 @@ export default function QrScannerScreen() {
     return (
       <View style={[styles.container, { paddingTop: insets.top }]}>
         <View style={styles.permissionContainer}>
-          <Text style={styles.permissionTitle}>카메라를 사용할 수 없습니다</Text>
-          <TouchableOpacity style={styles.closeTextButton} onPress={handleClose}>
+          <Text style={styles.permissionTitle}>
+            카메라를 사용할 수 없습니다
+          </Text>
+          <TouchableOpacity
+            style={styles.closeTextButton}
+            onPress={handleClose}
+          >
             <Text style={styles.closeTextButtonLabel}>닫기</Text>
           </TouchableOpacity>
         </View>
