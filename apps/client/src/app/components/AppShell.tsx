@@ -52,8 +52,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       {isMobile && !isFamilyTree && !isShowcase && !isSignIn && (
         <>
           {!isNativeApp() && <AddPetButton />}
-          {/* TODO: 모바일 웹 카메라 호환성 해결 후 복원 */}
-          {isNativeApp() && <QrScannerButton />}
+          <QrScannerButton />
         </>
       )}
       {/* 웹 */}

@@ -14,24 +14,37 @@ async function openQrScanner() {
     return;
   }
 
-  // 유저 제스처 컨텍스트에서 카메라 권한을 먼저 획득
+  // 유저 제스처 컨텍스트에서 카메라 stream 획득
+  if (!navigator.mediaDevices?.getUserMedia) {
+    toast.error("이 브라우저/환경에서는 카메라를 사용할 수 없습니다.");
+    return;
+  }
+
+  let stream: MediaStream;
   try {
-    const stream = await navigator.mediaDevices.getUserMedia({
+    stream = await navigator.mediaDevices.getUserMedia({
       video: { facingMode: "environment" },
     });
-    stream.getTracks().forEach((t) => t.stop());
   } catch {
     toast.error("카메라를 사용할 수 없습니다. 카메라 권한을 확인해주세요.");
     return;
   }
 
   overlay.open(({ isOpen, close }) => (
-    <Dialog open={isOpen} onOpenChange={close}>
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) {
+          stream.getTracks().forEach((t) => t.stop());
+        }
+        close();
+      }}
+    >
       <DialogContent className="max-w-sm">
         <DialogHeader>
           <DialogTitle>QR 스캔</DialogTitle>
         </DialogHeader>
-        <QrScanner onClose={close} />
+        <QrScanner stream={stream} onClose={close} />
       </DialogContent>
     </Dialog>
   ));

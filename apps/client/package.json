@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "next dev --turbopack",
+    "dev:https": "next dev --turbopack --experimental-https",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
@@ -51,6 +52,7 @@
     "d3-zoom": "^3.0.0",
     "framer-motion": "^12.11.0",
     "html5-qrcode": "^2.3.8",
+    "jsqr": "^1.4.0",
     "lottie-react": "^2.4.1",
     "lucide-react": "^0.504.0",
     "luxon": "^3.7.2",
