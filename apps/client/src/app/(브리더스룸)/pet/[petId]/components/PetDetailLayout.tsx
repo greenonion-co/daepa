@@ -227,7 +227,7 @@ export default function PetDetailLayout({
 
       {/* 개체 삭제 */}
       {isMyPet && (
-        <div className="flex justify-end px-2 pt-4 max-[580px]:justify-stretch">
+        <div className="flex justify-end px-2 max-[580px]:justify-stretch">
           <DeletePetButton
             petId={pet.petId}
             petName={pet.name}
