@@ -26,8 +26,13 @@ async function openQrScanner() {
       video: { facingMode: "environment" },
     });
   } catch {
-    toast.error("카메라를 사용할 수 없습니다. 카메라 권한을 확인해주세요.");
-    return;
+    // iOS Chrome 등에서 facingMode constraint 실패 시 기본 카메라로 fallback
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ video: true });
+    } catch {
+      toast.error("카메라를 사용할 수 없습니다. 카메라 권한을 확인해주세요.");
+      return;
+    }
   }
 
   overlay.open(({ isOpen, close }) => (
