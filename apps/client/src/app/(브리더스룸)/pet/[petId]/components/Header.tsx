@@ -4,6 +4,9 @@ import QRCode from "./QR코드";
 import { cn } from "@/lib/utils";
 import { PetDto } from "@repo/api-client";
 import Link from "next/link";
+import { Share2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { toast } from "@/lib/toast";
 import { useAdoptionStore } from "@/app/(브리더스룸)/pet/store/adoption";
 import { useEffect, useState } from "react";
 import TooltipText from "@/app/(브리더스룸)/components/TooltipText";
@@ -212,6 +215,23 @@ const Header = ({
           <div className="flex items-center gap-1">
             {/* QR코드 */}
             <QRCode pet={pet} isScrolled={isScrolled} />
+            {/* 공유 */}
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                const url = `${window.location.origin}/pet/${pet.petId}`;
+                navigator.clipboard.writeText(url).then(() => {
+                  toast.success("펫 페이지 링크가 복사되었습니다");
+                });
+              }}
+              className={cn(
+                "text-amber-500 hover:bg-amber-100 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800",
+                isScrolled ? "text-xs" : "text-sm",
+              )}
+            >
+              <Share2 className="h-4 w-4" />
+            </Button>
           </div>
           <div className="flex items-center gap-1">
             {/* 브리딩맵 */}
