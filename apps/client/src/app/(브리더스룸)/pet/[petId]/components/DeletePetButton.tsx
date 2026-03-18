@@ -86,12 +86,22 @@ function DeletePetButton({ petId, petName, onSuccess, label }: DeletePetButtonPr
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
         {label ? (
-          <Button variant="ghost" size="sm" className="gap-1 rounded-lg bg-white text-red-500 hover:bg-gray-50 hover:text-red-600 max-[580px]:w-full dark:bg-neutral-900 dark:text-red-400 dark:hover:bg-neutral-800">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="gap-1 rounded-lg bg-white text-red-500 hover:bg-gray-50 hover:text-red-600 max-[580px]:w-full dark:bg-neutral-900 dark:text-red-400 dark:hover:bg-neutral-800"
+          >
             <Trash2 className="h-4 w-4" />
             {label}
           </Button>
         ) : (
-          <Button variant="outline" size="icon" className="h-8 w-8">
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-8 w-8"
+            aria-label="개체 삭제"
+            title="개체 삭제"
+          >
             <Trash2 className="h-4 w-4 text-red-500" />
           </Button>
         )}

@@ -219,11 +219,16 @@ const Header = ({
             <Button
               size="sm"
               variant="outline"
-              onClick={() => {
+              aria-label="펫 페이지 링크 복사"
+              title="링크 복사"
+              onClick={async () => {
                 const url = `${window.location.origin}/pet/${pet.petId}`;
-                navigator.clipboard.writeText(url).then(() => {
+                try {
+                  await navigator.clipboard.writeText(url);
                   toast.success("펫 페이지 링크가 복사되었습니다");
-                });
+                } catch {
+                  toast.error("링크 복사에 실패했습니다");
+                }
               }}
               className={cn(
                 "text-amber-500 hover:bg-amber-100 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800",
