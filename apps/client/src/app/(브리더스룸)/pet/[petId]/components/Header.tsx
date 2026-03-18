@@ -4,7 +4,6 @@ import QRCode from "./QR코드";
 import { cn } from "@/lib/utils";
 import { PetDto } from "@repo/api-client";
 import Link from "next/link";
-import DeletePetButton from "./DeletePetButton";
 import { useAdoptionStore } from "@/app/(브리더스룸)/pet/store/adoption";
 import { useEffect, useState } from "react";
 import TooltipText from "@/app/(브리더스룸)/components/TooltipText";
@@ -31,8 +30,6 @@ interface HeaderProps {
   tabs?: { id: TabType; label: string; ref: React.RefObject<HTMLDivElement | null> }[];
   activeTab?: TabType;
   onTabClick?: (tabId: TabType, ref: React.RefObject<HTMLDivElement | null>) => void;
-  /** 펫 삭제 성공 시 콜백 */
-  onDelete?: () => void;
 }
 
 const Header = ({
@@ -41,7 +38,6 @@ const Header = ({
   tabs = [],
   activeTab,
   onTabClick = () => {},
-  onDelete,
 }: HeaderProps) => {
   const isMyPet = useIsMyPet(pet?.owner?.userId);
   const { isLoggedIn, user } = useAuth();
@@ -216,10 +212,6 @@ const Header = ({
           <div className="flex items-center gap-1">
             {/* QR코드 */}
             <QRCode pet={pet} isScrolled={isScrolled} />
-            {/* 개체 삭제 버튼 */}
-            {isLoggedIn && isMyPet && (
-              <DeletePetButton petId={pet.petId} petName={pet.name} onSuccess={onDelete} />
-            )}
           </div>
           <div className="flex items-center gap-1">
             {/* 브리딩맵 */}
