@@ -292,8 +292,11 @@ const QRCode = ({ pet, isScrolled }: QRCodeProps) => {
                 <img
                   src={previewDataUrl}
                   alt="QR Code Preview"
-                  className="rounded-lg border border-gray-300 dark:border-neutral-600"
-                  style={{ height: `${customHeight * (96 / 2.54)}px` }}
+                  className={cn(
+                    "rounded-lg border border-gray-300 dark:border-neutral-600",
+                    isMyPet ? "" : "w-full",
+                  )}
+                  style={isMyPet ? { height: `${customHeight * (96 / 2.54)}px` } : undefined}
                 />
               ) : (
                 <div className="flex h-[200px] w-[200px] items-center justify-center text-sm text-gray-500">
