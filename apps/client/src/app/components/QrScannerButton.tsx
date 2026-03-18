@@ -8,15 +8,15 @@ import { toast } from "sonner";
 import QrScanner from "./QrScanner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
+/** iOS Chrome(WKWebView)은 getUserMedia를 지원하지 않으므로 버튼 자체를 숨김 */
+function isIosChrome(): boolean {
+  if (typeof navigator === "undefined") return false;
+  return /CriOS/i.test(navigator.userAgent);
+}
+
 async function openQrScanner() {
   if (isNativeApp()) {
     requestOpenQrScanner();
-    return;
-  }
-
-  // 유저 제스처 컨텍스트에서 카메라 stream 획득
-  if (!navigator.mediaDevices?.getUserMedia) {
-    toast.error("이 브라우저/환경에서는 카메라를 사용할 수 없습니다.");
     return;
   }
 
@@ -26,13 +26,8 @@ async function openQrScanner() {
       video: { facingMode: "environment" },
     });
   } catch {
-    // iOS Chrome 등에서 facingMode constraint 실패 시 기본 카메라로 fallback
-    try {
-      stream = await navigator.mediaDevices.getUserMedia({ video: true });
-    } catch {
-      toast.error("카메라를 사용할 수 없습니다. 카메라 권한을 확인해주세요.");
-      return;
-    }
+    toast.error("카메라를 사용할 수 없습니다. 카메라 권한을 확인해주세요.");
+    return;
   }
 
   overlay.open(({ isOpen, close }) => (
@@ -56,6 +51,8 @@ async function openQrScanner() {
 }
 
 export default function QrScannerButton() {
+  if (isIosChrome()) return null;
+
   return (
     <button
       type="button"
