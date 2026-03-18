@@ -4,9 +4,24 @@ import { ScanLine } from "lucide-react";
 import { overlay } from "overlay-kit";
 import { isNativeApp, requestOpenQrScanner } from "@/lib/native-bridge";
 import { cn } from "@/lib/utils";
-import { toast } from "sonner";
 import QrScanner from "./QrScanner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+
+async function requestCameraStream(): Promise<MediaStream | null> {
+  if (!navigator.mediaDevices?.getUserMedia) return null;
+
+  try {
+    return await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: "environment" },
+    });
+  } catch {
+    try {
+      return await navigator.mediaDevices.getUserMedia({ video: true });
+    } catch {
+      return null;
+    }
+  }
+}
 
 async function openQrScanner() {
   if (isNativeApp()) {
@@ -14,45 +29,41 @@ async function openQrScanner() {
     return;
   }
 
-  // 유저 제스처 컨텍스트에서 카메라 stream 획득
-  if (!navigator.mediaDevices?.getUserMedia) {
-    toast.error("이 브라우저/환경에서는 카메라를 사용할 수 없습니다.");
-    return;
-  }
+  const stream = await requestCameraStream();
 
-  let stream: MediaStream;
-  try {
-    stream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: "environment" },
-    });
-  } catch {
-    // iOS Chrome 등에서 facingMode constraint 실패 시 기본 카메라로 fallback
-    try {
-      stream = await navigator.mediaDevices.getUserMedia({ video: true });
-    } catch {
-      toast.error("카메라를 사용할 수 없습니다. 카메라 권한을 확인해주세요.");
-      return;
-    }
+  if (stream) {
+    // Stream 방식 (Safari, Android Chrome 등)
+    overlay.open(({ isOpen, close }) => (
+      <Dialog
+        open={isOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            stream.getTracks().forEach((t) => t.stop());
+          }
+          close();
+        }}
+      >
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>QR 스캔</DialogTitle>
+          </DialogHeader>
+          <QrScanner mode="stream" stream={stream} onClose={close} />
+        </DialogContent>
+      </Dialog>
+    ));
+  } else {
+    // Capture 방식 (iOS Chrome 등 getUserMedia 미지원)
+    overlay.open(({ isOpen, close }) => (
+      <Dialog open={isOpen} onOpenChange={close}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>QR 스캔</DialogTitle>
+          </DialogHeader>
+          <QrScanner mode="capture" onClose={close} />
+        </DialogContent>
+      </Dialog>
+    ));
   }
-
-  overlay.open(({ isOpen, close }) => (
-    <Dialog
-      open={isOpen}
-      onOpenChange={(open) => {
-        if (!open) {
-          stream.getTracks().forEach((t) => t.stop());
-        }
-        close();
-      }}
-    >
-      <DialogContent className="max-w-sm">
-        <DialogHeader>
-          <DialogTitle>QR 스캔</DialogTitle>
-        </DialogHeader>
-        <QrScanner stream={stream} onClose={close} />
-      </DialogContent>
-    </Dialog>
-  ));
 }
 
 export default function QrScannerButton() {
