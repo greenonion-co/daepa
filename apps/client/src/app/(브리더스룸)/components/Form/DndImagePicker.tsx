@@ -258,7 +258,7 @@ export default function DndImagePicker({
           </p>
           <div className="mb-2 flex items-center gap-1 text-gray-600">
             <Info className="h-3 w-3" />
-            <p className="text-[12px]">사진을 길게 눌러 순서를 변경할 수 있습니다.</p>
+            <p className="text-[12px]">사진을 드래그하여 순서를 변경할 수 있습니다.</p>
           </div>
         </>
       )}
