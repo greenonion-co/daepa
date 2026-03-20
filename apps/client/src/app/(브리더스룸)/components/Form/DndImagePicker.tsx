@@ -3,8 +3,8 @@
 import {
   DndContext,
   DragEndEvent,
-  TouchSensor,
-  MouseSensor,
+  PointerSensor,
+  KeyboardSensor,
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
@@ -100,23 +100,17 @@ export default function DndImagePicker({
     });
   }, [images]);
 
-  // 터치와 마우스 센서 설정
-  const mouseSensor = useSensor(MouseSensor, {
-    // 마우스 드래그 시작을 위한 최소 이동 거리
+  // PointerSensor는 마우스와 터치를 통합 처리 (onPointerDown 기반)
+  // TouchSensor(onTouchStart)는 일부 모바일 브라우저에서 동작하지 않아 PointerSensor로 대체
+  const pointerSensor = useSensor(PointerSensor, {
     activationConstraint: {
       distance: 8,
     },
   });
 
-  const touchSensor = useSensor(TouchSensor, {
-    // 터치 드래그 시작을 위한 설정
-    activationConstraint: {
-      delay: 200, // 200ms 지연 후 드래그 시작
-      tolerance: 8, // 8px 이동까지는 허용
-    },
-  });
+  const keyboardSensor = useSensor(KeyboardSensor);
 
-  const sensors = useSensors(mouseSensor, touchSensor);
+  const sensors = useSensors(pointerSensor, keyboardSensor);
 
   const onAdd = useCallback(
     async (files: File[]) => {
@@ -380,51 +374,46 @@ function SortableThumb({
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
+    touchAction: "none",
+    WebkitTouchCallout: "none",
   } as const;
 
   return (
     <div
       ref={setNodeRef}
       style={style}
+      {...attributes}
+      {...listeners}
       className={cn(
-        "relative h-24 w-full select-none",
-        isDragging && "z-50 scale-105 rotate-3 shadow-xl",
+        "relative h-24 w-full select-none overflow-hidden rounded-xl border-2 transition-all duration-200",
+        isDragging
+          ? "z-50 scale-105 rotate-3 shadow-xl cursor-grabbing border-blue-400"
+          : cn(
+              "cursor-grab border-gray-200 hover:border-gray-300",
+              selected && "border-blue-400 hover:border-blue-500",
+            ),
       )}
+      onClick={(e) => {
+        e.stopPropagation();
+        if (isBusy || isDragging) return;
+        onSelect();
+      }}
     >
-      <div
-        {...attributes}
-        {...listeners}
-        className={cn(
-          "absolute inset-0 overflow-hidden rounded-xl border-2 transition-all duration-200",
-          isDragging
-            ? "cursor-grabbing border-blue-400"
-            : cn(
-                "cursor-grab border-gray-200 hover:border-gray-300",
-                selected && "border-blue-400 hover:border-blue-500",
-              ),
-        )}
-        style={{
-          touchAction: "none",
-        }}
-        onClick={(e) => {
-          e.stopPropagation();
-          if (isBusy || isDragging) return;
-          onSelect();
-        }}
-      >
-        <Image
-          src={buildR2TransformedUrl(src)}
-          alt={`image_${id}`}
-          fill
-          className="cursor-pointer object-cover"
-          draggable={false}
-        />
-      </div>
+      <Image
+        src={buildR2TransformedUrl(src)}
+        alt={`image_${id}`}
+        fill
+        className="pointer-events-none object-cover"
+        draggable={false}
+      />
 
       {!disabled && !isBusy && (
         <button
           type="button"
-          onClick={onDelete}
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete();
+          }}
           className={cn(
             "absolute top-1 right-1 z-10 inline-flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-red-500 text-white shadow-sm transition-all duration-200",
             "hover:bg-red-600 active:scale-95",
