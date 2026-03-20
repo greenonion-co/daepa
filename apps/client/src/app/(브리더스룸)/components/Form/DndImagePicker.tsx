@@ -32,7 +32,7 @@ type PhotoItem = {
 
 interface DndImagePickerProps {
   petId?: string;
-  max: number;
+  max?: number;
   disabled?: boolean;
   isSaving?: boolean;
   images?: PhotoItem[];
