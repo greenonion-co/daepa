@@ -373,7 +373,7 @@ function SortableThumb({
 
   const style = {
     transform: CSS.Transform.toString(transform),
-    transition,
+    transition: isDragging ? "none" : transition,
     touchAction: "none",
     WebkitTouchCallout: "none",
   } as const;
