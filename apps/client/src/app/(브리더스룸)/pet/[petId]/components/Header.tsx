@@ -117,7 +117,7 @@ const Header = ({
   return (
     <div
       className={cn(
-        "dark:bg-background sticky top-0 z-20 flex flex-col gap-2 bg-gray-100 px-2 transition-all transition-shadow duration-200",
+        "dark:bg-background sticky top-0 z-20 flex flex-col gap-2 bg-gray-100 px-2 transition-all duration-200",
         isScrolled ? "pt-2 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1)] min-[581px]:pb-2" : "",
         size === "small" &&
           "before:dark:bg-background top-1.5 before:absolute before:-top-2 before:right-0 before:left-0 before:h-2 before:bg-gray-100 min-[581px]:pb-2", // 모달에서 X 버튼 아래로 위치
@@ -195,7 +195,7 @@ const Header = ({
             <button
               type="button"
               onClick={() => router.push(`/@${encodeURIComponent(pet.owner!.name!)}`)}
-              className="mt-1 text-left text-[12px] font-medium text-blue-500 transition-colors hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300"
+              className="mt-1 w-fit text-left text-[12px] font-medium text-blue-500 transition-colors hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300"
             >
               @{pet.owner.name}
             </button>
@@ -211,7 +211,12 @@ const Header = ({
           </div>
         </div>
 
-        <div className={cn("flex flex-col items-end gap-1 sm:flex-row-reverse sm:items-center", size === "small" && "mt-2")}>
+        <div
+          className={cn(
+            "flex flex-col items-end gap-1 sm:flex-row-reverse sm:items-center",
+            size === "small" && "mt-2",
+          )}
+        >
           <div className="flex items-center gap-1">
             {/* QR코드 */}
             <QRCode pet={pet} isScrolled={isScrolled} />
