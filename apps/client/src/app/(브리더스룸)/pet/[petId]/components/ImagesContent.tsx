@@ -87,10 +87,12 @@ const ImagesContent = ({ pet, initialImages }: ImagesContentProps) => {
       <div className="flex items-center justify-between">
         <span className="flex items-center gap-1.5 text-[14px] font-[600] text-gray-600 dark:text-gray-300">
           이미지
-          <span className="flex items-center gap-1 rounded-full bg-gray-100 px-1.5 py-0.5 text-[11px] font-medium text-gray-400 dark:bg-gray-800 dark:text-gray-500">
-            <Info className="h-3 w-3" />
-            최대 {maxImgCount}장까지 업로드 가능합니다.
-          </span>
+          {isViewingMyPet && (
+            <span className="flex items-center gap-1 rounded-full bg-gray-100 px-1.5 py-0.5 text-[11px] font-medium text-gray-400 dark:bg-gray-800 dark:text-gray-500">
+              <Info className="h-3 w-3" />
+              최대 {maxImgCount}장까지 업로드 가능합니다.
+            </span>
+          )}
         </span>
       </div>
 
