@@ -374,8 +374,12 @@ function SortableThumb({
   const style = {
     transform: CSS.Transform.toString(transform),
     transition: isDragging ? "none" : transition,
-    touchAction: "none",
-    WebkitTouchCallout: "none",
+    ...(disabled || isBusy
+      ? {}
+      : {
+          touchAction: "none" as const,
+          WebkitTouchCallout: "none" as const,
+        }),
   } as const;
 
   return (
@@ -385,9 +389,9 @@ function SortableThumb({
       {...attributes}
       {...listeners}
       className={cn(
-        "relative h-24 w-full select-none overflow-hidden rounded-xl border-2 transition-all duration-200",
+        "relative h-24 w-full overflow-hidden rounded-xl border-2 transition-all duration-200 select-none",
         isDragging
-          ? "z-50 scale-105 rotate-3 shadow-xl cursor-grabbing border-blue-400"
+          ? "z-50 scale-105 rotate-3 cursor-grabbing border-blue-400 shadow-xl"
           : cn(
               "cursor-grab border-gray-200 hover:border-gray-300",
               selected && "border-blue-400 hover:border-blue-500",
