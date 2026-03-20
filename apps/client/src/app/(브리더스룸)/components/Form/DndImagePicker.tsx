@@ -14,7 +14,7 @@ import { useDropzone } from "react-dropzone";
 import Image from "next/image";
 import { buildR2TransformedUrl, cn, compressImageFile } from "@/lib/utils";
 import { toast } from "@/lib/toast";
-import { X, Plus, Info, Maximize2, ImageOff } from "lucide-react";
+import { X, Plus, Maximize2, ImageOff } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { isNil, range, remove } from "es-toolkit";
 import { ACCEPT_IMAGE_FORMATS } from "../../constants";
@@ -32,7 +32,7 @@ type PhotoItem = {
 
 interface DndImagePickerProps {
   petId?: string;
-  max?: number;
+  max: number;
   disabled?: boolean;
   isSaving?: boolean;
   images?: PhotoItem[];
@@ -74,7 +74,7 @@ function uploadWithProgress(
 
 export default function DndImagePicker({
   petId = "PENDING",
-  max = 3,
+  max,
   disabled,
   isSaving = false,
   images = [],
@@ -253,13 +253,7 @@ export default function DndImagePicker({
     <div>
       {!disabled && (
         <>
-          <p className="text-[14px] font-[500] text-blue-500">
-            최대 {max}장까지 업로드 가능합니다. (jpg, jpeg, png, gif, webp, avif)
-          </p>
-          <div className="mb-2 flex items-center gap-1 text-gray-600">
-            <Info className="h-3 w-3" />
-            <p className="text-[12px]">사진을 드래그하여 순서를 변경할 수 있습니다.</p>
-          </div>
+          <p className="text-xs font-[500] text-blue-500">jpg, jpeg, png, gif, webp, avif</p>
         </>
       )}
       <div {...getRootProps()} className="relative">

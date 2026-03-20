@@ -13,7 +13,7 @@ import { toast } from "@/lib/toast";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useIsMyPet } from "@/hooks/useIsMyPet";
 import { isEmpty } from "es-toolkit/compat";
-import { ImageOff } from "lucide-react";
+import { ImageOff, Info } from "lucide-react";
 
 interface ImagesContentProps {
   pet: PetDto;
@@ -80,9 +80,19 @@ const ImagesContent = ({ pet, initialImages }: ImagesContentProps) => {
     [mutateSaveImages, queryClient, pet.petId],
   );
 
+  const maxImgCount = 3;
+
   return (
     <div className="flex flex-1 flex-col gap-2 rounded-2xl bg-white p-3 shadow-xs dark:bg-neutral-900">
-      <div className="text-[14px] font-[600] text-gray-600 dark:text-gray-300">이미지</div>
+      <div className="flex items-center justify-between">
+        <span className="flex items-center gap-1.5 text-[14px] font-[600] text-gray-600 dark:text-gray-300">
+          이미지
+          <span className="flex items-center gap-1 rounded-full bg-gray-100 px-1.5 py-0.5 text-[11px] font-medium text-gray-400 dark:bg-gray-800 dark:text-gray-500">
+            <Info className="h-3 w-3" />
+            최대 {maxImgCount}장까지 업로드 가능합니다.
+          </span>
+        </span>
+      </div>
 
       {!isViewingMyPet && localPhotos.length === 0 ? (
         <div className="flex flex-col items-center justify-center gap-2 py-8 text-gray-400 dark:text-gray-500">
@@ -91,6 +101,7 @@ const ImagesContent = ({ pet, initialImages }: ImagesContentProps) => {
         </div>
       ) : (
         <DndImagePicker
+          max={maxImgCount}
           petId={pet.petId}
           disabled={!isViewingMyPet}
           isSaving={isSaving}
