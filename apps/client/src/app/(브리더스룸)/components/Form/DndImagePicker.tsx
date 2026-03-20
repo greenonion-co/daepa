@@ -74,7 +74,7 @@ function uploadWithProgress(
 
 export default function DndImagePicker({
   petId = "PENDING",
-  max,
+  max = 3,
   disabled,
   isSaving = false,
   images = [],
