@@ -86,7 +86,7 @@ export const PetDetailInfo = ({
             onBlur={() => onFieldBlur?.("weight")}
             placeholder={isEditMode ? "" : "-"}
             inputClassName={cn(
-              "h-[32px] w-full rounded-md border font-[500] border-gray-200 p-2 placeholder:font-[500]",
+              "h-[32px] w-20 rounded-md border font-[500] border-gray-200 p-2 placeholder:font-[500]",
               !isEditMode && "border-none",
             )}
           />
@@ -135,7 +135,7 @@ export const PetDetailInfo = ({
       />
 
       <FormItem
-        label="소개"
+        label="설명"
         content={
           <div className="w-full">
             <textarea
