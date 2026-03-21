@@ -135,7 +135,7 @@ export const PetDetailInfo = ({
       />
 
       <FormItem
-        label="소개"
+        label="설명"
         content={
           <div className="w-full">
             <textarea
