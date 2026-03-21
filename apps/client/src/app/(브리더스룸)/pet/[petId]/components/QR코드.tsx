@@ -7,13 +7,13 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn, generateQRCode } from "@/lib/utils";
 import { useEffect, useState, useCallback } from "react";
 import { QrCode } from "lucide-react";
-import { PetDto } from "@repo/api-client";
+import { PetDto, petControllerFindPetByPetId } from "@repo/api-client";
+import { useQuery } from "@tanstack/react-query";
 import { GENDER_KOREAN_INFO } from "@/app/(브리더스룸)/constants";
 import { DateTime } from "luxon";
 import { useIsMyPet } from "@/hooks/useIsMyPet";
@@ -74,13 +74,47 @@ const PET_INFO_OPTIONS: PetInfoOption[] = [
   // { id: "foods", label: "먹이", getValue: (pet) => pet.foods?.slice(0, 3).join(" | ") || null },
 ];
 
+/** 트리거 버튼 + 다이얼로그 open 상태 관리 */
 const QRCode = ({ pet, isScrolled }: QRCodeProps) => {
-  const isMyPet = useIsMyPet(pet.owner.userId);
   const [qrOpen, setQrOpen] = useState(false);
+
+  return (
+    <div className="ml-auto">
+      <Dialog open={qrOpen} onOpenChange={setQrOpen}>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => setQrOpen(true)}
+          className={cn(
+            "bg-neutral-900 text-white hover:bg-neutral-800 dark:border-gray-700 dark:bg-transparent dark:text-gray-300 dark:hover:bg-gray-800",
+            isScrolled ? "text-xs" : "text-sm",
+          )}
+        >
+          <QrCode className="h-4 w-4 sm:hidden" />
+          <span className="hidden sm:inline">QR</span>
+        </Button>
+
+        {qrOpen && <QRCodeDialogContent pet={pet} />}
+      </Dialog>
+    </div>
+  );
+};
+
+/** 다이얼로그 콘텐츠 — 열릴 때마다 마운트되어 서버에서 최신 pet 데이터를 가져옴 */
+function QRCodeDialogContent({ pet: petProp }: { pet: PetDto }) {
+  // 마운트 시 최신 데이터 fetch (staleTime=0 기본값이므로 자동 리패치)
+  const { data: freshPet } = useQuery({
+    queryKey: [petControllerFindPetByPetId.name, petProp.petId],
+    queryFn: () => petControllerFindPetByPetId(petProp.petId),
+    select: (response) => response.data.data,
+  });
+  const pet = (freshPet as PetDto) ?? petProp;
+
+  const isMyPet = useIsMyPet(pet.owner.userId);
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string>("");
   const [previewDataUrl, setPreviewDataUrl] = useState<string>("");
   const [selectedOptions, setSelectedOptions] = useState<string[]>(
-    PET_INFO_OPTIONS.filter((opt) => opt.getValue(pet)).map((opt) => opt.id),
+    PET_INFO_OPTIONS.filter((opt) => opt.getValue(petProp)).map((opt) => opt.id),
   );
   const [selectedPreset, setSelectedPreset] = useState<string | null>("M");
   const [customWidth, setCustomWidth] = useState(4);
@@ -254,168 +288,142 @@ const QRCode = ({ pet, isScrolled }: QRCodeProps) => {
   }, [previewDataUrl, pet.name]);
 
   return (
-    <div className="ml-auto">
-      <Dialog open={qrOpen} onOpenChange={setQrOpen}>
-        <DialogTrigger asChild>
-          <Button
-            size="sm"
-            variant="outline"
-            className={cn(
-              "bg-neutral-900 text-white hover:bg-neutral-800 dark:border-gray-700 dark:bg-transparent dark:text-gray-300 dark:hover:bg-gray-800",
-              isScrolled ? "text-xs" : "text-sm",
-            )}
-          >
-            <QrCode className="h-4 w-4 sm:hidden" />
-            <span className="hidden sm:inline">QR</span>
-          </Button>
-        </DialogTrigger>
+    <DialogContent className="max-h-[90vh] w-auto max-w-[90vw] min-w-[320px] overflow-y-auto">
+      <DialogHeader>
+        <DialogTitle>QR CODE</DialogTitle>
+      </DialogHeader>
 
-        <DialogContent className="max-h-[90vh] w-auto max-w-[90vw] min-w-[320px] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>QR CODE</DialogTitle>
-          </DialogHeader>
-
-          <div className={cn("flex flex-col items-center gap-4", !isMyPet && "flex-col")}>
-            {/* QR 코드 미리보기 */}
-            <div
+      <div className="flex flex-col items-center gap-4">
+        {/* QR 코드 미리보기 */}
+        <div
+          className="flex w-full items-center justify-center rounded-lg bg-white p-2"
+        >
+          {qrError ? (
+            <div className="flex h-[200px] w-[200px] items-center justify-center text-sm text-red-500">
+              QR 코드 생성에 실패했습니다
+            </div>
+          ) : previewDataUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={previewDataUrl}
+              alt="QR Code Preview"
               className={cn(
-                "flex w-full items-center justify-center rounded-lg bg-white p-2",
-                isMyPet && "",
+                "rounded-lg border border-gray-300 dark:border-neutral-600",
+                isMyPet ? "" : "w-full",
               )}
-            >
-              {qrError ? (
-                <div className="flex h-[200px] w-[200px] items-center justify-center text-sm text-red-500">
-                  QR 코드 생성에 실패했습니다
-                </div>
-              ) : previewDataUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={previewDataUrl}
-                  alt="QR Code Preview"
-                  className={cn(
-                    "rounded-lg border border-gray-300 dark:border-neutral-600",
-                    isMyPet ? "" : "w-full",
-                  )}
-                  style={isMyPet ? { height: `${customHeight * (96 / 2.54)}px` } : undefined}
-                />
-              ) : (
-                <div className="flex h-[200px] w-[200px] items-center justify-center text-sm text-gray-500">
-                  QR 코드를 생성 중입니다...
-                </div>
-              )}
+              style={isMyPet ? { height: `${customHeight * (96 / 2.54)}px` } : undefined}
+            />
+          ) : (
+            <div className="flex h-[200px] w-[200px] items-center justify-center text-sm text-gray-500">
+              QR 코드를 생성 중입니다...
+            </div>
+          )}
+        </div>
+
+        {isMyPet && (
+          <div className="flex w-full flex-col gap-3">
+            {/* 크기 선택 */}
+            <div className="rounded-lg bg-gray-50 p-3 dark:bg-neutral-800">
+              <p className="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">크기</p>
+              <div className="flex gap-2">
+                {SIZE_PRESETS.map((preset) => (
+                  <button
+                    key={preset.label}
+                    onClick={() => {
+                      setCustomWidth(preset.width);
+                      setCustomHeight(preset.height);
+                      setSelectedPreset(preset.label);
+                    }}
+                    className={cn(
+                      "flex-1 rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
+                      selectedPreset === preset.label
+                        ? "bg-neutral-800 text-white dark:bg-white dark:text-neutral-800"
+                        : "bg-gray-200 text-gray-600 hover:bg-gray-300 dark:bg-neutral-700 dark:text-gray-300 dark:hover:bg-neutral-600",
+                    )}
+                  >
+                    {preset.label}
+                  </button>
+                ))}
+              </div>
+              <div className="mt-2 flex items-center gap-2 text-sm">
+                <label className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
+                  가로
+                  <input
+                    type="number"
+                    min={1}
+                    max={10}
+                    step={0.1}
+                    value={customWidth}
+                    onChange={(e) => {
+                      const v = Number(e.target.value);
+                      if (!isNaN(v)) setCustomWidth(Math.max(1, Math.min(v, 10)));
+                      setSelectedPreset(null);
+                    }}
+                    onBlur={() => setCustomWidth((prev) => Math.max(1, Math.min(prev, 10)))}
+                    className="w-16 rounded-md border border-gray-300 px-2 py-1 text-center dark:border-neutral-600 dark:bg-neutral-700 dark:text-gray-200"
+                  />
+                  cm
+                </label>
+                <span className="text-gray-400">×</span>
+                <label className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
+                  세로
+                  <input
+                    type="number"
+                    min={1}
+                    max={5}
+                    step={0.1}
+                    value={customHeight}
+                    onChange={(e) => {
+                      const v = Number(e.target.value);
+                      if (!isNaN(v)) setCustomHeight(Math.max(1, Math.min(v, 5)));
+                      setSelectedPreset(null);
+                    }}
+                    onBlur={() => setCustomHeight((prev) => Math.max(1, Math.min(prev, 5)))}
+                    className="w-16 rounded-md border border-gray-300 px-2 py-1 text-center dark:border-neutral-600 dark:bg-neutral-700 dark:text-gray-200"
+                  />
+                  cm
+                </label>
+              </div>
             </div>
 
-            {isMyPet && (
-              <div className="flex w-full flex-col gap-3">
-                {/* 크기 선택 */}
-                <div className="rounded-lg bg-gray-50 p-3 dark:bg-neutral-800">
-                  <p className="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">크기</p>
-                  <div className="flex gap-2">
-                    {SIZE_PRESETS.map((preset) => (
-                      <button
-                        key={preset.label}
-                        onClick={() => {
-                          setCustomWidth(preset.width);
-                          setCustomHeight(preset.height);
-                          setSelectedPreset(preset.label);
-                        }}
-                        className={cn(
-                          "flex-1 rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
-                          selectedPreset === preset.label
-                            ? "bg-neutral-800 text-white dark:bg-white dark:text-neutral-800"
-                            : "bg-gray-200 text-gray-600 hover:bg-gray-300 dark:bg-neutral-700 dark:text-gray-300 dark:hover:bg-neutral-600",
-                        )}
-                      >
-                        {preset.label}
-                      </button>
-                    ))}
-                  </div>
-                  <div className="mt-2 flex items-center gap-2 text-sm">
-                    <label className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
-                      가로
-                      <input
-                        type="number"
-                        min={1}
-                        max={10}
-                        step={0.1}
-                        value={customWidth}
-                        onChange={(e) => {
-                          const v = Number(e.target.value);
-                          if (!isNaN(v)) setCustomWidth(Math.max(1, Math.min(v, 10)));
-                          setSelectedPreset(null);
-                        }}
-                        onBlur={() => setCustomWidth((prev) => Math.max(1, Math.min(prev, 10)))}
-                        className="w-16 rounded-md border border-gray-300 px-2 py-1 text-center dark:border-neutral-600 dark:bg-neutral-700 dark:text-gray-200"
-                      />
-                      cm
-                    </label>
-                    <span className="text-gray-400">×</span>
-                    <label className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
-                      세로
-                      <input
-                        type="number"
-                        min={1}
-                        max={5}
-                        step={0.1}
-                        value={customHeight}
-                        onChange={(e) => {
-                          const v = Number(e.target.value);
-                          if (!isNaN(v)) setCustomHeight(Math.max(1, Math.min(v, 5)));
-                          setSelectedPreset(null);
-                        }}
-                        onBlur={() => setCustomHeight((prev) => Math.max(1, Math.min(prev, 5)))}
-                        className="w-16 rounded-md border border-gray-300 px-2 py-1 text-center dark:border-neutral-600 dark:bg-neutral-700 dark:text-gray-200"
-                      />
-                      cm
-                    </label>
-                  </div>
-                </div>
+            {/* 포함할 정보 */}
+            <div className="w-full rounded-lg bg-gray-50 p-3 dark:bg-neutral-800">
+              <p className="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">포함 정보</p>
+              <div className={cn("flex flex-wrap justify-between gap-1")}>
+                {PET_INFO_OPTIONS.map((option) => {
+                  const value = option.getValue(pet);
+                  if (!value) return null;
 
-                {/* 포함할 정보 */}
-                <div className="w-full rounded-lg bg-gray-50 p-3 dark:bg-neutral-800">
-                  <p className="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                    포함 정보
-                  </p>
-                  <div className={cn("flex flex-wrap justify-between gap-1")}>
-                    {PET_INFO_OPTIONS.map((option) => {
-                      const value = option.getValue(pet);
-                      if (!value) return null;
-
-                      return (
-                        <label
-                          key={option.id}
-                          className="flex cursor-pointer items-center gap-1 rounded-md p-0.5 hover:bg-gray-100 dark:hover:bg-neutral-700"
-                        >
-                          <Checkbox
-                            checked={selectedOptions.includes(option.id)}
-                            onCheckedChange={() => toggleOption(option.id)}
-                          />
-                          <span className="text-sm whitespace-nowrap text-gray-600 dark:text-gray-400">
-                            {option.label}
-                          </span>
-                        </label>
-                      );
-                    })}
-                  </div>
-                </div>
+                  return (
+                    <label
+                      key={option.id}
+                      className="flex cursor-pointer items-center gap-1 rounded-md p-0.5 hover:bg-gray-100 dark:hover:bg-neutral-700"
+                    >
+                      <Checkbox
+                        checked={selectedOptions.includes(option.id)}
+                        onCheckedChange={() => toggleOption(option.id)}
+                      />
+                      <span className="text-sm whitespace-nowrap text-gray-600 dark:text-gray-400">
+                        {option.label}
+                      </span>
+                    </label>
+                  );
+                })}
               </div>
-            )}
+            </div>
           </div>
+        )}
+      </div>
 
-          <DialogFooter className="gap-2 sm:gap-0">
-            {isMyPet && (
-              <Button
-                onClick={downloadImage}
-                disabled={isDownloading || !previewDataUrl || qrError}
-              >
-                {isDownloading ? "생성 중..." : "다운로드"}
-              </Button>
-            )}
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
+      <DialogFooter className="gap-2 sm:gap-0">
+        {isMyPet && (
+          <Button onClick={downloadImage} disabled={isDownloading || !previewDataUrl || qrError}>
+            {isDownloading ? "생성 중..." : "다운로드"}
+          </Button>
+        )}
+      </DialogFooter>
+    </DialogContent>
   );
-};
+}
 
 export default QRCode;

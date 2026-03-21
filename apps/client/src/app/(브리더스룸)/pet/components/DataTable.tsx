@@ -65,7 +65,11 @@ export const DataTable = ({
   const router = useAppRouter();
   const [selectedPet, setSelectedPet] = useState<PetDto | null>(null);
   const [hoveredPetId, hoverEnter, hoverLeave] = useDebouncedHover<string>();
-  const [previewOverride, setPreviewOverride] = useState<{ petId: string; name?: string; status?: string } | null>(null);
+  const [previewOverride, setPreviewOverride] = useState<{
+    petId: string;
+    name?: string;
+    status?: string;
+  } | null>(null);
   const [previewSuppressed, setPreviewSuppressed] = useState(false);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
