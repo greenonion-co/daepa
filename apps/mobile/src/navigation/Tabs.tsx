@@ -15,7 +15,7 @@ import {
 } from '@react-navigation/bottom-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import HomeSvg from '@/assets/svgs/tabIcons/Home.svg';
-import Profile from '@/assets/svgs/tabIcons/Profile.svg';
+import Settings from '@/assets/svgs/tabIcons/Settings.svg';
 import Calendar from '@/assets/svgs/tabIcons/Calendar.svg';
 import Chart from '@/assets/svgs/tabIcons/Chart.svg';
 import WebViewScreen from '../screens/WebView';
@@ -101,7 +101,7 @@ const AnimatedTabButton = (props: BottomTabBarButtonProps) => {
 
 // 탭 아이콘들
 const HomeTabIcon = createAnimatedTabIcon(HomeSvg, '피드');
-const SettingsTabIcon = createAnimatedTabIcon(Profile, '마이페이지');
+const SettingsTabIcon = createAnimatedTabIcon(Settings, '설정');
 const EggTabIcon = createAnimatedTabIcon(Calendar, '해칭룸');
 const HeartTabIcon = createAnimatedTabIcon(Chart, '분양룸');
 const AdminHomeTabIcon = createAnimatedTabIcon(HomeSvg, '내 펫');
@@ -116,13 +116,13 @@ const AdminSettingsTabIcon = ({
   return (
     <View style={styles.tabIconContainer}>
       <View>
-        <Profile width={TAB_ICON_SIZE} height={TAB_ICON_SIZE} fill={color} />
+        <Settings width={TAB_ICON_SIZE} height={TAB_ICON_SIZE} fill={color} />
         {/* 관리자 모드 뱃지 */}
         <View style={styles.adminBadge}>
           <Text style={styles.adminBadgeText}>★</Text>
         </View>
       </View>
-      <Text style={[styles.tabLabel, { color }]}>마이페이지</Text>
+      <Text style={[styles.tabLabel, { color }]}>설정</Text>
     </View>
   );
 };
