@@ -48,9 +48,7 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
   // 로고 컴포넌트
   const Logo = ({ withLink = false, isMobile }: { withLink?: boolean; isMobile?: boolean }) => {
     const logo = (
-      <h1 className={cn("pr-4 text-2xl font-bold", isMobile && "px-1 text-lg")}>
-        {isMobile ? "B." : "BREEDY"}
-      </h1>
+      <h1 className={cn("pr-4 text-2xl font-bold", isMobile && "px-1 text-lg")}>BREEDY</h1>
     );
 
     if (isNative && withLink) {
