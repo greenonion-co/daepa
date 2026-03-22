@@ -20,20 +20,11 @@ const LoginScreen = () => {
         <View style={styles.content}>
           {/* 메인 카드 */}
           <View style={styles.card}>
-            {/* 로고 이미지 */}
-            <View style={styles.logoContainer}>
-              <Image
-                source={require('@/assets/images/lizard.png')}
-                style={styles.logo}
-                resizeMode="contain"
-              />
-            </View>
-
             {/* 로그인 버튼들 */}
             <View style={styles.buttonContainer}>
-              <AppleLoginButton />
               <GoogleLoginButton />
               <KakaoLoginButton />
+              <AppleLoginButton />
             </View>
           </View>
 

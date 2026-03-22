@@ -16,10 +16,11 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import HomeSvg from '@/assets/svgs/tabIcons/Home.svg';
 import Settings from '@/assets/svgs/tabIcons/Settings.svg';
+import Profile from '@/assets/svgs/tabIcons/Profile.svg';
 import Calendar from '@/assets/svgs/tabIcons/Calendar.svg';
 import Chart from '@/assets/svgs/tabIcons/Chart.svg';
 import WebViewScreen from '../screens/WebView';
-import GuestSettingsScreen from '../screens/Settings/GuestSettings';
+import LoginScreen from '../screens/Login';
 import ModeSelectionSheet, {
   AppMode,
 } from '../components/common/ModeSelectionSheet';
@@ -100,8 +101,9 @@ const AnimatedTabButton = (props: BottomTabBarButtonProps) => {
 };
 
 // 탭 아이콘들
-const HomeTabIcon = createAnimatedTabIcon(HomeSvg, '피드');
+const HomeTabIcon = createAnimatedTabIcon(HomeSvg, '홈');
 const SettingsTabIcon = createAnimatedTabIcon(Settings, '설정');
+const LoginTabIcon = createAnimatedTabIcon(Profile, '로그인');
 const EggTabIcon = createAnimatedTabIcon(Calendar, '해칭룸');
 const HeartTabIcon = createAnimatedTabIcon(Chart, '분양룸');
 const AdminHomeTabIcon = createAnimatedTabIcon(HomeSvg, '내 펫');
@@ -158,7 +160,7 @@ function SettingsScreen() {
   const { isLoggedIn } = useAuth();
 
   if (!isLoggedIn) {
-    return <GuestSettingsScreen />;
+    return <LoginScreen />;
   }
 
   return <SettingsWebView />;
@@ -170,6 +172,7 @@ interface TabsProps {
 
 // 일반 모드 탭
 function GeneralTabs({ onSettingsLongPress }: TabsProps) {
+  const { isLoggedIn } = useAuth();
   const theme = useThemeStore(state => state.theme);
   const colors = themeColors[theme];
   const insets = useSafeAreaInsets();
@@ -240,8 +243,8 @@ function GeneralTabs({ onSettingsLongPress }: TabsProps) {
           component={SettingsScreen}
           options={{
             tabBarLabel: () => null,
-            tabBarIcon: SettingsTabIcon,
-            tabBarButton: SettingsTabButton,
+            tabBarIcon: isLoggedIn ? SettingsTabIcon : LoginTabIcon,
+            tabBarButton: isLoggedIn ? SettingsTabButton : AnimatedTabButton,
           }}
           listeners={({ navigation }) => ({
             tabPress: () => {
