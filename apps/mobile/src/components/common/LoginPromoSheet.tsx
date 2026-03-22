@@ -2,7 +2,6 @@ import React, { useEffect, useRef } from 'react';
 import {
   Animated,
   Dimensions,
-  Image,
   Modal,
   StyleSheet,
   Text,
@@ -28,7 +27,7 @@ const VARIANT_CONTENT: Record<
   register: {
     title: '내 개체를 등록해보세요',
     description: '개체를 등록하고\n',
-    highlight: '개체 정보 관리・혈통 인증・메이팅 관리',
+    highlight: '개체 정보・혈통 인증・메이팅 관리',
   },
   relation: {
     title: '혈통 정보를 한눈에',
@@ -148,15 +147,6 @@ const LoginPromoSheet = ({
             { transform: [{ translateY: slideAnim }] },
           ]}
         >
-          {/* 이미지 */}
-          <View style={styles.imageContainer}>
-            <Image
-              source={require('@/assets/images/lizard_face.png')}
-              style={styles.image}
-              resizeMode="contain"
-            />
-          </View>
-
           {/* 제목 */}
           <Text style={styles.title}>{VARIANT_CONTENT[variant].title}</Text>
 
@@ -164,7 +154,6 @@ const LoginPromoSheet = ({
           <Text style={styles.description}>
             {variant === 'register' ? (
               <>
-                개체를 등록하고{'\n'}
                 <Text style={styles.descriptionHighlight}>
                   {VARIANT_CONTENT[variant].highlight}
                 </Text>
