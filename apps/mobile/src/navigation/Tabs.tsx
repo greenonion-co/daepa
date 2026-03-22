@@ -104,9 +104,9 @@ const AnimatedTabButton = (props: BottomTabBarButtonProps) => {
 const HomeTabIcon = createAnimatedTabIcon(HomeSvg, '홈');
 const SettingsTabIcon = createAnimatedTabIcon(Settings, '설정');
 const LoginTabIcon = createAnimatedTabIcon(Profile, '로그인');
-const EggTabIcon = createAnimatedTabIcon(Calendar, '해칭룸');
+const EggTabIcon = createAnimatedTabIcon(Calendar, '브리딩룸');
 const HeartTabIcon = createAnimatedTabIcon(Chart, '분양룸');
-const AdminHomeTabIcon = createAnimatedTabIcon(HomeSvg, '내 펫');
+const AdminHomeTabIcon = createAnimatedTabIcon(HomeSvg, '개체룸');
 
 // 관리자 모드용 Settings 아이콘 (뱃지 포함)
 const AdminSettingsTabIcon = ({
