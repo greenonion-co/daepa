@@ -8,7 +8,7 @@ import PetShowcaseGrid from "./PetShowcaseGrid";
 import ShowcaseMultiSelect from "./ShowcaseMultiSelect";
 import { MORPH_LIST_BY_SPECIES, TRAIT_LIST_BY_SPECIES } from "@/app/(브리더스룸)/constants";
 import { BadgeCheck, Share2 } from "lucide-react";
-import { toast } from "@/lib/toast";
+import { shareShowroom } from "../utils/shareShowroom";
 
 const SORT_DISPLAY: Record<string, string> = {
   DESC: "최신순",
@@ -57,12 +57,7 @@ export default function ShowcaseContent({ profile }: ShowcaseContentProps) {
     return () => observer.disconnect();
   }, []);
 
-  const handleShare = () => {
-    const url = `${window.location.origin}/@${encodeURIComponent(profile.name)}`;
-    navigator.clipboard.writeText(url).then(() => {
-      toast.success("쇼룸 링크가 복사되었습니다");
-    });
-  };
+  const handleShare = () => shareShowroom(profile.name);
 
   return (
     <div className="mx-auto md:flex md:h-dvh md:flex-col">
