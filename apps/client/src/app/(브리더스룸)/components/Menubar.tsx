@@ -131,9 +131,11 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
           <>
             <NotificationIcon />
             {/*{!isNative && (*/}
-            <Link href="/settings">
-              <Settings className="text-gray-500 dark:text-neutral-400" />
-            </Link>
+            {!isNative && (
+              <Link href="/settings">
+                <Settings className="text-gray-500 dark:text-neutral-400" />
+              </Link>
+            )}
             {/*)}*/}
           </>
         )}
