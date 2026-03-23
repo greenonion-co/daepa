@@ -1,4 +1,4 @@
-import React, { useRef, useCallback } from 'react';
+import React, { useRef, useCallback, useState } from 'react';
 import {
   View,
   StyleSheet,
@@ -13,41 +13,45 @@ import {
   BottomTabBarButtonProps,
 } from '@react-navigation/bottom-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import HomeSvg from '@/assets/svgs/tabIcons/Home.svg';
-import Profile from '@/assets/svgs/tabIcons/Profile.svg';
-import Calendar from '@/assets/svgs/tabIcons/Calendar.svg';
-import Chart from '@/assets/svgs/tabIcons/Chart.svg';
-import Category from '@/assets/svgs/tabIcons/Category.svg';
+import {
+  ChevronLeft,
+  Home,
+  LogIn,
+  Gem,
+  Menu,
+  PawPrint,
+  Egg,
+  HeartHandshake,
+} from 'lucide-react-native';
 import WebViewScreen from '../screens/WebView';
 import LoginScreen from '../screens/Login';
 import AddPetButton from '../components/common/AddPetButton';
-import { GeneralTabParamList, AdminTabParamList } from '@/types/navigation';
+import {
+  GuestTabParamList,
+  MemberMainTabParamList,
+  PetTabParamList,
+  SalesTabParamList,
+} from '@/types/navigation';
 import { useThemeStore, themeColors } from '@/store/theme';
 import { useNavigationStore } from '@/store/navigation';
 import useAuth, { useUser } from '@/hooks/useAuth';
 
-const GeneralTab = createBottomTabNavigator<GeneralTabParamList>();
-const AdminTab = createBottomTabNavigator<AdminTabParamList>();
+const GuestTab = createBottomTabNavigator<GuestTabParamList>();
+const MainTab = createBottomTabNavigator<MemberMainTabParamList>();
+const PetTab = createBottomTabNavigator<PetTabParamList>();
+const SalesTab = createBottomTabNavigator<SalesTabParamList>();
 
 const TAB_ICON_SIZE = 24;
 
 // 애니메이션 탭 아이콘 생성 함수
 const createAnimatedTabIcon = (
-  IconComponent: React.FC<{
-    width: number;
-    height: number;
-    fill: string;
-  }>,
+  IconComponent: React.FC<{ size: number; color: string }>,
   label: string,
 ) => {
   return ({ color }: { focused: boolean; color: string }) => {
     return (
       <View style={styles.tabIconContainer}>
-        <IconComponent
-          width={TAB_ICON_SIZE}
-          height={TAB_ICON_SIZE}
-          fill={color}
-        />
+        <IconComponent size={TAB_ICON_SIZE} color={color} />
         <Text style={[styles.tabLabel, { color }]}>{label}</Text>
       </View>
     );
@@ -92,14 +96,17 @@ const AnimatedTabButton = (props: BottomTabBarButtonProps) => {
 };
 
 // 탭 아이콘들
-const HomeTabIcon = createAnimatedTabIcon(HomeSvg, '홈');
-const LoginTabIcon = createAnimatedTabIcon(Profile, '로그인');
-const PetListTabIcon = createAnimatedTabIcon(HomeSvg, '개체룸');
-const EggTabIcon = createAnimatedTabIcon(Calendar, '브리딩룸');
-const HeartTabIcon = createAnimatedTabIcon(Chart, '분양룸');
-const ShowroomTabIcon = createAnimatedTabIcon(Category, '쇼룸');
+const HomeTabIcon = createAnimatedTabIcon(Home, '홈');
+const LoginTabIcon = createAnimatedTabIcon(LogIn, '로그인');
+const AllTabIcon = createAnimatedTabIcon(Menu, '전체');
+const ManagePetTabIcon = createAnimatedTabIcon(PawPrint, '개체관리');
+const PetListTabIcon = createAnimatedTabIcon(PawPrint, '개체룸');
+const EggTabIcon = createAnimatedTabIcon(Egg, '브리딩룸');
+const ManageSalesTabIcon = createAnimatedTabIcon(HeartHandshake, '분양관리');
+const HeartTabIcon = createAnimatedTabIcon(HeartHandshake, '분양룸');
+const ShowroomTabIcon = createAnimatedTabIcon(Gem, '쇼룸');
 
-// 빈 컴포넌트 (+ 버튼용, 실제로 렌더링되지 않음)
+// 빈 컴포넌트 (실제로 렌더링되지 않는 더미 스크린)
 function EmptyScreen() {
   return null;
 }
@@ -139,7 +146,7 @@ function GuestTabs() {
   const tabBarHeight = Platform.OS === 'android' ? 60 + insets.bottom : 80;
 
   return (
-    <GeneralTab.Navigator
+    <GuestTab.Navigator
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: colors.tabBarActive,
@@ -161,7 +168,7 @@ function GuestTabs() {
         tabBarHideOnKeyboard: true,
       }}
     >
-      <GeneralTab.Screen
+      <GuestTab.Screen
         name="Home"
         component={HomeWebView}
         options={{
@@ -177,7 +184,7 @@ function GuestTabs() {
           },
         })}
       />
-      <GeneralTab.Screen
+      <GuestTab.Screen
         name="AddPet"
         component={EmptyScreen}
         options={{
@@ -185,7 +192,7 @@ function GuestTabs() {
           tabBarButton: AddPetButton,
         }}
       />
-      <GeneralTab.Screen
+      <GuestTab.Screen
         name="Settings"
         component={LoginScreen}
         options={{
@@ -194,12 +201,61 @@ function GuestTabs() {
           tabBarButton: AnimatedTabButton,
         }}
       />
-    </GeneralTab.Navigator>
+    </GuestTab.Navigator>
   );
 }
 
-// 로그인 탭 (개체룸 / 브리딩룸 / (+) / 분양룸 / 쇼룸)
-function MemberTabs() {
+// 뒤로가기 탭 버튼
+function BackTabButton({
+  onGoBack,
+  color,
+}: {
+  onGoBack: () => void;
+  color: string;
+}) {
+  const scale = useRef(new Animated.Value(1)).current;
+
+  const handlePressIn = useCallback(() => {
+    Animated.timing(scale, {
+      toValue: 0.9,
+      duration: 100,
+      useNativeDriver: true,
+    }).start();
+  }, [scale]);
+
+  const handlePressOut = useCallback(() => {
+    Animated.timing(scale, {
+      toValue: 1,
+      duration: 100,
+      useNativeDriver: true,
+    }).start();
+  }, [scale]);
+
+  return (
+    <Pressable
+      onPress={onGoBack}
+      onPressIn={handlePressIn}
+      onPressOut={handlePressOut}
+      style={styles.tabButton}
+    >
+      <Animated.View
+        style={[styles.tabIconContainer, { transform: [{ scale }] }]}
+      >
+        <ChevronLeft size={TAB_ICON_SIZE} color={color} />
+        <Text style={[styles.tabLabel, { color }]}>뒤로</Text>
+      </Animated.View>
+    </Pressable>
+  );
+}
+
+// 로그인 1depth 탭 (홈 / 개체 / (+) / 분양 / 전체)
+function MemberMainTabs({
+  onEnterPet,
+  onEnterSales,
+}: {
+  onEnterPet: () => void;
+  onEnterSales: () => void;
+}) {
   const theme = useThemeStore(state => state.theme);
   const colors = themeColors[theme];
   const insets = useSafeAreaInsets();
@@ -210,7 +266,7 @@ function MemberTabs() {
   const tabBarHeight = Platform.OS === 'android' ? 60 + insets.bottom : 80;
 
   return (
-    <AdminTab.Navigator
+    <MainTab.Navigator
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: colors.tabBarActive,
@@ -235,12 +291,12 @@ function MemberTabs() {
         },
       }}
     >
-      <AdminTab.Screen
+      <MainTab.Screen
         name="Home"
-        component={PetListWebView}
+        component={HomeWebView}
         options={{
           tabBarLabel: () => null,
-          tabBarIcon: PetListTabIcon,
+          tabBarIcon: HomeTabIcon,
           tabBarButton: AnimatedTabButton,
         }}
         listeners={({ navigation }) => ({
@@ -251,7 +307,150 @@ function MemberTabs() {
           },
         })}
       />
-      <AdminTab.Screen
+      <MainTab.Screen
+        name="Pet"
+        component={PetListWebView}
+        options={{
+          tabBarLabel: () => null,
+          tabBarIcon: ManagePetTabIcon,
+          tabBarButton: AnimatedTabButton,
+        }}
+        listeners={() => ({
+          tabPress: () => {
+            onEnterPet();
+          },
+        })}
+      />
+      <MainTab.Screen
+        name="AddPet"
+        component={EmptyScreen}
+        options={{
+          tabBarLabel: '',
+          tabBarButton: AddPetButton,
+        }}
+      />
+      <MainTab.Screen
+        name="Sales"
+        component={AdoptionWebView}
+        options={{
+          tabBarLabel: () => null,
+          tabBarIcon: ManageSalesTabIcon,
+          tabBarButton: AnimatedTabButton,
+        }}
+        listeners={() => ({
+          tabPress: () => {
+            onEnterSales();
+          },
+        })}
+      />
+      <MainTab.Screen
+        name="All"
+        component={EmptyScreen}
+        options={{
+          tabBarLabel: () => null,
+          tabBarIcon: AllTabIcon,
+          tabBarButton: AnimatedTabButton,
+        }}
+      />
+    </MainTab.Navigator>
+  );
+}
+
+// 로그인 2depth 관리 탭 (뒤로 / 개체룸 / 브리딩룸 / 분양룸)
+function PetTabs({ onGoBack }: { onGoBack: () => void }) {
+  const theme = useThemeStore(state => state.theme);
+  const colors = themeColors[theme];
+  const insets = useSafeAreaInsets();
+  const triggerScrollToTop = useNavigationStore(
+    state => state.triggerScrollToTop,
+  );
+
+  const tabBarHeight = Platform.OS === 'android' ? 60 + insets.bottom : 80;
+
+  return (
+    <PetTab.Navigator
+      screenOptions={{
+        headerShown: false,
+        tabBarActiveTintColor: colors.tabBarActive,
+        tabBarInactiveTintColor: colors.tabBarInactive,
+        tabBarStyle: {
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          backgroundColor: colors.tabBar,
+          borderTopLeftRadius: 20,
+          borderTopRightRadius: 20,
+          borderWidth: 1,
+          borderBottomWidth: 0,
+          borderColor: colors.tabBarBorder,
+          paddingBottom: Platform.OS === 'android' ? insets.bottom : 20,
+          height: tabBarHeight,
+        },
+        tabBarHideOnKeyboard: true,
+        sceneStyle: {
+          backgroundColor: theme === 'dark' ? '#111827' : '#f3f4f6',
+        },
+      }}
+      tabBar={props => (
+        <View
+          style={[
+            props.descriptors[props.state.routes[props.state.index].key].options
+              .tabBarStyle as object,
+          ]}
+        >
+          <View style={styles.manageTabBarInner}>
+            <BackTabButton onGoBack={onGoBack} color={colors.tabBarInactive} />
+            {props.state.routes.map((route, index) => {
+              const { options } = props.descriptors[route.key];
+              const isFocused = props.state.index === index;
+              const color = isFocused
+                ? colors.tabBarActive
+                : colors.tabBarInactive;
+              const icon = options.tabBarIcon as
+                | ((p: { focused: boolean; color: string }) => React.ReactNode)
+                | undefined;
+
+              return (
+                <AnimatedTabButton
+                  key={route.key}
+                  onPress={() => {
+                    const event = props.navigation.emit({
+                      type: 'tabPress',
+                      target: route.key,
+                      canPreventDefault: true,
+                    });
+                    if (!isFocused && !event.defaultPrevented) {
+                      props.navigation.navigate(route.name);
+                    }
+                  }}
+                  style={styles.tabButton}
+                >
+                  {icon?.({ focused: isFocused, color })}
+                </AnimatedTabButton>
+              );
+            })}
+          </View>
+        </View>
+      )}
+    >
+      <PetTab.Screen
+        name="PetList"
+        component={PetListWebView}
+        options={{
+          tabBarLabel: () => null,
+          tabBarIcon: PetListTabIcon,
+          tabBarButton: AnimatedTabButton,
+        }}
+        listeners={({ navigation }) => ({
+          tabPress: () => {
+            if (navigation.isFocused()) {
+              triggerScrollToTop('PetList');
+            }
+          },
+        })}
+      />
+      <PetTab.Screen
         name="Hatching"
         component={HatchingWebView}
         options={{
@@ -267,15 +466,89 @@ function MemberTabs() {
           },
         })}
       />
-      <AdminTab.Screen
-        name="AddPet"
-        component={EmptyScreen}
-        options={{
-          tabBarLabel: '',
-          tabBarButton: AddPetButton,
-        }}
-      />
-      <AdminTab.Screen
+    </PetTab.Navigator>
+  );
+}
+
+// 로그인 2depth 분양 탭 (뒤로 / 분양룸 / 쇼룸)
+function SalesTabs({ onGoBack }: { onGoBack: () => void }) {
+  const theme = useThemeStore(state => state.theme);
+  const colors = themeColors[theme];
+  const insets = useSafeAreaInsets();
+  const triggerScrollToTop = useNavigationStore(
+    state => state.triggerScrollToTop,
+  );
+
+  const tabBarHeight = Platform.OS === 'android' ? 60 + insets.bottom : 80;
+
+  return (
+    <SalesTab.Navigator
+      screenOptions={{
+        headerShown: false,
+        tabBarActiveTintColor: colors.tabBarActive,
+        tabBarInactiveTintColor: colors.tabBarInactive,
+        tabBarStyle: {
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          backgroundColor: colors.tabBar,
+          borderTopLeftRadius: 20,
+          borderTopRightRadius: 20,
+          borderWidth: 1,
+          borderBottomWidth: 0,
+          borderColor: colors.tabBarBorder,
+          paddingBottom: Platform.OS === 'android' ? insets.bottom : 20,
+          height: tabBarHeight,
+        },
+        tabBarHideOnKeyboard: true,
+        sceneStyle: {
+          backgroundColor: theme === 'dark' ? '#111827' : '#f3f4f6',
+        },
+      }}
+      tabBar={props => (
+        <View
+          style={[
+            props.descriptors[props.state.routes[props.state.index].key].options
+              .tabBarStyle as object,
+          ]}
+        >
+          <View style={styles.manageTabBarInner}>
+            <BackTabButton onGoBack={onGoBack} color={colors.tabBarInactive} />
+            {props.state.routes.map((route, index) => {
+              const { options } = props.descriptors[route.key];
+              const isFocused = props.state.index === index;
+              const color = isFocused
+                ? colors.tabBarActive
+                : colors.tabBarInactive;
+              const icon = options.tabBarIcon as
+                | ((p: { focused: boolean; color: string }) => React.ReactNode)
+                | undefined;
+
+              return (
+                <AnimatedTabButton
+                  key={route.key}
+                  onPress={() => {
+                    const event = props.navigation.emit({
+                      type: 'tabPress',
+                      target: route.key,
+                      canPreventDefault: true,
+                    });
+                    if (!isFocused && !event.defaultPrevented) {
+                      props.navigation.navigate(route.name);
+                    }
+                  }}
+                  style={styles.tabButton}
+                >
+                  {icon?.({ focused: isFocused, color })}
+                </AnimatedTabButton>
+              );
+            })}
+          </View>
+        </View>
+      )}
+    >
+      <SalesTab.Screen
         name="Adoption"
         component={AdoptionWebView}
         options={{
@@ -291,8 +564,8 @@ function MemberTabs() {
           },
         })}
       />
-      <AdminTab.Screen
-        name="Settings"
+      <SalesTab.Screen
+        name="Showroom"
         component={ShowroomWebView}
         options={{
           tabBarLabel: () => null,
@@ -302,13 +575,34 @@ function MemberTabs() {
         listeners={({ navigation }) => ({
           tabPress: () => {
             if (navigation.isFocused()) {
-              triggerScrollToTop('Settings');
+              triggerScrollToTop('Showroom');
             }
           },
         })}
       />
-    </AdminTab.Navigator>
+    </SalesTab.Navigator>
   );
+}
+
+type DepthMode = 'main' | 'pet' | 'sales';
+
+// 로그인 사용자 탭 (1depth ↔ 2depth 전환)
+function MemberTabs() {
+  const [mode, setMode] = useState<DepthMode>('main');
+
+  const enterPet = useCallback(() => setMode('pet'), []);
+  const enterSales = useCallback(() => setMode('sales'), []);
+  const goBack = useCallback(() => setMode('main'), []);
+
+  if (mode === 'pet') {
+    return <PetTabs onGoBack={goBack} />;
+  }
+
+  if (mode === 'sales') {
+    return <SalesTabs onGoBack={goBack} />;
+  }
+
+  return <MemberMainTabs onEnterPet={enterPet} onEnterSales={enterSales} />;
 }
 
 export default function Tabs() {
@@ -335,6 +629,12 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  manageTabBarInner: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-around',
   },
   tabIconContainer: {
     alignItems: 'center',
