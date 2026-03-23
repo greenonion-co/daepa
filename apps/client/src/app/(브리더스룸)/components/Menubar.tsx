@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
-import { Mail, Settings } from "lucide-react";
+import { Bell, Settings } from "lucide-react";
 import { useSearchKeywordStore } from "../store/searchKeyword";
 import { useIsMobile } from "@/hooks/useMobile";
 import SearchInput from "./SearchInput";
@@ -36,7 +36,7 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
   // 알림 아이콘 컴포넌트
   const NotificationIcon = () => (
     <Link href="/notifications" className="relative">
-      <Mail className="text-gray-500 dark:text-neutral-400" />
+      <Bell className="text-gray-500 dark:text-neutral-400" />
       {unreadCount > 0 && (
         <div className="absolute -top-2 -right-2 flex h-[18px] w-[18px] items-center justify-center rounded-full bg-red-500 text-[12px] font-medium text-white">
           {unreadCount > 9 ? "9+" : unreadCount}
