@@ -13,6 +13,9 @@ import {
   BottomTabBarButtonProps,
 } from '@react-navigation/bottom-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
+import type { StackNavigationProp } from '@react-navigation/stack';
+import type { RootStackParamList } from '@/types/navigation';
 import {
   ChevronLeft,
   Home,
@@ -22,6 +25,7 @@ import {
   PawPrint,
   Egg,
   HeartHandshake,
+  Plus,
 } from 'lucide-react-native';
 import WebViewScreen from '../screens/WebView';
 import LoginScreen from '../screens/Login';
@@ -105,6 +109,14 @@ const EggTabIcon = createAnimatedTabIcon(Egg, '브리딩룸');
 const ManageSalesTabIcon = createAnimatedTabIcon(HeartHandshake, '분양관리');
 const HeartTabIcon = createAnimatedTabIcon(HeartHandshake, '분양룸');
 const ShowroomTabIcon = createAnimatedTabIcon(Gem, '쇼룸');
+const AddPetTabIcon = ({ color }: { focused: boolean; color: string }) => (
+  <View style={styles.addPetIconContainer}>
+    <View style={styles.addPetIconCircle}>
+      <Plus size={15} color="#fff" strokeWidth={2.5} />
+    </View>
+    <Text style={[styles.tabLabel, { color }]}>개체추가</Text>
+  </View>
+);
 
 // 빈 컴포넌트 (실제로 렌더링되지 않는 더미 스크린)
 function EmptyScreen() {
@@ -242,7 +254,6 @@ function BackTabButton({
         style={[styles.tabIconContainer, { transform: [{ scale }] }]}
       >
         <ChevronLeft size={TAB_ICON_SIZE} color={color} />
-        <Text style={[styles.tabLabel, { color }]}>뒤로</Text>
       </Animated.View>
     </Pressable>
   );
@@ -361,6 +372,8 @@ function PetTabs({ onGoBack }: { onGoBack: () => void }) {
   const theme = useThemeStore(state => state.theme);
   const colors = themeColors[theme];
   const insets = useSafeAreaInsets();
+  const rootNavigation =
+    useNavigation<StackNavigationProp<RootStackParamList>>();
   const triggerScrollToTop = useNavigationStore(
     state => state.triggerScrollToTop,
   );
@@ -466,6 +479,23 @@ function PetTabs({ onGoBack }: { onGoBack: () => void }) {
           },
         })}
       />
+      <PetTab.Screen
+        name="AddPet"
+        component={EmptyScreen}
+        options={{
+          tabBarLabel: () => null,
+          tabBarIcon: AddPetTabIcon,
+          tabBarButton: AnimatedTabButton,
+        }}
+        listeners={() => ({
+          tabPress: (e: { preventDefault: () => void }) => {
+            e.preventDefault();
+            rootNavigation.navigate('Main', {
+              path: '/register/1?_hideTopBar=1',
+            });
+          },
+        })}
+      />
     </PetTab.Navigator>
   );
 }
@@ -475,6 +505,8 @@ function SalesTabs({ onGoBack }: { onGoBack: () => void }) {
   const theme = useThemeStore(state => state.theme);
   const colors = themeColors[theme];
   const insets = useSafeAreaInsets();
+  const rootNavigation =
+    useNavigation<StackNavigationProp<RootStackParamList>>();
   const triggerScrollToTop = useNavigationStore(
     state => state.triggerScrollToTop,
   );
@@ -580,6 +612,23 @@ function SalesTabs({ onGoBack }: { onGoBack: () => void }) {
           },
         })}
       />
+      <SalesTab.Screen
+        name="AddPet"
+        component={EmptyScreen}
+        options={{
+          tabBarLabel: () => null,
+          tabBarIcon: AddPetTabIcon,
+          tabBarButton: AnimatedTabButton,
+        }}
+        listeners={() => ({
+          tabPress: (e: { preventDefault: () => void }) => {
+            e.preventDefault();
+            rootNavigation.navigate('Main', {
+              path: '/register/1?_hideTopBar=1',
+            });
+          },
+        })}
+      />
     </SalesTab.Navigator>
   );
 }
@@ -645,5 +694,18 @@ const styles = StyleSheet.create({
     fontSize: 10,
     marginTop: 4,
     textAlign: 'center',
+  },
+  addPetIconContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: 60,
+  },
+  addPetIconCircle: {
+    width: TAB_ICON_SIZE,
+    height: TAB_ICON_SIZE,
+    borderRadius: TAB_ICON_SIZE / 2,
+    backgroundColor: '#2D3645',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

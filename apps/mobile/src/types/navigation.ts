@@ -37,12 +37,14 @@ export type MemberMainTabParamList = {
 export type PetTabParamList = {
   PetList: WebViewParams | undefined;
   Hatching: WebViewParams | undefined;
+  AddPet: undefined;
 };
 
 // Tab Navigator params (로그인 2depth - 분양)
 export type SalesTabParamList = {
   Adoption: WebViewParams | undefined;
   Showroom: WebViewParams | undefined;
+  AddPet: undefined;
 };
 
 // 통합 Tab params
