@@ -35,7 +35,7 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
 
   // 알림 아이콘 컴포넌트
   const NotificationIcon = () => (
-    <Link href="/notifications" className="relative">
+    <Link href="/notifications" className="relative" aria-label="알림">
       <Bell className="text-gray-500 dark:text-neutral-400" />
       {unreadCount > 0 && (
         <div className="absolute -top-2 -right-2 flex h-[18px] w-[18px] items-center justify-center rounded-full bg-red-500 text-[12px] font-medium text-white">
@@ -132,7 +132,7 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
             <NotificationIcon />
             {/*{!isNative && (*/}
             {!isNative && (
-              <Link href="/settings">
+              <Link href="/settings" aria-label="설정">
                 <Settings className="text-gray-500 dark:text-neutral-400" />
               </Link>
             )}

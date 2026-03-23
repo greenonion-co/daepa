@@ -230,7 +230,11 @@ const Header = ({
               onClick={async () => {
                 const url = `${window.location.origin}/pet/${pet.petId}`;
                 if (isNativeApp()) {
-                  requestShare(url, pet.name ?? "펫 페이지");
+                  const shared = requestShare(url, pet.name ?? "펫 페이지");
+                  if (!shared) {
+                    await navigator.clipboard.writeText(url);
+                    toast.success("링크가 복사되었습니다");
+                  }
                   return;
                 }
                 try {
