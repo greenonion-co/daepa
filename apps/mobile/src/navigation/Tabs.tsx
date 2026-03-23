@@ -7,6 +7,7 @@ import {
   Pressable,
   Animated,
   Text,
+  ScrollView,
 } from 'react-native';
 import {
   createBottomTabNavigator,
@@ -26,6 +27,9 @@ import {
   Egg,
   HeartHandshake,
   Plus,
+  Bell,
+  Settings,
+  ChevronRight,
 } from 'lucide-react-native';
 import WebViewScreen from '../screens/WebView';
 import LoginScreen from '../screens/Login';
@@ -110,7 +114,7 @@ const ManageSalesTabIcon = createAnimatedTabIcon(HeartHandshake, '분양관리')
 const HeartTabIcon = createAnimatedTabIcon(HeartHandshake, '분양룸');
 const ShowroomTabIcon = createAnimatedTabIcon(Gem, '쇼룸');
 const AddPetTabIcon = ({ color }: { focused: boolean; color: string }) => (
-  <View style={styles.addPetIconContainer}>
+  <View style={styles.tabIconContainer}>
     <View style={styles.addPetIconCircle}>
       <Plus size={15} color="#fff" strokeWidth={2.5} />
     </View>
@@ -144,6 +148,98 @@ function ShowroomWebView() {
   const user = useUser();
   const path = user?.name ? `/@${encodeURIComponent(user.name)}` : '/@';
   return <WebViewScreen initialPath={path} />;
+}
+
+// 전체 메뉴 화면
+type AllMenuItem = {
+  icon: React.FC<{ size: number; color: string }>;
+  label: string;
+  action: 'tab' | 'pet' | 'sales' | 'webview';
+  tabName?: string;
+  petRoute?: keyof PetTabParamList;
+  salesRoute?: keyof SalesTabParamList;
+  path?: string;
+};
+
+const ALL_MENU_ITEMS: AllMenuItem[] = [
+  { icon: Home, label: '홈', action: 'tab', tabName: 'Home' },
+  { icon: Bell, label: '알림함', action: 'webview', path: '/notifications' },
+  { icon: PawPrint, label: '개체룸', action: 'pet', petRoute: 'PetList' },
+  { icon: Egg, label: '브리딩룸', action: 'pet', petRoute: 'Hatching' },
+  { icon: HeartHandshake, label: '분양룸', action: 'sales', salesRoute: 'Adoption' },
+  { icon: Gem, label: '쇼룸', action: 'sales', salesRoute: 'Showroom' },
+  { icon: Settings, label: '설정', action: 'webview', path: '/settings' },
+];
+
+function AllMenuScreen({
+  onEnterPet,
+  onEnterSales,
+}: {
+  onEnterPet: (initialRoute?: keyof PetTabParamList) => void;
+  onEnterSales: (initialRoute?: keyof SalesTabParamList) => void;
+}) {
+  const theme = useThemeStore(state => state.theme);
+  const colors = themeColors[theme];
+  const rootNavigation =
+    useNavigation<StackNavigationProp<RootStackParamList>>();
+  const tabNavigation = useNavigation<any>();
+  const insets = useSafeAreaInsets();
+
+  const handlePress = useCallback(
+    (item: AllMenuItem) => {
+      switch (item.action) {
+        case 'tab':
+          if (item.tabName) {
+            tabNavigation.navigate(item.tabName);
+          }
+          break;
+        case 'pet':
+          onEnterPet(item.petRoute);
+          break;
+        case 'sales':
+          onEnterSales(item.salesRoute);
+          break;
+        case 'webview':
+          if (item.path) {
+            rootNavigation.navigate('Main', { path: item.path });
+          }
+          break;
+      }
+    },
+    [tabNavigation, rootNavigation, onEnterPet, onEnterSales],
+  );
+
+  return (
+    <ScrollView
+      style={[
+        styles.allMenuContainer,
+        { backgroundColor: colors.background, paddingTop: insets.top },
+      ]}
+      contentContainerStyle={styles.allMenuContent}
+    >
+      <Text style={[styles.allMenuTitle, { color: colors.tabBarActive }]}>
+        전체
+      </Text>
+      {ALL_MENU_ITEMS.map(item => (
+        <Pressable
+          key={item.label}
+          style={[
+            styles.allMenuItem,
+            { borderBottomColor: colors.tabBarBorder },
+          ]}
+          onPress={() => handlePress(item)}
+        >
+          <View style={styles.allMenuItemLeft}>
+            <item.icon size={22} color={colors.tabBarActive} />
+            <Text style={[styles.allMenuItemLabel, { color: colors.tabBarActive }]}>
+              {item.label}
+            </Text>
+          </View>
+          <ChevronRight size={18} color={colors.tabBarInactive} />
+        </Pressable>
+      ))}
+    </ScrollView>
+  );
 }
 
 // 비로그인 탭 (홈 / (+) / 로그인)
@@ -217,6 +313,73 @@ function GuestTabs() {
   );
 }
 
+// 2depth 커스텀 탭바
+function DepthTabBar({
+  props,
+  onGoBack,
+  inactiveColor,
+  activeColor,
+  initialRoute,
+  hasNavigatedRef,
+}: {
+  props: any;
+  onGoBack: () => void;
+  inactiveColor: string;
+  activeColor: string;
+  initialRoute?: string;
+  hasNavigatedRef: React.RefObject<boolean>;
+}) {
+  if (!hasNavigatedRef.current && initialRoute) {
+    hasNavigatedRef.current = true;
+    setTimeout(() => props.navigation.navigate(initialRoute), 0);
+  }
+
+  return (
+    <View
+      style={[
+        props.descriptors[props.state.routes[props.state.index].key].options
+          .tabBarStyle as object,
+      ]}
+    >
+      <View style={styles.manageTabBarInner}>
+        <BackTabButton onGoBack={onGoBack} color={inactiveColor} />
+        {props.state.routes.map(
+          (route: { key: string; name: string }, index: number) => {
+            const { options } = props.descriptors[route.key];
+            const isFocused = props.state.index === index;
+            const color = isFocused ? activeColor : inactiveColor;
+            const icon = options.tabBarIcon as
+              | ((p: {
+                  focused: boolean;
+                  color: string;
+                }) => React.ReactNode)
+              | undefined;
+
+            return (
+              <AnimatedTabButton
+                key={route.key}
+                onPress={() => {
+                  const event = props.navigation.emit({
+                    type: 'tabPress',
+                    target: route.key,
+                    canPreventDefault: true,
+                  });
+                  if (!isFocused && !event.defaultPrevented) {
+                    props.navigation.navigate(route.name);
+                  }
+                }}
+                style={styles.tabButton}
+              >
+                {icon?.({ focused: isFocused, color })}
+              </AnimatedTabButton>
+            );
+          },
+        )}
+      </View>
+    </View>
+  );
+}
+
 // 뒤로가기 탭 버튼
 function BackTabButton({
   onGoBack,
@@ -264,8 +427,8 @@ function MemberMainTabs({
   onEnterPet,
   onEnterSales,
 }: {
-  onEnterPet: () => void;
-  onEnterSales: () => void;
+  onEnterPet: (initialRoute?: keyof PetTabParamList) => void;
+  onEnterSales: (initialRoute?: keyof SalesTabParamList) => void;
 }) {
   const theme = useThemeStore(state => state.theme);
   const colors = themeColors[theme];
@@ -356,19 +519,31 @@ function MemberMainTabs({
       />
       <MainTab.Screen
         name="All"
-        component={EmptyScreen}
         options={{
           tabBarLabel: () => null,
           tabBarIcon: AllTabIcon,
           tabBarButton: AnimatedTabButton,
         }}
-      />
+      >
+        {() => (
+          <AllMenuScreen
+            onEnterPet={onEnterPet}
+            onEnterSales={onEnterSales}
+          />
+        )}
+      </MainTab.Screen>
     </MainTab.Navigator>
   );
 }
 
-// 로그인 2depth 관리 탭 (뒤로 / 개체룸 / 브리딩룸 / 분양룸)
-function PetTabs({ onGoBack }: { onGoBack: () => void }) {
+// 로그인 2depth 개체 탭 (뒤로 / 개체룸 / 브리딩룸 / 개체추가)
+function PetTabs({
+  onGoBack,
+  initialRoute,
+}: {
+  onGoBack: () => void;
+  initialRoute?: keyof PetTabParamList;
+}) {
   const theme = useThemeStore(state => state.theme);
   const colors = themeColors[theme];
   const insets = useSafeAreaInsets();
@@ -379,6 +554,7 @@ function PetTabs({ onGoBack }: { onGoBack: () => void }) {
   );
 
   const tabBarHeight = Platform.OS === 'android' ? 60 + insets.bottom : 80;
+  const hasNavigatedRef = useRef(false);
 
   return (
     <PetTab.Navigator
@@ -405,46 +581,15 @@ function PetTabs({ onGoBack }: { onGoBack: () => void }) {
           backgroundColor: theme === 'dark' ? '#111827' : '#f3f4f6',
         },
       }}
-      tabBar={props => (
-        <View
-          style={[
-            props.descriptors[props.state.routes[props.state.index].key].options
-              .tabBarStyle as object,
-          ]}
-        >
-          <View style={styles.manageTabBarInner}>
-            <BackTabButton onGoBack={onGoBack} color={colors.tabBarInactive} />
-            {props.state.routes.map((route, index) => {
-              const { options } = props.descriptors[route.key];
-              const isFocused = props.state.index === index;
-              const color = isFocused
-                ? colors.tabBarActive
-                : colors.tabBarInactive;
-              const icon = options.tabBarIcon as
-                | ((p: { focused: boolean; color: string }) => React.ReactNode)
-                | undefined;
-
-              return (
-                <AnimatedTabButton
-                  key={route.key}
-                  onPress={() => {
-                    const event = props.navigation.emit({
-                      type: 'tabPress',
-                      target: route.key,
-                      canPreventDefault: true,
-                    });
-                    if (!isFocused && !event.defaultPrevented) {
-                      props.navigation.navigate(route.name);
-                    }
-                  }}
-                  style={styles.tabButton}
-                >
-                  {icon?.({ focused: isFocused, color })}
-                </AnimatedTabButton>
-              );
-            })}
-          </View>
-        </View>
+      tabBar={tabBarProps => (
+        <DepthTabBar
+          props={tabBarProps}
+          onGoBack={onGoBack}
+          inactiveColor={colors.tabBarInactive}
+          activeColor={colors.tabBarActive}
+          initialRoute={initialRoute}
+          hasNavigatedRef={hasNavigatedRef}
+        />
       )}
     >
       <PetTab.Screen
@@ -500,8 +645,14 @@ function PetTabs({ onGoBack }: { onGoBack: () => void }) {
   );
 }
 
-// 로그인 2depth 분양 탭 (뒤로 / 분양룸 / 쇼룸)
-function SalesTabs({ onGoBack }: { onGoBack: () => void }) {
+// 로그인 2depth 분양 탭 (뒤로 / 분양룸 / 쇼룸 / 개체추가)
+function SalesTabs({
+  onGoBack,
+  initialRoute,
+}: {
+  onGoBack: () => void;
+  initialRoute?: keyof SalesTabParamList;
+}) {
   const theme = useThemeStore(state => state.theme);
   const colors = themeColors[theme];
   const insets = useSafeAreaInsets();
@@ -512,6 +663,7 @@ function SalesTabs({ onGoBack }: { onGoBack: () => void }) {
   );
 
   const tabBarHeight = Platform.OS === 'android' ? 60 + insets.bottom : 80;
+  const hasNavigatedRef = useRef(false);
 
   return (
     <SalesTab.Navigator
@@ -538,46 +690,15 @@ function SalesTabs({ onGoBack }: { onGoBack: () => void }) {
           backgroundColor: theme === 'dark' ? '#111827' : '#f3f4f6',
         },
       }}
-      tabBar={props => (
-        <View
-          style={[
-            props.descriptors[props.state.routes[props.state.index].key].options
-              .tabBarStyle as object,
-          ]}
-        >
-          <View style={styles.manageTabBarInner}>
-            <BackTabButton onGoBack={onGoBack} color={colors.tabBarInactive} />
-            {props.state.routes.map((route, index) => {
-              const { options } = props.descriptors[route.key];
-              const isFocused = props.state.index === index;
-              const color = isFocused
-                ? colors.tabBarActive
-                : colors.tabBarInactive;
-              const icon = options.tabBarIcon as
-                | ((p: { focused: boolean; color: string }) => React.ReactNode)
-                | undefined;
-
-              return (
-                <AnimatedTabButton
-                  key={route.key}
-                  onPress={() => {
-                    const event = props.navigation.emit({
-                      type: 'tabPress',
-                      target: route.key,
-                      canPreventDefault: true,
-                    });
-                    if (!isFocused && !event.defaultPrevented) {
-                      props.navigation.navigate(route.name);
-                    }
-                  }}
-                  style={styles.tabButton}
-                >
-                  {icon?.({ focused: isFocused, color })}
-                </AnimatedTabButton>
-              );
-            })}
-          </View>
-        </View>
+      tabBar={tabBarProps => (
+        <DepthTabBar
+          props={tabBarProps}
+          onGoBack={onGoBack}
+          inactiveColor={colors.tabBarInactive}
+          activeColor={colors.tabBarActive}
+          initialRoute={initialRoute}
+          hasNavigatedRef={hasNavigatedRef}
+        />
       )}
     >
       <SalesTab.Screen
@@ -633,25 +754,53 @@ function SalesTabs({ onGoBack }: { onGoBack: () => void }) {
   );
 }
 
-type DepthMode = 'main' | 'pet' | 'sales';
+type DepthMode =
+  | { depth: 'main' }
+  | { depth: 'pet'; initialRoute?: keyof PetTabParamList }
+  | { depth: 'sales'; initialRoute?: keyof SalesTabParamList };
 
 // 로그인 사용자 탭 (1depth ↔ 2depth 전환)
 function MemberTabs() {
-  const [mode, setMode] = useState<DepthMode>('main');
+  const [mode, setMode] = useState<DepthMode>({ depth: 'main' });
 
-  const enterPet = useCallback(() => setMode('pet'), []);
-  const enterSales = useCallback(() => setMode('sales'), []);
-  const goBack = useCallback(() => setMode('main'), []);
+  const enterPet = useCallback(
+    (initialRoute?: keyof PetTabParamList) =>
+      setMode({ depth: 'pet', initialRoute }),
+    [],
+  );
+  const enterSales = useCallback(
+    (initialRoute?: keyof SalesTabParamList) =>
+      setMode({ depth: 'sales', initialRoute }),
+    [],
+  );
+  const goBack = useCallback(() => setMode({ depth: 'main' }), []);
 
-  if (mode === 'pet') {
-    return <PetTabs onGoBack={goBack} />;
+  if (mode.depth === 'pet') {
+    return (
+      <PetTabs
+        key={`pet-${mode.initialRoute ?? 'default'}`}
+        onGoBack={goBack}
+        initialRoute={mode.initialRoute}
+      />
+    );
   }
 
-  if (mode === 'sales') {
-    return <SalesTabs onGoBack={goBack} />;
+  if (mode.depth === 'sales') {
+    return (
+      <SalesTabs
+        key={`sales-${mode.initialRoute ?? 'default'}`}
+        onGoBack={goBack}
+        initialRoute={mode.initialRoute}
+      />
+    );
   }
 
-  return <MemberMainTabs onEnterPet={enterPet} onEnterSales={enterSales} />;
+  return (
+    <MemberMainTabs
+      onEnterPet={enterPet}
+      onEnterSales={enterSales}
+    />
+  );
 }
 
 export default function Tabs() {
@@ -695,11 +844,6 @@ const styles = StyleSheet.create({
     marginTop: 4,
     textAlign: 'center',
   },
-  addPetIconContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    minWidth: 60,
-  },
   addPetIconCircle: {
     width: TAB_ICON_SIZE,
     height: TAB_ICON_SIZE,
@@ -707,5 +851,33 @@ const styles = StyleSheet.create({
     backgroundColor: '#2D3645',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  allMenuContainer: {
+    flex: 1,
+  },
+  allMenuContent: {
+    padding: 20,
+    paddingBottom: 100,
+  },
+  allMenuTitle: {
+    fontSize: 22,
+    fontWeight: '700',
+    marginBottom: 16,
+  },
+  allMenuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 16,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  allMenuItemLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+  },
+  allMenuItemLabel: {
+    fontSize: 16,
+    fontWeight: '500',
   },
 });
