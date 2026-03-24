@@ -5,24 +5,30 @@ import { DateTime } from "luxon";
 
 export type ExportFieldKey =
   | "name"
+  | "sex"
   | "morphs"
   | "traits"
   | "growth"
   | "weight"
   | "hatchingDate"
-  | "fatherName"
-  | "motherName"
+  | "parents"
   | "link";
 
-export const EXPORT_FIELDS: { key: ExportFieldKey; label: string }[] = [
+const SEX_LABEL: Record<string, string> = {
+  M: "수컷",
+  F: "암컷",
+  N: "미구분",
+};
+
+export const EXPORT_FIELDS: { key: ExportFieldKey; label: string; defaultChecked?: boolean }[] = [
   { key: "name", label: "이름" },
+  { key: "sex", label: "성별" },
   { key: "morphs", label: "모프" },
   { key: "traits", label: "형질" },
-  { key: "growth", label: "크기" },
-  { key: "weight", label: "몸무게" },
+  { key: "growth", label: "크기", defaultChecked: false },
+  { key: "weight", label: "몸무게", defaultChecked: false },
   { key: "hatchingDate", label: "해칭일" },
-  { key: "fatherName", label: "부개체" },
-  { key: "motherName", label: "모개체" },
+  { key: "parents", label: "부모정보" },
   { key: "link", label: "QR 링크" },
 ];
 
@@ -30,6 +36,8 @@ function getFieldValue(pet: PetDto, key: ExportFieldKey, baseUrl: string): strin
   switch (key) {
     case "name":
       return pet.name ?? "";
+    case "sex":
+      return pet.sex ? (SEX_LABEL[pet.sex] ?? "") : "";
     case "morphs":
       return pet.morphs?.join(", ") ?? "";
     case "traits":
@@ -40,10 +48,12 @@ function getFieldValue(pet: PetDto, key: ExportFieldKey, baseUrl: string): strin
       return pet.weight != null ? `${pet.weight}g` : "";
     case "hatchingDate":
       return pet.hatchingDate ? DateTime.fromISO(pet.hatchingDate).toFormat("yyyy-MM-dd") : "";
-    case "fatherName":
-      return (pet.father as PetParentDto)?.name ?? "";
-    case "motherName":
-      return (pet.mother as PetParentDto)?.name ?? "";
+    case "parents": {
+      const father = (pet.father as PetParentDto)?.name;
+      const mother = (pet.mother as PetParentDto)?.name;
+      if (father && mother) return `${father}x${mother}`;
+      return father || mother || "";
+    }
     case "link":
       return `${baseUrl}/pet/${pet.petId}`;
   }

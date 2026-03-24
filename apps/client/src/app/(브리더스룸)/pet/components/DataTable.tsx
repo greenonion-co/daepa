@@ -75,6 +75,7 @@ export const DataTable = ({
       ),
       cell: ({ row }) => (
         <Checkbox
+          className="h-5 w-5"
           checked={row.getIsSelected()}
           onCheckedChange={(value) => row.toggleSelected(!!value)}
           onClick={(e) => e.stopPropagation()}

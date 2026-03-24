@@ -26,7 +26,7 @@ interface ExportToolbarProps {
 export default function ExportToolbar({ data, onClose }: ExportToolbarProps) {
   const { rowSelection, setRowSelection } = useTableStore();
   const [selectedFields, setSelectedFields] = useState<Set<ExportFieldKey>>(
-    () => new Set(EXPORT_FIELDS.map((f) => f.key)),
+    () => new Set(EXPORT_FIELDS.filter((f) => f.defaultChecked !== false).map((f) => f.key)),
   );
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
