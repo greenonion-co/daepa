@@ -7,6 +7,7 @@ import Link from "next/link";
 import { Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/lib/toast";
+import { isNativeApp, requestShare } from "@/lib/native-bridge";
 import { useAdoptionStore } from "@/app/(브리더스룸)/pet/store/adoption";
 import { useEffect, useState } from "react";
 import TooltipText from "@/app/(브리더스룸)/components/TooltipText";
@@ -228,6 +229,14 @@ const Header = ({
               title="링크 복사"
               onClick={async () => {
                 const url = `${window.location.origin}/pet/${pet.petId}`;
+                if (isNativeApp()) {
+                  const shared = requestShare(url, pet.name ?? "펫 페이지");
+                  if (!shared) {
+                    await navigator.clipboard.writeText(url);
+                    toast.success("링크가 복사되었습니다");
+                  }
+                  return;
+                }
                 try {
                   await navigator.clipboard.writeText(url);
                   toast.success("펫 페이지 링크가 복사되었습니다");

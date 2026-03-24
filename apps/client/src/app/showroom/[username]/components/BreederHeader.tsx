@@ -1,9 +1,9 @@
 import type { BreederPublicProfile } from "../data";
 import { BadgeCheck, MapPin, Phone, Share2 } from "lucide-react";
-import { toast } from "@/lib/toast";
 import { useIsLoggedIn } from "@/hooks/useAuth";
 import Link from "next/link";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { shareShowroom } from "../utils/shareShowroom";
 
 interface BreederHeaderProps {
   profile: BreederPublicProfile;
@@ -12,12 +12,7 @@ interface BreederHeaderProps {
 export default function BreederHeader({ profile }: BreederHeaderProps) {
   const isLoggedIn = useIsLoggedIn();
 
-  const handleShare = () => {
-    const url = `${window.location.origin}/@${encodeURIComponent(profile.name)}`;
-    navigator.clipboard.writeText(url).then(() => {
-      toast.success("쇼룸 링크가 복사되었습니다");
-    });
-  };
+  const handleShare = () => shareShowroom(profile.name);
 
   return (
     <div className="flex items-center justify-between gap-4 px-4 py-4 sm:px-6">

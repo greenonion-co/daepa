@@ -10,6 +10,7 @@ import {
   View,
   BackHandler,
   Platform,
+  Share,
   Text,
   TouchableOpacity,
   ScrollView,
@@ -282,6 +283,12 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
           break;
         case 'OPEN_QR_SCANNER':
           navigation.push('QrScanner');
+          break;
+        case 'SHARE':
+          Share.share({
+            message: message.url,
+            ...(message.title && { title: message.title }),
+          }).catch(() => {});
           break;
         default:
           break;
