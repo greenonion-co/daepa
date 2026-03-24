@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   ColumnDef,
@@ -10,6 +10,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
+import { Checkbox } from "@/components/ui/checkbox";
 
 import {
   Table,
@@ -59,7 +60,35 @@ export const DataTable = ({
   isEmpty = false,
 }: DataTableProps<PetDto>) => {
   const isMobile = useIsMobile();
-  const { sorting, rowSelection, setSorting, setRowSelection } = useTableStore();
+  const { sorting, rowSelection, isExportMode, setSorting, setRowSelection } = useTableStore();
+
+  const selectColumn: ColumnDef<PetDto> = useMemo(
+    () => ({
+      id: "select",
+      size: 40,
+      header: ({ table }) => (
+        <Checkbox
+          checked={table.getIsAllPageRowsSelected()}
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          aria-label="전체 선택"
+        />
+      ),
+      cell: ({ row }) => (
+        <Checkbox
+          checked={row.getIsSelected()}
+          onCheckedChange={(value) => row.toggleSelected(!!value)}
+          onClick={(e) => e.stopPropagation()}
+          aria-label="행 선택"
+        />
+      ),
+    }),
+    [],
+  );
+
+  const effectiveColumns = useMemo(
+    () => (isExportMode ? [selectColumn, ...columns] : columns),
+    [isExportMode, selectColumn, columns],
+  );
 
   const queryClient = useQueryClient();
   const router = useAppRouter();
@@ -134,7 +163,9 @@ export const DataTable = ({
 
   const table = useReactTable({
     data,
-    columns,
+    columns: effectiveColumns,
+    getRowId: (row) => row.petId,
+    enableRowSelection: isExportMode,
     onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
