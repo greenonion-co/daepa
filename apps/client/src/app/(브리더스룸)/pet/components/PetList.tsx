@@ -13,6 +13,7 @@ import { useAppRouter } from "@/hooks/useAppRouter";
 import { toast } from "@/lib/toast";
 import { RefreshCcw, FileSpreadsheet } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { isNativeApp } from "@/lib/native-bridge";
 
 import { useFilterStore } from "../../store/filter";
 import { useSearchKeywordStore } from "../../store/searchKeyword";
@@ -134,7 +135,7 @@ export default function PetList() {
         </button>
 
         <div className="flex items-center gap-2">
-          {!isExportMode && (
+          {!isExportMode && !isNativeApp() && (
             <button
               type="button"
               onClick={() => setExportMode(true)}
