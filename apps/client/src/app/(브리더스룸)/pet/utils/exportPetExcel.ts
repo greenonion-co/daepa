@@ -22,14 +22,14 @@ const SEX_LABEL: Record<string, string> = {
 
 export const EXPORT_FIELDS: { key: ExportFieldKey; label: string; defaultChecked?: boolean }[] = [
   { key: "name", label: "이름" },
+  { key: "hatchingDate", label: "해칭일" },
   { key: "sex", label: "성별" },
   { key: "morphs", label: "모프" },
   { key: "traits", label: "형질" },
-  { key: "growth", label: "크기", defaultChecked: false },
-  { key: "weight", label: "몸무게", defaultChecked: false },
-  { key: "hatchingDate", label: "해칭일" },
   { key: "parents", label: "부모정보" },
   { key: "link", label: "QR 링크" },
+  { key: "growth", label: "크기", defaultChecked: false },
+  { key: "weight", label: "몸무게", defaultChecked: false },
 ];
 
 function getFieldValue(pet: PetDto, key: ExportFieldKey, baseUrl: string): string {
