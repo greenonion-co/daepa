@@ -7,6 +7,7 @@ import React, { useState, useCallback } from "react";
 import { useAppRouter } from "@/hooks/useAppRouter";
 import { useIsMobile } from "@/hooks/useMobile";
 import PetDetailModal from "../[petId]/components/PetDetailModal";
+import useTableStore from "../store/table";
 
 interface PetCardListProps {
   data: PetDto[];
@@ -26,16 +27,29 @@ export default function PetCardList({
   const isMobile = useIsMobile();
   const router = useAppRouter();
   const [selectedPet, setSelectedPet] = useState<PetDto | null>(null);
+  const { isExportMode, rowSelection, setRowSelection } = useTableStore();
 
   const handleCardClick = useCallback(
     (pet: PetDto) => {
+      if (isExportMode) {
+        setRowSelection((prev) => {
+          const next = { ...prev };
+          if (next[pet.petId]) {
+            delete next[pet.petId];
+          } else {
+            next[pet.petId] = true;
+          }
+          return next;
+        });
+        return;
+      }
       if (isMobile) {
         router.push(`/pet/${pet.petId}`);
       } else {
         setSelectedPet(pet);
       }
     },
-    [isMobile, router],
+    [isMobile, router, isExportMode, setRowSelection],
   );
 
   if (isEmpty) {
@@ -63,7 +77,13 @@ export default function PetCardList({
         {/* 카드 그리드 */}
         <div className="grid grid-cols-[repeat(auto-fill,minmax(min(270px,100%),1fr))] gap-2">
           {data.map((pet) => (
-            <PetCard key={pet.petId} pet={pet} onCardClick={handleCardClick} />
+            <PetCard
+              key={pet.petId}
+              pet={pet}
+              onCardClick={handleCardClick}
+              isExportMode={isExportMode}
+              isSelected={!!rowSelection[pet.petId]}
+            />
           ))}
         </div>
 

@@ -11,9 +11,9 @@ import { useEffect, useMemo, useState, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { useAppRouter } from "@/hooks/useAppRouter";
 import { toast } from "@/lib/toast";
-import Link from "next/link";
-import { RefreshCcw } from "lucide-react";
+import { RefreshCcw, FileSpreadsheet } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { isNativeApp } from "@/lib/native-bridge";
 
 import { useFilterStore } from "../../store/filter";
 import { useSearchKeywordStore } from "../../store/searchKeyword";
@@ -21,6 +21,8 @@ import { useViewMode } from "../../store/viewMode";
 
 import Loading from "@/components/common/Loading";
 import { Filters } from "./Filters";
+import ExportToolbar from "./ExportToolbar";
+import useTableStore from "../store/table";
 
 export default function PetList() {
   const { ref, inView } = useInView();
@@ -29,6 +31,7 @@ export default function PetList() {
   const { searchFilters } = useFilterStore();
   const { searchKeyword } = useSearchKeywordStore();
   const { viewMode } = useViewMode();
+  const { isExportMode, setExportMode } = useTableStore();
   const searchParams = useSearchParams();
   const router = useAppRouter();
   const itemPerPage = 10;
@@ -132,15 +135,32 @@ export default function PetList() {
         </button>
 
         <div className="flex items-center gap-2">
-          <Link
-            href="/pet/deleted"
-            className="cursor-pointer rounded-lg px-2 py-1 text-xs text-red-600 underline hover:bg-red-100 dark:text-red-400 dark:hover:bg-red-900/30"
-          >
-            삭제된 개체 보기
-          </Link>
+          {!isExportMode && !isNativeApp() && (
+            <button
+              type="button"
+              onClick={() => setExportMode(true)}
+              className="flex cursor-pointer items-center gap-1 rounded-lg bg-emerald-600 p-2 text-sm font-semibold text-white hover:bg-emerald-700"
+            >
+              <FileSpreadsheet className="h-4 w-4" />
+              라벨링 목록 추출
+            </button>
+          )}
+          {/*<Link*/}
+          {/*  href="/pet/deleted"*/}
+          {/*  className="cursor-pointer rounded-lg px-2 py-1 text-xs text-red-600 underline hover:bg-red-100 dark:text-red-400 dark:hover:bg-red-900/30"*/}
+          {/*>*/}
+          {/*  삭제된 개체 보기*/}
+          {/*</Link>*/}
           <ViewModeToggle />
         </div>
       </div>
+
+      {/* 추출 모드 툴바 */}
+      {isExportMode && (
+        <div className="px-2">
+          <ExportToolbar data={items ?? []} onClose={() => setExportMode(false)} />
+        </div>
+      )}
 
       {/* 뷰 모드에 따른 렌더링 */}
       {viewMode === "table" ? (
