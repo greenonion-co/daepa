@@ -245,11 +245,6 @@ export default function DndImagePicker({
 
   return (
     <div>
-      {!disabled && (
-        <>
-          <p className="text-xs font-[500] text-blue-500">jpg, jpeg, png, gif, webp, avif</p>
-        </>
-      )}
       <div {...getRootProps()} className="relative">
         <input {...getInputProps()} />
         <DndContext

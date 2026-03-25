@@ -131,11 +131,6 @@ const PedigreeInfoContent = ({
     <div className="flex flex-1 flex-col gap-2 rounded-2xl bg-white p-3 shadow-xs dark:bg-neutral-900">
       <div className="text-[14px] font-[600] text-gray-600 dark:text-gray-300">혈통 정보</div>
 
-      <div className="flex items-center gap-1 text-[12px] text-gray-500 dark:text-gray-400">
-        <Info className="h-4 w-4" />
-        이미지 혹은 이름을 클릭하면 상세 페이지로 이동합니다.
-      </div>
-
       <div className="flex gap-3 max-[300px]:flex-col">
         <ParentLink
           excludePetId={petId}
