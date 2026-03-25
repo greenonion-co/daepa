@@ -134,7 +134,7 @@ export default function PetList() {
         </button>
 
         <div className="flex items-center gap-2">
-          {viewMode === "table" && !isExportMode && (
+          {!isExportMode && (
             <button
               type="button"
               onClick={() => setExportMode(true)}
