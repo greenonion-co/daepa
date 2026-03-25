@@ -30,7 +30,8 @@ export default function ExportToolbar({ data, onClose }: ExportToolbarProps) {
   );
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
-  const selectedCount = Object.keys(rowSelection).length;
+  const selectedPets = data.filter((pet) => rowSelection[pet.petId]);
+  const selectedCount = selectedPets.length;
 
   const toggleField = (key: ExportFieldKey) => {
     setSelectedFields((prev) => {
@@ -57,7 +58,6 @@ export default function ExportToolbar({ data, onClose }: ExportToolbarProps) {
   };
 
   const handleDownload = () => {
-    const selectedPets = data.filter((pet) => rowSelection[pet.petId]);
     const fields = EXPORT_FIELDS.filter((f) => selectedFields.has(f.key)).map(
       (f) => f.key,
     );
