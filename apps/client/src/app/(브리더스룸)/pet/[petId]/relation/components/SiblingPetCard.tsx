@@ -123,11 +123,11 @@ export default function SiblingPetCard({
           className={cn(
             "text-[11px] font-semibold",
             isMyPet
-              ? "text-purple-500 dark:text-purple-400"
+              ? "text-emerald-500 dark:text-emerald-400"
               : "text-gray-500/90 dark:text-gray-400",
           )}
         >
-          {isMyPet ? "내 개체" : ownerName ? `@ ${ownerName}` : null}
+          {ownerName ? `@ ${ownerName}` : null}
         </span>
       </div>
 
@@ -137,16 +137,15 @@ export default function SiblingPetCard({
           <span className="min-w-0 truncate text-[13px] font-[600] text-gray-600 dark:text-gray-200">
             {pet.name ?? "이름 없음"}
           </span>
+          {pet.hatchingDate && (
+            <span className="ml-auto shrink-0 text-[11px]">
+              {DateTime.fromISO(pet.hatchingDate).toFormat("yy.M.d")}
+            </span>
+          )}
         </div>
 
         <BadgeList variant={"outline"} items={pet.morphs} />
         <BadgeList items={pet.traits} variant={"secondary"} />
-
-        {pet.hatchingDate && (
-          <span className="mt-2 text-[11px] font-[600] text-gray-500 dark:text-gray-400">
-            {DateTime.fromISO(pet.hatchingDate).toFormat("yy년 M월 d일")}
-          </span>
-        )}
 
         {price !== undefined && (
           <span className="mt-1 text-[13px] font-bold text-emerald-600">{formatPrice(price)}</span>
@@ -178,11 +177,11 @@ export default function SiblingPetCard({
             {pet.name ?? "이름 없음"}
           </span>
           {isMyPet ? (
-            <span className="rounded bg-purple-50 px-1.5 py-0.5 text-[10px] font-medium text-purple-600 dark:bg-purple-900/50 dark:text-purple-400">
+            <span className="rounded bg-emerald-50 px-1.5 py-0.5 text-[10px] font-medium text-emerald-600 dark:bg-emerald-900/50 dark:text-emerald-400">
               내 개체
             </span>
           ) : ownerName ? (
-            <span className="flex items-center gap-0.5 rounded bg-blue-50 px-1.5 py-0.5 text-[10px] font-medium text-blue-600 dark:bg-blue-900/50 dark:text-blue-400">
+            <span className="flex items-center gap-0.5 rounded bg-emerald-50 px-1.5 py-0.5 text-[10px] font-medium text-emerald-600 dark:bg-emerald-900/50 dark:text-emerald-400">
               <ScanFace className="h-3 w-3" />
               {ownerName}
             </span>
