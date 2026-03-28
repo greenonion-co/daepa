@@ -111,9 +111,9 @@ const PetThumbnail = ({
           onError={() => setHasError(true)}
         />
       ) : hasError ? (
-        <div className="flex h-full w-full items-center justify-center opacity-50">
+        <div className="flex h-full w-full flex-col items-center justify-center gap-1 opacity-50">
           <ImageOff className="h-1/4 w-1/4 text-red-500" aria-hidden="true" />
-          <span className="sr-only">{alt}</span>
+          <span className="text-[10px] text-red-500">이미지 오류</span>
         </div>
       ) : (
         <div className="flex h-full w-full items-center justify-center opacity-30">

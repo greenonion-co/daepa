@@ -86,6 +86,7 @@ export default function DndImagePicker({
   const isBusy = isLoading || isSaving;
   const imageNamesInOrder = images.map(({ fileName }) => fileName);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(images.length > 0 ? 0 : null);
+  const [previewError, setPreviewError] = useState(false);
 
   useEffect(() => {
     if (images.length === 0) {
@@ -99,6 +100,10 @@ export default function DndImagePicker({
       return prev;
     });
   }, [images]);
+
+  useEffect(() => {
+    setPreviewError(false);
+  }, [selectedIndex]);
 
   // PointerSensor는 마우스와 터치를 통합 처리 (onPointerDown 기반)
   // TouchSensor(onTouchStart)는 일부 모바일 브라우저에서 동작하지 않아 PointerSensor로 대체
@@ -316,17 +321,27 @@ export default function DndImagePicker({
               ));
             }}
           >
-            <Image
-              src={buildR2TransformedUrl(images[selectedIndex].url, IMAGE_TRANSFORMS.lg)}
-              alt={`preview_${images[selectedIndex].fileName}`}
-              fill
-              className="object-cover"
-              draggable={false}
-              priority={false}
-            />
-            <div className="absolute right-2 bottom-2 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white transition-colors hover:bg-black/70">
-              <Expand className="h-4 w-4" />
-            </div>
+            {previewError ? (
+              <div className="flex h-full w-full flex-col items-center justify-center gap-1 opacity-50">
+                <ImageOff className="h-8 w-8 text-red-500" aria-hidden="true" />
+                <span className="text-xs text-red-500">이미지 오류</span>
+              </div>
+            ) : (
+              <>
+                <Image
+                  src={buildR2TransformedUrl(images[selectedIndex].url, IMAGE_TRANSFORMS.lg)}
+                  alt={`preview_${images[selectedIndex].fileName}`}
+                  fill
+                  className="object-cover"
+                  draggable={false}
+                  priority={false}
+                  onError={() => setPreviewError(true)}
+                />
+                <div className="absolute right-2 bottom-2 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white transition-colors hover:bg-black/70">
+                  <Expand className="h-4 w-4" />
+                </div>
+              </>
+            )}
           </div>
         </div>
       ) : (
@@ -359,6 +374,7 @@ function SortableThumb({
   selected?: boolean;
   onSelect: () => void;
 }) {
+  const [thumbError, setThumbError] = useState(false);
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id,
     disabled: disabled || isBusy,
@@ -396,13 +412,21 @@ function SortableThumb({
         onSelect();
       }}
     >
-      <Image
-        src={buildR2TransformedUrl(src)}
-        alt={`image_${id}`}
-        fill
-        className="pointer-events-none object-cover"
-        draggable={false}
-      />
+      {thumbError ? (
+        <div className="flex h-full w-full flex-col items-center justify-center gap-0.5 opacity-50">
+          <ImageOff className="h-5 w-5 text-red-500" aria-hidden="true" />
+          <span className="text-[10px] text-red-500">이미지 오류</span>
+        </div>
+      ) : (
+        <Image
+          src={buildR2TransformedUrl(src)}
+          alt={`image_${id}`}
+          fill
+          className="pointer-events-none object-cover"
+          draggable={false}
+          onError={() => setThumbError(true)}
+        />
+      )}
 
       {!disabled && !isBusy && (
         <button
