@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
-import { Mail, Settings } from "lucide-react";
+import { Bell, Settings } from "lucide-react";
 import { useSearchKeywordStore } from "../store/searchKeyword";
 import { useIsMobile } from "@/hooks/useMobile";
 import SearchInput from "./SearchInput";
@@ -35,8 +35,8 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
 
   // 알림 아이콘 컴포넌트
   const NotificationIcon = () => (
-    <Link href="/notifications" className="relative">
-      <Mail className="text-gray-500 dark:text-neutral-400" />
+    <Link href="/notifications" className="relative" aria-label="알림">
+      <Bell className="text-gray-500 dark:text-neutral-400" />
       {unreadCount > 0 && (
         <div className="absolute -top-2 -right-2 flex h-[18px] w-[18px] items-center justify-center rounded-full bg-red-500 text-[12px] font-medium text-white">
           {unreadCount > 9 ? "9+" : unreadCount}
@@ -48,9 +48,7 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
   // 로고 컴포넌트
   const Logo = ({ withLink = false, isMobile }: { withLink?: boolean; isMobile?: boolean }) => {
     const logo = (
-      <h1 className={cn("pr-4 text-2xl font-bold", isMobile && "px-1 text-lg")}>
-        {isMobile ? "B." : "BREEDY"}
-      </h1>
+      <h1 className={cn("pr-4 text-2xl font-bold", isMobile && "px-1 text-lg")}>BREEDY</h1>
     );
 
     if (isNative && withLink) {
@@ -98,11 +96,8 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
       <Logo withLink isMobile={isMobile} />
       {/* 웹에서만 메뉴바에 렌더링 */}
       {!isNative && !isMobile && !isRegisterPage && <AddPetButton />}
-      {isMobile && !pathname?.startsWith("/sign-in") && (
-        <Link
-          href="/sign-in"
-          className="rounded-full bg-blue-500 px-3 py-1 text-xs font-medium text-white"
-        >
+      {!isNative && isMobile && !pathname?.startsWith("/sign-in") && (
+        <Link href="/sign-in" className="rounded-full px-3 py-1 text-xs font-medium text-blue-500">
           로그인
         </Link>
       )}
@@ -135,11 +130,13 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
         {isMobile && (
           <>
             <NotificationIcon />
+            {/*{!isNative && (*/}
             {!isNative && (
-              <Link href="/settings">
+              <Link href="/settings" aria-label="설정">
                 <Settings className="text-gray-500 dark:text-neutral-400" />
               </Link>
             )}
+            {/*)}*/}
           </>
         )}
       </div>

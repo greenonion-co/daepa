@@ -76,17 +76,17 @@ export const PetDetailInfo = ({
       />
 
       <FormItem
-        label="몸무게"
+        label="체중(g)"
         content={
           <NumberField
             disabled={!isEditMode}
-            field={{ name: "weight", type: "number", unit: "g" }}
+            field={{ name: "weight", type: "number" }}
             value={String(formData.weight ?? "")}
             setValue={(value) => handleInput("weight", value.value)}
             onBlur={() => onFieldBlur?.("weight")}
             placeholder={isEditMode ? "" : "-"}
             inputClassName={cn(
-              "h-[32px] w-full rounded-md border font-[500] border-gray-200 p-2 placeholder:font-[500]",
+              "h-[32px] w-20 rounded-md border font-[500] border-gray-200 p-2 placeholder:font-[500]",
               !isEditMode && "border-none",
             )}
           />
@@ -135,7 +135,7 @@ export const PetDetailInfo = ({
       />
 
       <FormItem
-        label="소개"
+        label="설명"
         content={
           <div className="w-full">
             <textarea

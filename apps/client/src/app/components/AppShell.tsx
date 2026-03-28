@@ -10,6 +10,7 @@ import { useQuery } from "@tanstack/react-query";
 import { userNotificationControllerGetUnreadCount } from "@repo/api-client";
 import { isNativeApp } from "@/lib/native-bridge";
 import AddPetButton from "@/app/(브리더스룸)/components/AddPetButton";
+import QrScannerButton from "@/app/components/QrScannerButton";
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const { user } = useUserStore();
@@ -42,11 +43,18 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       className={`relative mx-auto flex w-full ${isFamilyTree ? "h-dvh overflow-hidden" : "min-h-screen"} ${isPetDetail ? "dark:bg-background bg-gray-100" : ""}`}
     >
       <div className={cn("w-full", !isMobile && "max-w-[calc(100%_-_var(--right-sidebar-width))]")}>
-        {!hasNativeTopBar && !hasHiddenTopBar && !isFamilyTree && (!isShowcase || user) && <Menubar unreadCount={unreadCount} />}
+        {!hasNativeTopBar && !hasHiddenTopBar && !isFamilyTree && (!isShowcase || user) && (
+          <Menubar unreadCount={unreadCount} />
+        )}
         <div className={cn(isNativeApp() && "pb-[80px]")}>{children}</div>
       </div>
-      {/* 모바일 웹 */}
-      {!isNativeApp() && isMobile && !isFamilyTree && !isShowcase && !isSignIn && <AddPetButton />}
+      {/* 모바일 플로팅 버튼 */}
+      {isMobile && !isFamilyTree && !isShowcase && !isSignIn && (
+        <>
+          {!isNativeApp() && <AddPetButton />}
+          <QrScannerButton />
+        </>
+      )}
       {/* 웹 */}
       {!isNativeApp() && !isMobile && <Sidebar unreadCount={unreadCount} />}
     </main>

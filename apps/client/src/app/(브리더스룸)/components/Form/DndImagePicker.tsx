@@ -3,8 +3,8 @@
 import {
   DndContext,
   DragEndEvent,
-  TouchSensor,
-  MouseSensor,
+  PointerSensor,
+  KeyboardSensor,
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
@@ -14,7 +14,7 @@ import { useDropzone } from "react-dropzone";
 import Image from "next/image";
 import { buildR2TransformedUrl, cn, compressImageFile } from "@/lib/utils";
 import { toast } from "@/lib/toast";
-import { X, Plus, Info, Maximize2, ImageOff } from "lucide-react";
+import { X, Plus, Maximize2, ImageOff } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { isNil, range, remove } from "es-toolkit";
 import { ACCEPT_IMAGE_FORMATS } from "../../constants";
@@ -100,23 +100,17 @@ export default function DndImagePicker({
     });
   }, [images]);
 
-  // 터치와 마우스 센서 설정
-  const mouseSensor = useSensor(MouseSensor, {
-    // 마우스 드래그 시작을 위한 최소 이동 거리
+  // PointerSensor는 마우스와 터치를 통합 처리 (onPointerDown 기반)
+  // TouchSensor(onTouchStart)는 일부 모바일 브라우저에서 동작하지 않아 PointerSensor로 대체
+  const pointerSensor = useSensor(PointerSensor, {
     activationConstraint: {
       distance: 8,
     },
   });
 
-  const touchSensor = useSensor(TouchSensor, {
-    // 터치 드래그 시작을 위한 설정
-    activationConstraint: {
-      delay: 200, // 200ms 지연 후 드래그 시작
-      tolerance: 8, // 8px 이동까지는 허용
-    },
-  });
+  const keyboardSensor = useSensor(KeyboardSensor);
 
-  const sensors = useSensors(mouseSensor, touchSensor);
+  const sensors = useSensors(pointerSensor, keyboardSensor);
 
   const onAdd = useCallback(
     async (files: File[]) => {
@@ -253,13 +247,7 @@ export default function DndImagePicker({
     <div>
       {!disabled && (
         <>
-          <p className="text-[14px] font-[500] text-blue-500">
-            최대 {max}장까지 업로드 가능합니다. (jpg, jpeg, png, gif, webp, avif)
-          </p>
-          <div className="mb-2 flex items-center gap-1 text-gray-600">
-            <Info className="h-3 w-3" />
-            <p className="text-[12px]">사진을 길게 눌러 순서를 변경할 수 있습니다.</p>
-          </div>
+          <p className="text-xs font-[500] text-blue-500">jpg, jpeg, png, gif, webp, avif</p>
         </>
       )}
       <div {...getRootProps()} className="relative">
@@ -385,52 +373,51 @@ function SortableThumb({
 
   const style = {
     transform: CSS.Transform.toString(transform),
-    transition,
+    transition: isDragging ? "none" : transition,
+    ...(disabled || isBusy
+      ? {}
+      : {
+          touchAction: "none" as const,
+          WebkitTouchCallout: "none" as const,
+        }),
   } as const;
 
   return (
     <div
       ref={setNodeRef}
       style={style}
+      {...attributes}
+      {...listeners}
       className={cn(
-        "relative h-24 w-full select-none",
-        isDragging && "z-50 scale-105 rotate-3 shadow-xl",
+        "relative h-24 w-full overflow-hidden rounded-xl border-2 transition-all duration-200 select-none",
+        isDragging
+          ? "z-50 scale-105 rotate-3 cursor-grabbing border-blue-400 shadow-xl"
+          : cn(
+              "cursor-grab border-gray-200 hover:border-gray-300",
+              selected && "border-blue-400 hover:border-blue-500",
+            ),
       )}
+      onClick={(e) => {
+        e.stopPropagation();
+        if (isBusy || isDragging) return;
+        onSelect();
+      }}
     >
-      <div
-        {...attributes}
-        {...listeners}
-        className={cn(
-          "absolute inset-0 overflow-hidden rounded-xl border-2 transition-all duration-200",
-          isDragging
-            ? "cursor-grabbing border-blue-400"
-            : cn(
-                "cursor-grab border-gray-200 hover:border-gray-300",
-                selected && "border-blue-400 hover:border-blue-500",
-              ),
-        )}
-        style={{
-          touchAction: "none",
-        }}
-        onClick={(e) => {
-          e.stopPropagation();
-          if (isBusy || isDragging) return;
-          onSelect();
-        }}
-      >
-        <Image
-          src={buildR2TransformedUrl(src)}
-          alt={`image_${id}`}
-          fill
-          className="cursor-pointer object-cover"
-          draggable={false}
-        />
-      </div>
+      <Image
+        src={buildR2TransformedUrl(src)}
+        alt={`image_${id}`}
+        fill
+        className="pointer-events-none object-cover"
+        draggable={false}
+      />
 
       {!disabled && !isBusy && (
         <button
           type="button"
-          onClick={onDelete}
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete();
+          }}
           className={cn(
             "absolute top-1 right-1 z-10 inline-flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-red-500 text-white shadow-sm transition-all duration-200",
             "hover:bg-red-600 active:scale-95",

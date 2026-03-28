@@ -4,7 +4,10 @@ import QRCode from "./QR코드";
 import { cn } from "@/lib/utils";
 import { PetDto } from "@repo/api-client";
 import Link from "next/link";
-import DeletePetButton from "./DeletePetButton";
+import { Share2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { toast } from "@/lib/toast";
+import { isNativeApp, requestShare } from "@/lib/native-bridge";
 import { useAdoptionStore } from "@/app/(브리더스룸)/pet/store/adoption";
 import { useEffect, useState } from "react";
 import TooltipText from "@/app/(브리더스룸)/components/TooltipText";
@@ -31,8 +34,6 @@ interface HeaderProps {
   tabs?: { id: TabType; label: string; ref: React.RefObject<HTMLDivElement | null> }[];
   activeTab?: TabType;
   onTabClick?: (tabId: TabType, ref: React.RefObject<HTMLDivElement | null>) => void;
-  /** 펫 삭제 성공 시 콜백 */
-  onDelete?: () => void;
 }
 
 const Header = ({
@@ -41,7 +42,6 @@ const Header = ({
   tabs = [],
   activeTab,
   onTabClick = () => {},
-  onDelete,
 }: HeaderProps) => {
   const isMyPet = useIsMyPet(pet?.owner?.userId);
   const { isLoggedIn, user } = useAuth();
@@ -118,7 +118,7 @@ const Header = ({
   return (
     <div
       className={cn(
-        "dark:bg-background sticky top-0 z-20 flex flex-col gap-2 bg-gray-100 px-2 transition-all transition-shadow duration-200",
+        "dark:bg-background sticky top-0 z-20 flex flex-col gap-2 bg-gray-100 px-2 transition-all duration-200",
         isScrolled ? "pt-2 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1)] min-[581px]:pb-2" : "",
         size === "small" &&
           "before:dark:bg-background top-1.5 before:absolute before:-top-2 before:right-0 before:left-0 before:h-2 before:bg-gray-100 min-[581px]:pb-2", // 모달에서 X 버튼 아래로 위치
@@ -196,7 +196,7 @@ const Header = ({
             <button
               type="button"
               onClick={() => router.push(`/@${encodeURIComponent(pet.owner!.name!)}`)}
-              className="mt-1 text-left text-[12px] font-medium text-blue-500 transition-colors hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300"
+              className="mt-1 w-fit text-left text-[12px] font-medium text-blue-500 transition-colors hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300"
             >
               @{pet.owner.name}
             </button>
@@ -212,14 +212,45 @@ const Header = ({
           </div>
         </div>
 
-        <div className={cn("flex flex-col items-end gap-1 sm:flex-row-reverse sm:items-center", size === "small" && "mt-2")}>
+        <div
+          className={cn(
+            "flex flex-col items-end gap-1 sm:flex-row-reverse sm:items-center",
+            size === "small" && "mt-2",
+          )}
+        >
           <div className="flex items-center gap-1">
             {/* QR코드 */}
             <QRCode pet={pet} isScrolled={isScrolled} />
-            {/* 개체 삭제 버튼 */}
-            {isLoggedIn && isMyPet && (
-              <DeletePetButton petId={pet.petId} petName={pet.name} onSuccess={onDelete} />
-            )}
+            {/* 공유 */}
+            <Button
+              size="sm"
+              variant="outline"
+              aria-label="펫 페이지 링크 복사"
+              title="링크 복사"
+              onClick={async () => {
+                const url = `${window.location.origin}/pet/${pet.petId}`;
+                if (isNativeApp()) {
+                  const shared = requestShare(url, pet.name ?? "펫 페이지");
+                  if (!shared) {
+                    await navigator.clipboard.writeText(url);
+                    toast.success("링크가 복사되었습니다");
+                  }
+                  return;
+                }
+                try {
+                  await navigator.clipboard.writeText(url);
+                  toast.success("펫 페이지 링크가 복사되었습니다");
+                } catch {
+                  toast.error("링크 복사에 실패했습니다");
+                }
+              }}
+              className={cn(
+                "text-amber-500 hover:bg-amber-100 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800",
+                isScrolled ? "text-xs" : "text-sm",
+              )}
+            >
+              <Share2 className="h-4 w-4" />
+            </Button>
           </div>
           <div className="flex items-center gap-1">
             {/* 브리딩맵 */}

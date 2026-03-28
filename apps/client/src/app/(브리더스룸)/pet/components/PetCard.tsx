@@ -19,10 +19,13 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { DateTime } from "luxon";
 import PetHoverPreview from "./PetHoverPreview";
 import { useDebouncedHover } from "@/hooks/useDebouncedHover";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface PetCardProps {
   pet: PetDto;
   onCardClick: (pet: PetDto) => void;
+  isExportMode?: boolean;
+  isSelected?: boolean;
 }
 
 type HoveredParent = { petId: string; name?: string; status?: string } | null;
@@ -56,6 +59,8 @@ const renderParent = (
     <span
       onMouseEnter={() => onHover({ petId: p.petId, name: p.name, status: p.status })}
       onMouseLeave={() => onHover(null)}
+      onClick={(e) => e.stopPropagation()}
+      onPointerDown={(e) => e.stopPropagation()}
     >
       <LinkButton
         href={`/pet/${p.petId}`}
@@ -72,7 +77,7 @@ const renderParent = (
   );
 };
 
-export default function PetCard({ pet, onCardClick }: PetCardProps) {
+export default function PetCard({ pet, onCardClick, isExportMode, isSelected }: PetCardProps) {
   const adoptionStatus = pet.adoption?.status;
   const dotColor =
     pet.sex === "M"
@@ -87,12 +92,22 @@ export default function PetCard({ pet, onCardClick }: PetCardProps) {
 
   return (
     <div
-      className={`relative flex cursor-pointer flex-col gap-1 rounded-xl border border-gray-200/70 bg-neutral-50 p-2 transition-all duration-150 hover:shadow-md dark:border-gray-700/60 dark:bg-[#18171C] ${pressed ? "scale-[0.98] dark:bg-gray-800" : ""}`}
+      className={`relative flex cursor-pointer flex-col gap-1 rounded-xl border bg-neutral-50 p-2 transition-all duration-150 hover:shadow-md dark:bg-[#18171C] ${isExportMode && isSelected ? "border-blue-500 bg-blue-50/50 dark:border-blue-400 dark:bg-blue-950/30" : "border-gray-200/70 dark:border-gray-700/60"} ${pressed ? "scale-[0.98] dark:bg-gray-800" : ""}`}
       onClick={() => onCardClick(pet)}
       onPointerDown={() => setPressed(true)}
       onPointerUp={() => setPressed(false)}
       onPointerLeave={() => setPressed(false)}
     >
+      {isExportMode && (
+        <div className="absolute top-2 left-2 z-10">
+          <Checkbox
+            checked={isSelected}
+            onCheckedChange={() => onCardClick(pet)}
+            onClick={(e) => e.stopPropagation()}
+            className="h-5 w-5 border-2 bg-white shadow-sm dark:bg-gray-800"
+          />
+        </div>
+      )}
       <div className="flex gap-2">
         {/* 이미지 */}
         <div className="relative flex h-20 w-20 shrink-0 flex-col items-center gap-0.5 self-center">
@@ -146,8 +161,6 @@ export default function PetCard({ pet, onCardClick }: PetCardProps) {
           {/* 부모 정보 */}
           <div
             className="flex items-center gap-1 truncate text-xs"
-            onClick={(e) => e.stopPropagation()}
-            onPointerDown={(e) => e.stopPropagation()}
             onMouseMove={(e) => setMousePos({ x: e.clientX, y: e.clientY })}
           >
             <span className="shrink-0 text-gray-400">부모</span>

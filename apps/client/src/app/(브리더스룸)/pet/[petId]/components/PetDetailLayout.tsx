@@ -4,6 +4,7 @@ import { ReactNode, RefObject, useEffect, useRef, useState } from "react";
 import { PetDto } from "@repo/api-client";
 import { useIsMyPet } from "@/hooks/useIsMyPet";
 import Header from "./Header";
+import DeletePetButton from "./DeletePetButton";
 import { useIsMobile } from "@/hooks/useMobile";
 import { cn } from "@/lib/utils";
 
@@ -161,8 +162,8 @@ export default function PetDetailLayout({
   }[] = [
     { id: "images", label: "이미지", ref: imagesRef },
     { id: "breeding", label: "개체정보", ref: breedingRef },
-    ...(isMyPet ? [{ id: "adoption" as TabType, label: "분양정보", ref: adoptionRef }] : []),
     { id: "pedigree", label: "혈통정보", ref: pedigreeRef },
+    ...(isMyPet ? [{ id: "adoption" as TabType, label: "분양정보", ref: adoptionRef }] : []),
     ...(isMyPet && feedingSlot
       ? [{ id: "feeding" as TabType, label: "피딩정보", ref: feedingRef }]
       : []),
@@ -176,7 +177,6 @@ export default function PetDetailLayout({
         activeTab={activeTab}
         onTabClick={handleTabClick}
         size={variant === "modal" ? "small" : "medium"}
-        onDelete={onDelete}
       />
 
       <div className="flex flex-wrap gap-3 px-2 pt-2">
@@ -224,6 +224,18 @@ export default function PetDetailLayout({
           </div>
         )}
       </div>
+
+      {/* 개체 삭제 */}
+      {isMyPet && (
+        <div className="flex justify-end px-2 max-[580px]:justify-stretch">
+          <DeletePetButton
+            petId={pet.petId}
+            petName={pet.name}
+            onSuccess={onDelete}
+            label="개체 정보 삭제"
+          />
+        </div>
+      )}
     </>
   );
 

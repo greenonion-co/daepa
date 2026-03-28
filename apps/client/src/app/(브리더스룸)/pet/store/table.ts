@@ -5,6 +5,7 @@ interface TableState<TData> {
   // 테이블 상태
   sorting: SortingState;
   rowSelection: Record<string, boolean>;
+  isExportMode: boolean;
 
   // 데이터
   data: TData[];
@@ -15,6 +16,7 @@ interface TableState<TData> {
     updater: Record<string, boolean> | ((prev: Record<string, boolean>) => Record<string, boolean>),
   ) => void;
   setData: (data: TData[]) => void;
+  setExportMode: (mode: boolean) => void;
 }
 
 const createTableStore = <TData>() =>
@@ -22,6 +24,7 @@ const createTableStore = <TData>() =>
     // 초기 상태
     sorting: [],
     rowSelection: {},
+    isExportMode: false,
     data: [],
 
     // 액션
@@ -34,6 +37,7 @@ const createTableStore = <TData>() =>
         rowSelection: typeof updater === "function" ? updater(state.rowSelection) : updater,
       })),
     setData: (data) => set({ data }),
+    setExportMode: (mode) => set({ isExportMode: mode, rowSelection: {} }),
   }));
 
 const useTableStore = createTableStore();

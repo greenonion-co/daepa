@@ -17,24 +17,41 @@ export type WebViewParams = {
   path?: string;
 };
 
-// Tab Navigator params (일반 모드)
-export type GeneralTabParamList = {
+// Tab Navigator params (비로그인)
+export type GuestTabParamList = {
   Home: WebViewParams | undefined;
   AddPet: undefined;
   Settings: undefined;
 };
 
-// Tab Navigator params (관리자 모드)
-export type AdminTabParamList = {
+// Tab Navigator params (로그인 1depth)
+export type MemberMainTabParamList = {
   Home: WebViewParams | undefined;
-  Hatching: undefined;
+  Pet: undefined;
   AddPet: undefined;
-  Adoption: undefined;
-  Settings: undefined;
+  Sales: undefined;
+  All: undefined;
+};
+
+// Tab Navigator params (로그인 2depth - 개체 관리)
+export type PetTabParamList = {
+  PetList: WebViewParams | undefined;
+  Hatching: WebViewParams | undefined;
+  AddPet: undefined;
+};
+
+// Tab Navigator params (로그인 2depth - 분양)
+export type SalesTabParamList = {
+  Adoption: WebViewParams | undefined;
+  Showroom: WebViewParams | undefined;
+  AddPet: undefined;
 };
 
 // 통합 Tab params
-export type TabParamList = GeneralTabParamList & AdminTabParamList;
+export type TabParamList = GuestTabParamList &
+  MemberMainTabParamList &
+  PetTabParamList &
+  SalesTabParamList;
 
 // 모든 화면의 params를 중앙에서 관리
 export type RootStackParamList = {
@@ -49,6 +66,9 @@ export type RootStackParamList = {
 
   // WebView (하이브리드)
   Main: WebViewParams | undefined;
+
+  // QR 스캐너
+  QrScanner: undefined;
 };
 
 // Navigation prop 타입들
