@@ -135,7 +135,8 @@ const Header = ({
           <PetThumbnail petId={pet.petId} maxSize={72} objectFit="cover" />
         </div>
         <div className="flex flex-1 flex-col">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
+            <span className={`h-2 w-2 shrink-0 rounded-full ${dotColor}`} />
             {displayName ? (
               <div
                 className={cn(
@@ -175,28 +176,31 @@ const Header = ({
                 )}
               </div>
             )}
-            <span className={`h-2 w-2 shrink-0 rounded-full ${dotColor}`} />
           </div>
 
-          <div className="flex items-center gap-1">
-            <span
-              className={cn(
-                "inline-flex items-center rounded-full px-2 py-0.5 text-[11px] leading-none font-medium",
-                breedingData?.isPublic
-                  ? "bg-[#35B0AB] text-white dark:bg-[#2B9A94]"
-                  : "bg-[#D5D5D4] text-[#55534E] dark:bg-[#3F3F3F] dark:text-[#9B9A97]",
+          {adoptionData?.status && (
+            <div className="flex items-center gap-1">
+              {isMyPet && (
+                <span
+                  className={cn(
+                    "inline-flex shrink-0 items-center rounded-full px-2 py-0.5 text-[11px] leading-none font-medium",
+                    breedingData?.isPublic
+                      ? "bg-[#35B0AB] text-white dark:bg-[#2B9A94]"
+                      : "bg-[#D5D5D4] text-[#55534E] dark:bg-[#3F3F3F] dark:text-[#9B9A97]",
+                  )}
+                >
+                  {breedingData?.isPublic ? "공개" : "비공개"}
+                </span>
               )}
-            >
-              {breedingData?.isPublic ? "공개" : "비공개"}
-            </span>
-            {adoptionData?.status && <AdoptionStatusBadge status={adoptionData.status} />}
-          </div>
+              <AdoptionStatusBadge status={adoptionData.status} />
+            </div>
+          )}
 
           {pet.owner?.name && (
             <button
               type="button"
               onClick={() => router.push(`/@${encodeURIComponent(pet.owner!.name!)}`)}
-              className="mt-1 w-fit text-left text-[12px] font-medium text-blue-500 transition-colors hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300"
+              className="my-0.5 w-fit text-left text-[12px] font-medium text-gray-500 transition-colors hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300"
             >
               @{pet.owner.name}
             </button>
@@ -204,7 +208,7 @@ const Header = ({
 
           <div
             className={cn(
-              "font-semibold text-green-600 transition-all max-[480px]:text-[16px]",
+              "font-semibold text-emerald-500 transition-all max-[480px]:text-[16px]",
               isScrolled ? "text-[16px]" : "text-[18px]",
             )}
           >
