@@ -14,7 +14,7 @@ import { useDropzone } from "react-dropzone";
 import Image from "next/image";
 import { buildR2TransformedUrl, cn, compressImageFile } from "@/lib/utils";
 import { toast } from "@/lib/toast";
-import { X, Plus, Maximize2, ImageOff } from "lucide-react";
+import { X, Plus, Expand, ImageOff } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { isNil, range, remove } from "es-toolkit";
 import { ACCEPT_IMAGE_FORMATS } from "../../constants";
@@ -300,7 +300,22 @@ export default function DndImagePicker({
       {/* 선택한 이미지 미리보기 */}
       {selectedIndex !== null && images[selectedIndex] ? (
         <div className="mt-3 overflow-hidden rounded-xl border border-gray-200">
-          <div className="relative aspect-[4/3] w-full">
+          <div
+            className="relative aspect-[4/3] w-full cursor-pointer"
+            onClick={() => {
+              const image = images[selectedIndex];
+              if (!image) return;
+              overlay.open(({ isOpen, close, unmount }) => (
+                <ImageViewer
+                  isOpen={isOpen}
+                  onClose={close}
+                  onExit={unmount}
+                  imageUrl={image.url}
+                  fileName={image.fileName}
+                />
+              ));
+            }}
+          >
             <Image
               src={buildR2TransformedUrl(images[selectedIndex].url, IMAGE_TRANSFORMS.lg)}
               alt={`preview_${images[selectedIndex].fileName}`}
@@ -309,26 +324,9 @@ export default function DndImagePicker({
               draggable={false}
               priority={false}
             />
-            <button
-              type="button"
-              onClick={() => {
-                const image = images[selectedIndex];
-                if (!image) return;
-                overlay.open(({ isOpen, close, unmount }) => (
-                  <ImageViewer
-                    isOpen={isOpen}
-                    onClose={close}
-                    onExit={unmount}
-                    imageUrl={image.url}
-                    fileName={image.fileName}
-                  />
-                ));
-              }}
-              className="absolute right-2 bottom-2 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white transition-colors hover:bg-black/70"
-              aria-label="전체화면으로 보기"
-            >
-              <Maximize2 className="h-4 w-4" />
-            </button>
+            <div className="absolute right-2 bottom-2 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white transition-colors hover:bg-black/70">
+              <Expand className="h-4 w-4" />
+            </div>
           </div>
         </div>
       ) : (
