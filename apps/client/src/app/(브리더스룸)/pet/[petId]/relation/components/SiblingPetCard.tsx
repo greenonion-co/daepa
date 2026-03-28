@@ -144,8 +144,8 @@ export default function SiblingPetCard({
           )}
         </div>
 
-        <BadgeList variant={"outline"} items={pet.morphs} />
-        <BadgeList items={pet.traits} variant={"secondary"} />
+        <BadgeList variant={"outline"} items={pet.morphs} badgeSize="sm" />
+        <BadgeList items={pet.traits} variant={"secondary"} badgeSize="sm" />
 
         {price !== undefined && (
           <span className="mt-1 text-[13px] font-bold text-emerald-600">{formatPrice(price)}</span>
@@ -188,10 +188,11 @@ export default function SiblingPetCard({
           ) : null}
         </div>
 
-        <BadgeList items={pet.morphs} />
+        <BadgeList items={pet.morphs} badgeSize="sm" />
         <BadgeList
           items={pet.traits}
           variant="outline"
+          badgeSize="sm"
           badgeClassName="bg-white text-black dark:bg-gray-700 dark:text-gray-200"
         />
       </div>
