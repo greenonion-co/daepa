@@ -205,7 +205,7 @@ export default function PetDetailPanel({
               onClick={() => onAction("relation", pet.petId)}
               className="flex w-full items-center justify-between rounded-lg border border-gray-200 bg-gray-100 px-2.5 py-1 text-[11px] text-gray-700 transition-colors hover:bg-gray-200 active:bg-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 dark:active:bg-gray-600"
             >
-              관계도
+              혈통
               <ChevronRight className="h-3 w-3 text-gray-700 dark:text-gray-300" />
             </button>
           </div>

@@ -179,22 +179,28 @@ function SiblingsPageContent({ params }: PetDetailPageProps) {
   return (
     <div className={cn("flex flex-col gap-6 p-4", isMobile && "p-2")}>
       {/* 1. 부모 프로필 */}
-      {parentsData?.father || parentsData?.mother ? (
+      <div className="flex gap-4">
         <section>
-          <h2 className="mb-3 text-[16px] font-bold text-gray-900 dark:text-gray-300">부모</h2>
-          <HorizontalScrollSection>
-            {parentsData.father && <SiblingPetCard pet={parentsData.father} />}
-            {parentsData.mother && <SiblingPetCard pet={parentsData.mother} />}
-          </HorizontalScrollSection>
+          <h2 className="mb-3 text-[16px] font-bold text-gray-900 dark:text-gray-300">부</h2>
+          {parentsData?.father ? (
+            <HorizontalScrollSection>
+              <SiblingPetCard pet={parentsData.father} />
+            </HorizontalScrollSection>
+          ) : (
+            <p className="text-xs text-gray-500 dark:text-gray-400">등록된 부개체 정보가 없습니다.</p>
+          )}
         </section>
-      ) : (
-        <div className="flex flex-col items-center justify-center py-12 text-center">
-          <p className="text-sm text-gray-400 dark:text-gray-500">등록된 부/모 정보가 없습니다.</p>
-          <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
-            부/모를 등록해 관계도를 확인해보세요.
-          </p>
-        </div>
-      )}
+        <section className="min-w-0 overflow-hidden">
+          <h2 className="mb-3 text-[16px] font-bold text-gray-900 dark:text-gray-300">모</h2>
+          {parentsData?.mother ? (
+            <HorizontalScrollSection>
+              <SiblingPetCard pet={parentsData.mother} />
+            </HorizontalScrollSection>
+          ) : (
+            <p className="text-xs text-gray-500 dark:text-gray-400">등록된 모개체 정보가 없습니다.</p>
+          )}
+        </section>
+      </div>
       <div className="flex gap-4">
         {/* 2. 내 프로필 */}
         {myProfile && (
@@ -221,7 +227,7 @@ function SiblingsPageContent({ params }: PetDetailPageProps) {
 
       {/* 4. 부모가 같은 펫 */}
       <section className="min-w-0 overflow-hidden">
-        <h2 className="mb-3 text-[16px] font-bold text-gray-900">부모가 같은 개체</h2>
+        <h2 className="mb-3 text-[16px] font-bold text-gray-900">동배</h2>
         <HorizontalScrollSection
           hasMore={hasNextSiblings}
           isLoading={isFetchingNextSiblings}
@@ -232,7 +238,7 @@ function SiblingsPageContent({ params }: PetDetailPageProps) {
               return <SiblingPetCard key={sibling.petId} pet={sibling} />;
             })
           ) : (
-            <div className="text-xs text-gray-500">부모가 같은 개체가 없습니다.</div>
+            <div className="text-xs text-gray-500">동배 개체가 없습니다.</div>
           )}
         </HorizontalScrollSection>
       </section>

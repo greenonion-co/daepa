@@ -287,8 +287,8 @@ const Header = ({
               )}
             >
               <TooltipText
-                text="관계도"
-                title="개체 관계도"
+                text="혈통"
+                title="개체 혈통 관계도"
                 className="text-gray-600 dark:text-gray-300"
                 content="혈통 관계가 있는 개체들을 확인합니다."
               />
