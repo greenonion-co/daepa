@@ -14,7 +14,6 @@ import { useCallback, useState } from "react";
 import { AxiosError } from "axios";
 import { toast } from "@/lib/toast";
 import { useUserStore } from "@/app/(브리더스룸)/store/user";
-import { Info } from "lucide-react";
 import { useIsMyPet } from "@/hooks/useIsMyPet";
 import { PetParentDtoWithMessage } from "../../store/parentLink";
 import ParentLink from "../../components/ParentLink";
