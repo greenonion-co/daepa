@@ -139,7 +139,7 @@ export default function PetList() {
             <button
               type="button"
               onClick={() => setExportMode(true)}
-              className="flex cursor-pointer items-center gap-1 rounded-lg bg-emerald-600 p-2 text-sm font-semibold text-white hover:bg-emerald-700"
+              className="flex cursor-pointer items-center gap-1 rounded-lg bg-emerald-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-emerald-700"
             >
               <FileSpreadsheet className="h-4 w-4" />
               라벨링 목록 추출

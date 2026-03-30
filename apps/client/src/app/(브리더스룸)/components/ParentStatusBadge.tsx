@@ -3,18 +3,15 @@ import ParentStatusIcon from "./ParentStatusIcon";
 
 const statusStyle: Record<string, { className: string; label: string }> = {
   approved: {
-    className:
-      "bg-green-100 text-[#0F7B6C] dark:bg-green-900/30 dark:text-[#4DAB9A]",
-    label: "인증",
+    className: "bg-green-100 text-[#0F7B6C] dark:bg-green-900/30 dark:text-[#4DAB9A]",
+    label: "인증 완료",
   },
   pending: {
-    className:
-      "bg-orange-100 text-[#D9730D] dark:bg-orange-900/30 dark:text-[#FFA344]",
+    className: "bg-orange-100 text-[#D9730D] dark:bg-orange-900/30 dark:text-[#FFA344]",
     label: "요청",
   },
   rejected: {
-    className:
-      "bg-red-100 text-[#E03E3E] dark:bg-red-900/30 dark:text-[#FF7369]",
+    className: "bg-red-100 text-[#E03E3E] dark:bg-red-900/30 dark:text-[#FF7369]",
     label: "거절",
   },
 };

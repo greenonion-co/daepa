@@ -6,7 +6,8 @@ import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import Loading from "./Loading";
 import { IMAGE_TRANSFORMS } from "@/app/constants";
-import { SmilePlus } from "lucide-react";
+import { PawPrint, ImageOff } from "lucide-react";
+import { useEffect, useState } from "react";
 
 /** maxSize 기준으로 적절한 transform 선택 */
 const getTransform = (maxSize: number) => {
@@ -90,8 +91,13 @@ const PetThumbnail = ({
     gcTime: Infinity,
   });
 
+  const [hasError, setHasError] = useState(false);
   const transform = getTransform(maxSize);
   const imageUrl = thumbnail?.url ? buildR2TransformedUrl(thumbnail.url, transform) : null;
+
+  useEffect(() => {
+    setHasError(false);
+  }, [imageUrl]);
 
   return (
     <div
@@ -99,19 +105,23 @@ const PetThumbnail = ({
     >
       {isLoading ? (
         <Loading />
-      ) : imageUrl ? (
-        <>
-          <Image
-            src={imageUrl}
-            alt={alt}
-            fill
-            sizes={`${maxSize}px`}
-            className={objectFit === "cover" ? "object-cover" : "object-contain"}
-          />
-        </>
+      ) : imageUrl && !hasError ? (
+        <Image
+          src={imageUrl}
+          alt={alt}
+          fill
+          sizes={`${maxSize}px`}
+          className={objectFit === "cover" ? "object-cover" : "object-contain"}
+          onError={() => setHasError(true)}
+        />
+      ) : hasError ? (
+        <div className="flex h-full w-full flex-col items-center justify-center gap-1 opacity-50">
+          <ImageOff className="h-1/4 w-1/4 text-red-500" aria-hidden="true" />
+          <span className="text-[10px] text-red-500">이미지 오류</span>
+        </div>
       ) : (
         <div className="flex h-full w-full items-center justify-center opacity-30">
-          <SmilePlus className="h-1/3 w-1/3" aria-hidden="true" />
+          <PawPrint className="h-1/4 w-1/4" aria-hidden="true" />
           <span className="sr-only">{alt}</span>
         </div>
       )}
