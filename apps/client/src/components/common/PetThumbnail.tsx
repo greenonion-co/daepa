@@ -7,7 +7,7 @@ import Image from "next/image";
 import Loading from "./Loading";
 import { IMAGE_TRANSFORMS } from "@/app/constants";
 import { PawPrint, ImageOff } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 /** maxSize 기준으로 적절한 transform 선택 */
 const getTransform = (maxSize: number) => {
@@ -94,6 +94,10 @@ const PetThumbnail = ({
   const [hasError, setHasError] = useState(false);
   const transform = getTransform(maxSize);
   const imageUrl = thumbnail?.url ? buildR2TransformedUrl(thumbnail.url, transform) : null;
+
+  useEffect(() => {
+    setHasError(false);
+  }, [imageUrl]);
 
   return (
     <div
