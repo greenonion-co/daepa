@@ -206,7 +206,13 @@ const ParentLink = ({
     <div className="flex-1">
       <dt className="mb-2 flex items-center gap-2 text-xs font-medium text-gray-500 dark:text-gray-400">
         {label}
-        {parent?.status && <ParentStatusBadge status={parent.status} />}
+        {parent?.status && (
+          <ParentStatusBadge
+            status={parent.status}
+            ownerName={parent.owner?.name ?? undefined}
+            parentName={parent.name ?? undefined}
+          />
+        )}
       </dt>
 
       <div className="group relative block h-full w-full transition-opacity hover:opacity-95">
