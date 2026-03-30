@@ -2,7 +2,7 @@
  * CSV 파일로부터 펫 데이터를 DB에 일괄 등록하는 스크립트
  *
  * 실행 방법:
- *   cd apps/server && npx ts-node scripts/upsert-pets.ts scripts/data/petlist.csv
+ *   cd apps/server && npx ts-node scripts/upsert-pets.ts scripts/data/sheet.csv
  *
  * 또는 절대 경로로:
  *   cd apps/server && npx ts-node scripts/upsert-pets.ts /path/to/your/file.csv
@@ -59,7 +59,7 @@ interface CsvRow {
   모프?: string;
   형질?: string;
   크기?: string;
-  '몸무게(g)'?: string;
+  몸무게?: string;
   먹이?: string;
   분양상태?: string;
   부개체?: string;
@@ -141,13 +141,13 @@ function mapCsvRow(row: CsvRow): PetData {
   return {
     species: safeString(row['종']),
     name: safeString(row['개체 이름']),
-    isPrivate: parseBoolean(row['비공개']),
+    isPrivate: !parseBoolean(row['공개']),
     hatchingDate: safeString(row['해칭일(YYYY-MM-DD)']) || null,
     sex: safeString(row['성별']),
     morphs: parseArray(row['모프']),
     traits: parseArray(row['형질']),
     growth: safeString(row['크기']),
-    weight: parseNumber(row['몸무게(g)']),
+    weight: parseNumber(row['몸무게']),
     foods: parseArray(row['먹이']),
     adoptionStatus: safeString(row['분양상태']),
     fatherName: safeString(row['부개체']) || null,
