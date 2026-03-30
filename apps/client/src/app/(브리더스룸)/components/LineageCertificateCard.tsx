@@ -31,7 +31,7 @@ const LineageCertificateCard = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent
         showCloseButton={false}
-        className="max-w-xs border-0 bg-transparent p-0 shadow-none sm:max-w-xs"
+        className="max-w-xs border-0 bg-transparent p-0 shadow-none outline-none sm:max-w-xs"
       >
         <VisuallyHidden>
           <DialogTitle>혈통인증서</DialogTitle>
