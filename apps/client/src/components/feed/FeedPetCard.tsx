@@ -54,6 +54,12 @@ export default function FeedPetCard({ pet }: FeedPetCardProps) {
               {pet.name || "이름 없음"}
             </h3>
             {sexLabel}
+            {/* 날짜 */}
+            {pet.hatchingDate && (
+              <p className="ml-auto text-xs font-semibold text-gray-400 dark:text-gray-500">
+                {DateTime.fromISO(pet.hatchingDate).toFormat("yy.M.d")}
+              </p>
+            )}
           </div>
 
           {/* 모프 & 형질 */}
@@ -88,13 +94,6 @@ export default function FeedPetCard({ pet }: FeedPetCardProps) {
           {/* 설명 */}
           {pet.desc && (
             <p className="line-clamp-2 text-sm text-gray-600 dark:text-gray-400">{pet.desc}</p>
-          )}
-
-          {/* 날짜 */}
-          {pet.hatchingDate && (
-            <p className="text-xs text-gray-400 dark:text-gray-500">
-              {DateTime.fromISO(pet.hatchingDate).toFormat("yyyy년 M월 d일")} 출생
-            </p>
           )}
         </div>
       </Link>
