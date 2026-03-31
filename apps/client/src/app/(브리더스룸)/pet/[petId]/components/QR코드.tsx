@@ -21,6 +21,7 @@ import { useIsMyPet } from "@/hooks/useIsMyPet";
 interface QRCodeProps {
   pet: PetDto;
   isScrolled: boolean;
+  adoptionPrice?: number;
 }
 
 type PetInfoOption = {
@@ -31,7 +32,7 @@ type PetInfoOption = {
 
 const SIZE_PRESETS = [
   { label: "S", width: 2.5, height: 0.75 },
-  { label: "M", width: 4, height: 1.2 },
+  { label: "M", width: 5, height: 2 },
   { label: "L", width: 6.5, height: 2 },
 ] as const;
 
@@ -46,7 +47,7 @@ const PET_INFO_OPTIONS: PetInfoOption[] = [
     id: "hatchingDate",
     label: "해칭일",
     getValue: (pet) =>
-      pet.hatchingDate ? DateTime.fromISO(pet.hatchingDate).toFormat("yy.MM.dd") : null,
+      pet.hatchingDate ? DateTime.fromISO(pet.hatchingDate).toFormat("yy.M.d") : null,
   },
   {
     id: "sex",
@@ -72,10 +73,19 @@ const PET_INFO_OPTIONS: PetInfoOption[] = [
   { id: "morphs", label: "모프", getValue: (pet) => pet.morphs?.slice(0, 3).join(" ") || null },
   { id: "traits", label: "형질", getValue: (pet) => pet.traits?.slice(0, 3).join(" ") || null },
   // { id: "foods", label: "먹이", getValue: (pet) => pet.foods?.slice(0, 3).join(" | ") || null },
+  {
+    id: "price",
+    label: "가격",
+    getValue: (pet) => {
+      const price = pet.adoption?.price;
+      if (price == null) return null;
+      return `${price / 10000}만`;
+    },
+  },
 ];
 
 /** 트리거 버튼 + 다이얼로그 open 상태 관리 */
-const QRCode = ({ pet, isScrolled }: QRCodeProps) => {
+const QRCode = ({ pet, isScrolled, adoptionPrice }: QRCodeProps) => {
   const [qrOpen, setQrOpen] = useState(false);
 
   return (
@@ -94,31 +104,39 @@ const QRCode = ({ pet, isScrolled }: QRCodeProps) => {
           <span className="hidden sm:inline">QR</span>
         </Button>
 
-        {qrOpen && <QRCodeDialogContent pet={pet} />}
+        {qrOpen && <QRCodeDialogContent pet={pet} adoptionPrice={adoptionPrice} />}
       </Dialog>
     </div>
   );
 };
 
 /** 다이얼로그 콘텐츠 — 열릴 때마다 마운트되어 서버에서 최신 pet 데이터를 가져옴 */
-function QRCodeDialogContent({ pet: petProp }: { pet: PetDto }) {
+function QRCodeDialogContent({ pet: petProp, adoptionPrice }: { pet: PetDto; adoptionPrice?: number }) {
   // 마운트 시 최신 데이터 fetch (staleTime=0 기본값이므로 자동 리패치)
   const { data: freshPet } = useQuery({
     queryKey: [petControllerFindPetByPetId.name, petProp.petId],
     queryFn: () => petControllerFindPetByPetId(petProp.petId),
     select: (response) => response.data.data,
   });
-  const pet = (freshPet as PetDto) ?? petProp;
+  const basePet = (freshPet as PetDto) ?? petProp;
+  // adoption price는 별도 store에서 관리되므로 pet 객체에 주입
+  const pet = adoptionPrice != null
+    ? { ...basePet, adoption: { ...basePet.adoption, price: adoptionPrice } as PetDto["adoption"] }
+    : basePet;
 
   const isMyPet = useIsMyPet(pet.owner.userId);
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string>("");
   const [previewDataUrl, setPreviewDataUrl] = useState<string>("");
-  const [selectedOptions, setSelectedOptions] = useState<string[]>(
-    PET_INFO_OPTIONS.filter((opt) => opt.getValue(petProp)).map((opt) => opt.id),
+  const [selectedOptions, setSelectedOptions] = useState<string[]>(() =>
+    PET_INFO_OPTIONS.filter((opt) => opt.getValue(
+      adoptionPrice != null
+        ? { ...petProp, adoption: { ...petProp.adoption, price: adoptionPrice } as PetDto["adoption"] }
+        : petProp,
+    )).map((opt) => opt.id),
   );
   const [selectedPreset, setSelectedPreset] = useState<string | null>("M");
-  const [customWidth, setCustomWidth] = useState(4);
-  const [customHeight, setCustomHeight] = useState(1.2);
+  const [customWidth, setCustomWidth] = useState("5");
+  const [customHeight, setCustomHeight] = useState("2");
   const [isDownloading, setIsDownloading] = useState(false);
   const [qrError, setQrError] = useState(false);
 
@@ -160,8 +178,10 @@ function QRCodeDialogContent({ pet: petProp }: { pet: PetDto }) {
 
     const scale = 2; // 렌더링 선명도용 배율
     const CM_TO_PX = 300 / 2.54 / scale; // 논리 px/cm (실제 px = 논리 × scale → 300 DPI 유지)
-    const width = Math.round(customWidth * CM_TO_PX);
-    const height = Math.round(customHeight * CM_TO_PX);
+    const parsedWidth = Number(customWidth) || 1;
+    const parsedHeight = Number(customHeight) || 1;
+    const width = Math.round(parsedWidth * CM_TO_PX);
+    const height = Math.round(parsedHeight * CM_TO_PX);
     const padding = Math.round(height * 0.07);
     let fontSize = 0; // infoLines 구성 후 동적 계산
     let lineHeight = 0;
@@ -214,7 +234,8 @@ function QRCodeDialogContent({ pet: petProp }: { pet: PetDto }) {
       lineHeight = Math.round(fontSize * 1.5);
     }
 
-    const totalHeight = height;
+    const infoHeight = hasInfo ? infoLines.length * lineHeight : 0;
+    const totalHeight = Math.max(height, infoHeight + padding * 2);
 
     // 텍스트 너비 측정 → 줄바꿈 없이 캔버스 너비를 텍스트에 맞게 확장
     let totalWidth: number;
@@ -247,7 +268,6 @@ function QRCodeDialogContent({ pet: petProp }: { pet: PetDto }) {
 
     // 펫 정보 (QR 우측, 세로 중앙 정렬)
     if (hasInfo) {
-      const infoHeight = infoLines.length * lineHeight;
       ctx.fillStyle = "#333333";
       ctx.textAlign = "left";
       const infoX = qrSize + padding * 2;
@@ -295,9 +315,7 @@ function QRCodeDialogContent({ pet: petProp }: { pet: PetDto }) {
 
       <div className="flex flex-col items-center gap-4">
         {/* QR 코드 미리보기 */}
-        <div
-          className="flex w-full items-center justify-center rounded-lg bg-white p-2"
-        >
+        <div className="flex w-full items-center justify-center rounded-lg bg-white p-2">
           {qrError ? (
             <div className="flex h-[200px] w-[200px] items-center justify-center text-sm text-red-500">
               QR 코드 생성에 실패했습니다
@@ -311,7 +329,7 @@ function QRCodeDialogContent({ pet: petProp }: { pet: PetDto }) {
                 "rounded-lg border border-gray-300 dark:border-neutral-600",
                 isMyPet ? "" : "w-full",
               )}
-              style={isMyPet ? { height: `${customHeight * (96 / 2.54)}px` } : undefined}
+              style={isMyPet ? { height: `${(Number(customHeight) || 1) * (96 / 2.54)}px` } : undefined}
             />
           ) : (
             <div className="flex h-[200px] w-[200px] items-center justify-center text-sm text-gray-500">
@@ -330,8 +348,8 @@ function QRCodeDialogContent({ pet: petProp }: { pet: PetDto }) {
                   <button
                     key={preset.label}
                     onClick={() => {
-                      setCustomWidth(preset.width);
-                      setCustomHeight(preset.height);
+                      setCustomWidth(String(preset.width));
+                      setCustomHeight(String(preset.height));
                       setSelectedPreset(preset.label);
                     }}
                     className={cn(
@@ -355,11 +373,10 @@ function QRCodeDialogContent({ pet: petProp }: { pet: PetDto }) {
                     step={0.1}
                     value={customWidth}
                     onChange={(e) => {
-                      const v = Number(e.target.value);
-                      if (!isNaN(v)) setCustomWidth(Math.max(1, Math.min(v, 10)));
+                      setCustomWidth(e.target.value);
                       setSelectedPreset(null);
                     }}
-                    onBlur={() => setCustomWidth((prev) => Math.max(1, Math.min(prev, 10)))}
+                    onBlur={() => setCustomWidth((prev) => String(Math.max(1, Math.min(Number(prev) || 1, 10))))}
                     className="w-16 rounded-md border border-gray-300 px-2 py-1 text-center dark:border-neutral-600 dark:bg-neutral-700 dark:text-gray-200"
                   />
                   cm
@@ -374,11 +391,10 @@ function QRCodeDialogContent({ pet: petProp }: { pet: PetDto }) {
                     step={0.1}
                     value={customHeight}
                     onChange={(e) => {
-                      const v = Number(e.target.value);
-                      if (!isNaN(v)) setCustomHeight(Math.max(1, Math.min(v, 5)));
+                      setCustomHeight(e.target.value);
                       setSelectedPreset(null);
                     }}
-                    onBlur={() => setCustomHeight((prev) => Math.max(1, Math.min(prev, 5)))}
+                    onBlur={() => setCustomHeight((prev) => String(Math.max(1, Math.min(Number(prev) || 1, 5))))}
                     className="w-16 rounded-md border border-gray-300 px-2 py-1 text-center dark:border-neutral-600 dark:bg-neutral-700 dark:text-gray-200"
                   />
                   cm
