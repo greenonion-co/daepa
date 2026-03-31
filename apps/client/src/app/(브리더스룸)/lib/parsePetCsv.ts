@@ -78,6 +78,7 @@ const FOOD_MAP: Record<string, string> = {
   "귀뚜라미(가루)": "cri_powder",
   "누에(생)": "sil_live",
   "누에(가루)": "sil_powder",
+  "밀웜(생)": "mil_live",
 };
 
 /** 분양상태 매핑 */
@@ -152,9 +153,7 @@ function parseXlsxToRows(buffer: ArrayBuffer): string[][] {
 
 export function parsePetCsv(input: string | ArrayBuffer): BulkCreatePetRowDto[] {
   const rawRows =
-    typeof input === "string"
-      ? parseCsvText(input.replace(/^\uFEFF/, ""))
-      : parseXlsxToRows(input);
+    typeof input === "string" ? parseCsvText(input.replace(/^\uFEFF/, "")) : parseXlsxToRows(input);
 
   if (rawRows.length < 2) {
     throw new Error("파일에 데이터가 없습니다.");
@@ -165,9 +164,7 @@ export function parsePetCsv(input: string | ArrayBuffer): BulkCreatePetRowDto[] 
   // 헤더 검증: 알려진 컬럼명이 하나도 없으면 에러
   const knownHeaders = headers.filter((h) => h in COLUMN_MAP);
   if (knownHeaders.length === 0) {
-    throw new Error(
-      "올바른 헤더를 찾을 수 없습니다.\n필수 헤더: 종, 개체 이름",
-    );
+    throw new Error("올바른 헤더를 찾을 수 없습니다.\n필수 헤더: 종, 개체 이름");
   }
 
   // 필수 헤더 체크
@@ -245,7 +242,8 @@ export function parsePetCsv(input: string | ArrayBuffer): BulkCreatePetRowDto[] 
 
     // 분양상태
     const adoptionStatusRaw = mapped.adoptionStatus?.trim() ?? "";
-    const adoptionStatus = (ADOPTION_STATUS_MAP[adoptionStatusRaw] ?? (adoptionStatusRaw || undefined)) as BulkCreatePetRowDtoAdoptionStatus | undefined;
+    const adoptionStatus = (ADOPTION_STATUS_MAP[adoptionStatusRaw] ??
+      (adoptionStatusRaw || undefined)) as BulkCreatePetRowDtoAdoptionStatus | undefined;
 
     results.push({
       name,

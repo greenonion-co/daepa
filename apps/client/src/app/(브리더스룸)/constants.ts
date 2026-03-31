@@ -279,6 +279,7 @@ export const MORPH_LIST_BY_SPECIES: Record<PetDtoSpecies, Record<string, string>
     루왁릴리: "루왁릴리",
     설악: "설악",
     슈퍼하이포: "슈퍼하이포",
+    "100%헷팬텀": "100%헷팬텀",
     "100%헷아잔틱": "100%헷아잔틱",
     "66%헷아잔틱": "66%헷아잔틱",
     "50%헷아잔틱": "50%헷아잔틱",
@@ -630,6 +631,10 @@ export const SELECTOR_CONFIGS: Record<
       {
         key: "sil_powder",
         value: "누에(가루)",
+      },
+      {
+        key: "mil_live",
+        value: "밀웜(생)",
       },
     ],
   },
