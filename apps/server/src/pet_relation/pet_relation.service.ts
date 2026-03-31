@@ -169,7 +169,7 @@ export class PetRelationService {
    */
   async getChildrenWithDetails(
     petId: string,
-    userId: string,
+    userId: string | undefined,
     pageOptionsDto: PageOptionsDto,
     manager?: EntityManager,
   ): Promise<GetChildrenPageResponseDto> {
@@ -613,7 +613,7 @@ export class PetRelationService {
    */
   async getClutchMatesByPetId(
     petId: string,
-    userId: string,
+    userId: string | undefined,
     queryDto?: GetClutchMatesQueryDto,
     manager?: EntityManager,
   ): Promise<GetClutchMatesResponseDto> {
@@ -757,7 +757,7 @@ export class PetRelationService {
   /** 캐시 우회 — 트랜잭션 컨텍스트용 기존 CTE 쿼리 */
   private async getClutchMatesDirect(
     petId: string,
-    userId: string,
+    userId: string | undefined,
     queryDto?: GetClutchMatesQueryDto,
     manager?: EntityManager,
   ): Promise<GetClutchMatesResponseDto> {

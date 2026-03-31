@@ -302,11 +302,11 @@ export class PetController {
   async getChildrenByPetId(
     @Param('petId') petId: string,
     @Query() pageOptionsDto: PageOptionsDto,
-    @JwtUser() token: JwtUserPayload,
+    @OptionalJwtUser() token: JwtUserPayload | null,
   ): Promise<GetChildrenPageResponseDto> {
     return this.petRelationService.getChildrenWithDetails(
       petId,
-      token.userId,
+      token?.userId,
       pageOptionsDto,
     );
   }
@@ -346,11 +346,11 @@ export class PetController {
   async getClutchMatesByPetId(
     @Param('petId') petId: string,
     @Query() queryDto: GetClutchMatesQueryDto,
-    @JwtUser() token: JwtUserPayload,
+    @OptionalJwtUser() token: JwtUserPayload | null,
   ): Promise<GetClutchMatesResponseDto> {
     return this.petRelationService.getClutchMatesByPetId(
       petId,
-      token.userId,
+      token?.userId,
       queryDto,
     );
   }
