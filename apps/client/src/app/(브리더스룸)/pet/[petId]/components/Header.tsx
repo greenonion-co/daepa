@@ -224,7 +224,7 @@ const Header = ({
         >
           <div className="flex items-center gap-1">
             {/* QR코드 */}
-            <QRCode pet={pet} isScrolled={isScrolled} />
+            <QRCode pet={pet} isScrolled={isScrolled} adoptionPrice={adoptionData?.price} />
             {/* 공유 */}
             <Button
               size="sm"
