@@ -17,7 +17,7 @@ import { useIsMobile } from "@/hooks/useMobile";
 import { SearchCheck } from "lucide-react";
 
 import Loading from "@/components/common/Loading";
-import { BizGuard } from "@/app/(브리더스룸)/components/BizGuard";
+// import { BizGuard } from "@/app/(브리더스룸)/components/BizGuard";
 
 interface PetDetailPageProps {
   params: Promise<{
@@ -269,8 +269,9 @@ function SiblingsPageContent({ params }: PetDetailPageProps) {
 
 export default function SiblingsPage({ params }: PetDetailPageProps) {
   return (
-    <BizGuard>
-      <SiblingsPageContent params={params} />
-    </BizGuard>
+    // TODO: 박람회 끝나고 처리
+    // <BizGuard>
+    <SiblingsPageContent params={params} />
+    // </BizGuard>
   );
 }
