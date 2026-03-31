@@ -17,7 +17,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { UserProfileDtoRole } from "@repo/api-client";
 import { useIsMyPet } from "@/hooks/useIsMyPet";
-import { openRelationPromoSheet } from "@/app/(브리더스룸)/components/LoginPromoSheet";
+// import { openRelationPromoSheet } from "@/app/(브리더스룸)/components/LoginPromoSheet";
 import { useAppRouter } from "@/hooks/useAppRouter";
 import { useBreedingInfoStore } from "../../store/breedingInfo";
 import AdoptionStatusBadge from "@/app/(브리더스룸)/components/AdoptionStatusBadge";
