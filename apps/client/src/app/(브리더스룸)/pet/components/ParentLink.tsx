@@ -50,7 +50,7 @@ const ParentLink = ({
   onUnlink,
 }: ParentLinkProps) => {
   // TODO: 박람회 이후 제거
-  const isOintTemp = data?.petId === "vef7k-16";
+  const isOintTemp = ["tz3jTgnk", "WZnbyP8x"].includes(data?.petId ?? "");
 
   const { user } = useUserStore();
   const pathname = usePathname();
