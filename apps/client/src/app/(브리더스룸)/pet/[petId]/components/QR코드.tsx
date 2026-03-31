@@ -135,8 +135,8 @@ function QRCodeDialogContent({ pet: petProp, adoptionPrice }: { pet: PetDto; ado
     )).map((opt) => opt.id),
   );
   const [selectedPreset, setSelectedPreset] = useState<string | null>("M");
-  const [customWidth, setCustomWidth] = useState(5);
-  const [customHeight, setCustomHeight] = useState(2);
+  const [customWidth, setCustomWidth] = useState("5");
+  const [customHeight, setCustomHeight] = useState("2");
   const [isDownloading, setIsDownloading] = useState(false);
   const [qrError, setQrError] = useState(false);
 
@@ -178,8 +178,10 @@ function QRCodeDialogContent({ pet: petProp, adoptionPrice }: { pet: PetDto; ado
 
     const scale = 2; // 렌더링 선명도용 배율
     const CM_TO_PX = 300 / 2.54 / scale; // 논리 px/cm (실제 px = 논리 × scale → 300 DPI 유지)
-    const width = Math.round(customWidth * CM_TO_PX);
-    const height = Math.round(customHeight * CM_TO_PX);
+    const parsedWidth = Number(customWidth) || 1;
+    const parsedHeight = Number(customHeight) || 1;
+    const width = Math.round(parsedWidth * CM_TO_PX);
+    const height = Math.round(parsedHeight * CM_TO_PX);
     const padding = Math.round(height * 0.07);
     let fontSize = 0; // infoLines 구성 후 동적 계산
     let lineHeight = 0;
@@ -327,7 +329,7 @@ function QRCodeDialogContent({ pet: petProp, adoptionPrice }: { pet: PetDto; ado
                 "rounded-lg border border-gray-300 dark:border-neutral-600",
                 isMyPet ? "" : "w-full",
               )}
-              style={isMyPet ? { height: `${customHeight * (96 / 2.54)}px` } : undefined}
+              style={isMyPet ? { height: `${(Number(customHeight) || 1) * (96 / 2.54)}px` } : undefined}
             />
           ) : (
             <div className="flex h-[200px] w-[200px] items-center justify-center text-sm text-gray-500">
@@ -346,8 +348,8 @@ function QRCodeDialogContent({ pet: petProp, adoptionPrice }: { pet: PetDto; ado
                   <button
                     key={preset.label}
                     onClick={() => {
-                      setCustomWidth(preset.width);
-                      setCustomHeight(preset.height);
+                      setCustomWidth(String(preset.width));
+                      setCustomHeight(String(preset.height));
                       setSelectedPreset(preset.label);
                     }}
                     className={cn(
@@ -371,11 +373,10 @@ function QRCodeDialogContent({ pet: petProp, adoptionPrice }: { pet: PetDto; ado
                     step={0.1}
                     value={customWidth}
                     onChange={(e) => {
-                      const v = Number(e.target.value);
-                      if (!isNaN(v)) setCustomWidth(Math.max(1, Math.min(v, 10)));
+                      setCustomWidth(e.target.value);
                       setSelectedPreset(null);
                     }}
-                    onBlur={() => setCustomWidth((prev) => Math.max(1, Math.min(prev, 10)))}
+                    onBlur={() => setCustomWidth((prev) => String(Math.max(1, Math.min(Number(prev) || 1, 10))))}
                     className="w-16 rounded-md border border-gray-300 px-2 py-1 text-center dark:border-neutral-600 dark:bg-neutral-700 dark:text-gray-200"
                   />
                   cm
@@ -390,11 +391,10 @@ function QRCodeDialogContent({ pet: petProp, adoptionPrice }: { pet: PetDto; ado
                     step={0.1}
                     value={customHeight}
                     onChange={(e) => {
-                      const v = Number(e.target.value);
-                      if (!isNaN(v)) setCustomHeight(Math.max(1, Math.min(v, 5)));
+                      setCustomHeight(e.target.value);
                       setSelectedPreset(null);
                     }}
-                    onBlur={() => setCustomHeight((prev) => Math.max(1, Math.min(prev, 5)))}
+                    onBlur={() => setCustomHeight((prev) => String(Math.max(1, Math.min(Number(prev) || 1, 5))))}
                     className="w-16 rounded-md border border-gray-300 px-2 py-1 text-center dark:border-neutral-600 dark:bg-neutral-700 dark:text-gray-200"
                   />
                   cm
