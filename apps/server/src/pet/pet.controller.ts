@@ -251,6 +251,8 @@ export class PetController {
     };
   }
 
+  // TODO: 박람회
+  @Public()
   @Get('/siblings/:petId')
   @ApiParam({
     name: 'petId',
@@ -279,6 +281,8 @@ export class PetController {
     );
   }
 
+  // TODO: 박람회
+  @Public()
   @Get('/children/:petId')
   @ApiParam({
     name: 'petId',
@@ -307,6 +311,8 @@ export class PetController {
     );
   }
 
+  // TODO: 박람회
+  @Public()
   @Get('/clutch-mates/:petId')
   @ApiParam({
     name: 'petId',
