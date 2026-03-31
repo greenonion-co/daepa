@@ -272,11 +272,11 @@ export class PetController {
   async getSiblingsByPetId(
     @Param('petId') petId: string,
     @Query() queryDto: GetSiblingsQueryDto,
-    @JwtUser() token: JwtUserPayload,
+    @OptionalJwtUser() token: JwtUserPayload | null,
   ): Promise<GetSiblingsPageResponseDto> {
     return this.petRelationService.getSiblingsWithDetails(
       petId,
-      token.userId,
+      token?.userId,
       queryDto,
     );
   }
