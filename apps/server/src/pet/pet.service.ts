@@ -381,6 +381,7 @@ export class PetService {
             species: row.species,
             hatchingDate: row.hatchingDate ? new Date(row.hatchingDate) : null,
             isPublic: row.isPublic ?? false,
+            isBreeder: row.isBreeder ?? false,
           }),
         ),
       );
