@@ -107,6 +107,7 @@ const Header = ({
   // 저장 완료된 값만 헤더에 반영 (중복확인 통과 후 저장된 값)
   const displayName = breedingData?.name || pet?.name;
   const displaySex = breedingData?.sex ?? pet?.sex;
+  const displayIsBreeder = breedingData?.isBreeder ?? pet?.isBreeder;
   const dotColor =
     displaySex === "M"
       ? "bg-[#2383E2] dark:bg-[#529CCA]"
@@ -146,7 +147,7 @@ const Header = ({
                 )}
               >
                 {displayName}
-                {pet.isBreeder && (
+                {displayIsBreeder && (
                   <BreederBadge size="sm" className="hidden min-[581px]:inline-flex" />
                 )}
               </div>
@@ -326,7 +327,7 @@ const Header = ({
       </div>
 
       {/* 브리더펫 뱃지 — 모바일에서만 Header 하단 경계에 플로팅 */}
-      {pet.isBreeder && (
+      {displayIsBreeder && (
         <div className="pointer-events-none absolute -bottom-5 left-1/2 z-30 hidden -translate-x-1/2 translate-y-1/2 max-[580px]:block">
           <BreederBadge size="md" className="pointer-events-auto shadow-md" />
         </div>

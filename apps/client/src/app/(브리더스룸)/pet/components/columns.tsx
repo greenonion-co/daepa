@@ -22,6 +22,7 @@ import HiddenPetBadge from "@/components/common/HiddenPetBadge";
 import { Popover, PopoverTrigger, PopoverContent, PopoverClose } from "@/components/ui/popover";
 import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export type PreviewOverride = { petId: string; name?: string; status?: string } | null;
 
@@ -29,6 +30,7 @@ export type TableMeta = {
   setPreviewOverride?: (info: PreviewOverride) => void;
   setPreviewSuppressed?: (suppressed: boolean) => void;
   togglePublic?: (petId: string, currentIsPublic: boolean) => void;
+  toggleBreeder?: (petId: string, currentIsBreeder: boolean) => void;
   changeAdoptionStatus?: (
     petId: string,
     currentAdoption: AdoptionDto | null | undefined,
@@ -168,6 +170,28 @@ export const columns: ColumnDef<PetDto>[] = [
               </div>
             </PopoverContent>
           </Popover>
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: "isBreeder",
+    size: 40,
+    header: "브리더",
+    cell: ({ cell, row, table }) => {
+      const isBreeder = cell.getValue() as boolean;
+      const toggleBreeder = (table.options.meta as TableMeta)?.toggleBreeder;
+      return (
+        <div className="flex justify-center">
+          <Checkbox
+            checked={!!isBreeder}
+            onCheckedChange={() => {
+              toggleBreeder?.(row.original.petId, !!isBreeder);
+            }}
+            onClick={(e) => e.stopPropagation()}
+            aria-label={`${row.original.name} 브리더 여부`}
+            className="h-4 w-4 border-amber-400 data-[state=checked]:border-amber-500 data-[state=checked]:bg-amber-500"
+          />
         </div>
       );
     },

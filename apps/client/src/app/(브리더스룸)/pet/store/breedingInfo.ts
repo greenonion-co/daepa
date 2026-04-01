@@ -5,6 +5,7 @@ interface BreedingInfo {
   name?: string;
   sex?: string;
   isPublic?: boolean;
+  isBreeder?: boolean;
 }
 
 interface BreedingInfoStore {

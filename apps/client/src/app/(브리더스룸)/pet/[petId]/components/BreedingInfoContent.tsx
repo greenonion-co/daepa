@@ -18,6 +18,7 @@ import { AxiosError } from "axios";
 import { useIsMyPet } from "@/hooks/useIsMyPet";
 
 import { PublicToggle } from "./펫정보/PublicToggle";
+import { BreederToggle } from "./펫정보/BreederToggle";
 import { PetBasicInfo } from "./펫정보/PetBasicInfo";
 import { PetDetailInfo } from "./펫정보/PetDetailInfo";
 import { EggInfo } from "./펫정보/EggInfo";
@@ -76,14 +77,20 @@ const BreedingInfoContent = ({ petId, ownerId, initialPet }: BreedingInfoContent
         if (petRef.current) {
           petRef.current = { ...petRef.current, ...updateData } as PetDto;
         }
-        // 헤더 동기화 (공개여부, 이름, 성별)
-        if ("isPublic" in updateData || "name" in updateData || "sex" in updateData) {
+        // 헤더 동기화 (공개여부, 이름, 성별, 브리더)
+        if (
+          "isPublic" in updateData ||
+          "name" in updateData ||
+          "sex" in updateData ||
+          "isBreeder" in updateData
+        ) {
           const updated = petRef.current;
           setBreedingInfo({
             petId,
             name: updated?.name,
             sex: updated?.sex,
             isPublic: updated?.isPublic,
+            isBreeder: updated?.isBreeder,
           });
         }
       } catch (error) {
@@ -235,6 +242,7 @@ const BreedingInfoContent = ({ petId, ownerId, initialPet }: BreedingInfoContent
       name: pet.name,
       sex: pet.sex,
       isPublic: pet?.isPublic,
+      isBreeder: pet?.isBreeder,
     });
   }, [pet, setFormData, setBreedingInfo]);
 
@@ -250,6 +258,14 @@ const BreedingInfoContent = ({ petId, ownerId, initialPet }: BreedingInfoContent
           isPublic={!!formData.isPublic}
           isEditMode={isViewingMyPet}
           onChange={(isPublic) => updateFieldAndSave("isPublic", isPublic)}
+        />
+      )}
+
+      {/* 브리더 여부 (본인 소유 펫만 노출) */}
+      {isViewingMyPet && (
+        <BreederToggle
+          isBreeder={!!formData.isBreeder}
+          onChange={(isBreeder) => updateFieldAndSave("isBreeder", isBreeder)}
         />
       )}
 
