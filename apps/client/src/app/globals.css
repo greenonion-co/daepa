@@ -162,6 +162,36 @@ body {
   will-change: transform;
 }
 
+@keyframes breeder-shine {
+  0% {
+    transform: translateX(-100%) skewX(-15deg);
+  }
+  100% {
+    transform: translateX(200%) skewX(-15deg);
+  }
+}
+
+.breeder-badge-shine {
+  position: relative;
+  overflow: hidden;
+}
+
+.breeder-badge-shine::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.4) 40%,
+    rgba(255, 255, 255, 0.6) 50%,
+    rgba(255, 255, 255, 0.4) 60%,
+    transparent 100%
+  );
+  width: 50%;
+  animation: breeder-shine 3s ease-in-out infinite;
+}
+
 :root {
   --right-sidebar-width: 55px;
   --radius: 0.5rem;

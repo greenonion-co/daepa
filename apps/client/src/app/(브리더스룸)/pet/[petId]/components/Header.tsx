@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { PetDto } from "@repo/api-client";
 import Link from "next/link";
 import { Share2 } from "lucide-react";
+import BreederBadge from "@/app/(브리더스룸)/components/BreederBadge";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/lib/toast";
 import { isNativeApp, requestShare } from "@/lib/native-bridge";
@@ -140,11 +141,14 @@ const Header = ({
             {displayName ? (
               <div
                 className={cn(
-                  "flex font-bold transition-all max-[480px]:text-[14px]",
+                  "flex items-center gap-1.5 font-bold transition-all max-[480px]:text-[14px]",
                   isScrolled ? "text-[14px]" : "text-[16px]",
                 )}
               >
                 {displayName}
+                {pet.isBreeder && (
+                  <BreederBadge size="sm" className="hidden min-[581px]:inline-flex" />
+                )}
               </div>
             ) : (
               <div
@@ -320,6 +324,13 @@ const Header = ({
           </button>
         ))}
       </div>
+
+      {/* 브리더펫 뱃지 — 모바일에서만 Header 하단 경계에 플로팅 */}
+      {pet.isBreeder && (
+        <div className="pointer-events-none absolute -bottom-5 left-1/2 z-30 hidden -translate-x-1/2 translate-y-1/2 max-[580px]:block">
+          <BreederBadge size="md" className="pointer-events-auto shadow-md" />
+        </div>
+      )}
     </div>
   );
 };
