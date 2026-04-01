@@ -13,6 +13,7 @@ export interface GraphNode extends SimulationNodeDatum {
   generation?: number;
   morphs?: string[];
   isPrivate?: boolean;
+  isBreeder?: boolean;
   fatherId?: string;
   motherId?: string;
 }
