@@ -46,6 +46,7 @@ export async function loadPetData(
         deletedAt: pet.deletedAt,
         deleteReason: pet.deleteReason,
         isPublic: pet.isPublic,
+        isBreeder: pet.isBreeder,
         sex,
       }),
       ownerId: pet.ownerId,

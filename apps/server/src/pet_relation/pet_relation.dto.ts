@@ -27,6 +27,7 @@ export interface RawFamilyTreeQueryResult {
   hatchingDate: Date | null;
   type: string;
   isPublic: boolean;
+  isBreeder: boolean;
   ownerId: string | null;
   sex: string | null;
   morphs: string | string[] | null;
@@ -48,6 +49,7 @@ export interface RawSiblingQueryResult {
   type: string;
   ownerId: string | null;
   isPublic: boolean;
+  isBreeder: boolean;
   isDeleted: boolean;
   // pet_details
   sex: string | null;
@@ -159,6 +161,7 @@ export interface RawChildQueryResult {
   type: string;
   ownerId: string | null;
   isPublic: boolean;
+  isBreeder: boolean;
   isDeleted: boolean;
   // pet_details
   sex: string | null;
@@ -324,6 +327,9 @@ export class FamilyTreeNodeDto {
 
   @ApiProperty({ description: '공개 여부' })
   isPublic: boolean;
+
+  @ApiProperty({ description: '브리더펫 여부' })
+  isBreeder: boolean;
 
   @ApiProperty({ description: '현재 유저의 소유 여부' })
   isOwner: boolean;

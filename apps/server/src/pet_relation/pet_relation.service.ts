@@ -196,6 +196,7 @@ export class PetRelationService {
           'p.type as type',
           'p.owner_id as ownerId',
           'p.is_public as isPublic',
+          'p.is_breeder as isBreeder',
           'p.is_deleted as isDeleted',
           // pet_details
           'pd.sex as sex',
@@ -240,6 +241,7 @@ export class PetRelationService {
           species: raw.species,
           hatchingDate: raw.hatchingDate ?? undefined,
           isPublic: raw.isPublic,
+          isBreeder: raw.isBreeder,
           isDeleted: raw.isDeleted,
           owner: {
             userId: raw.owner_userId ?? undefined,
@@ -408,6 +410,7 @@ export class PetRelationService {
         species: petData.species,
         hatchingDate: petData.hatchingDate,
         isPublic: petData.isPublic,
+        isBreeder: petData.isBreeder,
         isDeleted: petData.isDeleted,
         owner: owner
           ? {
@@ -518,6 +521,7 @@ export class PetRelationService {
           'p.type as type',
           'p.owner_id as ownerId',
           'p.is_public as isPublic',
+          'p.is_breeder as isBreeder',
           'p.is_deleted as isDeleted',
           'pd.sex as sex',
           'pd.morphs as morphs',
@@ -569,6 +573,7 @@ export class PetRelationService {
           species: raw.species,
           hatchingDate: raw.hatchingDate ?? undefined,
           isPublic: raw.isPublic,
+          isBreeder: raw.isBreeder,
           isDeleted: raw.isDeleted,
           owner: {
             userId: raw.owner_userId ?? undefined,
@@ -674,6 +679,7 @@ export class PetRelationService {
         species: petData.species,
         hatchingDate: petData.hatchingDate,
         isPublic: petData.isPublic,
+        isBreeder: petData.isBreeder,
         isDeleted: petData.isDeleted,
         owner: owner
           ? {
@@ -783,6 +789,7 @@ export class PetRelationService {
         .addSelect('p.hatching_date', 'hatchingDate')
         .addSelect('p.type', 'type')
         .addSelect('p.is_public', 'isPublic')
+        .addSelect('p.is_breeder', 'isBreeder')
         .addSelect('p.is_deleted', 'isDeleted')
         .addSelect('pd.sex', 'sex')
         .addSelect('pd.morphs', 'morphs')
@@ -832,6 +839,7 @@ export class PetRelationService {
           species: raw.species,
           hatchingDate: raw.hatchingDate ?? undefined,
           isPublic: raw.isPublic,
+          isBreeder: raw.isBreeder,
           isDeleted: raw.isDeleted,
           owner: raw.owner_userId
             ? {
@@ -980,6 +988,7 @@ export class PetRelationService {
           p.hatching_date   AS hatchingDate,
           p.type,
           p.is_public       AS isPublic,
+          p.is_breeder      AS isBreeder,
           p.owner_id        AS ownerId,
           pd.sex,
           pd.morphs,
@@ -1070,6 +1079,7 @@ export class PetRelationService {
               : undefined,
             type: raw.type,
             isPublic,
+            isBreeder: Boolean(raw.isBreeder),
             isOwner: Boolean(isOwner),
             ownerName: raw.ownerName ?? undefined,
           } as FamilyTreeNodeDto;

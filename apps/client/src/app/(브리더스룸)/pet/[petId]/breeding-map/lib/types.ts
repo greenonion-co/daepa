@@ -35,6 +35,7 @@ export interface FamilyPetData {
   isDeleted?: boolean;
   type?: string; // "EGG" | "PET"
   isPublic?: boolean;
+  isBreeder?: boolean;
   isOwner?: boolean;
   ownerName?: string;
 }
@@ -53,6 +54,7 @@ export interface FamilyTreeApiNode {
   hatchingDate?: string;
   type: string;
   isPublic: boolean;
+  isBreeder: boolean;
   isOwner: boolean;
   ownerName?: string;
 }
@@ -93,6 +95,7 @@ export function toPetData(pet: PetDto): FamilyPetData {
     hatchingDate: pet.hatchingDate,
     isDeleted: pet.isDeleted,
     type: pet.type,
+    isBreeder: pet.isBreeder,
   };
 }
 
@@ -108,6 +111,7 @@ export function apiNodeToPetData(node: FamilyTreeApiNode): FamilyPetData {
     hatchingDate: node.hatchingDate,
     type: node.type,
     isPublic: node.isPublic,
+    isBreeder: node.isBreeder,
     isOwner: node.isOwner,
     ownerName: node.ownerName,
   };
