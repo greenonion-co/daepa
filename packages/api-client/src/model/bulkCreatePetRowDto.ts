@@ -23,6 +23,8 @@ export interface BulkCreatePetRowDto {
   hatchingDate?: string;
   /** 공개 여부 */
   isPublic?: boolean;
+  /** 브리더펫 여부 */
+  isBreeder?: boolean;
   /** 모프 */
   morphs?: string[];
   /** 형질 */
