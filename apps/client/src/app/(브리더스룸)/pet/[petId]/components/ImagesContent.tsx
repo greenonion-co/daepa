@@ -10,7 +10,7 @@ import {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getPetThumbnailQueryKey } from "@/components/common/PetThumbnail";
 import { toast } from "@/lib/toast";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { useIsMyPet } from "@/hooks/useIsMyPet";
 import { isEmpty } from "es-toolkit/compat";
 import { ImageOff, Info } from "lucide-react";
@@ -20,7 +20,7 @@ interface ImagesContentProps {
   initialImages: PetImageItem[];
 }
 
-const ImagesContent = ({ pet, initialImages }: ImagesContentProps) => {
+const ImagesContent = memo(({ pet, initialImages }: ImagesContentProps) => {
   const queryClient = useQueryClient();
   const ownerId = pet.owner.userId ?? "";
   const isViewingMyPet = useIsMyPet(ownerId);
@@ -113,6 +113,7 @@ const ImagesContent = ({ pet, initialImages }: ImagesContentProps) => {
       )}
     </div>
   );
-};
+});
 
+ImagesContent.displayName = "ImagesContent";
 export default ImagesContent;

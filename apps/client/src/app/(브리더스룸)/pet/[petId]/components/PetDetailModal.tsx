@@ -14,6 +14,9 @@ import { useFlush } from "./FlushContext";
 import { useNameStore } from "@/app/(브리더스룸)/store/name";
 import { DUPLICATE_CHECK_STATUS } from "@/app/(브리더스룸)/constants";
 
+// memo 비교 시 매 렌더마다 새 참조가 생성되지 않도록 상수로 분리
+const EMPTY_IMAGES: never[] = [];
+
 interface PetDetailModalProps {
   isOpen: boolean;
   pet: PetDto;
@@ -50,7 +53,7 @@ export default function PetDetailModal({ isOpen, pet, onClose }: PetDetailModalP
                 initialPet={pet}
               />
             }
-            imagesSlot={<ImagesContent pet={pet} initialImages={[]} />}
+            imagesSlot={<ImagesContent pet={pet} initialImages={EMPTY_IMAGES} />}
             pedigreeSlot={
               <PedigreeInfoContent
                 species={pet.species}
