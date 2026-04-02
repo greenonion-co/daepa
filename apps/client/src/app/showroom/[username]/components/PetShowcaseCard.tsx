@@ -5,6 +5,7 @@ import { PetDto, PetDtoGrowth, PetDtoSex } from "@repo/api-client";
 import PetThumbnail from "@/components/common/PetThumbnail";
 import BadgeList from "@/app/(브리더스룸)/components/BadgeList";
 import { cn } from "@/lib/utils";
+import BreederBadge from "@/app/(브리더스룸)/components/BreederBadge";
 
 interface PetShowcaseCardProps {
   pet: PetDto;
@@ -69,9 +70,14 @@ export default function PetShowcaseCard({ pet }: PetShowcaseCardProps) {
           objectFit="cover"
           className="h-full w-full !rounded-none transition-transform duration-200 group-hover:scale-105"
         />
-        {/* 분양 상태 배지 */}
+        {/* 브리더 + 분양 상태 배지 */}
+        {pet.isBreeder && (
+          <div className="absolute top-1 left-1 flex items-center gap-1">
+            {pet.isBreeder && <BreederBadge size="sm" />}
+          </div>
+        )}
         {pet.adoption?.status && (
-          <div className="absolute top-0 left-1">
+          <div className="absolute top-0 right-1">
             <AdoptionBadge status={pet.adoption.status} price={pet.adoption.price} />
           </div>
         )}

@@ -172,6 +172,25 @@ function GraphNodeElementInner({
         </g>
       )}
 
+      {/* 브리더 별 배지 — 좌상단 (비공개가 아닐 때만, 자물쇠와 위치 공유) */}
+      {node.isBreeder && !node.isPrivate && (
+        <g style={{ pointerEvents: "none" }}>
+          <circle
+            cx={x - r * 0.7}
+            cy={y - r * 0.7}
+            r={7}
+            fill={isDark ? "#451a03" : "#fffbeb"}
+            stroke="#f59e0b"
+            strokeWidth={0.8}
+          />
+          <path
+            d="M0,-3.8 L0.9,-1.2 L3.6,-1.2 L1.35,0.5 L2.25,3.1 L0,1.3 L-2.25,3.1 L-1.35,0.5 L-3.6,-1.2 L-0.9,-1.2 Z"
+            fill="#f59e0b"
+            transform={`translate(${x - r * 0.7}, ${y - r * 0.7}) scale(1.3)`}
+          />
+        </g>
+      )}
+
       {/* 비공개 자물쇠 배지 */}
       {node.isPrivate && (
         <g style={{ pointerEvents: "none" }}>
@@ -203,7 +222,7 @@ function GraphNodeElementInner({
         </g>
       )}
 
-      {/* 성별 dot + 이름 라벨 */}
+      {/* 성별 dot + 이름 라벨 + 브리더 배지 */}
       <g opacity={labelOpacity} style={{ transition: "opacity 0.2s" }}>
         <circle
           cx={x - node.label.length * fontSize * 0.3 - dotRadius - 1}
@@ -240,6 +259,7 @@ export const GraphNodeElement = memo(GraphNodeElementInner, (prev, next) => {
   if (prev.node.label !== next.node.label) return false;
   if (prev.node.imageUrl !== next.node.imageUrl) return false;
   if (prev.node.isPrivate !== next.node.isPrivate) return false;
+  if (prev.node.isBreeder !== next.node.isBreeder) return false;
   if (prev.node.generation !== next.node.generation) return false;
   if (prev.node.sex !== next.node.sex) return false;
   return true;

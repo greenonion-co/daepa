@@ -26,6 +26,8 @@ export interface UpdatePetDto {
   desc?: string;
   /** 펫 공개 여부 */
   isPublic?: boolean;
+  /** 브리더펫 여부 */
+  isBreeder?: boolean;
   /** 펫 삭제 여부 */
   isDeleted?: boolean;
   /** 펫 삭제 일시 */

@@ -56,6 +56,9 @@ export class PetEntity {
   isPublic: boolean;
 
   @Column({ default: false })
+  isBreeder: boolean;
+
+  @Column({ default: false })
   isDeleted: boolean;
 
   @Column({ type: 'timestamp', nullable: true })

@@ -57,6 +57,11 @@ export class BulkCreatePetRowDto {
   @IsBoolean()
   isPublic?: boolean;
 
+  @ApiProperty({ description: '브리더펫 여부', required: false })
+  @IsOptional()
+  @IsBoolean()
+  isBreeder?: boolean;
+
   @ApiProperty({ description: '모프', required: false })
   @IsOptional()
   @IsArray()

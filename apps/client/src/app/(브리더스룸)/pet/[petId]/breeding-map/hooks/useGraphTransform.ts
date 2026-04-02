@@ -105,6 +105,7 @@ export function useGraphTransform({
       generation: generationMap.get(n.petId),
       morphs: n.pet?.morphs,
       isPrivate: false,
+      isBreeder: n.pet?.isBreeder,
       fatherId: n.fatherId ?? undefined,
       motherId: n.motherId ?? undefined,
     }));

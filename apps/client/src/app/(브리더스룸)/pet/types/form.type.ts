@@ -20,6 +20,7 @@ export type FormFieldName =
   | "layingDate"
   | "status"
   | "isPublic"
+  | "isBreeder"
   | "eggStatus"
   | "temperature"
   | "adoption"

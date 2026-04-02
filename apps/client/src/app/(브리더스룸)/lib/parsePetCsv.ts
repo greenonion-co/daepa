@@ -21,6 +21,7 @@ const COLUMN_MAP: Record<string, string> = {
   "몸무게(g)": "weight",
   몸무게: "weight",
   먹이: "foods",
+  브리더: "isBreeder",
   분양상태: "adoptionStatus",
   부개체: "fatherName",
   모개체: "motherName",
@@ -232,6 +233,9 @@ export function parsePetCsv(input: string | ArrayBuffer): BulkCreatePetRowDto[] 
       isPublic = mapped.isPrivate.trim().toUpperCase() !== "TRUE";
     }
 
+    // 브리더 여부
+    const isBreeder = mapped.isBreeder?.trim().toUpperCase() === "TRUE";
+
     // 몸무게
     const weightStr = mapped.weight?.trim();
     const weight = weightStr ? parseFloat(weightStr) : undefined;
@@ -252,6 +256,7 @@ export function parsePetCsv(input: string | ArrayBuffer): BulkCreatePetRowDto[] 
       growth: growth as BulkCreatePetRowDtoGrowth | undefined,
       hatchingDate,
       isPublic,
+      isBreeder,
       morphs: parseArray(mapped.morphs ?? ""),
       traits: parseArray(mapped.traits ?? ""),
       foods: parseArray(mapped.foods ?? "").map((f) => FOOD_MAP[f] ?? f),

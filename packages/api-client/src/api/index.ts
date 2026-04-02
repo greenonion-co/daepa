@@ -987,6 +987,7 @@ export const getPetControllerFindAllResponsePetParentDtoMock = (
       undefined,
     ]),
     isPublic: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+    isBreeder: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
     isDeleted: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
     status: faker.helpers.arrayElement([
       "pending",
@@ -1060,6 +1061,7 @@ export const getPetControllerFindAllResponseMock = (
     ]),
     desc: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
     isPublic: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+    isBreeder: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
     isDeleted: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
     deletedAt: faker.helpers.arrayElement([
       `${faker.date.past().toISOString().split(".")[0]}Z`,
@@ -1323,6 +1325,7 @@ export const getPetControllerGetFamilyTreeResponseFamilyTreeNodeDtoMock = (
     hatchingDate: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
     type: faker.string.alpha(20),
     isPublic: faker.datatype.boolean(),
+    isBreeder: faker.datatype.boolean(),
     isOwner: faker.datatype.boolean(),
     ownerName: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
   },
@@ -1385,6 +1388,7 @@ export const getPetControllerGetParentsByPetIdResponsePetParentDtoMock = (
       undefined,
     ]),
     isPublic: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+    isBreeder: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
     isDeleted: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
     status: faker.helpers.arrayElement([
       "pending",
@@ -1481,6 +1485,7 @@ export const getPetControllerGetSiblingsByPetIdResponsePetSummaryDtoMock = (
       undefined,
     ]),
     isPublic: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+    isBreeder: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
     isDeleted: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
     sex: faker.helpers.arrayElement([
       faker.helpers.arrayElement(["M", "F", "N"] as const),
@@ -1576,6 +1581,7 @@ export const getPetControllerGetChildrenByPetIdResponseChildPetDetailDtoMock = (
       undefined,
     ]),
     isPublic: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+    isBreeder: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
     isDeleted: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
     sex: faker.helpers.arrayElement([
       faker.helpers.arrayElement(["M", "F", "N"] as const),
@@ -1671,6 +1677,7 @@ export const getPetControllerGetClutchMatesByPetIdResponsePetSummaryDtoMock = (
       undefined,
     ]),
     isPublic: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+    isBreeder: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
     isDeleted: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
     sex: faker.helpers.arrayElement([
       faker.helpers.arrayElement(["M", "F", "N"] as const),
@@ -1752,6 +1759,7 @@ export const getPetControllerFindPetByPetIdResponsePetParentDtoMock = (
       undefined,
     ]),
     isPublic: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+    isBreeder: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
     isDeleted: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
     status: faker.helpers.arrayElement([
       "pending",
@@ -1828,6 +1836,7 @@ export const getPetControllerFindPetByPetIdResponseMock = (
       ]),
       desc: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
       isPublic: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+      isBreeder: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
       isDeleted: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
       deletedAt: faker.helpers.arrayElement([
         `${faker.date.past().toISOString().split(".")[0]}Z`,
@@ -2246,6 +2255,7 @@ export const getBrPetControllerFindAllResponsePetParentDtoMock = (
       undefined,
     ]),
     isPublic: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+    isBreeder: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
     isDeleted: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
     status: faker.helpers.arrayElement([
       "pending",
@@ -2319,6 +2329,7 @@ export const getBrPetControllerFindAllResponseMock = (
     ]),
     desc: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
     isPublic: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+    isBreeder: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
     isDeleted: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
     deletedAt: faker.helpers.arrayElement([
       `${faker.date.past().toISOString().split(".")[0]}Z`,
@@ -2531,6 +2542,7 @@ export const getBrPetControllerGetPetsByYearResponsePetParentDtoMock = (
       undefined,
     ]),
     isPublic: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+    isBreeder: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
     isDeleted: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
     status: faker.helpers.arrayElement([
       "pending",
@@ -2605,6 +2617,7 @@ export const getBrPetControllerGetPetsByYearResponseMock = (): BrPetControllerGe
     ]),
     desc: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
     isPublic: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+    isBreeder: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
     isDeleted: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
     deletedAt: faker.helpers.arrayElement([
       `${faker.date.past().toISOString().split(".")[0]}Z`,
@@ -2808,6 +2821,7 @@ export const getBrPetControllerGetPetsByMonthResponsePetParentDtoMock = (
       undefined,
     ]),
     isPublic: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+    isBreeder: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
     isDeleted: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
     status: faker.helpers.arrayElement([
       "pending",
@@ -2887,6 +2901,7 @@ export const getBrPetControllerGetPetsByMonthResponseMock = (
       ]),
       desc: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
       isPublic: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+      isBreeder: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
       isDeleted: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
       deletedAt: faker.helpers.arrayElement([
         `${faker.date.past().toISOString().split(".")[0]}Z`,
@@ -3103,6 +3118,7 @@ export const getBrPetControllerGetPetsByDateRangeResponsePetParentDtoMock = (
       undefined,
     ]),
     isPublic: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+    isBreeder: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
     isDeleted: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
     status: faker.helpers.arrayElement([
       "pending",
@@ -3182,6 +3198,7 @@ export const getBrPetControllerGetPetsByDateRangeResponseMock = (
       ]),
       desc: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
       isPublic: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+      isBreeder: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
       isDeleted: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
       deletedAt: faker.helpers.arrayElement([
         `${faker.date.past().toISOString().split(".")[0]}Z`,
@@ -3886,6 +3903,7 @@ export const getPairControllerGetPairListResponseMock = (
             faker.date.past().toISOString().split("T")[0],
             undefined,
           ]),
+          isBreeder: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
           isDeleted: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
           sex: faker.helpers.arrayElement([
             faker.helpers.arrayElement(["M", "F", "N"] as const),
@@ -3948,6 +3966,7 @@ export const getPairControllerGetPairListResponseMock = (
             faker.date.past().toISOString().split("T")[0],
             undefined,
           ]),
+          isBreeder: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
           isDeleted: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
           sex: faker.helpers.arrayElement([
             faker.helpers.arrayElement(["M", "F", "N"] as const),
@@ -4022,6 +4041,7 @@ export const getPairControllerGetPairListResponseMock = (
               faker.date.past().toISOString().split("T")[0],
               undefined,
             ]),
+            isBreeder: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
             isDeleted: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
             sex: faker.helpers.arrayElement([
               faker.helpers.arrayElement(["M", "F", "N"] as const),

@@ -40,6 +40,8 @@ export interface FamilyTreeNodeDto {
   type: string;
   /** 공개 여부 */
   isPublic: boolean;
+  /** 브리더펫 여부 */
+  isBreeder: boolean;
   /** 현재 유저의 소유 여부 */
   isOwner: boolean;
   /** 소유자 이름 */

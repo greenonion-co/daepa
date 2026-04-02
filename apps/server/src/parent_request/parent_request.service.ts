@@ -669,6 +669,7 @@ export class ParentRequestService {
                 }
               : undefined,
             isPublic: !!petData.isPublic,
+            isBreeder: !!petData.isBreeder,
             isDeleted: !!petData.isDeleted,
           });
 

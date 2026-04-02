@@ -141,6 +141,15 @@ export class PetBaseDto {
   isPublic?: boolean;
 
   @ApiProperty({
+    description: '브리더펫 여부',
+    example: false,
+    required: false,
+  })
+  @IsOptional()
+  @IsBoolean()
+  isBreeder?: boolean;
+
+  @ApiProperty({
     description: '펫 삭제 여부',
     example: false,
     required: false,
@@ -273,6 +282,7 @@ export class PetSummaryDto extends PickType(PetBaseDto, [
   'species',
   'hatchingDate',
   'isPublic',
+  'isBreeder',
   'isDeleted',
 ]) {
   @ApiProperty({
@@ -408,6 +418,7 @@ export class PetSummaryLayingDto extends PickType(PetSummaryDto, [
   'morphs',
   'traits',
   'weight',
+  'isBreeder',
   'isDeleted',
 ]) {
   @ApiProperty({
@@ -500,6 +511,7 @@ export class PetParentDto extends PickType(PetSummaryDto, [
   'species',
   'hatchingDate',
   'isPublic',
+  'isBreeder',
   'isDeleted',
 ]) {
   @ApiProperty({
