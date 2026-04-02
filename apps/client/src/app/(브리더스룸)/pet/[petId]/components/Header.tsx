@@ -216,90 +216,82 @@ const Header = ({
           </div>
         </div>
 
-        <div
-          className={cn(
-            "flex flex-col items-end gap-1 sm:flex-row-reverse sm:items-center",
-            size === "small" && "mt-2",
-          )}
-        >
-          <div className="flex items-center gap-1">
-            {/* QR코드 */}
-            <QRCode pet={pet} isScrolled={isScrolled} adoptionPrice={adoptionData?.price} />
-            {/* 공유 */}
-            <Button
-              size="sm"
-              variant="outline"
-              aria-label="펫 페이지 링크 복사"
-              title="링크 복사"
-              onClick={async () => {
-                const url = `${window.location.origin}/pet/${pet.petId}`;
-                if (isNativeApp()) {
-                  const shared = requestShare(url, pet.name ?? "펫 페이지");
-                  if (!shared) {
-                    await navigator.clipboard.writeText(url);
-                    toast.success("링크가 복사되었습니다");
-                  }
-                  return;
-                }
-                try {
-                  await navigator.clipboard.writeText(url);
-                  toast.success("펫 페이지 링크가 복사되었습니다");
-                } catch {
-                  toast.error("링크 복사에 실패했습니다");
-                }
-              }}
+        <div className={cn("flex items-center gap-1", size === "small" && "mt-2")}>
+          {/* 브리딩맵 */}
+          {isLoggedIn && isMyPet && isBreeder && (
+            <button
+              type="button"
+              onClick={() => router.push(`/pet/${pet.petId}/breeding-map`)}
               className={cn(
-                "text-amber-500 hover:bg-amber-100 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800",
+                "flex h-8 items-center gap-1.5 rounded-md border border-gray-200 bg-gradient-to-r from-blue-200/50 to-purple-200/65 px-3 font-[700] text-white transition-colors hover:from-blue-200/70 hover:to-purple-200/80 dark:border-gray-700 dark:from-blue-900/40 dark:to-purple-900/50 dark:hover:from-blue-900/60 dark:hover:to-purple-900/70",
                 isScrolled ? "text-xs" : "text-sm",
               )}
             >
-              <Share2 className="h-4 w-4" />
-            </Button>
-          </div>
-          <div className="flex items-center gap-1">
-            {/* 브리딩맵 */}
-            {isLoggedIn && isMyPet && isBreeder && (
-              <button
-                type="button"
-                onClick={() => router.push(`/pet/${pet.petId}/breeding-map`)}
-                className={cn(
-                  "flex items-center gap-0.5 rounded-lg border border-gray-200 bg-gradient-to-r from-blue-200/50 to-purple-200/65 px-2 font-[700] text-white transition-colors hover:from-blue-200/70 hover:to-purple-200/80 dark:border-gray-700 dark:from-blue-900/40 dark:to-purple-900/50 dark:hover:from-blue-900/60 dark:hover:to-purple-900/70",
-                  isScrolled ? "h-8 text-xs" : "h-8 text-sm",
-                )}
-              >
-                <TooltipText
-                  text="브리딩맵"
-                  title="브리딩맵"
-                  className="text-blue-600 dark:text-purple-300"
-                  content="혈통 관계를 트리 구조로 확인합니다."
-                />
-              </button>
-            )}
-            {/* 관계도 */}
-            <button
-              type="button"
-              onClick={() => {
-                router.push(`/pet/${pet.petId}/relation`);
-                // TODO: 박람회 이후 어떻게 처리할지
-                // if (isLoggedIn) {
-                //   router.push(`/pet/${pet.petId}/relation`);
-                // } else {
-                //   openRelationPromoSheet();
-                // }
-              }}
-              className={cn(
-                "flex items-center gap-0.5 rounded-lg border border-gray-200 bg-white px-2 font-[700] transition-colors hover:bg-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700",
-                isScrolled ? "h-8 text-xs" : "h-8 text-sm",
-              )}
-            >
               <TooltipText
-                text="혈통"
-                title="개체 혈통 관계도"
-                className="text-gray-600 dark:text-gray-300"
-                content="혈통 관계가 있는 개체들을 확인합니다."
+                text="브리딩맵"
+                title="브리딩맵"
+                className="text-blue-600 dark:text-purple-300"
+                content="혈통 관계를 트리 구조로 확인합니다."
               />
             </button>
-          </div>
+          )}
+          {/* 관계도 */}
+          <button
+            type="button"
+            onClick={() => {
+              router.push(`/pet/${pet.petId}/relation`);
+              // TODO: 박람회 이후 어떻게 처리할지
+              // if (isLoggedIn) {
+              //   router.push(`/pet/${pet.petId}/relation`);
+              // } else {
+              //   openRelationPromoSheet();
+              // }
+            }}
+            className={cn(
+              "flex h-8 items-center gap-1.5 rounded-md border border-white bg-white px-2 font-[700] transition-colors hover:bg-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700",
+              isScrolled ? "text-xs" : "text-sm",
+            )}
+          >
+            <TooltipText
+              text="혈통"
+              title="개체 혈통 관계도"
+              className="text-gray-600 dark:text-gray-300"
+              content="혈통 관계가 있는 개체들을 확인합니다."
+            />
+          </button>
+          {/* 공유 */}
+          {/* TODO: 박람회*/}
+          {/*<Button*/}
+          {/*  size="sm"*/}
+          {/*  variant="outline"*/}
+          {/*  aria-label="펫 페이지 링크 복사"*/}
+          {/*  title="링크 복사"*/}
+          {/*  onClick={async () => {*/}
+          {/*    const url = `${window.location.origin}/pet/${pet.petId}`;*/}
+          {/*    if (isNativeApp()) {*/}
+          {/*      const shared = requestShare(url, pet.name ?? "펫 페이지");*/}
+          {/*      if (!shared) {*/}
+          {/*        await navigator.clipboard.writeText(url);*/}
+          {/*        toast.success("링크가 복사되었습니다");*/}
+          {/*      }*/}
+          {/*      return;*/}
+          {/*    }*/}
+          {/*    try {*/}
+          {/*      await navigator.clipboard.writeText(url);*/}
+          {/*      toast.success("펫 페이지 링크가 복사되었습니다");*/}
+          {/*    } catch {*/}
+          {/*      toast.error("링크 복사에 실패했습니다");*/}
+          {/*    }*/}
+          {/*  }}*/}
+          {/*  className={cn(*/}
+          {/*    "text-amber-500 hover:bg-amber-100 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800",*/}
+          {/*    isScrolled ? "text-xs" : "text-sm",*/}
+          {/*  )}*/}
+          {/*>*/}
+          {/*  <Share2 className="h-4 w-4" />*/}
+          {/*</Button>*/}
+          {/* QR코드 */}
+          <QRCode pet={pet} isScrolled={isScrolled} adoptionPrice={adoptionData?.price} />
         </div>
       </div>
 

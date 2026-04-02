@@ -89,24 +89,22 @@ const QRCode = ({ pet, isScrolled, adoptionPrice }: QRCodeProps) => {
   const [qrOpen, setQrOpen] = useState(false);
 
   return (
-    <div className="ml-auto">
-      <Dialog open={qrOpen} onOpenChange={setQrOpen}>
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={() => setQrOpen(true)}
-          className={cn(
-            "bg-neutral-900 text-white hover:bg-neutral-800 dark:border-gray-700 dark:bg-transparent dark:text-gray-300 dark:hover:bg-gray-800",
-            isScrolled ? "text-xs" : "text-sm",
-          )}
-        >
-          <QrCode className="h-4 w-4 sm:hidden" />
-          <span className="hidden sm:inline">QR</span>
-        </Button>
+    <Dialog open={qrOpen} onOpenChange={setQrOpen}>
+      <Button
+        size="sm"
+        variant="outline"
+        onClick={() => setQrOpen(true)}
+        className={cn(
+          "px-3 bg-neutral-900 text-white hover:bg-neutral-800 dark:border-gray-700 dark:bg-transparent dark:text-gray-300 dark:hover:bg-gray-800",
+          isScrolled ? "text-xs" : "text-sm",
+        )}
+      >
+        <QrCode className="h-4 w-4 sm:hidden" />
+        <span className="hidden sm:inline">QR</span>
+      </Button>
 
-        {qrOpen && <QRCodeDialogContent pet={pet} adoptionPrice={adoptionPrice} />}
-      </Dialog>
-    </div>
+      {qrOpen && <QRCodeDialogContent pet={pet} adoptionPrice={adoptionPrice} />}
+    </Dialog>
   );
 };
 
