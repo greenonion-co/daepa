@@ -27,6 +27,7 @@ import {
   AdoptionDto,
   UpdateAdoptionDtoStatus,
   petControllerUpdate,
+  petControllerFindPetByPetId,
   petAdoptionControllerCreatePetAdoption,
   petAdoptionControllerUpdatePetAdoption,
 } from "@repo/api-client";
@@ -110,16 +111,45 @@ export const DataTable = ({
   const handleTogglePublic = useCallback(
     async (petId: string, currentIsPublic: boolean) => {
       const newIsPublic = !currentIsPublic;
-      // 낙관적 업데이트
       patchPetListCache(queryClient, petId, { isPublic: newIsPublic });
       try {
         await petControllerUpdate(petId, { isPublic: newIsPublic });
       } catch {
-        // 실패 시 롤백
         patchPetListCache(queryClient, petId, { isPublic: currentIsPublic });
       }
     },
     [queryClient],
+  );
+
+  const patchPetDetailCache = useCallback(
+    (petId: string, patch: Partial<PetDto>) => {
+      queryClient.setQueryData(
+        [petControllerFindPetByPetId.name, petId],
+        (old: any) => {
+          if (!old) return old;
+          return {
+            ...old,
+            data: { ...old.data, data: { ...old.data.data, ...patch } },
+          };
+        },
+      );
+    },
+    [queryClient],
+  );
+
+  const handleToggleBreeder = useCallback(
+    async (petId: string, currentIsBreeder: boolean) => {
+      const newIsBreeder = !currentIsBreeder;
+      patchPetListCache(queryClient, petId, { isBreeder: newIsBreeder });
+      patchPetDetailCache(petId, { isBreeder: newIsBreeder });
+      try {
+        await petControllerUpdate(petId, { isBreeder: newIsBreeder });
+      } catch {
+        patchPetListCache(queryClient, petId, { isBreeder: currentIsBreeder });
+        patchPetDetailCache(petId, { isBreeder: currentIsBreeder });
+      }
+    },
+    [queryClient, patchPetDetailCache],
   );
 
   const handleChangeGrowth = useCallback(
@@ -180,6 +210,7 @@ export const DataTable = ({
       setPreviewOverride,
       setPreviewSuppressed,
       togglePublic: handleTogglePublic,
+      toggleBreeder: handleToggleBreeder,
       changeAdoptionStatus: handleChangeAdoptionStatus,
       changeGrowth: handleChangeGrowth,
     },

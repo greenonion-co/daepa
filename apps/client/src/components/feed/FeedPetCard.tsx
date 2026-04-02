@@ -7,6 +7,7 @@ import PetThumbnail from "@/components/common/PetThumbnail";
 import { Badge } from "@/components/ui/badge";
 import { getSexIcon } from "@/lib/sex-icon";
 import { BadgeCheck } from "lucide-react";
+import BreederBadge from "@/app/(브리더스룸)/components/BreederBadge";
 
 interface FeedPetCardProps {
   pet: PetDto;
@@ -49,14 +50,14 @@ export default function FeedPetCard({ pet }: FeedPetCardProps) {
 
         <div className="mt-2 space-y-2 px-4 pb-4">
           {/* 이름과 성별 */}
-          <div className="flex items-center gap-2">
-            <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">
+          <div className="flex items-center gap-1.5">
+            <h3 className="text-base leading-none font-bold text-gray-900 dark:text-gray-100">
               {pet.name || "이름 없음"}
             </h3>
+            {pet.isBreeder && <BreederBadge size="sm" />}
             {sexLabel}
-            {/* 날짜 */}
             {pet.hatchingDate && (
-              <p className="ml-auto text-xs font-semibold text-gray-400 dark:text-gray-500">
+              <p className="ml-auto text-xs leading-none font-semibold text-gray-400 dark:text-gray-500">
                 {DateTime.fromISO(pet.hatchingDate).toFormat("yy.M.d")}
               </p>
             )}

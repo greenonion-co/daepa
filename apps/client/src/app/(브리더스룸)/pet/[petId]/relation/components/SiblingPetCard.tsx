@@ -11,6 +11,7 @@ import Link from "next/link";
 import { useUserStore } from "@/app/(브리더스룸)/store/user";
 import { cn, formatPrice } from "@/lib/utils";
 import BadgeList from "@/app/(브리더스룸)/components/BadgeList";
+import BreederBadge from "@/app/(브리더스룸)/components/BreederBadge";
 import PetThumbnail from "@/components/common/PetThumbnail";
 
 /** 기본 펫 정보 인터페이스 */
@@ -22,6 +23,7 @@ interface BasePetInfo {
   traits?: string[];
   hatchingDate?: string;
   isDeleted?: boolean;
+  isBreeder?: boolean;
 }
 
 /** 소유자 정보가 있는 펫 */
@@ -111,7 +113,11 @@ export default function SiblingPetCard({
     >
       <div className="relative aspect-square w-full rounded-xl bg-gray-100 dark:bg-gray-800">
         <PetThumbnail maxSize={150} petId={pet.petId} />
-
+        {("isBreeder" in pet && pet.isBreeder) && (
+          <div className="absolute top-1 left-1 z-10">
+            <BreederBadge size="sm" />
+          </div>
+        )}
         {isDeleted ? (
           <div className="absolute right-1 bottom-1 rounded-md bg-red-600 px-1 py-0.5 text-[10px] font-bold text-white">
             삭제됨
@@ -163,6 +169,11 @@ export default function SiblingPetCard({
     >
       <div className="relative h-14 w-14 shrink-0 rounded-xl bg-gray-100 dark:bg-gray-800">
         <PetThumbnail maxSize={150} petId={pet.petId} />
+        {"isBreeder" in pet && pet.isBreeder && (
+          <div className="absolute -top-1 -left-1 z-10">
+            <BreederBadge size="sm" />
+          </div>
+        )}
         {isDeleted && (
           <div className="absolute -top-1 -right-1 rounded-md bg-red-600 px-1 py-0.5 text-[8px] font-bold text-white">
             삭제됨
