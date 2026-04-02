@@ -3,7 +3,7 @@ import { SIDEBAR_ITEMS } from "../constants";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useRef, useCallback } from "react";
 import { Bell, Settings } from "lucide-react";
 import { useSearchKeywordStore } from "../store/searchKeyword";
 import { useIsMobile } from "@/hooks/useMobile";
@@ -13,12 +13,31 @@ import { isNativeApp } from "@/lib/native-bridge";
 import AddPetButton from "@/app/(브리더스룸)/components/AddPetButton";
 import AddPetBulkButton from "@/app/(브리더스룸)/components/AddPetBulkButton";
 
+const BETA_TAP_COUNT = 5;
+const BETA_TAP_TIMEOUT = 3000;
+
 const Menubar = ({ unreadCount }: { unreadCount: number }) => {
   const isLoggedIn = useIsLoggedIn();
   const user = useUser();
   const pathname = usePathname();
   const isMobile = useIsMobile();
   const { searchKeyword, setSearchKeyword } = useSearchKeywordStore();
+
+  // 로고 10번 탭 → 로그인 백도어
+  const tapCountRef = useRef(0);
+  const tapTimerRef = useRef<ReturnType<typeof setTimeout>>(null);
+  const handleLogoTap = useCallback(() => {
+    if (isLoggedIn) return;
+    tapCountRef.current += 1;
+    if (tapTimerRef.current) clearTimeout(tapTimerRef.current);
+    tapTimerRef.current = setTimeout(() => {
+      tapCountRef.current = 0;
+    }, BETA_TAP_TIMEOUT);
+    if (tapCountRef.current >= BETA_TAP_COUNT) {
+      tapCountRef.current = 0;
+      window.location.href = "/sign-in";
+    }
+  }, [isLoggedIn]);
 
   // 페이지 이동 시 검색어 초기화
   useEffect(() => {
@@ -48,7 +67,12 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
   // 로고 컴포넌트
   const Logo = ({ withLink = false, isMobile }: { withLink?: boolean; isMobile?: boolean }) => {
     const logo = (
-      <h1 className={cn("pr-4 text-2xl font-bold", isMobile && "px-1 text-lg")}>BREEDY</h1>
+      <h1
+        className={cn("pr-4 text-2xl font-bold", isMobile && "px-1 text-lg")}
+        onClick={handleLogoTap}
+      >
+        BREEDY
+      </h1>
     );
 
     if (isNative && withLink) {
@@ -97,7 +121,10 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
       {/* 웹에서만 메뉴바에 렌더링 */}
       {!isNative && !isMobile && !isRegisterPage && <AddPetButton />}
       {!isNative && isMobile && !pathname?.startsWith("/sign-in") && (
-        <Link href="/sign-in" className="rounded-full px-3 py-1 text-xs font-medium text-blue-500">
+        <Link
+          href="/beta-closed"
+          className="rounded-full px-3 py-1 text-xs font-medium text-blue-500"
+        >
           로그인
         </Link>
       )}
