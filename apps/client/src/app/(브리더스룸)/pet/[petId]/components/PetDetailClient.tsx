@@ -11,6 +11,9 @@ import AdoptionInfoContent from "./AdoptionInfoContent";
 import FeedingInfoContent from "./FeedingInfoContent";
 import Loading from "@/components/common/Loading";
 
+// memo 비교 시 매 렌더마다 새 참조가 생성되지 않도록 상수로 분리
+const EMPTY_IMAGES: never[] = [];
+
 interface PetDetailClientProps {
   petId: string;
 }
@@ -76,7 +79,7 @@ export default function PetDetailClient({ petId }: PetDetailClientProps) {
       breedingSlot={
         <BreedingInfoContent petId={pet.petId} ownerId={pet.owner.userId ?? ""} initialPet={pet} />
       }
-      imagesSlot={<ImagesContent pet={pet} initialImages={[]} />}
+      imagesSlot={<ImagesContent pet={pet} initialImages={EMPTY_IMAGES} />}
       pedigreeSlot={
         <PedigreeInfoContent
           species={pet.species}

@@ -104,9 +104,13 @@ export const DataTable = ({
   const [previewSuppressed, setPreviewSuppressed] = useState(false);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
-  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    setMousePos({ x: e.clientX, y: e.clientY });
-  }, []);
+  const handleMouseMove = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      if (selectedPet) return;
+      setMousePos({ x: e.clientX, y: e.clientY });
+    },
+    [selectedPet],
+  );
 
   const handleTogglePublic = useCallback(
     async (petId: string, currentIsPublic: boolean) => {
