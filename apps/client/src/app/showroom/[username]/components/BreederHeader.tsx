@@ -41,7 +41,7 @@ export default function BreederHeader({ profile }: BreederHeaderProps) {
             </button>
             {!isLoggedIn && (
               <Link
-                href="/sign-in"
+                href="/beta-closed"
                 className="shrink-0 rounded-lg border border-blue-200 px-3 py-1 text-xs font-medium text-blue-500 hover:bg-blue-50 dark:border-blue-800 dark:hover:bg-blue-900/30"
               >
                 로그인
