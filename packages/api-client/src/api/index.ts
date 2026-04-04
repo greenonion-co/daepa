@@ -711,6 +711,13 @@ export const feedingControllerDelete = (id: number) => {
   return useCustomInstance<CommonResponseDto>({ url: `/api/v1/feedings/${id}`, method: "DELETE" });
 };
 
+export const viewLogControllerRecordView = (resourceType: string, resourceId: string) => {
+  return useCustomInstance<void>({
+    url: `/api/v1/view/${resourceType}/${resourceId}`,
+    method: "POST",
+  });
+};
+
 export const fcmControllerRegisterToken = (registerFcmTokenDto: RegisterFcmTokenDto) => {
   return useCustomInstance<CommonResponseDto>({
     url: `/api/v1/fcm/token`,
@@ -946,6 +953,9 @@ export type FeedingControllerUpdateResult = NonNullable<
 >;
 export type FeedingControllerDeleteResult = NonNullable<
   Awaited<ReturnType<typeof feedingControllerDelete>>
+>;
+export type ViewLogControllerRecordViewResult = NonNullable<
+  Awaited<ReturnType<typeof viewLogControllerRecordView>>
 >;
 export type FcmControllerRegisterTokenResult = NonNullable<
   Awaited<ReturnType<typeof fcmControllerRegisterToken>>
@@ -5998,6 +6008,20 @@ export const getFeedingControllerDeleteMockHandler = (
   });
 };
 
+export const getViewLogControllerRecordViewMockHandler = (
+  overrideResponse?:
+    | void
+    | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<void> | void),
+) => {
+  return http.post("*/api/v1/view/:resourceType/:resourceId", async (info) => {
+    await delay(1000);
+    if (typeof overrideResponse === "function") {
+      await overrideResponse(info);
+    }
+    return new HttpResponse(null, { status: 204 });
+  });
+};
+
 export const getFcmControllerRegisterTokenMockHandler = (
   overrideResponse?:
     | CommonResponseDto
@@ -6136,6 +6160,7 @@ export const getProjectDaepaAPIMock = () => [
   getFeedingControllerGetListMockHandler(),
   getFeedingControllerUpdateMockHandler(),
   getFeedingControllerDeleteMockHandler(),
+  getViewLogControllerRecordViewMockHandler(),
   getFcmControllerRegisterTokenMockHandler(),
   getFcmControllerDeactivateTokenMockHandler(),
   getFcmControllerSendTestPushMockHandler(),
