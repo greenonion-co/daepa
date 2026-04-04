@@ -3,11 +3,11 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useUserStore } from "../store/user";
-import { toast } from "@/lib/toast";
+
 
 /**
  * isBiz 계정만 접근 가능하도록 제한하는 가드.
- * 비사업자 계정이면 루트('/')로 리다이렉트 + 에러 토스트.
+ * 비사업자 계정이면 /beta-closed로 리다이렉트.
  */
 export function BizGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -16,8 +16,7 @@ export function BizGuard({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // user가 로드된 뒤 isBiz 확인
     if (user && !user.isBiz) {
-      toast.error("권한이 없습니다");
-      router.replace("/");
+      router.replace("/beta-closed");
     }
   }, [user, router]);
 
