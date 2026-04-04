@@ -75,6 +75,9 @@ import { FcmTokenEntity } from './fcm/fcm_token.entity';
 import { FeedingEntity } from './feeding/feeding.entity';
 import { FeedingController } from './feeding/feeding.controller';
 import { FeedingService } from './feeding/feeding.service';
+import { ViewLogEntity } from './view_log/view_log.entity';
+import { ViewLogController } from './view_log/view_log.controller';
+import { ViewLogService } from './view_log/view_log.service';
 
 const ENTITIES = [
   UserEntity,
@@ -93,6 +96,7 @@ const ENTITIES = [
   PetRelationEntity,
   FcmTokenEntity,
   FeedingEntity,
+  ViewLogEntity,
 ];
 
 @Module({
@@ -144,6 +148,7 @@ const ENTITIES = [
     PetImageController,
     StatisticsController,
     FeedingController,
+    ViewLogController,
   ],
   providers: [
     AppService,
@@ -166,6 +171,7 @@ const ENTITIES = [
     PetRelationService,
     StatisticsService,
     FeedingService,
+    ViewLogService,
     {
       provide: KEYV_REDIS,
       useFactory: () => new KeyvRedis(buildRedisUrl()),

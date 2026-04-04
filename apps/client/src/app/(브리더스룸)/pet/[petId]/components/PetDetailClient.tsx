@@ -10,6 +10,7 @@ import PedigreeInfoContent from "./PedigreeInfoContent";
 import AdoptionInfoContent from "./AdoptionInfoContent";
 import FeedingInfoContent from "./FeedingInfoContent";
 import Loading from "@/components/common/Loading";
+import { useViewLog } from "@/hooks/useViewLog";
 
 // memo 비교 시 매 렌더마다 새 참조가 생성되지 않도록 상수로 분리
 const EMPTY_IMAGES: never[] = [];
@@ -19,6 +20,8 @@ interface PetDetailClientProps {
 }
 
 export default function PetDetailClient({ petId }: PetDetailClientProps) {
+  useViewLog("pet", petId);
+
   const {
     data: pet,
     isLoading,
