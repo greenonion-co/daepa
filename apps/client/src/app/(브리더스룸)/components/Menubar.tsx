@@ -122,7 +122,7 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
       {!isNative && !isMobile && !isRegisterPage && <AddPetButton />}
       {!isNative && isMobile && !pathname?.startsWith("/sign-in") && (
         <Link
-          href="/beta-closed"
+          href="/sign-in"
           className="rounded-full px-3 py-1 text-xs font-medium text-blue-500"
         >
           로그인

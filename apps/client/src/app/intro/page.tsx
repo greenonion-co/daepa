@@ -92,7 +92,7 @@ export default function IntroPage() {
           <span className="text-sm font-bold tracking-tight text-white">BREEDY</span>
         </div>
         <Link
-          href="/beta-closed"
+          href="/sign-in"
           className="rounded-full bg-white px-5 py-2 text-xs font-bold text-black transition-colors hover:bg-white/90"
         >
           시작하기
@@ -156,13 +156,13 @@ export default function IntroPage() {
             className="flex flex-col items-center gap-3 sm:flex-row"
           >
             <Link
-              href="/beta-closed"
+              href="/sign-in"
               className="flex items-center gap-2 rounded-full bg-white px-8 py-3.5 text-sm font-bold text-black shadow-2xl transition-all hover:bg-white/90 active:scale-95"
             >
               지금 시작하기 <ArrowRight size={14} strokeWidth={2.5} />
             </Link>
             <Link
-              href="/beta-closed"
+              href="/sign-in"
               className="flex items-center gap-2 rounded-full border border-white/15 bg-white/8 px-8 py-3.5 text-sm font-bold text-white backdrop-blur-sm transition-all hover:bg-white/12 active:scale-95"
             >
               카카오로 시작
@@ -308,13 +308,13 @@ export default function IntroPage() {
 
           <motion.div variants={fadeUp} className="flex w-full max-w-xs flex-col gap-3">
             <Link
-              href="/beta-closed"
+              href="/sign-in"
               className="flex w-full items-center justify-center rounded-2xl bg-[#FEE500] py-4 text-sm font-bold text-gray-900 transition-all hover:brightness-95 active:scale-95"
             >
               카카오로 시작하기
             </Link>
             <Link
-              href="/beta-closed"
+              href="/sign-in"
               className="flex w-full items-center justify-center rounded-2xl bg-white/10 py-4 text-sm font-bold text-white backdrop-blur-sm transition-all hover:bg-white/15 active:scale-95"
             >
               구글로 시작하기
