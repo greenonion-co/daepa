@@ -245,12 +245,6 @@ const Header = ({
             type="button"
             onClick={() => {
               router.push(`/pet/${pet.petId}/relation`);
-              // TODO: 박람회 이후 어떻게 처리할지
-              // if (isLoggedIn) {
-              //   router.push(`/pet/${pet.petId}/relation`);
-              // } else {
-              //   openRelationPromoSheet();
-              // }
             }}
             className={cn(
               "flex h-8 items-center gap-1.5 rounded-md border border-white bg-white px-2 font-[700] transition-colors hover:bg-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700",
