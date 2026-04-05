@@ -7,20 +7,9 @@ const PUBLIC_PATHS = [
   /^\/pet\/[^/]+$/, // /pet/[petId] (펫 상세 페이지)
 ];
 
-// isBiz 체크를 하지 않는 경로 패턴 (비사업자도 접근 가능)
-const BIZ_EXEMPT_PATHS = [
-  /^\/settings(\/|$)/, // /settings, /settings/*
-  /^\/pet\/[^/]+$/, // /pet/[petId] (펫 상세 페이지)
-];
-
 function isPublicPath(pathname: string): boolean {
   const normalizedPathname = pathname.replace(/\/$/, ""); // 트레일링 슬래시 제거
   return PUBLIC_PATHS.some((pattern) => pattern.test(normalizedPathname));
-}
-
-function isBizExemptPath(pathname: string): boolean {
-  const normalizedPathname = pathname.replace(/\/$/, "");
-  return BIZ_EXEMPT_PATHS.some((pattern) => pattern.test(normalizedPathname));
 }
 
 export default async function BrLayout({
@@ -43,11 +32,6 @@ export default async function BrLayout({
     redirect("/sign-in");
   }
 
-  // isBiz 면제 경로는 가드 없이 렌더링
-  if (isBizExemptPath(pathname)) {
-    return <>{children}</>;
-  }
-
-  // 나머지 경로는 isBiz 가드 적용
+  // BizGuard가 클라이언트에서 pathname을 감시하며 exempt 경로 판단
   return <BizGuard>{children}</BizGuard>;
 }

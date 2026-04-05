@@ -5,7 +5,7 @@ const BetaClosedPage = () => {
     <div className="flex min-h-[calc(100dvh-52px)] w-full items-center justify-center dark:bg-black">
       <div className="w-[90vw] max-w-md text-center">
         <div className="mb-4 text-xl font-bold text-gray-800 dark:text-white">
-          BREEDY 베타테스트 기간입니다
+          베타테스트 기간입니다
         </div>
         <p className="mb-6 text-sm text-gray-500 dark:text-gray-400">
           브리디를 사용해보고 싶으시다면
@@ -20,6 +20,13 @@ const BetaClosedPage = () => {
         >
           정식 출시 알림 신청
         </a>
+        <p className="mt-6 text-sm text-gray-500 dark:text-gray-400">
+          사업자이신 경우, 사전체험을 희망하시면
+          <br />
+          greenonion.dev@gmail.com로
+          <br />
+          문의 부탁드립니다
+        </p>
       </div>
     </div>
   );
