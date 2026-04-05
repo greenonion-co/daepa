@@ -10,6 +10,7 @@ import { isNativeApp, sendToNative } from "@/lib/native-bridge";
 interface UserState {
   accessToken: string | null;
   user: UserProfileDto | null;
+  isInitialized: boolean;
 }
 
 interface UserActions {
@@ -28,6 +29,7 @@ type UserStore = UserState & UserActions;
 export const useUserStore = create<UserStore>()((set, get) => ({
   accessToken: null,
   user: null,
+  isInitialized: false,
 
   setAccessToken: (token: string | null) => set({ accessToken: token }),
 
@@ -35,7 +37,7 @@ export const useUserStore = create<UserStore>()((set, get) => ({
     try {
       const token = tokenStorage.getToken();
       if (!token) {
-        set({ accessToken: null, user: null });
+        set({ accessToken: null, user: null, isInitialized: true });
         return;
       }
 
@@ -49,14 +51,14 @@ export const useUserStore = create<UserStore>()((set, get) => ({
       }
 
       const userData = data.data;
-      set({ user: userData });
+      set({ user: userData, isInitialized: true });
 
       // 네이티브 앱에서는 Native가 Source of Truth
       // 토큰은 Native에서 WebView로 주입됨 (injectedJavaScriptBeforeContentLoaded)
       // WebView → Native 동기화는 하지 않음
     } catch (error) {
       console.error(error);
-      set({ accessToken: null, user: null });
+      set({ accessToken: null, user: null, isInitialized: true });
     }
   },
 

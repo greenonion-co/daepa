@@ -7,7 +7,8 @@ import { useUserStore } from "../store/user";
 // isBiz 체크를 하지 않는 경로 패턴 (비사업자도 접근 가능)
 const BIZ_EXEMPT_PATHS = [
   /^\/settings(\/|$)/,
-  /^\/pet\/[^/]+$/,
+  /^\/pet\/(?!deleted$)[^/]+$/,
+  /^\/pet\/(?!deleted$)[^/]+\/relation$/,
 ];
 
 function isBizExemptPath(pathname: string): boolean {
@@ -24,15 +25,20 @@ export function BizGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const user = useUserStore((state) => state.user);
+  const isInitialized = useUserStore((state) => state.isInitialized);
   const isExempt = isBizExemptPath(pathname);
 
   useEffect(() => {
-    if (user && !user.isBiz && !isExempt) {
+    if (isExempt || !isInitialized) return;
+
+    if (!user) {
+      router.replace("/sign-in");
+    } else if (!user.isBiz) {
       router.replace("/beta-closed");
     }
-  }, [user, router, isExempt]);
+  }, [user, isInitialized, router, isExempt]);
 
-  // exempt 경로면 isBiz 상관없이 통과
+  // exempt 경로면 누구나 통과
   if (isExempt) {
     return <>{children}</>;
   }
