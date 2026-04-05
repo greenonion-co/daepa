@@ -56,7 +56,7 @@ const LoginPromoSheet = ({ isOpen, onOpenChange, title, description }: LoginProm
               if (isNativeApp()) {
                 navigate({ screen: "Login" });
               } else {
-                router.push("/beta-closed");
+                router.push("/sign-in");
               }
             }}
           >

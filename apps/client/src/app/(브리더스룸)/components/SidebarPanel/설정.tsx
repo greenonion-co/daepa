@@ -82,7 +82,7 @@ const SettingList = () => {
             </>
           ) : (
             <Link
-              href="/beta-closed"
+              href="/sign-in"
               className="flex h-[42px] items-center justify-center rounded-xl bg-blue-600 text-[16px] font-bold text-white"
             >
               로그인

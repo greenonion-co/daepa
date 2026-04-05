@@ -32,7 +32,7 @@ export default function PetList({ filterType, isVisible }: PetListProps) {
       if (isNativeApp()) {
         navigate({ screen: "Login" });
       } else {
-        router.push("/beta-closed");
+        router.push("/sign-in");
       }
     }
   };
