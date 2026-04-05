@@ -220,25 +220,7 @@ const Header = ({
           </div>
         </div>
 
-        <div className={cn("flex items-center gap-1", size === "small" && "mt-2")}>
-          {/* 브리딩맵 */}
-          {isLoggedIn && isMyPet && isBreeder && (
-            <button
-              type="button"
-              onClick={() => router.push(`/pet/${pet.petId}/breeding-map`)}
-              className={cn(
-                "flex h-8 items-center gap-1.5 rounded-md border border-gray-200 bg-gradient-to-r from-blue-200/50 to-purple-200/65 px-3 font-[700] text-white transition-colors hover:from-blue-200/70 hover:to-purple-200/80 dark:border-gray-700 dark:from-blue-900/40 dark:to-purple-900/50 dark:hover:from-blue-900/60 dark:hover:to-purple-900/70",
-                isScrolled ? "text-xs" : "text-sm",
-              )}
-            >
-              <TooltipText
-                text="브리딩맵"
-                title="브리딩맵"
-                className="text-blue-600 dark:text-purple-300"
-                content="혈통 관계를 트리 구조로 확인합니다."
-              />
-            </button>
-          )}
+        <div className={cn("grid grid-cols-3 gap-1", size === "small" && "mt-2")}>
           {/* 관계도 */}
           <button
             type="button"
@@ -258,7 +240,6 @@ const Header = ({
             />
           </button>
           {/* 공유 */}
-          {/* TODO: 박람회*/}
           <Button
             size="sm"
             variant="outline"
@@ -290,6 +271,24 @@ const Header = ({
           </Button>
           {/* QR코드 */}
           <QRCode pet={pet} isScrolled={isScrolled} adoptionPrice={adoptionData?.price} />
+          {/* 브리딩맵 */}
+          {isLoggedIn && isMyPet && isBreeder && (
+            <button
+              type="button"
+              onClick={() => router.push(`/pet/${pet.petId}/breeding-map`)}
+              className={cn(
+                "col-start-2 col-span-2 flex h-8 items-center justify-center gap-1.5 rounded-md border border-gray-200 bg-gradient-to-r from-blue-200/50 to-purple-200/65 px-3 font-[700] text-white transition-colors hover:from-blue-200/70 hover:to-purple-200/80 dark:border-gray-700 dark:from-blue-900/40 dark:to-purple-900/50 dark:hover:from-blue-900/60 dark:hover:to-purple-900/70",
+                isScrolled ? "text-xs" : "text-sm",
+              )}
+            >
+              <TooltipText
+                text="브리딩맵"
+                title="브리딩맵"
+                className="text-blue-600 dark:text-purple-300"
+                content="혈통 관계를 트리 구조로 확인합니다."
+              />
+            </button>
+          )}
         </div>
       </div>
 
