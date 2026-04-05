@@ -49,9 +49,6 @@ const ParentLink = ({
   onSelect,
   onUnlink,
 }: ParentLinkProps) => {
-  // TODO: 박람회 이후 제거
-  const isOintTemp = ["tz3jTgnk", "WZnbyP8x"].includes(data?.petId ?? "");
-
   const { user } = useUserStore();
   const pathname = usePathname();
   const isClickDisabled = pathname.includes("register") || pathname.includes("hatching");
@@ -209,7 +206,7 @@ const ParentLink = ({
     <div className="flex-1">
       <dt className="mb-2 flex items-center gap-2 text-xs font-medium text-gray-500 dark:text-gray-400">
         {label}
-        {parent?.status && !isOintTemp && (
+        {parent?.status && (
           <ParentStatusBadge
             status={parent.status}
             ownerName={parent.owner?.name ?? undefined}
