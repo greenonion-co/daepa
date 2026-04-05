@@ -4,42 +4,55 @@ import { useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useUserStore } from "../store/user";
 
-// isBiz 체크를 하지 않는 경로 패턴 (비사업자도 접근 가능)
-const BIZ_EXEMPT_PATHS = [
-  /^\/settings(\/|$)/,
+// 비로그인 사용자도 접근 가능한 경로 (인증 불필요)
+const PUBLIC_PATHS = [
   /^\/pet\/(?!deleted$)[^/]+$/,
   /^\/pet\/(?!deleted$)[^/]+\/relation$/,
 ];
 
-function isBizExemptPath(pathname: string): boolean {
+// 로그인 필요하지만 isBiz 체크는 면제되는 경로
+const BIZ_EXEMPT_PATHS = [
+  /^\/settings(\/|$)/,
+  ...PUBLIC_PATHS,
+];
+
+function matchesPath(pathname: string, patterns: RegExp[]): boolean {
   const normalized = pathname.replace(/\/$/, "");
-  return BIZ_EXEMPT_PATHS.some((pattern) => pattern.test(normalized));
+  return patterns.some((pattern) => pattern.test(normalized));
 }
 
 /**
  * isBiz 계정만 접근 가능하도록 제한하는 가드.
- * 비사업자 계정이면 /beta-closed로 리다이렉트.
- * exempt 경로(settings, pet 상세)에서는 통과.
+ * - PUBLIC 경로: 누구나 통과
+ * - BIZ_EXEMPT 경로: 로그인 필요, isBiz 불필요
+ * - 그 외: 로그인 + isBiz 필요
  */
 export function BizGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const user = useUserStore((state) => state.user);
   const isInitialized = useUserStore((state) => state.isInitialized);
-  const isExempt = isBizExemptPath(pathname);
+  const isPublic = matchesPath(pathname, PUBLIC_PATHS);
+  const isBizExempt = matchesPath(pathname, BIZ_EXEMPT_PATHS);
 
   useEffect(() => {
-    if (isExempt || !isInitialized) return;
+    if (isPublic || !isInitialized) return;
 
     if (!user) {
       router.replace("/sign-in");
-    } else if (!user.isBiz) {
+    } else if (!user.isBiz && !isBizExempt) {
       router.replace("/beta-closed");
     }
-  }, [user, isInitialized, router, isExempt]);
+  }, [user, isInitialized, router, isPublic, isBizExempt]);
 
-  // exempt 경로면 누구나 통과
-  if (isExempt) {
+  // 공개 경로면 누구나 통과
+  if (isPublic) {
+    return <>{children}</>;
+  }
+
+  // biz 면제 경로면 로그인만 확인
+  if (isBizExempt) {
+    if (!user) return null;
     return <>{children}</>;
   }
 

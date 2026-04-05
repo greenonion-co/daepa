@@ -34,6 +34,7 @@ export const useUserStore = create<UserStore>()((set, get) => ({
   setAccessToken: (token: string | null) => set({ accessToken: token }),
 
   initialize: async () => {
+    set({ isInitialized: false });
     try {
       const token = tokenStorage.getToken();
       if (!token) {
