@@ -48,3 +48,11 @@ GoogleService-Info.plist
 
 # React Native Config (auto-generated)
 apps/mobile/ios/tmp.xcconfig
+
+# Android Release Keystore
+*.keystore
+!apps/mobile/android/app/debug.keystore
+
+# Android Studio / Gradle (root level)
+.gradle/
+settings.gradle
