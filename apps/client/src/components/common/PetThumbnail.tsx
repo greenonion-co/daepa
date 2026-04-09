@@ -6,7 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import Loading from "./Loading";
 import { IMAGE_TRANSFORMS } from "@/app/constants";
-import { PawPrint, ImageOff } from "lucide-react";
+import { ImageOff } from "lucide-react";
 import { useEffect, useState } from "react";
 
 /** maxSize 기준으로 적절한 transform 선택 */
@@ -120,8 +120,8 @@ const PetThumbnail = ({
           <span className="text-[10px] text-red-500">이미지 오류</span>
         </div>
       ) : (
-        <div className="flex h-full w-full items-center justify-center opacity-30">
-          <PawPrint className="h-1/4 w-1/4" aria-hidden="true" />
+        <div className="flex h-full w-full items-center justify-center opacity-15">
+          <span className="text-xs font-bold tracking-wider select-none">BREEDY</span>
           <span className="sr-only">{alt}</span>
         </div>
       )}
