@@ -154,10 +154,10 @@ export default function PetShowcaseGrid({ userId, filters }: PetShowcaseGridProp
   }
 
   return (
-    <div className="flex flex-col gap-4 p-2">
+    <div className="mt-2 flex flex-col p-2">
       {/* 개수 표시 */}
       <div className="flex items-center gap-1.5 text-xs text-gray-400 dark:text-gray-500">
-        <span>{`${totalCount}마리`}</span>
+        <span>{`총 ${totalCount}마리`}</span>
         {isFetching && !isFetchingNextPage && (
           <svg className="h-3 w-3 animate-spin" viewBox="0 0 24 24" fill="none">
             <circle

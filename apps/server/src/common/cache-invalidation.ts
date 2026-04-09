@@ -71,6 +71,11 @@ export class CacheInvalidation {
     ]);
   }
 
+  /** 사용자 프로필 변경 시 */
+  async onUserProfileChanged(userName: string) {
+    await this.cacheService.del(CACHE.profile.key(userName));
+  }
+
   /** 분양 완료 시 */
   async onAdoptionCompleted(petId: string, userId: string) {
     await Promise.all([

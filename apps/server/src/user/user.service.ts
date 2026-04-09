@@ -27,6 +27,7 @@ import { EntityManager } from 'typeorm';
 import { plainToInstance } from 'class-transformer';
 import { OauthEntity } from 'src/auth/oauth/oauth.entity';
 import { PageDto, PageMetaDto } from 'src/common/page.dto';
+import { CacheInvalidation } from 'src/common/cache-invalidation';
 
 @Injectable()
 export class UserService {
@@ -35,6 +36,7 @@ export class UserService {
     private readonly userRepository: Repository<UserEntity>,
     private readonly oauthService: OauthService,
     private readonly dataSource: DataSource,
+    private readonly cacheInvalidation: CacheInvalidation,
   ) {}
 
   async generateUserId() {
@@ -258,6 +260,7 @@ export class UserService {
       throw new NotFoundException('사용자를 찾을 수 없습니다.');
     }
     await this.userRepository.update({ userId }, dto);
+    await this.cacheInvalidation.onUserProfileChanged(userEntity.name);
   }
 
   async findPublicProfileByName(
@@ -287,6 +290,7 @@ export class UserService {
       realName: userEntity.isRealNamePublic ? userEntity.realName : null,
       phone: userEntity.isPhonePublic ? userEntity.phone : null,
       address: userEntity.isAddressPublic ? userEntity.address : null,
+      bannerImageUrl: userEntity.bannerImageUrl ?? null,
     };
   }
 

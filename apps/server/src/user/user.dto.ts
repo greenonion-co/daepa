@@ -318,6 +318,16 @@ export class UpdateUserPrivateInfoDto {
   @IsBoolean()
   @IsOptional()
   isAddressPublic?: boolean;
+
+  @ApiProperty({
+    description: '배너 이미지 URL',
+    type: 'string',
+    nullable: true,
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  bannerImageUrl?: string | null;
 }
 
 export class VerifyNameDto {
@@ -378,6 +388,16 @@ export class BreederPublicProfileDto extends UserProfilePublicDto {
     required: false,
   })
   address?: string | null;
+
+  @ApiProperty({
+    description: '배너 이미지 URL',
+    type: 'string',
+    nullable: true,
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  bannerImageUrl?: string | null;
 }
 
 export class BreederPublicProfileResponseDto extends CommonResponseDto {

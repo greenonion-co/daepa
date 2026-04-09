@@ -3508,6 +3508,10 @@ export const getUserControllerGetPublicProfileResponseMock = (
       realName: faker.helpers.arrayElement([{}, undefined]),
       phone: faker.helpers.arrayElement([{}, undefined]),
       address: faker.helpers.arrayElement([{}, undefined]),
+      bannerImageUrl: faker.helpers.arrayElement([
+        faker.helpers.arrayElement([faker.string.alpha(20), null]),
+        undefined,
+      ]),
     },
   },
   ...overrideResponse,

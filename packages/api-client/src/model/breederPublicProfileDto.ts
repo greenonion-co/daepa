@@ -30,4 +30,9 @@ export interface BreederPublicProfileDto {
   phone?: BreederPublicProfileDtoPhone;
   /** 주소 (공개 설정 시) */
   address?: BreederPublicProfileDtoAddress;
+  /**
+   * 배너 이미지 URL
+   * @nullable
+   */
+  bannerImageUrl?: string | null;
 }

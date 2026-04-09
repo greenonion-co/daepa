@@ -54,6 +54,9 @@ export class UserEntity {
   @Column({ default: false })
   isAddressPublic: boolean;
 
+  @Column({ type: 'varchar', length: 500, nullable: true })
+  bannerImageUrl?: string | null;
+
   @Column({ type: 'varchar', nullable: true })
   refreshToken?: string | null;
 

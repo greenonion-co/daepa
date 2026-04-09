@@ -28,4 +28,9 @@ export interface UpdateUserPrivateInfoDto {
   isPhonePublic?: boolean;
   /** 주소 공개 여부 */
   isAddressPublic?: boolean;
+  /**
+   * 배너 이미지 URL
+   * @nullable
+   */
+  bannerImageUrl?: string | null;
 }

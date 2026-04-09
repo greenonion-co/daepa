@@ -11,6 +11,7 @@ export interface BreederPublicProfile {
   realName?: string | null;
   phone?: string | null;
   address?: string | null;
+  bannerImageUrl?: string | null;
 }
 
 export const fetchBreederProfile = cache(

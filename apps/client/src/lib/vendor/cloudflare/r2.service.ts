@@ -1,4 +1,4 @@
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { globalS3Client } from "@/lib/vendor/aws/s3/globalS3Client";
 import { nanoid } from "nanoid";
@@ -22,17 +22,19 @@ class R2Service {
 
   async upload({
     petId,
+    key,
     buffer,
     mimeType,
     size,
   }: {
-    petId: string;
+    petId?: string;
+    key?: string;
     buffer: Buffer;
     mimeType: string;
     size: number;
   }) {
     const file = {
-      name: `${petId}/${nanoid(10)}`,
+      name: key ?? `${petId}/${nanoid(10)}`,
       buffer: buffer,
       mimeType: mimeType,
       size: size,
@@ -58,6 +60,16 @@ class R2Service {
       mimeType: file.mimeType,
       url: `${this.r2ImageBaseUrl}/${file.name}`,
     };
+  }
+
+  async delete(url: string) {
+    const key = url.replace(`${this.r2ImageBaseUrl}/`, "");
+    await this.s3Client.send(
+      new DeleteObjectCommand({
+        Bucket: this.r2ImageBucketName,
+        Key: key,
+      }),
+    );
   }
 
   async getPresignedUploadUrl({ petId, mimeType }: { petId: string; mimeType: string }) {
