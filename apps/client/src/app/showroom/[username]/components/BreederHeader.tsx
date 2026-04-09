@@ -2,7 +2,6 @@ import { useRef, useState } from "react";
 import type { BreederPublicProfile } from "../data";
 import { Camera, ChevronRight, MapPin, Pencil, Phone, Share2 } from "lucide-react";
 import { useIsLoggedIn, useUser } from "@/hooks/useAuth";
-import Link from "next/link";
 import { shareShowroom } from "../utils/shareShowroom";
 import { userControllerUpdateUserPrivateInfo } from "@repo/api-client";
 import Image from "next/image";
@@ -173,14 +172,6 @@ export default function BreederHeader({ profile }: BreederHeaderProps) {
               >
                 <Share2 className="h-4 w-4" />
               </button>
-              {!isLoggedIn && (
-                <Link
-                  href="/sign-in"
-                  className="shrink-0 rounded-lg border border-blue-200 px-3 py-1 text-xs font-medium text-blue-500 hover:bg-blue-50 dark:border-blue-800 dark:hover:bg-blue-900/30"
-                >
-                  로그인
-                </Link>
-              )}
             </div>
           </div>
 
