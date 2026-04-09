@@ -291,6 +291,7 @@ export class UserService {
       phone: userEntity.isPhonePublic ? userEntity.phone : null,
       address: userEntity.isAddressPublic ? userEntity.address : null,
       bannerImageUrl: userEntity.bannerImageUrl ?? null,
+      bio: userEntity.bio ?? null,
     };
   }
 

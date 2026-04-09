@@ -328,6 +328,16 @@ export class UpdateUserPrivateInfoDto {
   @IsString()
   @IsOptional()
   bannerImageUrl?: string | null;
+
+  @ApiProperty({
+    description: '브리더 소개글',
+    type: 'string',
+    nullable: true,
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  bio?: string | null;
 }
 
 export class VerifyNameDto {
@@ -398,6 +408,16 @@ export class BreederPublicProfileDto extends UserProfilePublicDto {
   @IsString()
   @IsOptional()
   bannerImageUrl?: string | null;
+
+  @ApiProperty({
+    description: '브리더 소개글',
+    type: 'string',
+    nullable: true,
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  bio?: string | null;
 }
 
 export class BreederPublicProfileResponseDto extends CommonResponseDto {

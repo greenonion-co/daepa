@@ -12,6 +12,7 @@ export interface BreederPublicProfile {
   phone?: string | null;
   address?: string | null;
   bannerImageUrl?: string | null;
+  bio?: string | null;
 }
 
 export const fetchBreederProfile = cache(
