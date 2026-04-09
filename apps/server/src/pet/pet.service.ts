@@ -696,8 +696,12 @@ export class PetService {
     this.buildPetListSearchFilterQuery(queryBuilder, pageOptionsDto);
 
     // 정렬 및 페이지네이션
+    const sortColumn =
+      pageOptionsDto.sortBy === 'hatchingDate'
+        ? 'pets.hatchingDate'
+        : 'pets.createdAt';
     queryBuilder
-      .orderBy('pets.createdAt', pageOptionsDto.order)
+      .orderBy(sortColumn, pageOptionsDto.order)
       .skip(pageOptionsDto.skip)
       .take(pageOptionsDto.itemPerPage);
 

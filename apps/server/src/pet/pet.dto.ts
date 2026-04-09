@@ -1423,6 +1423,16 @@ export class PetFilterDto extends PageOptionsDto {
   @IsOptional()
   @IsEnum(PET_LIST_FILTER_TYPE)
   filterType?: PET_LIST_FILTER_TYPE;
+
+  @ApiProperty({
+    description: '정렬 기준 (createdAt: 등록일, hatchingDate: 해칭일)',
+    enum: ['createdAt', 'hatchingDate'],
+    default: 'createdAt',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  sortBy?: 'createdAt' | 'hatchingDate';
 }
 
 export class LinkParentDto {

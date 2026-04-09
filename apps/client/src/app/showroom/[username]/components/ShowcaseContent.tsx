@@ -11,8 +11,8 @@ import { BadgeCheck, Share2 } from "lucide-react";
 import { shareShowroom } from "../utils/shareShowroom";
 
 const SORT_DISPLAY: Record<string, string> = {
-  DESC: "최신순",
-  ASC: "오래된순",
+  "hatchingDate:DESC": "해칭일 최신순",
+  "hatchingDate:ASC": "해칭일 오래된순",
 };
 
 const CURRENT_SPECIES = "CR";
@@ -29,7 +29,7 @@ export default function ShowcaseContent({ profile }: ShowcaseContentProps) {
     morphs: [],
     traits: [],
     search: "",
-    sort: "DESC",
+    sort: "hatchingDate:DESC",
   });
 
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -115,13 +115,13 @@ export default function ShowcaseContent({ profile }: ShowcaseContentProps) {
           />
         </div>
         <ShowcaseMultiSelect
-          title="정렬"
+          title=""
           displayMap={SORT_DISPLAY}
           selected={[filters.sort]}
-          onChange={(v) => setFilters({ ...filters, sort: v[0] || "DESC" })}
+          onChange={(v) => setFilters({ ...filters, sort: v[0] || "hatchingDate:DESC" })}
           single
           dropdownPosition="right"
-          className="w-28"
+          className="w-32"
         />
       </div>
 

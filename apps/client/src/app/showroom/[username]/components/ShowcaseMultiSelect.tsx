@@ -95,7 +95,7 @@ export default function ShowcaseMultiSelect({
           {title}
           {hasSelection &&
             selected[0] &&
-            `\u30FB${displayMap[selected[0]] ?? selected[0]}${selected.length > 1 ? ` \uC678 ${selected.length - 1}\uAC1C` : ""}`}
+            `${title ? "\u30FB" : ""}${displayMap[selected[0]] ?? selected[0]}${selected.length > 1 ? ` \uC678 ${selected.length - 1}\uAC1C` : ""}`}
         </div>
         <ChevronDown
           className={cn(

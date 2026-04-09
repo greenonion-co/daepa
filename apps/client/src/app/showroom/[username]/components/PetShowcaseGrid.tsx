@@ -40,10 +40,12 @@ export default function PetShowcaseGrid({ userId, filters }: PetShowcaseGridProp
       filters.sort,
     ],
     queryFn: async ({ pageParam = 1 }) => {
+      const [sortBy, order] = filters.sort.split(":") as [string, "ASC" | "DESC"];
       const result = await petControllerFindAll({
         page: pageParam,
         itemPerPage: ITEMS_PER_PAGE,
-        order: filters.sort as "ASC" | "DESC",
+        order,
+        sortBy: sortBy as any,
         ownerId: userId,
         ...(filters.search ? { keyword: filters.search } : {}),
         ...(filters.sex.length > 0 ? { sex: filters.sex as any } : {}),
