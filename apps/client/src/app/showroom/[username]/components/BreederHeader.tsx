@@ -195,7 +195,7 @@ export default function BreederHeader({ profile }: BreederHeaderProps) {
                     setBioInput(bio);
                     setIsEditingBio(true);
                   }}
-                  className="rounded-full p-1.5 text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-neutral-500 dark:hover:bg-neutral-800 dark:hover:text-neutral-300"
+                  className="rounded-full p-1 text-blue-400 transition-colors hover:bg-neutral-100 hover:text-neutral-500 dark:hover:bg-neutral-800 dark:hover:text-neutral-300"
                 >
                   <Pencil className="h-3 w-3" />
                 </button>
@@ -254,25 +254,32 @@ export default function BreederHeader({ profile }: BreederHeaderProps) {
 
           {/* 연락처 / 주소 */}
           {(profile.phone || profile.address) && (
-            <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-blue-500 dark:text-blue-400">
+            <div className="flex items-center gap-3 rounded-lg border border-neutral-200 bg-gradient-to-r from-neutral-50 to-white px-4 py-2.5 dark:border-neutral-700 dark:from-neutral-800/80 dark:to-neutral-900">
               {profile.phone && (
                 <a
                   href={`tel:${profile.phone}`}
-                  className="flex items-center gap-1 hover:text-blue-600 dark:hover:text-blue-300"
+                  className="flex shrink-0 items-center gap-1.5 text-neutral-500 transition-colors hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-200"
                 >
-                  <Phone className="h-3 w-3" />
-                  {profile.phone}
+                  <Phone className="h-3 w-3 shrink-0" />
+                  <span className="text-[10px] font-medium tracking-[0.2em] whitespace-nowrap uppercase">
+                    Phone
+                  </span>
                 </a>
+              )}
+              {profile.phone && profile.address && (
+                <div className="h-3 w-px shrink-0 bg-neutral-200 dark:bg-neutral-700" />
               )}
               {profile.address && (
                 <a
                   href={`https://map.naver.com/v5/search/${encodeURIComponent(profile.address)}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-1 hover:text-blue-600 dark:hover:text-blue-300"
+                  className="flex min-w-0 items-center gap-1.5 text-neutral-500 transition-colors hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-200"
                 >
-                  <MapPin className="h-3 w-3" />
-                  {profile.address}
+                  <MapPin className="h-3 w-3 shrink-0" />
+                  <span className="truncate text-[10px] font-medium tracking-[0.2em]">
+                    {profile.address}
+                  </span>
                 </a>
               )}
             </div>
