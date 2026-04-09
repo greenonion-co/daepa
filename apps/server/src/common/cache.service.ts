@@ -113,6 +113,62 @@ export class CacheService {
     }
   }
 
+  // ── Redis Sorted Set 연산 (피드 셔플 등) ──
+
+  /** Sorted Set에 멤버 추가 + TTL 설정 */
+  async zadd(
+    key: string,
+    members: { score: number; value: string }[],
+    ttl?: number,
+  ): Promise<void> {
+    try {
+      const client = this.keyvRedis.client as RedisClientType;
+      const args = members.map((m) => ({
+        score: m.score,
+        value: m.value,
+      }));
+      await client.zAdd(key, args);
+      if (ttl) {
+        await client.pExpire(key, ttl);
+      }
+    } catch (err) {
+      this.logger.warn(`Cache ZADD failed for key=${key}`, err);
+    }
+  }
+
+  /** Sorted Set에서 범위 조회 (score 오름차순) */
+  async zrange(key: string, start: number, stop: number): Promise<string[]> {
+    try {
+      const client = this.keyvRedis.client as RedisClientType;
+      return await client.zRange(key, start, stop);
+    } catch (err) {
+      this.logger.warn(`Cache ZRANGE failed for key=${key}`, err);
+      return [];
+    }
+  }
+
+  /** Sorted Set 멤버 수 */
+  async zcard(key: string): Promise<number> {
+    try {
+      const client = this.keyvRedis.client as RedisClientType;
+      return await client.zCard(key);
+    } catch (err) {
+      this.logger.warn(`Cache ZCARD failed for key=${key}`, err);
+      return 0;
+    }
+  }
+
+  /** 키 존재 여부 확인 */
+  async exists(key: string): Promise<boolean> {
+    try {
+      const client = this.keyvRedis.client as RedisClientType;
+      return (await client.exists(key)) === 1;
+    } catch (err) {
+      this.logger.warn(`Cache EXISTS failed for key=${key}`, err);
+      return false;
+    }
+  }
+
   /** 패턴으로 일괄 삭제 — SCAN 기반 (비블로킹) */
   async delByPattern(pattern: string): Promise<void> {
     try {

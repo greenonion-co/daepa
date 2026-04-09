@@ -1386,4 +1386,211 @@ export class PetService {
       });
     }
   }
+
+  // ── 셔플 피드 ──
+
+  /**
+   * Seeded PRNG (mulberry32)
+   * 같은 seed → 같은 난수 시퀀스 → 같은 셔플 결과
+   */
+  private seededRandom(seed: number) {
+    return () => {
+      seed |= 0;
+      seed = (seed + 0x6d2b79f5) | 0;
+      let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  /**
+   * Fisher-Yates 셔플 (seeded)
+   */
+  private shuffleArray<T>(arr: T[], seed: number): T[] {
+    const rng = this.seededRandom(seed);
+    const shuffled = [...arr];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(rng() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  }
+
+  /**
+   * 셔플 피드 (cache-manager 기반)
+   *
+   * 1. seed로 캐시 키 조회 (sfeed:{seed})
+   * 2. MISS → DB에서 이미지 있는 공개 펫 ID 조회 → seed 기반 셔플 → 캐시 저장
+   * 3. HIT → 캐시에서 셔플된 ID 배열 반환
+   * 4. startOffset으로 순환 시작 위치 결정 → 페이지 범위 petId 추출
+   * 5. petId로 상세 데이터 조회 (WHERE IN)
+   */
+  async getShuffledFeed(
+    seed: number,
+    page: number,
+    itemPerPage: number,
+    startOffset: number = 0,
+  ): Promise<PageDto<PetDto>> {
+    const cacheKey = CACHE.shuffledFeed.key(seed);
+    const pageOffset = (page - 1) * itemPerPage;
+
+    // DB에서 이미지가 있는 공개 펫 ID 조회 (셔플 원본)
+    const fetchPetIds = async () => {
+      return this.petRepository
+        .createQueryBuilder('pets')
+        .select('pets.petId')
+        .innerJoin(
+          'pet_images',
+          'img',
+          'img.petId = pets.petId AND img.files IS NOT NULL',
+        )
+        .where('pets.isPublic = :isPublic', { isPublic: true })
+        .andWhere('pets.isDeleted = :isDeleted', { isDeleted: false })
+        .andWhere('pets.type = :type', { type: PET_TYPE.PET })
+        .getMany()
+        .then((rows) => rows.map((r) => r.petId));
+    };
+
+    // 1. 캐시에서 셔플된 ID 배열 조회 (singleflight + HIT/MISS 로그 자동)
+    const shuffled = await this.cacheService.wrap<string[] | null>(
+      cacheKey,
+      async () => {
+        const allIds = await fetchPetIds();
+        if (allIds.length === 0) return null; // null → 30초만 캐싱 (빈 피드 고정 방지)
+        return this.shuffleArray(allIds, seed);
+      },
+      CACHE.shuffledFeed.ttl,
+    );
+
+    if (!shuffled || shuffled.length === 0) {
+      return new PageDto(
+        [],
+        new PageMetaDto({
+          totalCount: 0,
+          pageOptionsDto: { page, itemPerPage, skip: pageOffset },
+        }),
+      );
+    }
+
+    const totalCount = shuffled.length;
+
+    // startOffset 기반 순환 인덱스 계산 (배열 복사 없이 인덱스만으로 페이지네이션)
+    // totalCount를 초과하면 빈 배열 반환 (무한 순환 방지)
+    const petIds: string[] = [];
+    if (totalCount > 0 && pageOffset < totalCount) {
+      const base = startOffset % totalCount;
+      const remaining = Math.min(itemPerPage, totalCount - pageOffset);
+      for (let i = 0; i < remaining; i++) {
+        const idx = (base + pageOffset + i) % totalCount;
+        petIds.push(shuffled[idx]);
+      }
+    }
+
+    if (petIds.length === 0) {
+      return new PageDto(
+        [],
+        new PageMetaDto({
+          totalCount,
+          pageOptionsDto: { page, itemPerPage, skip: pageOffset },
+        }),
+      );
+    }
+
+    // 3. 상세 조회 결과 캐시 (seed + startOffset + page 단위, TTL 2분)
+    const detailCacheKey = CACHE.shuffledFeedDetail.key(seed, startOffset, page);
+    const result = await this.cacheService.wrap<PageDto<PetDto>>(
+      detailCacheKey,
+      async () => {
+        const petEntities = await this.petRepository
+          .createQueryBuilder('pets')
+          .where('pets.petId IN (:...petIds)', { petIds })
+          .andWhere('pets.isPublic = :isPublic', { isPublic: true })
+          .andWhere('pets.isDeleted = :isDeleted', { isDeleted: false })
+          .innerJoinAndMapOne(
+            'pets.owner',
+            'users',
+            'users',
+            'users.userId = pets.ownerId',
+          )
+          .leftJoinAndMapOne(
+            'pets.petDetail',
+            'pet_details',
+            'petDetail',
+            'petDetail.petId = pets.petId',
+          )
+          .leftJoinAndMapOne(
+            'pets.adoption',
+            'pet_adoptions',
+            'pet_adoptions',
+            'pet_adoptions.petId = pets.petId',
+          )
+          .select([
+            'pets',
+            'users.userId',
+            'users.name',
+            'users.role',
+            'users.isBiz',
+            'users.status',
+            'petDetail',
+            'pet_adoptions',
+          ])
+          .getMany();
+
+        // 셔플 순서대로 정렬
+        const petMap = new Map(petEntities.map((p) => [p.petId, p]));
+        const orderedEntities = petIds
+          .map((id) => petMap.get(id))
+          .filter((p): p is PetEntity => !!p);
+
+        // PetDto 변환 (getPetListFull과 동일한 패턴)
+        const petDtos = await Promise.all(
+          orderedEntities.map(async (petRaw) => {
+            const { petId: pid } = petRaw;
+
+            const { father, mother } =
+              await this.parentRequestService.getParentsWithRequestStatus(pid);
+            const fatherDisplayable = replaceParentPublicSafe(
+              father,
+              petRaw.ownerId,
+              undefined,
+            );
+            const motherDisplayable = replaceParentPublicSafe(
+              mother,
+              petRaw.ownerId,
+              undefined,
+            );
+
+            return plainToInstance(PetDto, {
+              ...petRaw,
+              ...(petRaw.petDetail && {
+                sex: petRaw.petDetail.sex,
+                morphs: petRaw.petDetail.morphs,
+                traits: petRaw.petDetail.traits,
+                foods: petRaw.petDetail.foods,
+                weight: petRaw.petDetail.weight,
+                growth: petRaw.petDetail.growth,
+              }),
+              ...(petRaw.eggDetail && {
+                temperature: petRaw.eggDetail.temperature,
+                eggStatus: petRaw.eggDetail.status,
+              }),
+              father: fatherDisplayable,
+              mother: motherDisplayable,
+            });
+          }),
+        );
+
+        return new PageDto(
+          petDtos,
+          new PageMetaDto({
+            totalCount,
+            pageOptionsDto: { page, itemPerPage, skip: pageOffset },
+          }),
+        );
+      },
+      CACHE.shuffledFeedDetail.ttl,
+    );
+
+    return result;
+  }
 }

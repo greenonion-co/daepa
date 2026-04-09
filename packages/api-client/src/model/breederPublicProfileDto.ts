@@ -35,4 +35,9 @@ export interface BreederPublicProfileDto {
    * @nullable
    */
   bannerImageUrl?: string | null;
+  /**
+   * 브리더 소개글
+   * @nullable
+   */
+  bio?: string | null;
 }

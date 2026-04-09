@@ -19,6 +19,7 @@ import {
   VerifyPetNameDto,
   PetDto,
   PetFilterDto,
+  FeedQueryDto,
   GetParentsByPetIdQueryDto,
   GetParentsByPetIdResponseDto,
   DeletePetDto,
@@ -91,6 +92,35 @@ export class PetController {
     return this.petService.getPetListFull(
       pageOptionsDto,
       token?.userId ?? null,
+    );
+  }
+
+  @Get('/feed')
+  @Public()
+  @ApiExtraModels(PetDto, PageMetaDto)
+  @ApiResponse({
+    status: 200,
+    description: '셔플 피드 조회 성공',
+    schema: {
+      type: 'object',
+      required: ['data', 'meta'],
+      properties: {
+        data: {
+          type: 'array',
+          items: { $ref: getSchemaPath(PetDto) },
+        },
+        meta: { $ref: getSchemaPath(PageMetaDto) },
+      },
+    },
+  })
+  async feed(
+    @Query() query: FeedQueryDto,
+  ): Promise<PageDto<PetDto>> {
+    return this.petService.getShuffledFeed(
+      query.seed,
+      query.page,
+      query.itemPerPage,
+      query.startOffset,
     );
   }
 

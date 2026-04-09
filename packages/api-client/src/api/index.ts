@@ -28,6 +28,7 @@ import type {
   GoogleNativeLoginRequestDto,
   KakaoNativeLoginRequestDto,
   PairControllerGetPairListParams,
+  PetControllerFeedParams,
   PetControllerFindAllParams,
   PetControllerGetChildrenByPetIdParams,
   PetControllerGetClutchMatesByPetIdParams,
@@ -87,6 +88,7 @@ import type {
   ParentLinkDetailJson,
   ParentStatisticsDto,
   PendingRequestCountResponseDto,
+  PetControllerFeed200,
   PetControllerFindAll200,
   PetControllerGetClutchMatesByPetId200,
   PetControllerGetDeletedPets200,
@@ -113,6 +115,14 @@ export const petControllerCreate = (createPetDto: CreatePetDto) => {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     data: createPetDto,
+  });
+};
+
+export const petControllerFeed = (params: PetControllerFeedParams) => {
+  return useCustomInstance<PetControllerFeed200>({
+    url: `/api/v1/pet/feed`,
+    method: "GET",
+    params,
   });
 };
 
@@ -753,6 +763,7 @@ export type PetControllerFindAllResult = NonNullable<
 export type PetControllerCreateResult = NonNullable<
   Awaited<ReturnType<typeof petControllerCreate>>
 >;
+export type PetControllerFeedResult = NonNullable<Awaited<ReturnType<typeof petControllerFeed>>>;
 export type PetControllerGetDeletedPetsResult = NonNullable<
   Awaited<ReturnType<typeof petControllerGetDeletedPets>>
 >;
@@ -1259,6 +1270,293 @@ export const getPetControllerCreateResponseMock = (
 ): CommonResponseDto => ({
   success: faker.datatype.boolean(),
   message: faker.string.alpha(20),
+  ...overrideResponse,
+});
+
+export const getPetControllerFeedResponsePetParentDtoMock = (
+  overrideResponse: Partial<PetParentDto> = {},
+): PetParentDto => ({
+  ...{
+    petId: faker.string.alpha(20),
+    owner: {
+      ...{
+        status: faker.helpers.arrayElement([
+          "pending",
+          "active",
+          "inactive",
+          "suspended",
+          "deleted",
+        ] as const),
+        userId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+        name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+        role: faker.helpers.arrayElement([
+          faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
+          undefined,
+        ]),
+        isBiz: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+      },
+    },
+    name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+    species: faker.helpers.arrayElement(["CR", "LE", "FT", "KN", "LC", "GG"] as const),
+    hatchingDate: faker.helpers.arrayElement([
+      faker.date.past().toISOString().split("T")[0],
+      undefined,
+    ]),
+    isPublic: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+    isBreeder: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+    isDeleted: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+    status: faker.helpers.arrayElement([
+      "pending",
+      "approved",
+      "rejected",
+      "deleted",
+      "cancelled",
+    ] as const),
+    sex: faker.helpers.arrayElement([
+      faker.helpers.arrayElement(["M", "F", "N"] as const),
+      undefined,
+    ]),
+    morphs: faker.helpers.arrayElement([
+      Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+        faker.string.alpha(20),
+      ),
+      undefined,
+    ]),
+    traits: faker.helpers.arrayElement([
+      Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+        faker.string.alpha(20),
+      ),
+      undefined,
+    ]),
+  },
+  ...overrideResponse,
+});
+
+export const getPetControllerFeedResponsePetHiddenStatusDtoMock = (
+  overrideResponse: Partial<PetHiddenStatusDto> = {},
+): PetHiddenStatusDto => ({
+  ...{
+    petId: faker.string.alpha(20),
+    hiddenStatus: faker.helpers.arrayElement(["SECRET", "PENDING", "DELETED"] as const),
+  },
+  ...overrideResponse,
+});
+
+export const getPetControllerFeedResponseMock = (
+  overrideResponse: Partial<PetControllerFeed200> = {},
+): PetControllerFeed200 => ({
+  data: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+    petId: faker.string.alpha(20),
+    type: faker.helpers.arrayElement([
+      faker.helpers.arrayElement(["EGG", "PET"] as const),
+      undefined,
+    ]),
+    owner: {
+      ...{
+        status: faker.helpers.arrayElement([
+          "pending",
+          "active",
+          "inactive",
+          "suspended",
+          "deleted",
+        ] as const),
+        userId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+        name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+        role: faker.helpers.arrayElement([
+          faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
+          undefined,
+        ]),
+        isBiz: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+      },
+    },
+    name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+    species: faker.helpers.arrayElement(["CR", "LE", "FT", "KN", "LC", "GG"] as const),
+    hatchingDate: faker.helpers.arrayElement([
+      faker.date.past().toISOString().split("T")[0],
+      undefined,
+    ]),
+    desc: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+    isPublic: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+    isBreeder: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+    isDeleted: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+    deletedAt: faker.helpers.arrayElement([
+      `${faker.date.past().toISOString().split(".")[0]}Z`,
+      undefined,
+    ]),
+    deleteReason: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+    petDetail: faker.helpers.arrayElement([
+      {
+        ...{
+          growth: faker.helpers.arrayElement([
+            faker.helpers.arrayElement(["BABY", "JUVENILE", "PRE_ADULT", "ADULT", "DEAD"] as const),
+            undefined,
+          ]),
+          sex: faker.helpers.arrayElement([
+            faker.helpers.arrayElement(["M", "F", "N"] as const),
+            undefined,
+          ]),
+          morphs: faker.helpers.arrayElement([
+            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
+            undefined,
+          ]),
+          traits: faker.helpers.arrayElement([
+            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
+            undefined,
+          ]),
+          foods: faker.helpers.arrayElement([
+            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.string.alpha(20),
+            ),
+            undefined,
+          ]),
+          weight: faker.helpers.arrayElement([
+            faker.number.int({ min: undefined, max: undefined }),
+            undefined,
+          ]),
+        },
+      },
+      undefined,
+    ]),
+    eggDetail: faker.helpers.arrayElement([
+      {
+        ...{
+          temperature: faker.helpers.arrayElement([
+            faker.number.int({ min: undefined, max: undefined }),
+            undefined,
+          ]),
+          status: faker.helpers.arrayElement([
+            faker.helpers.arrayElement(["UNFERTILIZED", "FERTILIZED", "HATCHED", "DEAD"] as const),
+            undefined,
+          ]),
+        },
+      },
+      undefined,
+    ]),
+    laying: faker.helpers.arrayElement([
+      {
+        ...{
+          id: faker.number.int({ min: undefined, max: undefined }),
+          matingId: faker.helpers.arrayElement([
+            faker.number.int({ min: undefined, max: undefined }),
+            undefined,
+          ]),
+          layingDate: `${faker.date.past().toISOString().split(".")[0]}Z`,
+          clutch: faker.helpers.arrayElement([
+            faker.number.int({ min: undefined, max: undefined }),
+            undefined,
+          ]),
+          clutchOrder: faker.helpers.arrayElement([
+            faker.number.int({ min: undefined, max: undefined }),
+            undefined,
+          ]),
+        },
+      },
+      undefined,
+    ]),
+    growth: faker.helpers.arrayElement([
+      faker.helpers.arrayElement(["BABY", "JUVENILE", "PRE_ADULT", "ADULT", "DEAD"] as const),
+      undefined,
+    ]),
+    sex: faker.helpers.arrayElement([
+      faker.helpers.arrayElement(["M", "F", "N"] as const),
+      undefined,
+    ]),
+    morphs: faker.helpers.arrayElement([
+      Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+        faker.string.alpha(20),
+      ),
+      undefined,
+    ]),
+    traits: faker.helpers.arrayElement([
+      Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+        faker.string.alpha(20),
+      ),
+      undefined,
+    ]),
+    foods: faker.helpers.arrayElement([
+      Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+        faker.string.alpha(20),
+      ),
+      undefined,
+    ]),
+    weight: faker.helpers.arrayElement([
+      faker.number.int({ min: undefined, max: undefined }),
+      undefined,
+    ]),
+    temperature: faker.helpers.arrayElement([
+      faker.number.int({ min: undefined, max: undefined }),
+      undefined,
+    ]),
+    eggStatus: faker.helpers.arrayElement([
+      faker.helpers.arrayElement(["UNFERTILIZED", "FERTILIZED", "HATCHED", "DEAD"] as const),
+      undefined,
+    ]),
+    father: faker.helpers.arrayElement([
+      faker.helpers.arrayElement([
+        { ...getPetControllerFeedResponsePetParentDtoMock() },
+        { ...getPetControllerFeedResponsePetHiddenStatusDtoMock() },
+      ]),
+      undefined,
+    ]),
+    mother: faker.helpers.arrayElement([
+      faker.helpers.arrayElement([
+        { ...getPetControllerFeedResponsePetParentDtoMock() },
+        { ...getPetControllerFeedResponsePetHiddenStatusDtoMock() },
+      ]),
+      undefined,
+    ]),
+    adoption: faker.helpers.arrayElement([
+      {
+        ...{
+          price: faker.number.int({ min: undefined, max: undefined }),
+          status: faker.helpers.arrayElement(["NFS", "ON_SALE", "ON_RESERVATION"] as const),
+          memo: faker.string.alpha(20),
+          reservedUser: faker.helpers.arrayElement([
+            {
+              ...{
+                status: faker.helpers.arrayElement([
+                  "pending",
+                  "active",
+                  "inactive",
+                  "suspended",
+                  "deleted",
+                ] as const),
+                userId: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+                name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+                role: faker.helpers.arrayElement([
+                  faker.helpers.arrayElement(["user", "breeder", "admin"] as const),
+                  undefined,
+                ]),
+                isBiz: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+              },
+            },
+            undefined,
+          ]),
+          petId: faker.string.alpha(20),
+        },
+      },
+      undefined,
+    ]),
+    status: faker.helpers.arrayElement([
+      "pending",
+      "approved",
+      "rejected",
+      "deleted",
+      "cancelled",
+    ] as const),
+  })),
+  meta: {
+    page: faker.number.int({ min: undefined, max: undefined }),
+    itemPerPage: faker.number.int({ min: undefined, max: undefined }),
+    totalCount: faker.number.int({ min: undefined, max: undefined }),
+    totalPage: faker.number.int({ min: undefined, max: undefined }),
+    hasPreviousPage: faker.datatype.boolean(),
+    hasNextPage: faker.datatype.boolean(),
+  },
   ...overrideResponse,
 });
 
@@ -3512,6 +3810,10 @@ export const getUserControllerGetPublicProfileResponseMock = (
         faker.helpers.arrayElement([faker.string.alpha(20), null]),
         undefined,
       ]),
+      bio: faker.helpers.arrayElement([
+        faker.helpers.arrayElement([faker.string.alpha(20), null]),
+        undefined,
+      ]),
     },
   },
   ...overrideResponse,
@@ -4497,6 +4799,29 @@ export const getPetControllerCreateMockHandler = (
             ? await overrideResponse(info)
             : overrideResponse
           : getPetControllerCreateResponseMock(),
+      ),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+  });
+};
+
+export const getPetControllerFeedMockHandler = (
+  overrideResponse?:
+    | PetControllerFeed200
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<PetControllerFeed200> | PetControllerFeed200),
+) => {
+  return http.get("*/api/v1/pet/feed", async (info) => {
+    await delay(1000);
+
+    return new HttpResponse(
+      JSON.stringify(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getPetControllerFeedResponseMock(),
       ),
       { status: 200, headers: { "Content-Type": "application/json" } },
     );
@@ -6097,6 +6422,7 @@ export const getFcmControllerSendTestPushMockHandler = (
 export const getProjectDaepaAPIMock = () => [
   getPetControllerFindAllMockHandler(),
   getPetControllerCreateMockHandler(),
+  getPetControllerFeedMockHandler(),
   getPetControllerGetDeletedPetsMockHandler(),
   getPetControllerBulkCreateMockHandler(),
   getPetControllerVerifyNameMockHandler(),

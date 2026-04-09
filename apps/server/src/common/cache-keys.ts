@@ -98,4 +98,16 @@ export const CACHE = {
     pattern: (userId: string) => `pair-list:${userId}:*`,
     ttl: LIST_TTL,
   },
+  /** GET /v1/pet/feed — PetService.getShuffledFeed (셔플된 ID 배열) */
+  shuffledFeed: {
+    key: (seed: number) => `sfeed:${seed}`,
+    pattern: 'sfeed:*',
+    ttl: 30 * 60 * 1000, // 30분
+  },
+  /** GET /v1/pet/feed — 상세 조회 결과 캐시 (seed + startOffset + page) */
+  shuffledFeedDetail: {
+    key: (seed: number, startOffset: number, page: number) =>
+      `sfeed-d:${seed}:${startOffset}:${page}`,
+    ttl: 2 * 60 * 1000, // 2분
+  },
 } as const;
