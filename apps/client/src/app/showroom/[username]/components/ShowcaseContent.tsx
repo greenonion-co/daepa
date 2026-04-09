@@ -91,7 +91,7 @@ export default function ShowcaseContent({ profile }: ShowcaseContentProps) {
       </div>
 
       {/* 검색바 + 정렬 */}
-      <div className="flex shrink-0 items-center gap-2 px-2 sm:px-4">
+      <div className="flex shrink-0 items-center gap-2 px-2">
         <div className="relative flex-1">
           <svg
             className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400"

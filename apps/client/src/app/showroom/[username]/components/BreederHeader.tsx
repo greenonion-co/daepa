@@ -154,7 +154,7 @@ export default function BreederHeader({ profile }: BreederHeaderProps) {
       )}
 
       {/* 프로필 정보 */}
-      <div className="flex items-center justify-between gap-4 px-4 py-4 sm:px-6">
+      <div className="flex items-center justify-between gap-4 px-2 py-4">
         <div className="flex w-full flex-col gap-0.5">
           <div className="flex w-full items-center justify-between">
             <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">
@@ -183,7 +183,15 @@ export default function BreederHeader({ profile }: BreederHeaderProps) {
                 onClick={() => setIsBioModalOpen(true)}
                 className="group flex items-center gap-3 rounded-lg border border-neutral-200 bg-gradient-to-r from-neutral-50 to-white px-4 py-2 transition-all hover:shadow-sm dark:border-neutral-700 dark:from-neutral-800/80 dark:to-neutral-900"
               >
-                <span className="text-[10px] font-medium tracking-[0.2em] text-neutral-500 uppercase dark:text-neutral-400">
+                <span
+                  className="bg-clip-text text-[10px] font-medium tracking-[0.2em] text-transparent uppercase"
+                  style={{
+                    backgroundImage:
+                      "linear-gradient(90deg, #a3a3a3 0%, #a3a3a3 40%, #e5e5e5 50%, #a3a3a3 60%, #a3a3a3 100%)",
+                    backgroundSize: "200% 100%",
+                    animation: "shimmer 5s ease-in-out infinite",
+                  }}
+                >
                   About Us
                 </span>
                 <ChevronRight className="h-3 w-3 text-neutral-400 transition-transform group-hover:translate-x-0.5" />
