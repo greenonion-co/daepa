@@ -113,9 +113,7 @@ export class PetController {
       },
     },
   })
-  async feed(
-    @Query() query: FeedQueryDto,
-  ): Promise<PageDto<PetDto>> {
+  async feed(@Query() query: FeedQueryDto): Promise<PageDto<PetDto>> {
     return this.petService.getShuffledFeed(
       query.seed,
       query.page,

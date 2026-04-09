@@ -1497,7 +1497,11 @@ export class PetService {
     }
 
     // 3. 상세 조회 결과 캐시 (seed + startOffset + page 단위, TTL 2분)
-    const detailCacheKey = CACHE.shuffledFeedDetail.key(seed, startOffset, page);
+    const detailCacheKey = CACHE.shuffledFeedDetail.key(
+      seed,
+      startOffset,
+      page,
+    );
     const result = await this.cacheService.wrap<PageDto<PetDto>>(
       detailCacheKey,
       async () => {
