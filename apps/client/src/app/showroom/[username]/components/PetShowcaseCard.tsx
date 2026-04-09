@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { PetDto, PetDtoGrowth, PetDtoSex } from "@repo/api-client";
+import { PetDto, PetDtoSex } from "@repo/api-client";
 import PetThumbnail from "@/components/common/PetThumbnail";
 import BadgeList from "@/app/(브리더스룸)/components/BadgeList";
 import { cn } from "@/lib/utils";
 import BreederBadge from "@/app/(브리더스룸)/components/BreederBadge";
+import { DateTime } from "luxon";
 
 interface PetShowcaseCardProps {
   pet: PetDto;
@@ -41,13 +42,6 @@ function AdoptionBadge({ status, price }: { status?: string; price?: number }) {
 
   return null;
 }
-
-const GROWTH_LABEL: Record<string, string> = {
-  [PetDtoGrowth.BABY]: "베이비",
-  [PetDtoGrowth.JUVENILE]: "아성체",
-  [PetDtoGrowth.PRE_ADULT]: "준성체",
-  [PetDtoGrowth.ADULT]: "성체",
-};
 
 export default function PetShowcaseCard({ pet }: PetShowcaseCardProps) {
   const dotClass =
@@ -93,17 +87,10 @@ export default function PetShowcaseCard({ pet }: PetShowcaseCardProps) {
           </span>
         </div>
 
-        {/* 해칭일 · 성장단계 */}
-        {(pet.hatchingDate || pet.growth) && (
-          <p className="truncate text-sm text-gray-900 dark:text-gray-100">
-            {pet.hatchingDate &&
-              new Date(pet.hatchingDate).toLocaleDateString("ko-KR", {
-                year: "numeric",
-                month: "short",
-                day: "numeric",
-              })}
-            {pet.hatchingDate && pet.growth && " · "}
-            {pet.growth && GROWTH_LABEL[pet.growth]}
+        {/* 해칭일 */}
+        {pet.hatchingDate && (
+          <p className="truncate text-xs text-gray-500 dark:text-gray-100">
+            {pet.hatchingDate && DateTime.fromISO(pet.hatchingDate).toFormat("yyyy.M.d")}
           </p>
         )}
 

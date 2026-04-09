@@ -11,6 +11,7 @@ import type { PetControllerGetDeletedPetsSexItem } from "./petControllerGetDelet
 import type { PetControllerGetDeletedPetsStatusItem } from "./petControllerGetDeletedPetsStatusItem";
 import type { PetControllerGetDeletedPetsGrowthItem } from "./petControllerGetDeletedPetsGrowthItem";
 import type { PetControllerGetDeletedPetsFilterType } from "./petControllerGetDeletedPetsFilterType";
+import type { PetControllerGetDeletedPetsSortBy } from "./petControllerGetDeletedPetsSortBy";
 
 export type PetControllerGetDeletedPetsParams = {
   /**
@@ -85,4 +86,8 @@ export type PetControllerGetDeletedPetsParams = {
    * 펫 목록 필터링 타입
    */
   filterType?: PetControllerGetDeletedPetsFilterType;
+  /**
+   * 정렬 기준 (createdAt: 등록일, hatchingDate: 해칭일)
+   */
+  sortBy?: PetControllerGetDeletedPetsSortBy;
 };

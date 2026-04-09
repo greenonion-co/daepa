@@ -11,6 +11,7 @@ import type { PetControllerFindAllSexItem } from "./petControllerFindAllSexItem"
 import type { PetControllerFindAllStatusItem } from "./petControllerFindAllStatusItem";
 import type { PetControllerFindAllGrowthItem } from "./petControllerFindAllGrowthItem";
 import type { PetControllerFindAllFilterType } from "./petControllerFindAllFilterType";
+import type { PetControllerFindAllSortBy } from "./petControllerFindAllSortBy";
 
 export type PetControllerFindAllParams = {
   /**
@@ -85,4 +86,8 @@ export type PetControllerFindAllParams = {
    * 펫 목록 필터링 타입
    */
   filterType?: PetControllerFindAllFilterType;
+  /**
+   * 정렬 기준 (createdAt: 등록일, hatchingDate: 해칭일)
+   */
+  sortBy?: PetControllerFindAllSortBy;
 };

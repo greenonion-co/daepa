@@ -60,10 +60,10 @@ export default function ShowcaseContent({ profile }: ShowcaseContentProps) {
   const handleShare = () => shareShowroom(profile.name);
 
   return (
-    <div className="mx-auto md:flex md:h-dvh md:flex-col">
+    <div className="mx-auto max-w-screen-sm">
       {/* 모바일 미니 헤더 */}
       <div
-        className={`fixed top-0 right-0 left-0 z-30 flex items-center justify-between border-b border-gray-200 bg-white/80 px-4 py-2.5 backdrop-blur-sm transition-transform duration-300 md:hidden dark:border-gray-700 dark:bg-gray-900/80 ${
+        className={`fixed top-0 right-0 left-0 z-30 flex items-center justify-between border-b border-gray-200 bg-white/80 px-4 py-2.5 backdrop-blur-sm transition-transform duration-300 dark:border-gray-700 dark:bg-gray-900/80 ${
           showMiniHeader ? "translate-y-0" : "-translate-y-full"
         }`}
       >
@@ -125,24 +125,10 @@ export default function ShowcaseContent({ profile }: ShowcaseContentProps) {
         />
       </div>
 
-      {/* 사이드바 필터 + 그리드 */}
-      <div className="mt-3 md:flex md:min-h-0 md:flex-1">
-        {/* 사이드바 필터 (데스크톱) */}
-        <aside className="hidden w-65 shrink-0 px-4 md:block">
-          <div className="rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
-            <ShowcaseFilterBar
-              filters={filters}
-              onChange={setFilters}
-              availableMorphs={allMorphs}
-              availableTraits={allTraits}
-            />
-          </div>
-        </aside>
-
-        {/* 모바일 필터 + 그리드 */}
-        <div className="md:flex-1 md:overflow-y-auto">
-          {/* 모바일 필터 */}
-          <div className="px-2 md:hidden">
+      {/* 필터 + 그리드 */}
+      <div className="mt-3">
+        <div>
+          <div className="px-2">
             <ShowcaseFilterBar
               filters={filters}
               onChange={setFilters}

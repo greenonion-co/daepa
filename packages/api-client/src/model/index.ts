@@ -280,3 +280,6 @@ export * from "./userProfileResponseDto";
 export * from "./verifyEmailDto";
 export * from "./verifyNameDto";
 export * from "./verifyPetNameDto";
+export * from "./brPetControllerFindAllSortBy";
+export * from "./petControllerFindAllSortBy";
+export * from "./petControllerGetDeletedPetsSortBy";

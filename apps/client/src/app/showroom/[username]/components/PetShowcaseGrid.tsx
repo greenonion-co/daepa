@@ -180,7 +180,7 @@ export default function PetShowcaseGrid({ userId, filters }: PetShowcaseGridProp
       </div>
 
       {/* 그리드 */}
-      <div className="grid grid-cols-2 gap-2 min-[1800px]:grid-cols-7 min-[2100px]:grid-cols-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
+      <div className="grid grid-cols-2 gap-2">
         {pets.map((pet) => (
           <PetShowcaseCard key={pet.petId} pet={pet} />
         ))}

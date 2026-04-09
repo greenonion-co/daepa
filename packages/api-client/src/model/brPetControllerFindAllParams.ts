@@ -11,6 +11,7 @@ import type { BrPetControllerFindAllSexItem } from "./brPetControllerFindAllSexI
 import type { BrPetControllerFindAllStatusItem } from "./brPetControllerFindAllStatusItem";
 import type { BrPetControllerFindAllGrowthItem } from "./brPetControllerFindAllGrowthItem";
 import type { BrPetControllerFindAllFilterType } from "./brPetControllerFindAllFilterType";
+import type { BrPetControllerFindAllSortBy } from "./brPetControllerFindAllSortBy";
 
 export type BrPetControllerFindAllParams = {
   /**
@@ -85,4 +86,8 @@ export type BrPetControllerFindAllParams = {
    * 펫 목록 필터링 타입
    */
   filterType?: BrPetControllerFindAllFilterType;
+  /**
+   * 정렬 기준 (createdAt: 등록일, hatchingDate: 해칭일)
+   */
+  sortBy?: BrPetControllerFindAllSortBy;
 };
