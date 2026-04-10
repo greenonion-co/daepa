@@ -1,4 +1,4 @@
 <resources>
-    <string name="app_name">브리디</string>
+    <string name="app_name">BREEDY</string>
     <!-- kakao_app_key는 build.gradle에서 .env의 KAKAO_APP_KEY로 주입됨 -->
 </resources>
