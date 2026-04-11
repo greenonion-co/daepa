@@ -155,7 +155,7 @@ const RegisterPage = () => {
             toast.error("앱과 통신에 실패했습니다. 다시 시도해주세요.");
             return;
           }
-          const resetSuccess = requestResetToHome();
+          const resetSuccess = requestResetToHome("/pet");
           if (!resetSuccess) {
             console.error("네이티브 앱 홈 리셋 실패");
             toast.error("앱과 통신에 실패했습니다. 다시 시도해주세요.");

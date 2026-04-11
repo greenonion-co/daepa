@@ -441,6 +441,9 @@ function MemberMainTabs({
 
   return (
     <MainTab.Navigator
+      // 로그인 사용자는 첫 진입 시 개체관리(/pet) 탭이 active로 시작.
+      // Home 탭은 그대로 존재하며 사용자가 명시적으로 탭하면 진입 가능.
+      initialRouteName="Pet"
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: colors.tabBarActive,
