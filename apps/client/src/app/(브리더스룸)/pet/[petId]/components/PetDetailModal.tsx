@@ -1,8 +1,7 @@
 "use client";
 
 import { useCallback } from "react";
-import { useQueryClient } from "@tanstack/react-query";
-import { PetDto, brPetControllerFindAll } from "@repo/api-client";
+import { PetDto } from "@repo/api-client";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import PetDetailLayout from "./PetDetailLayout";
 import BreedingInfoContent from "./BreedingInfoContent";
@@ -24,18 +23,26 @@ interface PetDetailModalProps {
 }
 
 export default function PetDetailModal({ isOpen, pet, onClose }: PetDetailModalProps) {
-  const queryClient = useQueryClient();
   const { flushRef, flushAll, FlushProvider } = useFlush();
 
   const setDuplicateCheckStatus = useNameStore((s) => s.setDuplicateCheckStatus);
 
+  /**
+   * 모달 닫기 핸들러
+   *
+   * flushAll()은 모달 내부에서 아직 저장되지 않은 blur 필드(desc, weight, temperature, price, memo)를
+   * 서버에 저장하고, 동시에 patchPetListCache로 React Query 인메모리 캐시
+   * (brPetControllerFindAll 쿼리 — 브리더스룸 펫 목록 테이블의 무한스크롤 데이터)를 직접 패치한다.
+   * 즉시 저장 필드(name, sex, growth, isPublic 등)는 변경 시점에 이미 캐시 패치 + API 호출이 완료된 상태.
+   *
+   * 따라서 모달 닫을 때 invalidateQueries로 전체 목록을 서버에서 refetch할 필요가 없다.
+   * (수천 개의 펫 목록을 매번 재조회하는 서버 부하를 절감)
+   */
   const handleClose = useCallback(() => {
     setDuplicateCheckStatus(DUPLICATE_CHECK_STATUS.NONE);
     onClose();
-    flushAll().then(() => {
-      queryClient.invalidateQueries({ queryKey: [brPetControllerFindAll.name] });
-    });
-  }, [flushAll, onClose, queryClient, setDuplicateCheckStatus]);
+    flushAll();
+  }, [flushAll, onClose, setDuplicateCheckStatus]);
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>

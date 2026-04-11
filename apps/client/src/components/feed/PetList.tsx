@@ -1,8 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { petControllerFindAll, PetControllerFindAllFilterType } from "@repo/api-client";
+import { petControllerFeed, petControllerFindAll, PetControllerFindAllFilterType } from "@repo/api-client";
 import FeedPetCard from "@/components/feed/FeedPetCard";
 import Loading from "@/components/common/Loading";
 import { tokenStorage } from "@/lib/tokenStorage";
@@ -24,6 +24,10 @@ export default function PetList({ filterType, isVisible }: PetListProps) {
   const loadMoreRef = useRef<HTMLDivElement>(null);
 
   const { searchKeyword } = useSearchKeywordStore();
+  // 15분 단위로 seed 공유 — 같은 시간대 사용자들이 동일한 셔플 캐시를 재사용 (TTL 30분)
+  const seed = useMemo(() => Math.floor(Date.now() / (1000 * 60 * 15)), []);
+  // pull-to-refresh(페이지 reload) 시 랜덤 offset으로 다른 위치부터 피드 시작 (10가지 → 상세 조회 캐시 공유)
+  const startOffset = useMemo(() => Math.floor(Math.random() * 10), []);
 
   const handleRegisterClick = () => {
     if (tokenStorage.hasToken()) {
@@ -37,11 +41,24 @@ export default function PetList({ filterType, isVisible }: PetListProps) {
     }
   };
 
+  const isShuffledFeed =
+    filterType === PetControllerFindAllFilterType.ALL && !searchKeyword;
+
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isError } =
     useInfiniteQuery({
-      queryKey: [petControllerFindAll.name, filterType, searchKeyword],
+      queryKey: isShuffledFeed
+        ? ["shuffled-feed", seed, startOffset]
+        : [petControllerFindAll.name, filterType, searchKeyword],
       queryFn: async ({ pageParam = 1 }) => {
-        const result = await petControllerFindAll({
+        if (isShuffledFeed) {
+          return petControllerFeed({
+            seed,
+            page: pageParam,
+            itemPerPage: ITEMS_PER_PAGE,
+            startOffset,
+          } as any);
+        }
+        return petControllerFindAll({
           page: pageParam,
           itemPerPage: ITEMS_PER_PAGE,
           order: "DESC",
@@ -49,7 +66,6 @@ export default function PetList({ filterType, isVisible }: PetListProps) {
           keyword: searchKeyword,
           isPublic: 1,
         });
-        return result;
       },
       initialPageParam: 1,
       getNextPageParam: (lastPage) => {
