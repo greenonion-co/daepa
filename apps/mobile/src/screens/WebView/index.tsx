@@ -161,8 +161,21 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
         case 'LOGOUT':
           clear();
           navigation.reset({
-            index: 1,
-            routes: [{ name: 'Tabs' }, { name: 'Login' }],
+            index: 0,
+            routes: [
+              {
+                name: 'Tabs',
+                key: `tabs-${Date.now()}`,
+                state: {
+                  index: 2,
+                  routes: [
+                    { name: 'Home' },
+                    { name: 'AddPet' },
+                    { name: 'Settings' },
+                  ],
+                },
+              },
+            ],
           });
           break;
         case 'NAVIGATE': {
