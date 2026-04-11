@@ -183,6 +183,26 @@ export class UserService {
     await this.userRepository.update({ userId }, userEntity);
   }
 
+  /**
+   * 관리자에 의한 사용자별 펫 슬롯 한도 override 변경.
+   * - 호출자(관리자 컨트롤러)에서 ADMIN 권한을 검증해야 한다.
+   * - null 전달 시 override 해제 → role 기본값으로 복귀.
+   *
+   * 한도 축소로 인한 초과분 강등 처리는 호출자가
+   * `PetService.enforcePetLimitForUser(userId)` 를 별도로 호출해야 한다.
+   */
+  async updatePetLimitOverride(
+    userId: string,
+    petLimitOverride: number | null,
+  ): Promise<UserEntity> {
+    const userEntity = await this.userRepository.findOneBy({ userId });
+    if (!userEntity) {
+      throw new NotFoundException('사용자를 찾을 수 없습니다.');
+    }
+    await this.userRepository.update({ userId }, { petLimitOverride });
+    return { ...userEntity, petLimitOverride };
+  }
+
   async isNameExist(nickname: string) {
     const isExist = await this.userRepository.exists({
       where: {

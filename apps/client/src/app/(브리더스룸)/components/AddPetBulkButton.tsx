@@ -7,6 +7,7 @@ import { AxiosError } from "axios";
 import { brPetControllerFindAll, petControllerBulkCreate } from "@repo/api-client";
 import { toast } from "@/lib/toast";
 import { parsePetCsv } from "@/app/(브리더스룸)/lib/parsePetCsv";
+import { usePetLimitDialog } from "@/app/(브리더스룸)/hooks/usePetLimitDialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,6 +23,7 @@ const AddPetBulkButton = () => {
   const inputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const { handlePetLimitError, petLimitDialog } = usePetLimitDialog();
 
   const { mutateAsync, isPending } = useMutation({
     mutationFn: petControllerBulkCreate,
@@ -43,6 +45,9 @@ const AddPetBulkButton = () => {
       toast.success(result.data.message ?? `${pets.length}개의 개체가 등록되었습니다.`);
       queryClient.invalidateQueries({ queryKey: [brPetControllerFindAll.name] });
     } catch (error: unknown) {
+      // 공개 슬롯 한도 초과는 전용 다이얼로그로 안내
+      if (handlePetLimitError(error)) return;
+
       if (error instanceof AxiosError) {
         const message = error.response?.data?.message;
         const errorText = Array.isArray(message) ? message.join("\n") : message;
@@ -94,6 +99,8 @@ const AddPetBulkButton = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {petLimitDialog}
     </>
   );
 };

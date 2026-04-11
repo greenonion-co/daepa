@@ -40,6 +40,7 @@ import { JwtAuthGuard } from './auth/auth.decorator';
 import { HttpModule } from '@nestjs/axios';
 import { OauthService } from './auth/oauth/oauth.service';
 import { UserController } from './user/user.controller';
+import { AdminUserController } from './user/admin/admin.user.controller';
 import { OauthEntity } from './auth/oauth/oauth.entity';
 import { PetAdoptionEntity } from './pet_adoption/pet_adoption.entity';
 import { AdoptionHistoryEntity } from './adoption_history/adoption_history.entity';
@@ -139,6 +140,7 @@ const ENTITIES = [
     BrPetController,
     AuthController,
     UserController,
+    AdminUserController,
     PetAdoptionController,
     AdoptionHistoryController,
     MatingController,
