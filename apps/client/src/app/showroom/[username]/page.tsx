@@ -16,12 +16,23 @@ export async function generateMetadata({ params }: ShowcasePageProps): Promise<M
   }
 
   const title = `${profile.name}의 쇼룸`;
-  const description = `${profile.name}의 개체 ${profile.petCount}마리`;
+  const description = `브리더 ${profile.name}의 개체목록을 확인해 보세요!`;
+  const ogImage = profile.bannerImageUrl || "/icon-512.png";
 
   return {
     title,
     description,
-    openGraph: { title, description },
+    openGraph: {
+      title,
+      description,
+      images: [{ url: ogImage }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [ogImage],
+    },
   };
 }
 
