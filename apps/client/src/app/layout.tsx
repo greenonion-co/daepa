@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Script from "next/script";
 
+import { DEFAULT_OG_IMAGE } from "@/lib/metadata";
 import { Providers } from "./providers";
 import { Toaster } from "@/components/ui/sonner";
 import AppShell from "./components/AppShell";
@@ -21,8 +22,26 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "BREEDY",
-  description: "BREEDY",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://breedy.kr"),
+  title: {
+    default: "BREEDY",
+    template: "%s | BREEDY",
+  },
+  description: "모든 브리더를 위한 프리미엄 파충류 관리 · 브리딩 · 세일즈 솔루션",
+  openGraph: {
+    siteName: "BREEDY",
+    locale: "ko_KR",
+    type: "website",
+    images: [{ url: DEFAULT_OG_IMAGE, width: 512, height: 512 }],
+  },
+  twitter: {
+    card: "summary",
+    images: [DEFAULT_OG_IMAGE],
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export const viewport: Viewport = {
