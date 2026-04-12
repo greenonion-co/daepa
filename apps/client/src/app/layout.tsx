@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Script from "next/script";
 
+import { DEFAULT_OG_IMAGE } from "@/lib/metadata";
 import { Providers } from "./providers";
 import { Toaster } from "@/components/ui/sonner";
 import AppShell from "./components/AppShell";
@@ -31,11 +32,11 @@ export const metadata: Metadata = {
     siteName: "BREEDY",
     locale: "ko_KR",
     type: "website",
-    images: [{ url: "/icon-512.png", width: 512, height: 512 }],
+    images: [{ url: DEFAULT_OG_IMAGE, width: 512, height: 512 }],
   },
   twitter: {
     card: "summary",
-    images: ["/icon-512.png"],
+    images: [DEFAULT_OG_IMAGE],
   },
   robots: {
     index: true,

@@ -1,10 +1,10 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { DateTime } from "luxon";
 import { SPECIES_KOREAN_INFO, GENDER_KOREAN_INFO, GROWTH_KOREAN_INFO } from "../../constants";
 import { fetchPet, fetchPetThumbnail } from "./data";
+import { DEFAULT_OG_IMAGE } from "@/lib/metadata";
 import PetDetailClient from "./components/PetDetailClient";
-
-const DEFAULT_OG_IMAGE = "/icon-512.png";
 
 interface PetPageProps {
   params: Promise<{
@@ -50,8 +50,7 @@ export async function generateMetadata({ params }: PetPageProps): Promise<Metada
   if (pet.traits?.length) descParts.push(pet.traits.join(" · "));
   if (pet.sex && GENDER_KOREAN_INFO[pet.sex]) descParts.push(GENDER_KOREAN_INFO[pet.sex]);
   if (pet.hatchingDate) {
-    const d = new Date(pet.hatchingDate);
-    descParts.push(`${d.getFullYear() % 100}.${d.getMonth() + 1}.${d.getDate()}`);
+    descParts.push(DateTime.fromISO(pet.hatchingDate).toFormat("yy.M.d"));
   }
   const growthLabel = pet.growth && GROWTH_KOREAN_INFO[pet.growth];
   if (growthLabel) descParts.push(growthLabel);

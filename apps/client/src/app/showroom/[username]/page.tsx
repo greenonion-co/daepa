@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { fetchBreederProfile } from "./data";
+import { DEFAULT_OG_IMAGE } from "@/lib/metadata";
 import ShowcaseContent from "./components/ShowcaseContent";
 
 interface ShowcasePageProps {
@@ -17,7 +18,7 @@ export async function generateMetadata({ params }: ShowcasePageProps): Promise<M
 
   const title = `${profile.name}의 쇼룸`;
   const description = `브리더 ${profile.name}의 개체목록을 확인해 보세요!`;
-  const ogImage = profile.bannerImageUrl || "/icon-512.png";
+  const ogImage = profile.bannerImageUrl || DEFAULT_OG_IMAGE;
 
   return {
     title,
@@ -28,7 +29,7 @@ export async function generateMetadata({ params }: ShowcasePageProps): Promise<M
       images: [{ url: ogImage }],
     },
     twitter: {
-      card: "summary_large_image",
+      card: profile.bannerImageUrl ? "summary_large_image" : "summary",
       title,
       description,
       images: [ogImage],
