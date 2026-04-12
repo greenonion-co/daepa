@@ -30,7 +30,10 @@ import { isNil, omitBy } from 'es-toolkit';
 import { InjectRepository } from '@nestjs/typeorm';
 import { USER_STATUS } from 'src/user/user.constant';
 import { ParentRequestService } from '../parent_request/parent_request.service';
-import { extractOriginalPetName } from '../common/utils/pet-name.helper';
+import {
+  extractOriginalPetName,
+  resolveUniqueNameForOwner,
+} from '../common/utils/pet-name.helper';
 import { PetAdoptionEntity } from '../pet_adoption/pet_adoption.entity';
 import { PetEntity } from '../pet/pet.entity';
 import { PetDetailEntity } from '../pet_detail/pet_detail.entity';
@@ -373,13 +376,26 @@ export class AdoptionHistoryService {
       adoptionEntity.reservedUserId = null;
       await em.save(PetAdoptionEntity, adoptionEntity);
 
-      // 8. 펫 소유권 이전 (입양자가 없으면 소유권 박탈)
-      // isPublic은 false로 리셋 — 매수인이 의도적으로 공개를 선택하지 않은 상태에서
-      // 자동으로 공개되거나 한도를 우회하지 않도록 함. 매수인은 한도 안에서 직접 공개로 전환할 수 있다.
+      // 8. 펫 소유권 이전 + 이전 소유주 개인화 필드 초기화
+      // - isPublic: false — 매수인이 의도적으로 공개를 선택하지 않은 상태에서 자동 공개/한도 우회 방지
+      // - desc: null — 이전 소유주의 소개말(개인 메모 성격)
+      // - isBreeder: false — 브리더 지정은 매수인이 직접 결정할 사안
+      // - name: 매수인의 기존 펫과 이름 충돌 시 자동 접미사 부여 (UNIQUE_OWNER_PET_NAME 제약 대응)
+      const transferName =
+        finalBuyerId && petName
+          ? await resolveUniqueNameForOwner(petName, finalBuyerId, em)
+          : petName;
+
       await em.update(
         'pets',
         { petId },
-        { ownerId: finalBuyerId ?? null, isPublic: false },
+        {
+          ownerId: finalBuyerId ?? null,
+          name: transferName,
+          isPublic: false,
+          desc: null,
+          isBreeder: false,
+        },
       );
     });
 
