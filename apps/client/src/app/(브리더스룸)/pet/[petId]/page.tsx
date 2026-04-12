@@ -1,8 +1,10 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { SPECIES_KOREAN_INFO } from "../../constants";
-import { fetchPet } from "./data";
+import { SPECIES_KOREAN_INFO, GENDER_KOREAN_INFO, GROWTH_KOREAN_INFO } from "../../constants";
+import { fetchPet, fetchPetThumbnail } from "./data";
 import PetDetailClient from "./components/PetDetailClient";
+
+const DEFAULT_OG_IMAGE = "/icon-512.png";
 
 interface PetPageProps {
   params: Promise<{
@@ -10,7 +12,7 @@ interface PetPageProps {
   }>;
 }
 
-// 동적 메타데이터 생성 (SEO)
+// 동적 메타데이터 생성 (SEO + OG)
 export async function generateMetadata({ params }: PetPageProps): Promise<Metadata> {
   const { petId } = await params;
   const pet = await fetchPet(petId);
@@ -33,15 +35,46 @@ export async function generateMetadata({ params }: PetPageProps): Promise<Metada
   }
 
   const speciesKorean = SPECIES_KOREAN_INFO[pet.species] || pet.species;
-  const morphsText = pet.morphs?.join(", ") || "";
-  const description = `${speciesKorean} ${pet.name || ""}${morphsText ? ` - ${morphsText}` : ""}`;
+  const ownerName = pet.owner?.name;
+
+  // OG Title: "펫이름 | 소유자명" 또는 "종(한국어) | 개체 상세"
+  const title = pet.name
+    ? ownerName
+      ? `${pet.name} | ${ownerName}`
+      : `${pet.name} | 개체 상세`
+    : `${speciesKorean} | 개체 상세`;
+
+  // OG Description: 값이 존재하는 항목만 차례대로 표기
+  const descParts: string[] = [];
+  if (pet.morphs?.length) descParts.push(pet.morphs.join(" · "));
+  if (pet.traits?.length) descParts.push(pet.traits.join(" · "));
+  if (pet.sex && GENDER_KOREAN_INFO[pet.sex]) descParts.push(GENDER_KOREAN_INFO[pet.sex]);
+  if (pet.hatchingDate) {
+    const d = new Date(pet.hatchingDate);
+    descParts.push(`${d.getFullYear() % 100}.${d.getMonth() + 1}.${d.getDate()}`);
+  }
+  const growthLabel = pet.growth && GROWTH_KOREAN_INFO[pet.growth];
+  if (growthLabel) descParts.push(growthLabel);
+  if (pet.desc) descParts.push(pet.desc);
+  const description = descParts.join(" · ") || speciesKorean;
+
+  // OG Image: 펫 썸네일이 있으면 사용, 없으면 서비스 로고
+  const thumbnailUrl = await fetchPetThumbnail(petId);
+  const ogImage = thumbnailUrl || DEFAULT_OG_IMAGE;
 
   return {
-    title: pet.name ? `${pet.name} | 개체 상세` : `${speciesKorean} | 개체 상세`,
+    title,
     description,
     openGraph: {
-      title: pet.name ? `${pet.name} | 개체 상세` : `${speciesKorean} | 개체 상세`,
+      title,
       description,
+      images: [{ url: ogImage }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [ogImage],
     },
   };
 }

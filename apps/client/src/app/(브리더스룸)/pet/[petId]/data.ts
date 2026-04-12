@@ -24,6 +24,23 @@ export const fetchPet = cache(async (petId: string): Promise<PetDto | null> => {
   }
 });
 
+// generateMetadata에서 사용 (서버 컴포넌트 전용)
+export const fetchPetThumbnail = cache(
+  async (petId: string): Promise<string | null> => {
+    const url = `${BASE_URL}/api/v1/pet-image/thumbnail/${petId}`;
+    const headers = await getCachedHeaders();
+
+    try {
+      const res = await fetch(url, { next: { revalidate: 300 }, headers });
+      if (!res.ok) return null;
+      const data = await res.json();
+      return data.data?.url ?? null;
+    } catch {
+      return null;
+    }
+  },
+);
+
 export interface FeedingRecord {
   id: number;
   petId: string;
