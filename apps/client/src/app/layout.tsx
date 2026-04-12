@@ -22,7 +22,10 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://breedy.kr"),
-  title: "BREEDY",
+  title: {
+    default: "BREEDY",
+    template: "%s | BREEDY",
+  },
   description: "모든 브리더를 위한 프리미엄 파충류 관리 · 브리딩 · 세일즈 솔루션",
   openGraph: {
     siteName: "BREEDY",
