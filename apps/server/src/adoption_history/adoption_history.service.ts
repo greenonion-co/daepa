@@ -374,7 +374,13 @@ export class AdoptionHistoryService {
       await em.save(PetAdoptionEntity, adoptionEntity);
 
       // 8. 펫 소유권 이전 (입양자가 없으면 소유권 박탈)
-      await em.update('pets', { petId }, { ownerId: finalBuyerId ?? null });
+      // isPublic은 false로 리셋 — 매수인이 의도적으로 공개를 선택하지 않은 상태에서
+      // 자동으로 공개되거나 한도를 우회하지 않도록 함. 매수인은 한도 안에서 직접 공개로 전환할 수 있다.
+      await em.update(
+        'pets',
+        { petId },
+        { ownerId: finalBuyerId ?? null, isPublic: false },
+      );
     });
 
     // 9. 캐시 무효화 (트랜잭션 커밋 후)

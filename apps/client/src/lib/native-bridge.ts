@@ -33,7 +33,7 @@ type NativeMessage =
     }
   | { type: "GO_BACK" }
   | { type: "POP_TO_ROOT" }
-  | { type: "RESET_TO_HOME" }
+  | { type: "RESET_TO_HOME"; path?: string }
   | { type: "SHARE"; url: string; title?: string }
   | { type: "OPEN_CAMERA" }
   | { type: "OPEN_GALLERY" }
@@ -142,9 +142,12 @@ export const setNativeAccessToken = (token: string): boolean => {
 /**
  * 네이티브 앱 홈으로 리셋 (새로 마운트)
  * 회원가입 등 토큰 동기화가 필요한 경우 사용
+ *
+ * @param path 리셋 후 진입할 경로. 1depth 탭에 대응하는 path("/", "/pet", "/adoption")만 지원.
+ *             지정하지 않으면 기본 탭(Home /)으로 진입.
  */
-export const requestResetToHome = (): boolean => {
-  return sendToNative({ type: "RESET_TO_HOME" });
+export const requestResetToHome = (path?: string): boolean => {
+  return sendToNative({ type: "RESET_TO_HOME", path });
 };
 
 /**

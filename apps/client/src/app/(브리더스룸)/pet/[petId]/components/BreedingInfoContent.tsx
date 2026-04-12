@@ -16,6 +16,7 @@ import { useNameStore } from "@/app/(브리더스룸)/store/name";
 import { DUPLICATE_CHECK_STATUS } from "@/app/(브리더스룸)/constants";
 import { AxiosError } from "axios";
 import { useIsMyPet } from "@/hooks/useIsMyPet";
+import { usePetLimitDialog } from "@/app/(브리더스룸)/hooks/usePetLimitDialog";
 
 import { PublicToggle } from "./펫정보/PublicToggle";
 import { BreederToggle } from "./펫정보/BreederToggle";
@@ -36,6 +37,7 @@ const BreedingInfoContent = ({ petId, ownerId, initialPet }: BreedingInfoContent
   const { formData, errors, setFormData } = usePetStore();
   const { duplicateCheckStatus, setDuplicateCheckStatus } = useNameStore();
   const { breedingInfo, setBreedingInfo } = useBreedingInfoStore();
+  const { handlePetLimitError, petLimitDialog } = usePetLimitDialog();
 
   const isViewingMyPet = useIsMyPet(ownerId);
 
@@ -67,8 +69,13 @@ const BreedingInfoContent = ({ petId, ownerId, initialPet }: BreedingInfoContent
   // 단일 필드 자동 저장
   const autoSave = useCallback(
     async (updateData: UpdatePetDto) => {
-      // 낙관적 업데이트: API 호출 전에 리스트 캐시 즉시 반영
+      // 낙관적 업데이트 전 원본 값 보관 (에러 시 롤백용)
+      const rollbackData: Partial<PetDto> = {};
       if (petRef.current) {
+        for (const key of Object.keys(updateData) as (keyof UpdatePetDto)[]) {
+          (rollbackData as any)[key] = (petRef.current as any)[key] ?? null;
+        }
+        // 낙관적 업데이트: API 호출 전에 리스트 캐시 즉시 반영
         patchPetListCache(queryClient, petRef.current.petId, updateData as Partial<PetDto>);
       }
       try {
@@ -95,6 +102,14 @@ const BreedingInfoContent = ({ petId, ownerId, initialPet }: BreedingInfoContent
         }
       } catch (error) {
         console.error("Failed to update pet:", error);
+        // 한도 초과 에러는 다이얼로그로 처리하고 로컬/캐시 상태 롤백
+        if (handlePetLimitError(error)) {
+          if (petRef.current) {
+            patchPetListCache(queryClient, petRef.current.petId, rollbackData);
+          }
+          setFormData((prev) => ({ ...prev, ...rollbackData }));
+          return;
+        }
         if (error instanceof AxiosError) {
           toast.error(error.response?.data?.message ?? "저장에 실패했습니다.");
         } else {
@@ -102,7 +117,7 @@ const BreedingInfoContent = ({ petId, ownerId, initialPet }: BreedingInfoContent
         }
       }
     },
-    [mutateUpdatePet, queryClient, setBreedingInfo, petId],
+    [mutateUpdatePet, queryClient, setBreedingInfo, petId, handlePetLimitError, setFormData],
   );
 
   // 필드 업데이트 헬퍼 (로컬 상태만)
@@ -302,6 +317,8 @@ const BreedingInfoContent = ({ petId, ownerId, initialPet }: BreedingInfoContent
           onFieldBlur={handleFieldBlur}
         />
       )}
+
+      {petLimitDialog}
     </div>
   );
 };

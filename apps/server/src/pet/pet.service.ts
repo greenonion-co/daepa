@@ -61,6 +61,8 @@ import { LayingEntity } from 'src/laying/laying.entity';
 import { CacheService } from 'src/common/cache.service';
 import { CACHE } from 'src/common/cache-keys';
 import { loadPetData } from './pet.loader';
+import { PetLimitPolicy } from './pet-limit.policy';
+import { UserEntity } from 'src/user/user.entity';
 
 @Injectable()
 export class PetService {
@@ -76,6 +78,129 @@ export class PetService {
     private readonly dataSource: DataSource,
     private readonly cacheService: CacheService,
   ) {}
+
+  /**
+   * 사용자의 현재 공개 펫 슬롯 사용량 + 한도 조회.
+   * - 공개 슬롯: `isPublic = true && type = PET && isDeleted = false`
+   * - EGG는 hatching 후 PET이 되는 시점부터 카운트 대상.
+   */
+  private async getPublicPetSlotUsage(
+    ownerId: string,
+    em: EntityManager,
+  ): Promise<{ user: UserEntity; limit: number; current: number }> {
+    const user = await em.findOne(UserEntity, {
+      where: { userId: ownerId },
+      select: ['userId', 'role', 'petLimitOverride'],
+    });
+    if (!user) {
+      throw new NotFoundException('사용자를 찾을 수 없습니다.');
+    }
+
+    const limit = PetLimitPolicy.compute(user);
+    const current = await em.count(PetEntity, {
+      where: {
+        ownerId,
+        isPublic: true,
+        isDeleted: false,
+        type: PET_TYPE.PET,
+      },
+    });
+
+    return { user, limit, current };
+  }
+
+  /**
+   * "명시적 공개 시도" 한도 검증.
+   * 사용자가 직접 isPublic = true 액션을 한 시점에 호출 (createPet, bulkCreate, updatePet[false→true]).
+   * 한도 초과 시 BadRequestException 으로 즉시 거부.
+   *
+   * @param additionalCount 이번 작업으로 새로 추가될 공개 슬롯 수 (기본 1, bulk는 N)
+   */
+  private async assertCanPublishPet(
+    ownerId: string,
+    em: EntityManager,
+    additionalCount = 1,
+  ): Promise<void> {
+    if (additionalCount <= 0) return;
+
+    const { limit, current } = await this.getPublicPetSlotUsage(ownerId, em);
+    if (current + additionalCount > limit) {
+      throw new BadRequestException({
+        code: 'PET_PUBLIC_SLOT_EXCEEDED',
+        message: `공개 가능한 펫 수(${limit})를 초과했습니다.`,
+        limit,
+        current,
+        requested: additionalCount,
+      });
+    }
+  }
+
+  /**
+   * 사용자의 한도가 변경된 직후 (관리자 override 조정, 결제 다운그레이드 등)
+   * 현재 공개 펫 수가 새 한도를 초과하면 초과분을 자동으로 비공개 처리한다.
+   *
+   * 잠금 우선순위: 가장 최근 등록순 (createdAt DESC).
+   * - 결제 기간 동안 추가한 펫이 우선 잠기므로 형평성 문제 해결.
+   * - 사용자는 한도 안에서 다른 펫과 swap (`PATCH /v1/pet/:petId { isPublic }`) 가능.
+   *
+   * @returns 비공개로 강등된 펫의 petId 목록 (알림/로깅용)
+   */
+  async enforcePetLimitForUser(userId: string): Promise<string[]> {
+    return this.dataSource.transaction(async (em: EntityManager) => {
+      const { limit, current } = await this.getPublicPetSlotUsage(userId, em);
+      if (current <= limit) return [];
+
+      const overflow = current - limit;
+      const toDemote = await em.find(PetEntity, {
+        where: {
+          ownerId: userId,
+          isPublic: true,
+          isDeleted: false,
+          type: PET_TYPE.PET,
+        },
+        order: { createdAt: 'DESC' },
+        take: overflow,
+        select: ['petId'],
+      });
+
+      if (toDemote.length === 0) return [];
+
+      const ids = toDemote.map((p) => p.petId);
+      await em.update(PetEntity, { petId: In(ids) }, { isPublic: false });
+
+      // 강등된 각 펫의 단건 캐시(TTL 30일)만 무효화.
+      // feed/my-pets 목록 캐시는 TTL 3분이므로 기존 패턴(createPet/updatePet 등)과 동일하게 TTL에 의존.
+      await Promise.all(
+        ids.map((id) => this.cacheService.del(CACHE.pet.key(id))),
+      );
+
+      return ids;
+    });
+  }
+
+  /**
+   * "라이프사이클 전환" 한도 처리.
+   * EGG → PET (hatching) 또는 삭제된 펫 복구처럼 사용자가 "지금 막 공개를 누른" 액션이 아니라
+   * 시스템 전환 과정에서 카운트 대상이 되는 경우 호출.
+   *
+   * 한도 초과 시 throw 하지 않고 해당 펫의 isPublic을 false로 silent demote.
+   * 호출자는 이 함수가 true 를 반환하면 UI 메시지로 안내할 수 있다.
+   *
+   * @returns demote 가 발생했으면 true
+   */
+  private async demoteIfOverLimit(
+    ownerId: string,
+    petId: string,
+    em: EntityManager,
+  ): Promise<boolean> {
+    // 카운트는 이미 isPublic = true 상태인 모든 PET을 포함하므로,
+    // 이 메서드는 "이 펫이 isPublic = true 로 막 전환된 직후" 호출되어야 정확하다.
+    const { limit, current } = await this.getPublicPetSlotUsage(ownerId, em);
+    if (current <= limit) return false;
+
+    await em.update(PetEntity, { petId }, { isPublic: false });
+    return true;
+  }
 
   async createPet(
     createPetDto: CreatePetDto,
@@ -98,6 +223,16 @@ export class PetService {
         photos,
         ...petData
       } = createPetDto;
+
+      // 공개 펫 슬롯 한도 검증
+      // - EGG는 카운트 대상이 아니므로 type=PET 일 때만
+      // - 비공개 등록은 무제한이므로 isPublic=true 일 때만
+      const isPublishingNewPet =
+        (petData.type ?? PET_TYPE.PET) === PET_TYPE.PET &&
+        petData.isPublic === true;
+      if (isPublishingNewPet) {
+        await this.assertCanPublishPet(ownerId, em);
+      }
 
       try {
         // 공통 펫 데이터 준비
@@ -198,6 +333,12 @@ export class PetService {
       }
 
       // === 1단계: 사전 검증 ===
+
+      // 공개 펫 슬롯 한도 검증 (bulk: type 은 항상 PET, isPublic=true 행만 카운트)
+      const publishingCount = pets.filter((p) => p.isPublic === true).length;
+      if (publishingCount > 0) {
+        await this.assertCanPublishPet(ownerId, em, publishingCount);
+      }
 
       // CSV 내 이름 중복 체크
       const names = pets.map((p) => p.name);
@@ -588,6 +729,17 @@ export class PetService {
           }
         }
 
+        // 공개 펫 슬롯 한도 검증
+        // - EGG는 카운트 대상이 아니므로 type=PET 일 때만
+        // - false → true 전환일 때만 (이미 공개 상태였으면 슬롯 사용량 변화 없음)
+        const isPromotingToPublic =
+          existingPet.type === PET_TYPE.PET &&
+          petData.isPublic === true &&
+          existingPet.isPublic === false;
+        if (isPromotingToPublic) {
+          await this.assertCanPublishPet(existingPet.ownerId, entityManager);
+        }
+
         try {
           // 펫 기본 정보 업데이트
           await entityManager.update(PetEntity, { petId }, petData);
@@ -881,6 +1033,15 @@ export class PetService {
             );
           }
 
+          // 복구된 펫이 type=PET, isPublic=true 였다면 한도 카운트가 복구된다.
+          // 한도 초과 시 silent demote (라이프사이클 전환은 throw 대신 자동 비공개 처리).
+          if (
+            existingPet.type === PET_TYPE.PET &&
+            existingPet.isPublic === true
+          ) {
+            await this.demoteIfOverLimit(userId, petId, entityManager);
+          }
+
           return { petId };
         } catch (error: unknown) {
           if (error instanceof HttpException) {
@@ -1048,6 +1209,13 @@ export class PetService {
             growth: PET_GROWTH.BABY,
             sex: PET_SEX.NON,
           });
+
+          // EGG → PET 전환 시점부터 한도 카운트 대상이 됨.
+          // 이전에 isPublic=true 였다면, 현재 슬롯이 한도를 초과할 수 있으므로
+          // silent demote (라이프사이클 전환은 throw 대신 자동 비공개 처리).
+          if (existingPet.isPublic === true) {
+            await this.demoteIfOverLimit(userId, petId, entityManager);
+          }
 
           return { petId };
         } catch (error: unknown) {

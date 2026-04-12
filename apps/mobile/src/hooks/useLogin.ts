@@ -25,10 +25,11 @@ const useLogin = () => {
         break;
       case UserDtoStatus.ACTIVE:
         // 로그인 성공 시 네비게이션 스택 초기화 (뒤로가기 방지)
+        // 개체관리(Pet) 탭으로 진입 — MemberMainTabs initialRouteName과 일치
         navigation.dispatch(
           CommonActions.reset({
             index: 0,
-            routes: [{ name: 'Tabs', params: { screen: 'Home' } }],
+            routes: [{ name: 'Tabs', params: { screen: 'Pet' } }],
           }),
         );
         Toast.show('로그인에 성공했습니다.');
