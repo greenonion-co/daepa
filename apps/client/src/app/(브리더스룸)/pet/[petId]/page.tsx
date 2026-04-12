@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: PetPageProps): Promise<Metada
 
   if (!pet) {
     return {
-      title: "개체를 찾을 수 없습니다",
+      title: "조회할 수 없는 개체입니다",
     };
   }
 
