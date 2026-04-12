@@ -40,6 +40,7 @@ import PetDetailModal from "../[petId]/components/PetDetailModal";
 import { useIsMobile } from "@/hooks/useMobile";
 import { useDebouncedHover } from "@/hooks/useDebouncedHover";
 import PetHoverPreview from "./PetHoverPreview";
+import { usePetLimitDialog } from "@/app/(브리더스룸)/hooks/usePetLimitDialog";
 
 interface DataTableProps<TData> {
   columns: ColumnDef<TData>[];
@@ -94,6 +95,7 @@ export const DataTable = ({
 
   const queryClient = useQueryClient();
   const router = useAppRouter();
+  const { handlePetLimitError, petLimitDialog } = usePetLimitDialog();
   const [selectedPet, setSelectedPet] = useState<PetDto | null>(null);
   const [hoveredPetId, hoverEnter, hoverLeave] = useDebouncedHover<string>();
   const [previewOverride, setPreviewOverride] = useState<{
@@ -118,11 +120,12 @@ export const DataTable = ({
       patchPetListCache(queryClient, petId, { isPublic: newIsPublic });
       try {
         await petControllerUpdate(petId, { isPublic: newIsPublic });
-      } catch {
+      } catch (error) {
         patchPetListCache(queryClient, petId, { isPublic: currentIsPublic });
+        handlePetLimitError(error);
       }
     },
-    [queryClient],
+    [queryClient, handlePetLimitError],
   );
 
   const patchPetDetailCache = useCallback(
@@ -356,6 +359,8 @@ export const DataTable = ({
           parentStatus={previewOverride?.status}
         />
       )}
+
+      {petLimitDialog}
     </div>
   );
 };

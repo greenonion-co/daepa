@@ -72,6 +72,14 @@ export class UserEntity {
   })
   status: USER_STATUS;
 
+  /**
+   * 공개 펫 슬롯 한도 override.
+   * null 이면 role 기본값을 사용 (DEFAULT_PET_LIMIT_BY_ROLE).
+   * 관리자가 예외적으로 사용자별 한도를 지정할 때 사용.
+   */
+  @Column({ type: 'int', nullable: true })
+  petLimitOverride: number | null;
+
   @CreateDateColumn()
   createdAt: Date;
 

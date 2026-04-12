@@ -50,6 +50,7 @@ import type {
   UpdatePairDto,
   UpdateParentRequestDto,
   UpdatePetDto,
+  UpdatePetLimitOverrideDto,
   UpdateUserNotificationDto,
   UpdateUserPrivateInfoDto,
   UserControllerGetUserListSimpleParams,
@@ -96,6 +97,7 @@ import type {
   PetParentDto,
   PetSummaryDto,
   TokenResponseDto,
+  UpdatePetLimitOverrideResponseDto,
   UserControllerGetUserListSimple200,
   UserNotificationControllerFindAll200,
   UserNotificationControllerGetUnreadCount200,
@@ -451,6 +453,18 @@ export const userControllerVerifyEmail = (verifyEmailDto: VerifyEmailDto) => {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     data: verifyEmailDto,
+  });
+};
+
+export const adminUserControllerUpdatePetLimitOverride = (
+  userId: string,
+  updatePetLimitOverrideDto: UpdatePetLimitOverrideDto,
+) => {
+  return useCustomInstance<UpdatePetLimitOverrideResponseDto>({
+    url: `/api/v1/admin/user/${userId}/pet-limit`,
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    data: updatePetLimitOverrideDto,
   });
 };
 
@@ -880,6 +894,9 @@ export type UserControllerVerifyNameResult = NonNullable<
 >;
 export type UserControllerVerifyEmailResult = NonNullable<
   Awaited<ReturnType<typeof userControllerVerifyEmail>>
+>;
+export type AdminUserControllerUpdatePetLimitOverrideResult = NonNullable<
+  Awaited<ReturnType<typeof adminUserControllerUpdatePetLimitOverride>>
 >;
 export type PetAdoptionControllerCreatePetAdoptionResult = NonNullable<
   Awaited<ReturnType<typeof petAdoptionControllerCreatePetAdoption>>
@@ -3934,6 +3951,18 @@ export const getUserControllerVerifyEmailResponseMock = (
   ...overrideResponse,
 });
 
+export const getAdminUserControllerUpdatePetLimitOverrideResponseMock = (
+  overrideResponse: Partial<UpdatePetLimitOverrideResponseDto> = {},
+): UpdatePetLimitOverrideResponseDto => ({
+  success: faker.datatype.boolean(),
+  message: faker.string.alpha(20),
+  effectiveLimit: faker.number.int({ min: undefined, max: undefined }),
+  demotedPetIds: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+    () => faker.string.alpha(20),
+  ),
+  ...overrideResponse,
+});
+
 export const getPetAdoptionControllerCreatePetAdoptionResponseMock = (
   overrideResponse: Partial<CommonResponseDto> = {},
 ): CommonResponseDto => ({
@@ -5709,6 +5738,29 @@ export const getUserControllerVerifyEmailMockHandler = (
   });
 };
 
+export const getAdminUserControllerUpdatePetLimitOverrideMockHandler = (
+  overrideResponse?:
+    | UpdatePetLimitOverrideResponseDto
+    | ((
+        info: Parameters<Parameters<typeof http.patch>[1]>[0],
+      ) => Promise<UpdatePetLimitOverrideResponseDto> | UpdatePetLimitOverrideResponseDto),
+) => {
+  return http.patch("*/api/v1/admin/user/:userId/pet-limit", async (info) => {
+    await delay(1000);
+
+    return new HttpResponse(
+      JSON.stringify(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getAdminUserControllerUpdatePetLimitOverrideResponseMock(),
+      ),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+  });
+};
+
 export const getPetAdoptionControllerCreatePetAdoptionMockHandler = (
   overrideResponse?:
     | CommonResponseDto
@@ -6462,6 +6514,7 @@ export const getProjectDaepaAPIMock = () => [
   getUserControllerUpdateUserPrivateInfoMockHandler(),
   getUserControllerVerifyNameMockHandler(),
   getUserControllerVerifyEmailMockHandler(),
+  getAdminUserControllerUpdatePetLimitOverrideMockHandler(),
   getPetAdoptionControllerCreatePetAdoptionMockHandler(),
   getPetAdoptionControllerGetPetAdoptionMockHandler(),
   getPetAdoptionControllerUpdatePetAdoptionMockHandler(),
