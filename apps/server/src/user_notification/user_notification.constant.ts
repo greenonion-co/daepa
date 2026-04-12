@@ -3,6 +3,7 @@ export enum USER_NOTIFICATION_TYPE {
   PARENT_ACCEPT = 'parent_accept',
   PARENT_REJECT = 'parent_reject',
   PARENT_CANCEL = 'parent_cancel',
+  ADOPTION_COMPLETE = 'adoption_complete',
 }
 
 export enum USER_NOTIFICATION_STATUS {

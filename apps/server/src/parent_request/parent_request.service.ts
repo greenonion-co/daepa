@@ -168,11 +168,11 @@ export class ParentRequestService {
                 targetId: parentRequest.id,
                 detailJson: {
                   status: PARENT_STATUS.PENDING,
-                  childPet: {
+                  primaryPet: {
                     id: childPet?.petId ?? '',
                     name: childPet.name ?? undefined,
                   },
-                  parentPet: {
+                  secondaryPet: {
                     id: parentPet?.petId ?? '',
                     name: parentPet.name ?? undefined,
                   },
@@ -297,11 +297,11 @@ export class ParentRequestService {
                   targetId: parentRequest.id,
                   detailJson: {
                     status: PARENT_STATUS.CANCELLED,
-                    childPet: {
+                    primaryPet: {
                       id: parentRequest.childPetId,
                       name: childPet?.name ?? undefined,
                     },
-                    parentPet: {
+                    secondaryPet: {
                       id: parentRequest.parentPetId,
                       name: parentPet?.name ?? undefined,
                     },
@@ -497,11 +497,11 @@ export class ParentRequestService {
           targetId: parentRequest.id,
           detailJson: {
             status: updateParentRequestDto.status,
-            childPet: {
+            primaryPet: {
               id: parentRequest.childPetId,
               name: childPet?.name ?? undefined,
             },
-            parentPet: {
+            secondaryPet: {
               id: parentRequest.parentPetId,
               name: parentPet?.name ?? undefined,
             },

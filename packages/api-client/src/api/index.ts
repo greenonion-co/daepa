@@ -65,6 +65,7 @@ import { faker } from "@faker-js/faker";
 import { HttpResponse, delay, http } from "msw";
 
 import type {
+  AdoptionCompleteDetailJson,
   AdoptionDetailResponseDto,
   AdoptionHistoryControllerGetAllAdoptions200,
   AdoptionStatisticsDto,
@@ -2397,6 +2398,43 @@ export const getUserNotificationControllerFindAllResponseParentLinkDetailJsonMoc
   ...overrideResponse,
 });
 
+export const getUserNotificationControllerFindAllResponseAdoptionCompleteDetailJsonMock = (
+  overrideResponse: Partial<AdoptionCompleteDetailJson> = {},
+): AdoptionCompleteDetailJson => ({
+  ...{
+    message: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+    seller: faker.helpers.arrayElement([
+      {
+        ...{
+          id: faker.string.alpha(20),
+          name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+        },
+      },
+      undefined,
+    ]),
+    pet: faker.helpers.arrayElement([
+      {
+        ...{
+          id: faker.string.alpha(20),
+          name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+          thumbnailUrl: faker.helpers.arrayElement([{}, undefined]),
+        },
+      },
+      undefined,
+    ]),
+    adoptionDate: faker.helpers.arrayElement([{}, undefined]),
+    price: faker.helpers.arrayElement([{}, undefined]),
+    method: faker.helpers.arrayElement([
+      faker.helpers.arrayElement([
+        faker.helpers.arrayElement(["PICKUP", "DELIVERY", "WHOLESALE", "EXPORT"] as const),
+        null,
+      ]),
+      undefined,
+    ]),
+  },
+  ...overrideResponse,
+});
+
 export const getUserNotificationControllerFindAllResponseMock = (
   overrideResponse: Partial<UserNotificationControllerFindAll200> = {},
 ): UserNotificationControllerFindAll200 => ({
@@ -2409,6 +2447,7 @@ export const getUserNotificationControllerFindAllResponseMock = (
       "parent_accept",
       "parent_reject",
       "parent_cancel",
+      "adoption_complete",
     ] as const),
     targetId: faker.helpers.arrayElement([
       faker.number.int({ min: undefined, max: undefined }),
@@ -2419,6 +2458,7 @@ export const getUserNotificationControllerFindAllResponseMock = (
       faker.helpers.arrayElement([
         { ...getUserNotificationControllerFindAllResponseDetailJsonMock() },
         { ...getUserNotificationControllerFindAllResponseParentLinkDetailJsonMock() },
+        { ...getUserNotificationControllerFindAllResponseAdoptionCompleteDetailJsonMock() },
       ]),
       undefined,
     ]),
@@ -2520,6 +2560,43 @@ export const getUserNotificationControllerFindOneResponseParentLinkDetailJsonMoc
   ...overrideResponse,
 });
 
+export const getUserNotificationControllerFindOneResponseAdoptionCompleteDetailJsonMock = (
+  overrideResponse: Partial<AdoptionCompleteDetailJson> = {},
+): AdoptionCompleteDetailJson => ({
+  ...{
+    message: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+    seller: faker.helpers.arrayElement([
+      {
+        ...{
+          id: faker.string.alpha(20),
+          name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+        },
+      },
+      undefined,
+    ]),
+    pet: faker.helpers.arrayElement([
+      {
+        ...{
+          id: faker.string.alpha(20),
+          name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
+          thumbnailUrl: faker.helpers.arrayElement([{}, undefined]),
+        },
+      },
+      undefined,
+    ]),
+    adoptionDate: faker.helpers.arrayElement([{}, undefined]),
+    price: faker.helpers.arrayElement([{}, undefined]),
+    method: faker.helpers.arrayElement([
+      faker.helpers.arrayElement([
+        faker.helpers.arrayElement(["PICKUP", "DELIVERY", "WHOLESALE", "EXPORT"] as const),
+        null,
+      ]),
+      undefined,
+    ]),
+  },
+  ...overrideResponse,
+});
+
 export const getUserNotificationControllerFindOneResponseMock = (
   overrideResponse: Partial<UserNotificationDto> = {},
 ): UserNotificationDto => ({
@@ -2531,6 +2608,7 @@ export const getUserNotificationControllerFindOneResponseMock = (
     "parent_accept",
     "parent_reject",
     "parent_cancel",
+    "adoption_complete",
   ] as const),
   targetId: faker.helpers.arrayElement([
     faker.number.int({ min: undefined, max: undefined }),
@@ -2541,6 +2619,7 @@ export const getUserNotificationControllerFindOneResponseMock = (
     faker.helpers.arrayElement([
       { ...getUserNotificationControllerFindOneResponseDetailJsonMock() },
       { ...getUserNotificationControllerFindOneResponseParentLinkDetailJsonMock() },
+      { ...getUserNotificationControllerFindOneResponseAdoptionCompleteDetailJsonMock() },
     ]),
     undefined,
   ]),

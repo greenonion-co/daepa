@@ -7,8 +7,12 @@
  */
 import type { DetailJson } from "./detailJson";
 import type { ParentLinkDetailJson } from "./parentLinkDetailJson";
+import type { AdoptionCompleteDetailJson } from "./adoptionCompleteDetailJson";
 
 /**
  * 알림 상세 정보 JSON
  */
-export type UserNotificationDtoDetailJson = DetailJson | ParentLinkDetailJson;
+export type UserNotificationDtoDetailJson =
+  | DetailJson
+  | ParentLinkDetailJson
+  | AdoptionCompleteDetailJson;

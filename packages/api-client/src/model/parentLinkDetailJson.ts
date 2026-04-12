@@ -14,9 +14,13 @@ export interface ParentLinkDetailJson {
   message?: string;
   /** 부모 연동 상태 */
   status?: ParentLinkDetailJsonStatus;
-  /** 자식 개체 정보 */
+  /** 주 개체 (부모 연동: 자식 개체) */
+  primaryPet?: NotificationPetDto;
+  /** 보조 개체 (부모 연동: 부모 개체) */
+  secondaryPet?: NotificationPetDto;
+  /** @deprecated primaryPet 으로 이전. 기존 DB 알림 호환용. */
   childPet?: NotificationPetDto;
-  /** 부모 개체 정보 */
+  /** @deprecated secondaryPet 으로 이전. 기존 DB 알림 호환용. */
   parentPet?: NotificationPetDto;
   /** 부모 역할 */
   role?: ParentLinkDetailJsonRole;

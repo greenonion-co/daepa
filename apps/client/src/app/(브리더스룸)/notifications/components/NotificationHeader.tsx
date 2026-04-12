@@ -16,15 +16,32 @@ interface NotificationHeaderProps {
   isOpen: boolean;
 }
 
+/** 알림의 주 개체 petId 를 추출 (타입 무관, primaryPet 우선 + 구버전 호환) */
+const getThumbnailPetId = (
+  item: UserNotificationDto,
+): string | undefined => {
+  const detail = item.detailJson as Record<string, unknown> | undefined;
+  if (!detail) return undefined;
+
+  // 새 구조 (primaryPet) 우선, 구버전 (childPet / pet) fallback
+  return (
+    (detail.primaryPet as { id?: string })?.id ??
+    (detail.childPet as { id?: string })?.id ??
+    (detail.pet as { id?: string })?.id
+  );
+};
+
 const NotificationHeader = ({ item, isOpen }: NotificationHeaderProps) => {
   const detailData = castDetailJson<ParentLinkDetailJson>(item.type, item?.detailJson);
+  const thumbnailPetId = getThumbnailPetId(item);
+
   return (
     <div className="flex w-full items-center justify-between gap-2">
       <div className="flex items-center gap-2">
         <div className="flex flex-col gap-2">
           <div className="relative h-15 w-15 rounded-full bg-gray-100">
-            {detailData?.childPet?.id && (
-              <PetThumbnail petId={detailData.childPet.id} maxSize={60} rounded />
+            {thumbnailPetId && (
+              <PetThumbnail petId={thumbnailPetId} maxSize={60} rounded />
             )}
           </div>
         </div>
