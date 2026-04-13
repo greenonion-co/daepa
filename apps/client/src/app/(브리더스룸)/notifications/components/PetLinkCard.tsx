@@ -11,9 +11,8 @@ interface PetLinkCardProps {
 const PetLinkCard = ({ detailData }: PetLinkCardProps) => {
   if (!detailData) return null;
 
-  // 새 구조 (primaryPet/secondaryPet) 우선, 구버전 (childPet/parentPet) fallback
-  const primary = detailData.primaryPet ?? detailData.childPet;
-  const secondary = detailData.secondaryPet ?? detailData.parentPet;
+  const primary = detailData.primaryPet;
+  const secondary = detailData.secondaryPet;
 
   if (!primary?.id && !secondary?.id) return null;
 
