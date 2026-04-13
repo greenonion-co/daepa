@@ -57,7 +57,7 @@ export default function ShowcaseContent({ profile }: ShowcaseContentProps) {
     return () => observer.disconnect();
   }, []);
 
-  const handleShare = () => shareShowroom(profile.name);
+  const handleShare = () => shareShowroom(profile.showroomSlug!);
 
   return (
     <div className="mx-auto max-w-screen-sm">

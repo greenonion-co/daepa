@@ -22,7 +22,7 @@ export default function FeedPetCard({ pet }: FeedPetCardProps) {
       <div className="flex items-center gap-3 px-3 pt-3 pb-2">
         {pet.owner?.isBiz && pet.owner?.name ? (
           <Link
-            href={`/@${pet.owner.name}`}
+            href={`/@${pet.owner.showroomSlug ?? pet.owner.name}`}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center text-sm font-semibold text-blue-500 hover:text-blue-600 dark:text-gray-100"

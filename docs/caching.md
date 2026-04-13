@@ -98,6 +98,16 @@
 | **설계** | 비공개/삭제 처리를 pet 캐시 무효화에 편승. COUNT 쿼리 제거. owner 배치 조회(`WHERE IN`) |
 | **무효화** | `ParentRequestService.invalidateRelationCaches` — 본인 + 같은 부모의 모든 자식 `del` |
 
+### profileBySlug — 브리더 공개 프로필 (slug 기반)
+
+| 항목 | 값 |
+|------|---|
+| **키** | `profile:slug:{slug}` |
+| **TTL** | 30일 |
+| **API** | `GET /v1/user/public-profile/:slug` |
+| **서비스** | `UserService.findPublicProfileBySlug` |
+| **무효화** | `CacheInvalidation.onUserProfileChanged(slug)` 시 `del` |
+
 ---
 
 ## 무효화
@@ -120,3 +130,4 @@
 | `FeedingService.createFeeding` | 생성 후 | `feeding:{petId}:{yyyy-MM}` |
 | `FeedingService.updateFeeding` | 수정 후 | `feeding:{petId}:{yyyy-MM}` (+ 날짜 변경 시 새 월) |
 | `FeedingService.deleteFeeding` | 삭제 후 | `feeding:{petId}:{yyyy-MM}` |
+| `UserService.updatePrivateInfo` | 수정 후 | `profile:slug:{slug}` |

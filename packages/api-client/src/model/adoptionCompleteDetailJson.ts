@@ -6,7 +6,7 @@
  * OpenAPI spec version: 1.0
  */
 import type { NotificationSellerDto } from "./notificationSellerDto";
-import type { NotificationAdoptionPetDto } from "./notificationAdoptionPetDto";
+import type { NotificationPetDto } from "./notificationPetDto";
 import type { AdoptionCompleteDetailJsonAdoptionDate } from "./adoptionCompleteDetailJsonAdoptionDate";
 import type { AdoptionCompleteDetailJsonPrice } from "./adoptionCompleteDetailJsonPrice";
 import type { AdoptionCompleteDetailJsonMethod } from "./adoptionCompleteDetailJsonMethod";
@@ -16,8 +16,8 @@ export interface AdoptionCompleteDetailJson {
   message?: string;
   /** 판매자 정보 */
   seller?: NotificationSellerDto;
-  /** 개체 정보 (이름 + 썸네일) */
-  pet?: NotificationAdoptionPetDto;
+  /** 이전 대상 개체 정보 */
+  primaryPet?: NotificationPetDto;
   /**
    * 분양 날짜
    * @nullable

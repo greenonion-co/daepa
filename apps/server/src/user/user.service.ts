@@ -18,9 +18,7 @@ import {
 } from './user.dto';
 import { ProviderInfo } from 'src/auth/auth.types';
 import { USER_ROLE, USER_STATUS } from './user.constant';
-import { PetEntity } from 'src/pet/pet.entity';
-import { PET_TYPE } from 'src/pet/pet.constants';
-import { nanoid } from 'nanoid';
+import { nanoid, customAlphabet } from 'nanoid';
 import { isMySQLError } from 'src/common/error';
 import { OauthService } from 'src/auth/oauth/oauth.service';
 import { EntityManager } from 'typeorm';
@@ -28,6 +26,10 @@ import { plainToInstance } from 'class-transformer';
 import { OauthEntity } from 'src/auth/oauth/oauth.entity';
 import { PageDto, PageMetaDto } from 'src/common/page.dto';
 import { CacheInvalidation } from 'src/common/cache-invalidation';
+import { CacheService } from 'src/common/cache.service';
+import { CACHE } from 'src/common/cache-keys';
+
+const generateSlug = customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', 6);
 
 @Injectable()
 export class UserService {
@@ -37,6 +39,7 @@ export class UserService {
     private readonly oauthService: OauthService,
     private readonly dataSource: DataSource,
     private readonly cacheInvalidation: CacheInvalidation,
+    private readonly cacheService: CacheService,
   ) {}
 
   async generateUserId() {
@@ -53,6 +56,17 @@ export class UserService {
     }
 
     throw new Error('Failed to generate unique userId after maximum attempts');
+  }
+
+  private async generateShowroomSlug(): Promise<string> {
+    for (let attempt = 0; attempt < 10; attempt++) {
+      const slug = generateSlug();
+      const exists = await this.userRepository.exists({
+        where: { showroomSlug: slug },
+      });
+      if (!exists) return slug;
+    }
+    throw new Error('Failed to generate unique showroomSlug');
   }
 
   async getUserWithOauthsEntity(userId: string) {
@@ -95,6 +109,7 @@ export class UserService {
       name: entity.name,
       role: entity.role,
       isBiz: entity.isBiz,
+      showroomSlug: entity.showroomSlug ?? null,
     };
   }
 
@@ -130,6 +145,7 @@ export class UserService {
 
       return {
         ...this.toUserDto(userEntity),
+        showroomSlug: userEntity.showroomSlug ?? null,
         provider: userProviders,
       };
     };
@@ -230,6 +246,7 @@ export class UserService {
   ) {
     const run = async (em: EntityManager) => {
       const userId = await this.generateUserId();
+      const showroomSlug = await this.generateShowroomSlug();
       const pendingName = `USER_${userId}`;
       const createUserEntity = plainToInstance(UserEntity, {
         userId,
@@ -238,6 +255,7 @@ export class UserService {
         role: USER_ROLE.BREEDER,
         provider: providerInfo.provider,
         providerId: providerInfo.providerId,
+        showroomSlug,
         status,
       });
 
@@ -279,40 +297,60 @@ export class UserService {
     if (!userEntity) {
       throw new NotFoundException('사용자를 찾을 수 없습니다.');
     }
-    await this.userRepository.update({ userId }, dto);
-    await this.cacheInvalidation.onUserProfileChanged(userEntity.name);
-  }
+    const oldSlug = userEntity.showroomSlug ?? null;
 
-  async findPublicProfileByName(
-    name: string,
-  ): Promise<BreederPublicProfileDto> {
-    const userEntity = await this.userRepository.findOneBy({
-      name,
-      status: USER_STATUS.ACTIVE,
-    });
-
-    if (!userEntity) {
-      throw new NotFoundException('사용자를 찾을 수 없습니다.');
+    try {
+      await this.userRepository.update({ userId }, dto);
+    } catch (error) {
+      if (
+        isMySQLError(error) &&
+        error.code === 'ER_DUP_ENTRY' &&
+        error.message.includes('UNIQUE_SHOWROOM_SLUG')
+      ) {
+        throw new ConflictException('이미 사용 중인 쇼룸 주소입니다.');
+      }
+      throw error;
     }
 
-    const petCount = await this.dataSource.getRepository(PetEntity).count({
+    await this.cacheInvalidation.onUserProfileChanged(oldSlug);
+  }
+
+  async findPublicProfileBySlug(
+    slug: string,
+  ): Promise<BreederPublicProfileDto> {
+    return this.cacheService.wrap(
+      CACHE.profileBySlug.key(slug),
+      async () => {
+        const userEntity = await this.userRepository.findOneBy({
+          showroomSlug: slug,
+          status: USER_STATUS.ACTIVE,
+        });
+
+        if (!userEntity) {
+          throw new NotFoundException('사용자를 찾을 수 없습니다.');
+        }
+
+        return {
+          ...this.toUserSimpleDto(userEntity),
+          realName: userEntity.isRealNamePublic ? userEntity.realName : null,
+          phone: userEntity.isPhonePublic ? userEntity.phone : null,
+          address: userEntity.isAddressPublic ? userEntity.address : null,
+          bannerImageUrl: userEntity.bannerImageUrl ?? null,
+          bio: userEntity.bio ?? null,
+          showroomSlug: userEntity.showroomSlug ?? null,
+        };
+      },
+      CACHE.profileBySlug.ttl,
+    );
+  }
+
+  async isSlugExist(slug: string): Promise<boolean> {
+    return this.userRepository.exists({
       where: {
-        ownerId: userEntity.userId,
-        isPublic: true,
-        isDeleted: false,
-        type: PET_TYPE.PET,
+        showroomSlug: slug,
+        status: Not(USER_STATUS.DELETED),
       },
     });
-
-    return {
-      ...this.toUserSimpleDto(userEntity),
-      petCount,
-      realName: userEntity.isRealNamePublic ? userEntity.realName : null,
-      phone: userEntity.isPhonePublic ? userEntity.phone : null,
-      address: userEntity.isAddressPublic ? userEntity.address : null,
-      bannerImageUrl: userEntity.bannerImageUrl ?? null,
-      bio: userEntity.bio ?? null,
-    };
   }
 
   async getUserListSimple(

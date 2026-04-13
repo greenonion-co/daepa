@@ -38,4 +38,6 @@ export interface UpdateUserPrivateInfoDto {
    * @nullable
    */
   bio?: string | null;
+  /** 쇼룸 슬러그 (영소문자, 숫자, 밑줄 3~20자) */
+  showroomSlug?: string;
 }

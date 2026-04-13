@@ -203,7 +203,7 @@ const Header = ({
           {pet.owner?.name && (
             <button
               type="button"
-              onClick={() => router.push(`/@${encodeURIComponent(pet.owner!.name!)}`)}
+              onClick={() => router.push(`/@${pet.owner!.showroomSlug ?? pet.owner!.name!}`)}
               className="my-0.5 w-fit text-left text-[12px] font-medium text-gray-500 transition-colors hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300"
             >
               @{pet.owner.name}

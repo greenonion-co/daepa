@@ -7,17 +7,17 @@ export interface BreederPublicProfile {
   name: string;
   role: string;
   isBiz: boolean;
-  petCount: number;
   realName?: string | null;
   phone?: string | null;
   address?: string | null;
   bannerImageUrl?: string | null;
   bio?: string | null;
+  showroomSlug?: string | null;
 }
 
 export const fetchBreederProfile = cache(
   async (username: string): Promise<BreederPublicProfile | null> => {
-    const url = `${BASE_URL}/api/v1/user/public-profile/${encodeURIComponent(username)}`;
+    const url = `${BASE_URL}/api/v1/user/public-profile/${username}`;
 
     try {
       const res = await fetch(url, { cache: "no-store" });

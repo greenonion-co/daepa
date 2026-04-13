@@ -72,8 +72,11 @@ export class CacheInvalidation {
   }
 
   /** 사용자 프로필 변경 시 */
-  async onUserProfileChanged(userName: string) {
-    await this.cacheService.del(CACHE.profile.key(userName));
+  async onUserProfileChanged(slug: string | null) {
+    if (slug) {
+      await this.cacheService.del(CACHE.profileBySlug.key(slug));
+    }
   }
+
 
 }

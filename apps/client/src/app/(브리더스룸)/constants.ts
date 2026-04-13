@@ -721,7 +721,7 @@ export const SIDEBAR_ITEMS = [
   },
   {
     title: "쇼룸",
-    url: "/@", // Menubar에서 /@{user.name}으로 동적 치환
+    url: "/@", // Menubar에서 /@{user.showroomSlug}으로 동적 치환
   },
 ];
 

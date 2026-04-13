@@ -1,10 +1,10 @@
 import { toast } from "@/lib/toast";
 import { isNativeApp, requestShare } from "@/lib/native-bridge";
 
-export async function shareShowroom(name: string) {
-  const url = `${window.location.origin}/@${encodeURIComponent(name)}`;
+export async function shareShowroom(slug: string) {
+  const url = `${window.location.origin}/@${slug}`;
   if (isNativeApp()) {
-    requestShare(url, `${name}의 쇼룸`);
+    requestShare(url, url);
     return;
   }
   try {

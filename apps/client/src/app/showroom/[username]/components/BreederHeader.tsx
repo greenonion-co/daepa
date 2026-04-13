@@ -28,7 +28,7 @@ export default function BreederHeader({ profile }: BreederHeaderProps) {
   const [bioInput, setBioInput] = useState(profile.bio ?? "");
   const [isSavingBio, setIsSavingBio] = useState(false);
 
-  const handleShare = () => shareShowroom(profile.name);
+  const handleShare = () => shareShowroom(profile.showroomSlug!);
 
   const handleBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
