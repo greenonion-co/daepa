@@ -40,7 +40,7 @@ export async function resolveUniqueNameForOwner(
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const existing: { name: string }[] = await em.query(
     `SELECT name FROM pets WHERE owner_id = ? AND is_deleted = false AND (name = ? OR name LIKE ?)`,
-    [ownerId, baseName, `${baseName} (%))`],
+    [ownerId, baseName, `${baseName} (%)`],
   );
 
   if (existing.length === 0) return baseName;

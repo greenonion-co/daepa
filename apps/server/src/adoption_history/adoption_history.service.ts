@@ -326,7 +326,7 @@ export class AdoptionHistoryService {
           select: ['userId', 'name'],
         });
 
-        // 5. 부모 요청 확인
+        // 5. 부모 요청 확인 (미처리 건이 있으면 분양 완료 차단)
         const pendingCount =
           await this.parentRequestService.getPendingRequestCount(petId, em);
         if (pendingCount > 0) {
@@ -335,7 +335,7 @@ export class AdoptionHistoryService {
           );
         }
 
-        // 5. 펫 스냅샷 생성
+        // 6. 펫 스냅샷 생성
         const petDetail = await em.findOne(PetDetailEntity, {
           where: { petId },
           select: ['sex', 'growth', 'morphs', 'traits'],
@@ -367,7 +367,7 @@ export class AdoptionHistoryService {
           mother: mother ? { petId: mother.petId, name: mother.name } : null,
         };
 
-        // 6. adoption_histories에 INSERT
+        // 7. adoption_histories에 INSERT
         const historyEntity = new AdoptionHistoryEntity();
         Object.assign(historyEntity, {
           petId,
@@ -381,14 +381,14 @@ export class AdoptionHistoryService {
         });
         await em.save(AdoptionHistoryEntity, historyEntity);
 
-        // 7. pet_adoption 리셋
+        // 8. pet_adoption 리셋
         adoptionEntity.status = null;
         adoptionEntity.price = null;
         adoptionEntity.memo = null;
         adoptionEntity.reservedUserId = null;
         await em.save(PetAdoptionEntity, adoptionEntity);
 
-        // 8. 펫 소유권 이전 + 이전 소유주 개인화 필드 초기화
+        // 9. 펫 소유권 이전 + 이전 소유주 개인화 필드 초기화
         // - isPublic: false — 매수인이 의도적으로 공개를 선택하지 않은 상태에서 자동 공개/한도 우회 방지
         // - desc: null — 이전 소유주의 소개말(개인 메모 성격)
         // - isBreeder: false — 브리더 지정은 매수인이 직접 결정할 사안
@@ -410,7 +410,7 @@ export class AdoptionHistoryService {
           },
         );
 
-        // 9. 매수인에게 분양 완료 알림 생성 (트랜잭션 내)
+        // 10. 매수인에게 분양 완료 알림 생성 (트랜잭션 내)
         let savedNotification: UserNotificationEntity | null = null;
         if (finalBuyerId) {
           const notificationDto: CreateUserNotificationDto = {
@@ -439,13 +439,13 @@ export class AdoptionHistoryService {
       },
     );
 
-    // 10. 캐시 무효화 (트랜잭션 커밋 후)
+    // 11. 캐시 무효화 (트랜잭션 커밋 후)
     await Promise.all([
       this.cacheService.del(CACHE.pet.key(petId)),
       this.cacheService.del(CACHE.petAdoption.key(petId)),
     ]);
 
-    // 11. 푸시 알림 발송 (트랜잭션 커밋 후)
+    // 12. 푸시 알림 발송 (트랜잭션 커밋 후)
     if (savedNotification) {
       this.userNotificationService.sendPushNotificationForNotification(
         savedNotification,
