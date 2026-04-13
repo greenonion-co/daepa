@@ -132,7 +132,12 @@ export class ParentRequestService {
         })
         .getOne();
       if (existingRequest) {
-        throw new ConflictException('이미 존재하는 부모 연동 요청입니다.');
+        if (existingRequest.status === PARENT_STATUS.APPROVED) {
+          throw new ConflictException('이미 등록된 부모가 있습니다.');
+        }
+        throw new ConflictException(
+          '이미 다른 개체에 부모 연동 요청 중입니다. 기존 요청을 취소한 후 다시 시도해주세요.',
+        );
       }
 
       const isParentMyPet = userId === parentPet.ownerId;
