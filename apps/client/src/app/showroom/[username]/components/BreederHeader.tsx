@@ -143,7 +143,7 @@ export default function BreederHeader({ profile }: BreederHeaderProps) {
               className="flex h-full w-full flex-col items-center justify-center gap-2 text-gray-400 transition-colors hover:text-gray-500 dark:text-gray-500 dark:hover:text-gray-400"
             >
               <Camera className="h-6 w-6" />
-              <span className="text-sm text-amber-500">배너 이미지를 추가해주세요</span>
+              <span className="text-sm text-blue-400">배너 이미지 추가</span>
               <span className="text-gray-00 text-xs dark:text-gray-600">
                 이미지 권장 비율은 16:9 입니다.
                 <br />
@@ -225,9 +225,10 @@ export default function BreederHeader({ profile }: BreederHeaderProps) {
                     setBioInput(bio);
                     setIsEditingBio(true);
                   }}
-                  className="rounded-full p-1 text-blue-400 transition-colors hover:bg-neutral-100 hover:text-neutral-500 dark:hover:bg-neutral-800 dark:hover:text-neutral-300"
+                  className="flex items-center gap-1 rounded-full px-2 py-1 text-blue-400 transition-colors hover:bg-neutral-100 hover:text-neutral-500 dark:hover:bg-neutral-800 dark:hover:text-neutral-300"
                 >
                   <Pencil className="h-3 w-3" />
+                  <span className="text-xs">브리더 소개를 입력해 보세요</span>
                 </button>
               )}
             </div>
