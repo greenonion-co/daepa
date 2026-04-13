@@ -76,12 +76,4 @@ export class CacheInvalidation {
     await this.cacheService.del(CACHE.profile.key(userName));
   }
 
-  /** 분양 완료 시 */
-  async onAdoptionCompleted(petId: string, userId: string) {
-    await Promise.all([
-      this.cacheService.del(CACHE.petAdoption.key(petId)),
-      this.cacheService.delByPattern(CACHE.adoptionStats.pattern(userId)),
-      this.cacheService.delByPattern(CACHE.feed.pattern),
-    ]);
-  }
 }
