@@ -16,19 +16,18 @@ interface NotificationHeaderProps {
   isOpen: boolean;
 }
 
-/** 알림의 주 개체 petId 를 추출 (타입 무관, primaryPet 우선 + 구버전 호환) */
+/** 알림의 주 개체 petId 를 추출 (타입별 분기) */
 const getThumbnailPetId = (
   item: UserNotificationDto,
 ): string | undefined => {
   const detail = item.detailJson as Record<string, unknown> | undefined;
   if (!detail) return undefined;
 
-  // 새 구조 (primaryPet) 우선, 구버전 (childPet / pet) fallback
-  return (
-    (detail.primaryPet as { id?: string })?.id ??
-    (detail.childPet as { id?: string })?.id ??
-    (detail.pet as { id?: string })?.id
-  );
+  if (item.type === UserNotificationDtoType.ADOPTION_COMPLETE) {
+    return (detail.primaryPet as { id?: string })?.id;
+  }
+  return (detail.primaryPet as { id?: string })?.id ??
+    (detail.childPet as { id?: string })?.id;
 };
 
 const NotificationHeader = ({ item, isOpen }: NotificationHeaderProps) => {

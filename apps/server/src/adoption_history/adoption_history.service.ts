@@ -389,6 +389,7 @@ export class AdoptionHistoryService {
         await em.save(PetAdoptionEntity, adoptionEntity);
 
         // 9. 펫 소유권 이전 + 이전 소유주 개인화 필드 초기화
+        // 소유권 박탈(finalBuyerId === null) 시에도 동일하게 초기화한다.
         // - isPublic: false — 매수인이 의도적으로 공개를 선택하지 않은 상태에서 자동 공개/한도 우회 방지
         // - desc: null — 이전 소유주의 소개말(개인 메모 성격)
         // - isBreeder: false — 브리더 지정은 매수인이 직접 결정할 사안
@@ -420,7 +421,7 @@ export class AdoptionHistoryService {
               seller: { id: pet.ownerId, name: seller?.name },
               primaryPet: {
                 id: petId,
-                name: petName,
+                name: transferName ?? petName,
               },
               adoptionDate: completeAdoptionDto.adoptionDate ?? null,
               price: completeAdoptionDto.price ?? null,
