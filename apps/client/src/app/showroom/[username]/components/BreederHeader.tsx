@@ -143,7 +143,12 @@ export default function BreederHeader({ profile }: BreederHeaderProps) {
               className="flex h-full w-full flex-col items-center justify-center gap-2 text-gray-400 transition-colors hover:text-gray-500 dark:text-gray-500 dark:hover:text-gray-400"
             >
               <Camera className="h-6 w-6" />
-              <span className="text-sm">배너 이미지를 추가해주세요</span>
+              <span className="text-sm text-amber-500">배너 이미지를 추가해주세요</span>
+              <span className="text-gray-00 text-xs dark:text-gray-600">
+                이미지 권장 비율은 16:9 입니다.
+                <br />
+                다른 비율은 중앙 기준으로 잘려서 표시됩니다.
+              </span>
             </button>
           )}
 
