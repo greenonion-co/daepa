@@ -57,7 +57,7 @@
 | **제외** | reservedUser 정보 (매 요청마다 별도 조회) |
 | **무효화** | `createAdoption` — 자체 트랜잭션일 때 `del` |
 | | `updateAdoption` — 자체 트랜잭션일 때 `del` |
-| | `CacheInvalidation.onPetDeleted`, `onAdoptionCompleted` 시 `del` |
+| | `CacheInvalidation.onPetDeleted` 시 `del` |
 | **참고** | 외부 트랜잭션(`entityManager` 주입) 시 호출자가 캐시 무효화 책임 |
 
 ### feeding — 피딩 기록 (월별)

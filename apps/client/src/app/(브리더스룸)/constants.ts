@@ -730,6 +730,7 @@ export const NOTIFICATION_MESSAGE: Record<UserNotificationDtoType, string> = {
   parent_accept: "님이 부모 연동 요청을 수락했습니다.",
   parent_reject: "님이 부모 연동 요청을 거절했습니다.",
   parent_cancel: "님이 부모 연동 요청을 취소했습니다.",
+  adoption_complete: "님으로부터 소유권이 이전되었습니다.",
 };
 
 export const NOTIFICATION_TYPE: Record<UserNotificationDtoType, { label: string; color: string }> =
@@ -749,6 +750,10 @@ export const NOTIFICATION_TYPE: Record<UserNotificationDtoType, { label: string;
     parent_cancel: {
       label: "부모 연동 취소",
       color: "bg-gray-600",
+    },
+    adoption_complete: {
+      label: "소유권 이전",
+      color: "bg-blue-600 text-white",
     },
   };
 

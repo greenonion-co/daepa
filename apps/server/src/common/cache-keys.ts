@@ -31,13 +31,6 @@ export const CACHE = {
     pattern: (userId: string) => `pair-stats:${userId}:*`,
     ttl: DEFAULT_TTL,
   },
-  /** GET /v1/statistics/adoptions — StatisticsService.getAdoptionStatistics */
-  adoptionStats: {
-    key: (userId: string, filterHash: string) =>
-      `adopt-stats:${userId}:${filterHash}`,
-    pattern: (userId: string) => `adopt-stats:${userId}:*`,
-    ttl: DEFAULT_TTL,
-  },
   /** GET /v1/pet-adoption/:petId — PetAdoptionService.getPetAdoption */
   petAdoption: {
     key: (petId: string) => `pet-adopt:${petId}`,

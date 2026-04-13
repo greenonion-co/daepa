@@ -93,32 +93,40 @@ export class UserNotificationService {
     type: USER_NOTIFICATION_TYPE,
     detailJson?: Record<string, unknown> | null,
   ): { title: string; body: string } {
-    const childPetName =
-      (detailJson?.childPet as { name?: string })?.name ?? '펫';
-    const parentPetName =
-      (detailJson?.parentPet as { name?: string })?.name ?? '펫';
+    const primaryPetName =
+      (detailJson?.primaryPet as { name?: string })?.name ?? '펫';
+    const secondaryPetName =
+      (detailJson?.secondaryPet as { name?: string })?.name ?? '펫';
 
     switch (type) {
       case USER_NOTIFICATION_TYPE.PARENT_REQUEST:
         return {
           title: '부모 연동 요청',
-          body: `${childPetName}의 부모로 ${parentPetName}을(를) 연동하고 싶어합니다.`,
+          body: `${primaryPetName}의 부모로 ${secondaryPetName}을(를) 연동하고 싶어합니다.`,
         };
       case USER_NOTIFICATION_TYPE.PARENT_ACCEPT:
         return {
           title: '부모 연동 수락',
-          body: `${parentPetName}이(가) ${childPetName}의 부모로 연동되었습니다.`,
+          body: `${secondaryPetName}이(가) ${primaryPetName}의 부모로 연동되었습니다.`,
         };
       case USER_NOTIFICATION_TYPE.PARENT_REJECT:
         return {
           title: '부모 연동 거절',
-          body: `${parentPetName} 부모 연동 요청이 거절되었습니다.`,
+          body: `${secondaryPetName} 부모 연동 요청이 거절되었습니다.`,
         };
       case USER_NOTIFICATION_TYPE.PARENT_CANCEL:
         return {
           title: '부모 연동 취소',
-          body: `${parentPetName} 부모 연동 요청이 취소되었습니다.`,
+          body: `${secondaryPetName} 부모 연동 요청이 취소되었습니다.`,
         };
+      case USER_NOTIFICATION_TYPE.ADOPTION_COMPLETE: {
+        const sellerName =
+          (detailJson?.seller as { name?: string })?.name ?? '브리더';
+        return {
+          title: '소유권 이전',
+          body: `${sellerName}님으로부터 ${primaryPetName}의 소유권이 이전되었습니다.`,
+        };
+      }
       default:
         return {
           title: '알림',

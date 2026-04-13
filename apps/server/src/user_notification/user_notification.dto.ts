@@ -20,6 +20,7 @@ import {
   PARENT_ROLE,
   PARENT_STATUS,
 } from 'src/parent_request/parent_request.constants';
+import { PET_ADOPTION_METHOD } from 'src/pet/pet.constants';
 
 export class NotificationPetDto {
   @ApiProperty({
@@ -52,6 +53,11 @@ export class DetailJson {
   [key: string]: unknown;
 }
 
+/**
+ * 부모 연동 알림 상세 JSON.
+ * - primaryPet: 자식 개체 (헤더 썸네일 + 클릭 대상)
+ * - secondaryPet: 부모 개체
+ */
 export class ParentLinkDetailJson extends DetailJson {
   @ApiProperty({
     description: '부모 연동 상태',
@@ -64,20 +70,20 @@ export class ParentLinkDetailJson extends DetailJson {
   status?: PARENT_STATUS;
 
   @ApiProperty({
-    description: '자식 개체 정보',
+    description: '주 개체 (부모 연동: 자식 개체)',
     type: NotificationPetDto,
     required: false,
   })
   @IsOptional()
-  childPet?: NotificationPetDto;
+  primaryPet?: NotificationPetDto;
 
   @ApiProperty({
-    description: '부모 개체 정보',
+    description: '보조 개체 (부모 연동: 부모 개체)',
     type: NotificationPetDto,
     required: false,
   })
   @IsOptional()
-  parentPet?: NotificationPetDto;
+  secondaryPet?: NotificationPetDto;
 
   @ApiProperty({
     description: '부모 역할',
@@ -100,7 +106,76 @@ export class ParentLinkDetailJson extends DetailJson {
   rejectReason?: string;
 }
 
-@ApiExtraModels(DetailJson, ParentLinkDetailJson)
+export class NotificationSellerDto {
+  @ApiProperty({ description: '판매자 ID', example: 'XXXXXXXX' })
+  @IsString()
+  id: string;
+
+  @ApiProperty({
+    description: '판매자 이름',
+    example: '브리더A',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  name?: string;
+}
+
+/**
+ * 소유권 이전 알림 상세 JSON.
+ * - primaryPet: 이전 대상 개체 (헤더 썸네일 + 클릭 대상)
+ */
+export class AdoptionCompleteDetailJson extends DetailJson {
+  @ApiProperty({
+    description: '판매자 정보',
+    type: NotificationSellerDto,
+    required: false,
+  })
+  @IsOptional()
+  seller?: NotificationSellerDto;
+
+  @ApiProperty({
+    description: '이전 대상 개체 정보',
+    type: NotificationPetDto,
+    required: false,
+  })
+  @IsOptional()
+  primaryPet?: NotificationPetDto;
+
+  @ApiProperty({
+    description: '분양 날짜',
+    example: '2026-04-12',
+    required: false,
+    nullable: true,
+  })
+  @IsString()
+  @IsOptional()
+  adoptionDate?: string | null;
+
+  @ApiProperty({
+    description: '분양 가격',
+    example: 50000,
+    required: false,
+    nullable: true,
+  })
+  @IsNumber()
+  @IsOptional()
+  price?: number | null;
+
+  @ApiProperty({
+    description: '분양 방식',
+    example: 'PICKUP',
+    enum: PET_ADOPTION_METHOD,
+    'x-enumNames': Object.keys(PET_ADOPTION_METHOD),
+    required: false,
+    nullable: true,
+  })
+  @IsEnum(PET_ADOPTION_METHOD)
+  @IsOptional()
+  method?: PET_ADOPTION_METHOD | null;
+}
+
+@ApiExtraModels(DetailJson, ParentLinkDetailJson, AdoptionCompleteDetailJson)
 export class UserNotificationDto {
   @ApiProperty({
     description: '알림 아이디',
@@ -158,12 +233,13 @@ export class UserNotificationDto {
     oneOf: [
       { $ref: getSchemaPath(DetailJson) },
       { $ref: getSchemaPath(ParentLinkDetailJson) },
+      { $ref: getSchemaPath(AdoptionCompleteDetailJson) },
     ],
     example: {},
   })
   @IsOptional()
   @IsJSON()
-  detailJson?: DetailJson | ParentLinkDetailJson;
+  detailJson?: DetailJson | ParentLinkDetailJson | AdoptionCompleteDetailJson;
 
   @ApiProperty({
     description: '알림 발신 유저 이름',

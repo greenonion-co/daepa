@@ -11,42 +11,46 @@ interface PetLinkCardProps {
 const PetLinkCard = ({ detailData }: PetLinkCardProps) => {
   if (!detailData) return null;
 
-  if (!detailData.childPet?.id && !detailData.parentPet?.id) return null;
+  // 새 구조 (primaryPet/secondaryPet) 우선, 구버전 (childPet/parentPet) fallback
+  const primary = detailData.primaryPet ?? detailData.childPet;
+  const secondary = detailData.secondaryPet ?? detailData.parentPet;
+
+  if (!primary?.id && !secondary?.id) return null;
 
   return (
     <>
       <div className="flex items-center gap-1">
-        {detailData.childPet?.id && (
+        {primary?.id && (
           <Link
-            href={`/pet/${detailData.childPet.id}`}
+            href={`/pet/${primary.id}`}
             className="group flex flex-1 cursor-pointer flex-col items-center gap-2 transition-all dark:hover:bg-gray-800"
           >
             <PetThumbnail
-              petId={detailData.childPet.id}
-              alt={detailData.childPet.name}
+              petId={primary.id}
+              alt={primary.name}
               maxSize={128}
               objectFit="cover"
             />
-            <TooltipText text={detailData.childPet.name ?? ""} />
+            <TooltipText text={primary.name ?? ""} />
           </Link>
         )}
 
-        {detailData?.childPet?.id && detailData?.parentPet?.id && (
+        {primary?.id && secondary?.id && (
           <ArrowRight className="h-4 w-4" />
         )}
 
-        {detailData.parentPet?.id && (
+        {secondary?.id && (
           <Link
-            href={`/pet/${detailData.parentPet.id}`}
+            href={`/pet/${secondary.id}`}
             className="group flex flex-1 cursor-pointer flex-col items-center gap-2 transition-all dark:hover:bg-gray-800"
           >
             <PetThumbnail
-              petId={detailData?.parentPet?.id}
-              alt={detailData.parentPet.name}
+              petId={secondary.id}
+              alt={secondary.name}
               maxSize={128}
               objectFit="cover"
             />
-            <TooltipText text={detailData.parentPet.name ?? ""} />
+            <TooltipText text={secondary.name ?? ""} />
           </Link>
         )}
       </div>
