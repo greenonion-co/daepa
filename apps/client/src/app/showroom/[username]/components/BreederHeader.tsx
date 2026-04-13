@@ -5,6 +5,8 @@ import { useIsLoggedIn, useUser } from "@/hooks/useAuth";
 import { shareShowroom } from "../utils/shareShowroom";
 import { userControllerUpdateUserPrivateInfo } from "@repo/api-client";
 import Image from "next/image";
+import { overlay } from "overlay-kit";
+import ImageViewer from "@/app/(브리더스룸)/components/Form/ImageViewer";
 import BreederBioModal from "./BreederBioModal";
 
 interface BreederHeaderProps {
@@ -110,14 +112,29 @@ export default function BreederHeader({ profile }: BreederHeaderProps) {
           }`}
         >
           {bannerUrl ? (
-            <Image
-              src={bannerUrl}
-              alt="쇼룸 배너"
-              fill
-              className="object-cover"
-              sizes="(max-width: 768px) 100vw, 768px"
-              priority
-            />
+            <div
+              className="relative h-full w-full cursor-pointer"
+              onClick={() => {
+                overlay.open(({ isOpen, close, unmount }) => (
+                  <ImageViewer
+                    isOpen={isOpen}
+                    onClose={close}
+                    onExit={unmount}
+                    imageUrl={bannerUrl}
+                    fileName="쇼룸 배너"
+                  />
+                ));
+              }}
+            >
+              <Image
+                src={bannerUrl}
+                alt="쇼룸 배너"
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, 768px"
+                priority
+              />
+            </div>
           ) : (
             <button
               type="button"
