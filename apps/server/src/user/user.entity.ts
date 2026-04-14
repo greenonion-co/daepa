@@ -81,7 +81,7 @@ export class UserEntity {
   @Column({ type: 'int', nullable: true })
   petLimitOverride: number | null;
 
-  @Column({ type: 'varchar', length: 20, nullable: true, unique: true })
+  @Column({ type: 'varchar', length: 20, nullable: true })
   showroomSlug?: string | null;
 
   @CreateDateColumn()

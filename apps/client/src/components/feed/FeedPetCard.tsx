@@ -21,15 +21,22 @@ export default function FeedPetCard({ pet }: FeedPetCardProps) {
       {/* Header - 유저 정보 */}
       <div className="flex items-center gap-3 px-3 pt-3 pb-2">
         {pet.owner?.isBiz && pet.owner?.name ? (
-          <Link
-            href={`/@${pet.owner.showroomSlug ?? pet.owner.name}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center text-sm font-semibold text-blue-500 hover:text-blue-600 dark:text-gray-100"
-          >
-            {pet.owner.name}
-            <BadgeCheck className="h-5 w-5 fill-blue-500 stroke-white" />
-          </Link>
+          pet.owner.showroomSlug ? (
+            <Link
+              href={`/@${pet.owner.showroomSlug}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center text-sm font-semibold text-blue-500 hover:text-blue-600 dark:text-gray-100"
+            >
+              {pet.owner.name}
+              <BadgeCheck className="h-5 w-5 fill-blue-500 stroke-white" />
+            </Link>
+          ) : (
+            <span className="flex items-center text-sm font-semibold text-blue-500 dark:text-gray-100">
+              {pet.owner.name}
+              <BadgeCheck className="h-5 w-5 fill-blue-500 stroke-white" />
+            </span>
+          )
         ) : (
           <span className="text-sm font-semibold text-gray-700 dark:text-gray-100">
             {pet.owner?.name ?? "-"}

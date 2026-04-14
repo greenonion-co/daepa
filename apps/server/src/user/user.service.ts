@@ -246,21 +246,39 @@ export class UserService {
   ) {
     const run = async (em: EntityManager) => {
       const userId = await this.generateUserId();
-      const showroomSlug = await this.generateShowroomSlug();
       const pendingName = `USER_${userId}`;
-      const createUserEntity = plainToInstance(UserEntity, {
-        userId,
-        name: pendingName,
-        email: providerInfo.email,
-        role: USER_ROLE.BREEDER,
-        provider: providerInfo.provider,
-        providerId: providerInfo.providerId,
-        showroomSlug,
-        status,
-      });
 
-      const savedUserEntity = await em.save(UserEntity, createUserEntity);
-      return this.toUserDto(savedUserEntity);
+      // slug 충돌 시 재생성 retry (UNIQUE 제약 race condition 대비)
+      for (let attempt = 0; attempt < 3; attempt++) {
+        const showroomSlug = await this.generateShowroomSlug();
+        const createUserEntity = plainToInstance(UserEntity, {
+          userId,
+          name: pendingName,
+          email: providerInfo.email,
+          role: USER_ROLE.BREEDER,
+          provider: providerInfo.provider,
+          providerId: providerInfo.providerId,
+          showroomSlug,
+          status,
+        });
+
+        try {
+          const savedUserEntity = await em.save(UserEntity, createUserEntity);
+          return this.toUserDto(savedUserEntity);
+        } catch (error) {
+          if (
+            isMySQLError(error) &&
+            error.code === 'ER_DUP_ENTRY' &&
+            error.message.includes('UNIQUE_SHOWROOM_SLUG') &&
+            attempt < 2
+          ) {
+            continue;
+          }
+          throw error;
+        }
+      }
+
+      throw new Error('Failed to create user after slug collision retries');
     };
 
     if (manager) {
@@ -299,17 +317,21 @@ export class UserService {
     }
     const oldSlug = userEntity.showroomSlug ?? null;
 
-    try {
-      await this.userRepository.update({ userId }, dto);
-    } catch (error) {
-      if (
-        isMySQLError(error) &&
-        error.code === 'ER_DUP_ENTRY' &&
-        error.message.includes('UNIQUE_SHOWROOM_SLUG')
-      ) {
-        throw new ConflictException('이미 사용 중인 쇼룸 주소입니다.');
+    if (dto.showroomSlug) {
+      try {
+        await this.userRepository.update({ userId }, dto);
+      } catch (error) {
+        if (
+          isMySQLError(error) &&
+          error.code === 'ER_DUP_ENTRY' &&
+          error.message.includes('UNIQUE_SHOWROOM_SLUG')
+        ) {
+          throw new ConflictException('이미 사용 중인 쇼룸 주소입니다.');
+        }
+        throw error;
       }
-      throw error;
+    } else {
+      await this.userRepository.update({ userId }, dto);
     }
 
     await this.cacheInvalidation.onUserProfileChanged(oldSlug);
