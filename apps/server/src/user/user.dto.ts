@@ -89,6 +89,15 @@ class UserBaseDto {
   status: USER_STATUS;
 
   @ApiProperty({
+    description: '쇼룸 슬러그',
+    example: 'leopapa',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  showroomSlug?: string | null;
+
+  @ApiProperty({
     description: '생성 시간',
   })
   @IsDate()
@@ -137,6 +146,7 @@ export class UserProfileDto extends PickType(UserBaseDto, [
   'role',
   'isBiz',
   'provider',
+  'showroomSlug',
   'status',
   'createdAt',
 ]) {
@@ -180,6 +190,15 @@ export class UserProfilePublicDto extends PickType(UserBaseDto, ['status']) {
   @IsBoolean()
   @IsOptional()
   isBiz?: boolean;
+
+  @ApiProperty({
+    description: '쇼룸 슬러그',
+    example: 'leopapa',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  showroomSlug?: string | null;
 
   @Exclude()
   declare email?: string;
@@ -338,6 +357,18 @@ export class UpdateUserPrivateInfoDto {
   @IsString()
   @IsOptional()
   bio?: string | null;
+
+  @ApiProperty({
+    description: '쇼룸 슬러그 (영소문자, 숫자, 밑줄 3~20자)',
+    example: 'leopapa',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  @Matches(/^[a-zA-Z0-9_]{3,20}$/, {
+    message: '슬러그는 영문, 숫자, 밑줄 3~20자여야 합니다.',
+  })
+  showroomSlug?: string;
 }
 
 export class VerifyNameDto {
@@ -375,12 +406,6 @@ export class VerifyEmailDto {
 }
 
 export class BreederPublicProfileDto extends UserProfilePublicDto {
-  @ApiProperty({
-    description: '공개 펫 수',
-    example: 12,
-  })
-  petCount: number;
-
   @ApiProperty({
     description: '실명/상호 (공개 설정 시)',
     required: false,
@@ -426,4 +451,21 @@ export class BreederPublicProfileResponseDto extends CommonResponseDto {
     type: BreederPublicProfileDto,
   })
   data: BreederPublicProfileDto;
+}
+
+export class UpdateShowroomSlugDto {
+  @ApiProperty({
+    description: '쇼룸 슬러그 (영소문자, 숫자, 밑줄 3~20자)',
+    example: 'leopapa',
+  })
+  @IsString()
+  @Matches(/^[a-zA-Z0-9_]{3,20}$/, {
+    message: '슬러그는 영문, 숫자, 밑줄 3~20자여야 합니다.',
+  })
+  slug: string;
+}
+
+export class VerifySlugResponseDto extends CommonResponseDto {
+  @ApiProperty({ description: '사용 가능 여부' })
+  available: boolean;
 }

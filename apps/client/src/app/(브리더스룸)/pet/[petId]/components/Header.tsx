@@ -200,15 +200,20 @@ const Header = ({
             </div>
           )}
 
-          {pet.owner?.name && (
-            <button
-              type="button"
-              onClick={() => router.push(`/@${encodeURIComponent(pet.owner!.name!)}`)}
-              className="my-0.5 w-fit text-left text-[12px] font-medium text-gray-500 transition-colors hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300"
-            >
-              @{pet.owner.name}
-            </button>
-          )}
+          {pet.owner?.name &&
+            (pet.owner.showroomSlug ? (
+              <button
+                type="button"
+                onClick={() => router.push(`/@${pet.owner!.showroomSlug!}`)}
+                className="my-0.5 w-fit text-left text-[12px] font-medium text-gray-500 transition-colors hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300"
+              >
+                @{pet.owner.name}
+              </button>
+            ) : (
+              <span className="my-0.5 text-[12px] font-medium text-gray-500 dark:text-blue-400">
+                @{pet.owner.name}
+              </span>
+            ))}
 
           <div
             className={cn(

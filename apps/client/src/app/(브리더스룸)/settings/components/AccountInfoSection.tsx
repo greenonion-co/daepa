@@ -5,12 +5,17 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { userControllerGetUserProfile, userControllerCreateInitUserInfo } from "@repo/api-client";
+import {
+  userControllerGetUserProfile,
+  userControllerCreateInitUserInfo,
+  userControllerUpdateUserPrivateInfo,
+} from "@repo/api-client";
 import { toast } from "@/lib/toast";
 import { AxiosError } from "axios";
 import { SettingsGroup } from "./SettingsGroup";
 import { SettingsItem } from "./SettingsItem";
 import NicknameDuplicateCheckInput from "./NicknameDuplicateCheckInput";
+import SlugDuplicateCheckInput from "./SlugDuplicateCheckInput";
 import { DUPLICATE_CHECK_STATUS } from "@/app/(브리더스룸)/constants";
 import { providerIconMap } from "@/app/(user)/constants";
 
@@ -22,6 +27,13 @@ const AccountInfoSection = () => {
   const [duplicateCheckStatus, setDuplicateCheckStatus] = useState<
     (typeof DUPLICATE_CHECK_STATUS)[keyof typeof DUPLICATE_CHECK_STATUS]
   >(DUPLICATE_CHECK_STATUS.NONE);
+
+  const [isEditingSlug, setIsEditingSlug] = useState(false);
+  const [newSlug, setNewSlug] = useState("");
+  const [slugCheckStatus, setSlugCheckStatus] = useState<
+    (typeof DUPLICATE_CHECK_STATUS)[keyof typeof DUPLICATE_CHECK_STATUS]
+  >(DUPLICATE_CHECK_STATUS.NONE);
+  const [isUpdatingSlug, setIsUpdatingSlug] = useState(false);
 
   const { data: userProfile, isFetching } = useQuery({
     queryKey: [userControllerGetUserProfile.name],
@@ -76,6 +88,48 @@ const AccountInfoSection = () => {
     }
   };
 
+  const handleStartEditSlug = () => {
+    setNewSlug(String(userProfile?.showroomSlug ?? ""));
+    setIsEditingSlug(true);
+    setSlugCheckStatus(DUPLICATE_CHECK_STATUS.NONE);
+  };
+
+  const handleCancelEditSlug = () => {
+    setIsEditingSlug(false);
+    setNewSlug("");
+    setSlugCheckStatus(DUPLICATE_CHECK_STATUS.NONE);
+  };
+
+  const handleSaveSlug = async () => {
+    if (slugCheckStatus !== DUPLICATE_CHECK_STATUS.AVAILABLE) {
+      toast.error("중복확인을 먼저 진행해주세요.");
+      return;
+    }
+
+    setIsUpdatingSlug(true);
+    try {
+      await userControllerUpdateUserPrivateInfo({ showroomSlug: newSlug });
+
+      queryClient.invalidateQueries({ queryKey: [userControllerGetUserProfile.name] });
+      toast.success("쇼룸 주소가 변경되었습니다.");
+      setIsEditingSlug(false);
+      setNewSlug("");
+      setSlugCheckStatus(DUPLICATE_CHECK_STATUS.NONE);
+    } catch (error: unknown) {
+      if (error instanceof AxiosError) {
+        const message = error.response?.data?.message;
+        const errorMessage = Array.isArray(message) ? message[0] : message;
+        toast.error(errorMessage || "쇼룸 주소 변경 중 오류가 발생했습니다.");
+      } else {
+        toast.error("쇼룸 주소 변경 중 오류가 발생했습니다.");
+      }
+    } finally {
+      setIsUpdatingSlug(false);
+    }
+  };
+
+  const currentSlug = userProfile?.showroomSlug ? String(userProfile.showroomSlug) : undefined;
+
   return (
     <SettingsGroup title="계정 정보">
       {isEditingNickname ? (
@@ -116,6 +170,57 @@ const AccountInfoSection = () => {
           label="닉네임"
           value={userProfile?.name ?? "설정되지 않음"}
           onClick={handleStartEditNickname}
+          showChevron
+        />
+      )}
+      {isEditingSlug ? (
+        <div className="space-y-3 p-4">
+          <div className="text-sm font-medium text-gray-700 dark:text-gray-300">쇼룸 URL</div>
+          <SlugDuplicateCheckInput
+            value={newSlug}
+            onChange={setNewSlug}
+            duplicateCheckStatus={slugCheckStatus}
+            setDuplicateCheckStatus={setSlugCheckStatus}
+            currentSlug={currentSlug}
+          />
+          <div className="flex gap-2">
+            <Button
+              size="lg"
+              variant="outline"
+              onClick={handleCancelEditSlug}
+              disabled={isUpdatingSlug}
+              className="flex-1 rounded-xl"
+            >
+              취소
+            </Button>
+            <Button
+              size="lg"
+              onClick={handleSaveSlug}
+              disabled={isUpdatingSlug || slugCheckStatus !== DUPLICATE_CHECK_STATUS.AVAILABLE}
+              className="flex-1 rounded-xl"
+            >
+              {isUpdatingSlug ? "저장중..." : "저장"}
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <SettingsItem
+          iconBgColor="bg-blue-100 dark:bg-blue-900/30"
+          iconColor="text-blue-600 dark:text-blue-400"
+          label="쇼룸 URL"
+          value={
+            currentSlug ? (
+              <p className="truncate text-[13px] font-[600] text-gray-700 dark:text-gray-400">
+                <span className="font-medium text-gray-400 dark:text-gray-500">
+                  https://breedy.kr/
+                </span>
+                @{currentSlug}
+              </p>
+            ) : (
+              "설정되지 않음"
+            )
+          }
+          onClick={handleStartEditSlug}
           showChevron
         />
       )}

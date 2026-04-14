@@ -7,6 +7,7 @@
  */
 import type { UserProfilePublicDtoStatus } from "./userProfilePublicDtoStatus";
 import type { UserProfilePublicDtoRole } from "./userProfilePublicDtoRole";
+import type { UserProfilePublicDtoShowroomSlug } from "./userProfilePublicDtoShowroomSlug";
 
 export interface UserProfilePublicDto {
   /** 유저 상태 */
@@ -19,4 +20,6 @@ export interface UserProfilePublicDto {
   role?: UserProfilePublicDtoRole;
   /** 사업자 여부 */
   isBiz?: boolean;
+  /** 쇼룸 슬러그 */
+  showroomSlug?: UserProfilePublicDtoShowroomSlug;
 }

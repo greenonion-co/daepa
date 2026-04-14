@@ -13,6 +13,7 @@ import { USER_ROLE, USER_STATUS } from './user.constant';
 @Index('UNIQUE_USER_ID', ['userId'], { unique: true })
 @Index('UNIQUE_EMAIL', ['email'], { unique: true })
 @Index('UNIQUE_USER_NAME', ['name'], { unique: true })
+@Index('UNIQUE_SHOWROOM_SLUG', ['showroomSlug'], { unique: true })
 export class UserEntity {
   @Exclude()
   @PrimaryGeneratedColumn({ type: 'bigint' })
@@ -79,6 +80,9 @@ export class UserEntity {
    */
   @Column({ type: 'int', nullable: true })
   petLimitOverride: number | null;
+
+  @Column({ type: 'varchar', length: 20, nullable: true })
+  showroomSlug?: string | null;
 
   @CreateDateColumn()
   createdAt: Date;

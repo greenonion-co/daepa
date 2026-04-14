@@ -41,9 +41,9 @@ export const CACHE = {
     key: (petId: string) => `parents:${petId}`,
     ttl: DEFAULT_TTL,
   },
-  /** GET /v1/user/public-profile/:name — UserService.getPublicProfile */
-  profile: {
-    key: (name: string) => `profile:${name}`,
+  /** GET /v1/user/public-profile/:slug — UserService.findPublicProfileBySlug */
+  profileBySlug: {
+    key: (slug: string) => `profile:slug:${slug}`,
     ttl: DEFAULT_TTL,
   },
   /** GET /v1/pet/children/:petId — PetRelationService.getChildrenWithDetails */

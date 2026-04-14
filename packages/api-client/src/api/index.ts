@@ -51,6 +51,7 @@ import type {
   UpdateParentRequestDto,
   UpdatePetDto,
   UpdatePetLimitOverrideDto,
+  UpdateShowroomSlugDto,
   UpdateUserNotificationDto,
   UpdateUserPrivateInfoDto,
   UserControllerGetUserListSimpleParams,
@@ -105,6 +106,7 @@ import type {
   UserNotificationDto,
   UserPrivateInfoResponseDto,
   UserProfileResponseDto,
+  VerifySlugResponseDto,
 } from "../model";
 
 import { useCustomInstance } from "./mutator/use-custom-instance";
@@ -393,9 +395,9 @@ export const authControllerDeleteAccount = () => {
   return useCustomInstance<CommonResponseDto>({ url: `/api/auth/delete-account`, method: "POST" });
 };
 
-export const userControllerGetPublicProfile = (name: string) => {
+export const userControllerGetPublicProfile = (slug: string) => {
   return useCustomInstance<BreederPublicProfileResponseDto>({
-    url: `/api/v1/user/public-profile/${name}`,
+    url: `/api/v1/user/public-profile/${slug}`,
     method: "GET",
   });
 };
@@ -454,6 +456,15 @@ export const userControllerVerifyEmail = (verifyEmailDto: VerifyEmailDto) => {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     data: verifyEmailDto,
+  });
+};
+
+export const userControllerVerifySlug = (updateShowroomSlugDto: UpdateShowroomSlugDto) => {
+  return useCustomInstance<VerifySlugResponseDto>({
+    url: `/api/v1/user/verify-slug`,
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    data: updateShowroomSlugDto,
   });
 };
 
@@ -896,6 +907,9 @@ export type UserControllerVerifyNameResult = NonNullable<
 export type UserControllerVerifyEmailResult = NonNullable<
   Awaited<ReturnType<typeof userControllerVerifyEmail>>
 >;
+export type UserControllerVerifySlugResult = NonNullable<
+  Awaited<ReturnType<typeof userControllerVerifySlug>>
+>;
 export type AdminUserControllerUpdatePetLimitOverrideResult = NonNullable<
   Awaited<ReturnType<typeof adminUserControllerUpdatePetLimitOverride>>
 >;
@@ -1017,6 +1031,7 @@ export const getPetControllerFindAllResponsePetParentDtoMock = (
           undefined,
         ]),
         isBiz: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+        showroomSlug: faker.helpers.arrayElement([{}, undefined]),
       },
     },
     name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
@@ -1090,6 +1105,7 @@ export const getPetControllerFindAllResponseMock = (
           undefined,
         ]),
         isBiz: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+        showroomSlug: faker.helpers.arrayElement([{}, undefined]),
       },
     },
     name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
@@ -1255,6 +1271,7 @@ export const getPetControllerFindAllResponseMock = (
                   undefined,
                 ]),
                 isBiz: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+                showroomSlug: faker.helpers.arrayElement([{}, undefined]),
               },
             },
             undefined,
@@ -1312,6 +1329,7 @@ export const getPetControllerFeedResponsePetParentDtoMock = (
           undefined,
         ]),
         isBiz: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+        showroomSlug: faker.helpers.arrayElement([{}, undefined]),
       },
     },
     name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
@@ -1385,6 +1403,7 @@ export const getPetControllerFeedResponseMock = (
           undefined,
         ]),
         isBiz: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+        showroomSlug: faker.helpers.arrayElement([{}, undefined]),
       },
     },
     name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
@@ -1550,6 +1569,7 @@ export const getPetControllerFeedResponseMock = (
                   undefined,
                 ]),
                 isBiz: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+                showroomSlug: faker.helpers.arrayElement([{}, undefined]),
               },
             },
             undefined,
@@ -1705,6 +1725,7 @@ export const getPetControllerGetParentsByPetIdResponsePetParentDtoMock = (
           undefined,
         ]),
         isBiz: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+        showroomSlug: faker.helpers.arrayElement([{}, undefined]),
       },
     },
     name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
@@ -1802,6 +1823,7 @@ export const getPetControllerGetSiblingsByPetIdResponsePetSummaryDtoMock = (
           undefined,
         ]),
         isBiz: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+        showroomSlug: faker.helpers.arrayElement([{}, undefined]),
       },
     },
     name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
@@ -1898,6 +1920,7 @@ export const getPetControllerGetChildrenByPetIdResponseChildPetDetailDtoMock = (
           undefined,
         ]),
         isBiz: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+        showroomSlug: faker.helpers.arrayElement([{}, undefined]),
       },
     },
     name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
@@ -1994,6 +2017,7 @@ export const getPetControllerGetClutchMatesByPetIdResponsePetSummaryDtoMock = (
           undefined,
         ]),
         isBiz: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+        showroomSlug: faker.helpers.arrayElement([{}, undefined]),
       },
     },
     name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
@@ -2076,6 +2100,7 @@ export const getPetControllerFindPetByPetIdResponsePetParentDtoMock = (
           undefined,
         ]),
         isBiz: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+        showroomSlug: faker.helpers.arrayElement([{}, undefined]),
       },
     },
     name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
@@ -2152,6 +2177,7 @@ export const getPetControllerFindPetByPetIdResponseMock = (
             undefined,
           ]),
           isBiz: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+          showroomSlug: faker.helpers.arrayElement([{}, undefined]),
         },
       },
       name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
@@ -2371,7 +2397,7 @@ export const getUserNotificationControllerFindAllResponseParentLinkDetailJsonMoc
       ] as const),
       undefined,
     ]),
-    childPet: faker.helpers.arrayElement([
+    primaryPet: faker.helpers.arrayElement([
       {
         ...{
           id: faker.string.alpha(20),
@@ -2380,7 +2406,7 @@ export const getUserNotificationControllerFindAllResponseParentLinkDetailJsonMoc
       },
       undefined,
     ]),
-    parentPet: faker.helpers.arrayElement([
+    secondaryPet: faker.helpers.arrayElement([
       {
         ...{
           id: faker.string.alpha(20),
@@ -2412,12 +2438,11 @@ export const getUserNotificationControllerFindAllResponseAdoptionCompleteDetailJ
       },
       undefined,
     ]),
-    pet: faker.helpers.arrayElement([
+    primaryPet: faker.helpers.arrayElement([
       {
         ...{
           id: faker.string.alpha(20),
           name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
-          thumbnailUrl: faker.helpers.arrayElement([{}, undefined]),
         },
       },
       undefined,
@@ -2533,7 +2558,7 @@ export const getUserNotificationControllerFindOneResponseParentLinkDetailJsonMoc
       ] as const),
       undefined,
     ]),
-    childPet: faker.helpers.arrayElement([
+    primaryPet: faker.helpers.arrayElement([
       {
         ...{
           id: faker.string.alpha(20),
@@ -2542,7 +2567,7 @@ export const getUserNotificationControllerFindOneResponseParentLinkDetailJsonMoc
       },
       undefined,
     ]),
-    parentPet: faker.helpers.arrayElement([
+    secondaryPet: faker.helpers.arrayElement([
       {
         ...{
           id: faker.string.alpha(20),
@@ -2574,12 +2599,11 @@ export const getUserNotificationControllerFindOneResponseAdoptionCompleteDetailJ
       },
       undefined,
     ]),
-    pet: faker.helpers.arrayElement([
+    primaryPet: faker.helpers.arrayElement([
       {
         ...{
           id: faker.string.alpha(20),
           name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
-          thumbnailUrl: faker.helpers.arrayElement([{}, undefined]),
         },
       },
       undefined,
@@ -2650,6 +2674,7 @@ export const getBrPetControllerFindAllResponsePetParentDtoMock = (
           undefined,
         ]),
         isBiz: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+        showroomSlug: faker.helpers.arrayElement([{}, undefined]),
       },
     },
     name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
@@ -2723,6 +2748,7 @@ export const getBrPetControllerFindAllResponseMock = (
           undefined,
         ]),
         isBiz: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+        showroomSlug: faker.helpers.arrayElement([{}, undefined]),
       },
     },
     name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
@@ -2888,6 +2914,7 @@ export const getBrPetControllerFindAllResponseMock = (
                   undefined,
                 ]),
                 isBiz: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+                showroomSlug: faker.helpers.arrayElement([{}, undefined]),
               },
             },
             undefined,
@@ -2937,6 +2964,7 @@ export const getBrPetControllerGetPetsByYearResponsePetParentDtoMock = (
           undefined,
         ]),
         isBiz: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+        showroomSlug: faker.helpers.arrayElement([{}, undefined]),
       },
     },
     name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
@@ -3011,6 +3039,7 @@ export const getBrPetControllerGetPetsByYearResponseMock = (): BrPetControllerGe
           undefined,
         ]),
         isBiz: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+        showroomSlug: faker.helpers.arrayElement([{}, undefined]),
       },
     },
     name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
@@ -3176,6 +3205,7 @@ export const getBrPetControllerGetPetsByYearResponseMock = (): BrPetControllerGe
                   undefined,
                 ]),
                 isBiz: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+                showroomSlug: faker.helpers.arrayElement([{}, undefined]),
               },
             },
             undefined,
@@ -3216,6 +3246,7 @@ export const getBrPetControllerGetPetsByMonthResponsePetParentDtoMock = (
           undefined,
         ]),
         isBiz: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+        showroomSlug: faker.helpers.arrayElement([{}, undefined]),
       },
     },
     name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
@@ -3295,6 +3326,7 @@ export const getBrPetControllerGetPetsByMonthResponseMock = (
             undefined,
           ]),
           isBiz: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+          showroomSlug: faker.helpers.arrayElement([{}, undefined]),
         },
       },
       name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
@@ -3471,6 +3503,7 @@ export const getBrPetControllerGetPetsByMonthResponseMock = (
                     undefined,
                   ]),
                   isBiz: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+                  showroomSlug: faker.helpers.arrayElement([{}, undefined]),
                 },
               },
               undefined,
@@ -3513,6 +3546,7 @@ export const getBrPetControllerGetPetsByDateRangeResponsePetParentDtoMock = (
           undefined,
         ]),
         isBiz: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+        showroomSlug: faker.helpers.arrayElement([{}, undefined]),
       },
     },
     name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
@@ -3592,6 +3626,7 @@ export const getBrPetControllerGetPetsByDateRangeResponseMock = (
             undefined,
           ]),
           isBiz: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+          showroomSlug: faker.helpers.arrayElement([{}, undefined]),
         },
       },
       name: faker.helpers.arrayElement([faker.string.alpha(20), undefined]),
@@ -3768,6 +3803,7 @@ export const getBrPetControllerGetPetsByDateRangeResponseMock = (
                     undefined,
                   ]),
                   isBiz: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+                  showroomSlug: faker.helpers.arrayElement([{}, undefined]),
                 },
               },
               undefined,
@@ -3898,7 +3934,7 @@ export const getUserControllerGetPublicProfileResponseMock = (
         undefined,
       ]),
       isBiz: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
-      petCount: faker.number.int({ min: undefined, max: undefined }),
+      showroomSlug: faker.helpers.arrayElement([{}, undefined]),
       realName: faker.helpers.arrayElement([{}, undefined]),
       phone: faker.helpers.arrayElement([{}, undefined]),
       address: faker.helpers.arrayElement([{}, undefined]),
@@ -3933,6 +3969,7 @@ export const getUserControllerGetUserListSimpleResponseMock = (
       undefined,
     ]),
     isBiz: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+    showroomSlug: faker.helpers.arrayElement([{}, undefined]),
   })),
   meta: {
     page: faker.number.int({ min: undefined, max: undefined }),
@@ -3965,6 +4002,7 @@ export const getUserControllerGetUserProfileResponseMock = (
         "suspended",
         "deleted",
       ] as const),
+      showroomSlug: faker.helpers.arrayElement([{}, undefined]),
       createdAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
     },
   },
@@ -4030,6 +4068,15 @@ export const getUserControllerVerifyEmailResponseMock = (
   ...overrideResponse,
 });
 
+export const getUserControllerVerifySlugResponseMock = (
+  overrideResponse: Partial<VerifySlugResponseDto> = {},
+): VerifySlugResponseDto => ({
+  success: faker.datatype.boolean(),
+  message: faker.string.alpha(20),
+  available: faker.datatype.boolean(),
+  ...overrideResponse,
+});
+
 export const getAdminUserControllerUpdatePetLimitOverrideResponseMock = (
   overrideResponse: Partial<UpdatePetLimitOverrideResponseDto> = {},
 ): UpdatePetLimitOverrideResponseDto => ({
@@ -4086,6 +4133,7 @@ export const getPetAdoptionControllerGetPetAdoptionResponseMock = (
                 undefined,
               ]),
               isBiz: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+              showroomSlug: faker.helpers.arrayElement([{}, undefined]),
             },
           },
           undefined,
@@ -4142,6 +4190,7 @@ export const getAdoptionHistoryControllerGetAllAdoptionsResponseMock = (
             undefined,
           ]),
           isBiz: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+          showroomSlug: faker.helpers.arrayElement([{}, undefined]),
         },
       },
       undefined,
@@ -4163,6 +4212,7 @@ export const getAdoptionHistoryControllerGetAllAdoptionsResponseMock = (
             undefined,
           ]),
           isBiz: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+          showroomSlug: faker.helpers.arrayElement([{}, undefined]),
         },
       },
       undefined,
@@ -5640,7 +5690,7 @@ export const getUserControllerGetPublicProfileMockHandler = (
         info: Parameters<Parameters<typeof http.get>[1]>[0],
       ) => Promise<BreederPublicProfileResponseDto> | BreederPublicProfileResponseDto),
 ) => {
-  return http.get("*/api/v1/user/public-profile/:name", async (info) => {
+  return http.get("*/api/v1/user/public-profile/:slug", async (info) => {
     await delay(1000);
 
     return new HttpResponse(
@@ -5811,6 +5861,29 @@ export const getUserControllerVerifyEmailMockHandler = (
             ? await overrideResponse(info)
             : overrideResponse
           : getUserControllerVerifyEmailResponseMock(),
+      ),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+  });
+};
+
+export const getUserControllerVerifySlugMockHandler = (
+  overrideResponse?:
+    | VerifySlugResponseDto
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<VerifySlugResponseDto> | VerifySlugResponseDto),
+) => {
+  return http.post("*/api/v1/user/verify-slug", async (info) => {
+    await delay(1000);
+
+    return new HttpResponse(
+      JSON.stringify(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getUserControllerVerifySlugResponseMock(),
       ),
       { status: 200, headers: { "Content-Type": "application/json" } },
     );
@@ -6593,6 +6666,7 @@ export const getProjectDaepaAPIMock = () => [
   getUserControllerUpdateUserPrivateInfoMockHandler(),
   getUserControllerVerifyNameMockHandler(),
   getUserControllerVerifyEmailMockHandler(),
+  getUserControllerVerifySlugMockHandler(),
   getAdminUserControllerUpdatePetLimitOverrideMockHandler(),
   getPetAdoptionControllerCreatePetAdoptionMockHandler(),
   getPetAdoptionControllerGetPetAdoptionMockHandler(),

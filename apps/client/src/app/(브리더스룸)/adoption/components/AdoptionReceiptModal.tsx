@@ -258,12 +258,18 @@ const AdoptionReceiptModal = ({ isOpen, adoption, onClose }: AdoptionReceiptModa
                     <span className="text-sm text-gray-600 dark:text-gray-400">구매자 </span>
                     {/* TODO!: 법안을 고려하여 판매완료 정보는 사용자 정보가 삭제되더라도 기록으로 남겨놔야 할듯. */}
                     {adoption?.buyer?.name ? (
-                      <Link
-                        href={`/@${encodeURIComponent(adoption.buyer.name)}`}
-                        className="text-sm font-medium text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300"
-                      >
-                        @{adoption.buyer.name}
-                      </Link>
+                      adoption.buyer.showroomSlug ? (
+                        <Link
+                          href={`/@${adoption.buyer.showroomSlug}`}
+                          className="text-sm font-medium text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300"
+                        >
+                          @{adoption.buyer.name}
+                        </Link>
+                      ) : (
+                        <span className="text-sm font-medium text-gray-800 dark:text-gray-200">
+                          @{adoption.buyer.name}
+                        </span>
+                      )
                     ) : (
                       <span className="text-sm text-gray-800 dark:text-gray-200">-</span>
                     )}

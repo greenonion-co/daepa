@@ -12,12 +12,14 @@ import { UserService } from './user.service';
 import {
   BreederPublicProfileResponseDto,
   CreateInitUserInfoDto,
+  UpdateShowroomSlugDto,
   UpdateUserPrivateInfoDto,
   UserFilterDto,
   UserPrivateInfoResponseDto,
   UserProfileResponseDto,
   VerifyNameDto,
   UserProfilePublicDto,
+  VerifySlugResponseDto,
 } from './user.dto';
 import { CommonResponseDto } from 'src/common/response.dto';
 import {
@@ -35,12 +37,12 @@ import { PageDto, PageMetaDto } from 'src/common/page.dto';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Get('/public-profile/:name')
+  @Get('/public-profile/:slug')
   @Public()
   @ApiParam({
-    name: 'name',
-    description: '브리더 이름',
-    example: 'nancy',
+    name: 'slug',
+    description: '쇼룸 슬러그',
+    example: 'leopapa',
   })
   @ApiResponse({
     status: 200,
@@ -52,11 +54,9 @@ export class UserController {
     description: '사용자를 찾을 수 없습니다.',
   })
   async getPublicProfile(
-    @Param('name') name: string,
+    @Param('slug') slug: string,
   ): Promise<BreederPublicProfileResponseDto> {
-    const data = await this.userService.findPublicProfileByName(
-      decodeURIComponent(name),
-    );
+    const data = await this.userService.findPublicProfileBySlug(slug);
     return {
       success: true,
       message: '브리더 공개 프로필 조회 성공',
@@ -196,5 +196,26 @@ export class UserController {
       };
     }
     throw new ConflictException('이미 사용중인 이메일입니다.');
+  }
+
+  @Post('/verify-slug')
+  @Public()
+  @ApiResponse({
+    status: 200,
+    description: '쇼룸 슬러그 중복 확인',
+    type: VerifySlugResponseDto,
+  })
+  async verifySlug(
+    @Body() dto: UpdateShowroomSlugDto,
+  ): Promise<VerifySlugResponseDto> {
+    const isExist = await this.userService.isSlugExist(dto.slug);
+    if (!isExist) {
+      return {
+        success: true,
+        message: '사용 가능한 쇼룸 주소입니다.',
+        available: true,
+      };
+    }
+    throw new ConflictException('이미 사용 중인 쇼룸 주소입니다.');
   }
 }

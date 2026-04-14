@@ -7,6 +7,7 @@
  */
 import type { BreederPublicProfileDtoStatus } from "./breederPublicProfileDtoStatus";
 import type { BreederPublicProfileDtoRole } from "./breederPublicProfileDtoRole";
+import type { BreederPublicProfileDtoShowroomSlug } from "./breederPublicProfileDtoShowroomSlug";
 import type { BreederPublicProfileDtoRealName } from "./breederPublicProfileDtoRealName";
 import type { BreederPublicProfileDtoPhone } from "./breederPublicProfileDtoPhone";
 import type { BreederPublicProfileDtoAddress } from "./breederPublicProfileDtoAddress";
@@ -22,8 +23,8 @@ export interface BreederPublicProfileDto {
   role?: BreederPublicProfileDtoRole;
   /** 사업자 여부 */
   isBiz?: boolean;
-  /** 공개 펫 수 */
-  petCount: number;
+  /** 쇼룸 슬러그 */
+  showroomSlug?: BreederPublicProfileDtoShowroomSlug;
   /** 실명/상호 (공개 설정 시) */
   realName?: BreederPublicProfileDtoRealName;
   /** 연락처 (공개 설정 시) */

@@ -8,6 +8,7 @@
 import type { UserProfileDtoRole } from "./userProfileDtoRole";
 import type { UserProfileDtoProviderItem } from "./userProfileDtoProviderItem";
 import type { UserProfileDtoStatus } from "./userProfileDtoStatus";
+import type { UserProfileDtoShowroomSlug } from "./userProfileDtoShowroomSlug";
 
 export interface UserProfileDto {
   /** 회원 고유 ID */
@@ -24,6 +25,8 @@ export interface UserProfileDto {
   provider: UserProfileDtoProviderItem[];
   /** 유저 상태 */
   status: UserProfileDtoStatus;
+  /** 쇼룸 슬러그 */
+  showroomSlug?: UserProfileDtoShowroomSlug;
   /** 생성 시간 */
   createdAt: string;
 }
