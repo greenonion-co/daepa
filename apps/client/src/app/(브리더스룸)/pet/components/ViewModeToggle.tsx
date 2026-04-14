@@ -2,10 +2,10 @@
 
 import { LayoutGrid, Table } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useViewMode, ViewMode } from "../../store/viewMode";
+import { useViewMode, ViewMode, ViewModeKey } from "../../store/viewMode";
 
-export default function ViewModeToggle() {
-  const { viewMode, setViewMode } = useViewMode();
+export default function ViewModeToggle({ viewModeKey }: { viewModeKey?: ViewModeKey }) {
+  const { viewMode, setViewMode } = useViewMode(viewModeKey);
 
   const buttons: { mode: ViewMode; icon: React.ReactNode; label: string }[] = [
     { mode: "table", icon: <Table className="h-4 w-4" />, label: "테이블" },

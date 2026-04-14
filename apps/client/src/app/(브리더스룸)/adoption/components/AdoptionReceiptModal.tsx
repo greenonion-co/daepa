@@ -255,7 +255,7 @@ const AdoptionReceiptModal = ({ isOpen, adoption, onClose }: AdoptionReceiptModa
                   </div>
 
                   <div className="flex justify-between">
-                    <span className="text-sm text-gray-600 dark:text-gray-400">구매자 </span>
+                    <span className="text-sm text-gray-600 dark:text-gray-400">양수인</span>
                     {/* TODO!: 법안을 고려하여 판매완료 정보는 사용자 정보가 삭제되더라도 기록으로 남겨놔야 할듯. */}
                     {adoption?.buyer?.name ? (
                       adoption.buyer.showroomSlug ? (
