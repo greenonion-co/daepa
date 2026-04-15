@@ -25,7 +25,7 @@ const OWNER_ID = ''; // TODO: 실제 사용자 ID로 변경
 interface CsvRow {
   종?: string;
   '개체 이름'?: string;
-  비공개?: string;
+  공개?: string;
   '해칭일(YYYY-MM-DD)'?: string;
   성별?: string;
   모프?: string;

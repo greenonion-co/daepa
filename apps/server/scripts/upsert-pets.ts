@@ -53,7 +53,7 @@ function generateAdoptionId(): string {
 interface CsvRow {
   종?: string;
   '개체 이름'?: string;
-  비공개?: string;
+  공개?: string;
   '해칭일(YYYY-MM-DD)'?: string;
   성별?: string;
   모프?: string;
@@ -61,6 +61,7 @@ interface CsvRow {
   크기?: string;
   몸무게?: string;
   먹이?: string;
+  브리더?: string;
   분양상태?: string;
   부개체?: string;
   모개체?: string;
@@ -78,6 +79,7 @@ interface PetData {
   growth: string;
   weight: number | null;
   foods: string[];
+  isBreeder: boolean;
   adoptionStatus: string;
   fatherName: string | null;
   motherName: string | null;
@@ -149,6 +151,7 @@ function mapCsvRow(row: CsvRow): PetData {
     growth: safeString(row['크기']),
     weight: parseNumber(row['몸무게']),
     foods: parseArray(row['먹이']),
+    isBreeder: parseBoolean(row['브리더']),
     adoptionStatus: safeString(row['분양상태']),
     fatherName: safeString(row['부개체']) || null,
     motherName: safeString(row['모개체']) || null,
@@ -326,13 +329,14 @@ async function main() {
           const petId = await generateUniquePetId(queryRunner);
 
           await queryRunner.query(
-            `INSERT INTO pets (pet_id, name, species, is_public, hatching_date, type, owner_id)
-             VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            `INSERT INTO pets (pet_id, name, species, is_public, is_breeder, hatching_date, type, owner_id)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
             [
               petId,
               pet.name,
               'CR', // species: 모두 CR로 초기화
               !pet.isPrivate, // isPrivate → isPublic 변환
+              pet.isBreeder, // isBreeder: CSV '브리더' 필드
               pet.hatchingDate || null,
               'PET', // type: PET으로 초기화
               OWNER_ID,
