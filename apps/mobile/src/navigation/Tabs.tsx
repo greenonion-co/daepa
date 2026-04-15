@@ -146,7 +146,7 @@ function AdoptionWebView() {
 
 function ShowroomWebView() {
   const user = useUser();
-  const path = user?.name ? `/@${encodeURIComponent(user.name)}` : '/@';
+  const path = user?.showroomSlug ? `/@${user.showroomSlug}` : '/@';
   return <WebViewScreen initialPath={path} />;
 }
 
