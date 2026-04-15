@@ -30,18 +30,16 @@ const AdoptionDateRangeFilter = () => {
   const [isEntering, setIsEntering] = useState(false);
 
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen || isMobile) return;
 
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
       const root = containerRef.current;
 
-      // 컨테이너 내부를 클릭한 경우 무시
       if (root && root.contains(target)) {
         return;
       }
 
-      // 외부 클릭인 경우 닫기
       setIsOpen(false);
     };
 
@@ -49,7 +47,7 @@ const AdoptionDateRangeFilter = () => {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [isOpen]);
+  }, [isOpen, isMobile]);
 
   useEffect(() => {
     if (isOpen) {

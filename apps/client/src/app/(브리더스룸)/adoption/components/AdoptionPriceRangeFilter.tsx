@@ -18,7 +18,7 @@ const AdoptionPriceRangeFilter = () => {
   const [isEntering, setIsEntering] = useState(false);
 
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen || isMobile) return;
 
     const handlePointerDown = (event: MouseEvent | TouchEvent) => {
       const root = containerRef.current;
@@ -33,7 +33,7 @@ const AdoptionPriceRangeFilter = () => {
       document.removeEventListener("mousedown", handlePointerDown);
       document.removeEventListener("touchstart", handlePointerDown);
     };
-  }, [isOpen]);
+  }, [isOpen, isMobile]);
 
   useEffect(() => {
     if (isOpen) {

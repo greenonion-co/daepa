@@ -8,7 +8,7 @@ import {
   ADOPTION_METHOD_KOREAN_INFO,
 } from "../../constants";
 import SelectFilter from "../../components/selector/SingleSelect";
-import AdoptionMultiSelectFilter from "./AdoptionMultiSelectFilter";
+import MultiSelect from "../../components/selector/MultiSelect";
 import { useAdoptionFilterStore } from "../../store/adoptionFilter";
 import AdoptionPriceRangeFilter from "./AdoptionPriceRangeFilter";
 import AdoptionDateRangeFilter from "./AdoptionDateRangeFilter";
@@ -63,22 +63,39 @@ export function AdoptionFilters() {
         }}
       />
       {searchFilters.species && (
-        <AdoptionMultiSelectFilter
-          type="morphs"
+        <MultiSelect
           title="모프"
           displayMap={MORPH_LIST_BY_SPECIES[searchFilters.species]}
+          selected={searchFilters.morphs ?? []}
+          onChange={(morphs) => setSearchFilters((prev) => ({ ...prev, morphs }))}
         />
       )}
       {searchFilters.species && (
-        <AdoptionMultiSelectFilter
-          type="traits"
+        <MultiSelect
           title="형질"
           displayMap={TRAIT_LIST_BY_SPECIES[searchFilters.species]}
+          selected={searchFilters.traits ?? []}
+          onChange={(traits) => setSearchFilters((prev) => ({ ...prev, traits }))}
         />
       )}
-      <AdoptionMultiSelectFilter type="sex" title="성별" displayMap={GENDER_KOREAN_INFO} />
-      <AdoptionMultiSelectFilter type="growth" title="크기" displayMap={GROWTH_KOREAN_INFO} />
-      <AdoptionMultiSelectFilter type="method" title="분양 방식" displayMap={ADOPTION_METHOD_KOREAN_INFO} />
+      <MultiSelect
+        title="성별"
+        displayMap={GENDER_KOREAN_INFO}
+        selected={searchFilters.sex ?? []}
+        onChange={(sex) => setSearchFilters((prev) => ({ ...prev, sex: sex as typeof searchFilters.sex }))}
+      />
+      <MultiSelect
+        title="크기"
+        displayMap={GROWTH_KOREAN_INFO}
+        selected={searchFilters.growth ?? []}
+        onChange={(growth) => setSearchFilters((prev) => ({ ...prev, growth: growth as typeof searchFilters.growth }))}
+      />
+      <MultiSelect
+        title="분양 방식"
+        displayMap={ADOPTION_METHOD_KOREAN_INFO}
+        selected={searchFilters.method ?? []}
+        onChange={(method) => setSearchFilters((prev) => ({ ...prev, method: method as typeof searchFilters.method }))}
+      />
       <AdoptionPriceRangeFilter />
       <AdoptionDateRangeFilter />
 
