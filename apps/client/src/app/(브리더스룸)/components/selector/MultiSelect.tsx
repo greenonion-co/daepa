@@ -152,19 +152,31 @@ const MultiSelectFilter = ({
         )}
       </button>
 
+      {isOpen && isMobile && (
+        <div
+          className="fixed inset-0 z-40 bg-black/40"
+          onClick={() => {
+            setSelectedItem(searchFilters[type]);
+            setIsOpen(false);
+          }}
+        />
+      )}
       {isOpen && (
         <div
           ref={dropdownRef}
           className={cn(
-            "absolute top-10 z-50 w-[320px] rounded-2xl border-[1.8px] border-gray-200 bg-white p-5 shadow-lg dark:border-gray-600 dark:bg-[#18171C]",
+            "z-50 w-[320px] rounded-2xl border-[1.8px] border-gray-200 bg-white p-5 shadow-lg dark:border-gray-600 dark:bg-[#18171C]",
             "transform transition-all duration-200 ease-out",
-            // 수평 위치
-            dropdownPosition === "left" ? "left-0" : "right-0",
-            // 애니메이션 상태
+            isMobile
+              ? "fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+              : cn("absolute top-10", dropdownPosition === "left" ? "left-0" : "right-0"),
             isEntering
-              ? "translate-y-0 scale-100 opacity-100"
-              : "-translate-y-1 scale-95 opacity-0",
-            isMobile && "w-48",
+              ? isMobile
+                ? "scale-100 opacity-100"
+                : "translate-y-0 scale-100 opacity-100"
+              : isMobile
+                ? "scale-95 opacity-0"
+                : "-translate-y-1 scale-95 opacity-0",
           )}
         >
           <div className="mb-2 font-[500] dark:text-gray-200">{title}</div>
@@ -192,7 +204,7 @@ const MultiSelectFilter = ({
               })}
             </div>
           )}
-          <div className="mb-4 max-h-[240px] overflow-y-auto">
+          <div className="mb-2 max-h-[240px] overflow-y-auto">
             {selectList?.map((item) => {
               const isSelected = selectedItem?.includes(item) ?? false;
               const isFirstSelected = selectedItem?.[0] === item;
@@ -218,6 +230,26 @@ const MultiSelectFilter = ({
             })}
           </div>
 
+          {/* 취소 / 적용 */}
+          <div className="mt-2 flex items-center gap-3 pt-3">
+            <button
+              type="button"
+              className="text-[13px] font-medium text-gray-400 transition-colors hover:text-gray-600 active:text-gray-800 dark:text-gray-500 dark:hover:text-gray-300"
+              onClick={() => {
+                setSelectedItem(searchFilters[type]);
+                setIsOpen(false);
+              }}
+            >
+              취소
+            </button>
+            <button
+              type="button"
+              className="ml-auto rounded-full bg-gray-900 px-5 py-1.5 text-[13px] font-semibold text-white transition-all hover:bg-gray-800 active:scale-[0.96] dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100"
+              onClick={() => closeAndSave()}
+            >
+              적용
+            </button>
+          </div>
         </div>
       )}
     </div>

@@ -105,16 +105,30 @@ export default function ShowcaseMultiSelect({
         />
       </button>
 
+      {isOpen && isMobile && (
+        <div
+          className="fixed inset-0 z-40 bg-black/40"
+          onClick={() => {
+            setLocalSelected(selected);
+            setIsOpen(false);
+          }}
+        />
+      )}
       {isOpen && (
         <div
           className={cn(
-            "absolute top-10 z-50 rounded-2xl border border-gray-200 bg-white p-4 shadow-lg dark:border-gray-600 dark:bg-[#18171C]",
-            isMobile ? "w-48" : "w-[280px]",
-            dropdownPosition === "right" ? "right-0" : "left-0",
+            "z-50 rounded-2xl border border-gray-200 bg-white p-4 shadow-lg dark:border-gray-600 dark:bg-[#18171C]",
             "transform transition-all duration-200 ease-out",
+            isMobile
+              ? "fixed top-1/2 left-1/2 w-[280px] -translate-x-1/2 -translate-y-1/2"
+              : cn("absolute top-10 w-[280px]", dropdownPosition === "right" ? "right-0" : "left-0"),
             isEntering
-              ? "translate-y-0 scale-100 opacity-100"
-              : "-translate-y-1 scale-95 opacity-0",
+              ? isMobile
+                ? "scale-100 opacity-100"
+                : "translate-y-0 scale-100 opacity-100"
+              : isMobile
+                ? "scale-95 opacity-0"
+                : "-translate-y-1 scale-95 opacity-0",
           )}
         >
           <div className="mb-2 font-medium dark:text-gray-200">{title}</div>
@@ -138,7 +152,7 @@ export default function ShowcaseMultiSelect({
             </div>
           )}
 
-          <div className="max-h-[240px] overflow-y-auto">
+          <div className="mb-2 max-h-[240px] overflow-y-auto">
             {selectList.length === 0 ? (
               <p className="py-2 text-center text-sm text-gray-400">옵션 없음</p>
             ) : (
@@ -173,6 +187,29 @@ export default function ShowcaseMultiSelect({
               })
             )}
           </div>
+
+          {/* 취소 / 적용 */}
+          {!single && (
+            <div className="mt-2 flex items-center gap-3 pt-3">
+              <button
+                type="button"
+                className="text-[13px] font-medium text-gray-400 transition-colors hover:text-gray-600 active:text-gray-800 dark:text-gray-500 dark:hover:text-gray-300"
+                onClick={() => {
+                  setLocalSelected(selected);
+                  setIsOpen(false);
+                }}
+              >
+                취소
+              </button>
+              <button
+                type="button"
+                className="ml-auto rounded-full bg-gray-900 px-5 py-1.5 text-[13px] font-semibold text-white transition-all hover:bg-gray-800 active:scale-[0.96] dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100"
+                onClick={() => closeAndSave()}
+              >
+                적용
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>
