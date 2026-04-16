@@ -16,6 +16,13 @@ export function useAppRouter() {
   const push = useCallback(
     (path: string) => {
       if (isNativeApp()) {
+        // 같은 pathname 내 쿼리 변경은 WebView 내부에서 처리 (네이티브 push 방지)
+        const targetPathname = path.split(/[?#]/)[0];
+        const currentPathname = window.location.pathname;
+        if (targetPathname === currentPathname) {
+          window.location.href = path;
+          return;
+        }
         navigate({ path });
         return;
       }

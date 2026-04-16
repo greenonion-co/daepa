@@ -357,14 +357,10 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
     }, [canGoBack]),
   );
 
-  // TopBar 뒤로가기 버튼 처리 (WebView 내부 히스토리 우선)
+  // TopBar 뒤로가기 버튼 처리 (탭 화면으로 복귀)
   const handleTopBarBackPress = useCallback(() => {
-    if (canGoBack && webViewRef.current) {
-      webViewRef.current.goBack();
-    } else if (navigation.canGoBack()) {
-      navigation.goBack();
-    }
-  }, [canGoBack, navigation]);
+    navigation.popToTop();
+  }, [navigation]);
 
   // Pull-to-refresh 핸들러
   const onRefresh = useCallback(() => {
