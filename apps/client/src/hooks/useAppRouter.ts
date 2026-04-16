@@ -20,7 +20,7 @@ export function useAppRouter() {
         const targetPathname = path.split(/[?#]/)[0];
         const currentPathname = window.location.pathname;
         if (targetPathname === currentPathname) {
-          window.location.href = path;
+          router.push(path);
           return;
         }
         navigate({ path });
