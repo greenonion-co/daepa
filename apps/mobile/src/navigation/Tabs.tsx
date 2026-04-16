@@ -121,12 +121,9 @@ function ShowroomWebView() {
 function GuestTabs() {
   const theme = useThemeStore(state => state.theme);
   const colors = themeColors[theme];
-  const insets = useSafeAreaInsets();
   const triggerScrollToTop = useNavigationStore(
     state => state.triggerScrollToTop,
   );
-
-  const tabBarHeight = Platform.OS === 'android' ? 60 + insets.bottom : 80;
 
   return (
     <GuestTab.Navigator
@@ -134,20 +131,7 @@ function GuestTabs() {
         headerShown: false,
         tabBarActiveTintColor: colors.tabBarActive,
         tabBarInactiveTintColor: colors.tabBarInactive,
-        tabBarStyle: {
-          position: 'absolute',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          backgroundColor: colors.tabBar,
-          borderTopLeftRadius: 20,
-          borderTopRightRadius: 20,
-          borderWidth: 1,
-          borderBottomWidth: 0,
-          borderColor: colors.tabBarBorder,
-          paddingBottom: Platform.OS === 'android' ? insets.bottom : 20,
-          height: tabBarHeight,
-        },
+        tabBarStyle: { display: 'none' },
         tabBarHideOnKeyboard: true,
       }}
     >
