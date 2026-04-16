@@ -42,9 +42,7 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
     >
       <Bell className="text-gray-500 dark:text-neutral-400" />
       {unreadCount > 0 && (
-        <div className="absolute top-1 right-1 flex h-[18px] w-[18px] items-center justify-center rounded-full bg-red-500 text-[12px] font-medium text-white">
-          {unreadCount > 9 ? "9+" : unreadCount}
-        </div>
+        <div className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-500" />
       )}
     </Link>
   );
@@ -99,7 +97,7 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
       <Logo withLink isMobile={isMobile} />
       {/* 웹에서만 메뉴바에 렌더링 */}
       {!isNative && !isMobile && !isRegisterPage && <AddPetButton />}
-      {!isNative && isMobile && !pathname?.startsWith("/sign-in") && (
+      {isMobile && !pathname?.startsWith("/sign-in") && (
         <Link href="/sign-in" className="rounded-full px-3 py-1 text-xs font-medium text-blue-500">
           로그인
         </Link>
@@ -137,7 +135,7 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
               <button
                 type="button"
                 onClick={() => navigate({ path: "/settings" })}
-                className="flex h-11 w-11 items-center justify-center"
+                className="flex h-11 w-10 items-center justify-center"
                 aria-label="프로필"
               >
                 <CircleUserRound className="text-gray-500 dark:text-neutral-400" />
@@ -145,7 +143,7 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
             ) : (
               <Link
                 href="/settings"
-                className="flex h-11 w-11 items-center justify-center"
+                className="flex h-11 w-10 items-center justify-center"
                 aria-label="설정"
               >
                 <Settings className="text-gray-500 dark:text-neutral-400" />
