@@ -113,7 +113,9 @@ function AdoptionWebView() {
 function ShowroomWebView() {
   const user = useUser();
   const path =
-    (user as any)?.showroomSlug ? `/@${(user as any).showroomSlug}` : '/@';
+    user && 'showroomSlug' in user && user.showroomSlug
+      ? `/@${user.showroomSlug}`
+      : '/@';
   return <WebViewScreen initialPath={path} />;
 }
 

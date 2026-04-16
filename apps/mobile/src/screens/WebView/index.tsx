@@ -167,7 +167,7 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
                 name: 'Tabs',
                 key: `tabs-${Date.now()}`,
                 state: {
-                  index: 1,
+                  index: 0,
                   routes: [
                     { name: 'Feed' },
                     { name: 'Settings' },
@@ -219,35 +219,55 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
           break;
         case 'RESET_TO_HOME': {
           // 홈을 새로 마운트하여 최신 토큰으로 로드 (회원가입 등 토큰 동기화 필요한 경우)
-          // path에 따라 활성화할 탭 결정 (MemberTabs: Feed=0, Pets=1, Breeding=2, Adoption=3, Showroom=4)
-          const memberRoutes = [
-            { name: 'Feed' },
-            { name: 'Pets' },
-            { name: 'Breeding' },
-            { name: 'Adoption' },
-            { name: 'Showroom' },
-          ];
-          const pathToTabIndex: Record<string, number> = {
-            '/': 0,
-            '/pet': 1,
-            '/hatching': 2,
-            '/adoption': 3,
-          };
-          const tabIndex = pathToTabIndex[message.path ?? '/'] ?? 0;
+          if (accessToken) {
+            // 로그인 사용자: path에 따라 활성화할 탭 결정
+            const memberRoutes = [
+              { name: 'Feed' },
+              { name: 'Pets' },
+              { name: 'Breeding' },
+              { name: 'Adoption' },
+              { name: 'Showroom' },
+            ];
+            const pathToTabIndex: Record<string, number> = {
+              '/': 0,
+              '/pet': 1,
+              '/hatching': 2,
+              '/adoption': 3,
+            };
+            const tabIndex = pathToTabIndex[message.path ?? '/'] ?? 0;
 
-          navigation.reset({
-            index: 0,
-            routes: [
-              {
-                name: 'Tabs',
-                key: `tabs-${Date.now()}`,
-                state: {
-                  index: tabIndex,
-                  routes: memberRoutes,
+            navigation.reset({
+              index: 0,
+              routes: [
+                {
+                  name: 'Tabs',
+                  key: `tabs-${Date.now()}`,
+                  state: {
+                    index: tabIndex,
+                    routes: memberRoutes,
+                  },
                 },
-              },
-            ],
-          });
+              ],
+            });
+          } else {
+            // 비로그인 사용자: GuestTabs로 리셋
+            navigation.reset({
+              index: 0,
+              routes: [
+                {
+                  name: 'Tabs',
+                  key: `tabs-${Date.now()}`,
+                  state: {
+                    index: 0,
+                    routes: [
+                      { name: 'Feed' },
+                      { name: 'Settings' },
+                    ],
+                  },
+                },
+              ],
+            });
+          }
           break;
         }
         case 'READY':

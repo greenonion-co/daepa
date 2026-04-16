@@ -16,26 +16,37 @@ export default function FloatingActions() {
   const [collapsed, setCollapsed] = useState(false);
 
   // 스와이프 감지 (버튼 영역)
-  const touchStartX = useRef(0);
+  const touchStart = useRef({ x: 0, y: 0 });
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    touchStartX.current = e.touches[0]?.clientX ?? 0;
+    touchStart.current = {
+      x: e.touches[0]?.clientX ?? 0,
+      y: e.touches[0]?.clientY ?? 0,
+    };
   }, []);
   const handleTouchEnd = useCallback(
     (e: React.TouchEvent) => {
-      const dx = (e.changedTouches[0]?.clientX ?? 0) - touchStartX.current;
+      const dx = (e.changedTouches[0]?.clientX ?? 0) - touchStart.current.x;
+      const dy = (e.changedTouches[0]?.clientY ?? 0) - touchStart.current.y;
+      // 수직 스크롤이 수평보다 크면 무시
+      if (Math.abs(dy) > Math.abs(dx)) return;
       if (dx > 30 && !collapsed) setCollapsed(true);
     },
     [collapsed],
   );
 
   // 스와이프 감지 (복귀 영역 — 좌측 스와이프만)
-  const edgeTouchStartX = useRef(0);
+  const edgeTouchStart = useRef({ x: 0, y: 0 });
   const handleEdgeTouchStart = useCallback((e: React.TouchEvent) => {
-    edgeTouchStartX.current = e.touches[0]?.clientX ?? 0;
+    edgeTouchStart.current = {
+      x: e.touches[0]?.clientX ?? 0,
+      y: e.touches[0]?.clientY ?? 0,
+    };
   }, []);
   const handleEdgeTouchEnd = useCallback(
     (e: React.TouchEvent) => {
-      const dx = (e.changedTouches[0]?.clientX ?? 0) - edgeTouchStartX.current;
+      const dx = (e.changedTouches[0]?.clientX ?? 0) - edgeTouchStart.current.x;
+      const dy = (e.changedTouches[0]?.clientY ?? 0) - edgeTouchStart.current.y;
+      if (Math.abs(dy) > Math.abs(dx)) return;
       if (dx < -20 && collapsed) setCollapsed(false);
     },
     [collapsed],
