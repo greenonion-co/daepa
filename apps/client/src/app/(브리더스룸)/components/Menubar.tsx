@@ -98,9 +98,19 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
       {/* 웹에서만 메뉴바에 렌더링 */}
       {!isNative && !isMobile && !isRegisterPage && <AddPetButton />}
       {isMobile && !pathname?.startsWith("/sign-in") && (
-        <Link href="/sign-in" className="rounded-full px-3 py-1 text-xs font-medium text-blue-500">
-          로그인
-        </Link>
+        isNative ? (
+          <button
+            type="button"
+            onClick={() => navigate({ screen: "Login" })}
+            className="rounded-full px-3 py-1 text-xs font-medium text-blue-500"
+          >
+            로그인
+          </button>
+        ) : (
+          <Link href="/sign-in" className="rounded-full px-3 py-1 text-xs font-medium text-blue-500">
+            로그인
+          </Link>
+        )
       )}
     </>
   );
