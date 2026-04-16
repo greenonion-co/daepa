@@ -2,9 +2,7 @@
 
 import { ScanLine } from "lucide-react";
 import { overlay } from "overlay-kit";
-import { isNativeApp, isAndroid, requestOpenQrScanner } from "@/lib/native-bridge";
-import { cn } from "@/lib/utils";
-import { useSearchParams } from "next/navigation";
+import { isNativeApp, requestOpenQrScanner } from "@/lib/native-bridge";
 import { toast } from "sonner";
 import QrScanner from "./QrScanner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -52,25 +50,13 @@ async function openQrScanner() {
 }
 
 export default function QrScannerButton() {
-  const searchParams = useSearchParams();
-  const hasNativeTopBar = isNativeApp() && searchParams.get("_nativeTopBar") === "1";
-
   if (isIosChrome()) return null;
 
   return (
     <button
       type="button"
       onClick={openQrScanner}
-      className={cn(
-        "fixed right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-neutral-800 text-white shadow-lg ring-1 shadow-neutral-900/30 ring-white/20 transition-all active:scale-95 dark:bg-neutral-700 dark:text-neutral-100 dark:shadow-neutral-900/40 dark:ring-white/20",
-        isNativeApp()
-          ? hasNativeTopBar
-            ? "bottom-6"
-            : isAndroid()
-              ? "bottom-32"
-              : "bottom-16"
-          : "bottom-[92px]",
-      )}
+      className="flex h-14 w-14 items-center justify-center rounded-full bg-neutral-800 text-white shadow-lg ring-1 shadow-neutral-900/30 ring-white/20 transition-all active:scale-95 dark:bg-neutral-700 dark:text-neutral-100 dark:shadow-neutral-900/40 dark:ring-white/20"
     >
       <ScanLine className="h-6 w-6" strokeWidth={2} />
     </button>

@@ -2,11 +2,12 @@ import { Plus } from "lucide-react";
 import Link from "next/link";
 import { useIsLoggedIn } from "@/hooks/useAuth";
 import { useIsMobile } from "@/hooks/useMobile";
+import { isNativeApp, navigate } from "@/lib/native-bridge";
 import { openLoginPromoSheet } from "@/app/(브리더스룸)/components/LoginPromoSheet";
 
 const FloatingButton = () => {
   return (
-    <div className="fixed right-4 bottom-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-blue-100 text-blue-600 shadow-md ring-1 shadow-blue-200/50 ring-blue-200/50 transition-all active:scale-95 dark:bg-blue-900/50 dark:text-blue-400 dark:shadow-blue-900/30 dark:ring-blue-800/50">
+    <div className="flex h-14 w-14 items-center justify-center rounded-full bg-blue-100 text-blue-600 shadow-md ring-1 shadow-blue-200/50 ring-blue-200/50 transition-all active:scale-95 dark:bg-blue-900/50 dark:text-blue-400 dark:shadow-blue-900/30 dark:ring-blue-800/50">
       <Plus className="h-7 w-7" strokeWidth={2.5} />
     </div>
   );
@@ -27,7 +28,26 @@ const AddPetButton = () => {
   const isLoggedIn = useIsLoggedIn();
   const isMobile = useIsMobile();
 
-  // 웹, 모바일웹
+  const handleClick = () => {
+    if (!isLoggedIn) {
+      openLoginPromoSheet();
+      return;
+    }
+    if (isNativeApp()) {
+      navigate({ path: "/register/1", options: { replace: false } });
+    }
+  };
+
+  // 네이티브: button으로 처리 (Link의 preventDefault 불안정)
+  if (isNativeApp()) {
+    return (
+      <button type="button" onClick={handleClick}>
+        <FloatingButton />
+      </button>
+    );
+  }
+
+  // 웹: 기존 Link 유지
   return (
     <Link
       href="/register/1"

@@ -129,9 +129,9 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
     // 쿼리 파라미터와 해시 제거
     const pathname = path.split(/[?#]/)[0];
 
-    if (pathname === '/' || pathname === '') return 'Home';
-    if (pathname === '/pet') return 'Home'; // Admin 모드의 Home
-    if (pathname === '/hatching') return 'Hatching';
+    if (pathname === '/' || pathname === '') return 'Feed';
+    if (pathname === '/pet') return 'Pets';
+    if (pathname === '/hatching') return 'Breeding';
     if (pathname === '/adoption') return 'Adoption';
     if (pathname === '/settings') return 'Settings';
     return pathname;
@@ -167,10 +167,9 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
                 name: 'Tabs',
                 key: `tabs-${Date.now()}`,
                 state: {
-                  index: 2,
+                  index: 1,
                   routes: [
-                    { name: 'Home' },
-                    { name: 'AddPet' },
+                    { name: 'Feed' },
                     { name: 'Settings' },
                   ],
                 },
@@ -218,13 +217,39 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
           // 기존 화면 유지하며 홈으로 이동 (펫 등록 등 일반적인 경우)
           navigation.popToTop();
           break;
-        case 'RESET_TO_HOME':
+        case 'RESET_TO_HOME': {
           // 홈을 새로 마운트하여 최신 토큰으로 로드 (회원가입 등 토큰 동기화 필요한 경우)
+          // path에 따라 활성화할 탭 결정 (MemberTabs: Feed=0, Pets=1, Breeding=2, Adoption=3, Showroom=4)
+          const memberRoutes = [
+            { name: 'Feed' },
+            { name: 'Pets' },
+            { name: 'Breeding' },
+            { name: 'Adoption' },
+            { name: 'Showroom' },
+          ];
+          const pathToTabIndex: Record<string, number> = {
+            '/': 0,
+            '/pet': 1,
+            '/hatching': 2,
+            '/adoption': 3,
+          };
+          const tabIndex = pathToTabIndex[message.path ?? '/'] ?? 0;
+
           navigation.reset({
             index: 0,
-            routes: [{ name: 'Tabs', key: `tabs-${Date.now()}` }],
+            routes: [
+              {
+                name: 'Tabs',
+                key: `tabs-${Date.now()}`,
+                state: {
+                  index: tabIndex,
+                  routes: memberRoutes,
+                },
+              },
+            ],
           });
           break;
+        }
         case 'READY':
           console.log('WebView is ready');
           break;
