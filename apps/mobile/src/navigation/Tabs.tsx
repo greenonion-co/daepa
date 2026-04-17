@@ -17,9 +17,9 @@ import type { GuestTabParamList, MemberTabParamList } from '@/types/navigation';
 import {
   Home,
   LogIn,
-  PawPrint,
+  LayoutList,
   Egg,
-  HeartHandshake,
+  ArrowLeftRight,
   Gem,
 } from 'lucide-react-native';
 import WebViewScreen from '../screens/WebView';
@@ -88,9 +88,9 @@ const AnimatedTabButton = (props: BottomTabBarButtonProps) => {
 // 탭 아이콘들
 const FeedTabIcon = createAnimatedTabIcon(Home, '피드');
 const LoginTabIcon = createAnimatedTabIcon(LogIn, '로그인');
-const PetsTabIcon = createAnimatedTabIcon(PawPrint, '개체룸');
+const PetsTabIcon = createAnimatedTabIcon(LayoutList, '개체룸');
 const BreedingTabIcon = createAnimatedTabIcon(Egg, '브리딩룸');
-const AdoptionTabIcon = createAnimatedTabIcon(HeartHandshake, '분양룸');
+const AdoptionTabIcon = createAnimatedTabIcon(ArrowLeftRight, '분양룸');
 const ShowroomTabIcon = createAnimatedTabIcon(Gem, '쇼룸');
 
 // WebView 래퍼 컴포넌트들
