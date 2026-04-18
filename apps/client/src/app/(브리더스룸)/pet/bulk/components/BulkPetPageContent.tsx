@@ -156,11 +156,26 @@ export default function BulkPetPageContent() {
             <AlertDialogCancel onClick={() => router.push("/pet")}>
               개체룸으로 이동
             </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => setSuccessDialog({ open: false, count: 0 })}
-            >
+            <AlertDialogAction onClick={() => setSuccessDialog({ open: false, count: 0 })}>
               계속 등록
             </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* 임시 저장본 복원 확인 */}
+      <AlertDialog open={!!form.pendingDraft} onOpenChange={() => undefined}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>작성 중이던 내역이 있습니다</AlertDialogTitle>
+            <AlertDialogDescription>
+              {form.pendingDraft &&
+                `${new Date(form.pendingDraft.savedAt).toLocaleString()}에 임시 저장된 ${form.pendingDraft.rows.length}행이 있습니다. 이어서 편집하시겠어요?`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={form.dismissDraft}>처음부터 작성</AlertDialogCancel>
+            <AlertDialogAction onClick={form.restoreDraft}>복원</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

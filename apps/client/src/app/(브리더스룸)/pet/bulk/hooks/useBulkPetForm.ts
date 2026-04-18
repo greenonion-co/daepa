@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { nanoid } from "nanoid";
 import {
   bulkPetBatchSchema,
@@ -8,6 +8,13 @@ import {
   type BulkPetRowValue,
   type FieldError,
 } from "../lib/bulkPetSchema";
+import {
+  loadDraft,
+  saveDraft,
+  clearDraft,
+  hasMeaningfulContent,
+  type Draft,
+} from "../lib/draftStorage";
 
 export const MAX_ROWS = 200;
 
@@ -33,10 +40,53 @@ export type ServerFieldError = {
   message: string;
 };
 
+const DRAFT_SAVE_DEBOUNCE_MS = 500;
+
 export function useBulkPetForm() {
   const [rows, setRows] = useState<BulkPetRow[]>(() => [emptyRow()]);
   const [serverErrors, setServerErrors] = useState<ServerFieldError[]>([]);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+  // ── 임시 저장(localStorage) ───────────────
+  // 마운트 시 draft가 있으면 사용자에게 복원 여부를 묻기 위해 pendingDraft로 노출
+  const [pendingDraft, setPendingDraft] = useState<Draft | null>(null);
+  const [draftChecked, setDraftChecked] = useState(false);
+
+  useEffect(() => {
+    const draft = loadDraft();
+    if (draft && hasMeaningfulContent(draft.rows)) {
+      setPendingDraft(draft);
+    }
+    setDraftChecked(true);
+  }, []);
+
+  // rows가 바뀔 때마다 debounced 저장. 단, 마운트 직후나 사용자가 아직 복원 선택을 안 한 상태에선 스킵
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    if (!draftChecked || pendingDraft) return;
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = setTimeout(() => {
+      if (hasMeaningfulContent(rows)) {
+        saveDraft(rows);
+      } else {
+        clearDraft();
+      }
+    }, DRAFT_SAVE_DEBOUNCE_MS);
+    return () => {
+      if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    };
+  }, [rows, draftChecked, pendingDraft]);
+
+  const restoreDraft = useCallback(() => {
+    if (!pendingDraft) return;
+    setRows(pendingDraft.rows);
+    setPendingDraft(null);
+  }, [pendingDraft]);
+
+  const dismissDraft = useCallback(() => {
+    clearDraft();
+    setPendingDraft(null);
+  }, []);
 
   // 클라이언트 검증 오류 (실시간)
   const clientErrors = useMemo<FieldError[]>(() => {
@@ -158,6 +208,7 @@ export function useBulkPetForm() {
     setRows([]);
     setServerErrors([]);
     setSelectedIds(new Set());
+    clearDraft();
   }, []);
 
   // ── 행 선택 관리 ──────────────────────────
@@ -232,5 +283,9 @@ export function useBulkPetForm() {
     clearSelection,
     deleteSelected,
     duplicateSelected,
+    // 임시 저장 복원
+    pendingDraft,
+    restoreDraft,
+    dismissDraft,
   };
 }
