@@ -108,8 +108,35 @@ export class BulkCreatePetRowDto {
 export class BulkCreatePetDto {
   @ApiProperty({ description: '개체 목록', type: [BulkCreatePetRowDto] })
   @IsArray()
-  @ArrayMaxSize(500, { message: '최대 500개까지 등록할 수 있습니다.' })
+  @ArrayMaxSize(200, { message: '최대 200개까지 등록할 수 있습니다.' })
   @ValidateNested({ each: true })
   @Type(() => BulkCreatePetRowDto)
   pets: BulkCreatePetRowDto[];
+}
+
+/** 대량 등록 시 발생한 행 단위 검증 오류 */
+export class BulkCreatePetErrorItem {
+  @ApiProperty({
+    description: '오류가 발생한 행 인덱스 (0-based). 전역 오류는 생략',
+    required: false,
+  })
+  rowIndex?: number;
+
+  @ApiProperty({ description: '오류 필드명', required: false })
+  field?: string;
+
+  @ApiProperty({ description: '오류 코드' })
+  code: string;
+
+  @ApiProperty({ description: '오류 메시지' })
+  message: string;
+}
+
+/** 대량 등록 성공 응답 */
+export class BulkCreatePetResultDto {
+  @ApiProperty({ description: '성공적으로 생성된 개체 수' })
+  successCount: number;
+
+  @ApiProperty({ description: '생성된 개체의 petId 목록', type: [String] })
+  createdPetIds: string[];
 }

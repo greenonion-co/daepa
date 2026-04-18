@@ -667,16 +667,16 @@ export const SELECTOR_CONFIGS: Record<
         value: "미설정",
       },
       {
-        key: "NFS",
-        value: "분양 안함(NFS)",
-      },
-      {
         key: "ON_SALE",
         value: "분양중",
       },
       {
         key: "ON_RESERVATION",
         value: "예약중",
+      },
+      {
+        key: "NFS",
+        value: "NFS",
       },
     ],
   },

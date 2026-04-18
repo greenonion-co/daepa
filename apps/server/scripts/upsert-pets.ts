@@ -1,6 +1,12 @@
 /**
  * CSV 파일로부터 펫 데이터를 DB에 일괄 등록하는 스크립트
  *
+ * @deprecated 서비스 내재화 완료 — `POST /v1/pet/bulk` API 및 `/pet/bulk` 페이지(사업자 전용) 사용을 권장.
+ *             운영자 비상 복구 또는 대규모 초기 마이그레이션 용도로만 유지.
+ *             이 스크립트는 `bulkCreatePets` API와 달리 캐시 무효화가 없으므로
+ *             운영 DB에 실행한 뒤에는 관련 캐시(`my-pets:*`, `feed:*`, `children:*`,
+ *             `ftree:*`, `clutch:*`, `siblings:*`)를 수동 플러시할 것.
+ *
  * 실행 방법:
  *   cd apps/server && npx ts-node scripts/upsert-pets.ts scripts/data/sheet.csv
  *
@@ -58,7 +64,8 @@ interface CsvRow {
   성별?: string;
   모프?: string;
   형질?: string;
-  크기?: string;
+  성장단계?: string;
+  크기?: string; // 구 헤더 — backward compat
   몸무게?: string;
   먹이?: string;
   브리더?: string;
@@ -148,7 +155,7 @@ function mapCsvRow(row: CsvRow): PetData {
     sex: safeString(row['성별']),
     morphs: parseArray(row['모프']),
     traits: parseArray(row['형질']),
-    growth: safeString(row['크기']),
+    growth: safeString(row['성장단계'] ?? row['크기']),
     weight: parseNumber(row['몸무게']),
     foods: parseArray(row['먹이']),
     isBreeder: parseBoolean(row['브리더']),

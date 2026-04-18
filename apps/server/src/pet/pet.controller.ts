@@ -26,7 +26,11 @@ import {
   DeletedPetDto,
   PetSummaryDto,
 } from './pet.dto';
-import { BulkCreatePetDto } from './bulk-create-pet.dto';
+import {
+  BulkCreatePetDto,
+  BulkCreatePetResultDto,
+} from './bulk-create-pet.dto';
+import { UserService } from 'src/user/user.service';
 import { PetService } from './pet.service';
 import {
   ApiResponse,
@@ -64,6 +68,7 @@ export class PetController {
   constructor(
     private readonly petService: PetService,
     private readonly petRelationService: PetRelationService,
+    private readonly userService: UserService,
   ) {}
 
   @Get()
@@ -168,16 +173,34 @@ export class PetController {
   @ApiResponse({
     status: 200,
     description: '개체 대량 등록이 완료되었습니다.',
-    type: CommonResponseDto,
+    schema: {
+      type: 'object',
+      required: ['success', 'message', 'data'],
+      properties: {
+        success: { type: 'boolean' },
+        message: { type: 'string' },
+        data: { $ref: getSchemaPath(BulkCreatePetResultDto) },
+      },
+    },
   })
+  @ApiExtraModels(BulkCreatePetResultDto)
   async bulkCreate(
     @Body() dto: BulkCreatePetDto,
     @JwtUser() token: JwtUserPayload,
-  ): Promise<CommonResponseDto> {
-    const count = await this.petService.bulkCreatePets(dto, token.userId);
+  ): Promise<CommonResponseDto & { data: BulkCreatePetResultDto }> {
+    // 사업자(isBiz) 계정 이중 방어 — 클라이언트 BizGuard 우회 대비
+    const user = await this.userService.findOne({ userId: token.userId });
+    if (!user?.isBiz) {
+      throw new ForbiddenException(
+        '사업자 계정만 개체 대량 등록을 사용할 수 있습니다.',
+      );
+    }
+
+    const result = await this.petService.bulkCreatePets(dto, token.userId);
     return {
       success: true,
-      message: `${count}개의 개체가 등록되었습니다.`,
+      message: `${result.successCount}개의 개체가 등록되었습니다.`,
+      data: result,
     };
   }
 
