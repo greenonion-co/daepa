@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { Plus, Upload, FileDown, Trash2, Send, Copy, Trash } from "lucide-react";
+import { Plus, Trash2, Send, Copy, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -15,7 +15,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { parsePetCsv } from "@/app/(브리더스룸)/lib/parsePetCsv";
 import { toast } from "@/lib/toast";
-import { downloadBulkPetTemplate } from "../lib/csvTemplate";
 import { MAX_ROWS } from "../hooks/useBulkPetForm";
 import type { BulkPetRowValue } from "../lib/bulkPetSchema";
 
