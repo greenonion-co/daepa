@@ -32,6 +32,29 @@ jobs:
           ssh -o StrictHostKeyChecking=no ${{ secrets.LIGHTSAIL_USERNAME }}@${{ secrets.LIGHTSAIL_HOST }} << 'ENDSSH'
             set -e
 
+            echo "🧹 Cleaning up disk before deploy..."
+            echo "Before:"
+            df -h /
+
+            # 직전 실패한 git 작업이 남긴 lock 제거 (Out of disk 등으로 만들어진 빈 lock)
+            rm -f ~/daepa/.git/index.lock || true
+
+            # Docker: 정지된 컨테이너·dangling 이미지·unused 네트워크/볼륨 회수
+            # 현재 사용 중인 이미지는 보존됨
+            docker system prune -f || true
+
+            # 7일 이상 사용 안 된 이미지까지 회수 (정기 청소)
+            docker image prune -a -f --filter "until=168h" || true
+
+            # 7일 이상 된 오래된 .next 빌드 캐시 제거 (모노레포 누적 방지)
+            find ~/daepa -type d -name ".next" -mtime +7 -exec rm -rf {} + 2>/dev/null || true
+
+            # .git 객체 압축 — pack 누적으로 부푸는 것 방지
+            (cd ~/daepa && git gc --auto) || true
+
+            echo "After:"
+            df -h /
+
             echo "📦 Pulling latest code..."
             cd ~/daepa
             git fetch origin main
