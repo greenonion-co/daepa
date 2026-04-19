@@ -60,6 +60,7 @@ export function hasMeaningfulContent(rows: BulkPetRow[]): boolean {
       r.morphs?.length ||
       r.traits?.length ||
       r.foods?.length ||
+      r.images?.length ||
       r.isPublic ||
       r.isBreeder,
   );

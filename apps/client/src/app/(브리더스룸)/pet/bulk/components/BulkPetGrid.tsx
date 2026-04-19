@@ -24,7 +24,9 @@ import {
   DropdownCell,
   MultiSelectCell,
   ParentCell,
+  ImagesCell,
 } from "./BulkPetCells";
+import type { PetImageItem } from "@repo/api-client";
 import { Checkbox } from "@/components/ui/checkbox";
 
 type Props = {
@@ -321,6 +323,14 @@ function renderCell(
         />
       );
     }
+    case "images":
+      return (
+        <ImagesCell
+          value={row[col.field] as PetImageItem[] | undefined}
+          onChange={(v) => updateCell(row._clientId, col.field, v as never)}
+          error={error}
+        />
+      );
     default:
       return null;
   }

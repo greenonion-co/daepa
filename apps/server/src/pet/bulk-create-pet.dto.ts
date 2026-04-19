@@ -17,6 +17,7 @@ import {
   PET_SEX,
   PET_SPECIES,
 } from './pet.constants';
+import { PetImageItem } from '../pet_image/pet_image.dto';
 
 export class BulkCreatePetRowDto {
   @ApiProperty({ description: '개체 이름', example: '대파' })
@@ -103,6 +104,18 @@ export class BulkCreatePetRowDto {
   @IsOptional()
   @IsString()
   motherName?: string;
+
+  @ApiProperty({
+    description: '펫 이미지 (PENDING/* 키 사용 — 서버가 {petId}/*로 복사)',
+    type: [PetImageItem],
+    required: false,
+  })
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(3, { message: '이미지는 최대 3장까지 등록 가능합니다.' })
+  @ValidateNested({ each: true })
+  @Type(() => PetImageItem)
+  images?: PetImageItem[];
 }
 
 export class BulkCreatePetDto {

@@ -11,9 +11,36 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ChevronDown, Pencil } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { ChevronDown, ImagePlus, Pencil, Upload, X } from "lucide-react";
+import { overlay } from "overlay-kit";
+import Image from "next/image";
+import { useDropzone } from "react-dropzone";
+import {
+  DndContext,
+  type DragEndEvent,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  arrayMove,
+  rectSortingStrategy,
+  useSortable,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { buildR2TransformedUrl, compressImageFile } from "@/lib/utils";
+import { tokenStorage } from "@/lib/tokenStorage";
+import { toast } from "@/lib/toast";
+import { ACCEPT_IMAGE_FORMATS } from "@/app/(브리더스룸)/constants";
+import type { PetImageItem } from "@repo/api-client";
 import MultiSelectPopover from "./MultiSelectPopover";
+import { MAX_IMAGES_PER_ROW } from "../lib/bulkPetSchema";
 import { cn } from "@/lib/utils";
+
+const MAX_IMAGE_FILE_SIZE = 10 * 1024 * 1024;
 
 const CELL_BASE =
   "h-9 w-full rounded-none border-0 bg-transparent px-2 py-1 text-sm focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-emerald-500";
@@ -383,6 +410,327 @@ export function RowActions({
         title="삭제"
       >
         ✕
+      </button>
+    </div>
+  );
+}
+
+// ── Images (썸네일 스트립 + 모달 편집) ───────────────
+export function ImagesCell({
+  value,
+  onChange,
+  error,
+}: {
+  value: PetImageItem[] | undefined;
+  onChange: (v: PetImageItem[]) => void;
+  error?: string | null;
+}) {
+  const images = value ?? [];
+
+  const openEditor = () => {
+    overlay.open(({ isOpen, close }) => (
+      <ImagesEditorModal
+        isOpen={isOpen}
+        onClose={close}
+        initialImages={images}
+        max={MAX_IMAGES_PER_ROW}
+        onChange={onChange}
+      />
+    ));
+  };
+
+  return (
+    <CellWrapper error={error}>
+      <button
+        type="button"
+        onClick={openEditor}
+        title={images.length ? `${images.length}장 — 클릭하여 편집` : "이미지 추가"}
+        className={cn(
+          CELL_BASE,
+          "flex items-center gap-1 hover:bg-gray-50 dark:hover:bg-gray-800",
+        )}
+      >
+        {images.length === 0 ? (
+          <span className="flex items-center gap-1 text-gray-400">
+            <ImagePlus className="h-3.5 w-3.5" />
+            이미지
+          </span>
+        ) : (
+          <span className="flex flex-1 items-center gap-1">
+            {images.slice(0, MAX_IMAGES_PER_ROW).map((img) => (
+              <span
+                key={img.fileName}
+                className="relative inline-block h-6 w-6 overflow-hidden rounded border border-gray-200 dark:border-gray-700"
+              >
+                <Image
+                  src={buildR2TransformedUrl(img.url)}
+                  alt=""
+                  fill
+                  sizes="24px"
+                  className="object-cover"
+                  draggable={false}
+                />
+              </span>
+            ))}
+            <span className="ml-1 text-xs text-gray-500">{images.length}/{MAX_IMAGES_PER_ROW}</span>
+          </span>
+        )}
+        <Pencil className="ml-auto h-3 w-3 shrink-0 text-gray-400" />
+      </button>
+    </CellWrapper>
+  );
+}
+
+/**
+ * 모달 내부 상태로 이미지 목록을 보관해 즉시 재렌더되도록 보장.
+ * overlay-kit으로 열린 모달은 트리 외부에 마운트되어 부모 props 변화를 못 받으므로
+ * 자체 state가 필요. 변경 시마다 부모(onChange)로도 동기화한다.
+ */
+function ImagesEditorModal({
+  isOpen,
+  onClose,
+  initialImages,
+  max,
+  onChange,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  initialImages: PetImageItem[];
+  max: number;
+  onChange: (next: PetImageItem[]) => void;
+}) {
+  const [images, setImages] = useState(initialImages);
+
+  const handleChange = (next: PetImageItem[]) => {
+    setImages(next);
+    onChange(next);
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>이미지 업로드 (최대 {max}장)</DialogTitle>
+        </DialogHeader>
+        <SimpleImageUploader images={images} max={max} onChange={handleChange} />
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+/** 단일 셀에서 사용하는 가벼운 이미지 업로더 — 드래그앤드롭 + 클릭 업로드 */
+function SimpleImageUploader({
+  images,
+  max,
+  onChange,
+}: {
+  images: PetImageItem[];
+  max: number;
+  onChange: (next: PetImageItem[]) => void;
+}) {
+  const [uploading, setUploading] = useState(false);
+  const remaining = max - images.length;
+  const isFull = remaining <= 0;
+
+  const handleFiles = async (files: File[]) => {
+    if (uploading || isFull) return;
+    const accepted = files
+      .slice(0, remaining)
+      .filter((f) => {
+        if (f.size > MAX_IMAGE_FILE_SIZE) {
+          toast.error(`이미지 용량이 너무 큽니다 (최대 10MB): ${f.name}`);
+          return false;
+        }
+        return true;
+      });
+    if (accepted.length === 0) return;
+
+    setUploading(true);
+    try {
+      const uploaded = await Promise.all(
+        accepted.map(async (file) => {
+          const compressed = await compressImageFile(file);
+          const presignedRes = await fetch("/api/upload/presigned-url", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${tokenStorage.getToken()}`,
+            },
+            body: JSON.stringify({
+              petId: "PENDING",
+              mimeType: compressed.type,
+              size: compressed.size,
+            }),
+          });
+          if (!presignedRes.ok) {
+            throw new Error(`Presigned URL 발급 실패: ${file.name}`);
+          }
+          const { presignedUrl, fileName, url } = await presignedRes.json();
+          const putRes = await fetch(presignedUrl, {
+            method: "PUT",
+            headers: { "Content-Type": compressed.type },
+            body: compressed,
+          });
+          if (!putRes.ok) throw new Error(`업로드 실패: ${file.name}`);
+          return {
+            url,
+            fileName,
+            size: compressed.size,
+            mimeType: compressed.type,
+          } satisfies PetImageItem;
+        }),
+      );
+      onChange([...images, ...uploaded]);
+    } catch (err) {
+      console.error("이미지 업로드 실패:", err);
+      toast.error("이미지 업로드에 실패했습니다.");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    accept: ACCEPT_IMAGE_FORMATS,
+    multiple: true,
+    disabled: uploading || isFull,
+    onDropAccepted: handleFiles,
+    onDropRejected: (rejections) => {
+      const names = rejections.map((r) => r.file.name).join(", ");
+      toast.error(`허용되지 않는 이미지 형식입니다: ${names}`);
+    },
+  });
+
+  const handleDelete = (fileName: string) => {
+    onChange(images.filter((img) => img.fileName !== fileName));
+  };
+
+  // 드래그 정렬: PointerSensor의 distance constraint로 클릭(삭제 버튼)과 충돌 방지
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(KeyboardSensor),
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const oldIndex = images.findIndex((img) => img.fileName === active.id);
+    const newIndex = images.findIndex((img) => img.fileName === over.id);
+    if (oldIndex < 0 || newIndex < 0) return;
+    onChange(arrayMove(images, oldIndex, newIndex));
+  };
+
+  return (
+    <div className="space-y-3">
+      <div
+        {...getRootProps()}
+        className={cn(
+          "flex flex-col items-center justify-center gap-1.5 rounded-lg border-2 border-dashed px-4 py-6 text-sm transition-colors",
+          isDragActive
+            ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-950/30"
+            : "border-gray-300 hover:border-gray-400 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800",
+          (uploading || isFull) && "cursor-not-allowed opacity-50",
+          !uploading && !isFull && "cursor-pointer",
+        )}
+      >
+        <input {...getInputProps()} />
+        <Upload className="h-6 w-6 text-gray-400" />
+        {uploading ? (
+          <span className="text-gray-600 dark:text-gray-300">업로드 중...</span>
+        ) : isFull ? (
+          <span className="text-gray-500">최대 {max}장까지 등록 가능합니다.</span>
+        ) : (
+          <>
+            <span className="font-medium text-gray-700 dark:text-gray-200">
+              이미지를 드래그하거나 클릭해 업로드
+            </span>
+            <span className="text-xs text-gray-500">
+              JPG · PNG · WebP · GIF · HEIC · 최대 10MB · {images.length}/{max}장
+            </span>
+          </>
+        )}
+      </div>
+
+      {images.length > 0 && (
+        <>
+          <DndContext sensors={sensors} onDragEnd={handleDragEnd} autoScroll={false}>
+            <SortableContext
+              items={images.map((img) => img.fileName)}
+              strategy={rectSortingStrategy}
+            >
+              <div className="grid grid-cols-3 gap-2">
+                {images.map((img) => (
+                  <SortableImageThumb
+                    key={img.fileName}
+                    id={img.fileName}
+                    url={img.url}
+                    onDelete={() => handleDelete(img.fileName)}
+                  />
+                ))}
+              </div>
+            </SortableContext>
+          </DndContext>
+          {images.length > 1 && (
+            <p className="text-xs text-gray-500">드래그하여 순서를 변경할 수 있습니다.</p>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
+function SortableImageThumb({
+  id,
+  url,
+  onDelete,
+}: {
+  id: string;
+  url: string;
+  onDelete: () => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id,
+  });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition: isDragging ? "none" : transition,
+    touchAction: "none" as const,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...listeners}
+      className={cn(
+        "relative aspect-square cursor-grab overflow-hidden rounded-md border-2 select-none",
+        isDragging
+          ? "z-10 scale-105 cursor-grabbing border-emerald-400 shadow-lg"
+          : "border-gray-200 dark:border-gray-700",
+      )}
+    >
+      <Image
+        src={buildR2TransformedUrl(url)}
+        alt=""
+        fill
+        sizes="120px"
+        className="pointer-events-none object-cover"
+        draggable={false}
+      />
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          onDelete();
+        }}
+        className={cn(
+          "absolute top-1 right-1 inline-flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-red-500 text-white shadow-sm transition-colors hover:bg-red-600",
+          isDragging && "opacity-0",
+        )}
+        aria-label="이미지 삭제"
+      >
+        <X className="h-3.5 w-3.5" />
       </button>
     </div>
   );

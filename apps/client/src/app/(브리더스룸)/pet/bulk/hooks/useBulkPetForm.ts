@@ -30,6 +30,7 @@ function emptyRow(): BulkPetRow {
     morphs: [],
     traits: [],
     foods: [],
+    images: [],
   };
 }
 

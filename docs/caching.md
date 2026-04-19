@@ -127,7 +127,7 @@
 | `ParentRequestService.linkParent` | 부모 연결 후 (즉시 확정) | 본인 + 같은 부모의 모든 자식의 `clutch:*`, `siblings:*` |
 | `ParentRequestService.unlinkParent` | 부모 해제 후 (APPROVED) | 본인 + 같은 부모의 모든 자식의 `clutch:*`, `siblings:*` |
 | `ParentRequestService.updateParentRequestByNotificationId` | 부모 승인 후 | 본인 + 같은 부모의 모든 자식의 `clutch:*`, `siblings:*` |
-| `PetService.bulkCreatePets` | 대량 등록 commit 후 | `my-pets:{ownerId}:*` · 공개 펫 있으면 `feed:*` · DB 부모별로 `children:{parentId}:*`, `ftree:{parentId}:*` · 기존 형제(같은 부모 공유)별 `clutch:{siblingId}`, `siblings:{siblingId}` — `CacheInvalidation.onBulkPetsCreated` |
+| `PetService.bulkCreatePets` | 대량 등록 commit 후 | `my-pets:{ownerId}:*` · 공개 펫 있으면 `feed:*` · DB 부모별로 `children:{parentId}:*`, `ftree:{parentId}:*` · 기존 형제(같은 부모 공유)별 `clutch:{siblingId}`, `siblings:{siblingId}` — `CacheInvalidation.onBulkPetsCreated`. 이미지를 함께 등록한 경우 각 petId에 대해 `pet-img:{petId}` `del` (`PetImageService.saveAndUploadConfirmedImages` 내부 호출) |
 | `FeedingService.createFeeding` | 생성 후 | `feeding:{petId}:{yyyy-MM}` |
 | `FeedingService.updateFeeding` | 수정 후 | `feeding:{petId}:{yyyy-MM}` (+ 날짜 변경 시 새 월) |
 | `FeedingService.deleteFeeding` | 삭제 후 | `feeding:{petId}:{yyyy-MM}` |

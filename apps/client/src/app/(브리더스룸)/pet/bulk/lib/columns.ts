@@ -8,6 +8,7 @@ export type ColumnType =
   | "dropdown"
   | "multiSelect"
   | "parent"
+  | "images"
   | "species"; // species는 종별 morph/trait 맵이 바뀌어서 별도 처리
 
 export type ColumnDef = {
@@ -26,6 +27,7 @@ export type ColumnDef = {
 export const BULK_PET_COLUMNS: ColumnDef[] = [
   { field: "species", header: "종", type: "species", width: 40 },
   { field: "name", header: "개체 이름", type: "text", width: 140 },
+  { field: "images", header: "이미지", type: "images", width: 120 },
   { field: "isPublic", header: "공개", type: "checkbox", width: 60 },
   { field: "hatchingDate", header: "해칭일", type: "date", width: 120 },
   { field: "isBreeder", header: "브리더", type: "checkbox", width: 60 },

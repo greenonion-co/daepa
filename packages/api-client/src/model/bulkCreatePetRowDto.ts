@@ -9,6 +9,7 @@ import type { BulkCreatePetRowDtoSpecies } from "./bulkCreatePetRowDtoSpecies";
 import type { BulkCreatePetRowDtoSex } from "./bulkCreatePetRowDtoSex";
 import type { BulkCreatePetRowDtoGrowth } from "./bulkCreatePetRowDtoGrowth";
 import type { BulkCreatePetRowDtoAdoptionStatus } from "./bulkCreatePetRowDtoAdoptionStatus";
+import type { PetImageItem } from "./petImageItem";
 
 export interface BulkCreatePetRowDto {
   /** 개체 이름 */
@@ -39,4 +40,6 @@ export interface BulkCreatePetRowDto {
   fatherName?: string;
   /** 모개체 이름 */
   motherName?: string;
+  /** 펫 이미지 (PENDING/* 키 사용 — 서버가 {petId}/*로 복사) */
+  images?: PetImageItem[];
 }

@@ -708,6 +708,29 @@ export class PetService {
       existingSiblingIds: txResult.existingSiblingIds,
     });
 
+    // === 7단계: 이미지 R2 복사 + DB 저장 (커밋 후, 베스트 에포트) ===
+    // 펫 생성은 이미 커밋됨. 이미지 저장이 실패해도 펫 자체는 남고
+    // 사용자가 상세 페이지에서 재업로드 가능. 실패는 로그만 남기고 전체 응답은 성공 처리.
+    const imageTasks: Promise<unknown>[] = [];
+    for (let i = 0; i < pets.length; i++) {
+      const images = pets[i].images;
+      if (!images || images.length === 0) continue;
+      const petId = txResult.createdPetIds[i];
+      imageTasks.push(
+        this.petImageService
+          .saveAndUploadConfirmedImages(petId, images, ownerId, 'create')
+          .catch((err: Error) => {
+            console.error(
+              `[PetService.bulkCreatePets] 이미지 저장 실패 petId=${petId}:`,
+              err,
+            );
+          }),
+      );
+    }
+    if (imageTasks.length > 0) {
+      await Promise.all(imageTasks);
+    }
+
     return {
       successCount: txResult.createdPetIds.length,
       createdPetIds: txResult.createdPetIds,

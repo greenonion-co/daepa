@@ -5,7 +5,18 @@ import type {
   BulkCreatePetRowDtoSex,
   BulkCreatePetRowDtoGrowth,
   BulkCreatePetRowDtoAdoptionStatus,
+  PetImageItem,
 } from "@repo/api-client";
+
+export const MAX_IMAGES_PER_ROW = 3;
+
+/** PetImageItem 그대로 수용하는 zod 객체 (대량 등록은 업로드 메타데이터만 전달) */
+const petImageItemSchema = z.object({
+  fileName: z.string(),
+  url: z.string(),
+  mimeType: z.string(),
+  size: z.number(),
+});
 
 export const SPECIES_VALUES = ["CR", "LE", "FT", "KN", "LC", "GG"] as const;
 export const SEX_VALUES = ["M", "F", "N"] as const;
@@ -41,6 +52,10 @@ export const bulkPetRowSchema = z.object({
   adoptionStatus: z.enum(ADOPTION_STATUS_VALUES).optional(),
   fatherName: z.string().trim().max(30).optional().or(z.literal("")),
   motherName: z.string().trim().max(30).optional().or(z.literal("")),
+  images: z
+    .array(petImageItemSchema)
+    .max(MAX_IMAGES_PER_ROW, `이미지는 최대 ${MAX_IMAGES_PER_ROW}장까지 등록 가능합니다.`)
+    .optional(),
 });
 
 export type BulkPetRowValue = z.infer<typeof bulkPetRowSchema>;
@@ -97,7 +112,7 @@ export const bulkPetBatchSchema = z
   });
 
 /** 서버 전송 직전 DTO로 변환 (빈 문자열 → undefined) */
-export function toDto(row: BulkPetRowValue): BulkCreatePetRowDto {
+export function toDto(row: BulkPetRowValue): BulkCreatePetRowDto & { images?: PetImageItem[] } {
   return {
     name: row.name,
     species: row.species as BulkCreatePetRowDtoSpecies,
@@ -113,6 +128,7 @@ export function toDto(row: BulkPetRowValue): BulkCreatePetRowDto {
     adoptionStatus: row.adoptionStatus as BulkCreatePetRowDtoAdoptionStatus | undefined,
     fatherName: row.fatherName || undefined,
     motherName: row.motherName || undefined,
+    images: row.images?.length ? row.images : undefined,
   };
 }
 

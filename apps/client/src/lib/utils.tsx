@@ -1,6 +1,7 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import QRCode from "qrcode";
+import { heicTo, isHeic } from "heic-to";
 import { Badge } from "@/components/ui/badge";
 import {
   AdoptionDtoStatus,
@@ -83,17 +84,52 @@ export const buildR2TransformedUrl = (
   }
 };
 
-export const compressImageFile = (
+/**
+ * HEIC/HEIF → JPEG 변환. iPhone 기본 포맷이지만 Chrome/Firefox/Edge가 디코드 못 하므로
+ * canvas 압축 전에 JPEG로 정규화한다. heic-to는 최신 libheif(HEVC 지원) 빌드 사용.
+ */
+const convertHeicIfNeeded = async (file: File): Promise<File> => {
+  // heic-to의 isHeic은 매직바이트 검사로 확장자 없이도 정확히 판별
+  let shouldConvert = false;
+  try {
+    shouldConvert = await isHeic(file);
+  } catch {
+    // isHeic 자체가 실패하면 확장자/타입으로 폴백
+    shouldConvert =
+      file.type === "image/heic" || file.type === "image/heif" || /\.(heic|heif)$/i.test(file.name);
+  }
+  if (!shouldConvert) return file;
+
+  try {
+    const blob = await heicTo({
+      blob: file,
+      type: "image/jpeg",
+      quality: 0.9,
+    });
+    const newName = file.name.replace(/\.(heic|heif)$/i, ".jpg");
+    return new File([blob], newName, { type: "image/jpeg" });
+  } catch (err) {
+    console.error("HEIC 변환 실패:", err);
+    // 변환 실패 시 원본 반환 (이후 canvas 디코드도 실패하면 그대로 업로드되지만
+    // 적어도 시도는 해본다)
+    return file;
+  }
+};
+
+export const compressImageFile = async (
   file: File,
   maxDimension = 1600,
   quality = 0.82,
 ): Promise<File> => {
+  // HEIC/HEIF는 먼저 JPEG로 변환 (Chrome/Firefox 등이 디코드 못 함)
+  const normalized = await convertHeicIfNeeded(file);
+
   // GIF는 애니메이션 유지를 위해 압축하지 않음
-  if (file.type === "image/gif") return Promise.resolve(file);
+  if (normalized.type === "image/gif") return normalized;
 
   return new Promise((resolve) => {
     const img = new window.Image();
-    const objectUrl = URL.createObjectURL(file);
+    const objectUrl = URL.createObjectURL(normalized);
 
     img.onload = () => {
       URL.revokeObjectURL(objectUrl);
@@ -102,9 +138,9 @@ export const compressImageFile = (
       if (
         img.width <= maxDimension &&
         img.height <= maxDimension &&
-        file.size <= 500 * 1024
+        normalized.size <= 500 * 1024
       ) {
-        resolve(file);
+        resolve(normalized);
         return;
       }
 
@@ -117,7 +153,7 @@ export const compressImageFile = (
       canvas.height = targetH;
       const ctx = canvas.getContext("2d");
       if (!ctx) {
-        resolve(file);
+        resolve(normalized);
         return;
       }
       ctx.drawImage(img, 0, 0, targetW, targetH);
@@ -125,10 +161,10 @@ export const compressImageFile = (
       canvas.toBlob(
         (blob) => {
           if (!blob) {
-            resolve(file);
+            resolve(normalized);
             return;
           }
-          resolve(new File([blob], file.name, { type: blob.type }));
+          resolve(new File([blob], normalized.name, { type: blob.type }));
         },
         "image/webp",
         quality,
@@ -137,7 +173,7 @@ export const compressImageFile = (
 
     img.onerror = () => {
       URL.revokeObjectURL(objectUrl);
-      resolve(file);
+      resolve(normalized);
     };
     img.src = objectUrl;
   });

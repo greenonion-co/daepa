@@ -28,8 +28,9 @@ export function useBulkPetUpload() {
 
   const mutation = useMutation({
     mutationFn: async (rows: BulkPetRowValue[]) => {
-      const pets: BulkCreatePetRowDto[] = rows.map(toDto);
-      const res = await petControllerBulkCreate({ pets });
+      const pets = rows.map(toDto);
+      // images 필드는 orval 재생성 전이라 BulkCreatePetRowDto에 없을 수 있어 단언
+      const res = await petControllerBulkCreate({ pets: pets as BulkCreatePetRowDto[] });
       return res.data;
     },
   });
