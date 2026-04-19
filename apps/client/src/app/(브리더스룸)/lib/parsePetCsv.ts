@@ -17,7 +17,8 @@ const COLUMN_MAP: Record<string, string> = {
   성별: "sex",
   모프: "morphs",
   형질: "traits",
-  크기: "growth",
+  성장단계: "growth",
+  크기: "growth", // 구 헤더 — backward compat
   "몸무게(g)": "weight",
   몸무게: "weight",
   먹이: "foods",

@@ -1,6 +1,11 @@
 /**
  * CSV 파일을 기반으로 펫의 부모 정보를 연동하는 스크립트
  *
+ * @deprecated 서비스 내재화 완료 — `POST /v1/pet/bulk` API가 펫 생성과 부모 연결을 한 번에 처리.
+ *             운영자 비상 복구 또는 대규모 초기 마이그레이션 용도로만 유지.
+ *             이 스크립트는 관계 캐시(`clutch:*`, `siblings:*`, `ftree:*`, `children:*`)를
+ *             무효화하지 않으므로, 운영 DB에 실행 시 수동 플러시 필요.
+ *
  * 전제조건:
  *   - upsert-pets.ts 스크립트로 펫/분양 정보가 성공적으로 생성되어 있어야 함
  *
@@ -30,7 +35,8 @@ interface CsvRow {
   성별?: string;
   모프?: string;
   형질?: string;
-  크기?: string;
+  성장단계?: string;
+  크기?: string; // 구 헤더 — backward compat
   '몸무게(g)'?: string;
   먹이?: string;
   분양상태?: string;

@@ -14,6 +14,52 @@ export class CacheInvalidation {
     ]);
   }
 
+  /**
+   * 개체 대량 등록 시 — 목록/부모-자식 관계 캐시 일괄 플러시.
+   *
+   * 단건 `onPetCreated` 대비 추가로 다루는 것:
+   * - DB에 이미 존재하던 부모(`dbParentIds`)의 `children`·`familyTree` 패턴 무효화
+   * - 그 부모를 공유하는 기존 자식(`existingSiblingIds`)의 `clutchMates`·`siblings` 무효화
+   *   (단건의 경우 `ParentRequestService.invalidateRelationCaches`가 담당했으나,
+   *    `bulkCreatePets`는 `linkParent`를 우회하므로 여기서 직접 처리)
+   *
+   * 알려진 edge case — 본 메서드에서 처리 안 함:
+   * - `parents:{newPetId}`, `pet:{newPetId}` 등 새 펫 자체의 NULL_SENTINEL (30초 TTL) 잔존
+   * - 조부모 이상 선조의 `familyTree` — 단건 `createPet`도 미처리 (기존 설계 gap)
+   */
+  async onBulkPetsCreated(params: {
+    userId: string;
+    hasPublicPet: boolean;
+    dbParentIds: string[];
+    existingSiblingIds: string[];
+  }) {
+    const { userId, hasPublicPet, dbParentIds, existingSiblingIds } = params;
+
+    const ops: Promise<void>[] = [
+      this.cacheService.delByPattern(CACHE.myPets.pattern(userId)),
+    ];
+
+    if (hasPublicPet) {
+      ops.push(this.cacheService.delByPattern(CACHE.feed.pattern));
+    }
+
+    for (const parentId of dbParentIds) {
+      ops.push(
+        this.cacheService.delByPattern(CACHE.familyTree.pattern(parentId)),
+        this.cacheService.delByPattern(CACHE.children.pattern(parentId)),
+      );
+    }
+
+    for (const siblingId of existingSiblingIds) {
+      ops.push(
+        this.cacheService.del(CACHE.clutchMates.key(siblingId)),
+        this.cacheService.del(CACHE.siblings.key(siblingId)),
+      );
+    }
+
+    await Promise.all(ops);
+  }
+
   /** 개체 데이터 변경 시 — 개체 캐시 + 목록 캐시 플러시 */
   async onPetChanged(petId: string, userId: string) {
     await Promise.all([

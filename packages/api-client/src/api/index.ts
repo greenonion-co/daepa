@@ -91,6 +91,7 @@ import type {
   ParentLinkDetailJson,
   ParentStatisticsDto,
   PendingRequestCountResponseDto,
+  PetControllerBulkCreate200,
   PetControllerFeed200,
   PetControllerFindAll200,
   PetControllerGetClutchMatesByPetId200,
@@ -140,7 +141,7 @@ export const petControllerGetDeletedPets = (params?: PetControllerGetDeletedPets
 };
 
 export const petControllerBulkCreate = (bulkCreatePetDto: BulkCreatePetDto) => {
-  return useCustomInstance<CommonResponseDto>({
+  return useCustomInstance<PetControllerBulkCreate200>({
     url: `/api/v1/pet/bulk`,
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -1630,10 +1631,17 @@ export const getPetControllerGetDeletedPetsResponseMock = (
 });
 
 export const getPetControllerBulkCreateResponseMock = (
-  overrideResponse: Partial<CommonResponseDto> = {},
-): CommonResponseDto => ({
+  overrideResponse: Partial<PetControllerBulkCreate200> = {},
+): PetControllerBulkCreate200 => ({
   success: faker.datatype.boolean(),
   message: faker.string.alpha(20),
+  data: {
+    successCount: faker.number.int({ min: undefined, max: undefined }),
+    createdPetIds: Array.from(
+      { length: faker.number.int({ min: 1, max: 10 }) },
+      (_, i) => i + 1,
+    ).map(() => faker.string.alpha(20)),
+  },
   ...overrideResponse,
 });
 
@@ -5011,10 +5019,10 @@ export const getPetControllerGetDeletedPetsMockHandler = (
 
 export const getPetControllerBulkCreateMockHandler = (
   overrideResponse?:
-    | CommonResponseDto
+    | PetControllerBulkCreate200
     | ((
         info: Parameters<Parameters<typeof http.post>[1]>[0],
-      ) => Promise<CommonResponseDto> | CommonResponseDto),
+      ) => Promise<PetControllerBulkCreate200> | PetControllerBulkCreate200),
 ) => {
   return http.post("*/api/v1/pet/bulk", async (info) => {
     await delay(1000);

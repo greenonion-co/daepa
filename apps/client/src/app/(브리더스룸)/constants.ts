@@ -667,16 +667,16 @@ export const SELECTOR_CONFIGS: Record<
         value: "미설정",
       },
       {
-        key: "NFS",
-        value: "분양 안함(NFS)",
-      },
-      {
         key: "ON_SALE",
         value: "분양중",
       },
       {
         key: "ON_RESERVATION",
         value: "예약중",
+      },
+      {
+        key: "NFS",
+        value: "NFS",
       },
     ],
   },
@@ -799,6 +799,10 @@ export const ACCEPT_IMAGE_FORMATS: Record<string, string[]> = {
   "image/gif": [".gif"],
   "image/webp": [".webp"],
   "image/avif": [".avif"],
+  // HEIC/HEIF (iPhone 기본 포맷). 일부 브라우저는 file.type이 비어있을 수 있어
+  // 확장자 매칭을 위해 명시적으로 등록. compressImageFile에서 JPEG로 변환됨.
+  "image/heic": [".heic"],
+  "image/heif": [".heif"],
 };
 
 export const DUPLICATE_CHECK_STATUS = {

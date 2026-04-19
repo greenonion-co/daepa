@@ -17,6 +17,7 @@ import {
   PET_SEX,
   PET_SPECIES,
 } from './pet.constants';
+import { PetImageItem } from '../pet_image/pet_image.dto';
 
 export class BulkCreatePetRowDto {
   @ApiProperty({ description: '개체 이름', example: '대파' })
@@ -103,13 +104,52 @@ export class BulkCreatePetRowDto {
   @IsOptional()
   @IsString()
   motherName?: string;
+
+  @ApiProperty({
+    description: '펫 이미지 (PENDING/* 키 사용 — 서버가 {petId}/*로 복사)',
+    type: [PetImageItem],
+    required: false,
+  })
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(3, { message: '이미지는 최대 3장까지 등록 가능합니다.' })
+  @ValidateNested({ each: true })
+  @Type(() => PetImageItem)
+  images?: PetImageItem[];
 }
 
 export class BulkCreatePetDto {
   @ApiProperty({ description: '개체 목록', type: [BulkCreatePetRowDto] })
   @IsArray()
-  @ArrayMaxSize(500, { message: '최대 500개까지 등록할 수 있습니다.' })
+  @ArrayMaxSize(100, { message: '최대 100개까지 등록할 수 있습니다.' })
   @ValidateNested({ each: true })
   @Type(() => BulkCreatePetRowDto)
   pets: BulkCreatePetRowDto[];
+}
+
+/** 대량 등록 시 발생한 행 단위 검증 오류 */
+export class BulkCreatePetErrorItem {
+  @ApiProperty({
+    description: '오류가 발생한 행 인덱스 (0-based). 전역 오류는 생략',
+    required: false,
+  })
+  rowIndex?: number;
+
+  @ApiProperty({ description: '오류 필드명', required: false })
+  field?: string;
+
+  @ApiProperty({ description: '오류 코드' })
+  code: string;
+
+  @ApiProperty({ description: '오류 메시지' })
+  message: string;
+}
+
+/** 대량 등록 성공 응답 */
+export class BulkCreatePetResultDto {
+  @ApiProperty({ description: '성공적으로 생성된 개체 수' })
+  successCount: number;
+
+  @ApiProperty({ description: '생성된 개체의 petId 목록', type: [String] })
+  createdPetIds: string[];
 }
