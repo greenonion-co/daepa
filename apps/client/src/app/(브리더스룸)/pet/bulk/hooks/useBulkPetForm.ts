@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { nanoid } from "nanoid";
+import { useUser } from "@/hooks/useAuth";
 import {
   bulkPetBatchSchema,
   zodIssuesToFieldErrors,
@@ -44,9 +45,17 @@ export type ServerFieldError = {
 const DRAFT_SAVE_DEBOUNCE_MS = 500;
 
 export function useBulkPetForm() {
+  const user = useUser();
+  const userId = user?.userId ?? null;
   const [rows, setRows] = useState<BulkPetRow[]>(() => [emptyRow()]);
   const [serverErrors, setServerErrors] = useState<ServerFieldError[]>([]);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+  // updateCell 등이 항상 최신 rows를 참조할 수 있도록 ref로 보관 — deps에서 rows를 빼서 렌더 폭증 방지
+  const rowsRef = useRef(rows);
+  useEffect(() => {
+    rowsRef.current = rows;
+  }, [rows]);
 
   // ── 임시 저장(localStorage) ───────────────
   // 마운트 시 draft가 있으면 사용자에게 복원 여부를 묻기 위해 pendingDraft로 노출
@@ -54,29 +63,30 @@ export function useBulkPetForm() {
   const [draftChecked, setDraftChecked] = useState(false);
 
   useEffect(() => {
-    const draft = loadDraft();
+    if (!userId) return;
+    const draft = loadDraft(userId);
     if (draft && hasMeaningfulContent(draft.rows)) {
       setPendingDraft(draft);
     }
     setDraftChecked(true);
-  }, []);
+  }, [userId]);
 
   // rows가 바뀔 때마다 debounced 저장. 단, 마운트 직후나 사용자가 아직 복원 선택을 안 한 상태에선 스킵
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
-    if (!draftChecked || pendingDraft) return;
+    if (!draftChecked || pendingDraft || !userId) return;
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     saveTimerRef.current = setTimeout(() => {
       if (hasMeaningfulContent(rows)) {
-        saveDraft(rows);
+        saveDraft(userId, rows);
       } else {
-        clearDraft();
+        clearDraft(userId);
       }
     }, DRAFT_SAVE_DEBOUNCE_MS);
     return () => {
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     };
-  }, [rows, draftChecked, pendingDraft]);
+  }, [rows, draftChecked, pendingDraft, userId]);
 
   const restoreDraft = useCallback(() => {
     if (!pendingDraft) return;
@@ -85,9 +95,9 @@ export function useBulkPetForm() {
   }, [pendingDraft]);
 
   const dismissDraft = useCallback(() => {
-    clearDraft();
+    if (userId) clearDraft(userId);
     setPendingDraft(null);
-  }, []);
+  }, [userId]);
 
   // 클라이언트 검증 오류 (실시간)
   const clientErrors = useMemo<FieldError[]>(() => {
@@ -173,18 +183,21 @@ export function useBulkPetForm() {
       setRows((prev) =>
         prev.map((r) => (r._clientId === clientId ? { ...r, [field]: value } : r)),
       );
-      // 셀 수정 시 해당 행의 서버 오류는 일단 클리어 (재검증 후 다시 붙음)
-      setServerErrors((prev) => prev.filter((e) => {
-        const row = rows.find((r) => r._clientId === clientId);
-        if (!row) return true;
-        const rowIdx = rows.indexOf(row);
-        return e.rowIndex !== rowIdx;
-      }));
+      // 셀 수정 시 해당 행의 서버 오류는 일단 클리어 (재검증 후 다시 붙음).
+      // rowsRef로 최신 rows를 참조해 deps에서 rows 의존을 제거 → updateCell이 stable
+      setServerErrors((prev) =>
+        prev.filter((e) => {
+          const currentRows = rowsRef.current;
+          const rowIdx = currentRows.findIndex((r) => r._clientId === clientId);
+          if (rowIdx < 0) return true;
+          return e.rowIndex !== rowIdx;
+        }),
+      );
     },
-    [rows],
+    [],
   );
 
-  /** 파일 임포트 결과를 기존 rows에 병합. 200 초과분은 잘라내고 수량 반환 */
+  /** 파일 임포트 결과를 기존 rows에 병합. MAX_ROWS 초과분은 잘라내고 수량 반환 */
   const mergeImportedRows = useCallback(
     (imported: Omit<BulkPetRowValue, "_clientId">[]): { added: number; truncated: number } => {
       let added = 0;
@@ -209,8 +222,8 @@ export function useBulkPetForm() {
     setRows([]);
     setServerErrors([]);
     setSelectedIds(new Set());
-    clearDraft();
-  }, []);
+    if (userId) clearDraft(userId);
+  }, [userId]);
 
   // ── 행 선택 관리 ──────────────────────────
   const toggleSelection = useCallback((clientId: string) => {

@@ -68,6 +68,28 @@ import { loadPetData } from './pet.loader';
 import { PetLimitPolicy } from './pet-limit.policy';
 import { UserEntity } from 'src/user/user.entity';
 
+/** bulkCreatePets에서 이미지 처리 동시성 상한 — R2 burst·DB pool 점유 방지용 */
+const BULK_IMAGE_CONCURRENCY = 10;
+
+/** 작업 함수 배열을 주어진 동시성으로 실행. 각 작업은 자체 try/catch로 실패를 흡수해야 함. */
+async function runWithConcurrency<T>(
+  jobs: Array<() => Promise<T>>,
+  concurrency: number,
+): Promise<void> {
+  let cursor = 0;
+  const workers = Array.from(
+    { length: Math.min(concurrency, jobs.length) },
+    async () => {
+      while (true) {
+        const i = cursor++;
+        if (i >= jobs.length) return;
+        await jobs[i]();
+      }
+    },
+  );
+  await Promise.all(workers);
+}
+
 @Injectable()
 export class PetService {
   private readonly MAX_RETRIES = 3;
@@ -711,24 +733,30 @@ export class PetService {
     // === 7단계: 이미지 R2 복사 + DB 저장 (커밋 후, 베스트 에포트) ===
     // 펫 생성은 이미 커밋됨. 이미지 저장이 실패해도 펫 자체는 남고
     // 사용자가 상세 페이지에서 재업로드 가능. 실패는 로그만 남기고 전체 응답은 성공 처리.
-    const imageTasks: Promise<unknown>[] = [];
+    // 동시성을 BULK_IMAGE_CONCURRENCY로 제한해 R2 burst·DB connection pool 폭주를 방지.
+    const imageJobs: Array<() => Promise<void>> = [];
     for (let i = 0; i < pets.length; i++) {
       const images = pets[i].images;
       if (!images || images.length === 0) continue;
       const petId = txResult.createdPetIds[i];
-      imageTasks.push(
-        this.petImageService
-          .saveAndUploadConfirmedImages(petId, images, ownerId, 'create')
-          .catch((err: Error) => {
-            console.error(
-              `[PetService.bulkCreatePets] 이미지 저장 실패 petId=${petId}:`,
-              err,
-            );
-          }),
-      );
+      imageJobs.push(async () => {
+        try {
+          await this.petImageService.saveAndUploadConfirmedImages(
+            petId,
+            images,
+            ownerId,
+            'bulk-create',
+          );
+        } catch (err) {
+          console.error(
+            `[PetService.bulkCreatePets] 이미지 저장 실패 petId=${petId}:`,
+            err,
+          );
+        }
+      });
     }
-    if (imageTasks.length > 0) {
-      await Promise.all(imageTasks);
+    if (imageJobs.length > 0) {
+      await runWithConcurrency(imageJobs, BULK_IMAGE_CONCURRENCY);
     }
 
     return {

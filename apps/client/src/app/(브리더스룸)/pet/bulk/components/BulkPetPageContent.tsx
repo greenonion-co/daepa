@@ -106,13 +106,14 @@ export default function BulkPetPageContent() {
         toast.error(`서버 검증 실패: ${outcome.errors.length}개의 오류`);
         return;
       }
-      // 전역 오류 (슬롯 초과 등)
+      // 전역 오류 (슬롯 초과 등) — code 기반으로 정확히 분기
+      if (outcome.globalCode === "PET_PUBLIC_SLOT_EXCEEDED") {
+        const axiosShape = {
+          response: { data: { code: "PET_PUBLIC_SLOT_EXCEEDED" } },
+        };
+        if (handlePetLimitError(axiosShape as never)) return;
+      }
       if (outcome.globalMessage) {
-        // 슬롯 초과면 전용 다이얼로그
-        const axiosShape = { response: { data: { code: "PET_PUBLIC_SLOT_EXCEEDED" } } };
-        if (outcome.globalMessage.includes("공개") && handlePetLimitError(axiosShape as never)) {
-          return;
-        }
         setGlobalError(outcome.globalMessage);
       }
       return;
@@ -172,7 +173,7 @@ export default function BulkPetPageContent() {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* 성공 후 선택 다이얼로그 */}
+      {/* 성공 후 선택 다이얼로그 — Cancel은 닫기만, navigation은 별도 Action 버튼 */}
       <AlertDialog
         open={successDialog.open}
         onOpenChange={(open) => !open && setSuccessDialog({ open: false, count: 0 })}
@@ -185,9 +186,14 @@ export default function BulkPetPageContent() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => router.push("/pet")}>
+            <AlertDialogAction
+              onClick={() => {
+                setSuccessDialog({ open: false, count: 0 });
+                router.push("/pet");
+              }}
+            >
               개체룸으로 이동
-            </AlertDialogCancel>
+            </AlertDialogAction>
             <AlertDialogAction onClick={() => setSuccessDialog({ open: false, count: 0 })}>
               계속 등록
             </AlertDialogAction>

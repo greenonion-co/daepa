@@ -542,6 +542,13 @@ function SimpleImageUploader({
   const remaining = max - images.length;
   const isFull = remaining <= 0;
 
+  // 업로드 await 도중 사용자가 정렬·삭제하면 onChange 시점에 stale 클로저로
+  // 사라질 수 있어 ref로 최신 images를 추적
+  const imagesRef = useRef(images);
+  useEffect(() => {
+    imagesRef.current = images;
+  }, [images]);
+
   // 진행 상태 부모로 전파
   useEffect(() => {
     onUploadingChange?.(uploading);
@@ -560,7 +567,8 @@ function SimpleImageUploader({
 
     setPendingCount(accepted.length);
     try {
-      const uploaded = await Promise.all(
+      // allSettled로 부분 성공도 살림 — 한 장 실패가 나머지를 버리지 않도록
+      const settled = await Promise.allSettled(
         accepted.map(async (file) => {
           const compressed = await compressImageFile(file);
           const presignedRes = await fetch("/api/upload/presigned-url", {
@@ -593,9 +601,27 @@ function SimpleImageUploader({
           } satisfies PetImageItem;
         }),
       );
-      onChange([...images, ...uploaded]);
+
+      const ok: PetImageItem[] = [];
+      const failedNames: string[] = [];
+      settled.forEach((r, i) => {
+        if (r.status === "fulfilled") ok.push(r.value);
+        else failedNames.push(accepted[i]!.name);
+      });
+
+      if (ok.length > 0) {
+        // imagesRef로 업로드 도중 발생한 정렬·삭제를 보존
+        onChange([...imagesRef.current, ...ok]);
+      }
+      if (failedNames.length > 0) {
+        console.error("일부 이미지 업로드 실패:", failedNames);
+        toast.error(
+          `${failedNames.length}장 업로드 실패: ${failedNames.slice(0, 3).join(", ")}${failedNames.length > 3 ? " 외" : ""}`,
+        );
+      }
     } catch (err) {
-      console.error("이미지 업로드 실패:", err);
+      // allSettled를 쓰므로 여기는 거의 도달하지 않지만 방어
+      console.error("이미지 업로드 처리 중 예외:", err);
       toast.error("이미지 업로드에 실패했습니다.");
     } finally {
       setPendingCount(0);

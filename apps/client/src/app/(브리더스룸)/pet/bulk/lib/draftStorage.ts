@@ -1,6 +1,6 @@
 import type { BulkPetRow } from "../hooks/useBulkPetForm";
 
-const STORAGE_KEY = "bulk-pet-draft";
+const STORAGE_PREFIX = "bulk-pet-draft";
 const VERSION = 1;
 
 type DraftPayload = {
@@ -11,10 +11,15 @@ type DraftPayload = {
 
 export type Draft = { rows: BulkPetRow[]; savedAt: number };
 
-export function loadDraft(): Draft | null {
+/** 사용자별 namespace 적용 — 공용 PC에서 직전 사용자의 draft가 노출되지 않도록 */
+function storageKey(userId: string): string {
+  return `${STORAGE_PREFIX}:${userId}`;
+}
+
+export function loadDraft(userId: string): Draft | null {
   if (typeof window === "undefined") return null;
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(storageKey(userId));
     if (!raw) return null;
     const parsed = JSON.parse(raw) as DraftPayload;
     if (parsed.v !== VERSION || !Array.isArray(parsed.rows)) return null;
@@ -24,20 +29,20 @@ export function loadDraft(): Draft | null {
   }
 }
 
-export function saveDraft(rows: BulkPetRow[]) {
+export function saveDraft(userId: string, rows: BulkPetRow[]) {
   if (typeof window === "undefined") return;
   try {
     const payload: DraftPayload = { v: VERSION, savedAt: Date.now(), rows };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    localStorage.setItem(storageKey(userId), JSON.stringify(payload));
   } catch {
     // 쿼터 초과 등 — 무시
   }
 }
 
-export function clearDraft() {
+export function clearDraft(userId: string) {
   if (typeof window === "undefined") return;
   try {
-    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(storageKey(userId));
   } catch {
     // noop
   }

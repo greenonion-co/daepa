@@ -42,7 +42,7 @@ export class PetImageService {
 
   /**
    * 펫 이미지를 R2에 업로드하고 DB에 저장
-   * 1. 펫 존재 및 소유자 검증
+   * 1. 펫 존재 및 소유자 검증 (bulk-create는 직전 INSERT 보장으로 스킵)
    * 2. R2에 PENDING 이미지 업로드 (트랜잭션 외부)
    * 3. DB에 이미지 정보 저장 (트랜잭션 내부)
    */
@@ -50,17 +50,20 @@ export class PetImageService {
     petId: string,
     imageList: UpsertPetImageDto[],
     userId: string,
-    type: 'create' | 'update',
+    type: 'create' | 'update' | 'bulk-create',
     manager?: EntityManager,
   ) {
     // 타입 검증
-    if (!['create', 'update'].includes(type)) {
+    if (!['create', 'update', 'bulk-create'].includes(type)) {
       throw new ForbiddenException('잘못된 요청입니다.');
     }
 
     // 1. 펫 존재 및 소유자 검증 (트랜잭션 외부에서 먼저 확인)
-    const em = manager || this.dataSource.manager;
-    await this.validatePetOwnership(em, petId, userId, type);
+    // bulk-create는 호출 직전 트랜잭션에서 펫을 INSERT한 후 호출되므로 검증 SELECT를 스킵
+    if (type !== 'bulk-create') {
+      const em = manager || this.dataSource.manager;
+      await this.validatePetOwnership(em, petId, userId, type);
+    }
 
     // 2. R2 업로드 (트랜잭션 외부에서 수행하여 트랜잭션 시간 최소화)
     const savedImageList = await this.uploadPendingImages(imageList, petId);
@@ -93,7 +96,7 @@ export class PetImageService {
     em: EntityManager,
     petId: string,
     userId: string,
-    type: 'create' | 'update',
+    type: 'create' | 'update' | 'bulk-create',
   ): Promise<PetEntity> {
     const pet = await em.findOne(PetEntity, {
       where: { petId, isDeleted: false },
