@@ -60,6 +60,7 @@ import { PetAdoptionEntity } from 'src/pet_adoption/pet_adoption.entity';
 import { PetRelationEntity } from 'src/pet_relation/pet_relation.entity';
 import { replaceParentPublicSafe } from '../common/utils/pet-parent.helper';
 import { extractOriginalPetName } from '../common/utils/pet-name.helper';
+import { runWithConcurrency } from '../common/utils/concurrency';
 import { LayingEntity } from 'src/laying/laying.entity';
 import { CacheService } from 'src/common/cache.service';
 import { CacheInvalidation } from 'src/common/cache-invalidation';
@@ -70,25 +71,6 @@ import { UserEntity } from 'src/user/user.entity';
 
 /** bulkCreatePets에서 이미지 처리 동시성 상한 — R2 burst·DB pool 점유 방지용 */
 const BULK_IMAGE_CONCURRENCY = 10;
-
-/** 작업 함수 배열을 주어진 동시성으로 실행. 각 작업은 자체 try/catch로 실패를 흡수해야 함. */
-async function runWithConcurrency<T>(
-  jobs: Array<() => Promise<T>>,
-  concurrency: number,
-): Promise<void> {
-  let cursor = 0;
-  const workers = Array.from(
-    { length: Math.min(concurrency, jobs.length) },
-    async () => {
-      while (true) {
-        const i = cursor++;
-        if (i >= jobs.length) return;
-        await jobs[i]();
-      }
-    },
-  );
-  await Promise.all(workers);
-}
 
 @Injectable()
 export class PetService {
