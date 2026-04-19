@@ -121,7 +121,7 @@ export class BulkCreatePetRowDto {
 export class BulkCreatePetDto {
   @ApiProperty({ description: '개체 목록', type: [BulkCreatePetRowDto] })
   @IsArray()
-  @ArrayMaxSize(200, { message: '최대 200개까지 등록할 수 있습니다.' })
+  @ArrayMaxSize(100, { message: '최대 100개까지 등록할 수 있습니다.' })
   @ValidateNested({ each: true })
   @Type(() => BulkCreatePetRowDto)
   pets: BulkCreatePetRowDto[];

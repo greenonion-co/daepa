@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Loader2 } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,6 +21,13 @@ import BulkPetSummary from "./BulkPetSummary";
 import { useBulkPetForm } from "../hooks/useBulkPetForm";
 import { useBulkPetUpload } from "../hooks/useBulkPetUpload";
 
+const UPLOAD_PHASE_MESSAGES = [
+  "데이터 검증 중...",
+  "개체 정보 등록 중...",
+  "이미지 업로드 처리 중...",
+  "캐시 갱신 중...",
+];
+
 export default function BulkPetPageContent() {
   const router = useRouter();
   const form = useBulkPetForm();
@@ -31,6 +39,30 @@ export default function BulkPetPageContent() {
     open: boolean;
     count: number;
   }>({ open: false, count: 0 });
+
+  // 업로드 동안 페이지 이탈 방지 (탭 닫기/새로고침/외부 링크)
+  useEffect(() => {
+    if (!isPending) return;
+    const handler = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [isPending]);
+
+  // 단계 안내 사이클 — 실제 진행률을 받지 못하므로 사용자가 멈췄다고 오인하지 않도록 메시지를 순환
+  const [phaseIndex, setPhaseIndex] = useState(0);
+  useEffect(() => {
+    if (!isPending) {
+      setPhaseIndex(0);
+      return;
+    }
+    const interval = setInterval(() => {
+      setPhaseIndex((prev) => (prev + 1) % UPLOAD_PHASE_MESSAGES.length);
+    }, 2500);
+    return () => clearInterval(interval);
+  }, [isPending]);
 
   /** 업로드 버튼이 disabled일 때 사용자가 이유를 알 수 있도록 전달할 문구 */
   const uploadDisabledReason = useMemo<string | undefined>(() => {
@@ -94,7 +126,7 @@ export default function BulkPetPageContent() {
       <header className="border-b border-gray-200 p-4 dark:border-gray-700">
         <h1 className="text-lg font-semibold">개체 대량 등록</h1>
         <p className="mt-1 text-xs text-gray-500">
-          사업자 계정 전용 · 최대 200행 · 업로드 성공 시 초기화됩니다.
+          사업자 계정 전용 · 최대 100행 · 업로드 성공 시 초기화됩니다.
         </p>
       </header>
 
@@ -179,6 +211,35 @@ export default function BulkPetPageContent() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* 업로드 중 풀스크린 오버레이 — 클릭/스크롤 차단 + 페이지 이탈 방지 안내 */}
+      {isPending && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm"
+          role="dialog"
+          aria-modal="true"
+          aria-label="업로드 진행 중"
+        >
+          <div className="mx-4 flex max-w-sm flex-col items-center gap-4 rounded-xl bg-white p-6 text-center shadow-2xl dark:bg-gray-900">
+            <Loader2 className="h-10 w-10 animate-spin text-emerald-600" />
+            <div>
+              <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                {form.rows.length}개 개체를 등록하고 있습니다
+              </p>
+              <p className="mt-2 text-sm text-emerald-700 transition-opacity dark:text-emerald-400">
+                {UPLOAD_PHASE_MESSAGES[phaseIndex]}
+              </p>
+            </div>
+            <p className="text-xs leading-relaxed text-gray-500 dark:text-gray-400">
+              이미지 처리에 최대 1분이 걸릴 수 있습니다.
+              <br />
+              <strong className="text-red-600 dark:text-red-400">
+                페이지를 닫거나 새로고침하지 마세요.
+              </strong>
+            </p>
+          </div>
+        </div>
+      )}
 
       {petLimitDialog}
     </div>

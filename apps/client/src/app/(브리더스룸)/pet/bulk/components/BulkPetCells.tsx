@@ -1,6 +1,6 @@
 "use client";
 
-import { useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import {
   Select,
@@ -12,7 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ChevronDown, ImagePlus, Pencil, Upload, X } from "lucide-react";
+import { ChevronDown, CirclePlus, ImagePlus, Loader2, Pencil, Upload, X } from "lucide-react";
 import { overlay } from "overlay-kit";
 import Image from "next/image";
 import { useDropzone } from "react-dropzone";
@@ -24,12 +24,7 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
-import {
-  SortableContext,
-  arrayMove,
-  rectSortingStrategy,
-  useSortable,
-} from "@dnd-kit/sortable";
+import { SortableContext, arrayMove, rectSortingStrategy, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { buildR2TransformedUrl, compressImageFile } from "@/lib/utils";
 import { tokenStorage } from "@/lib/tokenStorage";
@@ -445,10 +440,7 @@ export function ImagesCell({
         type="button"
         onClick={openEditor}
         title={images.length ? `${images.length}장 — 클릭하여 편집` : "이미지 추가"}
-        className={cn(
-          CELL_BASE,
-          "flex items-center gap-1 hover:bg-gray-50 dark:hover:bg-gray-800",
-        )}
+        className={cn(CELL_BASE, "flex items-center gap-1 hover:bg-gray-50 dark:hover:bg-gray-800")}
       >
         {images.length === 0 ? (
           <span className="flex items-center gap-1 text-gray-400">
@@ -472,10 +464,12 @@ export function ImagesCell({
                 />
               </span>
             ))}
-            <span className="ml-1 text-xs text-gray-500">{images.length}/{MAX_IMAGES_PER_ROW}</span>
+            <span className="ml-1 text-xs text-gray-500">
+              {images.length}/{MAX_IMAGES_PER_ROW}
+            </span>
           </span>
         )}
-        <Pencil className="ml-auto h-3 w-3 shrink-0 text-gray-400" />
+        <CirclePlus className="ml-auto h-3.5 w-3.5 shrink-0 text-gray-400" />
       </button>
     </CellWrapper>
   );
@@ -500,19 +494,31 @@ function ImagesEditorModal({
   onChange: (next: PetImageItem[]) => void;
 }) {
   const [images, setImages] = useState(initialImages);
+  const [uploading, setUploading] = useState(false);
 
   const handleChange = (next: PetImageItem[]) => {
     setImages(next);
     onChange(next);
   };
 
+  // 업로드 중에는 ESC/배경 클릭으로 닫히지 않도록 가드
+  const handleOpenChange = (open: boolean) => {
+    if (!open && uploading) return;
+    if (!open) onClose();
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md">
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+      <DialogContent className="max-w-md" showCloseButton={!uploading}>
         <DialogHeader>
           <DialogTitle>이미지 업로드 (최대 {max}장)</DialogTitle>
         </DialogHeader>
-        <SimpleImageUploader images={images} max={max} onChange={handleChange} />
+        <SimpleImageUploader
+          images={images}
+          max={max}
+          onChange={handleChange}
+          onUploadingChange={setUploading}
+        />
       </DialogContent>
     </Dialog>
   );
@@ -523,29 +529,36 @@ function SimpleImageUploader({
   images,
   max,
   onChange,
+  onUploadingChange,
 }: {
   images: PetImageItem[];
   max: number;
   onChange: (next: PetImageItem[]) => void;
+  /** 업로드 진행 상태 — 모달 측에서 닫기 차단용으로 구독 */
+  onUploadingChange?: (uploading: boolean) => void;
 }) {
-  const [uploading, setUploading] = useState(false);
+  const [pendingCount, setPendingCount] = useState(0);
+  const uploading = pendingCount > 0;
   const remaining = max - images.length;
   const isFull = remaining <= 0;
 
+  // 진행 상태 부모로 전파
+  useEffect(() => {
+    onUploadingChange?.(uploading);
+  }, [uploading, onUploadingChange]);
+
   const handleFiles = async (files: File[]) => {
     if (uploading || isFull) return;
-    const accepted = files
-      .slice(0, remaining)
-      .filter((f) => {
-        if (f.size > MAX_IMAGE_FILE_SIZE) {
-          toast.error(`이미지 용량이 너무 큽니다 (최대 10MB): ${f.name}`);
-          return false;
-        }
-        return true;
-      });
+    const accepted = files.slice(0, remaining).filter((f) => {
+      if (f.size > MAX_IMAGE_FILE_SIZE) {
+        toast.error(`이미지 용량이 너무 큽니다 (최대 10MB): ${f.name}`);
+        return false;
+      }
+      return true;
+    });
     if (accepted.length === 0) return;
 
-    setUploading(true);
+    setPendingCount(accepted.length);
     try {
       const uploaded = await Promise.all(
         accepted.map(async (file) => {
@@ -585,7 +598,7 @@ function SimpleImageUploader({
       console.error("이미지 업로드 실패:", err);
       toast.error("이미지 업로드에 실패했습니다.");
     } finally {
-      setUploading(false);
+      setPendingCount(0);
     }
   };
 
@@ -625,21 +638,36 @@ function SimpleImageUploader({
         {...getRootProps()}
         className={cn(
           "flex flex-col items-center justify-center gap-1.5 rounded-lg border-2 border-dashed px-4 py-6 text-sm transition-colors",
-          isDragActive
-            ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-950/30"
-            : "border-gray-300 hover:border-gray-400 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800",
-          (uploading || isFull) && "cursor-not-allowed opacity-50",
+          uploading
+            ? "border-emerald-400 bg-emerald-50 dark:bg-emerald-950/30"
+            : isDragActive
+              ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-950/30"
+              : "border-gray-300 hover:border-gray-400 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800",
+          (uploading || isFull) && "cursor-not-allowed",
+          uploading && "pointer-events-none",
           !uploading && !isFull && "cursor-pointer",
+          isFull && !uploading && "opacity-50",
         )}
       >
         <input {...getInputProps()} />
-        <Upload className="h-6 w-6 text-gray-400" />
         {uploading ? (
-          <span className="text-gray-600 dark:text-gray-300">업로드 중...</span>
+          <>
+            <Loader2 className="h-6 w-6 animate-spin text-emerald-600" />
+            <span className="font-medium text-emerald-700 dark:text-emerald-400">
+              {pendingCount}장 업로드 중...
+            </span>
+            <span className="text-xs text-gray-500">
+              HEIC 변환·압축이 포함되면 1장당 수 초가 걸릴 수 있습니다
+            </span>
+          </>
         ) : isFull ? (
-          <span className="text-gray-500">최대 {max}장까지 등록 가능합니다.</span>
+          <>
+            <Upload className="h-6 w-6 text-gray-400" />
+            <span className="text-gray-500">최대 {max}장까지 등록 가능합니다.</span>
+          </>
         ) : (
           <>
+            <Upload className="h-6 w-6 text-gray-400" />
             <span className="font-medium text-gray-700 dark:text-gray-200">
               이미지를 드래그하거나 클릭해 업로드
             </span>
@@ -650,7 +678,7 @@ function SimpleImageUploader({
         )}
       </div>
 
-      {images.length > 0 && (
+      {(images.length > 0 || uploading) && (
         <>
           <DndContext sensors={sensors} onDragEnd={handleDragEnd} autoScroll={false}>
             <SortableContext
@@ -666,10 +694,18 @@ function SimpleImageUploader({
                     onDelete={() => handleDelete(img.fileName)}
                   />
                 ))}
+                {Array.from({ length: pendingCount }).map((_, i) => (
+                  <div
+                    key={`pending-${i}`}
+                    className="flex aspect-square animate-pulse items-center justify-center rounded-md border-2 border-dashed border-emerald-300 bg-emerald-50 dark:border-emerald-700 dark:bg-emerald-950/30"
+                  >
+                    <Loader2 className="h-5 w-5 animate-spin text-emerald-500" />
+                  </div>
+                ))}
               </div>
             </SortableContext>
           </DndContext>
-          {images.length > 1 && (
+          {images.length > 1 && !uploading && (
             <p className="text-xs text-gray-500">드래그하여 순서를 변경할 수 있습니다.</p>
           )}
         </>

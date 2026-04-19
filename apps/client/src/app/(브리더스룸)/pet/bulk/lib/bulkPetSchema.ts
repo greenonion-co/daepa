@@ -64,7 +64,7 @@ export type BulkPetRowValue = z.infer<typeof bulkPetRowSchema>;
 export const bulkPetBatchSchema = z
   .array(bulkPetRowSchema)
   .min(1, "최소 1개 이상의 개체가 필요합니다.")
-  .max(200, "최대 200개까지 등록할 수 있습니다.")
+  .max(100, "최대 100개까지 등록할 수 있습니다.")
   .superRefine((rows, ctx) => {
     // 배치 내 이름 중복
     const nameToIndices = new Map<string, number[]>();

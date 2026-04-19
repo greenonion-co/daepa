@@ -16,7 +16,7 @@ import {
   type Draft,
 } from "../lib/draftStorage";
 
-export const MAX_ROWS = 200;
+export const MAX_ROWS = 100;
 
 export type BulkPetRow = BulkPetRowValue & { _clientId: string };
 
