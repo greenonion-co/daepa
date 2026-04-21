@@ -26,6 +26,7 @@ import {
   RouteProp,
 } from '@react-navigation/native';
 import { useAuthStore } from '@/store/auth';
+import { getJwtIat, isTokenNewerOrEqual } from '@/utils/jwt';
 import { useThemeStore, themeColors } from '@/store/theme';
 import { useNavigationStore } from '@/store/navigation';
 import { RootStackNavigationProp } from '@/types/navigation';
@@ -117,6 +118,46 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
       );
     }
   }, [theme]);
+
+  // Native ↔ WebView 토큰 동기화 (Phase 1+2)
+  // native의 accessToken이 변경될 때마다 이미 열려 있는 WebView의 localStorage도 갱신.
+  // iat 비교로 web이 더 최신일 경우 덮어쓰지 않음.
+  useEffect(() => {
+    if (!webViewRef.current) return;
+    if (accessToken) {
+      const nativeIat = getJwtIat(accessToken);
+      webViewRef.current.injectJavaScript(`
+        (function() {
+          try {
+            function getIat(jwt) {
+              if (!jwt || typeof jwt !== 'string') return 0;
+              try {
+                var parts = jwt.split('.');
+                if (parts.length < 2) return 0;
+                var payload = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+                var pad = payload.length % 4 === 0 ? '' : new Array(5 - (payload.length % 4)).join('=');
+                var iat = JSON.parse(atob(payload + pad)).iat;
+                return typeof iat === 'number' ? iat : 0;
+              } catch (e) { return 0; }
+            }
+            var incoming = ${JSON.stringify(accessToken)};
+            var current = localStorage.getItem('accessToken');
+            if (current === incoming) return;
+            if (!current || ${nativeIat} >= getIat(current)) {
+              localStorage.setItem('accessToken', incoming);
+            }
+          } catch (e) {}
+        })();
+        true;
+      `);
+    } else {
+      // native 로그아웃 — WebView도 정리
+      webViewRef.current.injectJavaScript(`
+        try { localStorage.removeItem('accessToken'); } catch (e) {}
+        true;
+      `);
+    }
+  }, [accessToken]);
 
   // 컴포넌트 언마운트 시 로딩 닫기
   useEffect(() => {
@@ -270,6 +311,25 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
             routes: [{ name: 'Tabs' }, { name: 'Login' }],
           });
           break;
+        case 'SET_ACCESS_TOKEN': {
+          // WebView 안의 웹 refresh가 새 토큰을 받으면 native AsyncStorage도 동기화.
+          // 이 동기화가 없으면 다음 탭 이동 시 native의 이전 토큰이 다시 주입되어
+          // 만료된 토큰으로 첫 요청 → 401 → 또 refresh → 무한 루프가 발생.
+          //
+          // iat 비교로 web에서 들어온 값이 현재 native값보다 오래된 경우 무시 (race 방지).
+          const incoming = message.token || null;
+          if (!incoming) {
+            // 빈 토큰은 로그아웃 신호 — TOKEN_REFRESH_FAILED와 별개로 조용히 정리
+            useAuthStore.getState().setAccessToken(null);
+            break;
+          }
+          const currentNative = useAuthStore.getState().accessToken;
+          if (isTokenNewerOrEqual(incoming, currentNative)) {
+            useAuthStore.getState().setAccessToken(incoming);
+          }
+          // incoming이 더 오래됐으면 무시 (드물지만 race 시 안전망)
+          break;
+        }
         case 'LOG': {
           const prefix = '[WebView]';
           switch (message.level) {

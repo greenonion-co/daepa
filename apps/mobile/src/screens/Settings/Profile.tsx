@@ -63,18 +63,20 @@ const Profile = () => {
   const handleSignOut = async () => {
     if (isSignOutPending) return;
 
+    Loading.show();
     try {
-      Loading.show();
-      await signOut();
+      // 서버 invalidate는 베스트 에포트 — 네트워크 장애 등으로 실패해도 로컬 로그아웃은 진행.
+      // 실패 시 "로그아웃 실패" 토스트만 뜨고 클라 상태가 그대로 남는 기존 버그를 방지.
+      await signOut().catch(err => {
+        console.warn('[SignOut] 서버 invalidate 실패, 로컬 상태만 정리:', err);
+      });
 
       useAuthStore.getState().clear();
       queryClient.removeQueries({
         queryKey: [userControllerGetUserProfile.name],
       });
 
-      Toast.show('로그아웃에 성공했습니다.');
-    } catch {
-      Toast.show('로그아웃에 실패했습니다. 다시 시도해주세요.');
+      Toast.show('로그아웃되었습니다.');
     } finally {
       Loading.close();
     }

@@ -76,20 +76,50 @@ export const injectedJsForNoZoom = `
 /**
  * 페이지 로드 전에 실행되는 스크립트 생성 함수
  * @param accessToken - 앱에서 주입할 토큰
+ *
+ * 단순 덮어쓰기 대신 JWT iat(issued-at)을 비교해 **더 최신 토큰을 보존**.
+ * 예: 다른 탭의 WebView가 web refresh로 방금 token_B를 저장했는데,
+ *     이 탭이 마운트되며 native의 이전 token_A를 덮어쓰는 race를 방지.
  */
 export const createInjectedJavaScriptBeforeContentLoaded = (
   accessToken: string | null,
 ): string => `
   (function() {
     try {
-      // 앱에서 주입한 토큰을 localStorage에 저장
-      var token = ${accessToken ? JSON.stringify(accessToken) : 'null'};
-      if (token) {
-        localStorage.setItem('accessToken', token);
-      } else {
-        // 토큰이 없으면 localStorage에서 삭제 (네이티브 로그아웃 시)
-        localStorage.removeItem('accessToken');
+      // JWT iat (issued-at) 추출 — 실패 시 0 반환 (가장 오래된 것으로 처리)
+      function getIat(jwt) {
+        if (!jwt || typeof jwt !== 'string') return 0;
+        try {
+          var parts = jwt.split('.');
+          if (parts.length < 2) return 0;
+          var payload = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+          var pad = payload.length % 4 === 0 ? '' : new Array(5 - (payload.length % 4)).join('=');
+          var decoded = atob(payload + pad);
+          var iat = JSON.parse(decoded).iat;
+          return typeof iat === 'number' ? iat : 0;
+        } catch (e) { return 0; }
       }
+
+      var nativeToken = ${accessToken ? JSON.stringify(accessToken) : 'null'};
+      var currentWeb = null;
+      try { currentWeb = localStorage.getItem('accessToken'); } catch (e) {}
+
+      if (!nativeToken) {
+        // native 로그아웃 상태 — 웹도 정리
+        try { localStorage.removeItem('accessToken'); } catch (e) {}
+      } else if (!currentWeb) {
+        // 웹에 토큰 없음 — native 값 주입
+        try { localStorage.setItem('accessToken', nativeToken); } catch (e) {}
+      } else if (currentWeb !== nativeToken) {
+        // 둘 다 있으나 다름 — iat 비교해 더 최신 것 보존
+        var nativeIat = getIat(nativeToken);
+        var webIat = getIat(currentWeb);
+        if (nativeIat >= webIat) {
+          try { localStorage.setItem('accessToken', nativeToken); } catch (e) {}
+        }
+        // web이 더 최신이면 overwrite하지 않음
+      }
+      // 같으면 write 생략
 
       // 앱 환경임을 표시
       window.isNativeApp = true;

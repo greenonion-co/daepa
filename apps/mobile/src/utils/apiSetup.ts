@@ -2,9 +2,12 @@ import {
   AXIOS_INSTANCE,
   setAxiosInstanceBaseURL,
   setTokenProvider,
+  type AuthErrorReason,
 } from '@repo/api-client';
 import CookieManager from '@react-native-cookies/cookies';
+import Toast from '@/components/common/Toast';
 import { useAuthStore } from '../store/auth';
+import { resetToLogin } from '../navigation/navigationRef';
 import Config from './config';
 
 export const setupApiClient = () => {
@@ -16,7 +19,23 @@ export const setupApiClient = () => {
   const setToken = async (token: string) =>
     useAuthStore.getState().setAccessToken(token);
   const removeToken = async () => useAuthStore.getState().setAccessToken(null);
-  setTokenProvider({ setToken, getToken, removeToken });
+
+  /**
+   * axios 인터셉터가 인증 실패 시 호출 — native 환경 전용 처리.
+   * refresh 실패/401: 로컬 상태 정리 + Login 화면으로 reset.
+   * 403: 권한 없음 toast + 홈으로 이동 (WebView의 RESET_TO_HOME과 동일 UX).
+   */
+  const onAuthError = async (reason: AuthErrorReason) => {
+    if (reason === 'forbidden') {
+      Toast.show('권한이 없습니다. 관리자에게 문의해주세요.');
+      return;
+    }
+    // refresh-failed, unauthorized: 세션 종료
+    useAuthStore.getState().clear();
+    resetToLogin();
+  };
+
+  setTokenProvider({ setToken, getToken, removeToken, onAuthError });
 
   // Native cookie store ↔ axios 연결
   // 모바일은 브라우저처럼 HttpOnly 쿠키를 자동 처리하지 못하므로,
@@ -41,6 +60,12 @@ const setupCookieBridge = () => {
       if (cookieHeader) {
         config.headers = config.headers ?? {};
         (config.headers as Record<string, string>).Cookie = cookieHeader;
+        // [auth-debug] TEMP — refresh 검증용. token 엔드포인트만 찍어 noise 최소화.
+        if (config.url?.includes('/auth/token')) {
+          console.log('[auth-debug] refresh 요청에 Cookie 첨부', {
+            names: Object.keys(cookies),
+          });
+        }
       }
     } catch (err) {
       console.warn('[API] Cookie attach 실패:', err);
@@ -61,6 +86,13 @@ const setupCookieBridge = () => {
         for (const header of headers) {
           // setFromResponse는 단일 Set-Cookie 값을 받음 — 다중일 땐 순회
           await CookieManager.setFromResponse(url, header);
+        }
+        // [auth-debug] TEMP — auth 관련 응답만 로깅
+        if (response.config.url?.includes('/auth/')) {
+          console.log('[auth-debug] 응답 Set-Cookie 저장됨', {
+            url: response.config.url,
+            count: headers.length,
+          });
         }
       } catch (err) {
         console.warn('[API] Cookie 저장 실패:', err);

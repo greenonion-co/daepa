@@ -5,3 +5,4 @@ export {
   setAxiosInstanceBaseURL,
   AXIOS_INSTANCE,
 } from "./src/api/mutator/use-custom-instance";
+export type { TokenProvider, AuthErrorReason } from "./src/api/mutator/use-custom-instance";
