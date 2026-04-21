@@ -1,6 +1,6 @@
 "use client";
 
-import ShowcaseMultiSelect from "./ShowcaseMultiSelect";
+import MultiSelect from "@/app/(브리더스룸)/components/selector/MultiSelect";
 
 export interface ShowcaseFilters {
   sex: string[];
@@ -61,48 +61,43 @@ export default function ShowcaseFilterBar({
     return (
       <div className="flex flex-wrap gap-2">
         {Object.keys(availableMorphs).length > 0 && (
-          <ShowcaseMultiSelect
+          <MultiSelect
             title="모프"
             displayMap={availableMorphs}
             selected={filters.morphs}
             onChange={(morphs) => onChange({ ...filters, morphs })}
             variant="light"
-            dropdownPosition="left"
           />
         )}
         {Object.keys(availableTraits).length > 0 && (
-          <ShowcaseMultiSelect
+          <MultiSelect
             title="형질"
             displayMap={availableTraits}
             selected={filters.traits}
             onChange={(traits) => onChange({ ...filters, traits })}
             variant="light"
-            dropdownPosition="left"
           />
         )}
-        <ShowcaseMultiSelect
+        <MultiSelect
           title="성별"
           displayMap={SEX_DISPLAY}
           selected={filters.sex}
           onChange={(sex) => onChange({ ...filters, sex })}
           variant="light"
-          dropdownPosition="right"
         />
-        <ShowcaseMultiSelect
+        <MultiSelect
           title="크기"
           displayMap={GROWTH_DISPLAY}
           selected={filters.growth}
           onChange={(growth) => onChange({ ...filters, growth })}
           variant="light"
-          dropdownPosition="right"
         />
-        <ShowcaseMultiSelect
+        <MultiSelect
           title="분양상태"
           displayMap={STATUS_DISPLAY}
           selected={filters.status}
           onChange={(status) => onChange({ ...filters, status })}
           variant="light"
-          dropdownPosition="right"
         />
         {hasActiveFilters && (
           <button
@@ -135,7 +130,7 @@ export default function ShowcaseFilterBar({
       {Object.keys(availableMorphs).length > 0 && (
         <div className="flex flex-col gap-1.5 p-4">
           <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400">모프</h3>
-          <ShowcaseMultiSelect
+          <MultiSelect
             title="모프"
             displayMap={availableMorphs}
             selected={filters.morphs}
@@ -146,7 +141,7 @@ export default function ShowcaseFilterBar({
 
       <div className="flex flex-col gap-1.5 p-4">
         <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400">형질</h3>
-        <ShowcaseMultiSelect
+        <MultiSelect
           title="형질"
           displayMap={availableTraits}
           selected={filters.traits}
@@ -156,7 +151,7 @@ export default function ShowcaseFilterBar({
 
       <div className="flex flex-col gap-1.5 p-4">
         <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400">성별</h3>
-        <ShowcaseMultiSelect
+        <MultiSelect
           title="성별"
           displayMap={SEX_DISPLAY}
           selected={filters.sex}
@@ -166,7 +161,7 @@ export default function ShowcaseFilterBar({
 
       <div className="flex flex-col gap-1.5 p-4">
         <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400">크기</h3>
-        <ShowcaseMultiSelect
+        <MultiSelect
           title="크기"
           displayMap={GROWTH_DISPLAY}
           selected={filters.growth}
@@ -176,7 +171,7 @@ export default function ShowcaseFilterBar({
 
       <div className="flex flex-col gap-1.5 p-4">
         <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400">분양상태</h3>
-        <ShowcaseMultiSelect
+        <MultiSelect
           title="분양상태"
           displayMap={STATUS_DISPLAY}
           selected={filters.status}

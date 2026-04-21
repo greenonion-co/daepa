@@ -1,7 +1,14 @@
 import React from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { StyleSheet, View, Text, useColorScheme } from 'react-native';
-import LinearGradient from 'react-native-linear-gradient';
+import {
+  StyleSheet,
+  View,
+  Text,
+  Pressable,
+  useColorScheme,
+} from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import type { RootStackNavigationProp } from '@/types/navigation';
 import KakaoLoginButton from '../Settings/KakaoLoginButton';
 import AppleLoginButton from '../Settings/AppleLoginButton';
 import GoogleLoginButton from '../Settings/GoogleLoginButton';
@@ -9,18 +16,27 @@ import GoogleLoginButton from '../Settings/GoogleLoginButton';
 const LoginScreen = () => {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
+  const navigation = useNavigation<RootStackNavigationProp>();
 
-  const gradientColors = isDark
-    ? ['#18171C', '#18171C']
-    : ['#e5cf94', '#ffffff'];
+  const handleLogoPress = () => {
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'Tabs' }],
+    });
+  };
 
   return (
-    <LinearGradient colors={gradientColors} style={styles.gradient}>
-      <SafeAreaView style={styles.container}>
+    <View style={[styles.background, isDark && styles.backgroundDark]}>
+      <SafeAreaView style={styles.container} edges={['top']}>
+        <View style={styles.header}>
+          <Pressable onPress={handleLogoPress}>
+            <Text style={[styles.logoText, isDark && styles.logoTextDark]}>
+              BREEDY
+            </Text>
+          </Pressable>
+        </View>
         <View style={styles.content}>
-          {/* 메인 카드 */}
           <View style={styles.card}>
-            {/* 로그인 버튼들 */}
             <View style={styles.buttonContainer}>
               <GoogleLoginButton />
               <KakaoLoginButton />
@@ -28,22 +44,38 @@ const LoginScreen = () => {
             </View>
           </View>
 
-          {/* 추가 안내 */}
           <Text style={[styles.footerText, isDark && styles.footerTextDark]}>
             문제가 있으시면 고객센터로 문의해주세요
           </Text>
         </View>
       </SafeAreaView>
-    </LinearGradient>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  gradient: {
+  background: {
     flex: 1,
+    backgroundColor: '#ffffff',
+  },
+  backgroundDark: {
+    backgroundColor: '#18171C',
   },
   container: {
     flex: 1,
+  },
+  header: {
+    height: 52,
+    justifyContent: 'center',
+    paddingHorizontal: 16,
+  },
+  logoText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#1f2937',
+  },
+  logoTextDark: {
+    color: '#ffffff',
   },
   content: {
     flex: 1,
@@ -51,25 +83,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20,
   },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: 'rgba(31, 41, 55, 0.9)',
-    marginBottom: 10,
-    textAlign: 'center',
-  },
   card: {
     width: '100%',
     maxWidth: 400,
     borderRadius: 24,
-  },
-  logoContainer: {
-    alignItems: 'center',
-    paddingBottom: 40,
-  },
-  logo: {
-    width: 200,
-    height: 200,
   },
   buttonContainer: {
     gap: 8,

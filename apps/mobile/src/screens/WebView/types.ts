@@ -17,7 +17,7 @@ export type WebViewMessage =
     }
   | { type: 'GO_BACK' }
   | { type: 'POP_TO_ROOT' }
-  | { type: 'RESET_TO_HOME' }
+  | { type: 'RESET_TO_HOME'; path?: string }
   | { type: 'READY' }
   | { type: 'LOG'; level: 'log' | 'info' | 'warn' | 'error'; args: unknown[] }
   | { type: 'TOKEN_REFRESH_FAILED' }

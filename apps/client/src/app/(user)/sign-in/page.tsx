@@ -17,11 +17,6 @@ const SignInPage = () => {
   return (
     <div className="flex min-h-[calc(100dvh-52px)] w-full items-center justify-center dark:bg-black">
       <div className="w-[90vw] max-w-md">
-        {/* 메인 카드 */}
-        <div className="mb-10 text-center text-3xl font-bold text-gray-800/90 dark:text-white">
-          로그인
-        </div>
-
         <div className="rounded-3xl">
           <div>
             {/*<AppleLoginButton />*/}

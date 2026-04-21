@@ -19,39 +19,21 @@ export type WebViewParams = {
 
 // Tab Navigator params (비로그인)
 export type GuestTabParamList = {
-  Home: WebViewParams | undefined;
-  AddPet: undefined;
+  Feed: WebViewParams | undefined;
   Settings: undefined;
 };
 
-// Tab Navigator params (로그인 1depth)
-export type MemberMainTabParamList = {
-  Home: WebViewParams | undefined;
-  Pet: undefined;
-  AddPet: undefined;
-  Sales: undefined;
-  All: undefined;
-};
-
-// Tab Navigator params (로그인 2depth - 개체 관리)
-export type PetTabParamList = {
-  PetList: WebViewParams | undefined;
-  Hatching: WebViewParams | undefined;
-  AddPet: undefined;
-};
-
-// Tab Navigator params (로그인 2depth - 분양)
-export type SalesTabParamList = {
+// Tab Navigator params (로그인 사용자)
+export type MemberTabParamList = {
+  Feed: WebViewParams | undefined;
+  Pets: WebViewParams | undefined;
+  Breeding: WebViewParams | undefined;
   Adoption: WebViewParams | undefined;
   Showroom: WebViewParams | undefined;
-  AddPet: undefined;
 };
 
 // 통합 Tab params
-export type TabParamList = GuestTabParamList &
-  MemberMainTabParamList &
-  PetTabParamList &
-  SalesTabParamList;
+export type TabParamList = GuestTabParamList & MemberTabParamList;
 
 // 모든 화면의 params를 중앙에서 관리
 export type RootStackParamList = {
