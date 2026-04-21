@@ -307,7 +307,7 @@ export class AuthService {
         status: 'authenticated',
       },
       {
-        expiresIn: '180d',
+        expiresIn: '2m',
         secret: process.env.JWT_REFRESH_SECRET ?? '',
       },
     );
@@ -324,8 +324,15 @@ export class AuthService {
         secret: process.env.JWT_REFRESH_SECRET ?? '',
       });
     } catch {
+      // [auth-debug] TEMP
+      console.log('[auth-debug] refresh 검증 실패 — JWT verify 실패');
       throw new UnauthorizedException('유효하지 않은 refresh token입니다.');
     }
+
+    // [auth-debug] TEMP
+    console.log('[auth-debug] refresh JWT verify 통과', {
+      userId: tokenPayload.sub,
+    });
 
     const userId = tokenPayload.sub;
 
@@ -366,6 +373,10 @@ export class AuthService {
       );
 
       if (!isRefreshTokenValid) {
+        // [auth-debug] TEMP — DB 해시와 불일치 (가장 흔한 원인: rotation 후 이전 토큰 사용)
+        console.log('[auth-debug] refresh 실패 — DB 해시 불일치', {
+          userId: tokenPayload.sub,
+        });
         throw new UnauthorizedException('유효하지 않은 refresh token입니다.');
       }
 
