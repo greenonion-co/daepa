@@ -1,5 +1,4 @@
 import { Metadata } from "next";
-import { notFound } from "next/navigation";
 import { DateTime } from "luxon";
 import { SPECIES_KOREAN_INFO, GENDER_KOREAN_INFO, GROWTH_KOREAN_INFO } from "../../constants";
 import { fetchPet, fetchPetThumbnail } from "./data";
@@ -80,12 +79,10 @@ export async function generateMetadata({ params }: PetPageProps): Promise<Metada
 
 export default async function PetPage({ params }: PetPageProps) {
   const { petId } = await params;
-
-  // generateMetadata와 동일한 cache() 함수 사용 → 추가 요청 없음
-  const pet = await fetchPet(petId);
-  if (!pet) {
-    notFound();
-  }
-
+  // 서버에서 pet을 직접 fetch하지 않음:
+  //   - 실제 데이터 로드는 Client가 React Query + localStorage Bearer로 수행
+  //   - 404/비공개 접근 오류 UI 처리도 PetDetailClient가 담당 (isError 분기)
+  //   - 매 SSR마다 /auth/token 호출이 발생하던 비용 제거
+  //   - generateMetadata는 auth-free fetchPet으로 공개 펫 OG만 생성
   return <PetDetailClient petId={petId} />;
 }
