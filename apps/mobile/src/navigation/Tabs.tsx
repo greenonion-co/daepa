@@ -31,6 +31,16 @@ import useAuth, { useUser } from '@/hooks/useAuth';
 const GuestTab = createBottomTabNavigator<GuestTabParamList>();
 const MemberTab = createBottomTabNavigator<MemberTabParamList>();
 
+// 로그인 사용자 탭의 단일 소스. 순서가 탭바 노출 순서이자 navigation.reset 의 routes 인덱스.
+// path 는 web 경로 → 탭 index 매핑 (RESET_TO_HOME 등에서 사용). 없으면 path-매칭 대상 아님.
+export const MEMBER_TABS: ReadonlyArray<{ name: string; path?: string }> = [
+  { name: 'Feed', path: '/' },
+  { name: 'Pets', path: '/pet' },
+  { name: 'Breeding', path: '/hatching' },
+  { name: 'Adoption', path: '/adoption' },
+  { name: 'Showroom' },
+];
+
 const TAB_ICON_SIZE = 24;
 
 // 애니메이션 탭 아이콘 생성 함수
@@ -112,10 +122,11 @@ function AdoptionWebView() {
 
 function ShowroomWebView() {
   const user = useUser();
+  // showroomSlug 없으면 Feed (/) 로 폴백 — dead URL(/@) 방지.
   const path =
     user && 'showroomSlug' in user && user.showroomSlug
       ? `/@${user.showroomSlug}`
-      : '/@';
+      : '/';
   return <WebViewScreen initialPath={path} />;
 }
 

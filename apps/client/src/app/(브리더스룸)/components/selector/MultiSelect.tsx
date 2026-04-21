@@ -47,10 +47,12 @@ const MultiSelect = ({
     onChange(localSelectedRef.current);
   }, [onChange]);
 
-  // 외부 props 변경 시 로컬 동기화
+  // 외부 props 변경 시 로컬 동기화 (드롭다운 닫혀있을 때만 — 열린 상태에서는 진행 중인 선택 보존)
   useEffect(() => {
-    setLocalSelected(selected);
-  }, [selected]);
+    if (!isOpen) {
+      setLocalSelected(selected);
+    }
+  }, [selected, isOpen]);
 
   // 외부 클릭 시 저장 후 닫기 (데스크탑만 — 모바일은 오버레이로 처리)
   useEffect(() => {

@@ -29,6 +29,7 @@ import { useAuthStore } from '@/store/auth';
 import { useThemeStore, themeColors } from '@/store/theme';
 import { useNavigationStore } from '@/store/navigation';
 import { RootStackNavigationProp } from '@/types/navigation';
+import { MEMBER_TABS } from '../../navigation/Tabs';
 import Config from '@/utils/config';
 import LottieLoading from '@/components/common/LottieLoading';
 import TopBar from '@/components/common/TopBar';
@@ -220,21 +221,10 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
         case 'RESET_TO_HOME': {
           // 홈을 새로 마운트하여 최신 토큰으로 로드 (회원가입 등 토큰 동기화 필요한 경우)
           if (accessToken) {
-            // 로그인 사용자: path에 따라 활성화할 탭 결정
-            const memberRoutes = [
-              { name: 'Feed' },
-              { name: 'Pets' },
-              { name: 'Breeding' },
-              { name: 'Adoption' },
-              { name: 'Showroom' },
-            ];
-            const pathToTabIndex: Record<string, number> = {
-              '/': 0,
-              '/pet': 1,
-              '/hatching': 2,
-              '/adoption': 3,
-            };
-            const tabIndex = pathToTabIndex[message.path ?? '/'] ?? 0;
+            // 로그인 사용자: path에 따라 활성화할 탭 결정 — MEMBER_TABS 가 단일 소스
+            const memberRoutes = MEMBER_TABS.map(t => ({ name: t.name }));
+            const pathname = (message.path ?? '/').split(/[?#]/)[0];
+            const tabIndex = MEMBER_TABS.findIndex(t => t.path === pathname);
 
             navigation.reset({
               index: 0,
@@ -243,7 +233,7 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
                   name: 'Tabs',
                   key: `tabs-${Date.now()}`,
                   state: {
-                    index: tabIndex,
+                    index: tabIndex >= 0 ? tabIndex : 0,
                     routes: memberRoutes,
                   },
                 },
@@ -377,7 +367,8 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
     }, [canGoBack]),
   );
 
-  // TopBar 뒤로가기 버튼 처리 (탭 화면으로 복귀)
+  // TopBar 뒤로가기 버튼 처리 — 의도적으로 탭 루트로 복귀.
+  // WebView 내부 히스토리 뒤로가기는 디바이스 하드웨어 back / swipe back 이 담당.
   const handleTopBarBackPress = useCallback(() => {
     navigation.popToTop();
   }, [navigation]);

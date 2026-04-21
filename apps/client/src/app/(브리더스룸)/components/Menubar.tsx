@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
-import { Bell, CircleUserRound, Settings } from "lucide-react";
+import { Bell, Settings } from "lucide-react";
 import { useSearchKeywordStore } from "../store/searchKeyword";
 import { useIsMobile } from "@/hooks/useMobile";
 import SearchInput from "./SearchInput";
@@ -146,9 +146,9 @@ const Menubar = ({ unreadCount }: { unreadCount: number }) => {
                 type="button"
                 onClick={() => navigate({ path: "/settings" })}
                 className="flex h-11 w-10 items-center justify-center"
-                aria-label="프로필"
+                aria-label="설정"
               >
-                <CircleUserRound className="text-gray-500 dark:text-neutral-400" />
+                <Settings className="text-gray-500 dark:text-neutral-400" />
               </button>
             ) : (
               <Link

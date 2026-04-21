@@ -52,21 +52,18 @@ export default function FloatingActions() {
     [collapsed],
   );
 
+  const bottomClass = (() => {
+    if (!isNativeApp()) return "bottom-[92px]";
+    if (hasNativeTopBar) return "bottom-6";
+    if (isNativeGuest) return isAndroid() ? "bottom-16" : "bottom-6";
+    return isAndroid() ? "bottom-32" : "bottom-16";
+  })();
+
   return (
     <div
       className={cn(
         "fixed z-50",
-        isNativeApp()
-          ? hasNativeTopBar
-            ? "bottom-6"
-            : isNativeGuest
-              ? isAndroid()
-                ? "bottom-16"
-                : "bottom-6"
-              : isAndroid()
-                ? "bottom-32"
-                : "bottom-16"
-          : "bottom-[92px]",
+        bottomClass,
         collapsed ? "right-0" : "right-4",
       )}
     >
