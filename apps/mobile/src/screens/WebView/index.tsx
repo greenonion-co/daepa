@@ -29,6 +29,7 @@ import { useAuthStore } from '@/store/auth';
 import { useThemeStore, themeColors } from '@/store/theme';
 import { useNavigationStore } from '@/store/navigation';
 import { RootStackNavigationProp } from '@/types/navigation';
+import { MEMBER_TABS } from '../../navigation/Tabs';
 import Config from '@/utils/config';
 import LottieLoading from '@/components/common/LottieLoading';
 import TopBar from '@/components/common/TopBar';
@@ -129,9 +130,9 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
     // 쿼리 파라미터와 해시 제거
     const pathname = path.split(/[?#]/)[0];
 
-    if (pathname === '/' || pathname === '') return 'Home';
-    if (pathname === '/pet') return 'Home'; // Admin 모드의 Home
-    if (pathname === '/hatching') return 'Hatching';
+    if (pathname === '/' || pathname === '') return 'Feed';
+    if (pathname === '/pet') return 'Pets';
+    if (pathname === '/hatching') return 'Breeding';
     if (pathname === '/adoption') return 'Adoption';
     if (pathname === '/settings') return 'Settings';
     return pathname;
@@ -167,10 +168,9 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
                 name: 'Tabs',
                 key: `tabs-${Date.now()}`,
                 state: {
-                  index: 2,
+                  index: 0,
                   routes: [
-                    { name: 'Home' },
-                    { name: 'AddPet' },
+                    { name: 'Feed' },
                     { name: 'Settings' },
                   ],
                 },
@@ -218,13 +218,48 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
           // 기존 화면 유지하며 홈으로 이동 (펫 등록 등 일반적인 경우)
           navigation.popToTop();
           break;
-        case 'RESET_TO_HOME':
+        case 'RESET_TO_HOME': {
           // 홈을 새로 마운트하여 최신 토큰으로 로드 (회원가입 등 토큰 동기화 필요한 경우)
-          navigation.reset({
-            index: 0,
-            routes: [{ name: 'Tabs', key: `tabs-${Date.now()}` }],
-          });
+          if (accessToken) {
+            // 로그인 사용자: path에 따라 활성화할 탭 결정 — MEMBER_TABS 가 단일 소스
+            const memberRoutes = MEMBER_TABS.map(t => ({ name: t.name }));
+            const pathname = (message.path ?? '/').split(/[?#]/)[0];
+            const tabIndex = MEMBER_TABS.findIndex(t => t.path === pathname);
+
+            navigation.reset({
+              index: 0,
+              routes: [
+                {
+                  name: 'Tabs',
+                  key: `tabs-${Date.now()}`,
+                  state: {
+                    index: tabIndex >= 0 ? tabIndex : 0,
+                    routes: memberRoutes,
+                  },
+                },
+              ],
+            });
+          } else {
+            // 비로그인 사용자: GuestTabs로 리셋
+            navigation.reset({
+              index: 0,
+              routes: [
+                {
+                  name: 'Tabs',
+                  key: `tabs-${Date.now()}`,
+                  state: {
+                    index: 0,
+                    routes: [
+                      { name: 'Feed' },
+                      { name: 'Settings' },
+                    ],
+                  },
+                },
+              ],
+            });
+          }
           break;
+        }
         case 'READY':
           console.log('WebView is ready');
           break;
@@ -332,14 +367,11 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
     }, [canGoBack]),
   );
 
-  // TopBar 뒤로가기 버튼 처리 (WebView 내부 히스토리 우선)
+  // TopBar 뒤로가기 버튼 처리 — 의도적으로 탭 루트로 복귀.
+  // WebView 내부 히스토리 뒤로가기는 디바이스 하드웨어 back / swipe back 이 담당.
   const handleTopBarBackPress = useCallback(() => {
-    if (canGoBack && webViewRef.current) {
-      webViewRef.current.goBack();
-    } else if (navigation.canGoBack()) {
-      navigation.goBack();
-    }
-  }, [canGoBack, navigation]);
+    navigation.popToTop();
+  }, [navigation]);
 
   // Pull-to-refresh 핸들러
   const onRefresh = useCallback(() => {

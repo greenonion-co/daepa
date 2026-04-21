@@ -18,7 +18,7 @@ const AdoptionPriceRangeFilter = () => {
   const [isEntering, setIsEntering] = useState(false);
 
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen || isMobile) return;
 
     const handlePointerDown = (event: MouseEvent | TouchEvent) => {
       const root = containerRef.current;
@@ -33,7 +33,7 @@ const AdoptionPriceRangeFilter = () => {
       document.removeEventListener("mousedown", handlePointerDown);
       document.removeEventListener("touchstart", handlePointerDown);
     };
-  }, [isOpen]);
+  }, [isOpen, isMobile]);
 
   useEffect(() => {
     if (isOpen) {
@@ -93,15 +93,31 @@ const AdoptionPriceRangeFilter = () => {
         />
       </button>
 
+      {isOpen && isMobile && (
+        <div
+          className="fixed inset-0 z-40 bg-black/40"
+          onClick={() => {
+            setMinPrice(searchFilters.minPrice?.toString() || "");
+            setMaxPrice(searchFilters.maxPrice?.toString() || "");
+            setIsOpen(false);
+          }}
+        />
+      )}
       {isOpen && (
         <div
           className={cn(
-            "absolute left-0 top-[40px] z-50 rounded-2xl border-[1.8px] border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800",
-            "origin-top transform transition-all duration-200 ease-out",
+            "z-50 rounded-2xl border-[1.8px] border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800",
+            "transform transition-all duration-200 ease-out",
+            isMobile
+              ? "fixed top-1/2 left-1/2 w-[280px] -translate-x-1/2 -translate-y-1/2 p-5"
+              : "absolute left-0 top-[40px] w-[320px] p-5",
             isEntering
-              ? "translate-y-0 scale-100 opacity-100"
-              : "-translate-y-1 scale-95 opacity-0",
-            isMobile ? "w-[200px] p-3" : "w-[320px] p-5",
+              ? isMobile
+                ? "scale-100 opacity-100"
+                : "translate-y-0 scale-100 opacity-100"
+              : isMobile
+                ? "scale-95 opacity-0"
+                : "-translate-y-1 scale-95 opacity-0",
           )}
         >
           <div
@@ -185,7 +201,7 @@ const AdoptionPriceRangeFilter = () => {
             </div>
           </div>
 
-          <div className="flex justify-end gap-2">
+          <div className="mt-2 flex items-center gap-3 pt-3">
             <button
               type="button"
               onClick={() => {
@@ -197,12 +213,20 @@ const AdoptionPriceRangeFilter = () => {
                   maxPrice: undefined,
                 });
               }}
-              className={cn(
-                "cursor-pointer rounded-lg bg-gray-100 font-semibold text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600",
-                isMobile ? "h-[28px] px-2 text-[12px]" : "h-[32px] px-3 text-sm",
-              )}
+              className="text-[13px] font-medium text-gray-400 transition-colors hover:text-gray-600 active:text-gray-800 dark:text-gray-500 dark:hover:text-gray-300"
             >
               초기화
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setMinPrice(searchFilters.minPrice?.toString() || "");
+                setMaxPrice(searchFilters.maxPrice?.toString() || "");
+                setIsOpen(false);
+              }}
+              className="text-[13px] font-medium text-gray-400 transition-colors hover:text-gray-600 active:text-gray-800 dark:text-gray-500 dark:hover:text-gray-300"
+            >
+              취소
             </button>
             <button
               type="button"
@@ -214,12 +238,9 @@ const AdoptionPriceRangeFilter = () => {
                 });
                 setIsOpen(false);
               }}
-              className={cn(
-                "cursor-pointer rounded-lg bg-blue-500 font-semibold text-white hover:bg-blue-600",
-                isMobile ? "h-[28px] px-2 text-[12px]" : "h-[32px] px-3 text-sm",
-              )}
+              className="ml-auto rounded-full bg-gray-900 px-5 py-1.5 text-[13px] font-semibold text-white transition-all hover:bg-gray-800 active:scale-[0.96] dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100"
             >
-              저장
+              적용
             </button>
           </div>
         </div>

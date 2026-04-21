@@ -10,7 +10,7 @@ import {
 } from "../../constants";
 import SelectFilter from "../../components/selector/SingleSelect";
 import { cn } from "@/lib/utils";
-import MultiSelectFilter from "../../components/selector/MultiSelect";
+import MultiSelect from "../../components/selector/MultiSelect";
 import { useFilterStore } from "../../store/filter";
 
 interface FiltersProps {
@@ -132,36 +132,41 @@ export function Filters({ showPublicFilter = true, variant = "default" }: Filter
       />
       {searchFilters.species && (
         <>
-          <MultiSelectFilter
-            type="morphs"
+          <MultiSelect
             title="모프"
             displayMap={MORPH_LIST_BY_SPECIES[searchFilters.species]}
+            selected={searchFilters.morphs ?? []}
+            onChange={(morphs) => setSearchFilters({ ...searchFilters, morphs })}
             variant={variant}
           />
-          <MultiSelectFilter
-            type="traits"
+          <MultiSelect
             title="형질"
             displayMap={TRAIT_LIST_BY_SPECIES[searchFilters.species]}
+            selected={searchFilters.traits ?? []}
+            onChange={(traits) => setSearchFilters({ ...searchFilters, traits })}
             variant={variant}
           />
         </>
       )}
-      <MultiSelectFilter
-        type="growth"
+      <MultiSelect
         title="크기"
         displayMap={GROWTH_KOREAN_INFO}
+        selected={searchFilters.growth ?? []}
+        onChange={(growth) => setSearchFilters({ ...searchFilters, growth: growth as typeof searchFilters.growth })}
         variant={variant}
       />
-      <MultiSelectFilter
-        type="sex"
+      <MultiSelect
         title="성별"
         displayMap={GENDER_KOREAN_INFO}
+        selected={searchFilters.sex ?? []}
+        onChange={(sex) => setSearchFilters({ ...searchFilters, sex: sex as typeof searchFilters.sex })}
         variant={variant}
       />
-      <MultiSelectFilter
-        type="status"
+      <MultiSelect
         title="분양상태"
         displayMap={SALE_STATUS_KOREAN_INFO}
+        selected={searchFilters.status ?? []}
+        onChange={(status) => setSearchFilters({ ...searchFilters, status: status as typeof searchFilters.status })}
         variant={variant}
       />
       {/* TODO: 먹이 필터 추가 */}
