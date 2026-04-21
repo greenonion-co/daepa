@@ -30,3 +30,21 @@ export const isTokenNewerOrEqual = (
   if (!a) return false;
   return getJwtIat(a) >= getJwtIat(b);
 };
+
+/**
+ * WebView 에 주입하는 JS 에서 사용할 `getIat` 함수 snippet.
+ * `getJwtIat` 과 같은 로직을 JS 로 표현하여, native ↔ web 간 iat 비교 결과가 절대 어긋나지 않도록 단일 소스로 관리.
+ */
+export const JS_GET_IAT_SNIPPET = `
+function getIat(jwt) {
+  if (!jwt || typeof jwt !== 'string') return 0;
+  try {
+    var parts = jwt.split('.');
+    if (parts.length < 2) return 0;
+    var payload = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+    var pad = payload.length % 4 === 0 ? '' : new Array(5 - (payload.length % 4)).join('=');
+    var iat = JSON.parse(atob(payload + pad)).iat;
+    return typeof iat === 'number' ? iat : 0;
+  } catch (e) { return 0; }
+}
+`;

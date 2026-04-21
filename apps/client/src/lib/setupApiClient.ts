@@ -6,8 +6,19 @@ import {
 import { tokenStorage } from "./tokenStorage";
 
 // 모듈 로드 시점에 baseURL 설정
-const apiBaseURL = process.env.NEXT_PUBLIC_SERVER_BASE_URL || "http://localhost:4000";
-setAxiosInstanceBaseURL(apiBaseURL);
+const envBaseURL = process.env.NEXT_PUBLIC_SERVER_BASE_URL;
+if (!envBaseURL) {
+  if (process.env.NODE_ENV === "production") {
+    throw new Error(
+      "NEXT_PUBLIC_SERVER_BASE_URL is not defined. " +
+        "프로덕션 빌드에 env 가 주입되지 않았습니다.",
+    );
+  }
+  console.warn(
+    "[api] NEXT_PUBLIC_SERVER_BASE_URL 미설정 — http://localhost:4000 폴백 (dev 전용)",
+  );
+}
+setAxiosInstanceBaseURL(envBaseURL ?? "http://localhost:4000");
 
 /**
  * 웹 환경 인증 실패 처리 — 현재 URL을 redirectUrl로 저장하고 /sign-in으로 리다이렉트.

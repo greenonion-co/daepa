@@ -58,12 +58,12 @@ export interface TokenProvider {
   getToken(): Promise<string | null> | string | null;
   removeToken(): Promise<void> | void;
   /**
-   * 인증 에러 발생 시 환경별 UX 처리 (라우팅/알림). 미정의 시 기본 브라우저 fallback 사용.
+   * 인증 에러 발생 시 환경별 UX 처리 (라우팅/알림) — 필수.
    * - 웹: redirectUrl 저장 + /sign-in 이동
    * - React Native: navigation.reset → Login 화면
    * - WebView: postMessage('TOKEN_REFRESH_FAILED') 로 native에 위임
    */
-  onAuthError?(reason: AuthErrorReason): Promise<void> | void;
+  onAuthError(reason: AuthErrorReason): Promise<void> | void;
 }
 
 let tokenProvider: TokenProvider | null = null;
@@ -73,59 +73,14 @@ export const setTokenProvider = (provider: TokenProvider) => {
 };
 
 /**
- * provider에 onAuthError가 있으면 그것에 위임, 없으면 기존 web/webview fallback.
- * 모든 인증 에러 분기가 이 함수 하나로 일원화됨.
+ * 인증 에러를 provider에 위임. provider 는 setTokenProvider 시점에 반드시 등록돼 있어야 함.
  */
 const handleAuthError = async (reason: AuthErrorReason) => {
   if (!tokenProvider) return;
-
-  // 1순위: provider가 자체 처리 정의한 경우
-  if (tokenProvider.onAuthError) {
-    try {
-      await tokenProvider.onAuthError(reason);
-    } catch (e) {
-      console.error("[auth] onAuthError handler 실패:", e);
-    }
-    return;
-  }
-
-  // 2순위: 브라우저/WebView 자동 fallback (backward compat)
-  if (typeof window === "undefined") return;
-  const win = window as unknown as {
-    isNativeApp?: boolean;
-    ReactNativeWebView?: { postMessage: (msg: string) => void };
-    location?: Location;
-    localStorage?: Storage;
-  };
-
-  // WebView → native에 위임
-  if (win.isNativeApp || win.ReactNativeWebView) {
-    try {
-      const type = reason === "forbidden" ? "TOAST" : "TOKEN_REFRESH_FAILED";
-      const message =
-        reason === "forbidden"
-          ? JSON.stringify({ type, message: "권한이 없습니다. 관리자에게 문의해주세요." })
-          : JSON.stringify({ type });
-      win.ReactNativeWebView?.postMessage(message);
-      if (reason === "forbidden") {
-        win.ReactNativeWebView?.postMessage(JSON.stringify({ type: "RESET_TO_HOME" }));
-      }
-    } catch (e) {
-      console.error("[auth] WebView postMessage 실패:", e);
-    }
-    return;
-  }
-
-  // 일반 웹
-  if (reason === "forbidden") {
-    alert("권한이 없습니다. 관리자에게 문의해주세요.");
-    win.location!.href = "/";
-    return;
-  }
-  if (win.location && !win.location.pathname.startsWith("/sign-in")) {
-    const currentPath = win.location.pathname + win.location.search;
-    win.localStorage?.setItem("redirectUrl", currentPath);
-    win.location.href = "/sign-in";
+  try {
+    await tokenProvider.onAuthError(reason);
+  } catch (e) {
+    console.error("[auth] onAuthError handler 실패:", e);
   }
 };
 
@@ -159,14 +114,7 @@ AXIOS_INSTANCE.interceptors.response.use(
       const errorMessage = error.response.data.message;
 
       if (errorMessage === "ACCESS_TOKEN_INVALID") {
-        // [auth-debug] TEMP — refresh 자동 갱신 검증용 로그. 테스트 후 제거.
-        console.log(
-          "[auth-debug] 401 ACCESS_TOKEN_INVALID — refresh 시도 시작",
-          { url: originalRequest.url },
-        );
-
         if (isRefreshing) {
-          console.log("[auth-debug] 이미 refresh 진행 중 — 큐에 대기");
           // 이미 토큰 갱신 중이면 큐에 추가
           return new Promise((resolve, reject) => {
             failedQueue.push({ resolve, reject });
@@ -184,30 +132,12 @@ AXIOS_INSTANCE.interceptors.response.use(
         isRefreshing = true;
 
         try {
-          // [auth-debug] TEMP — refresh 직전 현재 토큰 prefix
-          const beforeToken = (await tokenProvider?.getToken()) ?? "";
-          console.log("[auth-debug] refresh 직전 현재 토큰", {
-            prefix: beforeToken.slice(0, 20),
-          });
-
           const response = await authControllerGetToken();
           const newAccessToken = response.data.token;
-
-          // [auth-debug] TEMP — 새 토큰 prefix + 변경 여부
-          console.log("[auth-debug] refresh 성공 — 새 access token 수신", {
-            newPrefix: newAccessToken?.slice(0, 20),
-            changed: beforeToken !== newAccessToken,
-          });
 
           // 새 토큰을 저장
           if (tokenProvider) {
             await tokenProvider.setToken(newAccessToken);
-            // [auth-debug] TEMP — setToken 직후 실제 저장 확인
-            const afterToken = (await tokenProvider.getToken()) ?? "";
-            console.log("[auth-debug] setToken 후 provider에서 재조회", {
-              afterPrefix: afterToken.slice(0, 20),
-              matches: afterToken === newAccessToken,
-            });
           }
 
           // 큐에 있는 요청들 처리
@@ -217,12 +147,6 @@ AXIOS_INSTANCE.interceptors.response.use(
           originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
           return AXIOS_INSTANCE(originalRequest);
         } catch (refreshError) {
-          // [auth-debug] TEMP
-          console.log(
-            "[auth-debug] refresh 실패 — 로그아웃 처리",
-            refreshError instanceof Error ? refreshError.message : refreshError,
-          );
-
           // 토큰 갱신 실패 시 큐에 있는 요청들 모두 실패 처리
           processQueue(refreshError, null);
 
@@ -237,11 +161,6 @@ AXIOS_INSTANCE.interceptors.response.use(
           isRefreshing = false;
         }
       } else if (tokenProvider) {
-        // [auth-debug] TEMP
-        console.log(
-          "[auth-debug] 401 (non-ACCESS_TOKEN_INVALID) — 즉시 로그아웃",
-          { errorMessage },
-        );
         // ACCESS_TOKEN_INVALID가 아닌 다른 401 에러 — refresh 시도 없이 즉시 로그아웃
         await tokenProvider.removeToken();
         await handleAuthError("unauthorized");

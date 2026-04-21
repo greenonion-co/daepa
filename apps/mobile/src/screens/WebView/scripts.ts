@@ -1,3 +1,5 @@
+import { JS_GET_IAT_SNIPPET } from '@/utils/jwt';
+
 /**
  * 줌 방지 및 콘솔 인터셉터 재설정 스크립트 (페이지 로드 후 실행)
  */
@@ -86,20 +88,7 @@ export const createInjectedJavaScriptBeforeContentLoaded = (
 ): string => `
   (function() {
     try {
-      // JWT iat (issued-at) 추출 — 실패 시 0 반환 (가장 오래된 것으로 처리)
-      function getIat(jwt) {
-        if (!jwt || typeof jwt !== 'string') return 0;
-        try {
-          var parts = jwt.split('.');
-          if (parts.length < 2) return 0;
-          var payload = parts[1].replace(/-/g, '+').replace(/_/g, '/');
-          var pad = payload.length % 4 === 0 ? '' : new Array(5 - (payload.length % 4)).join('=');
-          var decoded = atob(payload + pad);
-          var iat = JSON.parse(decoded).iat;
-          return typeof iat === 'number' ? iat : 0;
-        } catch (e) { return 0; }
-      }
-
+      ${JS_GET_IAT_SNIPPET}
       var nativeToken = ${accessToken ? JSON.stringify(accessToken) : 'null'};
       var currentWeb = null;
       try { currentWeb = localStorage.getItem('accessToken'); } catch (e) {}

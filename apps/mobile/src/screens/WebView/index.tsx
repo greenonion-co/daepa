@@ -26,7 +26,7 @@ import {
   RouteProp,
 } from '@react-navigation/native';
 import { useAuthStore } from '@/store/auth';
-import { getJwtIat, isTokenNewerOrEqual } from '@/utils/jwt';
+import { getJwtIat, isTokenNewerOrEqual, JS_GET_IAT_SNIPPET } from '@/utils/jwt';
 import { useThemeStore, themeColors } from '@/store/theme';
 import { useNavigationStore } from '@/store/navigation';
 import { RootStackNavigationProp } from '@/types/navigation';
@@ -129,17 +129,7 @@ const WebViewScreen: React.FC<WebViewScreenProps> = ({
       webViewRef.current.injectJavaScript(`
         (function() {
           try {
-            function getIat(jwt) {
-              if (!jwt || typeof jwt !== 'string') return 0;
-              try {
-                var parts = jwt.split('.');
-                if (parts.length < 2) return 0;
-                var payload = parts[1].replace(/-/g, '+').replace(/_/g, '/');
-                var pad = payload.length % 4 === 0 ? '' : new Array(5 - (payload.length % 4)).join('=');
-                var iat = JSON.parse(atob(payload + pad)).iat;
-                return typeof iat === 'number' ? iat : 0;
-              } catch (e) { return 0; }
-            }
+            ${JS_GET_IAT_SNIPPET}
             var incoming = ${JSON.stringify(accessToken)};
             var current = localStorage.getItem('accessToken');
             if (current === incoming) return;

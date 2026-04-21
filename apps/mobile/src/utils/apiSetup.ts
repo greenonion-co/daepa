@@ -60,12 +60,6 @@ const setupCookieBridge = () => {
       if (cookieHeader) {
         config.headers = config.headers ?? {};
         (config.headers as Record<string, string>).Cookie = cookieHeader;
-        // [auth-debug] TEMP — refresh 검증용. token 엔드포인트만 찍어 noise 최소화.
-        if (config.url?.includes('/auth/token')) {
-          console.log('[auth-debug] refresh 요청에 Cookie 첨부', {
-            names: Object.keys(cookies),
-          });
-        }
       }
     } catch (err) {
       console.warn('[API] Cookie attach 실패:', err);
@@ -86,13 +80,6 @@ const setupCookieBridge = () => {
         for (const header of headers) {
           // setFromResponse는 단일 Set-Cookie 값을 받음 — 다중일 땐 순회
           await CookieManager.setFromResponse(url, header);
-        }
-        // [auth-debug] TEMP — auth 관련 응답만 로깅
-        if (response.config.url?.includes('/auth/')) {
-          console.log('[auth-debug] 응답 Set-Cookie 저장됨', {
-            url: response.config.url,
-            count: headers.length,
-          });
         }
       } catch (err) {
         console.warn('[API] Cookie 저장 실패:', err);

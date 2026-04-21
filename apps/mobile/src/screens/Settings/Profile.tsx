@@ -69,6 +69,8 @@ const Profile = () => {
       // 실패 시 "로그아웃 실패" 토스트만 뜨고 클라 상태가 그대로 남는 기존 버그를 방지.
       await signOut().catch(err => {
         console.warn('[SignOut] 서버 invalidate 실패, 로컬 상태만 정리:', err);
+        // TODO: Sentry/Crashlytics 도입 시 여기서 보고 — 서버에 refreshToken 해시가
+        //       남는 dangling 상태가 조용히 누적되지 않도록 운영 가시성 확보 필요.
       });
 
       useAuthStore.getState().clear();
