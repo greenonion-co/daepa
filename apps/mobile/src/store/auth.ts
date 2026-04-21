@@ -31,13 +31,26 @@ export const useAuthStore = create<AuthState>()(
     {
       name: 'auth-store',
       storage: createJSONStorage(() => AsyncStorage),
+      version: 1,
+      // 향후 store shape 변경 시 사용. 현재는 v1 신규.
+      migrate: (persistedState: unknown) => {
+        // 현재는 마이그레이션 없음 — 미래 변경 시 여기서 분기.
+        // 마이그레이션 실패 또는 알 수 없는 형태면 빈 state 반환해 강제 재로그인 유도.
+        if (typeof persistedState !== 'object' || persistedState === null) {
+          return { accessToken: null };
+        }
+        return persistedState as { accessToken: string | null };
+      },
       partialize: state => ({
         accessToken: state.accessToken,
       }),
       onRehydrateStorage: () => {
         return (state, error) => {
           if (error) {
+            // hydration 실패 — 안전하게 logged-out 상태로 복원
             console.error('Auth store hydration error:', error);
+            useAuthStore.setState({ accessToken: null, user: null });
+            CookieManager.clearAll().catch(console.error);
             return;
           }
 

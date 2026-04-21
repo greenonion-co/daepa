@@ -1,9 +1,74 @@
-import { setAxiosInstanceBaseURL, setTokenProvider } from "@repo/api-client";
+import {
+  setAxiosInstanceBaseURL,
+  setTokenProvider,
+  type AuthErrorReason,
+} from "@repo/api-client";
 import { tokenStorage } from "./tokenStorage";
 
 // 모듈 로드 시점에 baseURL 설정
-const apiBaseURL = process.env.NEXT_PUBLIC_SERVER_BASE_URL || "http://localhost:4000";
-setAxiosInstanceBaseURL(apiBaseURL);
+const envBaseURL = process.env.NEXT_PUBLIC_SERVER_BASE_URL;
+setAxiosInstanceBaseURL(envBaseURL ?? "http://localhost:4000");
+
+// env 누락 감지는 클라이언트 런타임에서만 — Next.js 빌드 단계(`/_not-found` 프리렌더 등)는
+// NODE_ENV=production 으로 실행되지만 여기서 throw 하면 빌드가 깨지므로 window 체크로 분리.
+if (!envBaseURL && typeof window !== "undefined") {
+  if (process.env.NODE_ENV === "production") {
+    throw new Error(
+      "NEXT_PUBLIC_SERVER_BASE_URL is not defined. " +
+        "프로덕션 빌드에 env 가 주입되지 않았습니다.",
+    );
+  }
+  console.warn(
+    "[api] NEXT_PUBLIC_SERVER_BASE_URL 미설정 — http://localhost:4000 폴백 (dev 전용)",
+  );
+}
+
+/**
+ * 웹 환경 인증 실패 처리 — 현재 URL을 redirectUrl로 저장하고 /sign-in으로 리다이렉트.
+ * WebView 내부면 ReactNativeWebView.postMessage로 native에 위임.
+ */
+const onAuthError = (reason: AuthErrorReason) => {
+  if (typeof window === "undefined") return;
+
+  const win = window as unknown as {
+    isNativeApp?: boolean;
+    ReactNativeWebView?: { postMessage: (msg: string) => void };
+  };
+
+  // WebView 내부 — native에 위임
+  if (win.isNativeApp || win.ReactNativeWebView) {
+    try {
+      if (reason === "forbidden") {
+        win.ReactNativeWebView?.postMessage(
+          JSON.stringify({
+            type: "TOAST",
+            message: "권한이 없습니다. 관리자에게 문의해주세요.",
+          }),
+        );
+        win.ReactNativeWebView?.postMessage(JSON.stringify({ type: "RESET_TO_HOME" }));
+      } else {
+        win.ReactNativeWebView?.postMessage(
+          JSON.stringify({ type: "TOKEN_REFRESH_FAILED" }),
+        );
+      }
+    } catch (e) {
+      console.error("[auth] WebView postMessage 실패:", e);
+    }
+    return;
+  }
+
+  // 일반 웹
+  if (reason === "forbidden") {
+    alert("권한이 없습니다. 관리자에게 문의해주세요.");
+    window.location.href = "/";
+    return;
+  }
+  if (!window.location.pathname.startsWith("/sign-in")) {
+    const currentPath = window.location.pathname + window.location.search;
+    localStorage.setItem("redirectUrl", currentPath);
+    window.location.href = "/sign-in";
+  }
+};
 
 // 클라이언트 사이드에서 모듈 로드 시점에 토큰 프로바이더 설정
 if (typeof window !== "undefined") {
@@ -11,6 +76,7 @@ if (typeof window !== "undefined") {
     setToken: (token: string) => tokenStorage.setToken(token),
     getToken: () => tokenStorage.getToken(),
     removeToken: () => tokenStorage.removeToken(),
+    onAuthError,
   });
 }
 

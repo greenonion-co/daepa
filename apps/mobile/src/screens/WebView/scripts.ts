@@ -1,3 +1,5 @@
+import { JS_GET_IAT_SNIPPET } from '@/utils/jwt';
+
 /**
  * 줌 방지 및 콘솔 인터셉터 재설정 스크립트 (페이지 로드 후 실행)
  */
@@ -76,20 +78,37 @@ export const injectedJsForNoZoom = `
 /**
  * 페이지 로드 전에 실행되는 스크립트 생성 함수
  * @param accessToken - 앱에서 주입할 토큰
+ *
+ * 단순 덮어쓰기 대신 JWT iat(issued-at)을 비교해 **더 최신 토큰을 보존**.
+ * 예: 다른 탭의 WebView가 web refresh로 방금 token_B를 저장했는데,
+ *     이 탭이 마운트되며 native의 이전 token_A를 덮어쓰는 race를 방지.
  */
 export const createInjectedJavaScriptBeforeContentLoaded = (
   accessToken: string | null,
 ): string => `
   (function() {
     try {
-      // 앱에서 주입한 토큰을 localStorage에 저장
-      var token = ${accessToken ? JSON.stringify(accessToken) : 'null'};
-      if (token) {
-        localStorage.setItem('accessToken', token);
-      } else {
-        // 토큰이 없으면 localStorage에서 삭제 (네이티브 로그아웃 시)
-        localStorage.removeItem('accessToken');
+      ${JS_GET_IAT_SNIPPET}
+      var nativeToken = ${accessToken ? JSON.stringify(accessToken) : 'null'};
+      var currentWeb = null;
+      try { currentWeb = localStorage.getItem('accessToken'); } catch (e) {}
+
+      if (!nativeToken) {
+        // native 로그아웃 상태 — 웹도 정리
+        try { localStorage.removeItem('accessToken'); } catch (e) {}
+      } else if (!currentWeb) {
+        // 웹에 토큰 없음 — native 값 주입
+        try { localStorage.setItem('accessToken', nativeToken); } catch (e) {}
+      } else if (currentWeb !== nativeToken) {
+        // 둘 다 있으나 다름 — iat 비교해 더 최신 것 보존
+        var nativeIat = getIat(nativeToken);
+        var webIat = getIat(currentWeb);
+        if (nativeIat >= webIat) {
+          try { localStorage.setItem('accessToken', nativeToken); } catch (e) {}
+        }
+        // web이 더 최신이면 overwrite하지 않음
       }
+      // 같으면 write 생략
 
       // 앱 환경임을 표시
       window.isNativeApp = true;

@@ -45,16 +45,43 @@ const processQueue = (error: any, token: string | null = null) => {
   failedQueue = [];
 };
 
+/**
+ * 인증 에러 원인 — provider가 원인별로 다른 UX를 제공할 수 있도록 전달.
+ * - refresh-failed: refresh token도 만료/무효 → 강제 재로그인 유도
+ * - unauthorized: refresh 시도조차 못 하는 401 (다른 에러 메시지) → 동일하게 로그아웃
+ * - forbidden: 403 — 권한 부족 (로그인은 유지하지만 현재 리소스 접근 불가)
+ */
+export type AuthErrorReason = "refresh-failed" | "unauthorized" | "forbidden";
+
 export interface TokenProvider {
   setToken(token: string): Promise<void> | void;
   getToken(): Promise<string | null> | string | null;
   removeToken(): Promise<void> | void;
+  /**
+   * 인증 에러 발생 시 환경별 UX 처리 (라우팅/알림) — 필수.
+   * - 웹: redirectUrl 저장 + /sign-in 이동
+   * - React Native: navigation.reset → Login 화면
+   * - WebView: postMessage('TOKEN_REFRESH_FAILED') 로 native에 위임
+   */
+  onAuthError(reason: AuthErrorReason): Promise<void> | void;
 }
 
 let tokenProvider: TokenProvider | null = null;
 
 export const setTokenProvider = (provider: TokenProvider) => {
   tokenProvider = provider;
+};
+
+/**
+ * 인증 에러를 provider에 위임. provider 는 setTokenProvider 시점에 반드시 등록돼 있어야 함.
+ */
+const handleAuthError = async (reason: AuthErrorReason) => {
+  if (!tokenProvider) return;
+  try {
+    await tokenProvider.onAuthError(reason);
+  } catch (e) {
+    console.error("[auth] onAuthError handler 실패:", e);
+  }
 };
 
 // 요청 인터셉터 추가
@@ -123,83 +150,25 @@ AXIOS_INSTANCE.interceptors.response.use(
           // 토큰 갱신 실패 시 큐에 있는 요청들 모두 실패 처리
           processQueue(refreshError, null);
 
-          // 로그아웃 처리
+          // 로그아웃 처리 — provider가 환경별 UX를 담당
           if (tokenProvider) {
             await tokenProvider.removeToken();
-            if (typeof window !== "undefined") {
-              // WebView 환경이면 모바일 앱에 알림
-              const win = window as any;
-              if (win.isNativeApp || win.ReactNativeWebView) {
-                try {
-                  const message = JSON.stringify({ type: "TOKEN_REFRESH_FAILED" });
-                  win.ReactNativeWebView?.postMessage(message);
-                } catch (e) {
-                  console.error("Failed to notify native app:", e);
-                }
-              } else if (window?.location?.pathname) {
-                // 일반 웹 환경 - 현재 경로 저장 후 로그인 페이지로 리다이렉트
-                if (!window.location.pathname.startsWith("/sign-in")) {
-                  const currentPath = window.location.pathname + window.location.search;
-                  localStorage.setItem("redirectUrl", currentPath);
-                  window.location.href = "/sign-in";
-                }
-              }
-            }
+            await handleAuthError("refresh-failed");
           }
 
           return Promise.reject(refreshError);
         } finally {
           isRefreshing = false;
         }
-      }
-
-      // ACCESS_TOKEN_INVALID가 아닌 다른 401 에러
-      if (tokenProvider) {
-        tokenProvider.removeToken();
-        if (typeof window !== "undefined") {
-          const win = window as any;
-          if (win.isNativeApp || win.ReactNativeWebView) {
-            try {
-              const message = JSON.stringify({ type: "TOKEN_REFRESH_FAILED" });
-              win.ReactNativeWebView?.postMessage(message);
-            } catch (e) {
-              console.error("Failed to notify native app:", e);
-            }
-          } else if (window?.location?.pathname) {
-            // 일반 웹 환경 - 현재 경로 저장 후 로그인 페이지로 리다이렉트
-            if (!window.location.pathname.startsWith("/sign-in")) {
-              const currentPath = window.location.pathname + window.location.search;
-              localStorage.setItem("redirectUrl", currentPath);
-              window.location.href = "/sign-in";
-            }
-          }
-        }
+      } else if (tokenProvider) {
+        // ACCESS_TOKEN_INVALID가 아닌 다른 401 에러 — refresh 시도 없이 즉시 로그아웃
+        await tokenProvider.removeToken();
+        await handleAuthError("unauthorized");
       }
     }
 
     if (error.response?.status === 403) {
-      if (typeof window !== "undefined") {
-        const win = window as any;
-
-        if (win.isNativeApp || win.ReactNativeWebView) {
-          // WebView 환경 - 네이티브 Toast + 홈으로 이동
-          try {
-            win.ReactNativeWebView?.postMessage(
-              JSON.stringify({
-                type: "TOAST",
-                message: "권한이 없습니다. 관리자에게 문의해주세요.",
-              }),
-            );
-            win.ReactNativeWebView?.postMessage(JSON.stringify({ type: "RESET_TO_HOME" }));
-          } catch (e) {
-            console.error("Failed to notify native app:", e);
-          }
-        } else {
-          // 일반 웹 환경
-          alert("권한이 없습니다. 관리자에게 문의해주세요.");
-          window.location.href = "/";
-        }
-      }
+      await handleAuthError("forbidden");
     }
 
     return Promise.reject(error);

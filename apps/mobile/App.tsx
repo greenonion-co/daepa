@@ -1,13 +1,14 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { View, StyleSheet, Text } from 'react-native';
 import AppConfig from './src/utils/config';
-import {
-  NavigationContainer,
-  NavigationContainerRef,
-} from '@react-navigation/native';
+import { NavigationContainer } from '@react-navigation/native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import BootSplash from 'react-native-bootsplash';
 import Navigation from './src/navigation';
+import {
+  flushPendingNavigation,
+  navigationRef,
+} from './src/navigation/navigationRef';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { setupApiClient } from './src/utils/apiSetup';
 import { useAuthStore } from './src/store/auth';
@@ -15,7 +16,6 @@ import { userControllerGetUserProfile } from '@repo/api-client';
 import Toast from '@/components/common/Toast';
 import Loading from '@/components/common/Loading';
 import Popup from '@/components/common/Popup';
-import { RootStackParamList } from '@/types/navigation';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import Config from 'react-native-config';
 import usePushNotification from './src/hooks/usePushNotification';
@@ -39,8 +39,6 @@ const isDev =
   serverUrl.includes('10.0.');
 
 function App() {
-  const navigationRef =
-    useRef<NavigationContainerRef<RootStackParamList>>(null);
   const [hydrated, setHydrated] = useState(
     useAuthStore.persist?.hasHydrated?.() ?? false,
   );
@@ -62,8 +60,8 @@ function App() {
 
   // 알림 배너 클릭 시 해당 알림으로 이동
   const handleNotificationPress = useCallback(() => {
-    if (notification?.notificationId) {
-      navigationRef.current?.navigate('Main', {
+    if (notification?.notificationId && navigationRef.isReady()) {
+      navigationRef.navigate('Main', {
         path: `/notifications?id=${notification.notificationId}&_nativeTopBar=1`,
       });
     }
@@ -115,8 +113,8 @@ function App() {
 
   // 백그라운드 알림 클릭으로 앱 열렸을 때 해당 알림으로 이동
   useEffect(() => {
-    if (isNavigationReady && pendingNotificationId) {
-      navigationRef.current?.navigate('Main', {
+    if (isNavigationReady && pendingNotificationId && navigationRef.isReady()) {
+      navigationRef.navigate('Main', {
         path: `/notifications?id=${pendingNotificationId}&_nativeTopBar=1`,
       });
       clearPendingNotificationId();
@@ -129,7 +127,11 @@ function App() {
         <View style={styles.container}>
           <NavigationContainer
             ref={navigationRef}
-            onReady={() => setIsNavigationReady(true)}
+            onReady={() => {
+              setIsNavigationReady(true);
+              // ready 이전에 인터셉터 등이 요청한 navigation 액션(resetToLogin 등)을 실행
+              flushPendingNavigation();
+            }}
           >
             <Navigation />
           </NavigationContainer>
