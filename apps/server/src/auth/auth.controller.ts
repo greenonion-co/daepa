@@ -274,12 +274,6 @@ export class AuthController {
     req: RequestWithCookies & { query: { code?: string } },
     @Res({ passthrough: true }) res: Response,
   ) {
-    // [auth-debug] TEMP — refresh 검증용. 테스트 후 제거.
-    console.log('[auth-debug] GET /auth/token 진입', {
-      hasCode: !!req.query.code,
-      hasRefreshCookie: !!req.cookies.refreshToken,
-    });
-
     // 1. auth code로 토큰 교환 (OAuth redirect 후 모바일/웹 공통)
     const authCode = req.query.code;
     if (authCode && typeof authCode === 'string') {
@@ -301,8 +295,6 @@ export class AuthController {
     const refreshToken = req.cookies.refreshToken;
 
     if (!refreshToken || typeof refreshToken !== 'string') {
-      // [auth-debug] TEMP
-      console.log('[auth-debug] refresh 실패 — cookie 누락');
       throw new UnauthorizedException('Refresh token이 유효하지 않습니다.');
     }
 
@@ -310,8 +302,6 @@ export class AuthController {
       await this.authService.refresh(refreshToken);
 
     if (newRefreshToken) {
-      // [auth-debug] TEMP
-      console.log('[auth-debug] refresh token rotation 발동 — 새 쿠키 발급');
       res.cookie('refreshToken', newRefreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
@@ -320,9 +310,6 @@ export class AuthController {
         domain: COOKIE_DOMAIN,
       });
     }
-
-    // [auth-debug] TEMP
-    console.log('[auth-debug] refresh 성공 — 새 access token 응답');
 
     return {
       token: newAccessToken,
