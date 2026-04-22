@@ -3,7 +3,9 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "android": "react-native run-android",
+    "android": "react-native run-android --appId com.greenonion.daepa",
+    "android:bundle": "cd android && ENVFILE=.env.production ./gradlew clean bundleRelease",
+    "android:apk": "cd android && ENVFILE=.env.production ./gradlew clean assembleRelease",
     "ios": "react-native run-ios --scheme breedy-alpha",
     "ios:setup": "ENVFILE=.env.development pod install --project-directory=ios && react-native run-ios --scheme breedy-alpha",
     "ios:prod": "ENVFILE=.env.production pod install --project-directory=ios && react-native run-ios --scheme breedy --mode Release",

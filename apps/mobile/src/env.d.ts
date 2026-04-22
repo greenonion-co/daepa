@@ -1,7 +1,8 @@
 declare module 'react-native-config' {
   export interface NativeConfig {
-    // 앱 식별자
+    // 앱 식별자 — iOS 는 BUNDLE_ID, Android 는 ANDROID_APPLICATION_ID 를 각각 사용
     BUNDLE_ID: string;
+    ANDROID_APPLICATION_ID: string;
     APP_NAME: string;
 
     // 카카오 SDK

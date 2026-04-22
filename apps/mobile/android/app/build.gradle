@@ -88,10 +88,37 @@ def jscFlavor = 'io.github.react-native-community:jsc-android:2026004.+'
 def kakaoAppKey = project.env.get("KAKAO_APP_KEY") ?: ""
 
 // 릴리스 빌드 시 필수 환경변수 검증
+// 과거 Play Store 정지 사유(로그인 불가, 잘못된 백엔드 URL)를 원천 차단하기 위한 방어선.
+// ENVFILE=.env.production 지정 누락 시 .env(개발용) 가 로드돼 LAN IP 가 release 에 섞이는 사고 방지.
 gradle.taskGraph.whenReady { taskGraph ->
     def isReleaseBuild = taskGraph.allTasks.any { it.name.toLowerCase().contains("release") }
-    if (isReleaseBuild && kakaoAppKey.isEmpty()) {
-        throw new RuntimeException("KAKAO_APP_KEY is required for release builds. Please set it in your .env file.")
+    if (!isReleaseBuild) return
+
+    def errors = []
+    def serverUrl = project.env.get("SERVER_BASE_URL") ?: ""
+    def appId = project.env.get("ANDROID_APPLICATION_ID") ?: ""
+    def googleClientIdWeb = project.env.get("GOOGLE_CLIENT_ID_WEB") ?: ""
+
+    if (kakaoAppKey.isEmpty()) {
+        errors << "KAKAO_APP_KEY 누락"
+    }
+    if (serverUrl.isEmpty()) {
+        errors << "SERVER_BASE_URL 누락"
+    } else if (!serverUrl.startsWith("https://")) {
+        errors << "SERVER_BASE_URL 이 https:// 가 아님 (현재: ${serverUrl}). ENVFILE=.env.production 로 실행했는지 확인."
+    }
+    if (appId.isEmpty() || appId == "com.mobile") {
+        errors << "ANDROID_APPLICATION_ID 가 비어있거나 fallback 'com.mobile' 임 (현재: ${appId})"
+    }
+    if (googleClientIdWeb.isEmpty()) {
+        errors << "GOOGLE_CLIENT_ID_WEB 누락 (Android Google 로그인 불가)"
+    }
+
+    if (!errors.isEmpty()) {
+        def msg = "\n\n❌ Release 빌드 환경 검증 실패:\n" +
+                errors.collect { "  • " + it }.join("\n") +
+                "\n\n  → 반드시 'pnpm android:bundle' (또는 ENVFILE=.env.production 지정)로 실행하세요.\n"
+        throw new GradleException(msg)
     }
 }
 
@@ -102,11 +129,12 @@ android {
 
     namespace "com.mobile"
     defaultConfig {
-        applicationId project.env.get("BUNDLE_ID") ?: "com.mobile"
+        // Android applicationId 는 ANDROID_APPLICATION_ID 에서 읽는다 (iOS 의 BUNDLE_ID 와 분리).
+        applicationId project.env.get("ANDROID_APPLICATION_ID") ?: "com.mobile"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 3
-        versionName "1.0"
+        versionCode 1
+        versionName "1.0.0"
 
         // react-native-config 환경변수를 리소스로 사용 가능하게 설정
         resValue "string", "build_config_package", "com.mobile"
