@@ -76,7 +76,7 @@ versionName "1.0"
 릴리스 빌드 시 아래 환경변수가 필수:
 
 - `KAKAO_APP_KEY` — 없으면 빌드 실패
-- `BUNDLE_ID` — 없으면 기본값 `com.mobile` 사용
+- `ANDROID_APPLICATION_ID` — Android `applicationId`. 없으면 기본값 `com.mobile` 사용 (iOS 는 별도로 `BUNDLE_ID` 사용)
 
 ## 5단계: App Bundle 빌드
 
