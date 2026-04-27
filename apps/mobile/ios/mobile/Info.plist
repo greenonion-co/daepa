@@ -41,6 +41,8 @@
 	</array>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>KAKAO_APP_KEY</key>
 	<string>$(KAKAO_APP_KEY)</string>
 	<key>LSApplicationQueriesSchemes</key>
@@ -61,8 +63,6 @@
 	</dict>
 	<key>NSCameraUsageDescription</key>
 	<string>QR 코드를 스캔하기 위해 카메라 접근 권한이 필요합니다.</string>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string></string>
 	<key>RCTNewArchEnabled</key>
 	<false/>
 	<key>UIBackgroundModes</key>
