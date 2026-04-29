@@ -3,22 +3,17 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
+import { DateTime } from "luxon";
+import { Info } from "lucide-react";
 import { petControllerFindPetByPetId } from "@repo/api-client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { toast } from "@/lib/toast";
 import { createAuction } from "../api";
 
-function pad(n: number) {
-  return String(n).padStart(2, "0");
-}
-
-function toLocalInputValue(d: Date): string {
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(
-    d.getHours(),
-  )}:${pad(d.getMinutes())}`;
-}
+// `<input type="datetime-local">` 가 요구하는 포맷
+const DATETIME_LOCAL_FORMAT = "yyyy-LL-dd'T'HH:mm";
+const toLocalInputValue = (dt: DateTime) => dt.toFormat(DATETIME_LOCAL_FORMAT);
 
 interface CreateAuctionFormProps {
   /** 폼에 미리 채워둘 펫 ID */
@@ -29,6 +24,30 @@ interface CreateAuctionFormProps {
   onClose?: () => void;
 }
 
+const HelperText = ({ children }: { children: React.ReactNode }) => (
+  <div className="mt-1 flex items-center gap-1">
+    <Info size={14} className="text-gray-400 dark:text-gray-500" />
+    <span className="text-xs text-gray-400 dark:text-gray-500">{children}</span>
+  </div>
+);
+
+// 항목명(라벨) 위, 항목값(content) 아래로 세로 배치하는 form row.
+const FieldRow = ({
+  label,
+  content,
+  subContent,
+}: {
+  label: string;
+  content: React.ReactNode;
+  subContent?: React.ReactNode;
+}) => (
+  <div className="flex flex-col gap-1">
+    <span className="text-[13px] font-[500] text-gray-600 dark:text-gray-300">{label}</span>
+    <div>{content}</div>
+    {subContent}
+  </div>
+);
+
 export function CreateAuctionForm({
   initialPetId = "",
   lockPetId = false,
@@ -36,16 +55,15 @@ export function CreateAuctionForm({
 }: CreateAuctionFormProps) {
   const router = useRouter();
 
-  const now = new Date();
-  const startDefault = new Date(now.getTime() + 5 * 60 * 1000);
-  const oneHourLater = new Date(startDefault.getTime() + 60 * 60 * 1000);
+  const startDefault = DateTime.now().plus({ minutes: 5 });
+  const endDefault = startDefault.plus({ hours: 1 });
 
   const [petId, setPetId] = useState(initialPetId);
   const [startingPrice, setStartingPrice] = useState<string>("0");
   const [minIncrement, setMinIncrement] = useState<string>("1000");
-  const [extensionMinutes, setExtensionMinutes] = useState<string>("5");
+  const [extensionMinutes, setExtensionMinutes] = useState<string>("1");
   const [startTime, setStartTime] = useState<string>(toLocalInputValue(startDefault));
-  const [endTime, setEndTime] = useState<string>(toLocalInputValue(oneHourLater));
+  const [endTime, setEndTime] = useState<string>(toLocalInputValue(endDefault));
   const [submitting, setSubmitting] = useState(false);
   const [created, setCreated] = useState<{
     shareUrl: string;
@@ -63,10 +81,10 @@ export function CreateAuctionForm({
 
   // 시작 시각이 종료 시각을 추월하면 종료 시각을 자동으로 +1시간 으로 보정.
   useEffect(() => {
-    const sMs = new Date(startTime).getTime();
-    const eMs = new Date(endTime).getTime();
-    if (Number.isFinite(sMs) && Number.isFinite(eMs) && eMs <= sMs) {
-      setEndTime(toLocalInputValue(new Date(sMs + 60 * 60 * 1000)));
+    const sDt = DateTime.fromISO(startTime);
+    const eDt = DateTime.fromISO(endTime);
+    if (sDt.isValid && eDt.isValid && eDt <= sDt) {
+      setEndTime(toLocalInputValue(sDt.plus({ hours: 1 })));
     }
     // endTime 은 의도적으로 deps 제외 — startTime 변경 시점에만 보정.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -92,12 +110,14 @@ export function CreateAuctionForm({
       toast.error("펫 ID를 입력하세요.");
       return;
     }
-    const startMs = new Date(startTime).getTime();
-    const endMs = new Date(endTime).getTime();
-    if (!Number.isFinite(startMs) || !Number.isFinite(endMs)) {
+    const sDt = DateTime.fromISO(startTime);
+    const eDt = DateTime.fromISO(endTime);
+    if (!sDt.isValid || !eDt.isValid) {
       toast.error("시작/종료 시각이 올바르지 않습니다.");
       return;
     }
+    const startMs = sDt.toMillis();
+    const endMs = eDt.toMillis();
     if (endMs <= startMs) {
       toast.error("종료 시각은 시작 시각 이후여야 합니다.");
       return;
@@ -123,8 +143,8 @@ export function CreateAuctionForm({
         startingPrice: Number(startingPrice),
         minIncrement: Number(minIncrement),
         extensionMinutes: ext,
-        startTime: new Date(startMs).toISOString(),
-        endTime: new Date(endMs).toISOString(),
+        startTime: sDt.toUTC().toISO() ?? "",
+        endTime: eDt.toUTC().toISO() ?? "",
       });
       toast.success("경매가 생성되었습니다.");
       setCreated({ shareUrl: data.shareUrl, shareToken: data.shareToken });
@@ -141,8 +161,10 @@ export function CreateAuctionForm({
 
   if (created) {
     return (
-      <div className="space-y-3">
-        <p className="text-sm">아래 링크를 공유해 경매를 시작하세요.</p>
+      <div className="flex flex-col gap-3">
+        <p className="text-[14px] text-gray-700 dark:text-gray-300">
+          아래 링크를 공유해 경매를 시작하세요.
+        </p>
         <div className="flex gap-2">
           <Input readOnly value={created.shareUrl} />
           <Button
@@ -176,21 +198,25 @@ export function CreateAuctionForm({
   }
 
   return (
-    <div className="space-y-3">
-      <div className="space-y-1">
-        <Label htmlFor="petId">개체 이름</Label>
-        <Input
-          id="petId"
-          value={lockPetId ? petName : petId}
-          onChange={(e) => setPetId(e.target.value)}
-          placeholder={lockPetId ? "" : "개체 ID"}
-          readOnly={lockPetId}
-          disabled={lockPetId}
-        />
-      </div>
-      <div className="grid grid-cols-2 gap-3">
-        <div className="space-y-1">
-          <Label htmlFor="startingPrice">시작가 (원)</Label>
+    <div className="flex flex-col gap-3">
+      <FieldRow
+        label="개체"
+        content={
+          <Input
+            id="petId"
+            value={lockPetId ? petName : petId}
+            onChange={(e) => setPetId(e.target.value)}
+            placeholder={lockPetId ? "" : "개체 ID"}
+            readOnly={lockPetId}
+            disabled={lockPetId}
+            className="text-[13px]"
+          />
+        }
+      />
+
+      <FieldRow
+        label="시작가"
+        content={
           <Input
             id="startingPrice"
             type="number"
@@ -198,10 +224,14 @@ export function CreateAuctionForm({
             onChange={(e) => setStartingPrice(e.target.value)}
             min={0}
             step={100}
+            className="text-[13px]"
           />
-        </div>
-        <div className="space-y-1">
-          <Label htmlFor="minIncrement">최소 입찰 단위 (원)</Label>
+        }
+      />
+
+      <FieldRow
+        label="입찰 단위"
+        content={
           <Input
             id="minIncrement"
             type="number"
@@ -209,37 +239,44 @@ export function CreateAuctionForm({
             onChange={(e) => setMinIncrement(e.target.value)}
             min={100}
             step={100}
+            className="text-[13px]"
           />
-        </div>
-      </div>
-      <div className="space-y-1">
-        <Label htmlFor="extensionMinutes">연장 분 (1~10)</Label>
-        <Input
-          id="extensionMinutes"
-          type="number"
-          value={extensionMinutes}
-          onChange={(e) => setExtensionMinutes(e.target.value)}
-          min={1}
-          max={10}
-        />
-        <p className="text-muted-foreground text-xs">
-          마감 직전 입찰 시 종료시각을 N분 뒤로 자동 연장합니다.
-        </p>
-      </div>
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        <div className="space-y-1">
-          <Label htmlFor="startTime">시작 시각</Label>
+        }
+      />
+
+      <FieldRow
+        label="연장 분"
+        content={
+          <Input
+            id="extensionMinutes"
+            type="number"
+            value={extensionMinutes}
+            onChange={(e) => setExtensionMinutes(e.target.value)}
+            min={1}
+            max={10}
+            className="text-[13px]"
+          />
+        }
+        subContent={<HelperText>마지막 입찰 시 종료 시각을 N분 뒤로 자동 연장 (1~10).</HelperText>}
+      />
+
+      <FieldRow
+        label="시작 시각"
+        content={
           <Input
             id="startTime"
             type="datetime-local"
             value={startTime}
             onChange={(e) => setStartTime(e.target.value)}
             onClick={openDateTimePicker}
-            className="w-full"
+            className="w-full text-[13px]"
           />
-        </div>
-        <div className="space-y-1">
-          <Label htmlFor="endTime">종료 시각</Label>
+        }
+      />
+
+      <FieldRow
+        label="종료 시각"
+        content={
           <Input
             id="endTime"
             type="datetime-local"
@@ -247,11 +284,16 @@ export function CreateAuctionForm({
             min={startTime}
             onChange={(e) => setEndTime(e.target.value)}
             onClick={openDateTimePicker}
-            className="w-full"
+            className="w-full text-[13px]"
           />
-        </div>
-      </div>
-      <Button onClick={handleSubmit} disabled={submitting} className="w-full bg-amber-600">
+        }
+      />
+
+      <Button
+        onClick={handleSubmit}
+        disabled={submitting}
+        className="mt-2 w-full bg-amber-600 text-white hover:bg-amber-700 dark:bg-amber-500 dark:hover:bg-amber-600"
+      >
         {submitting ? "생성 중..." : "경매 생성"}
       </Button>
     </div>
