@@ -56,6 +56,12 @@ function App() {
   const clearPendingNotificationId = useNotificationStore(
     state => state.clearPendingNotificationId,
   );
+  const pendingDeepLinkPath = useNotificationStore(
+    state => state.pendingDeepLinkPath,
+  );
+  const clearPendingDeepLinkPath = useNotificationStore(
+    state => state.clearPendingDeepLinkPath,
+  );
   const [isNavigationReady, setIsNavigationReady] = useState(false);
 
   // 알림 배너 클릭 시 해당 알림으로 이동
@@ -120,6 +126,14 @@ function App() {
       clearPendingNotificationId();
     }
   }, [isNavigationReady, pendingNotificationId, clearPendingNotificationId]);
+
+  // 푸시 data.path 가 있으면 해당 경로로 webview 열기 (경매 등 deep link)
+  useEffect(() => {
+    if (isNavigationReady && pendingDeepLinkPath && navigationRef.isReady()) {
+      navigationRef.navigate('Main', { path: pendingDeepLinkPath });
+      clearPendingDeepLinkPath();
+    }
+  }, [isNavigationReady, pendingDeepLinkPath, clearPendingDeepLinkPath]);
 
   return (
     <SafeAreaProvider>

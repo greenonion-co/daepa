@@ -123,6 +123,4 @@ export class CacheInvalidation {
       await this.cacheService.del(CACHE.profileBySlug.key(slug));
     }
   }
-
-
 }

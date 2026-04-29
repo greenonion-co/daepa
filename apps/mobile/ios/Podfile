@@ -24,6 +24,12 @@ target 'mobile' do
   use_frameworks! :linkage => :static
   $RNFirebaseAsStaticFramework = true
 
+  # VisionCamera 의 CoreLocation 연동을 비활성화.
+  # QR 스캐너 용도로만 카메라를 사용하므로 위치 데이터가 불필요.
+  # 기본값 true 로 남기면 CoreLocation 이 링크되어 App Store validation 에서
+  # NSLocationWhenInUseUsageDescription 사유 문자열을 강제 요구한다.
+  $VCEnableLocation = false
+
   use_react_native!(
     :path => config[:reactNativePath],
     # An absolute path to your application root.
@@ -40,6 +46,19 @@ target 'mobile' do
       # :ccache_enabled => true
     )
 
+    # Pod 들의 deployment target 을 앱과 동일하게 강제.
+    # VisionCamera 처럼 podspec 에 iOS 12.4 를 박아둔 라이브러리가
+    # UIWindowScene(iOS 13+) 을 써서 archive 시 깨지는 문제를 방지.
+    app_min_ios = '15.1'
+    installer.pods_project.targets.each do |target|
+      target.build_configurations.each do |build_config|
+        current = build_config.build_settings['IPHONEOS_DEPLOYMENT_TARGET']
+        if current.nil? || current.to_f < app_min_ios.to_f
+          build_config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = app_min_ios
+        end
+      end
+    end
+
     # react-native-config 환경변수를 Pods xcconfig에 include
     installer.pods_project.targets.each do |target|
       target.build_configurations.each do |build_config|
@@ -53,6 +72,39 @@ target 'mobile' do
           end
         end
       end
+    end
+
+    # Hermes dSYM 생성 phase 를 메인 앱 target 에 주입.
+    # RN 0.80.x 의 Hermes prebuilt 가 dSYM 을 포함하지 않아
+    # archive validation 시 'did not include a dSYM for hermes.framework' 로
+    # 차단되는 문제를 우회. dsymutil 로 UUID 매칭되는 dSYM 을 생성해
+    # ${DWARF_DSYM_FOLDER_PATH} 에 배치한다.
+    hermes_phase_name = '[Hermes] Generate dSYM'
+    installer.aggregate_targets.each do |aggregate_target|
+      user_project = aggregate_target.user_project
+      next unless user_project
+      aggregate_target.user_targets.each do |user_target|
+        next if user_target.shell_script_build_phases.any? { |p| p.name == hermes_phase_name }
+        phase = user_target.new_shell_script_build_phase(hermes_phase_name)
+        phase.shell_path = '/bin/sh'
+        phase.shell_script = <<~SH
+          set -e
+          if [ "${CONFIGURATION}" = "Debug" ]; then
+            exit 0
+          fi
+          HERMES_FRAMEWORK="${BUILT_PRODUCTS_DIR}/hermes.framework"
+          HERMES_BIN="${HERMES_FRAMEWORK}/hermes"
+          if [ ! -f "${HERMES_BIN}" ]; then
+            echo "warning: hermes binary not found at ${HERMES_BIN}, skipping dSYM generation"
+            exit 0
+          fi
+          mkdir -p "${DWARF_DSYM_FOLDER_PATH}"
+          DSYM_OUT="${DWARF_DSYM_FOLDER_PATH}/hermes.framework.dSYM"
+          echo "[Hermes] Generating dSYM at ${DSYM_OUT}"
+          /usr/bin/xcrun dsymutil "${HERMES_BIN}" -o "${DSYM_OUT}"
+        SH
+      end
+      user_project.save
     end
   end
 end

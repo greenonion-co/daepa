@@ -1633,7 +1633,8 @@ export class FeedQueryDto {
   itemPerPage: number = 10;
 
   @ApiProperty({
-    description: '셔플 배열 시작 오프셋 (pull-to-refresh 시 랜덤 값으로 다른 위치부터 순환 조회)',
+    description:
+      '셔플 배열 시작 오프셋 (pull-to-refresh 시 랜덤 값으로 다른 위치부터 순환 조회)',
     default: 0,
     minimum: 0,
     required: false,

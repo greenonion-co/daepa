@@ -79,6 +79,10 @@ import { FeedingService } from './feeding/feeding.service';
 import { ViewLogEntity } from './view_log/view_log.entity';
 import { ViewLogController } from './view_log/view_log.controller';
 import { ViewLogService } from './view_log/view_log.service';
+import { AuctionModule } from './auction/auction.module';
+import { AuctionEntity } from './auction/auction.entity';
+import { AuctionBidEntity } from './auction/auction_bid.entity';
+import { AuctionParticipantEntity } from './auction/auction_participant.entity';
 
 const ENTITIES = [
   UserEntity,
@@ -98,6 +102,9 @@ const ENTITIES = [
   FcmTokenEntity,
   FeedingEntity,
   ViewLogEntity,
+  AuctionEntity,
+  AuctionBidEntity,
+  AuctionParticipantEntity,
 ];
 
 @Module({
@@ -132,6 +139,7 @@ const ENTITIES = [
       signOptions: { expiresIn: '1h' },
     }),
     FcmModule,
+    AuctionModule,
   ],
   controllers: [
     AppController,

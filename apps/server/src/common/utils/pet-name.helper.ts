@@ -37,7 +37,7 @@ export async function resolveUniqueNameForOwner(
   em: EntityManager,
 ): Promise<string> {
   // 매수인이 보유 중인 같은 이름(또는 접미사 붙은 이름)들을 한 번에 조회
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
   const existing: { name: string }[] = await em.query(
     `SELECT name FROM pets WHERE owner_id = ? AND is_deleted = false AND (name = ? OR name LIKE ?)`,
     [ownerId, baseName, `${baseName} (%)`],

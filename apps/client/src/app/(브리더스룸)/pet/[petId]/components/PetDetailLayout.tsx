@@ -5,6 +5,7 @@ import { PetDto } from "@repo/api-client";
 import { useIsMyPet } from "@/hooks/useIsMyPet";
 import Header from "./Header";
 import DeletePetButton from "./DeletePetButton";
+import StartAuctionButton from "./StartAuctionButton";
 import { useIsMobile } from "@/hooks/useMobile";
 import { cn } from "@/lib/utils";
 
@@ -225,14 +226,15 @@ export default function PetDetailLayout({
         )}
       </div>
 
-      {/* 개체 삭제 */}
+      {/* 개체 액션 — 경매 시작 + 삭제 */}
       {isMyPet && (
-        <div className="flex justify-end px-2 max-[580px]:justify-stretch">
+        <div className="flex justify-end gap-2 px-2 max-[580px]:flex-col max-[580px]:justify-stretch">
+          <StartAuctionButton petId={pet.petId} isPublic={pet.isPublic ?? false} />
           <DeletePetButton
             petId={pet.petId}
             petName={pet.name}
             onSuccess={onDelete}
-            label="개체 정보 삭제"
+            label="개체 삭제"
           />
         </div>
       )}

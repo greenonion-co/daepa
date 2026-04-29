@@ -89,9 +89,8 @@ function DeletePetButton({ petId, petName, onSuccess, label }: DeletePetButtonPr
           <Button
             variant="ghost"
             size="sm"
-            className="gap-1 rounded-lg bg-white text-red-500 hover:bg-gray-50 hover:text-red-600 max-[580px]:w-full dark:bg-neutral-900 dark:text-red-400 dark:hover:bg-neutral-800"
+            className="rounded-lg bg-white text-red-500 hover:bg-gray-50 hover:text-red-600 max-[580px]:w-full dark:bg-neutral-900 dark:text-red-400 dark:hover:bg-neutral-800"
           >
-            <Trash2 className="h-4 w-4" />
             {label}
           </Button>
         ) : (
