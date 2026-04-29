@@ -27,7 +27,7 @@ export default function CreateAuctionDialog({
     >
       <DialogContent className="max-h-[90dvh] w-full overflow-y-auto sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>경매 설정</DialogTitle>
+          <DialogTitle>경매 정보 설정</DialogTitle>
         </DialogHeader>
         <CreateAuctionForm initialPetId={initialPetId} lockPetId={lockPetId} onClose={onClose} />
       </DialogContent>

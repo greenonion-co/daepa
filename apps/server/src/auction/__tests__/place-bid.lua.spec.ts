@@ -158,6 +158,78 @@ describeIfRedis('place-bid.lua', () => {
     expect(r[5]).toBe('0');
   });
 
+  test('연장 시 분 정시로 올림 (30초 이하)', async () => {
+    // baseMs = 분 정시 (예: 11:00:00.000)
+    const baseMs = Math.floor(Date.now() / 60_000) * 60_000;
+    const nowMs = baseMs + 30_000; // baseMs + 30초
+    const extWindowMs = 2 * 60 * 1000;
+    await redis.hset(stateKey, {
+      start_time_ms: String(baseMs - 60_000),
+      current_end_time_ms: String(nowMs + 1000), // 1초 후 마감 → 트리거 가능
+      extension_window_ms: String(extWindowMs),
+      original_end_time_ms: String(baseMs - 60_000), // 충분히 과거 → 항상 초과
+    });
+    const r = (await place(10_000, 'u1', nowMs)) as [
+      number,
+      string,
+      string,
+      string,
+      string,
+      string,
+      string,
+    ];
+    expect(r[0]).toBe(1);
+    expect(r[5]).toBe('1'); // triggered
+    // new_end = nowMs + 120_000 = baseMs + 150_000 → ceil → baseMs + 180_000 (3분 정시)
+    expect(Number(r[4])).toBe(baseMs + 180_000);
+  });
+
+  test('연장 시 분 정시로 올림 (30초 초과)', async () => {
+    const baseMs = Math.floor(Date.now() / 60_000) * 60_000;
+    const nowMs = baseMs + 31_000; // 31초
+    const extWindowMs = 2 * 60 * 1000;
+    await redis.hset(stateKey, {
+      start_time_ms: String(baseMs - 60_000),
+      current_end_time_ms: String(nowMs + 1000),
+      extension_window_ms: String(extWindowMs),
+      original_end_time_ms: String(baseMs - 60_000),
+    });
+    const r = (await place(10_000, 'u1', nowMs)) as [number, string, ...string[]];
+    expect(r[0]).toBe(1);
+    // new_end = baseMs + 151_000 → ceil → baseMs + 180_000 (3분 정시)
+    expect(Number(r[4])).toBe(baseMs + 180_000);
+  });
+
+  test('연장 시 분 정시 입력은 그대로 유지', async () => {
+    const baseMs = Math.floor(Date.now() / 60_000) * 60_000;
+    const nowMs = baseMs; // 정확히 분 정시
+    const extWindowMs = 2 * 60 * 1000;
+    await redis.hset(stateKey, {
+      start_time_ms: String(baseMs - 60_000),
+      current_end_time_ms: String(nowMs + 1000),
+      extension_window_ms: String(extWindowMs),
+      original_end_time_ms: String(baseMs - 60_000),
+    });
+    const r = (await place(10_000, 'u1', nowMs)) as [number, string, ...string[]];
+    expect(r[0]).toBe(1);
+    // new_end = baseMs + 120_000 (정확히 2분 정시) → ceil → 변화 없음
+    expect(Number(r[4])).toBe(baseMs + 120_000);
+  });
+
+  test('original 미초과 시 분 반올림 적용 안 됨', async () => {
+    const now = Date.now();
+    await redis.hset(stateKey, {
+      current_end_time_ms: String(now + 5 * 60 * 1000),
+      extension_window_ms: String(5 * 60 * 1000),
+      original_end_time_ms: String(now + 100 * 60 * 1000), // 충분히 미래
+    });
+    const r = (await place(10_000, 'u1', now)) as [number, string, ...string[]];
+    expect(r[0]).toBe(1);
+    expect(r[5]).toBe('1');
+    // new_end = now + 5min, original = now + 100min → new_end < original → 반올림 X
+    expect(Number(r[4])).toBe(now + 5 * 60 * 1000);
+  });
+
   test('동시성: 100 개 동시 입찰 → 정확히 1 개만 성공 (같은 금액)', async () => {
     const promises = Array.from({ length: 100 }).map((_, i) =>
       place(11_000, `u${i}`),

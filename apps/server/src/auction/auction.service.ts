@@ -68,14 +68,22 @@ export class AuctionService {
     userId: string,
     dto: CreateAuctionDto,
   ): Promise<{ auctionId: string; shareToken: string }> {
-    // 1. 시간 검증
-    const startMs = new Date(dto.startTime).getTime();
-    const endMs = new Date(dto.endTime).getTime();
+    // 1. 시간 검증 + 분 정시 정렬
+    // 시작/종료 시각을 항상 분 정시(HH:MM:00)로 floor — 입찰자가 초 단위 마감 경쟁을
+    // 하지 않도록 보장. UI 는 datetime-local 의 step=60 으로 분 단위만 받지만,
+    // API 직접 호출 등 우회 경로에 대비해 서버에서 강제 정렬.
+    const rawStartMs = new Date(dto.startTime).getTime();
+    const rawEndMs = new Date(dto.endTime).getTime();
     const nowMs = Date.now();
 
-    if (!Number.isFinite(startMs) || !Number.isFinite(endMs)) {
+    if (!Number.isFinite(rawStartMs) || !Number.isFinite(rawEndMs)) {
       throw new BadRequestException('INVALID_TIME');
     }
+
+    const alignToMinute = (ms: number) => Math.floor(ms / 60_000) * 60_000;
+    const startMs = alignToMinute(rawStartMs);
+    const endMs = alignToMinute(rawEndMs);
+
     if (endMs <= startMs) {
       throw new BadRequestException('END_BEFORE_START');
     }

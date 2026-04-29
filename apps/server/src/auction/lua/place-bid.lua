@@ -9,7 +9,8 @@
 local state = redis.call('HMGET', KEYS[1],
   'status','highest_bid','highest_bidder_id',
   'starting_price','min_increment',
-  'start_time_ms','current_end_time_ms','extension_window_ms')
+  'start_time_ms','current_end_time_ms','extension_window_ms',
+  'original_end_time_ms')
 
 if state[1] == false or state[1] == nil then
   return {0, 'NOT_FOUND'}
@@ -22,6 +23,7 @@ local min_increment        = tonumber(state[5]) or 0
 local start_time_ms        = tonumber(state[6]) or 0
 local current_end_time_ms  = tonumber(state[7]) or 0
 local extension_window_ms  = tonumber(state[8]) or 0
+local original_end_time_ms = tonumber(state[9]) or current_end_time_ms
 
 local bid_amount = tonumber(ARGV[1])
 local bidder_id  = ARGV[2]
@@ -49,6 +51,13 @@ local new_end_time_ms = current_end_time_ms
 if now_ms >= (current_end_time_ms - extension_window_ms) then
   new_end_time_ms = now_ms + extension_window_ms
   triggered_extension = 1
+
+  -- 최초 설정된 종료 시각을 초과하여 연장되는 경우 분 단위 올림.
+  -- 마감 시각이 항상 분 정시(HH:MM:00)가 되도록 하여 입찰자가 초 단위 경쟁을 하지 않도록 완화.
+  -- 호스트가 설정한 연장 시간이 최소 보장됨 (실제 연장: N분 ~ N분 59초).
+  if new_end_time_ms > original_end_time_ms then
+    new_end_time_ms = math.ceil(new_end_time_ms / 60000) * 60000
+  end
 end
 
 redis.call('HSET', KEYS[1],

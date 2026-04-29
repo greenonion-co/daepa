@@ -1,7 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
+import { petControllerFindPetByPetId } from "@repo/api-client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -35,20 +37,55 @@ export function CreateAuctionForm({
   const router = useRouter();
 
   const now = new Date();
-  const oneDayLater = new Date(now.getTime() + 24 * 60 * 60 * 1000);
   const startDefault = new Date(now.getTime() + 5 * 60 * 1000);
+  const oneHourLater = new Date(startDefault.getTime() + 60 * 60 * 1000);
 
   const [petId, setPetId] = useState(initialPetId);
   const [startingPrice, setStartingPrice] = useState<string>("0");
   const [minIncrement, setMinIncrement] = useState<string>("1000");
   const [extensionMinutes, setExtensionMinutes] = useState<string>("5");
   const [startTime, setStartTime] = useState<string>(toLocalInputValue(startDefault));
-  const [endTime, setEndTime] = useState<string>(toLocalInputValue(oneDayLater));
+  const [endTime, setEndTime] = useState<string>(toLocalInputValue(oneHourLater));
   const [submitting, setSubmitting] = useState(false);
   const [created, setCreated] = useState<{
     shareUrl: string;
     shareToken: string;
   } | null>(null);
+
+  // 사용자에게 ID 를 노출하지 않기 위해, lockPetId 모드일 때는 펫 이름을 조회해 표시.
+  const { data: petResponse } = useQuery({
+    queryKey: [petControllerFindPetByPetId.name, petId],
+    queryFn: () => petControllerFindPetByPetId(petId),
+    enabled: lockPetId && !!petId,
+    staleTime: 5 * 60 * 1000,
+  });
+  const petName = petResponse?.data?.data?.name ?? "";
+
+  // 시작 시각이 종료 시각을 추월하면 종료 시각을 자동으로 +1시간 으로 보정.
+  useEffect(() => {
+    const sMs = new Date(startTime).getTime();
+    const eMs = new Date(endTime).getTime();
+    if (Number.isFinite(sMs) && Number.isFinite(eMs) && eMs <= sMs) {
+      setEndTime(toLocalInputValue(new Date(sMs + 60 * 60 * 1000)));
+    }
+    // endTime 은 의도적으로 deps 제외 — startTime 변경 시점에만 보정.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [startTime]);
+
+  // datetime-local 인풋 박스 안을 직접 클릭/탭했을 때만 native picker 를 즉시 띄움.
+  // Label(htmlFor) 클릭으로 인한 synthetic click 은 e.detail === 0 이라 무시 → 라벨 영역에서는 트리거되지 않음.
+  // showPicker 는 user activation 컨텍스트에서만 동작.
+  const openDateTimePicker = (e: React.MouseEvent<HTMLInputElement>) => {
+    if (e.detail === 0) return;
+    const el = e.currentTarget as HTMLInputElement & {
+      showPicker?: () => void;
+    };
+    try {
+      el.showPicker?.();
+    } catch {
+      // 일부 브라우저에서 user-activation 미달 시 throw — 무시 (기본 동작 fallback)
+    }
+  };
 
   const handleSubmit = async () => {
     if (!petId.trim()) {
@@ -141,12 +178,12 @@ export function CreateAuctionForm({
   return (
     <div className="space-y-3">
       <div className="space-y-1">
-        <Label htmlFor="petId">펫 ID</Label>
+        <Label htmlFor="petId">개체 이름</Label>
         <Input
           id="petId"
-          value={petId}
+          value={lockPetId ? petName : petId}
           onChange={(e) => setPetId(e.target.value)}
-          placeholder="펫 상세 페이지의 ID"
+          placeholder={lockPetId ? "" : "개체 ID"}
           readOnly={lockPetId}
           disabled={lockPetId}
         />
@@ -189,7 +226,7 @@ export function CreateAuctionForm({
           마감 직전 입찰 시 종료시각을 N분 뒤로 자동 연장합니다.
         </p>
       </div>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div className="space-y-1">
           <Label htmlFor="startTime">시작 시각</Label>
           <Input
@@ -197,6 +234,8 @@ export function CreateAuctionForm({
             type="datetime-local"
             value={startTime}
             onChange={(e) => setStartTime(e.target.value)}
+            onClick={openDateTimePicker}
+            className="w-full"
           />
         </div>
         <div className="space-y-1">
@@ -205,7 +244,10 @@ export function CreateAuctionForm({
             id="endTime"
             type="datetime-local"
             value={endTime}
+            min={startTime}
             onChange={(e) => setEndTime(e.target.value)}
+            onClick={openDateTimePicker}
+            className="w-full"
           />
         </div>
       </div>

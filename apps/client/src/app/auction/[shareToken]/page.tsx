@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import AuctionLiveView from "./AuctionLiveView";
-import EndedAuctionNotice from "./EndedAuctionNotice";
+import AuctionPageClient from "./AuctionPageClient";
 import { fetchAuctionByShareToken } from "../api";
 
 interface Props {
@@ -25,9 +24,5 @@ export default async function AuctionPage({ params }: Props) {
   const state = await fetchAuctionByShareToken(shareToken);
   if (!state) notFound();
 
-  if (state.status === "ENDED" || state.status === "CANCELED") {
-    return <EndedAuctionNotice />;
-  }
-
-  return <AuctionLiveView initialState={state} />;
+  return <AuctionPageClient initialState={state} />;
 }
