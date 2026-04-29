@@ -159,20 +159,29 @@ export class AuctionService {
   // ── cancel ──
 
   async cancelByHost(shareToken: string, userId: string): Promise<void> {
-    await this.dataSource.transaction(async (em) => {
-      const auction = await em.findOne(AuctionEntity, {
-        where: { shareToken },
-      });
-      if (!auction) throw new NotFoundException('AUCTION_NOT_FOUND');
-      if (auction.hostUserId !== userId)
-        throw new ForbiddenException('NOT_HOST');
-      if (auction.status !== AUCTION_STATUS.PENDING) {
-        throw new BadRequestException('CANNOT_CANCEL_NON_PENDING');
+    const auction = await this.dataSource.transaction(async (em) => {
+      const a = await em.findOne(AuctionEntity, { where: { shareToken } });
+      if (!a) throw new NotFoundException('AUCTION_NOT_FOUND');
+      if (a.hostUserId !== userId) throw new ForbiddenException('NOT_HOST');
+      if (
+        a.status !== AUCTION_STATUS.PENDING &&
+        a.status !== AUCTION_STATUS.ACTIVE
+      ) {
+        // 이미 종료/취소된 경매는 다시 취소 불가
+        throw new BadRequestException('CANNOT_CANCEL_TERMINAL');
       }
-      auction.status = AUCTION_STATUS.CANCELED;
-      await em.save(AuctionEntity, auction);
+      a.status = AUCTION_STATUS.CANCELED;
+      await em.save(AuctionEntity, a);
 
-      await this.stateService.setStatus(auction.id, AUCTION_STATUS.CANCELED);
+      await this.stateService.setStatus(a.id, AUCTION_STATUS.CANCELED);
+      return a;
+    });
+
+    // 트랜잭션 커밋 후 broadcast — 입찰자/관전자에게 즉시 안내.
+    // BullMQ 의 finalize 잡은 그대로 두어도 finalize 시 status === CANCELED 분기로 skip.
+    await this.stateService.publishUpdate(auction.id, 'AUCTION_CANCELED', {
+      auctionId: auction.auctionId,
+      shareToken: auction.shareToken,
     });
   }
 

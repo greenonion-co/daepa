@@ -105,6 +105,8 @@ export class AuctionGateway
         return 'auction:bid_accepted';
       case 'AUCTION_ENDED':
         return 'auction:ended';
+      case 'AUCTION_CANCELED':
+        return 'auction:cancelled';
       case 'AUCTION_STARTED':
         return 'auction:started';
       default:

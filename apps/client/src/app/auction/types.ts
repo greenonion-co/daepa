@@ -29,6 +29,11 @@ export interface AuctionEndedEvent {
   winner: { userId: string; price: number } | null;
 }
 
+export interface AuctionCanceledEvent {
+  auctionId: string;
+  shareToken: string;
+}
+
 export interface AuctionStartedEvent {
   auctionId: string;
   shareToken: string;

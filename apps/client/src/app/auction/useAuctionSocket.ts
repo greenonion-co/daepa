@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { io, type Socket } from "socket.io-client";
 import { tokenStorage } from "@/lib/tokenStorage";
 import type {
+  AuctionCanceledEvent,
   AuctionEndedEvent,
   AuctionStartedEvent,
   AuctionStateWire,
@@ -23,6 +24,7 @@ interface UseAuctionSocketOptions {
   onBidAccepted?: (event: BidAcceptedEvent) => void;
   onBidRejected?: (event: BidRejectedEvent) => void;
   onEnded?: (event: AuctionEndedEvent) => void;
+  onCanceled?: (event: AuctionCanceledEvent) => void;
   onStarted?: (event: AuctionStartedEvent) => void;
   onServerTime?: (serverNowMs: number) => void;
 }
@@ -60,6 +62,9 @@ export function useAuctionSocket(opts: UseAuctionSocketOptions) {
     });
     socket.on("auction:ended", (event: AuctionEndedEvent) => {
       optsRef.current.onEnded?.(event);
+    });
+    socket.on("auction:cancelled", (event: AuctionCanceledEvent) => {
+      optsRef.current.onCanceled?.(event);
     });
     socket.on("auction:started", (event: AuctionStartedEvent) => {
       optsRef.current.onStarted?.(event);

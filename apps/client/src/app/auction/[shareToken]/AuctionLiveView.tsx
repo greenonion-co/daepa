@@ -15,6 +15,7 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import PetCard from "@/app/(브리더스룸)/pet/components/PetCard";
 import PetDetailModal from "@/app/(브리더스룸)/pet/[petId]/components/PetDetailModal";
+import CancelAuctionButton from "./CancelAuctionButton";
 import { useAuctionSocket } from "../useAuctionSocket";
 import type { AuctionStateWire, AuctionStatus, BidAcceptedEvent } from "../types";
 
@@ -145,6 +146,10 @@ export default function AuctionLiveView({ initialState }: Props) {
         winnerUserId: e.winner?.userId ?? null,
       }));
       toast.message(e.winner ? `낙찰가 ${KRW(e.winner.price)}` : "입찰 없이 종료");
+    },
+    onCanceled: () => {
+      setState((prev) => ({ ...prev, status: "CANCELED" }));
+      toast.message("경매가 취소되었습니다");
     },
     onStarted: () => {
       setState((prev) => ({ ...prev, status: "ACTIVE" }));
@@ -312,6 +317,16 @@ export default function AuctionLiveView({ initialState }: Props) {
           {isOwnPet && isActive && (
             <div className="bg-muted text-muted-foreground rounded-md border p-3 text-sm">
               본인이 등록한 펫의 경매에는 입찰할 수 없습니다.
+            </div>
+          )}
+
+          {/* 호스트 전용 — 시작 전/진행 중일 때만 취소 가능. 진행 중 취소는 강력한 확인 절차. */}
+          {isOwnPet && (isPending || isActive) && (
+            <div className="flex justify-end">
+              <CancelAuctionButton
+                shareToken={state.shareToken}
+                status={state.status}
+              />
             </div>
           )}
         </CardContent>
