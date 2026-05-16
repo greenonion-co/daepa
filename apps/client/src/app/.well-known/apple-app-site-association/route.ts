@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 const APP_ID = "FSPV9YZ3G8.com.greenonion.daepamily";
 
-const PATHS = ["/pet/*", "/showroom/*", "/notifications/*"];
+const PATHS = ["/pet/*", "/showroom/*", "/notifications", "/notifications/*"];
 
 export async function GET() {
   const body = {

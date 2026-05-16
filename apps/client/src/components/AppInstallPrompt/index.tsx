@@ -20,6 +20,7 @@ import {
   APP_STORE_URL,
   PLAY_STORE_URL,
   buildAndroidIntentUrl,
+  buildIOSDeepLinkUrl,
 } from "./storeLinks";
 
 const EXCLUDED_PATH_PREFIXES = [
@@ -91,9 +92,16 @@ export function AppInstallPrompt() {
       return;
     }
     if (env.isIOS) {
-      // iOS는 인앱 브라우저가 아니어도 이미 Universal Link을 시도했을 가능성이 높음.
-      // 여기 도달했다는 건 앱 미설치 → 앱스토어 직행.
-      window.location.href = APP_STORE_URL;
+      // iOS: custom scheme 으로 앱 진입 시도. 1.5초 안에 앱이 켜져 페이지가
+      // hidden 으로 바뀌지 않으면 미설치로 간주하고 앱스토어로 이동.
+      const timer = window.setTimeout(() => {
+        window.location.href = APP_STORE_URL;
+      }, 1500);
+      const onVisibilityChange = () => {
+        if (document.hidden) window.clearTimeout(timer);
+      };
+      document.addEventListener("visibilitychange", onVisibilityChange, { once: true });
+      window.location.href = buildIOSDeepLinkUrl(targetPath);
       return;
     }
     // 그 외 모바일은 도메인 추측 불가 → 두 스토어 모두 제공할 수 있겠지만 일단 Android 폴백

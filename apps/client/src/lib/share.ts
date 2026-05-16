@@ -26,8 +26,8 @@ export async function sharePage({
   const url = buildShareUrl(path);
 
   if (isNativeApp()) {
-    requestShare(url, title);
-    return;
+    if (requestShare(url, title)) return;
+    // 브릿지 호출 실패 시 클립보드 폴백
   }
 
   if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
