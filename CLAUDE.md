@@ -1,5 +1,3 @@
-@../../_platform/.claude/CLAUDE.md
-
 # Daepa — Claude Code 참고 메모
 
 ## 프로젝트 구조
