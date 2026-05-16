@@ -65,6 +65,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     completionHandler([.banner, .sound, .badge])
   }
 
+  // Custom scheme (breedy://, kakao{key}://) 진입 처리
   func application(
     _ app: UIApplication,
     open url: URL,
@@ -73,7 +74,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     if AuthApi.isKakaoTalkLoginUrl(url) {
       return AuthController.handleOpenUrl(url: url)
     }
-    return false
+    return RCTLinkingManager.application(app, open: url, options: options)
+  }
+
+  // Universal Link (https://breedy.kr/...) 진입 처리
+  func application(
+    _ application: UIApplication,
+    continue userActivity: NSUserActivity,
+    restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void
+  ) -> Bool {
+    return RCTLinkingManager.application(
+      application, continue: userActivity, restorationHandler: restorationHandler
+    )
   }
 
   // 앱이 활성화될 때 badge 초기화
