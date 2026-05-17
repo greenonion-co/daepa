@@ -1,12 +1,14 @@
 "use client";
 
+import { createPortal } from "react-dom";
+
 interface BottomSheetProps {
   onOpenApp: () => void;
   onContinueWeb: () => void;
 }
 
 export function BottomSheet({ onOpenApp, onContinueWeb }: BottomSheetProps) {
-  return (
+  return createPortal(
     <div
       role="dialog"
       aria-modal="true"
@@ -49,6 +51,7 @@ export function BottomSheet({ onOpenApp, onContinueWeb }: BottomSheetProps) {
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

@@ -1,19 +1,16 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 
 import { detectClientEnv } from "@/lib/userAgent";
 import {
-  dismissBanner,
   dismissBottomSheet,
   dismissKakaoGuide,
-  isBannerDismissed,
   isBottomSheetDismissed,
   isKakaoGuideDismissed,
 } from "@/lib/appPromptStorage";
 
-import { Banner } from "./Banner";
 import { BottomSheet } from "./BottomSheet";
 import { KakaoInAppGuide } from "./KakaoInAppGuide";
 import {
@@ -30,11 +27,10 @@ const EXCLUDED_PATH_PREFIXES = [
   "/api",
 ];
 
-type PromptVariant = "banner" | "bottomSheet" | "kakaoGuide" | null;
+type PromptVariant = "bottomSheet" | "kakaoGuide" | null;
 
 export function AppInstallPrompt() {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const [mounted, setMounted] = useState(false);
   const [variant, setVariant] = useState<PromptVariant>(null);
 
@@ -45,7 +41,6 @@ export function AppInstallPrompt() {
 
   const env = useMemo(() => (mounted ? detectClientEnv() : null), [mounted]);
 
-  const fromShare = searchParams?.get("ref") === "share";
   const isExcludedPath = EXCLUDED_PATH_PREFIXES.some((p) =>
     (pathname ?? "").startsWith(p)
   );
@@ -67,20 +62,14 @@ export function AppInstallPrompt() {
       return;
     }
 
-    // 공유 진입: 인터스티셜 모달 (세션 1회)
-    if (fromShare && !isBottomSheetDismissed()) {
+    // 모든 진입: 인터스티셜 모달 (7일 dismiss)
+    if (!isBottomSheetDismissed()) {
       setVariant("bottomSheet");
       return;
     }
 
-    // 일반 진입: 상단 배너 (7일)
-    if (!isBannerDismissed()) {
-      setVariant("banner");
-      return;
-    }
-
     setVariant(null);
-  }, [env, fromShare, isExcludedPath]);
+  }, [env, isExcludedPath]);
 
   if (!env || !variant) return null;
 
@@ -120,26 +109,14 @@ export function AppInstallPrompt() {
     );
   }
 
-  if (variant === "bottomSheet") {
-    return (
-      <BottomSheet
-        onOpenApp={() => {
-          dismissBottomSheet();
-          handleOpenApp();
-        }}
-        onContinueWeb={() => {
-          dismissBottomSheet();
-          setVariant(null);
-        }}
-      />
-    );
-  }
-
   return (
-    <Banner
-      onOpenApp={handleOpenApp}
-      onDismiss={() => {
-        dismissBanner();
+    <BottomSheet
+      onOpenApp={() => {
+        dismissBottomSheet();
+        handleOpenApp();
+      }}
+      onContinueWeb={() => {
+        dismissBottomSheet();
         setVariant(null);
       }}
     />
