@@ -56,3 +56,6 @@ apps/mobile/ios/tmp.xcconfig
 # Android Studio / Gradle (root level)
 .gradle/
 settings.gradle
+
+# Claude Code (per-developer symlinks to ~/Documents/greenonion/_platform/.claude)
+.claude/

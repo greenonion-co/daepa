@@ -9,6 +9,7 @@ import {
   flushPendingNavigation,
   navigationRef,
 } from './src/navigation/navigationRef';
+import { linking } from './src/navigation/linking';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { setupApiClient } from './src/utils/apiSetup';
 import { useAuthStore } from './src/store/auth';
@@ -127,6 +128,7 @@ function App() {
         <View style={styles.container}>
           <NavigationContainer
             ref={navigationRef}
+            linking={linking}
             onReady={() => {
               setIsNavigationReady(true);
               // ready 이전에 인터셉터 등이 요청한 navigation 액션(resetToLogin 등)을 실행

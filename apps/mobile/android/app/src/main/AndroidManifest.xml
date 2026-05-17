@@ -29,6 +29,26 @@
         <action android:name="android.intent.action.MAIN" />
         <category android:name="android.intent.category.LAUNCHER" />
       </intent-filter>
+
+      <!-- Universal/App Link: https://breedy.kr/<path> -->
+      <intent-filter android:autoVerify="true">
+        <action android:name="android.intent.action.VIEW" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <category android:name="android.intent.category.BROWSABLE" />
+        <data android:scheme="https" />
+        <data android:host="breedy.kr" />
+        <data android:pathPrefix="/pet/" />
+        <data android:pathPrefix="/showroom/" />
+        <data android:pathPrefix="/notifications" />
+      </intent-filter>
+
+      <!-- Custom scheme: breedy://<path> -->
+      <intent-filter>
+        <action android:name="android.intent.action.VIEW" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <category android:name="android.intent.category.BROWSABLE" />
+        <data android:scheme="breedy" />
+      </intent-filter>
     </activity>
 
     <activity
