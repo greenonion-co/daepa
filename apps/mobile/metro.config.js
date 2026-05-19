@@ -25,6 +25,7 @@ const config = {
   resolver: {
     unstable_enableSymlinks: true, // this enable the use of Symlinks
     unstable_enablePackageExports: true, // to support Export Maps which is a modern way to export content from a package
+    blockList: [/[/\\]\.claude[/\\]/],
   },
   // this specifies the folder where are located the node_modules for the project
   watchFolders: [path.join(__dirname, '..', '..')],

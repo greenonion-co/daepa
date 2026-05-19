@@ -6,8 +6,7 @@ import { PetDto } from "@repo/api-client";
 import Link from "next/link";
 import { Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { toast } from "@/lib/toast";
-import { isNativeApp, requestShare } from "@/lib/native-bridge";
+import { sharePage } from "@/lib/share";
 import BreederBadge from "@/app/(브리더스룸)/components/BreederBadge";
 import { useAdoptionStore } from "@/app/(브리더스룸)/pet/store/adoption";
 import { useEffect, useState } from "react";
@@ -250,27 +249,13 @@ const Header = ({
             variant="outline"
             aria-label="펫 페이지 링크 복사"
             title="링크 복사"
-            onClick={async () => {
-              const url = `${window.location.origin}/pet/${pet.petId}`;
-              if (isNativeApp()) {
-                const shared = requestShare(url, pet.name ?? "펫 페이지");
-                if (!shared) {
-                  try {
-                    await navigator.clipboard.writeText(url);
-                    toast.success("링크가 복사되었습니다");
-                  } catch {
-                    toast.error("링크 복사에 실패했습니다");
-                  }
-                }
-                return;
-              }
-              try {
-                await navigator.clipboard.writeText(url);
-                toast.success("펫 페이지 링크가 복사되었습니다");
-              } catch {
-                toast.error("링크 복사에 실패했습니다");
-              }
-            }}
+            onClick={() =>
+              sharePage({
+                path: `/pet/${pet.petId}`,
+                title: pet.name ?? "펫 페이지",
+                copySuccessMessage: "펫 페이지 링크가 복사되었습니다",
+              })
+            }
             className={cn(
               "text-amber-500 hover:bg-amber-100 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800",
               isScrolled ? "text-xs" : "text-sm",

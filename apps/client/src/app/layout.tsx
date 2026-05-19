@@ -10,6 +10,7 @@ import AppShell from "./components/AppShell";
 import { Suspense } from "react";
 import LoadingScreen from "@/app/loading";
 import OfflineBanner from "@/components/common/OfflineBanner";
+import { AppInstallPrompt } from "@/components/AppInstallPrompt";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -66,6 +67,9 @@ export default function RootLayout({
         <Providers>
           <Toaster />
           <OfflineBanner />
+          <Suspense fallback={null}>
+            <AppInstallPrompt />
+          </Suspense>
           <Suspense fallback={<LoadingScreen />}>
             <AppShell>{children}</AppShell>
           </Suspense>

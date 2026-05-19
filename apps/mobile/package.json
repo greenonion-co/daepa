@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "android": "react-native run-android --appId com.greenonion.daepa",
-    "android:bundle": "cd android && ENVFILE=.env.production ./gradlew clean bundleRelease",
+    "android:bundle": "cd android && ENVFILE=.env.production ./gradlew clean && ENVFILE=.env.production ./gradlew :react-native-vision-camera:assembleRelease :app:bundleRelease",
     "android:apk": "cd android && ENVFILE=.env.production ./gradlew clean assembleRelease",
     "ios": "react-native run-ios --scheme breedy-alpha",
     "ios:setup": "ENVFILE=.env.development pod install --project-directory=ios && react-native run-ios --scheme breedy-alpha",
