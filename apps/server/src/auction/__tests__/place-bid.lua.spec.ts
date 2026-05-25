@@ -194,7 +194,11 @@ describeIfRedis('place-bid.lua', () => {
       extension_window_ms: String(extWindowMs),
       original_end_time_ms: String(baseMs - 60_000),
     });
-    const r = (await place(10_000, 'u1', nowMs)) as [number, string, ...string[]];
+    const r = (await place(10_000, 'u1', nowMs)) as [
+      number,
+      string,
+      ...string[],
+    ];
     expect(r[0]).toBe(1);
     // new_end = baseMs + 151_000 → ceil → baseMs + 180_000 (3분 정시)
     expect(Number(r[4])).toBe(baseMs + 180_000);
@@ -210,7 +214,11 @@ describeIfRedis('place-bid.lua', () => {
       extension_window_ms: String(extWindowMs),
       original_end_time_ms: String(baseMs - 60_000),
     });
-    const r = (await place(10_000, 'u1', nowMs)) as [number, string, ...string[]];
+    const r = (await place(10_000, 'u1', nowMs)) as [
+      number,
+      string,
+      ...string[],
+    ];
     expect(r[0]).toBe(1);
     // new_end = baseMs + 120_000 (정확히 2분 정시) → ceil → 변화 없음
     expect(Number(r[4])).toBe(baseMs + 120_000);

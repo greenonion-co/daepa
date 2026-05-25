@@ -18,6 +18,7 @@ end
 
 local status               = state[1]
 local highest_bid          = tonumber(state[2]) or 0
+local prev_highest_bidder  = state[3] or ''
 local starting_price       = tonumber(state[4]) or 0
 local min_increment        = tonumber(state[5]) or 0
 local start_time_ms        = tonumber(state[6]) or 0
@@ -83,4 +84,5 @@ return {1, 'OK',
   bidder_id,
   tostring(new_end_time_ms),
   tostring(triggered_extension),
-  tostring(now_ms)}
+  tostring(now_ms),
+  prev_highest_bidder}

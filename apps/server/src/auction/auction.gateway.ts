@@ -243,6 +243,7 @@ export class AuctionGateway
 
     const result = await this.bidService.placeBid({
       auctionId: auction.id,
+      auctionExternalId: auction.auctionId,
       auctionShareToken: auction.shareToken,
       userId: client.data.userId,
       nickname: client.data.nickname ?? '',

@@ -127,6 +127,49 @@ export class UserNotificationService {
           body: `${sellerName}님으로부터 ${primaryPetName}의 소유권이 이전되었습니다.`,
         };
       }
+      case USER_NOTIFICATION_TYPE.AUCTION_STARTED: {
+        const petName = (detailJson?.petName as string) ?? '내 펫';
+        return {
+          title: '경매가 시작되었습니다',
+          body: `${petName}의 경매가 시작되었습니다.`,
+        };
+      }
+      case USER_NOTIFICATION_TYPE.AUCTION_ENDED_HOST: {
+        const petName = (detailJson?.petName as string) ?? '내 펫';
+        const finalPrice = detailJson?.finalPrice as number | null | undefined;
+        return {
+          title:
+            finalPrice != null
+              ? '경매가 낙찰되었습니다'
+              : '경매가 종료되었습니다',
+          body:
+            finalPrice != null
+              ? `${petName} 경매가 ${finalPrice.toLocaleString()}원에 낙찰되었습니다.`
+              : `${petName} 경매가 입찰자 없이 종료되었습니다.`,
+        };
+      }
+      case USER_NOTIFICATION_TYPE.AUCTION_ENDED_WINNER: {
+        const petName = (detailJson?.petName as string) ?? '펫';
+        const finalPrice = detailJson?.finalPrice as number | undefined;
+        return {
+          title: '낙찰을 축하합니다',
+          body:
+            finalPrice != null
+              ? `${petName}을(를) ${finalPrice.toLocaleString()}원에 낙찰받으셨습니다.`
+              : `${petName} 낙찰을 축하합니다.`,
+        };
+      }
+      case USER_NOTIFICATION_TYPE.AUCTION_OUTBID: {
+        const petName = (detailJson?.petName as string) ?? '경매';
+        const newHighestBid = detailJson?.newHighestBid as number | undefined;
+        return {
+          title: '입찰가가 갱신되었습니다',
+          body:
+            newHighestBid != null
+              ? `${petName} 경매의 최고가가 ${newHighestBid.toLocaleString()}원으로 갱신되었습니다.`
+              : `${petName} 경매의 최고가가 갱신되었습니다.`,
+        };
+      }
       default:
         return {
           title: '알림',

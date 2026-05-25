@@ -9,6 +9,13 @@ import { FcmService } from '../fcm/fcm.service';
 import { AuctionEntity } from './auction.entity';
 import { PetEntity } from '../pet/pet.entity';
 
+export type NotifyBidOutbidInput = {
+  auctionId: number;
+  auctionShareToken: string;
+  prevHighestBidderId: string;
+  newHighestBid: number;
+};
+
 @Injectable()
 export class AuctionNotificationService {
   private readonly logger = new Logger(AuctionNotificationService.name);
@@ -119,6 +126,37 @@ export class AuctionNotificationService {
       );
     } catch (err) {
       this.logger.warn('notifyAuctionEnded failed', err);
+    }
+  }
+
+  // 인앱 알림은 unique index 충돌/spam 회피를 위해 생략하고 푸시만 발송.
+  async notifyBidOutbid(input: NotifyBidOutbidInput): Promise<void> {
+    try {
+      const auction = await this.dataSource
+        .getRepository(AuctionEntity)
+        .findOne({
+          where: { id: input.auctionId },
+        });
+      if (!auction) return;
+
+      const pet = await this.dataSource
+        .getRepository(PetEntity)
+        .findOne({ where: { petId: auction.petId } });
+      const petName = pet?.name ?? '펫';
+
+      void this.fcmService.sendPushNotification({
+        userId: input.prevHighestBidderId,
+        title: '입찰가가 갱신되었습니다',
+        body: `${petName} 경매의 최고가가 ${input.newHighestBid.toLocaleString()}원으로 갱신되었습니다.`,
+        data: {
+          type: 'AUCTION_OUTBID',
+          shareToken: input.auctionShareToken,
+          auctionId: auction.auctionId,
+          path: `/auction/${input.auctionShareToken}`,
+        },
+      });
+    } catch (err) {
+      this.logger.warn('notifyBidOutbid failed', err);
     }
   }
 

@@ -13,7 +13,7 @@ export type AuctionBidWire = AuctionBidDto;
 
 // WS 이벤트 페이로드는 서버에서만 보내고 OpenAPI 스키마에 없으므로 직접 정의
 export interface BidAcceptedEvent {
-  auctionId: number;
+  auctionId: string;
   shareToken: string;
   bidderId: string;
   nickname: string;

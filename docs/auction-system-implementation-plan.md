@@ -100,86 +100,13 @@ Breedy의 펫(상품)을 경매에 부치는 기능을 추가합니다. 핵심 �
 
 ## 4. 데이터 모델
 
-### 4.1 MySQL 스키마
-
-```sql
--- 경매 메타 + 최종 결과
-CREATE TABLE auctions (
-  id              BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
-  animal_id       BIGINT UNSIGNED NOT NULL,
-  host_user_id    BIGINT UNSIGNED NOT NULL,
-  share_token     CHAR(22) NOT NULL UNIQUE,           -- nanoid 22자리
-  status          ENUM('PENDING','ACTIVE','ENDED','CANCELED') NOT NULL DEFAULT 'PENDING',
-  starting_price  BIGINT NOT NULL,                    -- 원 단위
-  min_increment   BIGINT NOT NULL,                    -- 최소 입찰 단위
-  extension_minutes INT NOT NULL DEFAULT 5,           -- 연장 분(n)
-  start_time      DATETIME(3) NOT NULL,
-  original_end_time DATETIME(3) NOT NULL,             -- 최초 설정 종료시간
-  current_end_time  DATETIME(3) NOT NULL,             -- 연장 반영 현재 종료시간
-  final_price     BIGINT NULL,
-  winner_user_id  BIGINT UNSIGNED NULL,
-  winner_bid_id   BIGINT UNSIGNED NULL,
-  created_at      DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-  updated_at      DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
-  INDEX idx_status_end (status, current_end_time),
-  INDEX idx_share_token (share_token),
-  INDEX idx_animal (animal_id),
-  CONSTRAINT fk_auction_animal FOREIGN KEY (animal_id) REFERENCES animals(id),
-  CONSTRAINT fk_auction_host  FOREIGN KEY (host_user_id) REFERENCES users(id)
-);
-
--- 모든 입찰 시도 audit log (성공한 것만 저장. 실패는 ops 로그로)
-CREATE TABLE auction_bids (
-  id              BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
-  auction_id      BIGINT UNSIGNED NOT NULL,
-  bidder_user_id  BIGINT UNSIGNED NOT NULL,
-  amount          BIGINT NOT NULL,
-  server_ts_ms    BIGINT NOT NULL,                    -- 서버 수신 epoch ms (정렬 기준)
-  triggered_extension TINYINT(1) NOT NULL DEFAULT 0,
-  created_at      DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-  INDEX idx_auction_ts (auction_id, server_ts_ms),
-  INDEX idx_bidder (bidder_user_id),
-  CONSTRAINT fk_bid_auction FOREIGN KEY (auction_id) REFERENCES auctions(id),
-  CONSTRAINT fk_bid_user    FOREIGN KEY (bidder_user_id) REFERENCES users(id)
-);
-
--- (선택) 단순 동시 접속 통계용
-CREATE TABLE auction_participants (
-  auction_id      BIGINT UNSIGNED NOT NULL,
-  user_id         BIGINT UNSIGNED NOT NULL,
-  first_joined_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-  PRIMARY KEY (auction_id, user_id)
-);
-```
-
-> **shareToken**은 `nanoid(22)`로 생성 (충돌 확률 무시 가능, URL-safe).
-
-### 4.2 Redis 키 설계
-
-```
-auction:{id}:state         # HASH - 라이브 상태 (가장 중요)
-   status                  # 'ACTIVE' | 'ENDED'
-   highest_bid             # 현재 최고가 (없으면 0)
-   highest_bidder_id       # 0 if none
-   starting_price
-   min_increment
-   start_time_ms
-   original_end_time_ms
-   current_end_time_ms     # 연장 시 갱신
-   extension_window_ms     # n * 60_000
-   last_bid_ts_ms
-
-auction:{id}:bids          # LIST - 최근 N건 캐시 (LPUSH, LTRIM 50)
-                           # JSON: {bidderId, amount, ts, nickname}
-
-auction:{id}:participants  # SET - 현재 룸에 들어와있는 user id (선택)
-
-auction:active             # SET - 현재 ACTIVE 상태인 auction id 목록 (스케줄러용)
-
-bullmq:*                   # BullMQ 내부 (auction-finalize, bid-persist 큐)
-```
-
-**TTL 정책**: `auction:{id}:state`는 종료 후 24시간 TTL 부여. `bids` 캐시도 동일.
+> 이 섹션의 원안 DDL/Redis 키 정의는 구현 과정에서 프로젝트 컨벤션(FK 미사용, varchar nanoid ID, camelCase, 외부 ID 분리 등)에 맞게 조정되었습니다. **현재 구현 기준의 단일 진실 공급원(SSoT)은 운영 가이드 문서** 입니다.
+>
+> - MySQL 스키마: [`docs/auction-operations-guide.md` §4](./auction-operations-guide.md#4-데이터-모델-mysql)
+> - Redis 키 구조 + TTL: [`docs/auction-operations-guide.md` §5](./auction-operations-guide.md#5-redis-키-구조)
+> - Entity 정의 (실 코드): [`apps/server/src/auction/auction.entity.ts`](../apps/server/src/auction/auction.entity.ts), [`auction_bid.entity.ts`](../apps/server/src/auction/auction_bid.entity.ts), [`auction_participant.entity.ts`](../apps/server/src/auction/auction_participant.entity.ts)
+>
+> 본 계획서는 설계 의사결정(왜 이렇게 잘랐는가 / 왜 Redis + MySQL 이분 구조인가)의 배경 기록으로 유지하고, 스키마 그 자체는 위 SSoT 만 참조하세요.
 
 ---
 

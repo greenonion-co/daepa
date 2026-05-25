@@ -84,9 +84,21 @@ export default function AuctionLiveView({ initialState }: Props) {
   }, [state]);
 
   const [bidInput, setBidInput] = useState<string>("");
+  // 사용자가 직접 input 을 건드린 적이 있으면 minBid 변경으로 덮어쓰지 않는다.
+  // (인기 경매에서 타이핑 중 다른 입찰이 들어와 입력이 사라지는 문제 방지)
+  const bidInputDirtyRef = useRef(false);
   useEffect(() => {
+    if (bidInputDirtyRef.current) return;
     setBidInput(String(minBid));
   }, [minBid]);
+
+  // 연장 애니메이션용 setTimeout 의 cleanup — unmount 후 setState 경고 방지
+  const extendingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    return () => {
+      if (extendingTimerRef.current) clearTimeout(extendingTimerRef.current);
+    };
+  }, []);
 
   // 카운트다운: 100ms 틱
   useEffect(() => {
@@ -124,7 +136,11 @@ export default function AuctionLiveView({ initialState }: Props) {
       }));
       if (event.extended) {
         setExtending(true);
-        setTimeout(() => setExtending(false), 2000);
+        if (extendingTimerRef.current) clearTimeout(extendingTimerRef.current);
+        extendingTimerRef.current = setTimeout(() => {
+          setExtending(false);
+          extendingTimerRef.current = null;
+        }, 2000);
       }
     },
     onBidRejected: (e) => {
@@ -185,10 +201,13 @@ export default function AuctionLiveView({ initialState }: Props) {
       return;
     }
     placeBid(amount);
+    // 제출 후엔 다음 새 minBid 가 자동으로 채워지도록 dirty 해제
+    bidInputDirtyRef.current = false;
   }, [isLoggedIn, bidInput, minBid, placeBid, router]);
 
   const quickAdd = (k: number) => {
     setBidInput(String(minBid + state.minIncrement * k));
+    bidInputDirtyRef.current = true;
   };
 
   // 실시간 now 의존성 → useMemo도 재계산
@@ -290,7 +309,10 @@ export default function AuctionLiveView({ initialState }: Props) {
               <Input
                 type="number"
                 value={bidInput}
-                onChange={(e) => setBidInput(e.target.value)}
+                onChange={(e) => {
+                  setBidInput(e.target.value);
+                  bidInputDirtyRef.current = true;
+                }}
                 min={minBid}
                 step={state.minIncrement}
               />

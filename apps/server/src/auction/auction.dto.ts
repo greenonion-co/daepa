@@ -114,7 +114,9 @@ export class CreateAuctionResponseDto extends CommonResponseDto {
 
 export class BidHistoryItemDto {
   @ApiProperty() bidderUserId: string;
-  @ApiProperty({ type: 'string', nullable: true }) bidderNickname: string | null;
+  @ApiProperty({ type: 'string', nullable: true }) bidderNickname:
+    | string
+    | null;
   @ApiProperty() amount: number;
   @ApiProperty() serverTsMs: number;
   @ApiProperty() triggeredExtension: boolean;

@@ -17,9 +17,13 @@ import {
   auctionBidsKey,
   auctionStateKey,
 } from './auction-state.service';
+import { AuctionNotificationService } from './auction-notification.service';
 
 export type PlaceBidInput = {
+  /** 내부 DB row id — Redis key / BullMQ jobId 용 */
   auctionId: number;
+  /** 외부 노출용 식별자 (nanoid) — broadcast / 알림 payload 의 auctionId */
+  auctionExternalId: string;
   auctionShareToken: string;
   userId: string;
   nickname: string;
@@ -54,6 +58,7 @@ export class BidService {
     private readonly stateService: AuctionStateService,
     @InjectQueue(AUCTION_BID_QUEUE_NAME) private readonly bidQueue: Queue,
     @InjectQueue(AUCTION_QUEUE_NAME) private readonly auctionQueue: Queue,
+    private readonly notificationService: AuctionNotificationService,
   ) {
     const luaPath = path.join(__dirname, 'lua', 'place-bid.lua');
     if (fs.existsSync(luaPath)) {
@@ -129,6 +134,7 @@ export class BidService {
     const newEndTimeMs = Number(arr[4]);
     const extended = String(arr[5]) === '1';
     const tsMs = Number(arr[6]);
+    const prevHighestBidderId = arr[7] ? String(arr[7]) : '';
 
     const payload: BidSuccess = {
       success: true,
@@ -140,9 +146,9 @@ export class BidService {
       tsMs,
     };
 
-    // 1) 모든 노드에 broadcast
+    // 1) 모든 노드에 broadcast — 페이로드의 auctionId 는 외부 식별자(string)로 통일
     await this.stateService.publishUpdate(input.auctionId, 'BID_ACCEPTED', {
-      auctionId: input.auctionId,
+      auctionId: input.auctionExternalId,
       shareToken: input.auctionShareToken,
       bidderId,
       nickname: input.nickname,
@@ -174,7 +180,19 @@ export class BidService {
       this.logger.warn('bid persist enqueue failed', err);
     }
 
-    // 3) 연장됐다면 종료 잡 재스케줄
+    // 3) 직전 최고가 입찰자가 있고 본인이 아니면 outbid 알림 발송 (fire-and-forget)
+    if (prevHighestBidderId && prevHighestBidderId !== bidderId) {
+      void this.notificationService
+        .notifyBidOutbid({
+          auctionId: input.auctionId,
+          auctionShareToken: input.auctionShareToken,
+          prevHighestBidderId,
+          newHighestBid: amount,
+        })
+        .catch((err) => this.logger.warn('notifyBidOutbid failed', err));
+    }
+
+    // 4) 연장됐다면 종료 잡 재스케줄
     if (extended) {
       try {
         const finalizeJobId = `auction:${input.auctionId}:finalize`;
