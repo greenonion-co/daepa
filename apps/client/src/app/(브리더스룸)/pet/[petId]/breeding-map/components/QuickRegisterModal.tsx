@@ -5,6 +5,7 @@ import { useMutation } from "@tanstack/react-query";
 import {
   petControllerCreate,
   petControllerFindAll,
+  type CreatePetDto,
   type CreatePetDtoSpecies,
   type CreateParentDtoRole,
   PetDtoSex,
@@ -52,12 +53,19 @@ interface QuickRegisterModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: (petId: string) => void;
+  /**
+   * 제공되면 펫을 즉시 생성하지 않고 작성된 DTO 만 호출자에게 전달.
+   * 경매 생성 흐름처럼 후속 단계에서 펫 생성을 함께 수행해야 할 때 사용.
+   * onSubmitDraft 가 있으면 onSuccess 는 무시된다.
+   */
+  onSubmitDraft?: (dto: CreatePetDto) => void;
 }
 
 export default function QuickRegisterModal({
   isOpen,
   onClose,
   onSuccess,
+  onSubmitDraft,
 }: QuickRegisterModalProps) {
   const { duplicateCheckStatus, setDuplicateCheckStatus } = useNameStore();
   const { setErrors } = usePetStore();
@@ -156,31 +164,41 @@ export default function QuickRegisterModal({
     if (!name || !sex || morphs.length === 0) return;
     if (duplicateCheckStatus !== DUPLICATE_CHECK_STATUS.AVAILABLE) return;
 
+    const dto: CreatePetDto = {
+      species: "CR" as CreatePetDtoSpecies,
+      name,
+      sex,
+      morphs,
+      ...(traits.length > 0 && { traits }),
+      ...(desc && { desc }),
+      ...(hatchingDate && { hatchingDate }),
+      ...(weight && { weight: Number(weight) }),
+      ...(foods.length > 0 && { foods }),
+      ...(photos.length > 0 && { photos }),
+      ...(father && {
+        father: {
+          parentId: father.petId,
+          role: "father" as CreateParentDtoRole,
+        },
+      }),
+      ...(mother && {
+        mother: {
+          parentId: mother.petId,
+          role: "mother" as CreateParentDtoRole,
+        },
+      }),
+    };
+
+    // Draft 모드 — 펫 생성은 호출자가 처리.
+    if (onSubmitDraft) {
+      onSubmitDraft(dto);
+      resetForm();
+      onClose();
+      return;
+    }
+
     try {
-      await createPet({
-        species: "CR" as CreatePetDtoSpecies,
-        name,
-        sex,
-        morphs,
-        ...(traits.length > 0 && { traits }),
-        ...(desc && { desc }),
-        ...(hatchingDate && { hatchingDate }),
-        ...(weight && { weight: Number(weight) }),
-        ...(foods.length > 0 && { foods }),
-        ...(photos.length > 0 && { photos }),
-        ...(father && {
-          father: {
-            parentId: father.petId,
-            role: "father" as CreateParentDtoRole,
-          },
-        }),
-        ...(mother && {
-          mother: {
-            parentId: mother.petId,
-            role: "mother" as CreateParentDtoRole,
-          },
-        }),
-      });
+      await createPet(dto);
 
       // 생성된 개체의 petId 조회
       const searchResult = await petControllerFindAll({
@@ -214,6 +232,7 @@ export default function QuickRegisterModal({
     resetForm,
     onClose,
     onSuccess,
+    onSubmitDraft,
   ]);
 
   const handleGoToStep2 = useCallback(() => {
@@ -438,7 +457,7 @@ export default function QuickRegisterModal({
                 disabled={isSubmitDisabled}
                 className="flex-1 rounded-xl bg-black py-2.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50 dark:bg-blue-700 dark:hover:bg-blue-800"
               >
-                {isPending ? "등록 중..." : "등록"}
+                {onSubmitDraft ? "다음" : isPending ? "등록 중..." : "등록"}
               </button>
             </div>
             <button
@@ -465,7 +484,7 @@ export default function QuickRegisterModal({
               disabled={isPending}
               className="flex-1 rounded-xl bg-black py-2.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50 dark:bg-blue-700 dark:hover:bg-blue-800"
             >
-              {isPending ? "등록 중..." : "등록"}
+              {onSubmitDraft ? "다음" : isPending ? "등록 중..." : "등록"}
             </button>
           </div>
         )}

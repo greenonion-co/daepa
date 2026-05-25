@@ -1,5 +1,6 @@
 "use client";
 
+import { type CreatePetDto } from "@repo/api-client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { CreateAuctionForm } from "./CreateAuctionForm";
 
@@ -10,6 +11,11 @@ interface CreateAuctionDialogProps {
   initialPetId?: string;
   /** true 면 펫 ID 인풋 잠금 */
   lockPetId?: boolean;
+  /**
+   * 제공되면 폼 제출 시 이 DTO 로 펫을 먼저 생성한 후 그 petId 로 경매를 만든다.
+   * 경매 생성 흐름에서 "새 개체 추가 후 경매" 를 선택했을 때 사용.
+   */
+  pendingPet?: CreatePetDto;
 }
 
 export default function CreateAuctionDialog({
@@ -17,6 +23,7 @@ export default function CreateAuctionDialog({
   onClose,
   initialPetId,
   lockPetId,
+  pendingPet,
 }: CreateAuctionDialogProps) {
   return (
     <Dialog
@@ -29,7 +36,12 @@ export default function CreateAuctionDialog({
         <DialogHeader>
           <DialogTitle>경매 정보 설정</DialogTitle>
         </DialogHeader>
-        <CreateAuctionForm initialPetId={initialPetId} lockPetId={lockPetId} onClose={onClose} />
+        <CreateAuctionForm
+          initialPetId={initialPetId}
+          lockPetId={lockPetId}
+          pendingPet={pendingPet}
+          onClose={onClose}
+        />
       </DialogContent>
     </Dialog>
   );

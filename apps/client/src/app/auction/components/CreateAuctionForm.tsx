@@ -2,10 +2,16 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { DateTime } from "luxon";
 import { Info } from "lucide-react";
-import { petControllerFindPetByPetId } from "@repo/api-client";
+import {
+  petControllerCreate,
+  petControllerFindAll,
+  petControllerFindPetByPetId,
+  type CreatePetDto,
+  type PetDto,
+} from "@repo/api-client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/lib/toast";
@@ -22,6 +28,12 @@ interface CreateAuctionFormProps {
   lockPetId?: boolean;
   /** 생성 후 사용자가 모달/페이지를 닫고 싶을 때 호출 (모달 환경에서 전달). */
   onClose?: () => void;
+  /**
+   * 제공되면 "경매 생성" 클릭 시 이 DTO 로 펫을 isPublic=true 로 먼저 생성하고
+   * 그 petId 로 경매를 만든다. 사용자가 폼을 그대로 닫으면 펫도 만들어지지 않는다.
+   * 경매 생성이 실패해도 이미 만들어진 펫은 유지하고 createdPetId 로 재시도를 허용한다.
+   */
+  pendingPet?: CreatePetDto;
 }
 
 const HelperText = ({ children }: { children: React.ReactNode }) => (
@@ -52,13 +64,18 @@ export function CreateAuctionForm({
   initialPetId = "",
   lockPetId = false,
   onClose,
+  pendingPet,
 }: CreateAuctionFormProps) {
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const startDefault = DateTime.now().plus({ minutes: 5 });
   const endDefault = startDefault.plus({ hours: 1 });
 
   const [petId, setPetId] = useState(initialPetId);
+  // pendingPet 모드에서 펫 생성이 성공한 뒤 그 petId 를 저장 — 경매 생성 실패 후 재시도 시
+  // 펫 재생성으로 인한 UNIQUE_OWNER_PET_NAME 충돌을 피한다.
+  const [createdPetId, setCreatedPetId] = useState<string | null>(null);
   const [startingPrice, setStartingPrice] = useState<string>("0");
   const [minIncrement, setMinIncrement] = useState<string>("1000");
   const [extensionMinutes, setExtensionMinutes] = useState<string>("1");
@@ -70,14 +87,16 @@ export function CreateAuctionForm({
     shareToken: string;
   } | null>(null);
 
-  // 사용자에게 ID 를 노출하지 않기 위해, lockPetId 모드일 때는 펫 이름을 조회해 표시.
+  // pendingPet 모드: 사용자가 인풋에서 볼 이름은 작성한 DTO 의 name.
+  // lockPetId 모드: 서버에서 펫 이름 조회. (이미 존재하는 펫)
   const { data: petResponse } = useQuery({
     queryKey: [petControllerFindPetByPetId.name, petId],
     queryFn: () => petControllerFindPetByPetId(petId),
-    enabled: lockPetId && !!petId,
+    enabled: lockPetId && !!petId && !pendingPet,
     staleTime: 5 * 60 * 1000,
   });
-  const petName = petResponse?.data?.data?.name ?? "";
+  const petName = pendingPet?.name ?? petResponse?.data?.data?.name ?? "";
+  const isPetInputLocked = lockPetId || !!pendingPet;
 
   // 시작 시각이 종료 시각을 추월하면 종료 시각을 자동으로 +1시간 으로 보정.
   useEffect(() => {
@@ -106,10 +125,7 @@ export function CreateAuctionForm({
   };
 
   const handleSubmit = async () => {
-    if (!petId.trim()) {
-      toast.error("펫 ID를 입력하세요.");
-      return;
-    }
+    // 경매 파라미터를 먼저 검증 — 검증 실패 시 펫이 만들어지지 않도록.
     const sDt = DateTime.fromISO(startTime);
     const eDt = DateTime.fromISO(endTime);
     if (!sDt.isValid || !eDt.isValid) {
@@ -136,10 +152,46 @@ export function CreateAuctionForm({
       return;
     }
 
+    if (!pendingPet && !petId.trim()) {
+      toast.error("펫 ID를 입력하세요.");
+      return;
+    }
+
     setSubmitting(true);
     try {
+      // pendingPet 모드: 아직 생성하지 않았다면 공개 펫으로 생성하고 petId 조회.
+      let effectivePetId = createdPetId ?? petId.trim();
+      if (pendingPet && !createdPetId) {
+        try {
+          await petControllerCreate({ ...pendingPet, isPublic: true });
+        } catch (err) {
+          const e = err as { response?: { data?: { message?: string } }; message?: string };
+          toast.error(e.response?.data?.message ?? "개체 생성에 실패했습니다.");
+          return;
+        }
+
+        const searchResult = await petControllerFindAll({
+          keyword: pendingPet.name ?? "",
+          filterType: "MY",
+          itemPerPage: 5,
+        });
+        const newPet = (searchResult.data?.data ?? []).find(
+          (p: PetDto) => p.name === pendingPet.name,
+        );
+        if (!newPet) {
+          toast.error("생성된 개체를 찾지 못했습니다. 다시 시도해주세요.");
+          return;
+        }
+        setCreatedPetId(newPet.petId);
+        effectivePetId = newPet.petId;
+        // 새 펫이 목록 캐시에 반영되도록.
+        queryClient.invalidateQueries({ queryKey: [petControllerFindAll.name] });
+        // 펫이 만들어졌음을 알린다 — 이 시점에 사용자가 다이얼로그를 닫더라도 펫은 보존됨.
+        toast.success("개체가 등록되었습니다. 계속해서 경매를 생성합니다.");
+      }
+
       const data = await createAuction({
-        petId: petId.trim(),
+        petId: effectivePetId,
         startingPrice: Number(startingPrice),
         minIncrement: Number(minIncrement),
         extensionMinutes: ext,
@@ -204,13 +256,21 @@ export function CreateAuctionForm({
         content={
           <Input
             id="petId"
-            value={lockPetId ? petName : petId}
+            value={isPetInputLocked ? petName : petId}
             onChange={(e) => setPetId(e.target.value)}
-            placeholder={lockPetId ? "" : "개체 ID"}
-            readOnly={lockPetId}
-            disabled={lockPetId}
+            placeholder={isPetInputLocked ? "" : "개체 ID"}
+            readOnly={isPetInputLocked}
+            disabled={isPetInputLocked}
             className="text-[13px]"
           />
+        }
+        subContent={
+          pendingPet ? (
+            <HelperText>
+              경매를 위해 개체는 공개 상태로 등록됩니다. 공개 한도가 초과되면 기존 공개 개체 중
+              일부가 비공개로 전환될 수 있습니다.
+            </HelperText>
+          ) : undefined
         }
       />
 

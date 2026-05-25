@@ -1,21 +1,41 @@
 "use client";
 
 import { useMemo } from "react";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
+import { overlay } from "overlay-kit";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { DateTime } from "luxon";
+import { Plus } from "lucide-react";
 import {
   myAuctionControllerMyAuctions,
   petControllerFindPetByPetId,
+  type CreatePetDto,
   type MyAuctionItemDto,
   MyAuctionItemDtoStatus,
   type PetDto,
 } from "@repo/api-client";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PetCard from "@/app/(브리더스룸)/pet/components/PetCard";
 import LoadingScreen from "@/app/loading";
+
+// 큰 모달들은 트리거 클릭 시점에만 chunk 로드
+const CreateAuctionChooserDialog = dynamic(
+  () => import("./components/CreateAuctionChooserDialog"),
+  { ssr: false },
+);
+const MyPetPickerDialog = dynamic(() => import("./components/MyPetPickerDialog"), { ssr: false });
+const CreateAuctionDialog = dynamic(() => import("@/app/auction/components/CreateAuctionDialog"), {
+  ssr: false,
+});
+// 직접 dynamic import 시 Turbopack 이 한글 route group 포함 chunk 이름을
+// 바이트 경계 무시한 채 자르다 panic — 짧은 경로의 재수출 shim 으로 우회.
+const QuickRegisterModal = dynamic(() => import("./components/QuickRegisterModalLazy"), {
+  ssr: false,
+});
 
 const KRW = (n: number | null | undefined) =>
   typeof n === "number" ? `${n.toLocaleString("ko-KR")}원` : null;
@@ -180,12 +200,101 @@ function AuctionList({ items }: { items: MyAuctionItemDto[] }) {
 }
 
 export default function MyAuctionsPage() {
+  const queryClient = useQueryClient();
+
   const { data, isLoading } = useQuery({
     queryKey: [myAuctionControllerMyAuctions.name],
     queryFn: () => myAuctionControllerMyAuctions(),
   });
 
   const items = useMemo(() => data?.data?.data ?? [], [data]);
+
+  // 경매 생성 후 목록 자동 갱신
+  const invalidateMyAuctions = () =>
+    queryClient.invalidateQueries({ queryKey: [myAuctionControllerMyAuctions.name] });
+
+  const openCreateAuctionWithPetId = (petId: string) => {
+    overlay.open(({ isOpen: open, close, unmount }) => (
+      <CreateAuctionDialog
+        isOpen={open}
+        onClose={() => {
+          close();
+          setTimeout(unmount, 200);
+          invalidateMyAuctions();
+        }}
+        initialPetId={petId}
+        lockPetId
+      />
+    ));
+  };
+
+  // "새 개체 추가 후 경매" 경로 — 펫 생성은 다이얼로그 제출 시점에 isPublic=true 로 수행.
+  const openCreateAuctionWithPendingPet = (pendingPet: CreatePetDto) => {
+    overlay.open(({ isOpen: open, close, unmount }) => (
+      <CreateAuctionDialog
+        isOpen={open}
+        onClose={() => {
+          close();
+          setTimeout(unmount, 200);
+          invalidateMyAuctions();
+        }}
+        pendingPet={pendingPet}
+        lockPetId
+      />
+    ));
+  };
+
+  const openMyPetPicker = () => {
+    overlay.open(({ isOpen: open, close, unmount }) => (
+      <MyPetPickerDialog
+        isOpen={open}
+        onClose={() => {
+          close();
+          setTimeout(unmount, 200);
+        }}
+        onSelect={(petId) => {
+          openCreateAuctionWithPetId(petId);
+        }}
+      />
+    ));
+  };
+
+  const openQuickRegister = () => {
+    overlay.open(({ isOpen: open, close, unmount }) => (
+      <QuickRegisterModal
+        isOpen={open}
+        onClose={() => {
+          close();
+          setTimeout(unmount, 200);
+        }}
+        onSubmitDraft={(dto) => {
+          openCreateAuctionWithPendingPet(dto);
+        }}
+      />
+    ));
+  };
+
+  const openCreateAuctionFlow = () => {
+    overlay.open(({ isOpen: open, close, unmount }) => (
+      <CreateAuctionChooserDialog
+        isOpen={open}
+        onClose={() => {
+          close();
+          setTimeout(unmount, 200);
+        }}
+        onSelectExisting={() => {
+          close();
+          setTimeout(unmount, 200);
+          openMyPetPicker();
+        }}
+        onCreateNew={() => {
+          close();
+          setTimeout(unmount, 200);
+          openQuickRegister();
+        }}
+      />
+    ));
+  };
 
   const grouped = useMemo(() => {
     const active: MyAuctionItemDto[] = [];
@@ -210,7 +319,17 @@ export default function MyAuctionsPage() {
 
   return (
     <div className="mx-auto w-full max-w-2xl p-4">
-      <h1 className="mb-4 text-xl font-bold">내 경매</h1>
+      <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <h1 className="text-xl font-bold">내 경매</h1>
+        <Button
+          onClick={openCreateAuctionFlow}
+          size="sm"
+          className="breeder-badge-shine w-full rounded-lg bg-amber-600 text-white hover:bg-amber-700 sm:w-auto dark:bg-amber-500 dark:hover:bg-amber-600"
+        >
+          <Plus className="mr-1 h-4 w-4" />
+          경매 생성
+        </Button>
+      </div>
       <Tabs defaultValue="active">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="active">
