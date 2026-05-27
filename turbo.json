@@ -46,7 +46,6 @@
         "REDIS_HOST",
         "REDIS_PORT",
         "REDIS_PASSWORD",
-        "DISCORD_AUCTION_WEBHOOK_URL",
         "FIREBASE_SERVICE_ACCOUNT_PATH",
         "NEXT_PUBLIC_WS_BASE_URL"
       ]

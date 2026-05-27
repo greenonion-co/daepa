@@ -68,13 +68,13 @@ redis.call('HSET', KEYS[1],
   'last_bid_ts_ms', tostring(now_ms),
   'current_end_time_ms', tostring(new_end_time_ms))
 
-local bid_json = string.format(
-  '{"bidderId":"%s","nickname":"%s","amount":%d,"ts":%d,"ext":%d}',
-  bidder_id,
-  string.gsub(nickname, '"', '\\"'),
-  bid_amount,
-  now_ms,
-  triggered_extension)
+local bid_json = cjson.encode({
+  bidderId = bidder_id,
+  nickname = nickname,
+  amount = bid_amount,
+  ts = now_ms,
+  ext = triggered_extension,
+})
 
 redis.call('LPUSH', KEYS[2], bid_json)
 redis.call('LTRIM', KEYS[2], 0, tonumber(ARGV[5]) - 1)

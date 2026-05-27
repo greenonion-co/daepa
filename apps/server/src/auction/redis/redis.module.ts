@@ -1,4 +1,4 @@
-import { Global, Module, OnModuleDestroy } from '@nestjs/common';
+import { Global, Inject, Module, OnModuleDestroy } from '@nestjs/common';
 import IORedis, { Redis } from 'ioredis';
 
 export const AUCTION_REDIS = 'AUCTION_REDIS';
@@ -36,9 +36,19 @@ const redisBullProvider = {
   exports: [AUCTION_REDIS, AUCTION_REDIS_SUB, AUCTION_REDIS_BULL],
 })
 export class AuctionRedisModule implements OnModuleDestroy {
-  constructor() {}
+  constructor(
+    @Inject(AUCTION_REDIS) private readonly redis: Redis,
+    @Inject(AUCTION_REDIS_SUB) private readonly redisSub: Redis,
+    @Inject(AUCTION_REDIS_BULL) private readonly redisBull: Redis,
+  ) {}
 
+  // graceful shutdown — 명시적 quit() 없이는 ioredis 연결이 정리되지 않아
+  // 프로세스 종료 지연 / SUB 리스너 좀비화 발생.
   async onModuleDestroy() {
-    // 프로세스 종료 시 클라이언트 정리는 NestJS lifecycle이 처리
+    await Promise.allSettled([
+      this.redis.quit(),
+      this.redisSub.quit(),
+      this.redisBull.quit(),
+    ]);
   }
 }
