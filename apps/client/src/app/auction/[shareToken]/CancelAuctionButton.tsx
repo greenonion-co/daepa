@@ -85,7 +85,8 @@ export default function CancelAuctionButton({ shareToken, status }: CancelAuctio
                     취소하면 즉시 종료되며, 재개할 수 없습니다.
                   </p>
                   <p>
-                    아래 입력란에 <strong className="text-foreground">"{CONFIRM_PHRASE}"</strong>를
+                    아래 입력란에{" "}
+                    <strong className="text-foreground">&quot;{CONFIRM_PHRASE}&quot;</strong>를
                     정확히 입력하세요.
                   </p>
                 </>
