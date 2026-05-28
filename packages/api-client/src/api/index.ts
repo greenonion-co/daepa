@@ -8,6 +8,7 @@
 import type {
   AdoptionHistoryControllerGetAllAdoptionsParams,
   AppleNativeLoginRequestDto,
+  AuctionControllerBidsParams,
   BrPetControllerFindAllParams,
   BrPetControllerGetPetsByDateRangeParams,
   BrPetControllerGetPetsByMonthParams,
@@ -15,6 +16,7 @@ import type {
   CompleteAdoptionDto,
   CompleteHatchingDto,
   CreateAdoptionDto,
+  CreateAuctionDto,
   CreateFeedingDto,
   CreateInitUserInfoDto,
   CreateLayingDto,
@@ -70,11 +72,14 @@ import type {
   AdoptionDetailResponseDto,
   AdoptionHistoryControllerGetAllAdoptions200,
   AdoptionStatisticsDto,
+  AuctionResponseDto,
+  BidHistoryResponseDto,
   BrPetControllerFindAll200,
   BrPetControllerGetPetsByYear200,
   BreederPublicProfileResponseDto,
   ChildPetDetailDto,
   CommonResponseDto,
+  CreateAuctionResponseDto,
   DetailJson,
   FamilyTreeNodeDto,
   FeedingControllerGetList200,
@@ -86,6 +91,7 @@ import type {
   GetFamilyTreeResponseDto,
   GetParentsByPetIdResponseDto,
   GetSiblingsPageResponseDto,
+  MyAuctionListResponseDto,
   NativeLoginResponseDto,
   PairControllerGetPairList200,
   ParentLinkDetailJson,
@@ -111,6 +117,10 @@ import type {
 } from "../model";
 
 import { useCustomInstance } from "./mutator/use-custom-instance";
+export const appControllerHealth = () => {
+  return useCustomInstance<void>({ url: `/api/health`, method: "GET" });
+};
+
 export const petControllerFindAll = (params?: PetControllerFindAllParams) => {
   return useCustomInstance<PetControllerFindAll200>({ url: `/api/v1/pet`, method: "GET", params });
 };
@@ -784,6 +794,44 @@ export const fcmControllerSendTestPush = (testPushNotificationDto: TestPushNotif
   });
 };
 
+export const auctionControllerCreateAuction = (createAuctionDto: CreateAuctionDto) => {
+  return useCustomInstance<CreateAuctionResponseDto>({
+    url: `/api/v1/auction`,
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    data: createAuctionDto,
+  });
+};
+
+export const auctionControllerGetByShareToken = (shareToken: string) => {
+  return useCustomInstance<AuctionResponseDto>({
+    url: `/api/v1/auction/${shareToken}`,
+    method: "GET",
+  });
+};
+
+export const auctionControllerCancel = (shareToken: string) => {
+  return useCustomInstance<CommonResponseDto>({
+    url: `/api/v1/auction/${shareToken}/cancel`,
+    method: "POST",
+  });
+};
+
+export const auctionControllerBids = (auctionId: string, params?: AuctionControllerBidsParams) => {
+  return useCustomInstance<BidHistoryResponseDto>({
+    url: `/api/v1/auction/${auctionId}/bids`,
+    method: "GET",
+    params,
+  });
+};
+
+export const myAuctionControllerMyAuctions = () => {
+  return useCustomInstance<MyAuctionListResponseDto>({ url: `/api/v1/me/auction`, method: "GET" });
+};
+
+export type AppControllerHealthResult = NonNullable<
+  Awaited<ReturnType<typeof appControllerHealth>>
+>;
 export type PetControllerFindAllResult = NonNullable<
   Awaited<ReturnType<typeof petControllerFindAll>>
 >;
@@ -1009,6 +1057,21 @@ export type FcmControllerDeactivateTokenResult = NonNullable<
 >;
 export type FcmControllerSendTestPushResult = NonNullable<
   Awaited<ReturnType<typeof fcmControllerSendTestPush>>
+>;
+export type AuctionControllerCreateAuctionResult = NonNullable<
+  Awaited<ReturnType<typeof auctionControllerCreateAuction>>
+>;
+export type AuctionControllerGetByShareTokenResult = NonNullable<
+  Awaited<ReturnType<typeof auctionControllerGetByShareToken>>
+>;
+export type AuctionControllerCancelResult = NonNullable<
+  Awaited<ReturnType<typeof auctionControllerCancel>>
+>;
+export type AuctionControllerBidsResult = NonNullable<
+  Awaited<ReturnType<typeof auctionControllerBids>>
+>;
+export type MyAuctionControllerMyAuctionsResult = NonNullable<
+  Awaited<ReturnType<typeof myAuctionControllerMyAuctions>>
 >;
 
 export const getPetControllerFindAllResponsePetParentDtoMock = (
@@ -2481,6 +2544,10 @@ export const getUserNotificationControllerFindAllResponseMock = (
       "parent_reject",
       "parent_cancel",
       "adoption_complete",
+      "auction_started",
+      "auction_ended_host",
+      "auction_ended_winner",
+      "auction_outbid",
     ] as const),
     targetId: faker.helpers.arrayElement([
       faker.number.int({ min: undefined, max: undefined }),
@@ -2641,6 +2708,10 @@ export const getUserNotificationControllerFindOneResponseMock = (
     "parent_reject",
     "parent_cancel",
     "adoption_complete",
+    "auction_started",
+    "auction_ended_host",
+    "auction_ended_winner",
+    "auction_outbid",
   ] as const),
   targetId: faker.helpers.arrayElement([
     faker.number.int({ min: undefined, max: undefined }),
@@ -4925,6 +4996,131 @@ export const getFcmControllerSendTestPushResponseMock = (
   ...overrideResponse,
 });
 
+export const getAuctionControllerCreateAuctionResponseMock = (
+  overrideResponse: Partial<CreateAuctionResponseDto> = {},
+): CreateAuctionResponseDto => ({
+  success: faker.datatype.boolean(),
+  message: faker.string.alpha(20),
+  data: {
+    auctionId: faker.string.alpha(20),
+    shareToken: faker.string.alpha(20),
+    shareUrl: faker.string.alpha(20),
+  },
+  ...overrideResponse,
+});
+
+export const getAuctionControllerGetByShareTokenResponseMock = (
+  overrideResponse: Partial<AuctionResponseDto> = {},
+): AuctionResponseDto => ({
+  success: faker.datatype.boolean(),
+  message: faker.string.alpha(20),
+  data: {
+    ...{
+      auctionId: faker.string.alpha(20),
+      shareToken: faker.string.alpha(20),
+      petId: faker.string.alpha(20),
+      hostUserId: faker.string.alpha(20),
+      status: faker.helpers.arrayElement(["PENDING", "ACTIVE", "ENDED", "CANCELED"] as const),
+      startingPrice: faker.number.int({ min: undefined, max: undefined }),
+      minIncrement: faker.number.int({ min: undefined, max: undefined }),
+      extensionMinutes: faker.number.int({ min: undefined, max: undefined }),
+      startTimeMs: faker.number.int({ min: undefined, max: undefined }),
+      originalEndTimeMs: faker.number.int({ min: undefined, max: undefined }),
+      currentEndTimeMs: faker.number.int({ min: undefined, max: undefined }),
+      highestBid: faker.number.int({ min: undefined, max: undefined }),
+      highestBidder: {
+        ...{
+          userId: faker.string.alpha(20),
+          nickname: faker.helpers.arrayElement([faker.string.alpha(20), null]),
+        },
+      },
+      recentBids: Array.from(
+        { length: faker.number.int({ min: 1, max: 10 }) },
+        (_, i) => i + 1,
+      ).map(() => ({
+        bidderUserId: faker.string.alpha(20),
+        bidderNickname: faker.helpers.arrayElement([
+          faker.helpers.arrayElement([faker.string.alpha(20), null]),
+          undefined,
+        ]),
+        amount: faker.number.int({ min: undefined, max: undefined }),
+        serverTsMs: faker.number.int({ min: undefined, max: undefined }),
+        triggeredExtension: faker.datatype.boolean(),
+      })),
+      serverNowMs: faker.number.int({ min: undefined, max: undefined }),
+      finalPrice: faker.helpers.arrayElement([
+        faker.number.int({ min: undefined, max: undefined }),
+        null,
+      ]),
+      winnerUserId: faker.helpers.arrayElement([faker.string.alpha(20), null]),
+    },
+  },
+  ...overrideResponse,
+});
+
+export const getAuctionControllerCancelResponseMock = (
+  overrideResponse: Partial<CommonResponseDto> = {},
+): CommonResponseDto => ({
+  success: faker.datatype.boolean(),
+  message: faker.string.alpha(20),
+  ...overrideResponse,
+});
+
+export const getAuctionControllerBidsResponseMock = (
+  overrideResponse: Partial<BidHistoryResponseDto> = {},
+): BidHistoryResponseDto => ({
+  success: faker.datatype.boolean(),
+  message: faker.string.alpha(20),
+  data: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+    bidderUserId: faker.string.alpha(20),
+    bidderNickname: faker.helpers.arrayElement([faker.string.alpha(20), null]),
+    amount: faker.number.int({ min: undefined, max: undefined }),
+    serverTsMs: faker.number.int({ min: undefined, max: undefined }),
+    triggeredExtension: faker.datatype.boolean(),
+  })),
+  nextCursor: faker.helpers.arrayElement([faker.string.alpha(20), null]),
+  ...overrideResponse,
+});
+
+export const getMyAuctionControllerMyAuctionsResponseMock = (
+  overrideResponse: Partial<MyAuctionListResponseDto> = {},
+): MyAuctionListResponseDto => ({
+  success: faker.datatype.boolean(),
+  message: faker.string.alpha(20),
+  data: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+    auctionId: faker.string.alpha(20),
+    shareToken: faker.string.alpha(20),
+    petId: faker.string.alpha(20),
+    status: faker.helpers.arrayElement(["PENDING", "ACTIVE", "ENDED", "CANCELED"] as const),
+    startTimeMs: faker.number.int({ min: undefined, max: undefined }),
+    currentEndTimeMs: faker.number.int({ min: undefined, max: undefined }),
+    startingPrice: faker.number.int({ min: undefined, max: undefined }),
+    highestBid: faker.helpers.arrayElement([
+      faker.number.int({ min: undefined, max: undefined }),
+      null,
+    ]),
+    finalPrice: faker.helpers.arrayElement([
+      faker.number.int({ min: undefined, max: undefined }),
+      null,
+    ]),
+  })),
+  ...overrideResponse,
+});
+
+export const getAppControllerHealthMockHandler = (
+  overrideResponse?:
+    | void
+    | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<void> | void),
+) => {
+  return http.get("*/api/health", async (info) => {
+    await delay(1000);
+    if (typeof overrideResponse === "function") {
+      await overrideResponse(info);
+    }
+    return new HttpResponse(null, { status: 200 });
+  });
+};
+
 export const getPetControllerFindAllMockHandler = (
   overrideResponse?:
     | PetControllerFindAll200
@@ -6631,7 +6827,123 @@ export const getFcmControllerSendTestPushMockHandler = (
     );
   });
 };
+
+export const getAuctionControllerCreateAuctionMockHandler = (
+  overrideResponse?:
+    | CreateAuctionResponseDto
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<CreateAuctionResponseDto> | CreateAuctionResponseDto),
+) => {
+  return http.post("*/api/v1/auction", async (info) => {
+    await delay(1000);
+
+    return new HttpResponse(
+      JSON.stringify(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getAuctionControllerCreateAuctionResponseMock(),
+      ),
+      { status: 201, headers: { "Content-Type": "application/json" } },
+    );
+  });
+};
+
+export const getAuctionControllerGetByShareTokenMockHandler = (
+  overrideResponse?:
+    | AuctionResponseDto
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<AuctionResponseDto> | AuctionResponseDto),
+) => {
+  return http.get("*/api/v1/auction/:shareToken", async (info) => {
+    await delay(1000);
+
+    return new HttpResponse(
+      JSON.stringify(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getAuctionControllerGetByShareTokenResponseMock(),
+      ),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+  });
+};
+
+export const getAuctionControllerCancelMockHandler = (
+  overrideResponse?:
+    | CommonResponseDto
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<CommonResponseDto> | CommonResponseDto),
+) => {
+  return http.post("*/api/v1/auction/:shareToken/cancel", async (info) => {
+    await delay(1000);
+
+    return new HttpResponse(
+      JSON.stringify(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getAuctionControllerCancelResponseMock(),
+      ),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+  });
+};
+
+export const getAuctionControllerBidsMockHandler = (
+  overrideResponse?:
+    | BidHistoryResponseDto
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<BidHistoryResponseDto> | BidHistoryResponseDto),
+) => {
+  return http.get("*/api/v1/auction/:auctionId/bids", async (info) => {
+    await delay(1000);
+
+    return new HttpResponse(
+      JSON.stringify(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getAuctionControllerBidsResponseMock(),
+      ),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+  });
+};
+
+export const getMyAuctionControllerMyAuctionsMockHandler = (
+  overrideResponse?:
+    | MyAuctionListResponseDto
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<MyAuctionListResponseDto> | MyAuctionListResponseDto),
+) => {
+  return http.get("*/api/v1/me/auction", async (info) => {
+    await delay(1000);
+
+    return new HttpResponse(
+      JSON.stringify(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getMyAuctionControllerMyAuctionsResponseMock(),
+      ),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+  });
+};
 export const getProjectDaepaAPIMock = () => [
+  getAppControllerHealthMockHandler(),
   getPetControllerFindAllMockHandler(),
   getPetControllerCreateMockHandler(),
   getPetControllerFeedMockHandler(),
@@ -6708,4 +7020,9 @@ export const getProjectDaepaAPIMock = () => [
   getFcmControllerRegisterTokenMockHandler(),
   getFcmControllerDeactivateTokenMockHandler(),
   getFcmControllerSendTestPushMockHandler(),
+  getAuctionControllerCreateAuctionMockHandler(),
+  getAuctionControllerGetByShareTokenMockHandler(),
+  getAuctionControllerCancelMockHandler(),
+  getAuctionControllerBidsMockHandler(),
+  getMyAuctionControllerMyAuctionsMockHandler(),
 ];

@@ -1,4 +1,4 @@
-import { Bubbles, DollarSign, Home } from "lucide-react";
+import { Bubbles, DollarSign, Gavel, Home } from "lucide-react";
 import { FormStep } from "./pet/types/form.type";
 import {
   AdoptionHistoryDtoMethod,
@@ -723,6 +723,11 @@ export const SIDEBAR_ITEMS = [
     title: "쇼룸",
     url: "/@", // Menubar에서 /@{user.showroomSlug}으로 동적 치환
   },
+  {
+    title: "경매",
+    url: "/auction",
+    icon: Gavel,
+  },
 ];
 
 export const NOTIFICATION_MESSAGE: Record<UserNotificationDtoType, string> = {
@@ -731,6 +736,10 @@ export const NOTIFICATION_MESSAGE: Record<UserNotificationDtoType, string> = {
   parent_reject: "님이 부모 연동 요청을 거절했습니다.",
   parent_cancel: "님이 부모 연동 요청을 취소했습니다.",
   adoption_complete: "님으로부터 소유권이 이전되었습니다.",
+  auction_started: "님의 경매가 시작되었습니다.",
+  auction_ended_host: "내 경매가 종료되었습니다.",
+  auction_ended_winner: "경매에서 낙찰되었습니다.",
+  auction_outbid: "더 높은 입찰이 들어왔습니다.",
 };
 
 export const NOTIFICATION_TYPE: Record<UserNotificationDtoType, { label: string; color: string }> =
@@ -754,6 +763,22 @@ export const NOTIFICATION_TYPE: Record<UserNotificationDtoType, { label: string;
     adoption_complete: {
       label: "소유권 이전",
       color: "bg-blue-600 text-white",
+    },
+    auction_started: {
+      label: "경매 시작",
+      color: "bg-amber-600 text-white",
+    },
+    auction_ended_host: {
+      label: "경매 종료",
+      color: "bg-amber-700 text-white",
+    },
+    auction_ended_winner: {
+      label: "낙찰",
+      color: "bg-emerald-600 text-white",
+    },
+    auction_outbid: {
+      label: "추월 입찰",
+      color: "bg-orange-500 text-white",
     },
   };
 

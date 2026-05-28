@@ -34,6 +34,9 @@ const usePushNotification = () => {
   const setPendingNotificationId = useNotificationStore(
     state => state.setPendingNotificationId,
   );
+  const setPendingDeepLinkPath = useNotificationStore(
+    state => state.setPendingDeepLinkPath,
+  );
   const isRegistering = useRef(false);
 
   // FCM 토큰 서버에 등록
@@ -174,7 +177,10 @@ const usePushNotification = () => {
     const unsubscribe = messaging().onNotificationOpenedApp(remoteMessage => {
       if (__DEV__) console.log('[FCM] Notification opened app');
       const notificationId = remoteMessage.data?.notificationId as string;
-      if (notificationId) {
+      const path = remoteMessage.data?.path as string | undefined;
+      if (path) {
+        setPendingDeepLinkPath(path);
+      } else if (notificationId) {
         setPendingNotificationId(notificationId);
       }
     });
@@ -186,14 +192,17 @@ const usePushNotification = () => {
         if (remoteMessage) {
           if (__DEV__) console.log('[FCM] App opened from quit state');
           const notificationId = remoteMessage.data?.notificationId as string;
-          if (notificationId) {
+          const path = remoteMessage.data?.path as string | undefined;
+          if (path) {
+            setPendingDeepLinkPath(path);
+          } else if (notificationId) {
             setPendingNotificationId(notificationId);
           }
         }
       });
 
     return () => unsubscribe();
-  }, [setPendingNotificationId]);
+  }, [setPendingNotificationId, setPendingDeepLinkPath]);
 
   // 로그인 상태 변경 시 토큰 등록
   useEffect(() => {
