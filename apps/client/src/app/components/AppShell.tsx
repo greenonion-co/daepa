@@ -16,7 +16,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const isPetDetail = pathname?.startsWith("/pet/") ?? false;
-  const isShowcase = pathname?.startsWith("/@") ?? false;
+  const isShowcase = (pathname?.startsWith("/@") || pathname?.startsWith("/showroom")) ?? false;
   const isFamilyTree = /\/pet\/[^/]+\/breeding-map/.test(pathname ?? "");
   const isIntroPage = pathname === "/intro";
   const isSignIn = pathname?.startsWith("/sign-in") ?? false;
@@ -41,8 +41,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     <main
       className={`relative mx-auto flex w-full ${isFamilyTree ? "h-dvh overflow-hidden" : "min-h-screen"} ${isPetDetail ? "dark:bg-background bg-gray-100" : ""}`}
     >
-      <div className={cn("w-full", !isMobile && "max-w-[calc(100%_-_var(--right-sidebar-width))]")}>
-        {!hasNativeTopBar && !hasHiddenTopBar && !isFamilyTree && (!isShowcase || user) && (
+      <div className={cn("w-full", !isMobile && !isShowcase && "max-w-[calc(100%_-_var(--right-sidebar-width))]")}>
+        {!hasNativeTopBar && !hasHiddenTopBar && !isFamilyTree && !isShowcase && (
           <Menubar unreadCount={unreadCount} />
         )}
         <div className={cn(isNativeApp() && "pb-[80px]")}>{children}</div>
@@ -52,7 +52,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         <FloatingActions />
       )}
       {/* 웹 */}
-      {!isNativeApp() && !isMobile && <Sidebar unreadCount={unreadCount} />}
+      {!isNativeApp() && !isMobile && !isShowcase && <Sidebar unreadCount={unreadCount} />}
     </main>
   );
 }
