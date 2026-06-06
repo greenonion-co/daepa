@@ -6,6 +6,7 @@ import { PetSingleDto } from './pet.dto';
 import { PET_TYPE } from './pet.constants';
 import { PetDetailEntity } from '../pet_detail/pet_detail.entity';
 import { EggDetailEntity } from '../egg_detail/egg_detail.entity';
+import { assembleRatingScores } from '../pet_detail/pet_rating';
 
 export type PetSingleCacheData = PetSingleDto & { ownerId: string };
 
@@ -34,6 +35,7 @@ export async function loadPetData(
   }
 
   const { growth, sex, morphs, traits, foods, weight } = petDetail ?? {};
+  const ratingScores = assembleRatingScores(petDetail);
   const { temperature, status: eggStatus } = eggDetail ?? {};
 
   if (pet.isDeleted) {
@@ -62,6 +64,7 @@ export async function loadPetData(
       traits,
       foods,
       weight,
+      ratingScores,
       eggDetail,
       temperature,
       eggStatus,

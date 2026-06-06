@@ -11,6 +11,11 @@ import {
   ValidateNested,
   ValidateIf,
   Matches,
+  ArrayMaxSize,
+  ArrayMinSize,
+  IsInt,
+  Max,
+  Min,
 } from 'class-validator';
 import {
   PET_ADOPTION_STATUS,
@@ -41,6 +46,11 @@ import { CommonResponseDto } from 'src/common/response.dto';
 import { UpsertPetImageDto } from 'src/pet_image/pet_image.dto';
 import { EGG_STATUS } from 'src/egg_detail/egg_detail.constants';
 import { PetDetailBaseDto } from 'src/pet_detail/pet_detail.dto';
+import {
+  RATING_COUNT,
+  RATING_MAX,
+  RATING_MIN,
+} from 'src/pet_detail/pet_rating';
 import { EggDetailDto } from 'src/egg_detail/egg_detail.dto';
 import { LayingDto } from 'src/laying/laying.dto';
 import { extractOriginalPetName } from 'src/common/utils/pet-name.helper';
@@ -675,6 +685,16 @@ export class PetDto extends PetBaseDto {
   weight?: number;
 
   @ApiProperty({
+    description: '펫 평가 점수(육각형 능력치)',
+    example: [3, 5, 2, 4, 1, 0],
+    type: [Number],
+    required: false,
+  })
+  @IsOptional()
+  @IsArray()
+  ratingScores?: number[];
+
+  @ApiProperty({
     description: '부화 온도',
     example: 25,
     required: false,
@@ -812,6 +832,16 @@ export class PetSingleDto extends PetBaseDto {
     return isNaN(num) ? undefined : num;
   })
   weight?: number;
+
+  @ApiProperty({
+    description: '펫 평가 점수(육각형 능력치)',
+    example: [3, 5, 2, 4, 1, 0],
+    type: [Number],
+    required: false,
+  })
+  @IsOptional()
+  @IsArray()
+  ratingScores?: number[];
 
   @ApiProperty({
     description: '부화 온도',
@@ -962,6 +992,21 @@ export class CreatePetDto extends OmitType(PetBaseDto, [
     return isNaN(num) ? undefined : num;
   })
   weight?: number;
+
+  @ApiProperty({
+    description: `펫 평가 점수(육각형 능력치). 길이 ${RATING_COUNT}, 각 ${RATING_MIN}~${RATING_MAX}`,
+    example: [3, 5, 2, 4, 1, 0],
+    type: [Number],
+    required: false,
+  })
+  @IsOptional()
+  @IsArray()
+  @ArrayMinSize(RATING_COUNT)
+  @ArrayMaxSize(RATING_COUNT)
+  @IsInt({ each: true })
+  @Min(RATING_MIN, { each: true })
+  @Max(RATING_MAX, { each: true })
+  ratingScores?: number[];
 
   @ApiProperty({
     description: '아빠 개체 정보',

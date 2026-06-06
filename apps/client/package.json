@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "next dev --turbopack",
-    "dev:mobile": "dotenv -e .env.mobile -- next dev --turbopack -H 0.0.0.0",
+    "dev:mobile": "dotenv -e .env.mobile -- next dev --turbopack",
     "dev:https": "next dev --turbopack --experimental-https",
     "build": "next build",
     "start": "next start",
@@ -94,6 +94,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "dotenv-cli": "^8.0.0",
     "eslint": "^9",
     "eslint-config-next": "15.3.8",
     "tailwindcss": "^4",

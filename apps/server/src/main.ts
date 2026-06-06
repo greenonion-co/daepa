@@ -12,13 +12,11 @@ async function bootstrap() {
     throw new Error('CLIENT_BASE_URL and SERVER_BASE_URL must be defined');
   }
 
-  // CORS 허용 origin 목록 (localhost + 추가 IP)
+  // CORS 허용 origin 목록 (mobile 테스트 시 .env.mobile이 두 값을 LAN IP로 override)
   const corsOrigins = [
     process.env.CLIENT_BASE_URL,
     process.env.SERVER_BASE_URL,
-    // 모바일 앱 테스트용 IP (MOBILE_CLIENT_URL 환경변수가 있으면 추가)
-    process.env.MOBILE_CLIENT_URL,
-  ].filter(Boolean) as string[];
+  ].filter(Boolean);
 
   app.enableCors({
     origin: corsOrigins,

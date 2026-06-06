@@ -6,6 +6,7 @@ import { useIsMyPet } from "@/hooks/useIsMyPet";
 import Header from "./Header";
 import DeletePetButton from "./DeletePetButton";
 import StartAuctionButton from "./StartAuctionButton";
+import { PetRatingCard } from "./PetRatingCard";
 import { useIsMobile } from "@/hooks/useMobile";
 import { cn } from "@/lib/utils";
 
@@ -182,12 +183,17 @@ export default function PetDetailLayout({
 
       <div className="flex flex-wrap gap-3 px-2 pt-2">
         {/* 펫정보 */}
-        <div
-          ref={breedingRef}
-          data-section="breeding"
-          className="flex max-w-[440px] min-w-[300px] flex-1 max-[580px]:order-2 max-[580px]:max-w-none"
-        >
-          {breedingSlot}
+        <div className="flex max-w-[440px] min-w-[300px] flex-1 flex-col gap-3 max-[580px]:order-2 max-[580px]:max-w-none">
+          <div ref={breedingRef} data-section="breeding" className="flex">
+            {breedingSlot}
+          </div>
+          <div className="flex">
+            <PetRatingCard
+              petId={pet.petId}
+              ownerId={pet.owner.userId}
+              scores={pet.ratingScores}
+            />
+          </div>
         </div>
 
         {/* 사진 */}

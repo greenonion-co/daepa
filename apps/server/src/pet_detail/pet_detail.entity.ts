@@ -37,6 +37,25 @@ export class PetDetailEntity {
   @Column({ type: 'decimal', precision: 10, scale: 1, nullable: true })
   weight: number | null; // 몸무게(g)
 
+  // 펫 평가(육각형 능력치) 0~5. 필터링/정렬을 위해 개별 컬럼으로 저장.
+  @Column({ type: 'tinyint', unsigned: true, nullable: true })
+  score1: number | null;
+
+  @Column({ type: 'tinyint', unsigned: true, nullable: true })
+  score2: number | null;
+
+  @Column({ type: 'tinyint', unsigned: true, nullable: true })
+  score3: number | null;
+
+  @Column({ type: 'tinyint', unsigned: true, nullable: true })
+  score4: number | null;
+
+  @Column({ type: 'tinyint', unsigned: true, nullable: true })
+  score5: number | null;
+
+  @Column({ type: 'tinyint', unsigned: true, nullable: true })
+  score6: number | null;
+
   @Column({ default: false })
   isDeleted: boolean;
 

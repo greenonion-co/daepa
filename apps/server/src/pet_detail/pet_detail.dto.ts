@@ -1,13 +1,19 @@
 import { ApiProperty, PickType } from '@nestjs/swagger';
 import { Exclude, Transform } from 'class-transformer';
 import {
+  ArrayMaxSize,
+  ArrayMinSize,
   IsArray,
   IsEnum,
+  IsInt,
   IsNumber,
   IsOptional,
   IsString,
+  Max,
+  Min,
 } from 'class-validator';
 import { PET_GROWTH, PET_SEX } from 'src/pet/pet.constants';
+import { RATING_COUNT, RATING_MAX, RATING_MIN } from './pet_rating';
 
 export class PetDetailBaseDto {
   @ApiProperty({
@@ -75,6 +81,21 @@ export class PetDetailBaseDto {
     return isNaN(num) ? undefined : num;
   })
   weight?: number;
+
+  @ApiProperty({
+    description: `펫 평가 점수(육각형 능력치). 길이 ${RATING_COUNT}, 각 ${RATING_MIN}~${RATING_MAX}`,
+    example: [3, 5, 2, 4, 1, 0],
+    type: [Number],
+    required: false,
+  })
+  @IsOptional()
+  @IsArray()
+  @ArrayMinSize(RATING_COUNT)
+  @ArrayMaxSize(RATING_COUNT)
+  @IsInt({ each: true })
+  @Min(RATING_MIN, { each: true })
+  @Max(RATING_MAX, { each: true })
+  ratingScores?: number[];
 
   @Exclude()
   declare createdAt?: Date;
