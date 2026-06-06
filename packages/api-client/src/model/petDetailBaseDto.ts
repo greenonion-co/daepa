@@ -21,4 +21,6 @@ export interface PetDetailBaseDto {
   foods?: string[];
   /** 펫 몸무게(g) */
   weight?: number;
+  /** 펫 평가 점수(육각형 능력치). 길이 6, 각 0~5 */
+  ratingScores?: number[];
 }

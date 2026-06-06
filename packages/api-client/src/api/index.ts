@@ -1220,6 +1220,12 @@ export const getPetControllerFindAllResponseMock = (
             faker.number.int({ min: undefined, max: undefined }),
             undefined,
           ]),
+          ratingScores: faker.helpers.arrayElement([
+            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.number.int({ min: undefined, max: undefined }),
+            ),
+            undefined,
+          ]),
         },
       },
       undefined,
@@ -1288,6 +1294,12 @@ export const getPetControllerFindAllResponseMock = (
     ]),
     weight: faker.helpers.arrayElement([
       faker.number.int({ min: undefined, max: undefined }),
+      undefined,
+    ]),
+    ratingScores: faker.helpers.arrayElement([
+      Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+        faker.number.int({ min: undefined, max: undefined }),
+      ),
       undefined,
     ]),
     temperature: faker.helpers.arrayElement([
@@ -1518,6 +1530,12 @@ export const getPetControllerFeedResponseMock = (
             faker.number.int({ min: undefined, max: undefined }),
             undefined,
           ]),
+          ratingScores: faker.helpers.arrayElement([
+            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.number.int({ min: undefined, max: undefined }),
+            ),
+            undefined,
+          ]),
         },
       },
       undefined,
@@ -1586,6 +1604,12 @@ export const getPetControllerFeedResponseMock = (
     ]),
     weight: faker.helpers.arrayElement([
       faker.number.int({ min: undefined, max: undefined }),
+      undefined,
+    ]),
+    ratingScores: faker.helpers.arrayElement([
+      Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+        faker.number.int({ min: undefined, max: undefined }),
+      ),
       undefined,
     ]),
     temperature: faker.helpers.arrayElement([
@@ -2305,6 +2329,12 @@ export const getPetControllerFindPetByPetIdResponseMock = (
               faker.number.int({ min: undefined, max: undefined }),
               undefined,
             ]),
+            ratingScores: faker.helpers.arrayElement([
+              Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => faker.number.int({ min: undefined, max: undefined }),
+              ),
+              undefined,
+            ]),
           },
         },
         undefined,
@@ -2378,6 +2408,12 @@ export const getPetControllerFindPetByPetIdResponseMock = (
       ]),
       weight: faker.helpers.arrayElement([
         faker.number.int({ min: undefined, max: undefined }),
+        undefined,
+      ]),
+      ratingScores: faker.helpers.arrayElement([
+        Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+          faker.number.int({ min: undefined, max: undefined }),
+        ),
         undefined,
       ]),
       temperature: faker.helpers.arrayElement([
@@ -2878,6 +2914,12 @@ export const getBrPetControllerFindAllResponseMock = (
             faker.number.int({ min: undefined, max: undefined }),
             undefined,
           ]),
+          ratingScores: faker.helpers.arrayElement([
+            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.number.int({ min: undefined, max: undefined }),
+            ),
+            undefined,
+          ]),
         },
       },
       undefined,
@@ -2946,6 +2988,12 @@ export const getBrPetControllerFindAllResponseMock = (
     ]),
     weight: faker.helpers.arrayElement([
       faker.number.int({ min: undefined, max: undefined }),
+      undefined,
+    ]),
+    ratingScores: faker.helpers.arrayElement([
+      Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+        faker.number.int({ min: undefined, max: undefined }),
+      ),
       undefined,
     ]),
     temperature: faker.helpers.arrayElement([
@@ -3169,6 +3217,12 @@ export const getBrPetControllerGetPetsByYearResponseMock = (): BrPetControllerGe
             faker.number.int({ min: undefined, max: undefined }),
             undefined,
           ]),
+          ratingScores: faker.helpers.arrayElement([
+            Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.number.int({ min: undefined, max: undefined }),
+            ),
+            undefined,
+          ]),
         },
       },
       undefined,
@@ -3237,6 +3291,12 @@ export const getBrPetControllerGetPetsByYearResponseMock = (): BrPetControllerGe
     ]),
     weight: faker.helpers.arrayElement([
       faker.number.int({ min: undefined, max: undefined }),
+      undefined,
+    ]),
+    ratingScores: faker.helpers.arrayElement([
+      Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+        faker.number.int({ min: undefined, max: undefined }),
+      ),
       undefined,
     ]),
     temperature: faker.helpers.arrayElement([
@@ -3462,6 +3522,12 @@ export const getBrPetControllerGetPetsByMonthResponseMock = (
               faker.number.int({ min: undefined, max: undefined }),
               undefined,
             ]),
+            ratingScores: faker.helpers.arrayElement([
+              Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => faker.number.int({ min: undefined, max: undefined }),
+              ),
+              undefined,
+            ]),
           },
         },
         undefined,
@@ -3535,6 +3601,12 @@ export const getBrPetControllerGetPetsByMonthResponseMock = (
       ]),
       weight: faker.helpers.arrayElement([
         faker.number.int({ min: undefined, max: undefined }),
+        undefined,
+      ]),
+      ratingScores: faker.helpers.arrayElement([
+        Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+          faker.number.int({ min: undefined, max: undefined }),
+        ),
         undefined,
       ]),
       temperature: faker.helpers.arrayElement([
@@ -3762,6 +3834,12 @@ export const getBrPetControllerGetPetsByDateRangeResponseMock = (
               faker.number.int({ min: undefined, max: undefined }),
               undefined,
             ]),
+            ratingScores: faker.helpers.arrayElement([
+              Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+                () => faker.number.int({ min: undefined, max: undefined }),
+              ),
+              undefined,
+            ]),
           },
         },
         undefined,
@@ -3835,6 +3913,12 @@ export const getBrPetControllerGetPetsByDateRangeResponseMock = (
       ]),
       weight: faker.helpers.arrayElement([
         faker.number.int({ min: undefined, max: undefined }),
+        undefined,
+      ]),
+      ratingScores: faker.helpers.arrayElement([
+        Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+          faker.number.int({ min: undefined, max: undefined }),
+        ),
         undefined,
       ]),
       temperature: faker.helpers.arrayElement([

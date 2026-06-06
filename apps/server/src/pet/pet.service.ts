@@ -52,6 +52,7 @@ import { PetImageService } from 'src/pet_image/pet_image.service';
 import { EGG_STATUS } from 'src/egg_detail/egg_detail.constants';
 import { EggDetailEntity } from 'src/egg_detail/egg_detail.entity';
 import { PetDetailEntity } from 'src/pet_detail/pet_detail.entity';
+import { decomposeRatingScores } from 'src/pet_detail/pet_rating';
 import { isUndefined } from 'es-toolkit';
 import { PairEntity } from 'src/pair/pair.entity';
 import { DateTime } from 'luxon';
@@ -810,6 +811,7 @@ export class PetService {
           foods,
           weight,
           growth,
+          ratingScores,
           temperature,
           eggStatus,
           ...petData
@@ -884,6 +886,8 @@ export class PetService {
             if (!isUndefined(foods)) updateData.foods = foods;
             if (!isUndefined(weight)) updateData.weight = weight;
             if (!isUndefined(growth)) updateData.growth = growth;
+            if (!isUndefined(ratingScores))
+              Object.assign(updateData, decomposeRatingScores(ratingScores));
 
             if (Object.keys(updateData).length > 0) {
               await entityManager.update(

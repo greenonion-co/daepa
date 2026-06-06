@@ -61,6 +61,8 @@ export interface PetSingleDto {
   foods?: string[];
   /** 펫 몸무게(g) */
   weight?: number;
+  /** 펫 평가 점수(육각형 능력치) */
+  ratingScores?: number[];
   /** 부화 온도 */
   temperature?: number;
   /** 알 상태 */
