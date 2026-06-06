@@ -47,12 +47,29 @@ export function RatingRadar({ scores, editable, onChange }: RatingRadarProps) {
     return Math.round((clamped / R) * RATING_MAX);
   };
 
-  const handleDown = (i: number) => (e: React.PointerEvent) => {
+  // 포인터 각도에 가장 가까운 축 선택 (0점이라 꼭짓점이 중앙에 겹쳐도 방향으로 구분 가능)
+  const nearestAxis = (x: number, y: number) => {
+    const ang = Math.atan2(y - C, x - C);
+    let best = 0;
+    let bestDiff = Infinity;
+    for (let i = 0; i < N; i++) {
+      let diff = Math.abs(ang - angleFor(i));
+      diff = Math.min(diff, 2 * Math.PI - diff);
+      if (diff < bestDiff) {
+        bestDiff = diff;
+        best = i;
+      }
+    }
+    return best;
+  };
+
+  const handleDown = (e: React.PointerEvent) => {
     if (!editable) return;
     e.preventDefault();
+    const { x, y } = toView(e.clientX, e.clientY);
+    const i = nearestAxis(x, y);
     activeRef.current = i;
     svgRef.current?.setPointerCapture(e.pointerId);
-    const { x, y } = toView(e.clientX, e.clientY);
     onChange?.(i, valueFromPointer(i, x, y));
   };
 
@@ -73,7 +90,8 @@ export function RatingRadar({ scores, editable, onChange }: RatingRadarProps) {
       <svg
         ref={svgRef}
         viewBox={`0 0 ${VIEW} ${VIEW}`}
-        className="w-full touch-none select-none"
+        className={`w-full touch-none select-none ${editable ? "cursor-pointer" : ""}`}
+        onPointerDown={handleDown}
         onPointerMove={handleMove}
         onPointerUp={handleUp}
         onPointerCancel={handleUp}
@@ -137,23 +155,21 @@ export function RatingRadar({ scores, editable, onChange }: RatingRadarProps) {
           );
         })}
 
-        {/* 편집 핸들 */}
+        {/* 편집 핸들 (장식 — 입력은 SVG 전체에서 각도로 축을 선택) */}
         {editable &&
           scores.map((v, i) => {
             const p = point(i, v);
             return (
-              <g key={i} className="cursor-pointer" onPointerDown={handleDown(i)}>
-                {/* 넓은 히트 영역 */}
-                <circle cx={p.x} cy={p.y} r={16} fill="transparent" />
-                <circle
-                  cx={p.x}
-                  cy={p.y}
-                  r={6}
-                  fill="#ffffff"
-                  stroke="#6366f1"
-                  strokeWidth={2}
-                />
-              </g>
+              <circle
+                key={i}
+                cx={p.x}
+                cy={p.y}
+                r={6}
+                fill="#ffffff"
+                stroke="#6366f1"
+                strokeWidth={2}
+                className="pointer-events-none"
+              />
             );
           })}
       </svg>
