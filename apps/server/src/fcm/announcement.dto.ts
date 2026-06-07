@@ -1,11 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
 import { ANNOUNCEMENT_STATUS } from './announcement.entity';
 
 export class CreateAnnouncementDto {
   @ApiProperty({ description: '공지 제목', example: '서비스 점검 안내' })
   @IsString()
   @IsNotEmpty()
+  @MaxLength(255) // announcements.title VARCHAR(255)
   title: string;
 
   @ApiProperty({
@@ -14,6 +15,7 @@ export class CreateAnnouncementDto {
   })
   @IsString()
   @IsNotEmpty()
+  @MaxLength(1000) // FCM payload(4KB) 안전 경계
   body: string;
 
   @ApiProperty({

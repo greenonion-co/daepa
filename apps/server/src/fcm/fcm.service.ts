@@ -8,12 +8,12 @@ import { ConfigService } from '@nestjs/config';
 import * as path from 'path';
 import * as fs from 'fs';
 
-// 영구 무효 토큰(앱 삭제/토큰 만료/잘못된 토큰)일 때만 비활성화.
-// 그 외(서버 일시 장애, rate limit 등)는 유지하고 다음 발송 때 재시도 대상으로 둔다.
+// 토큰 자체가 영구 무효(앱 삭제/토큰 만료/형식 오류)인 경우에만 비활성화.
+// invalid-argument 는 payload 문제일 때도 반환되어(모든 토큰 동일 실패) 대량 비활성화
+// 위험이 있으므로 제외한다. 서버 일시 장애/rate limit 등도 유지하고 다음 발송 때 재시도.
 const DEAD_TOKEN_ERROR_CODES = new Set([
   'messaging/registration-token-not-registered',
   'messaging/invalid-registration-token',
-  'messaging/invalid-argument',
 ]);
 
 export interface BroadcastResult {

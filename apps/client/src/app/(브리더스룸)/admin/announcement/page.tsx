@@ -2,7 +2,10 @@
 
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { AXIOS_INSTANCE, UserProfileDtoRole } from "@repo/api-client";
+import {
+  adminAnnouncementControllerCreateAnnouncement,
+  UserProfileDtoRole,
+} from "@repo/api-client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "@/lib/toast";
 import { Button } from "@/components/ui/button";
@@ -28,12 +31,6 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
-interface CreateAnnouncementResponse {
-  id: number;
-  status: string;
-  message: string;
-}
-
 export default function AdminAnnouncementPage() {
   const { user } = useAuth();
   const [title, setTitle] = useState("");
@@ -42,10 +39,10 @@ export default function AdminAnnouncementPage() {
 
   const sendMutation = useMutation({
     mutationFn: async () => {
-      const res = await AXIOS_INSTANCE<CreateAnnouncementResponse>({
-        url: "/api/v1/admin/announcement",
-        method: "POST",
-        data: { title, body, path: path || undefined },
+      const res = await adminAnnouncementControllerCreateAnnouncement({
+        title,
+        body,
+        path: path || undefined,
       });
       return res.data;
     },
