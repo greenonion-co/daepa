@@ -1,12 +1,27 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { FcmTokenEntity } from './fcm_token.entity';
 import { RegisterFcmTokenDto, SendPushNotificationDto } from './fcm.dto';
 import * as admin from 'firebase-admin';
 import { ConfigService } from '@nestjs/config';
 import * as path from 'path';
 import * as fs from 'fs';
+
+// 영구 무효 토큰(앱 삭제/토큰 만료/잘못된 토큰)일 때만 비활성화.
+// 그 외(서버 일시 장애, rate limit 등)는 유지하고 다음 발송 때 재시도 대상으로 둔다.
+const DEAD_TOKEN_ERROR_CODES = new Set([
+  'messaging/registration-token-not-registered',
+  'messaging/invalid-registration-token',
+  'messaging/invalid-argument',
+]);
+
+export interface BroadcastResult {
+  targetCount: number;
+  successCount: number;
+  failureCount: number;
+  failuresByCode: Record<string, number>; // FCM 에러 코드별 실패 토큰 수
+}
 
 @Injectable()
 export class FcmService implements OnModuleInit {
@@ -214,5 +229,149 @@ export class FcmService implements OnModuleInit {
     for (const userId of userIds) {
       await this.sendPushNotification({ userId, title, body, data });
     }
+  }
+
+  /**
+   * 전체 사용자 broadcast (공지 발송용)
+   * - production: 활성 토큰 전체를 조회해 멀티캐스트로 전송
+   * - 그 외(dev 등): 실유저 발송을 막기 위해 ANNOUNCEMENT_TEST_USER_ID 에게만 발송.
+   *   해당 env 미설정 시 아무에게도 보내지 않음 (fail-safe).
+   */
+  async sendBroadcast(
+    title: string,
+    body: string,
+    data?: Record<string, string>,
+  ): Promise<BroadcastResult> {
+    if (process.env.NODE_ENV !== 'production') {
+      const testUserId = this.configService.get<string>(
+        'ANNOUNCEMENT_TEST_USER_ID',
+      );
+      if (!testUserId) {
+        this.logger.warn(
+          'Non-production broadcast blocked: ANNOUNCEMENT_TEST_USER_ID not set. Skipping.',
+        );
+        return {
+          targetCount: 0,
+          successCount: 0,
+          failureCount: 0,
+          failuresByCode: {},
+        };
+      }
+      this.logger.warn(
+        `Non-production broadcast restricted to test user ${testUserId}.`,
+      );
+      return this.sendBroadcastToUser(testUserId, title, body, data);
+    }
+
+    const tokens = await this.fcmTokenRepository.find({
+      where: { isActive: true },
+      select: ['token', 'userId', 'deviceId', 'platform'],
+    });
+    return this.sendMulticast(tokens, title, body, data);
+  }
+
+  /**
+   * 특정 사용자에게만 broadcast 코드 경로로 전송 (테스트용)
+   * - 라이브 DB에서도 대상 유저의 활성 토큰에만 발송되어 안전
+   */
+  async sendBroadcastToUser(
+    userId: string,
+    title: string,
+    body: string,
+    data?: Record<string, string>,
+  ): Promise<BroadcastResult> {
+    const tokens = await this.getActiveTokens(userId);
+    return this.sendMulticast(tokens, title, body, data);
+  }
+
+  /**
+   * 토큰 목록에 500개씩 멀티캐스트 발송. 실패한 토큰은 비활성화.
+   */
+  private async sendMulticast(
+    tokens: FcmTokenEntity[],
+    title: string,
+    body: string,
+    data?: Record<string, string>,
+  ): Promise<BroadcastResult> {
+    if (!admin.apps.length) {
+      this.logger.warn('Firebase Admin not initialized. Skipping broadcast.');
+      return {
+        targetCount: 0,
+        successCount: 0,
+        failureCount: 0,
+        failuresByCode: {},
+      };
+    }
+
+    let successCount = 0;
+    let failureCount = 0;
+    const failuresByCode: Record<string, number> = {};
+
+    // FCM 멀티캐스트는 1회 최대 500개 토큰
+    const BATCH_SIZE = 500;
+    for (let i = 0; i < tokens.length; i += BATCH_SIZE) {
+      const batch = tokens.slice(i, i + BATCH_SIZE);
+
+      try {
+        const response = await admin.messaging().sendEachForMulticast({
+          tokens: batch.map((t) => t.token),
+          notification: { title, body },
+          data,
+          apns: {
+            payload: {
+              aps: {
+                alert: { title, body },
+                sound: 'default',
+                badge: 1,
+                'content-available': 1,
+              },
+            },
+          },
+          android: {
+            priority: 'high',
+            notification: { sound: 'default', channelId: 'default' },
+          },
+        });
+
+        successCount += response.successCount;
+        failureCount += response.failureCount;
+
+        // 토큰별 실패 사유 로깅 — 영구 무효 토큰만 비활성화
+        const deadTokens: string[] = [];
+        response.responses.forEach((r, idx) => {
+          if (r.success) return;
+          const t = batch[idx];
+          const code = r.error?.code ?? 'unknown';
+          failuresByCode[code] = (failuresByCode[code] ?? 0) + 1;
+          this.logger.warn(
+            `FCM send failed [${code}] user=${t.userId} device=${t.deviceId} (${t.platform}): ${r.error?.message ?? ''}`,
+          );
+          if (DEAD_TOKEN_ERROR_CODES.has(code)) {
+            deadTokens.push(t.token);
+          }
+        });
+
+        if (deadTokens.length > 0) {
+          await this.fcmTokenRepository.update(
+            { token: In(deadTokens) },
+            { isActive: false },
+          );
+        }
+      } catch (error) {
+        failureCount += batch.length;
+        failuresByCode['messaging/batch-error'] =
+          (failuresByCode['messaging/batch-error'] ?? 0) + batch.length;
+        this.logger.error(
+          `Broadcast batch failed: ${(error as Error).message}`,
+        );
+      }
+    }
+
+    return {
+      targetCount: tokens.length,
+      successCount,
+      failureCount,
+      failuresByCode,
+    };
   }
 }
