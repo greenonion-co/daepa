@@ -12,6 +12,8 @@
 | **양방향 실시간 동기화** | 어느 쪽이 refresh해도 반대편 store에 **즉시** 전파. 한쪽에만 있는 최신 토큰이 다른 쪽의 오래된 토큰에 의해 덮어써지지 않도록 iat 기반 ordering. |
 | **Native는 "언제나 최신 토큰을 안다"** | 웹 refresh도 native zustand에 반영. 탭 이동 시 재주입되는 값이 항상 최신이라 stale overwrite 사이클 차단. |
 | **단일 진실 공급원은 "iat가 가장 큰 토큰"** | 저장 위치가 여러 개여도 논리적 순서는 JWT `iat` 단 하나로 결정. |
+| **Refresh 쿠키는 영속 credential — 함부로 지우지 않는다** | 일회용 access token(1h)의 부재만으로 refresh 쿠키를 삭제하면 유효한 세션이 강제 종료된다. 쿠키 삭제는 **명시적 로그아웃**과 **서버의 확정 거부(401/403)** 에만 한정. |
+| **Refresh 실패는 확정/일시로 구분** | 서버 401/403(refresh token 무효)만 세션 종료. 네트워크/타임아웃/5xx는 세션 유지 후 재시도 — 잦은 refresh(1h TTL) 중 일시 실패를 로그아웃으로 오인하지 않기 위함. |
 
 ## 2. 주요 컴포넌트
 
@@ -187,18 +189,46 @@ handleSignOut:
 
 정책: **서버 invalidate 실패해도 로컬 상태는 반드시 정리**. 오프라인/네트워크 장애에서도 "로그아웃됨" 상태 보장.
 
-### 4-2. Refresh 실패에 따른 강제 로그아웃
+### 4-2. Refresh 실패 처리 — 확정 실패에만 로그아웃
+
+refresh 실패를 **확정(definitive)** 과 **일시적(transient)** 으로 구분한다(`isDefinitiveAuthFailure`).
+access token TTL이 1h라 refresh가 잦은데, 일시적 실패를 로그아웃으로 처리하면 refresh token이
+유효해도 며칠 안에 강제 로그아웃이 발생하기 때문이다.
 
 ```
 interceptor catch(refreshError):
   processQueue(refreshError, null)
-  tokenProvider.removeToken()
-    → Native: useAuthStore.setAccessToken(null)
-    → Web: tokenStorage.removeToken() → postMessage('SET_ACCESS_TOKEN', '')
-  handleAuthError('refresh-failed')
-    → Native: useAuthStore.clear() + resetToLogin() → Tabs + Login 스택
-    → WebView: postMessage('TOKEN_REFRESH_FAILED') → native handleMessage에서 clear + navigation.reset
+
+  if (확정 실패: refreshError가 axios 401/403):   ← refresh token 무효
+    tokenProvider.removeToken()
+      → Native: useAuthStore.setAccessToken(null)
+      → Web: tokenStorage.removeToken() → postMessage('SET_ACCESS_TOKEN', '')
+    handleAuthError('refresh-failed')
+      → Native: useAuthStore.clear() + resetToLogin() → Tabs + Login 스택
+      → WebView: postMessage('TOKEN_REFRESH_FAILED') → native handleMessage에서 clear + navigation.reset
+  else (일시적 실패: 네트워크/타임아웃/5xx):
+    로그아웃하지 않음. 토큰·세션·쿠키 모두 유지 → 다음 요청에서 자동 재시도
+    console.warn 로그만 남김
 ```
+
+### 4-3. Startup 세션 복구 (web `initialize`)
+
+cold start 시 access token이 없어도 refresh 쿠키가 살아있으면 세션을 복구한다.
+
+```
+AuthProvider → useUserStore.initialize():
+  token = tokenStorage.getToken()
+  if (!token):
+    if (sign-in 페이지): logged-out 처리 후 종료   ← 로그인 화면 자동 재로그인 방지
+    else: authControllerGetToken() 1회 시도
+      ├─ 성공: setToken(new) → user fetch (세션 복구)
+      └─ 실패: logged-out 처리
+```
+
+> 과거엔 native `onRehydrateStorage`가 "access token 없음"만으로 `CookieManager.clearAll()`을
+> 호출해 **유효한 refresh 쿠키까지 파괴**했다. 이제는 호출하지 않는다 — 일회용 access token의
+> 부재로 영속 credential(refresh 쿠키)을 지우면 복구가 불가능해지기 때문 (§1 원칙 참조).
+> 쿠키 정리는 **명시적 로그아웃(`clear()`)** 에서만 수행한다.
 
 ## 5. 주요 파일 맵
 
@@ -206,7 +236,7 @@ interceptor catch(refreshError):
 
 | 파일 | 역할 |
 |---|---|
-| `src/store/auth.ts` | zustand store — accessToken / user. AsyncStorage persist. logout 시 CookieManager.clearAll. |
+| `src/store/auth.ts` | zustand store — accessToken / user. AsyncStorage persist. **명시적 `clear()`(로그아웃)에서만** CookieManager.clearAll. `onRehydrateStorage`는 access token 없음/hydration 오류 시 user만 정리하고 **refresh 쿠키는 보존**(startup 복구용). |
 | `src/utils/apiSetup.ts` | axios baseURL, token provider, cookie bridge, onAuthError 연결 |
 | `src/utils/jwt.ts` | JWT iat 파서, `isTokenNewerOrEqual` |
 | `src/navigation/navigationRef.ts` | 모듈 레벨 ref + `resetToLogin()` + pending action queue |
@@ -254,7 +284,8 @@ interceptor catch(refreshError):
 | Native와 Web이 동시에 refresh | 서버 `refreshPromises` 맵으로 같은 userId는 단일 promise 공유, 같은 토큰 발급 |
 | Native AsyncStorage stale → WebView 마운트 시 stale 주입 | Web → Native sync (SET_ACCESS_TOKEN) + Native → WebView 실시간 주입 + iat 비교 |
 | Web이 refresh 후 Native에 sync 전에 다른 탭 마운트 | 새 탭의 injected JS가 기존 localStorage 값과 iat 비교 → web이 더 최신이면 skip |
-| Refresh 자체 실패 (refresh token도 만료) | `handleAuthError('refresh-failed')` → removeToken + Login 화면으로 reset |
+| Refresh **확정** 실패 (서버 401/403 = refresh token 무효) | `handleAuthError('refresh-failed')` → removeToken + Login 화면으로 reset |
+| Refresh **일시** 실패 (네트워크 단절 / 타임아웃 / 5xx) | 로그아웃하지 않음 — 토큰·쿠키 유지, 다음 요청에서 자동 재시도 (`isDefinitiveAuthFailure`로 구분) |
 | 로그아웃 서버 호출 실패 | `.catch()`로 흡수, 로컬 `clear()` 항상 실행 |
 | Cold start 시 NavigationContainer 미 ready 상태에서 onAuthError | `navigationRef`에 pending action 큐잉 → onReady 시 flush |
 
@@ -312,17 +343,19 @@ interceptor catch(refreshError):
 
 | 안전망 | 위치 | 작동 조건 | 복구 동작 |
 |---|---|---|---|
-| Refresh interceptor | `use-custom-instance.ts` | API 401 + ACCESS_TOKEN_INVALID | refresh 자동 시도 |
+| Refresh interceptor | `use-custom-instance.ts` | API 401 (ACCESS_TOKEN_INVALID 또는 Authorization 헤더가 있던 비표준 401) | refresh 자동 시도 |
+| Startup 세션 복구 | `store/user.ts` `initialize()` | cold start 시 access token 없음 (sign-in 페이지 제외) | refresh 쿠키로 1회 복구 시도 |
+| Transient 실패 내성 | `use-custom-instance.ts` `isDefinitiveAuthFailure` | refresh가 네트워크/타임아웃/5xx로 실패 | 로그아웃 안 함, 세션 유지 후 재시도 |
 | Refresh dedupe (서버) | `auth.service.ts` `refreshPromises` | 동일 user 동시 refresh | 단일 promise로 합치기 |
 | Refresh dedupe (클라) | `use-custom-instance.ts` `isRefreshing` + `failedQueue` | 동시 다중 401 | 1회만 refresh, 나머지 queue |
 | iat 비교 | `WebView/scripts.ts`, `index.tsx` SET_ACCESS_TOKEN | 토큰 sync 시 race | 더 오래된 토큰 무시 |
-| `handleAuthError` | `use-custom-instance.ts` | refresh 실패 (모든 원인) | provider 콜백 호출 → Login reset |
+| `handleAuthError` | `use-custom-instance.ts` | refresh **확정** 실패 (서버 401/403) | provider 콜백 호출 → Login reset (일시적 실패는 호출 안 함) |
 | `pendingAction` queue | `navigationRef.ts` | NavigationContainer 미준비 시 reset 요청 | onReady 시 flush |
 | `clear()` always 실행 | `Profile.tsx` 로그아웃 | 서버 signOut 실패 | 로컬 상태 강제 정리 |
 | Cookie bridge `\|\| true` | `apiSetup.ts` 인터셉터 | cookie read/write 실패 | 요청은 정상 진행 |
 | **Memory fallback** | `tokenStorage.ts` | localStorage 사용 불가 | 메모리에 임시 보관, 무한 루프 방지 |
 | **Hydration version + migrate** | `store/auth.ts` | persist 스키마 충돌 | 빈 state로 안전 복원 → 재로그인 유도 |
-| **Hydration error catch** | `store/auth.ts` `onRehydrateStorage` | AsyncStorage 손상 | accessToken=null로 정리 + cookie clear |
+| **Hydration error catch** | `store/auth.ts` `onRehydrateStorage` | AsyncStorage 손상 | accessToken=null로 정리 (refresh 쿠키는 **보존** → startup 복구 가능) |
 
 ### 11-2. 사용자 시각 복구 매트릭스
 
@@ -333,10 +366,10 @@ interceptor catch(refreshError):
 | Access token 만료 | ✅ 자동 | 없음 (다음 요청 자동 갱신) |
 | Refresh token 만료/무효 | ✅ 자동 | 다시 로그인 화면 표시됨 → 재로그인 |
 | 네트워크 일시 단절 | ✅ 자동 | 연결 복구 후 다음 요청에서 재시도 |
-| 서버 5xx 일시 장애 | ⚠️ 부분 | 잠시 후 재시도. 장기 지속 시 앱 재실행 |
-| DB의 refresh hash 강제 invalidate | ✅ 자동 | refresh 실패 → Login 표시 → 재로그인 |
+| 서버 5xx 일시 장애 | ✅ 자동 | **로그아웃 안 됨** — 세션 유지, 다음 요청에서 재시도 (확정 실패가 아님) |
+| DB의 refresh hash 강제 invalidate | ✅ 자동 | refresh 확정 실패(401) → Login 표시 → 재로그인 |
 | 다른 기기에서 로그인으로 본 기기 invalidate | ✅ 자동 | 위와 동일 |
-| AsyncStorage 손상 | ✅ 자동 (v1) | `onRehydrateStorage`가 정리 → Login 표시 |
+| AsyncStorage 손상 | ✅ 자동 (v1) | `onRehydrateStorage`가 user 정리(쿠키 보존) → startup refresh로 복구 시도, 실패 시 Login 표시 |
 | localStorage 비활성 (WebView) | ✅ 자동 | 메모리 폴백 동작. 새로고침 시 native에서 재주입 |
 | zustand store shape 변경 (앱 업데이트) | ✅ 자동 (`migrate`) | 마이그레이션 실패 시 빈 state → 재로그인 |
 | OS가 앱 데이터/쿠키 클리어 | ✅ 자동 | refresh 실패 → Login 표시 → 재로그인 |
@@ -371,6 +404,8 @@ interceptor catch(refreshError):
 | 10 | 명시적 로그아웃 후 재로그인 | 정상 복귀, 잔여 cookie 없음 (`CookieManager.clearAll`) |
 | 11 | 동시 다중 API 호출 (페이지 로드 시) | refresh 1회만, 모든 요청 성공 |
 | 12 | 서버 maintenance(503) 중 사용 | 적절한 에러 표시, 강제 로그아웃 없음 |
+| 13 | refresh 시점에 일시적 네트워크 단절 (비행기모드 토글 등) | **로그아웃 안 됨** — 세션 유지, 복구 후 다음 요청 정상 |
+| 14 | access token 없는 cold start + 유효 refresh 쿠키 | startup refresh로 자동 복구 (Login 안 뜸). sign-in 페이지에선 복구 시도 안 함 |
 
 ## 부록 — 디버깅 체크리스트
 

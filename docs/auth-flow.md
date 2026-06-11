@@ -306,7 +306,7 @@ const user = useUser();              // state.user 추상화
 1. **XSS 방지**: WebView 토큰 주입 시 `JSON.stringify()` 사용
 2. **CSRF 방지**: refreshToken 쿠키에 `SameSite=Lax` 설정
 3. **토큰 노출 최소화**: accessToken은 쿠키에 저장하지 않음
-4. **자동 로그아웃**: 토큰 갱신 실패 시 즉시 로그아웃 처리
+4. **선별적 자동 로그아웃**: refresh가 **확정 실패(서버 401/403 = refresh token 무효)**일 때만 로그아웃. 네트워크 단절·타임아웃·5xx 등 **일시적 실패는 세션을 유지**하고 다음 요청에서 재시도 (일시 실패를 로그아웃으로 오인해 며칠 뒤 강제 로그아웃되던 문제 방지)
 5. **무한루프 방지**: `/sign-in/*` 경로에서는 리다이렉트 제외
 6. **Auth code 패턴**: 웹 OAuth redirect URL에 refresh token 대신 30초 유효 auth code 사용하여 URL 노출 방지
 7. **사용자 상태 검증**: token refresh 시 ACTIVE 상태가 아닌 사용자 차단

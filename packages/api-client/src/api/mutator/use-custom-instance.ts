@@ -125,7 +125,16 @@ AXIOS_INSTANCE.interceptors.response.use(
     ) {
       const errorMessage = error.response?.data?.message;
 
-      if (errorMessage === "ACCESS_TOKEN_INVALID") {
+      // refresh 로 복구를 시도할지 판단한다.
+      // - ACCESS_TOKEN_INVALID: 만료/토큰 없음 (서버가 명시) → refresh
+      // - 우리 access token 을 실어 보냈는데 거부된 비표준 401(손상/서명 불일치 등)
+      //   → 역시 refresh 로 복구 시도 (Authorization 헤더 유무로 판별)
+      // Authorization 헤더가 없던 401(로그인 실패 등 세션 무관)은 건너뛴다.
+      const hadAuthHeader = Boolean(originalRequest.headers?.Authorization);
+      const shouldAttemptRefresh =
+        errorMessage === "ACCESS_TOKEN_INVALID" || hadAuthHeader;
+
+      if (shouldAttemptRefresh) {
         if (isRefreshing) {
           // 이미 토큰 갱신 중이면 큐에 추가
           return new Promise((resolve, reject) => {
@@ -166,8 +175,22 @@ AXIOS_INSTANCE.interceptors.response.use(
           // 일시적 실패(네트워크/타임아웃/5xx)면 토큰·세션을 유지하고 다음 요청에서
           // 다시 refresh 가 시도되도록 둔다.
           if (tokenProvider && isDefinitiveAuthFailure(refreshError)) {
+            console.warn(
+              "[auth] refresh 확정 실패 — 세션 종료:",
+              Axios.isAxiosError(refreshError)
+                ? refreshError.response?.status
+                : refreshError,
+            );
             await tokenProvider.removeToken();
             await handleAuthError("refresh-failed");
+          } else {
+            // 일시적 실패 — 세션 유지. 추적을 위해 남긴다(로그아웃은 하지 않음).
+            console.warn(
+              "[auth] refresh 일시 실패 — 세션 유지하고 재시도합니다:",
+              Axios.isAxiosError(refreshError)
+                ? (refreshError.code ?? refreshError.response?.status)
+                : refreshError,
+            );
           }
 
           return Promise.reject(refreshError);
@@ -175,8 +198,8 @@ AXIOS_INSTANCE.interceptors.response.use(
           isRefreshing = false;
         }
       }
-      // ACCESS_TOKEN_INVALID 가 아닌 401(프록시/게이트웨이의 비표준 401 등)은
-      // 세션 무효로 단정하지 않는다 — 토큰을 지우지 않고 요청만 실패시킨다.
+      // shouldAttemptRefresh=false: Authorization 헤더 없이 발생한 비표준 401
+      // (로그인 실패 등 세션과 무관) — 토큰을 지우지 않고 요청만 실패시킨다.
     }
 
     if (error.response?.status === 403) {

@@ -39,6 +39,16 @@ export const useUserStore = create<UserStore>()((set, get) => ({
     try {
       let token = tokenStorage.getToken();
       if (!token) {
+        // sign-in 페이지에서는 세션 복구를 시도하지 않는다.
+        // (로그인 화면에서 유효 쿠키로 자동 재로그인되는 것을 방지)
+        const onSignInPage =
+          typeof window !== "undefined" &&
+          window.location.pathname.startsWith("/sign-in");
+        if (onSignInPage) {
+          set({ accessToken: null, user: null, isInitialized: true });
+          return;
+        }
+
         // access token 이 없어도 refresh 쿠키가 살아있으면 세션을 복구할 수 있다.
         // 로그아웃으로 단정하기 전에 1회 refresh 를 시도한다 (며칠 뒤 로그아웃 방지).
         try {
