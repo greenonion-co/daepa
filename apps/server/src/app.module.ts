@@ -73,6 +73,7 @@ import { StatisticsController } from './statistics/statistics.controller';
 import { StatisticsService } from './statistics/statistics.service';
 import { FcmModule } from './fcm/fcm.module';
 import { FcmTokenEntity } from './fcm/fcm_token.entity';
+import { AnnouncementEntity } from './fcm/announcement.entity';
 import { FeedingEntity } from './feeding/feeding.entity';
 import { FeedingController } from './feeding/feeding.controller';
 import { FeedingService } from './feeding/feeding.service';
@@ -100,6 +101,7 @@ const ENTITIES = [
   EggDetailEntity,
   PetRelationEntity,
   FcmTokenEntity,
+  AnnouncementEntity,
   FeedingEntity,
   ViewLogEntity,
   AuctionEntity,

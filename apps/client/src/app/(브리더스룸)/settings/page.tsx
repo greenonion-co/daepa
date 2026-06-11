@@ -6,6 +6,7 @@ import ReporterInfoSection from "./components/ReporterInfoSection";
 // import AppSettingsSection from "./components/AppSettingsSection";
 import HelpSection from "./components/HelpSection";
 import AccountManagementSection from "./components/AccountManagementSection";
+import AdminSection from "./components/AdminSection";
 
 const SettingsPage = () => {
   return (
@@ -20,6 +21,8 @@ const SettingsPage = () => {
           <AccountManagementSection />
           <HelpSection />
         </div>
+
+        <AdminSection />
 
         {/* 버전 정보 */}
         <div className="my-8 text-center">

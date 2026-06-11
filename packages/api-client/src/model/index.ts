@@ -326,3 +326,8 @@ export * from "./verifyEmailDto";
 export * from "./verifyNameDto";
 export * from "./verifyPetNameDto";
 export * from "./verifySlugResponseDto";
+export * from "./createAnnouncementDto";
+export * from "./createAnnouncementResponseDto";
+export * from "./createAnnouncementResponseDtoStatus";
+export * from "./testAnnouncementDto";
+export * from "./testAnnouncementResponseDto";

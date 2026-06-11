@@ -16,6 +16,7 @@ import type {
   CompleteAdoptionDto,
   CompleteHatchingDto,
   CreateAdoptionDto,
+  CreateAnnouncementDto,
   CreateAuctionDto,
   CreateFeedingDto,
   CreateInitUserInfoDto,
@@ -42,6 +43,7 @@ import type {
   SaveFilesDto,
   StatisticsControllerGetAdoptionStatisticsParams,
   StatisticsControllerGetPairStatisticsParams,
+  TestAnnouncementDto,
   TestPushNotificationDto,
   UnlinkParentDto,
   UpdateAdoptionDto,
@@ -79,6 +81,7 @@ import type {
   BreederPublicProfileResponseDto,
   ChildPetDetailDto,
   CommonResponseDto,
+  CreateAnnouncementResponseDto,
   CreateAuctionResponseDto,
   DetailJson,
   FamilyTreeNodeDto,
@@ -105,6 +108,7 @@ import type {
   PetHiddenStatusDto,
   PetParentDto,
   PetSummaryDto,
+  TestAnnouncementResponseDto,
   TokenResponseDto,
   UpdatePetLimitOverrideResponseDto,
   UserControllerGetUserListSimple200,
@@ -794,6 +798,36 @@ export const fcmControllerSendTestPush = (testPushNotificationDto: TestPushNotif
   });
 };
 
+/**
+ * 활성 FCM 토큰을 가진 모든 사용자에게 공지를 발송한다. 발송은 백그라운드에서 처리되며 즉시 응답한다.
+ * @summary 전체 사용자에게 공지 푸시 발송 (관리자 전용)
+ */
+export const adminAnnouncementControllerCreateAnnouncement = (
+  createAnnouncementDto: CreateAnnouncementDto,
+) => {
+  return useCustomInstance<CreateAnnouncementResponseDto>({
+    url: `/api/v1/admin/announcement`,
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    data: createAnnouncementDto,
+  });
+};
+
+/**
+ * broadcast 코드 경로를 그대로 타되 targetUserId(생략 시 관리자 본인)의 활성 토큰에만 전송한다. 이력은 저장하지 않으며 발송 결과를 동기 반환한다.
+ * @summary 공지 푸시 테스트 발송 (특정 유저에게만)
+ */
+export const adminAnnouncementControllerSendTestAnnouncement = (
+  testAnnouncementDto: TestAnnouncementDto,
+) => {
+  return useCustomInstance<TestAnnouncementResponseDto>({
+    url: `/api/v1/admin/announcement/test`,
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    data: testAnnouncementDto,
+  });
+};
+
 export const auctionControllerCreateAuction = (createAuctionDto: CreateAuctionDto) => {
   return useCustomInstance<CreateAuctionResponseDto>({
     url: `/api/v1/auction`,
@@ -1057,6 +1091,12 @@ export type FcmControllerDeactivateTokenResult = NonNullable<
 >;
 export type FcmControllerSendTestPushResult = NonNullable<
   Awaited<ReturnType<typeof fcmControllerSendTestPush>>
+>;
+export type AdminAnnouncementControllerCreateAnnouncementResult = NonNullable<
+  Awaited<ReturnType<typeof adminAnnouncementControllerCreateAnnouncement>>
+>;
+export type AdminAnnouncementControllerSendTestAnnouncementResult = NonNullable<
+  Awaited<ReturnType<typeof adminAnnouncementControllerSendTestAnnouncement>>
 >;
 export type AuctionControllerCreateAuctionResult = NonNullable<
   Awaited<ReturnType<typeof auctionControllerCreateAuction>>
@@ -5080,6 +5120,24 @@ export const getFcmControllerSendTestPushResponseMock = (
   ...overrideResponse,
 });
 
+export const getAdminAnnouncementControllerCreateAnnouncementResponseMock = (
+  overrideResponse: Partial<CreateAnnouncementResponseDto> = {},
+): CreateAnnouncementResponseDto => ({
+  id: faker.number.int({ min: undefined, max: undefined }),
+  status: faker.helpers.arrayElement(["sending", "sent", "failed"] as const),
+  message: faker.string.alpha(20),
+  ...overrideResponse,
+});
+
+export const getAdminAnnouncementControllerSendTestAnnouncementResponseMock = (
+  overrideResponse: Partial<TestAnnouncementResponseDto> = {},
+): TestAnnouncementResponseDto => ({
+  targetCount: faker.number.int({ min: undefined, max: undefined }),
+  successCount: faker.number.int({ min: undefined, max: undefined }),
+  failureCount: faker.number.int({ min: undefined, max: undefined }),
+  ...overrideResponse,
+});
+
 export const getAuctionControllerCreateAuctionResponseMock = (
   overrideResponse: Partial<CreateAuctionResponseDto> = {},
 ): CreateAuctionResponseDto => ({
@@ -6912,6 +6970,52 @@ export const getFcmControllerSendTestPushMockHandler = (
   });
 };
 
+export const getAdminAnnouncementControllerCreateAnnouncementMockHandler = (
+  overrideResponse?:
+    | CreateAnnouncementResponseDto
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<CreateAnnouncementResponseDto> | CreateAnnouncementResponseDto),
+) => {
+  return http.post("*/api/v1/admin/announcement", async (info) => {
+    await delay(1000);
+
+    return new HttpResponse(
+      JSON.stringify(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getAdminAnnouncementControllerCreateAnnouncementResponseMock(),
+      ),
+      { status: 201, headers: { "Content-Type": "application/json" } },
+    );
+  });
+};
+
+export const getAdminAnnouncementControllerSendTestAnnouncementMockHandler = (
+  overrideResponse?:
+    | TestAnnouncementResponseDto
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<TestAnnouncementResponseDto> | TestAnnouncementResponseDto),
+) => {
+  return http.post("*/api/v1/admin/announcement/test", async (info) => {
+    await delay(1000);
+
+    return new HttpResponse(
+      JSON.stringify(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getAdminAnnouncementControllerSendTestAnnouncementResponseMock(),
+      ),
+      { status: 201, headers: { "Content-Type": "application/json" } },
+    );
+  });
+};
+
 export const getAuctionControllerCreateAuctionMockHandler = (
   overrideResponse?:
     | CreateAuctionResponseDto
@@ -7104,6 +7208,8 @@ export const getProjectDaepaAPIMock = () => [
   getFcmControllerRegisterTokenMockHandler(),
   getFcmControllerDeactivateTokenMockHandler(),
   getFcmControllerSendTestPushMockHandler(),
+  getAdminAnnouncementControllerCreateAnnouncementMockHandler(),
+  getAdminAnnouncementControllerSendTestAnnouncementMockHandler(),
   getAuctionControllerCreateAuctionMockHandler(),
   getAuctionControllerGetByShareTokenMockHandler(),
   getAuctionControllerCancelMockHandler(),
