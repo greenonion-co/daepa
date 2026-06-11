@@ -47,7 +47,7 @@ export class AdminAnnouncementController {
   @ApiOperation({
     summary: '공지 푸시 테스트 발송 (특정 유저에게만)',
     description:
-      'broadcast 코드 경로를 그대로 타되 targetUserId(생략 시 관리자 본인)의 활성 토큰에만 전송한다. 이력은 저장하지 않으며 발송 결과를 동기 반환한다.',
+      'broadcast 와 동일한 멀티캐스트 발송 로직을 공유하되, targetUserId(생략 시 관리자 본인)의 활성 토큰에만 전송한다. 이력은 저장하지 않으며 발송 결과를 동기 반환한다.',
   })
   @ApiResponse({ status: 201, type: TestAnnouncementResponseDto })
   @ApiResponse({ status: 403, description: '관리자 권한이 필요합니다.' })

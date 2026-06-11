@@ -85,7 +85,7 @@ export default function AdminAnnouncementPage() {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="공지 제목"
-              maxLength={100}
+              maxLength={255}
             />
           </div>
 
@@ -97,7 +97,7 @@ export default function AdminAnnouncementPage() {
               onChange={(e) => setBody(e.target.value)}
               placeholder="공지 내용"
               rows={5}
-              maxLength={500}
+              maxLength={1000}
             />
           </div>
 

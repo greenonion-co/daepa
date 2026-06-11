@@ -90,9 +90,18 @@ export class AnnouncementService {
       this.logger.error(
         `Announcement ${announcement.id} broadcast failed: ${(error as Error).message}`,
       );
-      await this.announcementRepository.update(announcement.id, {
-        status: ANNOUNCEMENT_STATUS.FAILED,
-      });
+      // fire-and-forget 경로이므로 상태 갱신 실패가 unhandled rejection 으로 새어
+      // 나가지 않도록 방어. 갱신까지 실패하면 status 가 'sending' 에 고착되므로
+      // 수동 점검이 가능하도록 명확히 로깅한다.
+      try {
+        await this.announcementRepository.update(announcement.id, {
+          status: ANNOUNCEMENT_STATUS.FAILED,
+        });
+      } catch (updateError) {
+        this.logger.error(
+          `Announcement ${announcement.id} left in 'sending' (status update failed): ${(updateError as Error).message}`,
+        );
+      }
     }
   }
 }

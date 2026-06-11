@@ -263,9 +263,11 @@ export class FcmService implements OnModuleInit {
       return this.sendBroadcastToUser(testUserId, title, body, data);
     }
 
+    // TODO: 유저 수십만 이상으로 늘면 활성 토큰을 한 번에 메모리에 적재하지 말고
+    //       id 커서(`id > cursor LIMIT N`)로 배치 조회하며 발송하도록 전환.
     const tokens = await this.fcmTokenRepository.find({
       where: { isActive: true },
-      select: ['token', 'userId', 'deviceId', 'platform'],
+      select: ['id', 'token', 'userId', 'deviceId', 'platform'],
     });
     return this.sendMulticast(tokens, title, body, data);
   }
@@ -336,24 +338,24 @@ export class FcmService implements OnModuleInit {
         successCount += response.successCount;
         failureCount += response.failureCount;
 
-        // 토큰별 실패 사유 로깅 — 영구 무효 토큰만 비활성화
-        const deadTokens: string[] = [];
+        // 토큰별 실패 사유 — 영구 무효 토큰만 비활성화 (요약은 루프 종료 후 1줄로 로깅)
+        const deadIds: number[] = [];
         response.responses.forEach((r, idx) => {
           if (r.success) return;
           const t = batch[idx];
           const code = r.error?.code ?? 'unknown';
           failuresByCode[code] = (failuresByCode[code] ?? 0) + 1;
-          this.logger.warn(
+          this.logger.debug(
             `FCM send failed [${code}] user=${t.userId} device=${t.deviceId} (${t.platform}): ${r.error?.message ?? ''}`,
           );
           if (DEAD_TOKEN_ERROR_CODES.has(code)) {
-            deadTokens.push(t.token);
+            deadIds.push(t.id);
           }
         });
 
-        if (deadTokens.length > 0) {
+        if (deadIds.length > 0) {
           await this.fcmTokenRepository.update(
-            { token: In(deadTokens) },
+            { id: In(deadIds) },
             { isActive: false },
           );
         }
@@ -365,6 +367,12 @@ export class FcmService implements OnModuleInit {
           `Broadcast batch failed: ${(error as Error).message}`,
         );
       }
+    }
+
+    if (failureCount > 0) {
+      this.logger.warn(
+        `Broadcast finished: target=${tokens.length} success=${successCount} failure=${failureCount} byCode=${JSON.stringify(failuresByCode)}`,
+      );
     }
 
     return {
