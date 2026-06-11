@@ -30,7 +30,7 @@ export const setupApiClient = () => {
       Toast.show('권한이 없습니다. 관리자에게 문의해주세요.');
       return;
     }
-    // refresh-failed, unauthorized: 세션 종료
+    // refresh-failed: 세션 종료
     useAuthStore.getState().clear();
     resetToLogin();
   };

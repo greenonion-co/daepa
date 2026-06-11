@@ -2,6 +2,7 @@ import { create } from "zustand";
 import {
   userControllerGetUserProfile,
   authControllerSignOut,
+  authControllerGetToken,
   UserProfileDto,
 } from "@repo/api-client";
 import { tokenStorage } from "@/lib/tokenStorage";
@@ -36,10 +37,18 @@ export const useUserStore = create<UserStore>()((set, get) => ({
   initialize: async () => {
     set({ isInitialized: false });
     try {
-      const token = tokenStorage.getToken();
+      let token = tokenStorage.getToken();
       if (!token) {
-        set({ accessToken: null, user: null, isInitialized: true });
-        return;
+        // access token 이 없어도 refresh 쿠키가 살아있으면 세션을 복구할 수 있다.
+        // 로그아웃으로 단정하기 전에 1회 refresh 를 시도한다 (며칠 뒤 로그아웃 방지).
+        try {
+          const { data } = await authControllerGetToken();
+          token = data.token;
+          tokenStorage.setToken(token);
+        } catch {
+          set({ accessToken: null, user: null, isInitialized: true });
+          return;
+        }
       }
 
       // 토큰을 store에 저장 (반응형 상태)
