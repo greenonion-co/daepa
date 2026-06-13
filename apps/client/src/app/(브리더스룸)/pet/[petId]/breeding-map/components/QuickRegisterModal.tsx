@@ -272,7 +272,12 @@ export default function QuickRegisterModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-h-[90dvh] w-[calc(100%-2rem)] max-w-[440px] overflow-y-auto rounded-2xl p-6 dark:bg-neutral-800">
+      {/* 우측 상단 닫기 버튼이 있으므로 백그라운드 오터치 닫힘 방지 (X 닫기 시 dirty 확인은 유지) */}
+      <DialogContent
+        className="max-h-[90dvh] w-[calc(100%-2rem)] max-w-[440px] overflow-y-auto rounded-2xl p-6 dark:bg-neutral-800"
+        onPointerDownOutside={(e) => e.preventDefault()}
+        onInteractOutside={(e) => e.preventDefault()}
+      >
         <DialogTitle className="text-[16px] font-semibold dark:text-gray-100">
           {step === 1 ? "빠른 개체 등록" : "상세 정보 입력"}
         </DialogTitle>

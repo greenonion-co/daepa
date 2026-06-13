@@ -116,7 +116,12 @@ export default function MyPetPickerDialog({ isOpen, onClose, onSelect }: MyPetPi
         if (!open) onClose();
       }}
     >
-      <DialogContent className="flex max-h-[90dvh] w-[calc(100%-2rem)] flex-col gap-0 overflow-hidden p-0 sm:max-w-3xl">
+      {/* 우측 상단 닫기 버튼이 있으므로 백그라운드 오터치 닫힘 방지 (경매 생성 흐름 공통) */}
+      <DialogContent
+        className="flex max-h-[90dvh] w-[calc(100%-2rem)] flex-col gap-0 overflow-hidden p-0 sm:max-w-3xl"
+        onPointerDownOutside={(e) => e.preventDefault()}
+        onInteractOutside={(e) => e.preventDefault()}
+      >
         <DialogHeader className="border-b px-6 pt-6 pb-3">
           <DialogTitle>경매할 개체 선택</DialogTitle>
         </DialogHeader>
