@@ -1,4 +1,4 @@
-import { Bubbles, DollarSign, Gavel, Home } from "lucide-react";
+import { Bubbles, DollarSign, Home } from "lucide-react";
 import { FormStep } from "./pet/types/form.type";
 import {
   AdoptionHistoryDtoMethod,
@@ -722,11 +722,6 @@ export const SIDEBAR_ITEMS = [
   {
     title: "쇼룸",
     url: "/@", // Menubar에서 /@{user.showroomSlug}으로 동적 치환
-  },
-  {
-    title: "경매",
-    url: "/auction",
-    icon: Gavel,
   },
 ];
 
