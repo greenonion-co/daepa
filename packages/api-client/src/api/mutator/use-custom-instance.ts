@@ -47,11 +47,10 @@ const processQueue = (error: any, token: string | null = null) => {
 
 /**
  * 인증 에러 원인 — provider가 원인별로 다른 UX를 제공할 수 있도록 전달.
- * - refresh-failed: refresh token도 만료/무효 → 강제 재로그인 유도
- * - unauthorized: refresh 시도조차 못 하는 401 (다른 에러 메시지) → 동일하게 로그아웃
+ * - refresh-failed: refresh token도 만료/무효(확실한 401/403) → 강제 재로그인 유도
  * - forbidden: 403 — 권한 부족 (로그인은 유지하지만 현재 리소스 접근 불가)
  */
-export type AuthErrorReason = "refresh-failed" | "unauthorized" | "forbidden";
+export type AuthErrorReason = "refresh-failed" | "forbidden";
 
 export interface TokenProvider {
   setToken(token: string): Promise<void> | void;
@@ -67,6 +66,19 @@ export interface TokenProvider {
 }
 
 let tokenProvider: TokenProvider | null = null;
+
+/**
+ * refresh 실패가 "확실한 인증 실패"인지 판단한다.
+ * - 서버가 401/403 으로 refresh token 을 명시적으로 거부한 경우만 true (→ 세션 종료).
+ * - 네트워크 단절/타임아웃/5xx 등 일시적 실패는 false → 세션을 유지하고 다음 기회에 재시도.
+ *   (access token 이 1h 라 refresh 가 잦은데, 일시적 실패를 로그아웃으로 처리하면
+ *    refresh token 이 유효해도 며칠 안에 강제 로그아웃이 발생한다.)
+ */
+const isDefinitiveAuthFailure = (error: unknown): boolean => {
+  if (!Axios.isAxiosError(error)) return false;
+  const status = error.response?.status;
+  return status === 401 || status === 403;
+};
 
 export const setTokenProvider = (provider: TokenProvider) => {
   tokenProvider = provider;
@@ -111,9 +123,18 @@ AXIOS_INSTANCE.interceptors.response.use(
       error.response?.status === 401 &&
       !originalRequest._retry
     ) {
-      const errorMessage = error.response.data.message;
+      const errorMessage = error.response?.data?.message;
 
-      if (errorMessage === "ACCESS_TOKEN_INVALID") {
+      // refresh 로 복구를 시도할지 판단한다.
+      // - ACCESS_TOKEN_INVALID: 만료/토큰 없음 (서버가 명시) → refresh
+      // - 우리 access token 을 실어 보냈는데 거부된 비표준 401(손상/서명 불일치 등)
+      //   → 역시 refresh 로 복구 시도 (Authorization 헤더 유무로 판별)
+      // Authorization 헤더가 없던 401(로그인 실패 등 세션 무관)은 건너뛴다.
+      const hadAuthHeader = Boolean(originalRequest.headers?.Authorization);
+      const shouldAttemptRefresh =
+        errorMessage === "ACCESS_TOKEN_INVALID" || hadAuthHeader;
+
+      if (shouldAttemptRefresh) {
         if (isRefreshing) {
           // 이미 토큰 갱신 중이면 큐에 추가
           return new Promise((resolve, reject) => {
@@ -147,24 +168,38 @@ AXIOS_INSTANCE.interceptors.response.use(
           originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
           return AXIOS_INSTANCE(originalRequest);
         } catch (refreshError) {
-          // 토큰 갱신 실패 시 큐에 있는 요청들 모두 실패 처리
+          // 큐에 있는 요청들 처리
           processQueue(refreshError, null);
 
-          // 로그아웃 처리 — provider가 환경별 UX를 담당
-          if (tokenProvider) {
+          // 확실한 인증 실패(refresh token 무효 = 401/403)일 때만 로그아웃한다.
+          // 일시적 실패(네트워크/타임아웃/5xx)면 토큰·세션을 유지하고 다음 요청에서
+          // 다시 refresh 가 시도되도록 둔다.
+          if (tokenProvider && isDefinitiveAuthFailure(refreshError)) {
+            console.warn(
+              "[auth] refresh 확정 실패 — 세션 종료:",
+              Axios.isAxiosError(refreshError)
+                ? refreshError.response?.status
+                : refreshError,
+            );
             await tokenProvider.removeToken();
             await handleAuthError("refresh-failed");
+          } else {
+            // 일시적 실패 — 세션 유지. 추적을 위해 남긴다(로그아웃은 하지 않음).
+            console.warn(
+              "[auth] refresh 일시 실패 — 세션 유지하고 재시도합니다:",
+              Axios.isAxiosError(refreshError)
+                ? (refreshError.code ?? refreshError.response?.status)
+                : refreshError,
+            );
           }
 
           return Promise.reject(refreshError);
         } finally {
           isRefreshing = false;
         }
-      } else if (tokenProvider) {
-        // ACCESS_TOKEN_INVALID가 아닌 다른 401 에러 — refresh 시도 없이 즉시 로그아웃
-        await tokenProvider.removeToken();
-        await handleAuthError("unauthorized");
       }
+      // shouldAttemptRefresh=false: Authorization 헤더 없이 발생한 비표준 401
+      // (로그인 실패 등 세션과 무관) — 토큰을 지우지 않고 요청만 실패시킨다.
     }
 
     if (error.response?.status === 403) {

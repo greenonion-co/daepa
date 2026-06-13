@@ -47,17 +47,19 @@ export const useAuthStore = create<AuthState>()(
       onRehydrateStorage: () => {
         return (state, error) => {
           if (error) {
-            // hydration 실패 — 안전하게 logged-out 상태로 복원
+            // hydration 실패 — logged-out 상태로 복원하되, refresh 쿠키는 지우지 않는다.
+            // 쿠키는 영속 credential 이므로 일시적 hydration 오류로 파괴하면 안 된다
+            // (WebView 의 startup refresh 가 이 쿠키로 세션을 복구할 수 있어야 함).
             console.error('Auth store hydration error:', error);
             useAuthStore.setState({ accessToken: null, user: null });
-            CookieManager.clearAll().catch(console.error);
             return;
           }
 
-          // 앱 시작 시 토큰이 없으면 user도 초기화하고 WebView 쿠키도 정리
+          // access token 이 없어도 refresh 쿠키는 살아있을 수 있다 — 여기서 쿠키를
+          // 지우지 않는다. 일회용 access token 의 부재로 영속 refresh 쿠키를 파괴하면
+          // 유효한 세션도 강제 로그아웃된다. (명시적 로그아웃은 clear() 에서 쿠키 정리)
           if (!state?.accessToken) {
             useAuthStore.setState({ user: null });
-            CookieManager.clearAll().catch(console.error);
           }
         };
       },

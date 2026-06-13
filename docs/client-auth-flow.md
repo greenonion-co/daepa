@@ -136,7 +136,11 @@ useEffect(() => {
 ```
 
 - 토큰 있음 → `userControllerGetUserProfile()` 호출 → `set({ user })`
-- 토큰 없음 → `set({ user: null })`
+- 토큰 없음 → **(sign-in 페이지가 아니면) `authControllerGetToken()`으로 refresh 1회 시도**
+  - 성공: 새 accessToken을 localStorage에 저장 후 user fetch — refresh 쿠키가 살아있는 한 세션 자동 복구 (access token 부재만으로 로그아웃되던 "며칠 뒤 로그아웃" 방지)
+  - 실패(쿠키 무효/만료) 또는 sign-in 페이지: `set({ user: null })`
+
+> **sign-in 페이지에서는 복구 시도를 건너뛴다** — 로그인 화면에서 유효 쿠키로 자동 재로그인되는 것을 막기 위함 (`window.location.pathname.startsWith("/sign-in")` 체크).
 
 ### C. Native App WebView에서 실행 시
 
@@ -270,20 +274,26 @@ export const getServerRequestHeaders = cache(async () => {
 
 **파일: `packages/api-client/src/api/mutator/use-custom-instance.ts`**
 
-```
-[API 401 에러 + ACCESS_TOKEN_INVALID]
-    ↓ refreshToken 쿠키로 토큰 갱신 시도 (authControllerGetToken)
-    ↓ 성공: 새 accessToken으로 원래 요청 재시도
-    ↓ 실패:
-        ↓ tokenProvider.removeToken()
-        ↓ WebView: TOKEN_REFRESH_FAILED 메시지 → Native
-        ↓ Web: /sign-in으로 리다이렉트 (/sign-in/* 경로는 제외)
+refresh를 시도할지 여부와 실패 처리를 다음과 같이 구분한다:
 
-[API 401 에러 + 기타 (ACCESS_TOKEN_INVALID가 아닌 경우)]
-    ↓ tokenProvider.removeToken()
-    ↓ WebView: TOKEN_REFRESH_FAILED 메시지 → Native
-    ↓ Web: /sign-in으로 리다이렉트 (/sign-in/* 경로는 제외)
 ```
+[API 401]
+    ↓ refresh 시도 조건:
+    │    - message === "ACCESS_TOKEN_INVALID" (만료/토큰 없음), 또는
+    │    - 요청에 Authorization 헤더가 있었음 (우리 토큰이 거부된 비표준 401 — 손상/서명 불일치 등)
+    │  → 둘 다 아니면(헤더 없는 비표준 401, 예: 로그인 실패) 토큰 유지, 요청만 실패
+    ↓ authControllerGetToken()으로 갱신 시도
+    ├─ 성공: 새 accessToken으로 원래 요청 재시도
+    ├─ 확정 실패 (refresh 응답이 401/403 = refresh token 무효):
+    │    ↓ tokenProvider.removeToken()
+    │    ↓ handleAuthError("refresh-failed")
+    │    ↓ WebView: TOKEN_REFRESH_FAILED → Native / Web: /sign-in 리다이렉트
+    └─ 일시적 실패 (네트워크/타임아웃/5xx):
+         ↓ 로그아웃하지 않음. 토큰·세션 유지 → 다음 요청에서 자동 재시도
+         ↓ console.warn 로그만 남김
+```
+
+**핵심:** refresh 실패를 **확정(401/403)** 과 **일시적(네트워크/5xx)** 으로 구분(`isDefinitiveAuthFailure`). 일시적 실패를 로그아웃으로 처리하면 refresh token이 유효해도 며칠 안에 강제 로그아웃되므로, 확정 실패에만 세션을 종료한다.
 
 **참고:** 무한 리다이렉트 방지를 위해 `/sign-in/*` 경로에서는 리다이렉트하지 않음
 
@@ -386,8 +396,8 @@ export const getServerRequestHeaders = cache(async () => {
 
 1. **accessToken 쿠키 미사용**: localStorage만 사용하여 쿠키 노출 최소화
 2. **refreshToken HttpOnly**: XSS 공격으로 탈취 불가
-3. **자동 토큰 갱신**: 401 에러 시 자동으로 refreshToken으로 갱신
-4. **무한루프 방지**: `/sign-in/*` 경로에서는 로그인 리다이렉트 제외
+3. **자동 토큰 갱신 + 일시 실패 내성**: 401 시 refreshToken으로 자동 갱신. refresh가 **확정 실패(401/403)** 일 때만 로그아웃하고, **일시적 실패(네트워크/5xx)** 는 세션을 유지해 다음 요청에서 재시도 (며칠 뒤 강제 로그아웃 방지)
+4. **무한루프 방지**: `/sign-in/*` 경로에서는 로그인 리다이렉트 제외 + `initialize()`의 startup refresh도 건너뜀
 5. **SSR 인증 분리**: 서버 컴포넌트는 refreshToken으로 별도 인증
 6. **Auth code 패턴**: OAuth redirect URL에 refresh token 대신 30초 유효 auth code 사용하여 URL 노출 방지
 7. **사용자 상태 검증**: token refresh 시 ACTIVE 상태가 아닌 사용자 차단
