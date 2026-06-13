@@ -267,8 +267,9 @@ export default function QuickRegisterModal({
           {step === 1 ? "빠른 개체 등록" : "추가 정보 입력"}
         </DialogTitle>
 
-        {step === 1 ? (
-          <div className="mt-2 space-y-4">
+        {/* step 1 본문은 언마운트하지 않고 숨김 처리 — 입력(NameDuplicateCheckInput)이
+            remount되며 중복확인 상태가 풀리는 것을 방지 (단계 왕복 시 상태 유지) */}
+        <div className={step === 1 ? "mt-2 space-y-4" : "hidden"}>
             {/* 이름 */}
             <div className="flex w-fit items-center">
               <label className="block min-w-10 text-[13px] font-medium text-gray-700 dark:text-gray-300">
@@ -356,8 +357,8 @@ export default function QuickRegisterModal({
                 </PopoverContent>
               </Popover>
             </div>
-          </div>
-        ) : (
+        </div>
+        {step === 2 && (
           <div className="mt-2 space-y-4">
             {/* 부모 정보 */}
             <div>
