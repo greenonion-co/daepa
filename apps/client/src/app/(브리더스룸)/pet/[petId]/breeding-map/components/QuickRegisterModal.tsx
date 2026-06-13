@@ -64,6 +64,8 @@ interface QuickRegisterModalProps {
    * 부/모는 표시용 데이터가 없어 복원하지 않는다.
    */
   initialDraft?: CreatePetDto;
+  /** true면 바깥 클릭/터치로 닫히지 않음 (경매 생성 흐름 등에서만 사용). 기본 false. */
+  preventOutsideClose?: boolean;
 }
 
 export default function QuickRegisterModal({
@@ -72,6 +74,7 @@ export default function QuickRegisterModal({
   onSuccess,
   onSubmitDraft,
   initialDraft,
+  preventOutsideClose = false,
 }: QuickRegisterModalProps) {
   const { duplicateCheckStatus, setDuplicateCheckStatus } = useNameStore();
   const { setErrors } = usePetStore();
@@ -272,11 +275,10 @@ export default function QuickRegisterModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      {/* 우측 상단 닫기 버튼이 있으므로 백그라운드 오터치 닫힘 방지 (X 닫기 시 dirty 확인은 유지) */}
+      {/* 경매 생성 흐름 등에서만 백그라운드 오터치 닫힘 방지 (X 닫기 시 dirty 확인은 유지) */}
       <DialogContent
         className="max-h-[90dvh] w-[calc(100%-2rem)] max-w-[440px] overflow-y-auto rounded-2xl p-6 dark:bg-neutral-800"
-        onPointerDownOutside={(e) => e.preventDefault()}
-        onInteractOutside={(e) => e.preventDefault()}
+        preventOutsideClose={preventOutsideClose}
       >
         <DialogTitle className="text-[16px] font-semibold dark:text-gray-100">
           {step === 1 ? "빠른 개체 등록" : "상세 정보 입력"}

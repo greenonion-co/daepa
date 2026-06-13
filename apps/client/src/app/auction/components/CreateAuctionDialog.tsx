@@ -35,12 +35,10 @@ export default function CreateAuctionDialog({
         if (!open) onClose();
       }}
     >
-      {/* 우측 상단 닫기 버튼이 있으므로, 백그라운드 오터치로 인한 의도치 않은 닫힘 방지.
-          onInteractOutside 가 pointer/focus 바깥 상호작용을 모두 포괄 → dismiss 차단. */}
+      {/* 우측 상단 닫기 버튼이 있으므로 백그라운드 오터치로 인한 의도치 않은 닫힘 방지 */}
       <DialogContent
         className="max-h-[90dvh] w-full overflow-y-auto sm:max-w-lg"
-        onPointerDownOutside={(e) => e.preventDefault()}
-        onInteractOutside={(e) => e.preventDefault()}
+        preventOutsideClose
       >
         <DialogHeader>
           <DialogTitle>경매 정보 설정</DialogTitle>

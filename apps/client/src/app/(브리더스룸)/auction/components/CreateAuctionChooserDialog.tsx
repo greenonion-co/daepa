@@ -24,11 +24,7 @@ export default function CreateAuctionChooserDialog({
       }}
     >
       {/* 우측 상단 닫기 버튼이 있으므로 백그라운드 오터치 닫힘 방지 (경매 생성 흐름 공통) */}
-      <DialogContent
-        className="w-[calc(100%-2rem)] sm:max-w-md"
-        onPointerDownOutside={(e) => e.preventDefault()}
-        onInteractOutside={(e) => e.preventDefault()}
-      >
+      <DialogContent className="w-[calc(100%-2rem)] sm:max-w-md" preventOutsideClose>
         <DialogHeader>
           <DialogTitle>경매를 어떻게 시작할까요?</DialogTitle>
         </DialogHeader>

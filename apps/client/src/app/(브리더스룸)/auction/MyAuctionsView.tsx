@@ -287,6 +287,7 @@ export function MyAuctionsView() {
           setTimeout(unmount, 200);
         }}
         initialDraft={initialDraft}
+        preventOutsideClose
         onSubmitDraft={(dto) => {
           openCreateAuctionWithPendingPet(dto, () => openQuickRegister(dto));
         }}
