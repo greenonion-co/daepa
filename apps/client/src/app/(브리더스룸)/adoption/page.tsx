@@ -1,11 +1,17 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useAppRouter } from "@/hooks/useAppRouter";
 import AdoptionTable from "./components/AdoptionTable";
 import AdoptionDashboard from "./components/AdoptionDashboard";
-import { MyAuctionsView } from "../auction/MyAuctionsView";
+
+// 경매 탭 콘텐츠는 탭 진입 시에만 로드 — 분양 목록/대시보드만 쓰는 사용자의 번들 부담 제거.
+const MyAuctionsView = dynamic(
+  () => import("../auction/MyAuctionsView").then((m) => m.MyAuctionsView),
+  { ssr: false },
+);
 
 const AdoptionPage = () => {
   const router = useAppRouter();

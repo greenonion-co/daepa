@@ -338,9 +338,9 @@ export function MyAuctionsView() {
   if (isLoading) return <LoadingScreen />;
 
   return (
-    <div className="mx-auto w-full max-w-2xl p-4">
-      <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-xl font-bold">내 경매</h1>
+    <div className="w-full">
+      {/* '경매' 탭 안에서 렌더되므로 별도 제목 없이 생성 버튼만 우측 정렬 */}
+      <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
         <Button
           onClick={openCreateAuctionFlow}
           size="sm"
