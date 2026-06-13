@@ -213,7 +213,7 @@ export function MyAuctionsView() {
   const invalidateMyAuctions = () =>
     queryClient.invalidateQueries({ queryKey: [myAuctionControllerMyAuctions.name] });
 
-  const openCreateAuctionWithPetId = (petId: string) => {
+  const openCreateAuctionWithPetId = (petId: string, onBack?: () => void) => {
     overlay.open(({ isOpen: open, close, unmount }) => (
       <CreateAuctionDialog
         isOpen={open}
@@ -224,12 +224,23 @@ export function MyAuctionsView() {
         }}
         initialPetId={petId}
         lockPetId
+        onBack={
+          onBack &&
+          (() => {
+            close();
+            setTimeout(unmount, 200);
+            onBack();
+          })
+        }
       />
     ));
   };
 
   // "새 개체 추가 후 경매" 경로 — 펫 생성은 다이얼로그 제출 시점에 isPublic=true 로 수행.
-  const openCreateAuctionWithPendingPet = (pendingPet: CreatePetDto) => {
+  const openCreateAuctionWithPendingPet = (
+    pendingPet: CreatePetDto,
+    onBack?: () => void,
+  ) => {
     overlay.open(({ isOpen: open, close, unmount }) => (
       <CreateAuctionDialog
         isOpen={open}
@@ -240,6 +251,14 @@ export function MyAuctionsView() {
         }}
         pendingPet={pendingPet}
         lockPetId
+        onBack={
+          onBack &&
+          (() => {
+            close();
+            setTimeout(unmount, 200);
+            onBack();
+          })
+        }
       />
     ));
   };
@@ -253,13 +272,13 @@ export function MyAuctionsView() {
           setTimeout(unmount, 200);
         }}
         onSelect={(petId) => {
-          openCreateAuctionWithPetId(petId);
+          openCreateAuctionWithPetId(petId, () => openMyPetPicker());
         }}
       />
     ));
   };
 
-  const openQuickRegister = () => {
+  const openQuickRegister = (initialDraft?: CreatePetDto) => {
     overlay.open(({ isOpen: open, close, unmount }) => (
       <QuickRegisterModal
         isOpen={open}
@@ -267,8 +286,9 @@ export function MyAuctionsView() {
           close();
           setTimeout(unmount, 200);
         }}
+        initialDraft={initialDraft}
         onSubmitDraft={(dto) => {
-          openCreateAuctionWithPendingPet(dto);
+          openCreateAuctionWithPendingPet(dto, () => openQuickRegister(dto));
         }}
       />
     ));

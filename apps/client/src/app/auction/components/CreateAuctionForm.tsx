@@ -28,6 +28,8 @@ interface CreateAuctionFormProps {
   lockPetId?: boolean;
   /** 생성 후 사용자가 모달/페이지를 닫고 싶을 때 호출 (모달 환경에서 전달). */
   onClose?: () => void;
+  /** 제공되면 '이전' 버튼을 표시하고 클릭 시 호출 (직전 단계로 복귀). */
+  onBack?: () => void;
   /**
    * 제공되면 "경매 생성" 클릭 시 이 DTO 로 펫을 isPublic=true 로 먼저 생성하고
    * 그 petId 로 경매를 만든다. 사용자가 폼을 그대로 닫으면 펫도 만들어지지 않는다.
@@ -64,6 +66,7 @@ export function CreateAuctionForm({
   initialPetId = "",
   lockPetId = false,
   onClose,
+  onBack,
   pendingPet,
 }: CreateAuctionFormProps) {
   const router = useRouter();
@@ -349,13 +352,26 @@ export function CreateAuctionForm({
         }
       />
 
-      <Button
-        onClick={handleSubmit}
-        disabled={submitting}
-        className="mt-2 w-full bg-amber-600 text-white hover:bg-amber-700 dark:bg-amber-500 dark:hover:bg-amber-600"
-      >
-        {submitting ? "생성 중..." : "경매 생성"}
-      </Button>
+      <div className="mt-2 flex gap-2">
+        {onBack && (
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onBack}
+            disabled={submitting}
+            className="flex-1"
+          >
+            이전
+          </Button>
+        )}
+        <Button
+          onClick={handleSubmit}
+          disabled={submitting}
+          className="flex-1 bg-amber-600 text-white hover:bg-amber-700 dark:bg-amber-500 dark:hover:bg-amber-600"
+        >
+          {submitting ? "생성 중..." : "경매 생성"}
+        </Button>
+      </div>
     </div>
   );
 }
