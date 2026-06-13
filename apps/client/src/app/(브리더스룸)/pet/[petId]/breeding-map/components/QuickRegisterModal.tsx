@@ -469,19 +469,19 @@ export default function QuickRegisterModal({
           <div className="mt-4 flex flex-col gap-2">
             <button
               type="button"
-              onClick={handleSubmit}
-              disabled={isSubmitDisabled}
-              className="w-full rounded-xl bg-black py-2.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50 dark:bg-blue-700 dark:hover:bg-blue-800"
-            >
-              {onSubmitDraft ? "다음" : isPending ? "등록 중..." : "등록"}
-            </button>
-            <button
-              type="button"
               onClick={handleGoToStep2}
               disabled={isSubmitDisabled}
               className="w-full rounded-xl border border-blue-600 py-2.5 text-sm font-semibold text-blue-600 hover:bg-blue-50 disabled:opacity-50 dark:border-blue-500 dark:text-blue-400 dark:hover:bg-blue-900/20"
             >
               상세 정보 입력
+            </button>
+            <button
+              type="button"
+              onClick={handleSubmit}
+              disabled={isSubmitDisabled}
+              className="w-full rounded-xl bg-black py-2.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50 dark:bg-blue-700 dark:hover:bg-blue-800"
+            >
+              {onSubmitDraft ? "다음" : isPending ? "등록 중..." : "등록"}
             </button>
           </div>
         ) : (
