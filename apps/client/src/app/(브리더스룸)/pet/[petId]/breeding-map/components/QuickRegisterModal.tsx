@@ -33,7 +33,7 @@ import {
 } from "@/app/(브리더스룸)/constants";
 import { toast } from "@/lib/toast";
 import { overlay } from "overlay-kit";
-import { CalendarIcon, Search } from "lucide-react";
+import { CalendarIcon, Info, Search } from "lucide-react";
 import { DateTime } from "luxon";
 
 const DESC_MAX_LENGTH = 500;
@@ -59,6 +59,13 @@ interface QuickRegisterModalProps {
    * onSubmitDraft 가 있으면 onSuccess 는 무시된다.
    */
   onSubmitDraft?: (dto: CreatePetDto) => void;
+  /**
+   * 작성하던 DTO 를 다시 채워 넣을 때 사용 (예: 후속 단계에서 '이전'으로 복귀).
+   * 부/모는 표시용 데이터가 없어 복원하지 않는다.
+   */
+  initialDraft?: CreatePetDto;
+  /** true면 바깥 클릭/터치로 닫히지 않음 (경매 생성 흐름 등에서만 사용). 기본 false. */
+  preventOutsideClose?: boolean;
 }
 
 export default function QuickRegisterModal({
@@ -66,6 +73,8 @@ export default function QuickRegisterModal({
   onClose,
   onSuccess,
   onSubmitDraft,
+  initialDraft,
+  preventOutsideClose = false,
 }: QuickRegisterModalProps) {
   const { duplicateCheckStatus, setDuplicateCheckStatus } = useNameStore();
   const { setErrors } = usePetStore();
@@ -73,20 +82,24 @@ export default function QuickRegisterModal({
   // Step
   const [step, setStep] = useState<1 | 2>(1);
 
-  // Step 1 fields
-  const [name, setName] = useState("");
-  const [sex, setSex] = useState<"M" | "F" | "N" | null>("M");
-  const [morphs, setMorphs] = useState<string[]>([]);
-  const [traits, setTraits] = useState<string[]>([]);
-  const [desc, setDesc] = useState("");
+  // Step 1 fields (initialDraft 가 있으면 작성하던 값으로 복원 — '이전' 복귀용)
+  const [name, setName] = useState(initialDraft?.name ?? "");
+  const [sex, setSex] = useState<"M" | "F" | "N" | null>(
+    (initialDraft?.sex as "M" | "F" | "N" | null) ?? "M",
+  );
+  const [morphs, setMorphs] = useState<string[]>(initialDraft?.morphs ?? []);
+  const [traits, setTraits] = useState<string[]>(initialDraft?.traits ?? []);
+  const [desc, setDesc] = useState(initialDraft?.desc ?? "");
 
-  // Step 2 fields
+  // Step 2 fields (부/모는 표시용 데이터가 없어 복원하지 않음)
   const [father, setFather] = useState<PetParentDtoWithMessage | null>(null);
   const [mother, setMother] = useState<PetParentDtoWithMessage | null>(null);
-  const [photos, setPhotos] = useState<PhotoItem[]>([]);
-  const [hatchingDate, setHatchingDate] = useState<string>("");
-  const [weight, setWeight] = useState<string>("");
-  const [foods, setFoods] = useState<string[]>([]);
+  const [photos, setPhotos] = useState<PhotoItem[]>((initialDraft?.photos as PhotoItem[]) ?? []);
+  const [hatchingDate, setHatchingDate] = useState<string>(initialDraft?.hatchingDate ?? "");
+  const [weight, setWeight] = useState<string>(
+    initialDraft?.weight != null ? String(initialDraft.weight) : "",
+  );
+  const [foods, setFoods] = useState<string[]>(initialDraft?.foods ?? []);
 
   const { mutateAsync: createPet, isPending } = useMutation({
     mutationFn: petControllerCreate,
@@ -262,102 +275,120 @@ export default function QuickRegisterModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-h-[90dvh] w-[calc(100%-2rem)] max-w-[440px] overflow-y-auto rounded-2xl p-6 dark:bg-neutral-800">
+      {/* 경매 생성 흐름 등에서만 백그라운드 오터치 닫힘 방지 (X 닫기 시 dirty 확인은 유지) */}
+      <DialogContent
+        className="max-h-[90dvh] w-[calc(100%-2rem)] max-w-[440px] overflow-y-auto rounded-2xl p-6 dark:bg-neutral-800"
+        preventOutsideClose={preventOutsideClose}
+      >
         <DialogTitle className="text-[16px] font-semibold dark:text-gray-100">
-          {step === 1 ? "빠른 개체 등록" : "추가 정보 입력"}
+          {step === 1 ? "빠른 개체 등록" : "상세 정보 입력"}
         </DialogTitle>
 
-        {step === 1 ? (
-          <div className="mt-2 space-y-4">
-            {/* 이름 */}
-            <div className="flex w-fit items-center">
-              <label className="block min-w-10 text-[13px] font-medium text-gray-700 dark:text-gray-300">
-                이름 <span className="text-red-500">*</span>
-              </label>
-              <NameDuplicateCheckInput
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="개체 이름 입력"
-              />
-            </div>
-
-            {/* 성별 */}
-            <div className="flex w-fit items-center">
-              <label className="block min-w-10 text-[13px] font-medium text-gray-700 dark:text-gray-300">
-                성별 <span className="text-red-500">*</span>
-              </label>
-              <SingleSelect
-                type="sex"
-                initialItem={sex}
-                onSelect={(v: "M" | "F" | null) => setSex(v)}
-                variant="form"
-                forceCenter
-              />
-            </div>
-
-            {/* 모프 */}
-            <div className="flex w-fit items-center">
-              <label className="block min-w-10 text-[13px] font-medium text-gray-700 dark:text-gray-300">
-                모프 <span className="text-red-500">*</span>
-              </label>
-              <FormMultiSelect
-                title="모프"
-                displayMap={MORPH_LIST_BY_SPECIES.CR}
-                initialItems={morphs}
-                onSelect={(items) => setMorphs(items ?? [])}
-                forceCenter
-              />
-            </div>
-
-            {/* 형질 */}
-            <div className="flex w-fit items-center">
-              <label className="block min-w-10 text-[13px] font-medium text-gray-700 dark:text-gray-300">
-                형질
-              </label>
-              <FormMultiSelect
-                title="형질"
-                displayMap={TRAIT_LIST_BY_SPECIES.CR}
-                initialItems={traits}
-                onSelect={(items) => setTraits(items ?? [])}
-                forceCenter
-              />
-            </div>
-
-            {/* 해칭일 */}
-            <div className="flex w-fit items-center">
-              <label className="block min-w-12 text-[13px] font-medium text-gray-700 dark:text-gray-300">
-                해칭일
-              </label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <button
-                    type="button"
-                    className="flex h-9 w-full items-center justify-between rounded-lg border border-gray-200 px-3 text-left text-sm dark:border-gray-700 dark:bg-[#18171C] dark:text-white"
-                  >
-                    <span
-                      className={hatchingDate ? "text-gray-900 dark:text-white" : "text-gray-400"}
-                    >
-                      {hatchingDate
-                        ? DateTime.fromISO(hatchingDate).toFormat("yyyy년 MM월 dd일")
-                        : "해칭일을 선택해주세요"}
-                    </span>
-                    <CalendarIcon className="h-4 w-4 text-gray-400" />
-                  </button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={hatchingDate ? new Date(hatchingDate) : undefined}
-                    onSelect={(date) => {
-                      if (date) setHatchingDate(date.toISOString());
-                    }}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
+        {/* 이전 단계에서 복귀(prefill) 시, 부모 정보는 복원되지 않으므로 명시적으로 안내.
+            step 1 의 '다음'으로 바로 제출될 수 있어 step 과 무관하게 항상 노출한다. */}
+        {(initialDraft?.father || initialDraft?.mother) && !father && !mother && (
+          <div className="mt-2 flex items-start gap-1.5 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-[12px] text-amber-800 dark:border-amber-700/60 dark:bg-amber-900/20 dark:text-amber-300">
+            <Info className="mt-0.5 h-4 w-4 shrink-0" />
+            <span>
+              이전에 선택한 부모 정보가 초기화되었습니다.
+              <br />
+              ‘상세 정보 입력’에서 다시 선택해 주세요.
+            </span>
           </div>
-        ) : (
+        )}
+
+        {/* step 1 본문은 언마운트하지 않고 숨김 처리 — 입력(NameDuplicateCheckInput)이
+            remount되며 중복확인 상태가 풀리는 것을 방지 (단계 왕복 시 상태 유지) */}
+        <div className={step === 1 ? "mt-2 space-y-4" : "hidden"}>
+          {/* 이름 */}
+          <div className="flex w-fit items-center">
+            <label className="block min-w-10 text-[13px] font-medium text-gray-700 dark:text-gray-300">
+              이름 <span className="text-red-500">*</span>
+            </label>
+            <NameDuplicateCheckInput
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="개체 이름 입력"
+            />
+          </div>
+
+          {/* 성별 */}
+          <div className="flex w-fit items-center">
+            <label className="block min-w-10 text-[13px] font-medium text-gray-700 dark:text-gray-300">
+              성별 <span className="text-red-500">*</span>
+            </label>
+            <SingleSelect
+              type="sex"
+              initialItem={sex}
+              onSelect={(v: "M" | "F" | null) => setSex(v)}
+              variant="form"
+              forceCenter
+            />
+          </div>
+
+          {/* 모프 */}
+          <div className="flex w-fit items-center">
+            <label className="block min-w-10 text-[13px] font-medium text-gray-700 dark:text-gray-300">
+              모프 <span className="text-red-500">*</span>
+            </label>
+            <FormMultiSelect
+              title="모프"
+              displayMap={MORPH_LIST_BY_SPECIES.CR}
+              initialItems={morphs}
+              onSelect={(items) => setMorphs(items ?? [])}
+              forceCenter
+            />
+          </div>
+
+          {/* 형질 */}
+          <div className="flex w-fit items-center">
+            <label className="block min-w-10 text-[13px] font-medium text-gray-700 dark:text-gray-300">
+              형질
+            </label>
+            <FormMultiSelect
+              title="형질"
+              displayMap={TRAIT_LIST_BY_SPECIES.CR}
+              initialItems={traits}
+              onSelect={(items) => setTraits(items ?? [])}
+              forceCenter
+            />
+          </div>
+
+          {/* 해칭일 */}
+          <div className="flex w-fit items-center">
+            <label className="block min-w-12 text-[13px] font-medium text-gray-700 dark:text-gray-300">
+              해칭일
+            </label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <button
+                  type="button"
+                  className="flex h-9 w-full items-center justify-between rounded-lg border border-gray-200 px-3 text-left text-sm dark:border-gray-700 dark:bg-[#18171C] dark:text-white"
+                >
+                  <span
+                    className={hatchingDate ? "text-gray-900 dark:text-white" : "text-gray-400"}
+                  >
+                    {hatchingDate
+                      ? DateTime.fromISO(hatchingDate).toFormat("yyyy년 MM월 dd일")
+                      : "해칭일을 선택해주세요"}
+                  </span>
+                  <CalendarIcon className="h-4 w-4 text-gray-400" />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={hatchingDate ? new Date(hatchingDate) : undefined}
+                  onSelect={(date) => {
+                    if (date) setHatchingDate(date.toISOString());
+                  }}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+        </div>
+        {step === 2 && (
           <div className="mt-2 space-y-4">
             {/* 부모 정보 */}
             <div>
@@ -443,30 +474,21 @@ export default function QuickRegisterModal({
         {/* 하단 버튼 */}
         {step === 1 ? (
           <div className="mt-4 flex flex-col gap-2">
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={handleClose}
-                className="text-gray-700dark:bg-gray-700 flex-1 rounded-xl bg-gray-200 py-2.5 text-sm font-medium dark:bg-gray-700 dark:text-gray-200"
-              >
-                취소
-              </button>
-              <button
-                type="button"
-                onClick={handleSubmit}
-                disabled={isSubmitDisabled}
-                className="flex-1 rounded-xl bg-black py-2.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50 dark:bg-blue-700 dark:hover:bg-blue-800"
-              >
-                {onSubmitDraft ? "다음" : isPending ? "등록 중..." : "등록"}
-              </button>
-            </div>
             <button
               type="button"
               onClick={handleGoToStep2}
               disabled={isSubmitDisabled}
-              className="w-full rounded-xl py-2.5 text-sm font-medium text-blue-600 hover:bg-blue-50 disabled:opacity-50 dark:border-blue-800 dark:text-blue-400 dark:hover:bg-blue-900/20"
+              className="w-full rounded-xl border border-blue-600 py-2.5 text-sm font-semibold text-blue-600 hover:bg-blue-50 disabled:opacity-50 dark:border-blue-500 dark:text-blue-400 dark:hover:bg-blue-900/20"
             >
-              추가 정보 입력
+              상세 정보 입력
+            </button>
+            <button
+              type="button"
+              onClick={handleSubmit}
+              disabled={isSubmitDisabled}
+              className="w-full rounded-xl bg-black py-2.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50 dark:bg-blue-700 dark:hover:bg-blue-800"
+            >
+              {onSubmitDraft ? "다음" : isPending ? "등록 중..." : "등록"}
             </button>
           </div>
         ) : (
