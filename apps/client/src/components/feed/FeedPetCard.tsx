@@ -17,7 +17,7 @@ export default function FeedPetCard({ pet }: FeedPetCardProps) {
   const sexLabel = getSexIcon(pet.sex, { size: "xs" });
 
   return (
-    <article className="overflow-hidden rounded-2xl bg-white transition-shadow hover:shadow-md dark:bg-neutral-900">
+    <article className="border-b border-gray-100 bg-white dark:border-neutral-800 dark:bg-neutral-900">
       {/* Header - 유저 정보 */}
       <div className="flex items-center gap-3 px-3 pt-3 pb-2">
         {pet.owner?.isBiz && pet.owner?.name ? (

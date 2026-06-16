@@ -150,7 +150,7 @@ export default function PetList({ filterType, isVisible }: PetListProps) {
   }
 
   return (
-    <div className="flex w-full flex-col gap-4">
+    <div className="flex w-full flex-col">
       {allPets.map((pet) => (
         <FeedPetCard key={pet.petId} pet={pet} />
       ))}
