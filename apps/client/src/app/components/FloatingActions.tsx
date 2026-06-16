@@ -1,56 +1,45 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
+import { Plus } from "lucide-react";
 import { isNativeApp, isAndroid } from "@/lib/native-bridge";
 import { useIsLoggedIn } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 import AddPetButton from "@/app/(브리더스룸)/components/AddPetButton";
-import QrScannerButton from "@/app/components/QrScannerButton";
+import QrScannerButton, { isIosChrome } from "@/app/components/QrScannerButton";
 
 export default function FloatingActions() {
   const searchParams = useSearchParams();
   const isLoggedIn = useIsLoggedIn();
   const hasNativeTopBar = isNativeApp() && searchParams.get("_nativeTopBar") === "1";
   const isNativeGuest = isNativeApp() && !isLoggedIn;
-  const [collapsed, setCollapsed] = useState(false);
 
-  // 스와이프 감지 (버튼 영역)
-  const touchStart = useRef({ x: 0, y: 0 });
-  const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    touchStart.current = {
-      x: e.touches[0]?.clientX ?? 0,
-      y: e.touches[0]?.clientY ?? 0,
-    };
-  }, []);
-  const handleTouchEnd = useCallback(
-    (e: React.TouchEvent) => {
-      const dx = (e.changedTouches[0]?.clientX ?? 0) - touchStart.current.x;
-      const dy = (e.changedTouches[0]?.clientY ?? 0) - touchStart.current.y;
-      // 수직 스크롤이 수평보다 크면 무시
-      if (Math.abs(dy) > Math.abs(dx)) return;
-      if (dx > 30 && !collapsed) setCollapsed(true);
-    },
-    [collapsed],
-  );
+  const [open, setOpen] = useState(false);
+  const [hidden, setHidden] = useState(false);
 
-  // 스와이프 감지 (복귀 영역 — 좌측 스와이프만)
-  const edgeTouchStart = useRef({ x: 0, y: 0 });
-  const handleEdgeTouchStart = useCallback((e: React.TouchEvent) => {
-    edgeTouchStart.current = {
-      x: e.touches[0]?.clientX ?? 0,
-      y: e.touches[0]?.clientY ?? 0,
+  // 아래로 스크롤하면 숨기고, 위로 스크롤하면 다시 표시 — 콘텐츠 가림 최소화
+  useEffect(() => {
+    let lastY = window.scrollY;
+    let ticking = false;
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        const y = window.scrollY;
+        if (y > lastY + 8 && y > 80) {
+          setHidden(true);
+          setOpen(false);
+        } else if (y < lastY - 8) {
+          setHidden(false);
+        }
+        lastY = y;
+        ticking = false;
+      });
     };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
-  const handleEdgeTouchEnd = useCallback(
-    (e: React.TouchEvent) => {
-      const dx = (e.changedTouches[0]?.clientX ?? 0) - edgeTouchStart.current.x;
-      const dy = (e.changedTouches[0]?.clientY ?? 0) - edgeTouchStart.current.y;
-      if (Math.abs(dy) > Math.abs(dx)) return;
-      if (dx < -20 && collapsed) setCollapsed(false);
-    },
-    [collapsed],
-  );
 
   const bottomClass = (() => {
     if (!isNativeApp()) return "bottom-[92px]";
@@ -59,46 +48,64 @@ export default function FloatingActions() {
     return isAndroid() ? "bottom-32" : "bottom-16";
   })();
 
-  return (
-    <div
-      className={cn(
-        "fixed z-50",
-        bottomClass,
-        collapsed ? "right-0" : "right-4",
-      )}
-    >
-      {/* 펼침 상태 */}
-      <div
-        className={cn(
-          "flex flex-col-reverse items-center gap-2 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]",
-          collapsed
-            ? "pointer-events-none translate-x-24 opacity-0"
-            : "translate-x-0 opacity-100",
-        )}
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
-      >
-        <AddPetButton />
-        <QrScannerButton />
-      </div>
+  const itemClass = cn(
+    "flex items-center gap-2 transition-all duration-200",
+    open ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-3 opacity-0",
+  );
 
-      {/* 접힌 상태 — 우측 가장자리 스와이프 영역 (넓은 터치 영역 + 얇은 시각 탭) */}
+  const labelClass =
+    "rounded-lg bg-neutral-900/85 px-2.5 py-1 text-xs font-medium text-white shadow-sm dark:bg-neutral-700";
+
+  return (
+    <>
+      {/* 바깥 탭으로 닫기 */}
       <div
         className={cn(
-          "absolute bottom-0 right-0 flex h-24 w-10 items-center justify-end transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]",
-          collapsed
-            ? "pointer-events-auto opacity-100"
-            : "pointer-events-none opacity-0",
+          "fixed inset-0 z-40 transition-opacity",
+          open ? "opacity-100" : "pointer-events-none opacity-0",
         )}
-        onTouchStart={handleEdgeTouchStart}
-        onTouchEnd={handleEdgeTouchEnd}
+        onClick={() => setOpen(false)}
+      />
+
+      <div
+        className={cn(
+          "fixed right-4 z-50 flex flex-col items-end gap-3 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]",
+          bottomClass,
+          hidden && "pointer-events-none translate-y-24 opacity-0",
+        )}
       >
-        <div className="h-12 w-3 rounded-l-lg bg-blue-400/40 shadow-md dark:bg-blue-300/30">
-          <span className="flex h-full items-center justify-center">
-            <span className="h-5 w-[2px] rounded-full bg-white/60" />
-          </span>
+        {/* 스피드다이얼 항목 — QR 스캔 */}
+        {!isIosChrome() && (
+          <div
+            onClick={() => setOpen(false)}
+            className={itemClass}
+            style={{ transitionDelay: open ? "60ms" : "0ms" }}
+          >
+            <span className={labelClass}>QR 스캔</span>
+            <QrScannerButton />
+          </div>
+        )}
+
+        {/* 스피드다이얼 항목 — 개체 추가 */}
+        <div onClick={() => setOpen(false)} className={itemClass}>
+          <span className={labelClass}>개체 추가</span>
+          <AddPetButton />
         </div>
+
+        {/* 메인 FAB */}
+        <button
+          type="button"
+          onClick={() => setOpen((v) => !v)}
+          aria-label={open ? "메뉴 닫기" : "메뉴 열기"}
+          aria-expanded={open}
+          className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-b from-amber-400 to-amber-600 text-white ring-1 ring-white/20 shadow-[0_6px_14px_-2px_rgba(180,120,10,0.45),inset_0_1px_0_rgba(255,255,255,0.35)] transition-all active:scale-95 active:shadow-[0_3px_8px_-2px_rgba(180,120,10,0.4),inset_0_1px_0_rgba(255,255,255,0.25)] dark:from-amber-400 dark:to-amber-600"
+        >
+          <Plus
+            className={cn("h-7 w-7 transition-transform duration-300", open && "rotate-45")}
+            strokeWidth={2.5}
+          />
+        </button>
       </div>
-    </div>
+    </>
   );
 }

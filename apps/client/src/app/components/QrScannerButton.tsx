@@ -8,7 +8,7 @@ import QrScanner from "./QrScanner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 /** iOS Chrome(WKWebView)은 getUserMedia를 지원하지 않으므로 버튼 자체를 숨김 */
-function isIosChrome(): boolean {
+export function isIosChrome(): boolean {
   if (typeof navigator === "undefined") return false;
   return /CriOS/i.test(navigator.userAgent);
 }
