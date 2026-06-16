@@ -5,15 +5,10 @@ import type { BreederPublicProfile } from "../data";
 import BreederHeader from "./BreederHeader";
 import ShowcaseFilterBar, { type ShowcaseFilters } from "./ShowcaseFilterBar";
 import PetShowcaseGrid from "./PetShowcaseGrid";
-import MultiSelect from "@/app/(브리더스룸)/components/selector/MultiSelect";
+import SortToggle, { SORT_DESC } from "./SortToggle";
 import { MORPH_LIST_BY_SPECIES, TRAIT_LIST_BY_SPECIES } from "@/app/(브리더스룸)/constants";
 import { BadgeCheck, Share2 } from "lucide-react";
 import { shareShowroom } from "../utils/shareShowroom";
-
-const SORT_DISPLAY: Record<string, string> = {
-  "hatchingDate:DESC": "해칭일 최신순",
-  "hatchingDate:ASC": "해칭일 오래된순",
-};
 
 const CURRENT_SPECIES = "CR";
 
@@ -29,7 +24,7 @@ export default function ShowcaseContent({ profile }: ShowcaseContentProps) {
     morphs: [],
     traits: [],
     search: "",
-    sort: "hatchingDate:DESC",
+    sort: SORT_DESC,
   });
 
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -116,13 +111,9 @@ export default function ShowcaseContent({ profile }: ShowcaseContentProps) {
             className="w-full rounded-xl bg-white py-2 pr-3 pl-9 text-sm transition-colors outline-none placeholder:text-gray-400 focus:border-gray-400 dark:border-gray-600 dark:bg-gray-800 dark:placeholder:text-gray-500 dark:focus:border-gray-500"
           />
         </div>
-        <MultiSelect
-          title=""
-          displayMap={SORT_DISPLAY}
-          selected={[filters.sort]}
-          onChange={(v) => setFilters({ ...filters, sort: v[0] || "hatchingDate:DESC" })}
-          single
-          className="w-32"
+        <SortToggle
+          value={filters.sort}
+          onChange={(v) => setFilters({ ...filters, sort: v })}
         />
       </div>
 

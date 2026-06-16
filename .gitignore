@@ -60,4 +60,7 @@ apps/mobile/ios/tmp.xcconfig
 settings.gradle
 
 # Claude Code (per-developer symlinks to ~/Documents/greenonion/_platform/.claude)
-.claude/
+# No trailing slash: also matches the .claude symlink Conductor worktrees create.
+.claude
+# Conductor personal workspace settings (per-developer)
+.conductor/settings.local.toml
