@@ -64,7 +64,7 @@ export default function FeedPetCard({ pet }: FeedPetCardProps) {
             {pet.isBreeder && <BreederBadge size="sm" />}
             {sexLabel}
             {pet.hatchingDate && (
-              <p className="ml-auto text-xs leading-none font-semibold text-gray-400 dark:text-gray-500">
+              <p className="ml-auto text-xs leading-none font-medium tabular-nums text-gray-500 dark:text-gray-400">
                 {DateTime.fromISO(pet.hatchingDate).toFormat("yy.M.d")}
               </p>
             )}
