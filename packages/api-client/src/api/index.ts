@@ -7,6 +7,7 @@
  */
 import type {
   AdoptionHistoryControllerGetAllAdoptionsParams,
+  AnswerInquiryDto,
   AppleNativeLoginRequestDto,
   AuctionControllerBidsParams,
   BrPetControllerFindAllParams,
@@ -20,6 +21,7 @@ import type {
   CreateAuctionDto,
   CreateFeedingDto,
   CreateInitUserInfoDto,
+  CreateInquiryDto,
   CreateLayingDto,
   CreateMatingDto,
   CreateParentDto,
@@ -70,6 +72,7 @@ import { faker } from "@faker-js/faker";
 import { HttpResponse, delay, http } from "msw";
 
 import type {
+  AdminInquiryDto,
   AdoptionCompleteDetailJson,
   AdoptionDetailResponseDto,
   AdoptionHistoryControllerGetAllAdoptions200,
@@ -94,6 +97,7 @@ import type {
   GetFamilyTreeResponseDto,
   GetParentsByPetIdResponseDto,
   GetSiblingsPageResponseDto,
+  InquiryDto,
   MyAuctionListResponseDto,
   NativeLoginResponseDto,
   PairControllerGetPairList200,
@@ -769,6 +773,44 @@ export const viewLogControllerRecordView = (resourceType: string, resourceId: st
   });
 };
 
+/**
+ * @summary 1:1 문의 등록
+ */
+export const inquiryControllerCreate = (createInquiryDto: CreateInquiryDto) => {
+  return useCustomInstance<InquiryDto>({
+    url: `/api/v1/inquiry`,
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    data: createInquiryDto,
+  });
+};
+
+/**
+ * @summary 내 1:1 문의 내역 조회
+ */
+export const inquiryControllerListMine = () => {
+  return useCustomInstance<InquiryDto[]>({ url: `/api/v1/inquiry`, method: "GET" });
+};
+
+/**
+ * @summary 전체 1:1 문의 목록 조회 (관리자 전용)
+ */
+export const adminInquiryControllerListAll = () => {
+  return useCustomInstance<AdminInquiryDto[]>({ url: `/api/v1/admin/inquiry`, method: "GET" });
+};
+
+/**
+ * @summary 1:1 문의 답변 등록 (관리자 전용)
+ */
+export const adminInquiryControllerAnswer = (id: number, answerInquiryDto: AnswerInquiryDto) => {
+  return useCustomInstance<InquiryDto>({
+    url: `/api/v1/admin/inquiry/${id}/answer`,
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    data: answerInquiryDto,
+  });
+};
+
 export const fcmControllerRegisterToken = (registerFcmTokenDto: RegisterFcmTokenDto) => {
   return useCustomInstance<CommonResponseDto>({
     url: `/api/v1/fcm/token`,
@@ -814,7 +856,7 @@ export const adminAnnouncementControllerCreateAnnouncement = (
 };
 
 /**
- * broadcast 코드 경로를 그대로 타되 targetUserId(생략 시 관리자 본인)의 활성 토큰에만 전송한다. 이력은 저장하지 않으며 발송 결과를 동기 반환한다.
+ * broadcast 와 동일한 멀티캐스트 발송 로직을 공유하되, targetUserId(생략 시 관리자 본인)의 활성 토큰에만 전송한다. 이력은 저장하지 않으며 발송 결과를 동기 반환한다.
  * @summary 공지 푸시 테스트 발송 (특정 유저에게만)
  */
 export const adminAnnouncementControllerSendTestAnnouncement = (
@@ -1082,6 +1124,18 @@ export type FeedingControllerDeleteResult = NonNullable<
 >;
 export type ViewLogControllerRecordViewResult = NonNullable<
   Awaited<ReturnType<typeof viewLogControllerRecordView>>
+>;
+export type InquiryControllerCreateResult = NonNullable<
+  Awaited<ReturnType<typeof inquiryControllerCreate>>
+>;
+export type InquiryControllerListMineResult = NonNullable<
+  Awaited<ReturnType<typeof inquiryControllerListMine>>
+>;
+export type AdminInquiryControllerListAllResult = NonNullable<
+  Awaited<ReturnType<typeof adminInquiryControllerListAll>>
+>;
+export type AdminInquiryControllerAnswerResult = NonNullable<
+  Awaited<ReturnType<typeof adminInquiryControllerAnswer>>
 >;
 export type FcmControllerRegisterTokenResult = NonNullable<
   Awaited<ReturnType<typeof fcmControllerRegisterToken>>
@@ -5096,6 +5150,65 @@ export const getFeedingControllerDeleteResponseMock = (
   ...overrideResponse,
 });
 
+export const getInquiryControllerCreateResponseMock = (
+  overrideResponse: Partial<InquiryDto> = {},
+): InquiryDto => ({
+  id: faker.number.int({ min: undefined, max: undefined }),
+  content: faker.string.alpha(20),
+  status: faker.helpers.arrayElement(["pending", "answered"] as const),
+  answer: faker.helpers.arrayElement([faker.string.alpha(20), null]),
+  answeredAt: faker.helpers.arrayElement([
+    `${faker.date.past().toISOString().split(".")[0]}Z`,
+    null,
+  ]),
+  createdAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+  ...overrideResponse,
+});
+
+export const getInquiryControllerListMineResponseMock = (): InquiryDto[] =>
+  Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+    id: faker.number.int({ min: undefined, max: undefined }),
+    content: faker.string.alpha(20),
+    status: faker.helpers.arrayElement(["pending", "answered"] as const),
+    answer: faker.helpers.arrayElement([faker.string.alpha(20), null]),
+    answeredAt: faker.helpers.arrayElement([
+      `${faker.date.past().toISOString().split(".")[0]}Z`,
+      null,
+    ]),
+    createdAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+  }));
+
+export const getAdminInquiryControllerListAllResponseMock = (): AdminInquiryDto[] =>
+  Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+    id: faker.number.int({ min: undefined, max: undefined }),
+    content: faker.string.alpha(20),
+    status: faker.helpers.arrayElement(["pending", "answered"] as const),
+    answer: faker.helpers.arrayElement([faker.string.alpha(20), null]),
+    answeredAt: faker.helpers.arrayElement([
+      `${faker.date.past().toISOString().split(".")[0]}Z`,
+      null,
+    ]),
+    createdAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+    userId: faker.string.alpha(20),
+    userName: faker.helpers.arrayElement([faker.string.alpha(20), null]),
+    userEmail: faker.helpers.arrayElement([faker.string.alpha(20), null]),
+  }));
+
+export const getAdminInquiryControllerAnswerResponseMock = (
+  overrideResponse: Partial<InquiryDto> = {},
+): InquiryDto => ({
+  id: faker.number.int({ min: undefined, max: undefined }),
+  content: faker.string.alpha(20),
+  status: faker.helpers.arrayElement(["pending", "answered"] as const),
+  answer: faker.helpers.arrayElement([faker.string.alpha(20), null]),
+  answeredAt: faker.helpers.arrayElement([
+    `${faker.date.past().toISOString().split(".")[0]}Z`,
+    null,
+  ]),
+  createdAt: `${faker.date.past().toISOString().split(".")[0]}Z`,
+  ...overrideResponse,
+});
+
 export const getFcmControllerRegisterTokenResponseMock = (
   overrideResponse: Partial<CommonResponseDto> = {},
 ): CommonResponseDto => ({
@@ -5135,6 +5248,7 @@ export const getAdminAnnouncementControllerSendTestAnnouncementResponseMock = (
   targetCount: faker.number.int({ min: undefined, max: undefined }),
   successCount: faker.number.int({ min: undefined, max: undefined }),
   failureCount: faker.number.int({ min: undefined, max: undefined }),
+  failuresByCode: {},
   ...overrideResponse,
 });
 
@@ -6901,6 +7015,94 @@ export const getViewLogControllerRecordViewMockHandler = (
   });
 };
 
+export const getInquiryControllerCreateMockHandler = (
+  overrideResponse?:
+    | InquiryDto
+    | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<InquiryDto> | InquiryDto),
+) => {
+  return http.post("*/api/v1/inquiry", async (info) => {
+    await delay(1000);
+
+    return new HttpResponse(
+      JSON.stringify(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getInquiryControllerCreateResponseMock(),
+      ),
+      { status: 201, headers: { "Content-Type": "application/json" } },
+    );
+  });
+};
+
+export const getInquiryControllerListMineMockHandler = (
+  overrideResponse?:
+    | InquiryDto[]
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<InquiryDto[]> | InquiryDto[]),
+) => {
+  return http.get("*/api/v1/inquiry", async (info) => {
+    await delay(1000);
+
+    return new HttpResponse(
+      JSON.stringify(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getInquiryControllerListMineResponseMock(),
+      ),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+  });
+};
+
+export const getAdminInquiryControllerListAllMockHandler = (
+  overrideResponse?:
+    | AdminInquiryDto[]
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<AdminInquiryDto[]> | AdminInquiryDto[]),
+) => {
+  return http.get("*/api/v1/admin/inquiry", async (info) => {
+    await delay(1000);
+
+    return new HttpResponse(
+      JSON.stringify(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getAdminInquiryControllerListAllResponseMock(),
+      ),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+  });
+};
+
+export const getAdminInquiryControllerAnswerMockHandler = (
+  overrideResponse?:
+    | InquiryDto
+    | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<InquiryDto> | InquiryDto),
+) => {
+  return http.post("*/api/v1/admin/inquiry/:id/answer", async (info) => {
+    await delay(1000);
+
+    return new HttpResponse(
+      JSON.stringify(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getAdminInquiryControllerAnswerResponseMock(),
+      ),
+      { status: 201, headers: { "Content-Type": "application/json" } },
+    );
+  });
+};
+
 export const getFcmControllerRegisterTokenMockHandler = (
   overrideResponse?:
     | CommonResponseDto
@@ -7205,6 +7407,10 @@ export const getProjectDaepaAPIMock = () => [
   getFeedingControllerUpdateMockHandler(),
   getFeedingControllerDeleteMockHandler(),
   getViewLogControllerRecordViewMockHandler(),
+  getInquiryControllerCreateMockHandler(),
+  getInquiryControllerListMineMockHandler(),
+  getAdminInquiryControllerListAllMockHandler(),
+  getAdminInquiryControllerAnswerMockHandler(),
   getFcmControllerRegisterTokenMockHandler(),
   getFcmControllerDeactivateTokenMockHandler(),
   getFcmControllerSendTestPushMockHandler(),

@@ -84,6 +84,10 @@ import { AuctionModule } from './auction/auction.module';
 import { AuctionEntity } from './auction/auction.entity';
 import { AuctionBidEntity } from './auction/auction_bid.entity';
 import { AuctionParticipantEntity } from './auction/auction_participant.entity';
+import { InquiryEntity } from './inquiry/inquiry.entity';
+import { InquiryService } from './inquiry/inquiry.service';
+import { InquiryController } from './inquiry/inquiry.controller';
+import { AdminInquiryController } from './inquiry/admin/admin.inquiry.controller';
 
 const ENTITIES = [
   UserEntity,
@@ -107,6 +111,7 @@ const ENTITIES = [
   AuctionEntity,
   AuctionBidEntity,
   AuctionParticipantEntity,
+  InquiryEntity,
 ];
 
 @Module({
@@ -161,6 +166,8 @@ const ENTITIES = [
     StatisticsController,
     FeedingController,
     ViewLogController,
+    InquiryController,
+    AdminInquiryController,
   ],
   providers: [
     AppService,
@@ -184,6 +191,7 @@ const ENTITIES = [
     StatisticsService,
     FeedingService,
     ViewLogService,
+    InquiryService,
     {
       provide: KEYV_REDIS,
       useFactory: () => new KeyvRedis(buildRedisUrl()),

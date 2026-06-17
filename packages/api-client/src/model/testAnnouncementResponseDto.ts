@@ -5,6 +5,7 @@
  * Project Daepa API description
  * OpenAPI spec version: 1.0
  */
+import type { TestAnnouncementResponseDtoFailuresByCode } from "./testAnnouncementResponseDtoFailuresByCode";
 
 export interface TestAnnouncementResponseDto {
   /** 발송 대상 토큰 수 */
@@ -13,4 +14,6 @@ export interface TestAnnouncementResponseDto {
   successCount: number;
   /** 실패 토큰 수 */
   failureCount: number;
+  /** FCM 에러 코드별 실패 토큰 수 */
+  failuresByCode: TestAnnouncementResponseDtoFailuresByCode;
 }

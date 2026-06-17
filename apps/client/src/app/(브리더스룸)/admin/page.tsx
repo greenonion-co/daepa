@@ -1,6 +1,6 @@
 "use client";
 
-import { Megaphone } from "lucide-react";
+import { Megaphone, MessageCircle } from "lucide-react";
 import { UserProfileDtoRole } from "@repo/api-client";
 import { useAuth } from "@/hooks/useAuth";
 import { useAppRouter } from "@/hooks/useAppRouter";
@@ -15,6 +15,13 @@ const ADMIN_FEATURES = [
     icon: <Megaphone className="h-5 w-5" />,
     iconBgColor: "bg-purple-100 dark:bg-purple-900/30",
     iconColor: "text-purple-600 dark:text-purple-400",
+  },
+  {
+    label: "1:1 문의 관리",
+    href: "/admin/inquiry",
+    icon: <MessageCircle className="h-5 w-5" />,
+    iconBgColor: "bg-blue-100 dark:bg-blue-900/30",
+    iconColor: "text-blue-600 dark:text-blue-400",
   },
 ];
 

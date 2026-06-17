@@ -95,9 +95,13 @@ const SettingList = () => {
           <h4 className="mb-2 text-sm font-semibold text-blue-900 dark:text-neutral-300">
             도움이 필요하신가요?
           </h4>
-          <p className="text-xs text-blue-800 dark:text-neutral-400">
-            문의사항이 있으시면 고객센터로 연락해주세요.
-          </p>
+          <Link
+            href="/inquiry"
+            className="group flex w-fit items-center gap-1 text-xs font-[500] text-blue-600 dark:text-blue-400"
+          >
+            <span>1:1 문의하기</span>
+            <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />
+          </Link>
         </div>
       </div>
     </ScrollArea>
