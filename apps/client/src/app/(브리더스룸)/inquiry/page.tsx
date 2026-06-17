@@ -11,27 +11,9 @@ import { toast } from "@/lib/toast";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-
-// orval 은 nullable 필드를 `{[key]: unknown} | null` 로 생성하므로 실제 shape 로 매핑해 사용한다.
-type Inquiry = {
-  id: number;
-  content: string;
-  status: InquiryDtoStatus;
-  answer: string | null;
-  answeredAt: string | null;
-  createdAt: string;
-};
+import { formatInquiryDate, type Inquiry } from "@/lib/inquiry";
 
 const MAX_LENGTH = 2000;
-
-const formatDate = (value: string | Date) =>
-  new Date(value).toLocaleString("ko-KR", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
 
 const InquiryCard = ({ inquiry }: { inquiry: Inquiry }) => {
   const isAnswered = inquiry.status === InquiryDtoStatus.answered;
@@ -43,10 +25,10 @@ const InquiryCard = ({ inquiry }: { inquiry: Inquiry }) => {
           {isAnswered ? "답변 완료" : "답변 대기"}
         </Badge>
         <span className="text-[12px] text-gray-400">
-          {formatDate(inquiry.createdAt)}
+          {formatInquiryDate(inquiry.createdAt)}
         </span>
       </div>
-      <p className="text-[15px] whitespace-pre-wrap text-gray-900 dark:text-white">
+      <p className="text-[15px] break-words whitespace-pre-wrap text-gray-900 dark:text-white">
         {inquiry.content}
       </p>
 
@@ -58,11 +40,11 @@ const InquiryCard = ({ inquiry }: { inquiry: Inquiry }) => {
             </span>
             {inquiry.answeredAt && (
               <span className="text-[12px] text-gray-400">
-                {formatDate(inquiry.answeredAt)}
+                {formatInquiryDate(inquiry.answeredAt)}
               </span>
             )}
           </div>
-          <p className="text-[14px] whitespace-pre-wrap text-gray-800 dark:text-gray-200">
+          <p className="text-[14px] break-words whitespace-pre-wrap text-gray-800 dark:text-gray-200">
             {inquiry.answer}
           </p>
         </div>

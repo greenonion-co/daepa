@@ -1,6 +1,6 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
@@ -43,10 +43,8 @@ export class InquiryService {
       }),
     );
 
-    const user = await this.userRepository.findOne({ where: { userId } });
-    await this.sendDiscord(
-      `:envelope_with_arrow: **새 1:1 문의** — id=\`${inquiry.id}\`, user_id=\`${userId}\`, name=\`${user?.name ?? '-'}\` (${user?.email ?? '-'})\n${dto.content}`,
-    );
+    // Discord 알림은 응답 흐름을 막지 않도록 fire-and-forget (이미 DB 저장 완료).
+    void this.notifyDiscord(inquiry);
 
     return this.toInquiryDto(inquiry);
   }
@@ -60,16 +58,16 @@ export class InquiryService {
   }
 
   async listAllInquiries(): Promise<AdminInquiryDto[]> {
+    // 누적 증가 대비 최신 N건으로 제한. 추후 필요 시 cursor 페이지네이션으로 확장.
     const inquiries = await this.inquiryRepository.find({
       order: { createdAt: 'DESC' },
+      take: 100,
     });
 
     const userIds = [...new Set(inquiries.map((i) => i.userId))];
     const users =
       userIds.length > 0
-        ? await this.userRepository.find({
-            where: userIds.map((userId) => ({ userId })),
-          })
+        ? await this.userRepository.find({ where: { userId: In(userIds) } })
         : [];
     const userMap = new Map(users.map((u) => [u.userId, u]));
 
@@ -122,11 +120,33 @@ export class InquiryService {
     };
   }
 
-  private async sendDiscord(content: string): Promise<void> {
+  private async notifyDiscord(inquiry: InquiryEntity): Promise<void> {
     const url = this.configService.get<string>('DISCORD_INQUIRY_WEBHOOK_URL');
     if (!url) return;
+
+    const user = await this.userRepository.findOne({
+      where: { userId: inquiry.userId },
+    });
+
+    const payload = {
+      embeds: [
+        {
+          title: '[1:1 문의] 새 문의가 도착했어요',
+          description: inquiry.content,
+          color: 0x3b82f6,
+          fields: [
+            { name: '닉네임', value: user?.name ?? '-', inline: true },
+            { name: 'user_id', value: inquiry.userId, inline: true },
+            { name: '이메일', value: user?.email ?? '-', inline: false },
+            { name: 'inquiry_id', value: String(inquiry.id), inline: true },
+          ],
+          timestamp: inquiry.createdAt.toISOString(),
+        },
+      ],
+    };
+
     try {
-      await firstValueFrom(this.httpService.post(url, { content }));
+      await firstValueFrom(this.httpService.post(url, payload));
     } catch (err) {
       this.logger.warn('discord webhook failed', err);
     }
