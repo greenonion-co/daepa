@@ -75,7 +75,7 @@ export default function MultiSelectList({
               : `${selectedItems.length}개 선택됨`}
           </span>
         </div>
-        <div className="flex max-h-[50dvh] flex-wrap gap-1 overflow-y-auto">
+        <div className="flex max-h-[50dvh] flex-wrap gap-2 overflow-y-auto">
           {selectList?.map((key) => (
             <SelectableBadge
               key={key}

@@ -105,7 +105,7 @@ const FormMultiSelect = ({
   }, [isOpen]);
 
   const optionsBody = (
-    <div className="flex flex-wrap gap-1">
+    <div className="flex flex-wrap gap-2 md:gap-1.5">
       {selectList.map((item) => (
         <SelectableBadge
           key={item}

@@ -17,7 +17,7 @@ export const SelectableBadge = ({ label, selected, onClick }: SelectableBadgePro
     type="button"
     onClick={onClick}
     className={cn(
-      "rounded-full px-3.5 py-1.5 text-[13px] font-medium transition-all duration-200 active:scale-[0.97]",
+      "rounded-full px-4 py-2.5 text-sm font-medium transition-all duration-200 active:scale-[0.97] md:px-3.5 md:py-1.5 md:text-[13px]",
       selected
         ? "bg-gradient-to-b from-zinc-700 via-zinc-800 to-zinc-950 text-white ring-1 ring-black/5 shadow-[inset_0_1px_0_rgba(255,255,255,0.15),0_2px_5px_rgba(0,0,0,0.3)] dark:from-zinc-100 dark:via-zinc-200 dark:to-zinc-300 dark:text-zinc-900 dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.6),0_2px_5px_rgba(0,0,0,0.4)]"
         : "bg-white text-gray-600 shadow-sm ring-1 ring-inset ring-gray-200 hover:ring-gray-300 dark:bg-gray-800/50 dark:text-gray-300 dark:ring-gray-700",

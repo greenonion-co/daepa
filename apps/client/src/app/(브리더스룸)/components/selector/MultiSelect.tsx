@@ -108,7 +108,7 @@ const MultiSelect = ({
     selectList.length === 0 ? (
       <p className="py-2 text-center text-sm text-gray-400">옵션 없음</p>
     ) : (
-      <div className="flex flex-wrap gap-1">
+      <div className="flex flex-wrap gap-2 md:gap-1.5">
         {selectList.map((item) => (
           <SelectableBadge
             key={item}
