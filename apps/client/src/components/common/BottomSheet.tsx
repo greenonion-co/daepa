@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { setSwipeBack } from "@/lib/native-bridge";
 
 interface BottomSheetProps {
@@ -99,7 +100,8 @@ export default function BottomSheet({
 
   if (!isVisible) return null;
 
-  return (
+  // 부모의 stacking context에 갇혀 FAB 등 전역 fixed 요소에 가려지지 않도록 body로 portal
+  return createPortal(
     <>
       <div
         className={`fixed inset-0 z-[60] bg-black/10 transition-opacity duration-300 ${isClosing ? "opacity-0" : "opacity-100"}`}
@@ -138,6 +140,7 @@ export default function BottomSheet({
           </div>
         )}
       </div>
-    </>
+    </>,
+    document.body,
   );
 }
