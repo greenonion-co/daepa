@@ -17,10 +17,10 @@ export const SelectableBadge = ({ label, selected, onClick }: SelectableBadgePro
     type="button"
     onClick={onClick}
     className={cn(
-      "rounded-full border border-gray-200 px-3 py-1 text-center dark:border-gray-600 dark:hover:bg-gray-800",
+      "rounded-full px-3.5 py-1.5 text-[13px] font-medium transition-all duration-200 active:scale-[0.97]",
       selected
-        ? "bg-neutral-800 text-neutral-100 dark:bg-neutral-200 dark:text-neutral-900"
-        : "hover:bg-gray-100 dark:text-gray-300",
+        ? "bg-gradient-to-b from-zinc-700 via-zinc-800 to-zinc-950 text-white ring-1 ring-black/5 shadow-[inset_0_1px_0_rgba(255,255,255,0.15),0_2px_5px_rgba(0,0,0,0.3)] dark:from-zinc-100 dark:via-zinc-200 dark:to-zinc-300 dark:text-zinc-900 dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.6),0_2px_5px_rgba(0,0,0,0.4)]"
+        : "bg-white text-gray-600 shadow-sm ring-1 ring-inset ring-gray-200 hover:ring-gray-300 dark:bg-gray-800/50 dark:text-gray-300 dark:ring-gray-700",
     )}
   >
     {label}
