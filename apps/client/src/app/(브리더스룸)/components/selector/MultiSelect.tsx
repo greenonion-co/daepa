@@ -155,7 +155,7 @@ const MultiSelect = ({
       >
         {disabled ? (
           selected.length > 0 ? (
-            <div>{selected.map((item) => displayMap[item] ?? item).join(" | ")}</div>
+            <div>{selected.map((item) => displayMap[item] ?? item).join(" · ")}</div>
           ) : (
             <div>-</div>
           )

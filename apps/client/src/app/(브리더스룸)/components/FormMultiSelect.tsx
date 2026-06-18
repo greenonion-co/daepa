@@ -160,7 +160,7 @@ const FormMultiSelect = ({
         ) : (
           <>
             {initialItems && initialItems.length > 0 ? (
-              <div>{initialItems.map((item) => displayMap[item] ?? item).join(" | ")}</div>
+              <div>{initialItems.map((item) => displayMap[item] ?? item).join(" · ")}</div>
             ) : (
               <div className="text-gray-400 dark:text-gray-500">{title} 선택하기</div>
             )}
