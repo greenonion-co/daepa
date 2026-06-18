@@ -6,6 +6,7 @@ import { ChevronDown } from "lucide-react";
 import { useIsMobile } from "@/hooks/useMobile";
 import BadgeList from "@/app/(브리더스룸)/components/BadgeList";
 import { SelectableBadge } from "@/app/(브리더스룸)/components/selector/SelectableBadge";
+import BottomSheet from "@/components/common/BottomSheet";
 
 interface FormMultiSelectProps {
   title: string;
@@ -75,7 +76,8 @@ const FormMultiSelect = ({
       openSnapshotRef.current = selectedItemsRef.current;
     }
 
-    if (!isOpen) return;
+    // 모바일은 BottomSheet가 자체 오버레이로 닫기를 처리
+    if (!isOpen || isMobile) return;
 
     const handlePointerDown = (event: MouseEvent | TouchEvent) => {
       const root = containerRef.current;
@@ -90,7 +92,7 @@ const FormMultiSelect = ({
       document.removeEventListener("mousedown", handlePointerDown);
       document.removeEventListener("touchstart", handlePointerDown);
     };
-  }, [isOpen, closeAndSave]);
+  }, [isOpen, isMobile, closeAndSave]);
 
   useEffect(() => {
     if (isOpen) {
@@ -101,6 +103,26 @@ const FormMultiSelect = ({
       setIsEntering(false);
     }
   }, [isOpen]);
+
+  const optionsBody = (
+    <div className="flex flex-wrap gap-1">
+      {selectList.map((item) => (
+        <SelectableBadge
+          key={item}
+          label={displayMap[item] ?? item}
+          selected={!!selectedItems?.includes(item)}
+          onClick={() => {
+            setSelectedItems((prev) => {
+              if (prev?.includes(item)) {
+                return prev?.filter((m) => m !== item);
+              }
+              return [...(prev || []), item];
+            });
+          }}
+        />
+      ))}
+    </div>
+  );
 
   return (
     <div ref={containerRef} className="relative">
@@ -147,60 +169,48 @@ const FormMultiSelect = ({
         )}
       </div>
 
-      {isOpen && (isMobile || forceCenter) && (
-        <div
-          className="fixed inset-0 z-40 bg-black/40"
-          onClick={() => closeAndSave()}
-        />
-      )}
-      {isOpen && (
-        <div
-          className={cn(
-            "z-50 w-[320px] rounded-2xl border-[1.8px] border-gray-200 bg-white p-5 shadow-lg dark:border-gray-700 dark:bg-gray-800",
-            "transform transition-all duration-200 ease-out",
-            isMobile || forceCenter
-              ? "fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
-              : "absolute top-[40px] left-0 origin-top",
-            isEntering
-              ? isMobile || forceCenter
-                ? "scale-100 opacity-100"
-                : "translate-y-0 scale-100 opacity-100"
-              : isMobile || forceCenter
-                ? "scale-95 opacity-0"
-                : "-translate-y-1 scale-95 opacity-0",
+      {isMobile ? (
+        <BottomSheet isOpen={isOpen} onClose={closeAndSave} buttonText="닫기" onClick={closeAndSave}>
+          <h2 className="mb-3 pl-1 text-xl font-bold dark:text-gray-100">{title}</h2>
+          {optionsBody}
+        </BottomSheet>
+      ) : (
+        <>
+          {isOpen && forceCenter && (
+            <div className="fixed inset-0 z-40 bg-black/40" onClick={() => closeAndSave()} />
           )}
-        >
-          <div className="mb-2 font-[500] dark:text-gray-100">{title}</div>
-          {/* 옵션 목록 (badge) */}
-          <div className="mb-4 max-h-[240px] overflow-y-auto">
-            <div className="flex flex-wrap gap-1">
-              {selectList.map((item) => (
-                <SelectableBadge
-                  key={item}
-                  label={displayMap[item] ?? item}
-                  selected={!!selectedItems?.includes(item)}
-                  onClick={() => {
-                    setSelectedItems((prev) => {
-                      if (prev?.includes(item)) {
-                        return prev?.filter((m) => m !== item);
-                      }
-                      return [...(prev || []), item];
-                    });
-                  }}
-                />
-              ))}
-            </div>
-          </div>
-
-          <div className="flex justify-end">
-            <button
-              onClick={() => closeAndSave()}
-              className="h-[32px] cursor-pointer rounded-lg bg-blue-500 px-3 text-sm font-semibold text-white hover:bg-blue-600"
+          {isOpen && (
+            <div
+              className={cn(
+                "z-50 w-[320px] rounded-2xl border-[1.8px] border-gray-200 bg-white p-5 shadow-lg dark:border-gray-700 dark:bg-gray-800",
+                "transform transition-all duration-200 ease-out",
+                forceCenter
+                  ? "fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+                  : "absolute top-[40px] left-0 origin-top",
+                isEntering
+                  ? forceCenter
+                    ? "scale-100 opacity-100"
+                    : "translate-y-0 scale-100 opacity-100"
+                  : forceCenter
+                    ? "scale-95 opacity-0"
+                    : "-translate-y-1 scale-95 opacity-0",
+              )}
             >
-              닫기
-            </button>
-          </div>
-        </div>
+              <div className="mb-2 font-[500] dark:text-gray-100">{title}</div>
+              {/* 옵션 목록 (badge) */}
+              <div className="mb-4 max-h-[240px] overflow-y-auto">{optionsBody}</div>
+
+              <div className="flex justify-end">
+                <button
+                  onClick={() => closeAndSave()}
+                  className="h-[32px] cursor-pointer rounded-lg bg-blue-500 px-3 text-sm font-semibold text-white hover:bg-blue-600"
+                >
+                  닫기
+                </button>
+              </div>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
