@@ -2,9 +2,10 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
-import { Check, ChevronDown, X } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { useIsMobile } from "@/hooks/useMobile";
 import BadgeList from "@/app/(브리더스룸)/components/BadgeList";
+import { SelectableBadge } from "@/app/(브리더스룸)/components/selector/SelectableBadge";
 
 interface FormMultiSelectProps {
   title: string;
@@ -170,37 +171,14 @@ const FormMultiSelect = ({
           )}
         >
           <div className="mb-2 font-[500] dark:text-gray-100">{title}</div>
-          <div className="mb-2 flex flex-nowrap gap-1 overflow-x-auto overflow-y-hidden pb-1">
-            {selectedItems?.map((item) => {
-              return (
-                <div
-                  className="flex shrink-0 items-center rounded-full bg-blue-100 px-2 py-0.5 text-[12px] whitespace-nowrap text-blue-600 dark:bg-blue-900/50 dark:text-blue-400"
-                  key={item}
-                >
-                  {displayMap[item] ?? item}
-                  <button
-                    className="cursor-pointer"
-                    onClick={() => {
-                      setSelectedItems((prev) => {
-                        return prev?.filter((m) => m !== item);
-                      });
-                    }}
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </div>
-              );
-            })}
-          </div>
+          {/* 옵션 목록 (badge) */}
           <div className="mb-4 max-h-[240px] overflow-y-auto">
-            {selectList.map((item) => {
-              return (
-                <div
+            <div className="flex flex-wrap gap-1">
+              {selectList.map((item) => (
+                <SelectableBadge
                   key={item}
-                  className={cn(
-                    "flex cursor-pointer items-center justify-between rounded-xl px-2 py-2 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700",
-                    selectedItems?.includes(item) && "text-blue-700 dark:text-blue-400",
-                  )}
+                  label={displayMap[item] ?? item}
+                  selected={!!selectedItems?.includes(item)}
                   onClick={() => {
                     setSelectedItems((prev) => {
                       if (prev?.includes(item)) {
@@ -209,15 +187,9 @@ const FormMultiSelect = ({
                       return [...(prev || []), item];
                     });
                   }}
-                >
-                  {displayMap[item] ?? item}
-
-                  {selectedItems?.includes(item) && (
-                    <Check className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                  )}
-                </div>
-              );
-            })}
+                />
+              ))}
+            </div>
           </div>
 
           <div className="flex justify-end">
