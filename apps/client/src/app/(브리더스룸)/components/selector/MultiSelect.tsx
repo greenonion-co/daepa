@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, X } from "lucide-react";
 import { useIsMobile } from "@/hooks/useMobile";
 import { SelectableBadge } from "./SelectableBadge";
 
@@ -177,6 +177,26 @@ const MultiSelect = ({
           )}
         >
           <div className="mb-2 font-[500] dark:text-gray-200">{title}</div>
+
+          {/* 선택된 항목 칩 */}
+          {!single && localSelected.length > 0 && (
+            <div className="flex flex-nowrap gap-1 overflow-x-auto overflow-y-hidden pb-2">
+              {localSelected.map((item) => (
+                <div
+                  className="flex shrink-0 items-center whitespace-nowrap rounded-full bg-blue-100 px-2 py-0.5 text-[12px] text-blue-600 dark:bg-blue-900/50 dark:text-blue-400"
+                  key={item}
+                >
+                  {displayMap[item] ?? item}
+                  <button
+                    type="button"
+                    onClick={() => setLocalSelected((prev) => prev.filter((m) => m !== item))}
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
 
           {/* 옵션 목록 (badge) */}
           <div className="mb-2 max-h-[240px] overflow-y-auto">

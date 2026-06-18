@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, X } from "lucide-react";
 import { useIsMobile } from "@/hooks/useMobile";
 import BadgeList from "@/app/(브리더스룸)/components/BadgeList";
 import { SelectableBadge } from "@/app/(브리더스룸)/components/selector/SelectableBadge";
@@ -171,6 +171,27 @@ const FormMultiSelect = ({
           )}
         >
           <div className="mb-2 font-[500] dark:text-gray-100">{title}</div>
+          {/* 선택된 항목 칩 */}
+          {selectedItems && selectedItems.length > 0 && (
+            <div className="mb-2 flex flex-nowrap gap-1 overflow-x-auto overflow-y-hidden pb-1">
+              {selectedItems.map((item) => (
+                <div
+                  className="flex shrink-0 items-center rounded-full bg-blue-100 px-2 py-0.5 text-[12px] whitespace-nowrap text-blue-600 dark:bg-blue-900/50 dark:text-blue-400"
+                  key={item}
+                >
+                  {displayMap[item] ?? item}
+                  <button
+                    className="cursor-pointer"
+                    onClick={() => {
+                      setSelectedItems((prev) => prev?.filter((m) => m !== item));
+                    }}
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
           {/* 옵션 목록 (badge) */}
           <div className="mb-4 max-h-[240px] overflow-y-auto">
             <div className="flex flex-wrap gap-1">
