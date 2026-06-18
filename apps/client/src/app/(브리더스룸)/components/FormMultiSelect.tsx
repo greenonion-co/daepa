@@ -172,7 +172,7 @@ const FormMultiSelect = ({
       {isMobile ? (
         <BottomSheet isOpen={isOpen} onClose={closeAndSave} buttonText="닫기" onClick={closeAndSave}>
           <h2 className="mb-3 pl-1 text-xl font-bold dark:text-gray-100">{title}</h2>
-          {optionsBody}
+          <div className="max-h-[50dvh] overflow-y-auto">{optionsBody}</div>
         </BottomSheet>
       ) : (
         <>

@@ -182,14 +182,14 @@ const MultiSelect = ({
       {isMobile ? (
         <BottomSheet
           isOpen={isOpen}
-          onClose={cancel}
+          onClose={closeAndSave}
           buttonText={single ? "" : "적용"}
           secondButtonText={single ? "" : "취소"}
           onSecondButtonClick={cancel}
           onClick={closeAndSave}
         >
           <h2 className="mb-3 pl-1 text-xl font-bold dark:text-gray-200">{title}</h2>
-          {optionsBody}
+          <div className="max-h-[50dvh] overflow-y-auto">{optionsBody}</div>
         </BottomSheet>
       ) : (
         isOpen && (
