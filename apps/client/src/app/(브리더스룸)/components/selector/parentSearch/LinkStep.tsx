@@ -96,14 +96,14 @@ const LinkStep = ({ selectedPet, onSelect, onClose }: LinkStepProps) => {
             <div className="space-y-2 rounded-xl">
               <div>
                 <div className="flex items-center gap-1">
-                  <h4 className="text-[14px] font-[600] dark:text-gray-100">부모 개체 연결 요청</h4>
+                  <h4 className="text-[14px] font-[600] dark:text-gray-100">부모 개체 인증 요청</h4>
                   <Send className="h-3 w-3" />
                 </div>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
                   <span className="decoration-1px font-[700] text-blue-500 underline decoration-gray-400">
                     {selectedPet.owner?.name}
                   </span>{" "}
-                  님에게 부모 개체 연결을 요청합니다.
+                  님에게 부모 개체 인증을 요청합니다.
                 </p>
               </div>
 
@@ -125,7 +125,7 @@ const LinkStep = ({ selectedPet, onSelect, onClose }: LinkStepProps) => {
                   onClick: onClose,
                 }}
                 rightButton={{
-                  title: "연결 요청하기",
+                  title: "인증 요청하기",
                   onClick: () =>
                     onSelect({ ...selectedPet, message: message ?? defaultMessage(selectedPet) }),
                 }}
@@ -134,7 +134,7 @@ const LinkStep = ({ selectedPet, onSelect, onClose }: LinkStepProps) => {
           ) : (
             <FloatingButton
               rightButton={{
-                title: "연결",
+                title: "인증",
                 onClick: () => onSelect(selectedPet),
               }}
             />

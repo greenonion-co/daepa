@@ -726,10 +726,10 @@ export const SIDEBAR_ITEMS = [
 ];
 
 export const NOTIFICATION_MESSAGE: Record<UserNotificationDtoType, string> = {
-  parent_request: "님이 회원님에게 부모 연동 요청을 보냈습니다.",
-  parent_accept: "님이 부모 연동 요청을 수락했습니다.",
-  parent_reject: "님이 부모 연동 요청을 거절했습니다.",
-  parent_cancel: "님이 부모 연동 요청을 취소했습니다.",
+  parent_request: "님이 회원님에게 부모 인증 요청을 보냈습니다.",
+  parent_accept: "님이 부모 인증 요청을 수락했습니다.",
+  parent_reject: "님이 부모 인증 요청을 거절했습니다.",
+  parent_cancel: "님이 부모 인증 요청을 취소했습니다.",
   adoption_complete: "님으로부터 소유권이 이전되었습니다.",
   auction_started: "님의 경매가 시작되었습니다.",
   auction_ended_host: "내 경매가 종료되었습니다.",
@@ -740,19 +740,19 @@ export const NOTIFICATION_MESSAGE: Record<UserNotificationDtoType, string> = {
 export const NOTIFICATION_TYPE: Record<UserNotificationDtoType, { label: string; color: string }> =
   {
     parent_request: {
-      label: "부모 연동 요청",
+      label: "부모 인증 요청",
       color: "bg-gray-200 text-gray-900",
     },
     parent_accept: {
-      label: "부모 연동 수락",
+      label: "부모 인증 수락",
       color: "bg-green-600",
     },
     parent_reject: {
-      label: "부모 연동 거절",
+      label: "부모 인증 거절",
       color: "bg-red-600",
     },
     parent_cancel: {
-      label: "부모 연동 취소",
+      label: "부모 인증 취소",
       color: "bg-gray-600",
     },
     adoption_complete: {

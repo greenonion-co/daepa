@@ -37,15 +37,15 @@ export const useNotificationActions = () => {
 
       toast.success(
         res?.data?.message ??
-          `부모 연동이 ${status === UpdateParentRequestDtoStatus.APPROVED ? "수락" : status === UpdateParentRequestDtoStatus.CANCELLED ? "취소" : "거절"} 되었습니다.`,
+          `부모 인증이 ${status === UpdateParentRequestDtoStatus.APPROVED ? "수락" : status === UpdateParentRequestDtoStatus.CANCELLED ? "취소" : "거절"} 되었습니다.`,
       );
 
       close?.();
     } catch (error: unknown) {
       if (error instanceof AxiosError) {
-        toast.error(error?.response?.data?.message ?? "부모 연동 상태 변경에 실패했습니다.");
+        toast.error(error?.response?.data?.message ?? "부모 인증 상태 변경에 실패했습니다.");
       } else {
-        toast.error("부모 연동 상태 변경에 실패했습니다.");
+        toast.error("부모 인증 상태 변경에 실패했습니다.");
       }
     } finally {
       await queryClient.invalidateQueries({ queryKey: [userNotificationControllerFindAll.name] });

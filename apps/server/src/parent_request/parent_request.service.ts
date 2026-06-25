@@ -136,7 +136,7 @@ export class ParentRequestService {
           throw new ConflictException('이미 등록된 부모가 있습니다.');
         }
         throw new ConflictException(
-          '이미 다른 개체에 부모 연동 요청 중입니다. 기존 요청을 취소한 후 다시 시도해주세요.',
+          '이미 다른 개체에 부모 인증 요청 중입니다. 기존 요청을 취소한 후 다시 시도해주세요.',
         );
       }
 
@@ -150,7 +150,7 @@ export class ParentRequestService {
         status: isParentMyPet ? PARENT_STATUS.APPROVED : PARENT_STATUS.PENDING,
       });
 
-      // isParentMyPet인 경우는 연동상태가 즉시 확정이기 때문에 pet_relation에 펫-부모 정보를 업데이트한다.
+      // isParentMyPet인 경우는 인증상태가 즉시 확정이기 때문에 pet_relation에 펫-부모 정보를 업데이트한다.
       if (isParentMyPet) {
         await this.petRelationService.upsertParentRelation(
           childPetId,

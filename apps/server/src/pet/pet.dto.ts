@@ -1500,9 +1500,9 @@ export class LinkParentDto {
   role: PARENT_ROLE;
 
   @ApiProperty({
-    description: '연동 요청 메시지',
+    description: '인증 요청 메시지',
     required: false,
-    example: '혈통 정보를 위해 연동 요청합니다.',
+    example: '혈통 정보를 위해 인증 요청합니다.',
   })
   @IsOptional()
   @IsString()

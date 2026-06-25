@@ -43,7 +43,7 @@ export class NotificationPetDto {
 export class DetailJson {
   @ApiProperty({
     description: '메시지',
-    example: '뽀삐 부모 연동 요청',
+    example: '뽀삐 부모 인증 요청',
     required: false,
   })
   @IsString()
@@ -54,13 +54,13 @@ export class DetailJson {
 }
 
 /**
- * 부모 연동 알림 상세 JSON.
+ * 부모 인증 알림 상세 JSON.
  * - primaryPet: 자식 개체 (헤더 썸네일 + 클릭 대상)
  * - secondaryPet: 부모 개체
  */
 export class ParentLinkDetailJson extends DetailJson {
   @ApiProperty({
-    description: '부모 연동 상태',
+    description: '부모 인증 상태',
     example: PARENT_STATUS.PENDING,
     enum: PARENT_STATUS,
     required: false,
@@ -70,7 +70,7 @@ export class ParentLinkDetailJson extends DetailJson {
   status?: PARENT_STATUS;
 
   @ApiProperty({
-    description: '주 개체 (부모 연동: 자식 개체)',
+    description: '주 개체 (부모 인증: 자식 개체)',
     type: NotificationPetDto,
     required: false,
   })
@@ -78,7 +78,7 @@ export class ParentLinkDetailJson extends DetailJson {
   primaryPet?: NotificationPetDto;
 
   @ApiProperty({
-    description: '보조 개체 (부모 연동: 부모 개체)',
+    description: '보조 개체 (부모 인증: 부모 개체)',
     type: NotificationPetDto,
     required: false,
   })
@@ -98,7 +98,7 @@ export class ParentLinkDetailJson extends DetailJson {
 
   @ApiProperty({
     description: '거절 이유',
-    example: '뽀삐 부모 연동 거절',
+    example: '뽀삐 부모 인증 거절',
     required: false,
   })
   @IsString()
