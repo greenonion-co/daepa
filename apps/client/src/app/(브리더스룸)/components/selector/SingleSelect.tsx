@@ -5,7 +5,8 @@ import { cn } from "@/lib/utils";
 import { SELECTOR_CONFIGS } from "../../constants";
 import { ChevronDown } from "lucide-react";
 import { useIsMobile } from "@/hooks/useMobile";
-import { SelectItem } from "./SelectItem";
+import { SelectableBadge } from "./SelectableBadge";
+import BottomSheet from "@/components/common/BottomSheet";
 
 interface SingleSelectProps {
   type: keyof typeof SELECTOR_CONFIGS;
@@ -52,7 +53,8 @@ const SingleSelect = ({
   }, [initialItem, onSelect]);
 
   useEffect(() => {
-    if (!isOpen) return;
+    // 모바일은 BottomSheet가 자체 오버레이로 닫기를 처리
+    if (!isOpen || isMobile) return;
 
     const handlePointerDown = (event: MouseEvent | TouchEvent) => {
       const root = containerRef.current;
@@ -67,7 +69,7 @@ const SingleSelect = ({
       document.removeEventListener("mousedown", handlePointerDown);
       document.removeEventListener("touchstart", handlePointerDown);
     };
-  }, [isOpen, closeAndSave]);
+  }, [isOpen, isMobile, closeAndSave]);
 
   useEffect(() => {
     setSelectedItem(initialItem);
@@ -97,6 +99,34 @@ const SingleSelect = ({
       setDropdownPosition(horizontal);
     }
   }, [isOpen]);
+
+  const config = SELECTOR_CONFIGS[type];
+
+  const optionsBody = (
+    <div className="flex flex-wrap gap-2 md:gap-1.5">
+      {showSelectAll && (
+        <SelectableBadge
+          label="전체"
+          selected={selectedItem === null}
+          onClick={() => {
+            onSelect?.(null);
+            setIsOpen(false);
+          }}
+        />
+      )}
+      {config.selectList.map((item) => (
+        <SelectableBadge
+          key={item.key}
+          label={item.value}
+          selected={selectedItem === item.key}
+          onClick={() => {
+            onSelect?.(item.key);
+            setIsOpen(false);
+          }}
+        />
+      ))}
+    </div>
+  );
 
   return (
     <div ref={containerRef} className="relative">
@@ -153,60 +183,39 @@ const SingleSelect = ({
         )}
       </button>
 
-      {isOpen && (isMobile || forceCenter) && (
-        <div
-          className="fixed inset-0 z-40 bg-black/40"
-          onClick={() => closeAndSave()}
-        />
-      )}
-      {isOpen && (
-        <div
-          ref={dropdownRef}
-          className={cn(
-            "z-50 w-80 rounded-2xl border-[1.8px] border-gray-200 bg-white p-5 shadow-lg dark:border-gray-600 dark:bg-[#18171C]",
-            "transform transition-all duration-200 ease-out",
-            isMobile || forceCenter
-              ? "fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
-              : cn("absolute top-10", dropdownPosition === "left" ? "left-0" : "right-0"),
-            isEntering
-              ? isMobile || forceCenter
-                ? "scale-100 opacity-100"
-                : "translate-y-0 scale-100 opacity-100"
-              : isMobile || forceCenter
-                ? "scale-95 opacity-0"
-                : "-translate-y-1 scale-95 opacity-0",
+      {isMobile ? (
+        <BottomSheet isOpen={isOpen} onClose={closeAndSave}>
+          <h2 className="mb-3 pl-1 text-xl font-bold dark:text-gray-200">{config.title}</h2>
+          <div className="max-h-[50dvh] overflow-y-auto">{optionsBody}</div>
+        </BottomSheet>
+      ) : (
+        <>
+          {isOpen && forceCenter && (
+            <div className="fixed inset-0 z-40 bg-black/40" onClick={() => closeAndSave()} />
           )}
-        >
-          <div className="mb-2 font-[500] dark:text-gray-200">{SELECTOR_CONFIGS[type].title}</div>
-          <div className="mb-2 max-h-[240px] overflow-y-auto">
-            {showSelectAll && (
-              <SelectItem
-                item={{
-                  key: null,
-                  value: "전체",
-                }}
-                isSelected={selectedItem === null}
-                onClick={() => {
-                  onSelect?.(null);
-                  setIsOpen(false);
-                }}
-              />
-            )}
-
-            {SELECTOR_CONFIGS[type].selectList.map((item) => (
-              <SelectItem
-                key={item.key}
-                item={item}
-                isSelected={selectedItem === item.key}
-                onClick={() => {
-                  onSelect?.(item.key);
-                  setIsOpen(false);
-                }}
-              />
-            ))}
-          </div>
-
-        </div>
+          {isOpen && (
+            <div
+              ref={dropdownRef}
+              className={cn(
+                "z-50 w-80 rounded-2xl border-[1.8px] border-gray-200 bg-white p-5 shadow-lg dark:border-gray-600 dark:bg-[#18171C]",
+                "transform transition-all duration-200 ease-out",
+                forceCenter
+                  ? "fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+                  : cn("absolute top-10", dropdownPosition === "left" ? "left-0" : "right-0"),
+                isEntering
+                  ? forceCenter
+                    ? "scale-100 opacity-100"
+                    : "translate-y-0 scale-100 opacity-100"
+                  : forceCenter
+                    ? "scale-95 opacity-0"
+                    : "-translate-y-1 scale-95 opacity-0",
+              )}
+            >
+              <div className="mb-2 font-[500] dark:text-gray-200">{config.title}</div>
+              <div className="mb-2 max-h-[240px] overflow-y-auto">{optionsBody}</div>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

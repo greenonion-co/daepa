@@ -2,9 +2,10 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
-import { ChevronDown, X } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { useIsMobile } from "@/hooks/useMobile";
-import { SelectItem } from "./SelectItem";
+import { SelectableBadge } from "./SelectableBadge";
+import BottomSheet from "@/components/common/BottomSheet";
 
 interface MultiSelectProps {
   title: string;
@@ -46,6 +47,11 @@ const MultiSelect = ({
     setIsOpen(false);
     onChange(localSelectedRef.current);
   }, [onChange]);
+
+  const cancel = useCallback(() => {
+    setLocalSelected(selected);
+    setIsOpen(false);
+  }, [selected]);
 
   // 외부 props 변경 시 로컬 동기화 (드롭다운 닫혀있을 때만 — 열린 상태에서는 진행 중인 선택 보존)
   useEffect(() => {
@@ -98,6 +104,32 @@ const MultiSelect = ({
 
   const hasSelection = selected.length > 0;
 
+  const optionsBody =
+    selectList.length === 0 ? (
+      <p className="py-2 text-center text-sm text-gray-400">옵션 없음</p>
+    ) : (
+      <div className="flex flex-wrap gap-2 md:gap-1.5">
+        {selectList.map((item) => (
+          <SelectableBadge
+            key={item}
+            label={displayMap[item] ?? item}
+            selected={localSelected.includes(item)}
+            onClick={() => {
+              if (single) {
+                setLocalSelected([item]);
+                onChange([item]);
+                setIsOpen(false);
+              } else {
+                setLocalSelected((prev) =>
+                  prev.includes(item) ? prev.filter((m) => m !== item) : [...prev, item],
+                );
+              }
+            }}
+          />
+        ))}
+      </div>
+    );
+
   return (
     <div ref={containerRef} className={cn("relative", className)}>
       <button
@@ -123,7 +155,7 @@ const MultiSelect = ({
       >
         {disabled ? (
           selected.length > 0 ? (
-            <div>{selected.map((item) => displayMap[item] ?? item).join(" | ")}</div>
+            <div>{selected.map((item) => displayMap[item] ?? item).join(" · ")}</div>
           ) : (
             <div>-</div>
           )
@@ -147,114 +179,58 @@ const MultiSelect = ({
         )}
       </button>
 
-      {/* 모바일 오버레이 */}
-      {isOpen && isMobile && (
-        <div
-          className="fixed inset-0 z-40 bg-black/40"
-          onClick={() => {
-            setLocalSelected(selected);
-            setIsOpen(false);
-          }}
-        />
-      )}
-
-      {isOpen && (
-        <div
-          ref={dropdownRef}
-          className={cn(
-            "z-50 w-[280px] rounded-2xl border-[1.8px] border-gray-200 bg-white p-5 shadow-lg dark:border-gray-600 dark:bg-[#18171C]",
-            "transform transition-all duration-200 ease-out",
-            isMobile
-              ? "fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
-              : cn("absolute top-10", dropdownPosition === "left" ? "left-0" : "right-0"),
-            isEntering
-              ? isMobile
-                ? "scale-100 opacity-100"
-                : "translate-y-0 scale-100 opacity-100"
-              : isMobile
-                ? "scale-95 opacity-0"
-                : "-translate-y-1 scale-95 opacity-0",
-          )}
+      {isMobile ? (
+        <BottomSheet
+          isOpen={isOpen}
+          onClose={closeAndSave}
+          buttonText={single ? "" : "적용"}
+          secondButtonText={single ? "" : "취소"}
+          onSecondButtonClick={cancel}
+          onClick={closeAndSave}
         >
-          <div className="mb-2 font-[500] dark:text-gray-200">{title}</div>
+          <h2 className="mb-3 pl-1 text-xl font-bold dark:text-gray-200">{title}</h2>
+          <div className="max-h-[50dvh] overflow-y-auto">{optionsBody}</div>
+        </BottomSheet>
+      ) : (
+        isOpen && (
+          <div
+            ref={dropdownRef}
+            className={cn(
+              "z-50 w-[280px] rounded-2xl border-[1.8px] border-gray-200 bg-white p-5 shadow-lg dark:border-gray-600 dark:bg-[#18171C]",
+              "transform transition-all duration-200 ease-out",
+              "absolute top-10",
+              dropdownPosition === "left" ? "left-0" : "right-0",
+              isEntering
+                ? "translate-y-0 scale-100 opacity-100"
+                : "-translate-y-1 scale-95 opacity-0",
+            )}
+          >
+            <div className="mb-2 font-[500] dark:text-gray-200">{title}</div>
 
-          {/* 선택된 항목 칩 */}
-          {!single && localSelected.length > 0 && (
-            <div className="flex flex-nowrap gap-1 overflow-x-auto overflow-y-hidden pb-2">
-              {localSelected.map((item) => (
-                <div
-                  className="flex shrink-0 items-center whitespace-nowrap rounded-full bg-blue-100 px-2 py-0.5 text-[12px] text-blue-600 dark:bg-blue-900/50 dark:text-blue-400"
-                  key={item}
+            {/* 옵션 목록 (badge) */}
+            <div className="mb-2 max-h-[240px] overflow-y-auto">{optionsBody}</div>
+
+            {/* 취소 / 적용 버튼 (multi 모드만) */}
+            {!single && (
+              <div className="mt-2 flex items-center gap-3 pt-3">
+                <button
+                  type="button"
+                  className="text-[13px] font-medium text-gray-400 transition-colors hover:text-gray-600 active:text-gray-800 dark:text-gray-500 dark:hover:text-gray-300"
+                  onClick={cancel}
                 >
-                  {displayMap[item] ?? item}
-                  <button
-                    type="button"
-                    onClick={() => setLocalSelected((prev) => prev.filter((m) => m !== item))}
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* 옵션 목록 */}
-          <div className="mb-2 max-h-[240px] overflow-y-auto">
-            {selectList.length === 0 ? (
-              <p className="py-2 text-center text-sm text-gray-400">옵션 없음</p>
-            ) : (
-              selectList.map((item) => {
-                const isSelected = localSelected.includes(item);
-                const isFirstSelected = localSelected[0] === item;
-                return (
-                  <SelectItem
-                    key={item}
-                    item={{
-                      key: item,
-                      value: displayMap[item] ?? "",
-                    }}
-                    isSelected={isSelected}
-                    autoScroll={isFirstSelected}
-                    onClick={() => {
-                      if (single) {
-                        setLocalSelected([item]);
-                        onChange([item]);
-                        setIsOpen(false);
-                      } else {
-                        setLocalSelected((prev) =>
-                          prev.includes(item) ? prev.filter((m) => m !== item) : [...prev, item],
-                        );
-                      }
-                    }}
-                  />
-                );
-              })
+                  취소
+                </button>
+                <button
+                  type="button"
+                  className="ml-auto rounded-full bg-gray-900 px-5 py-1.5 text-[13px] font-semibold text-white transition-all hover:bg-gray-800 active:scale-[0.96] dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100"
+                  onClick={() => closeAndSave()}
+                >
+                  적용
+                </button>
+              </div>
             )}
           </div>
-
-          {/* 취소 / 적용 버튼 (multi 모드만) */}
-          {!single && (
-            <div className="mt-2 flex items-center gap-3 pt-3">
-              <button
-                type="button"
-                className="text-[13px] font-medium text-gray-400 transition-colors hover:text-gray-600 active:text-gray-800 dark:text-gray-500 dark:hover:text-gray-300"
-                onClick={() => {
-                  setLocalSelected(selected);
-                  setIsOpen(false);
-                }}
-              >
-                취소
-              </button>
-              <button
-                type="button"
-                className="ml-auto rounded-full bg-gray-900 px-5 py-1.5 text-[13px] font-semibold text-white transition-all hover:bg-gray-800 active:scale-[0.96] dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100"
-                onClick={() => closeAndSave()}
-              >
-                적용
-              </button>
-            </div>
-          )}
-        </div>
+        )
       )}
     </div>
   );

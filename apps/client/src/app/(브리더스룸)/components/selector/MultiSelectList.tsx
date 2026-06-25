@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import BottomSheet from "@/components/common/BottomSheet";
 import { toast } from "@/lib/toast";
+import { SelectableBadge } from "./SelectableBadge";
 
 interface MultiSelectListProps {
   isOpen: boolean;
@@ -74,19 +75,14 @@ export default function MultiSelectList({
               : `${selectedItems.length}개 선택됨`}
           </span>
         </div>
-        <div className="max-h-[50dvh] overflow-y-auto">
+        <div className="flex max-h-[50dvh] flex-wrap gap-2 overflow-y-auto">
           {selectList?.map((key) => (
-            <button
+            <SelectableBadge
               key={key}
-              className={`mb-1 mr-1 rounded-full border border-gray-200 px-3 py-1 text-center dark:border-gray-600 ${
-                selectedItems.includes(key)
-                  ? "bg-neutral-800 text-neutral-100 dark:bg-neutral-200 dark:text-neutral-900"
-                  : "hover:bg-gray-100 dark:text-gray-300"
-              } dark:hover:bg-gray-800`}
+              label={displayMap[key] ?? key}
+              selected={selectedItems.includes(key)}
               onClick={() => handleMultipleSelect(key)}
-            >
-              {displayMap[key]}
-            </button>
+            />
           ))}
         </div>
       </div>
