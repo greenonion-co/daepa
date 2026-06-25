@@ -51,7 +51,7 @@ export class ParentRequestController {
   })
   @ApiResponse({
     status: 201,
-    description: '부모 연동 요청이 완료되었습니다.',
+    description: '부모 인증 요청이 완료되었습니다.',
     type: CommonResponseDto,
   })
   @ApiResponse({
@@ -76,7 +76,7 @@ export class ParentRequestController {
   })
   @ApiResponse({
     status: 409,
-    description: '이미 해당 역할의 부모가 연동되어 있습니다.',
+    description: '이미 해당 역할의 부모가 인증되어 있습니다.',
   })
   async linkParent(
     @Param('petId') petId: string,
@@ -91,7 +91,7 @@ export class ParentRequestController {
 
     return {
       success: true,
-      message: '부모 연동 요청이 완료되었습니다.',
+      message: '부모 인증 요청이 완료되었습니다.',
     };
   }
 
@@ -103,7 +103,7 @@ export class ParentRequestController {
   })
   @ApiResponse({
     status: 200,
-    description: '부모 연동 해제가 완료되었습니다.',
+    description: '부모 인증 해제가 완료되었습니다.',
     type: CommonResponseDto,
   })
   @ApiResponse({
@@ -131,7 +131,7 @@ export class ParentRequestController {
 
     return {
       success: true,
-      message: '부모 연동 해제가 완료되었습니다.',
+      message: '부모 인증 해제가 완료되었습니다.',
     };
   }
 

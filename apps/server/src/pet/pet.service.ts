@@ -273,7 +273,7 @@ export class PetService {
           });
         }
 
-        // 부모 연동 요청 처리
+        // 부모 인증 요청 처리
         if (father) {
           await this.parentRequestService.linkParent(
             petId,
@@ -628,7 +628,7 @@ export class PetService {
           })),
         );
 
-        // === 5단계: 부모 연결 (일괄) ===
+        // === 5단계: 부모 인증 (일괄) ===
         const parentRequests: Array<{
           childPetId: string;
           parentPetId: string;
@@ -849,7 +849,7 @@ export class PetService {
           });
           if (childExists) {
             throw new BadRequestException(
-              '누군가의 부모로 연결된 펫입니다. 성별을 변경하기 전에 이를 먼저 처리해주세요.',
+              '누군가의 부모로 인증된 펫입니다. 성별을 변경하기 전에 이를 먼저 처리해주세요.',
             );
           }
         }

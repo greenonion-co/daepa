@@ -101,23 +101,23 @@ export class UserNotificationService {
     switch (type) {
       case USER_NOTIFICATION_TYPE.PARENT_REQUEST:
         return {
-          title: '부모 연동 요청',
-          body: `${primaryPetName}의 부모로 ${secondaryPetName}을(를) 연동하고 싶어합니다.`,
+          title: '부모 인증 요청',
+          body: `${primaryPetName}의 부모로 ${secondaryPetName}을(를) 인증하고 싶어합니다.`,
         };
       case USER_NOTIFICATION_TYPE.PARENT_ACCEPT:
         return {
-          title: '부모 연동 수락',
-          body: `${secondaryPetName}이(가) ${primaryPetName}의 부모로 연동되었습니다.`,
+          title: '부모 인증 수락',
+          body: `${secondaryPetName}이(가) ${primaryPetName}의 부모로 인증되었습니다.`,
         };
       case USER_NOTIFICATION_TYPE.PARENT_REJECT:
         return {
-          title: '부모 연동 거절',
-          body: `${secondaryPetName} 부모 연동 요청이 거절되었습니다.`,
+          title: '부모 인증 거절',
+          body: `${secondaryPetName} 부모 인증 요청이 거절되었습니다.`,
         };
       case USER_NOTIFICATION_TYPE.PARENT_CANCEL:
         return {
-          title: '부모 연동 취소',
-          body: `${secondaryPetName} 부모 연동 요청이 취소되었습니다.`,
+          title: '부모 인증 취소',
+          body: `${secondaryPetName} 부모 인증 요청이 취소되었습니다.`,
         };
       case USER_NOTIFICATION_TYPE.ADOPTION_COMPLETE: {
         const sellerName =

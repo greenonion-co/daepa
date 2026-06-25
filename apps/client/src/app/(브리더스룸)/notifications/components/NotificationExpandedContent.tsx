@@ -207,7 +207,7 @@ const NotificationExpandedContent = ({
               {/* 자식 펫 정보 카드 */}
               <PetLinkCard detailData={detailData} />
 
-              {/* 액션 버튼 (부모 연동 요청인 경우) */}
+              {/* 액션 버튼 (부모 인증 요청인 경우) */}
               {item.type === UserNotificationDtoType.PARENT_REQUEST && !alreadyProcessed && (
                 <NotificationActions onUpdate={onUpdate} onClose={onClose} />
               )}

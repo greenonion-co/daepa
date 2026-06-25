@@ -88,9 +88,9 @@ const PedigreeInfoContent = ({
         );
       } catch (error) {
         if (error instanceof AxiosError) {
-          toast.error(error.response?.data?.message ?? "부모 연동 요청에 실패했습니다.");
+          toast.error(error.response?.data?.message ?? "부모 인증 요청에 실패했습니다.");
         } else {
-          toast.error("부모 연동 요청에 실패했습니다.");
+          toast.error("부모 인증 요청에 실패했습니다.");
         }
       } finally {
         setLoadingRole(null);
@@ -103,7 +103,7 @@ const PedigreeInfoContent = ({
     async (label: UnlinkParentDtoRole) => {
       const parent = parents?.[label];
       if (!parent || !("petId" in parent) || !parent.petId)
-        return toast.error("부모 연동 해제에 실패했습니다.");
+        return toast.error("부모 인증 해제에 실패했습니다.");
       setLoadingRole(label);
       try {
         await mutateUnlinkParent({ role: label });
@@ -112,12 +112,12 @@ const PedigreeInfoContent = ({
         // 펫 목록 쿼리를 stale 처리 (백그라운드 갱신, await 하지 않아 저장 동작 차단 없음)
         queryClient.invalidateQueries({ queryKey: [brPetControllerFindAll.name] });
 
-        toast.success("부모 연동이 해제되었습니다.");
+        toast.success("부모 인증이 해제되었습니다.");
       } catch (error) {
         if (error instanceof AxiosError) {
-          toast.error(error.response?.data?.message ?? "부모 연동 해제에 실패했습니다.");
+          toast.error(error.response?.data?.message ?? "부모 인증 해제에 실패했습니다.");
         } else {
-          toast.error("부모 연동 해제에 실패했습니다.");
+          toast.error("부모 인증 해제에 실패했습니다.");
         }
       } finally {
         setLoadingRole(null);
