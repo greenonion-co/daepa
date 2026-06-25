@@ -78,7 +78,7 @@ const ParentLink = ({
         description =
           "부모 인증을 해제하시겠습니까? \n 타인의 개체인 경우, 해제 시 인증 절차를 다시 진행해야 합니다.";
       } else {
-        title = data?.status === PetParentDtoStatus.APPROVED ? "부모 인증 해제" : "부모 요청 취소";
+        title = data?.status === PetParentDtoStatus.APPROVED ? "부모 인증 해제" : "부모 인증 요청 취소";
         description =
           data?.status === PetParentDtoStatus.APPROVED
             ? "부모 인증을 해제하시겠습니까? \n 타인의 개체인 경우, 해제 시 인증 절차를 다시 진행해야 합니다."
