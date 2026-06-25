@@ -3,7 +3,24 @@
 import Link from "next/link";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
-import { Check, ArrowRight, ChevronDown, Home, DollarSign, Bubbles } from "lucide-react";
+import { Check, ChevronDown, Home, DollarSign, Bubbles, Globe } from "lucide-react";
+import { APP_STORE_URL, PLAY_STORE_URL } from "@/components/AppInstallPrompt/storeLinks";
+
+/* ── 스토어 브랜드 글리프 (lucide 브랜드 아이콘 미제공) ── */
+function AppleGlyph({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 814 1000" fill="currentColor" className={className} aria-hidden>
+      <path d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76.5 0-103.7 40.8-165.9 40.8s-105.6-57-155.5-127C46.7 790.7 0 663 0 541.8c0-194.4 126.4-297.5 250.8-297.5 66.1 0 121.2 43.4 162.7 43.4 39.5 0 101.1-46 176.3-46 28.5 0 130.9 2.6 198.3 99.2zm-234-181.5c31.1-36.9 53.1-88.1 53.1-139.3 0-7.1-.6-14.3-1.9-20.1-50.6 1.9-110.8 33.7-147.1 75.8-28.5 32.4-55.1 83.6-55.1 135.5 0 7.8 1.3 15.6 1.9 18.1 3.2.6 8.4 1.3 13.6 1.3 45.4 0 102.5-30.4 135.5-71.3z" />
+    </svg>
+  );
+}
+function GooglePlayGlyph({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden>
+      <path d="M22.018 13.298l-3.919 2.218-3.515-3.493 3.543-3.521 3.891 2.202a1.49 1.49 0 0 1 0 2.594zM1.337.924a1.486 1.486 0 0 0-.112.568v21.017c0 .217.045.419.124.6l11.155-11.087L1.337.924zm12.207 10.065l3.258-3.238L3.45.195a1.466 1.466 0 0 0-.946-.179l11.04 10.973zm0 2.067l-11 10.933c.298.036.612-.016.906-.183l13.324-7.54-3.23-3.21z" />
+    </svg>
+  );
+}
 
 /* ── 애니메이션 ── */
 const fadeUp = {
@@ -91,12 +108,50 @@ export default function IntroPage() {
         <div className="flex items-center gap-2.5">
           <span className="text-sm font-bold tracking-tight text-white">BREEDY</span>
         </div>
-        <Link
-          href="/sign-in"
-          className="rounded-full bg-white px-5 py-2 text-xs font-bold text-black transition-colors hover:bg-white/90"
-        >
-          시작하기
-        </Link>
+        <div className="flex items-center">
+          <div className="flex items-center gap-2">
+            <a
+              href={APP_STORE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="App Store에서 시작하기"
+              className="group flex flex-col items-center gap-1"
+            >
+              <span className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/70 transition-colors group-hover:bg-white/10 group-hover:text-white">
+                <AppleGlyph className="h-4 w-4" />
+              </span>
+              <span className="text-[9px] font-medium text-white/40 transition-colors group-hover:text-white/70">
+                iOS
+              </span>
+            </a>
+            <a
+              href={PLAY_STORE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Google Play에서 시작하기"
+              className="group flex flex-col items-center gap-1"
+            >
+              <span className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/70 transition-colors group-hover:bg-white/10 group-hover:text-white">
+                <GooglePlayGlyph className="h-4 w-4" />
+              </span>
+              <span className="text-[9px] font-medium text-white/40 transition-colors group-hover:text-white/70">
+                Android
+              </span>
+            </a>
+            <Link
+              href="/"
+              aria-label="웹에서 시작하기"
+              className="group flex flex-col items-center gap-1"
+            >
+              <span className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/70 transition-colors group-hover:bg-white/10 group-hover:text-white">
+                <Globe size={16} strokeWidth={2.5} />
+              </span>
+              <span className="text-[9px] font-medium text-white/40 transition-colors group-hover:text-white/70">
+                Web
+              </span>
+            </Link>
+          </div>
+        </div>
       </header>
 
       {/* ── Hero ── */}
@@ -119,7 +174,7 @@ export default function IntroPage() {
             className="mb-8 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs font-medium text-white/60 backdrop-blur-sm"
           >
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-            크레스티드 게코 브리더를 위한 앱
+            모든 브리더를 위한 앱
           </motion.div>
 
           {/* 헤드라인 */}
@@ -148,26 +203,6 @@ export default function IntroPage() {
             브리더를 위한 단 하나의 앱.
           </motion.p>
 
-          {/* CTA */}
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.55, duration: 0.7 }}
-            className="flex flex-col items-center gap-3 sm:flex-row"
-          >
-            <Link
-              href="/sign-in"
-              className="flex items-center gap-2 rounded-full bg-white px-8 py-3.5 text-sm font-bold text-black shadow-2xl transition-all hover:bg-white/90 active:scale-95"
-            >
-              지금 시작하기 <ArrowRight size={14} strokeWidth={2.5} />
-            </Link>
-            <Link
-              href="/sign-in"
-              className="flex items-center gap-2 rounded-full border border-white/15 bg-white/8 px-8 py-3.5 text-sm font-bold text-white backdrop-blur-sm transition-all hover:bg-white/12 active:scale-95"
-            >
-              카카오로 시작
-            </Link>
-          </motion.div>
         </motion.div>
 
         {/* 스크롤 힌트 */}
@@ -303,21 +338,42 @@ export default function IntroPage() {
           </motion.h2>
 
           <motion.p variants={fadeUp} className="mb-10 text-base text-white/40">
-            카카오 · 구글 계정으로 간편하게
+            앱으로 더 편하게, 웹에서 바로 시작하세요
           </motion.p>
 
-          <motion.div variants={fadeUp} className="flex w-full max-w-xs flex-col gap-3">
+          <motion.div variants={fadeUp} className="flex w-full max-w-sm flex-col gap-3">
+            <div className="grid grid-cols-2 gap-3">
+              <a
+                href={APP_STORE_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2.5 rounded-2xl bg-white py-3.5 text-gray-900 transition-all hover:bg-white/90 active:scale-95"
+              >
+                <AppleGlyph className="h-5 w-5" />
+                <span className="flex flex-col items-start leading-none">
+                  <span className="text-[10px] font-medium text-gray-500">다운로드</span>
+                  <span className="text-sm font-bold">App Store</span>
+                </span>
+              </a>
+              <a
+                href={PLAY_STORE_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2.5 rounded-2xl bg-white/10 py-3.5 text-white backdrop-blur-sm transition-all hover:bg-white/15 active:scale-95"
+              >
+                <GooglePlayGlyph className="h-5 w-5" />
+                <span className="flex flex-col items-start leading-none">
+                  <span className="text-[10px] font-medium text-white/50">다운로드</span>
+                  <span className="text-sm font-bold">Google Play</span>
+                </span>
+              </a>
+            </div>
             <Link
-              href="/sign-in"
-              className="flex w-full items-center justify-center rounded-2xl bg-[#FEE500] py-4 text-sm font-bold text-gray-900 transition-all hover:brightness-95 active:scale-95"
+              href="/"
+              className="flex w-full items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/5 py-4 text-sm font-bold text-white backdrop-blur-sm transition-all hover:bg-white/10 active:scale-95"
             >
-              카카오로 시작하기
-            </Link>
-            <Link
-              href="/sign-in"
-              className="flex w-full items-center justify-center rounded-2xl bg-white/10 py-4 text-sm font-bold text-white backdrop-blur-sm transition-all hover:bg-white/15 active:scale-95"
-            >
-              구글로 시작하기
+              <Globe size={16} strokeWidth={2.5} />
+              웹에서 시작하기
             </Link>
           </motion.div>
         </motion.div>
